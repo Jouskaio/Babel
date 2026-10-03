@@ -1,0 +1,66 @@
+# --- OS / editors ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# --- Secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Python (api/) ---
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# --- Flutter / Dart (app/, packages/) ---
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/app/build/
+/packages/*/build/
+*.iml
+app/coverage/
+# Files generated locally by platform builds
+app/ios/Flutter/.last_build_id
+app/ios/Pods/
+app/android/.gradle/
+app/android/local.properties
+app/macos/Flutter/ephemeral/
+app/linux/flutter/ephemeral/
+app/windows/flutter/ephemeral/
+
+# Temporary folder of the client generator
+.generated-api-client/
+
+# --- AI assistants (kept local, never committed) ---
+CLAUDE.md
+CLAUDE.local.md
+**/CLAUDE.md
+.claude/
+AGENTS.md
+.cursor/
+.cursorrules
+.cursorignore
+.windsurfrules
+.aider*
+.continue/
+.github/copilot-instructions.md
+.codex/
+.gemini/
+GEMINI.md

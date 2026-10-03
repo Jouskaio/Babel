@@ -1,0 +1,43 @@
+name: App release
+
+# Runs only for app tags created by `git flow release finish app-X.Y.Z`.
+on:
+  push:
+    tags: ["app-v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target: web
+            command: flutter build web --release --dart-define=BABEL_API_URL=${{ vars.BABEL_API_URL }}
+            artifact: app/build/web
+          - target: android
+            command: flutter build apk --release --dart-define=BABEL_API_URL=${{ vars.BABEL_API_URL }}
+            artifact: app/build/app/outputs/flutter-apk/app-release.apk
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - uses: actions/setup-java@v4
+        if: matrix.target == 'android'
+        with:
+          distribution: temurin
+          java-version: "17"
+      - run: flutter pub get
+      - run: ${{ matrix.command }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: babel-${{ matrix.target }}-${{ github.ref_name }}
+          path: ${{ matrix.artifact }}
