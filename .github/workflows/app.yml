@@ -1,0 +1,43 @@
+name: App
+
+on:
+  pull_request:
+    paths:
+      - "app/**"
+      - "packages/api_client/**"
+      - ".github/workflows/app.yml"
+  push:
+    branches: [develop, master]
+    paths:
+      - "app/**"
+      - "packages/api_client/**"
+      - ".github/workflows/app.yml"
+
+concurrency:
+  group: app-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: app
+
+jobs:
+  quality:
+    name: Format, analyze and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Format
+        run: dart format --set-exit-if-changed lib test
+      - name: Analyze
+        run: flutter analyze --fatal-infos
+      - name: Tests
+        run: flutter test --coverage

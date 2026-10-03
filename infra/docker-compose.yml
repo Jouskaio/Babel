@@ -1,0 +1,16 @@
+# Babel API deployment on the server VM (copied to /opt/babel).
+# The image tag is set by the release workflow through BABEL_API_TAG.
+services:
+  api:
+    image: ghcr.io/jouskaio/babel-api:${BABEL_API_TAG:-latest}
+    container_name: babel-api
+    env_file: .env
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
