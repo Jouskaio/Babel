@@ -1,0 +1,47 @@
+name: Contract
+
+# Guarantees that the OpenAPI contract and the generated Dart client match the API code.
+on:
+  pull_request:
+    paths:
+      - "api/**"
+      - "contracts/**"
+      - "packages/api_client/**"
+      - "scripts/generate-api-client.sh"
+      - ".github/workflows/contract.yml"
+  push:
+    branches: [develop, master]
+    paths:
+      - "api/**"
+      - "contracts/**"
+      - "packages/api_client/**"
+      - "scripts/generate-api-client.sh"
+      - ".github/workflows/contract.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Contract and client are in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: api/uv.lock
+      - name: OpenAPI contract matches the API
+        working-directory: api
+        run: |
+          uv sync --frozen
+          uv run python -m babel_api.scripts.export_openapi --check
+      - name: Dart client matches the contract
+        run: |
+          ./scripts/generate-api-client.sh
+          # status (not diff) also catches newly generated files
+          if [ -n "$(git status --porcelain -- packages/api_client)" ]; then
+            git status --short -- packages/api_client
+            echo "::error::packages/api_client is out of date. Run ./scripts/generate-api-client.sh"
+            exit 1
+          fi

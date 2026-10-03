@@ -1,0 +1,4 @@
+# Generator files not needed in this repository
+git_push.sh
+.travis.yml
+test/**
