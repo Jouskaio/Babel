@@ -44,8 +44,8 @@ tailscale up --hostname babel-api --advertise-tags tag:babel-api --ssh
 
 ### GitHub container registry
 
-After the first release, open the `babel-api` package on GitHub and set its visibility to
-**public** so the server can pull it without credentials.
+The deploy job logs the server into GHCR with the short-lived workflow token, pulls the image
+and logs out again, so the package can stay private and no credential is kept on the server.
 
 ### GitHub (Settings → Environments → `production`)
 
