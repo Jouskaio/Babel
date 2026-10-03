@@ -6,9 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget _wrap(Override override) => ProviderScope(
-  overrides: [override],
-  child: const MaterialApp(home: HomePage()),
-);
+      overrides: [override],
+      child: const MaterialApp(home: HomePage()),
+    );
 
 void main() {
   testWidgets('shows the API version when the API responds', (tester) async {

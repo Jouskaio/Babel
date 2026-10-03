@@ -50,8 +50,8 @@ abstract final class BabelTheme {
 
   /// Text style of book content in the reader.
   static TextStyle reading({double size = 18}) => GoogleFonts.literata(
-    fontSize: size,
-    height: 1.75,
-    color: BabelColors.textPrimary,
-  );
+        fontSize: size,
+        height: 1.75,
+        color: BabelColors.textPrimary,
+      );
 }
