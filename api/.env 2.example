@@ -1,5 +1,0 @@
-# Copy to .env (never committed) and adjust.
-BABEL_ENVIRONMENT=development
-BABEL_LOG_LEVEL=INFO
-# Origins allowed for the web app (JSON list)
-BABEL_CORS_ORIGINS=["http://localhost:8080"]

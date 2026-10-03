@@ -5,7 +5,7 @@ The Flutter app is never deployed here: it ships as store, web and desktop build
 
 ```
 git tag api-vX.Y.Z ─► GitHub Actions
-                        1. build + push image to GHCR (public)
+                        1. build + push image to GHCR
                         2. join the tailnet as an ephemeral tag:ci node
                         3. Tailscale SSH as deploy@babel-api ─► docker compose pull && up -d
                         4. smoke test GET /v1/health
@@ -39,8 +39,8 @@ tailscale up --hostname babel-api --advertise-tags tag:babel-api --ssh
 ### Tailscale admin console
 
 1. **Access controls**: merge [`tailscale-policy.hujson`](tailscale-policy.hujson).
-2. **Settings → OAuth clients**: create a client with the *Auth Keys (write)* scope and the
-   `tag:ci` tag.
+2. **Settings → Trust credentials**: create an OAuth client with the *Auth Keys (write)* scope
+   and the `tag:ci` tag only.
 
 ### GitHub container registry
 
