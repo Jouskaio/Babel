@@ -1,0 +1,24 @@
+// Tailscale policy fragment for Babel.
+// Merge these sections into the tailnet policy (admin console → Access controls).
+{
+  "tagOwners": {
+    // Ephemeral GitHub Actions runners
+    "tag:ci": ["autogroup:admin"],
+    // The Babel API server
+    "tag:babel-api": ["autogroup:admin"],
+  },
+
+  "grants": [
+    // CI may reach the API server for SSH (deployment) and HTTP (smoke test) only.
+    {"src": ["tag:ci"], "dst": ["tag:babel-api"], "ip": ["tcp:22", "tcp:8000"]},
+    // Your own devices keep full access to the server.
+    {"src": ["autogroup:member"], "dst": ["tag:babel-api"], "ip": ["*"]},
+  ],
+
+  "ssh": [
+    // CI logs in as the unprivileged "deploy" user, without any SSH key.
+    {"action": "accept", "src": ["tag:ci"], "dst": ["tag:babel-api"], "users": ["deploy"]},
+    // Your devices may log in as root or deploy after a periodic re-authentication.
+    {"action": "check", "src": ["autogroup:member"], "dst": ["tag:babel-api"], "users": ["root", "deploy"]},
+  ],
+}

@@ -11,6 +11,8 @@ permissions:
 
 env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/babel-api
+  # Tailscale MagicDNS name of the API server
+  DEPLOY_HOST: babel-api
 
 jobs:
   publish:
@@ -35,6 +37,9 @@ jobs:
           tags: |
             ${{ env.IMAGE }}:${{ steps.version.outputs.value }}
             ${{ env.IMAGE }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.version.outputs.value }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -42,16 +47,46 @@ jobs:
     name: Deploy to the API server
     runs-on: ubuntu-latest
     needs: publish
-    # Secrets live in the "production" environment (Settings → Environments).
     environment: production
+    permissions:
+      contents: read
+      packages: read
     steps:
-      - uses: appleboy/ssh-action@v1
+      - uses: actions/checkout@v4
+
+      # Joins the tailnet as an ephemeral tag:ci node, removed when the job ends.
+      # Access to the server is granted by the Tailscale policy (Tailscale SSH),
+      # so no SSH key is stored in GitHub.
+      - uses: tailscale/github-action@v3
         with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: |
-            cd /opt/babel
-            export BABEL_API_TAG=${{ needs.publish.outputs.version }}
-            docker compose pull api
-            docker compose up -d api
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: Upload the compose file
+        run: |
+          scp -o StrictHostKeyChecking=accept-new infra/docker-compose.yml \
+            "deploy@${DEPLOY_HOST}:/opt/babel/docker-compose.yml"
+
+      - name: Roll out the new version
+        env:
+          VERSION: ${{ needs.publish.outputs.version }}
+          # Short-lived workflow token: lets the server pull the image even while the
+          # package is private, and is removed right after the pull.
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$REGISTRY_TOKEN" | ssh -o StrictHostKeyChecking=accept-new "deploy@${DEPLOY_HOST}" \
+            "docker login ghcr.io -u ${{ github.actor }} --password-stdin >/dev/null \
+             && cd /opt/babel \
+             && BABEL_API_TAG=${VERSION} docker compose pull api; \
+             status=\$?; docker logout ghcr.io >/dev/null; [ \$status -eq 0 ] \
+             && BABEL_API_TAG=${VERSION} docker compose up -d api"
+
+      - name: Smoke test
+        run: |
+          for attempt in $(seq 1 15); do
+            if curl -fsS "http://${DEPLOY_HOST}:8000/v1/health"; then exit 0; fi
+            sleep 4
+          done
+          echo "::error::The API did not become healthy after deployment"
+          exit 1

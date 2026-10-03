@@ -8,14 +8,14 @@
 | `develop` | Integration of the next version | `master` | `release/*` |
 | `feature/<topic>` | A feature | `develop` | `develop` (PR) |
 | `bugfix/<topic>` | Non-urgent fix | `develop` | `develop` (PR) |
-| `release/<component>-<version>` | Release stabilization | `develop` | `master` **and** `develop` |
-| `hotfix/<component>-<version>` | Urgent production fix | `master` | `master` **and** `develop` |
+| `release/<component>-v<version>` | Release stabilization | `develop` | `master` **and** `develop` |
+| `hotfix/<component>-v<version>` | Urgent production fix | `master` | `master` **and** `develop` |
 
 ```bash
 git flow feature start my-feature
 git flow feature finish my-feature    # or open a PR to develop
-git flow release start api-1.2.0
-git flow release finish api-1.2.0     # tag api-v1.2.0
+git flow release start api-v1.2.0
+git flow release finish api-v1.2.0    # tag api-v1.2.0
 ```
 
 ## Versions and tags
