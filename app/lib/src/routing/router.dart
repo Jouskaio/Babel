@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../core/auth/auth_controller.dart';
 import '../core/telemetry/telemetry.dart';
 import '../features/account/presentation/account_page.dart';
+import '../features/auth/presentation/forgot_password_page.dart';
 import '../features/auth/presentation/login_page.dart';
+import '../features/auth/presentation/reset_password_page.dart';
 import '../features/auth/presentation/signup_page.dart';
 import '../features/home/presentation/home_page.dart';
 import '../features/landing/presentation/landing_page.dart';
@@ -18,8 +20,13 @@ abstract final class Routes {
   static const splash = '/splash';
   static const home = '/home';
   static const account = '/account';
+  static const forgotPassword = '/forgot-password';
+  static const resetPassword = '/reset-password';
 
   static const public = {landing, login, signup};
+
+  /// Reachable whether signed in or not (e.g. links opened from an email).
+  static const open = {forgotPassword, resetPassword};
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -40,6 +47,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.signup, builder: (_, __) => const SignupPage()),
       GoRoute(path: Routes.splash, builder: (_, __) => const SplashPage()),
       GoRoute(path: Routes.home, builder: (_, __) => const HomePage()),
+      GoRoute(
+        path: Routes.forgotPassword,
+        builder: (_, __) => const ForgotPasswordPage(),
+      ),
+      GoRoute(
+        path: Routes.resetPassword,
+        builder: (_, state) =>
+            ResetPasswordPage(token: state.uri.queryParameters['token'] ?? ''),
+      ),
       GoRoute(path: Routes.account, builder: (_, __) => const AccountPage()),
     ],
   );
@@ -59,6 +75,7 @@ String? redirectFor(AuthState session, Uri uri) {
   String withFrom(String to) =>
       Uri(path: to, queryParameters: {'from': uri.toString()}).toString();
 
+  if (Routes.open.contains(path) && session is! AuthRestoring) return null;
   switch (session) {
     case AuthRestoring():
       return path == Routes.splash ? null : withFrom(Routes.splash);
