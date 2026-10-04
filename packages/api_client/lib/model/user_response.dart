@@ -16,6 +16,7 @@ class UserResponse {
     required this.createdAt,
     required this.displayName,
     required this.email,
+    required this.emailVerified,
     required this.hasPassword,
     required this.id,
     required this.locale,
@@ -27,6 +28,8 @@ class UserResponse {
   String displayName;
 
   String email;
+
+  bool emailVerified;
 
   bool hasPassword;
 
@@ -41,6 +44,7 @@ class UserResponse {
     other.createdAt == createdAt &&
     other.displayName == displayName &&
     other.email == email &&
+    other.emailVerified == emailVerified &&
     other.hasPassword == hasPassword &&
     other.id == id &&
     other.locale == locale &&
@@ -52,19 +56,21 @@ class UserResponse {
     (createdAt.hashCode) +
     (displayName.hashCode) +
     (email.hashCode) +
+    (emailVerified.hashCode) +
     (hasPassword.hashCode) +
     (id.hashCode) +
     (locale.hashCode) +
     (providers.hashCode);
 
   @override
-  String toString() => 'UserResponse[createdAt=$createdAt, displayName=$displayName, email=$email, hasPassword=$hasPassword, id=$id, locale=$locale, providers=$providers]';
+  String toString() => 'UserResponse[createdAt=$createdAt, displayName=$displayName, email=$email, emailVerified=$emailVerified, hasPassword=$hasPassword, id=$id, locale=$locale, providers=$providers]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'display_name'] = this.displayName;
       json[r'email'] = this.email;
+      json[r'email_verified'] = this.emailVerified;
       json[r'has_password'] = this.hasPassword;
       json[r'id'] = this.id;
       json[r'locale'] = this.locale;
@@ -94,6 +100,7 @@ class UserResponse {
         createdAt: mapDateTime(json, r'created_at', r'')!,
         displayName: mapValueOfType<String>(json, r'display_name')!,
         email: mapValueOfType<String>(json, r'email')!,
+        emailVerified: mapValueOfType<bool>(json, r'email_verified')!,
         hasPassword: mapValueOfType<bool>(json, r'has_password')!,
         id: mapValueOfType<String>(json, r'id')!,
         locale: UserResponseLocaleEnum.fromJson(json[r'locale'])!,
@@ -148,6 +155,7 @@ class UserResponse {
     'created_at',
     'display_name',
     'email',
+    'email_verified',
     'has_password',
     'id',
     'locale',

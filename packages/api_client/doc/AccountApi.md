@@ -12,6 +12,7 @@ Method | HTTP request | Description
 [**changePassword**](AccountApi.md#changepassword) | **POST** /v1/me/password | Change Password
 [**deleteMe**](AccountApi.md#deleteme) | **DELETE** /v1/me | Delete Me
 [**getMe**](AccountApi.md#getme) | **GET** /v1/me | Get Me
+[**resendVerificationEmail**](AccountApi.md#resendverificationemail) | **POST** /v1/me/email/verification | Resend Verification
 [**updateMe**](AccountApi.md#updateme) | **PATCH** /v1/me | Update Me
 
 
@@ -140,6 +141,51 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**UserResponse**](UserResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **resendVerificationEmail**
+> Object resendVerificationEmail()
+
+Resend Verification
+
+Send the confirmation link again (at most once a minute).
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = AccountApi();
+
+try {
+    final result = api_instance.resendVerificationEmail();
+    print(result);
+} catch (e) {
+    print('Exception when calling AccountApi->resendVerificationEmail: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**Object**](Object.md)
 
 ### Authorization
 

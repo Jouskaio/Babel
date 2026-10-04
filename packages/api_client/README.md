@@ -67,6 +67,7 @@ Class | Method | HTTP request | Description
 *AccountApi* | [**changePassword**](doc//AccountApi.md#changepassword) | **POST** /v1/me/password | Change Password
 *AccountApi* | [**deleteMe**](doc//AccountApi.md#deleteme) | **DELETE** /v1/me | Delete Me
 *AccountApi* | [**getMe**](doc//AccountApi.md#getme) | **GET** /v1/me | Get Me
+*AccountApi* | [**resendVerificationEmail**](doc//AccountApi.md#resendverificationemail) | **POST** /v1/me/email/verification | Resend Verification
 *AccountApi* | [**updateMe**](doc//AccountApi.md#updateme) | **PATCH** /v1/me | Update Me
 *AuthApi* | [**forgotPassword**](doc//AuthApi.md#forgotpassword) | **POST** /v1/auth/password/forgot | Forgot Password
 *AuthApi* | [**getAuthProviders**](doc//AuthApi.md#getauthproviders) | **GET** /v1/auth/providers | Get Providers
@@ -77,6 +78,7 @@ Class | Method | HTTP request | Description
 *AuthApi* | [**refreshSession**](doc//AuthApi.md#refreshsession) | **POST** /v1/auth/refresh | Refresh
 *AuthApi* | [**register**](doc//AuthApi.md#register) | **POST** /v1/auth/register | Register
 *AuthApi* | [**resetPassword**](doc//AuthApi.md#resetpassword) | **POST** /v1/auth/password/reset | Reset Password
+*AuthApi* | [**verifyEmail**](doc//AuthApi.md#verifyemail) | **POST** /v1/auth/email/verify | Verify Email
 *CatalogApi* | [**getCover**](doc//CatalogApi.md#getcover) | **GET** /v1/catalog/covers/{cover_id}/{size} | Get Cover
 *CatalogApi* | [**getTrendingWorks**](doc//CatalogApi.md#gettrendingworks) | **GET** /v1/catalog/trending | Get Trending
 *HealthApi* | [**getHealth**](doc//HealthApi.md#gethealth) | **GET** /v1/health | Get Health
@@ -98,6 +100,7 @@ Class | Method | HTTP request | Description
  - [TrendingWorkResponse](doc//TrendingWorkResponse.md)
  - [UpdateProfileRequest](doc//UpdateProfileRequest.md)
  - [UserResponse](doc//UserResponse.md)
+ - [VerifyEmailRequest](doc//VerifyEmailRequest.md)
 
 
 ## Documentation For Authorization
