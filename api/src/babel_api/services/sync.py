@@ -10,16 +10,23 @@ from uuid import UUID
 from babel_api.domain.errors import DomainError, NotFoundError
 from babel_api.domain.ports import FileRepository, SyncRepository
 from babel_api.domain.sync import (
+    Annotation,
     Change,
     ChangeOp,
     Device,
     DeviceKind,
     EntityKind,
+    HighlightColor,
     ReadingPosition,
+    Visibility,
 )
 from babel_api.services.files import FileService
 
 logger = logging.getLogger(__name__)
+
+# Longest selection and note kept with an annotation.
+MAX_QUOTE = 2000
+MAX_NOTE = 5000
 
 
 class OpOutcome(StrEnum):
@@ -128,6 +135,10 @@ class SyncService:
         match operation.entity, operation.op:
             case EntityKind.READING_POSITION, ChangeOp.UPSERT:
                 return await self._save_position(user_id, device_id, operation.data)
+            case EntityKind.ANNOTATION, ChangeOp.UPSERT:
+                return await self._save_annotation(user_id, device_id, operation)
+            case EntityKind.ANNOTATION, ChangeOp.DELETE:
+                return await self._delete_annotation(user_id, device_id, operation.entity_id)
             case EntityKind.LIBRARY_ITEM, ChangeOp.UPSERT:
                 await self._library.add_existing(user_id, str(operation.data["sha256"]), device_id)
                 return OpOutcome.APPLIED
@@ -173,5 +184,59 @@ class SyncService:
             ChangeOp.UPSERT,
             position.as_data(),
             device_id,
+        )
+        return OpOutcome.APPLIED
+
+    async def _save_annotation(
+        self, user_id: UUID, device_id: UUID, operation: Operation
+    ) -> OpOutcome:
+        data = operation.data
+        annotation_id = UUID(operation.entity_id)
+        item = await self._files.get_item(UUID(str(data["item_id"])))
+        if item is None or item.user_id != user_id:
+            raise NotFoundError
+        quote = str(data["quote"]).strip()
+        note = str(data["note"]).strip() if data.get("note") else None
+        chapter = int(data["chapter"])
+        if not quote or len(quote) > MAX_QUOTE or (note and len(note) > MAX_NOTE) or chapter < 0:
+            raise ValueError("annotation")
+        client_time = datetime.fromisoformat(str(data["client_time"]))
+        if client_time.tzinfo is None:
+            client_time = client_time.replace(tzinfo=UTC)
+        stored = await self._sync.get_annotation(annotation_id)
+        if stored is not None and stored.user_id != user_id:
+            raise NotFoundError  # another reader's id: never overwritten
+        if stored is not None and stored.client_time >= client_time:
+            return OpOutcome.STALE  # a newer edit already won
+        annotation = Annotation(
+            id=annotation_id,
+            user_id=user_id,
+            file_sha256=item.file.sha256,
+            item_id=item.id,
+            chapter=chapter,
+            quote=quote,
+            color=HighlightColor(str(data.get("color") or HighlightColor.NONE.value)),
+            note=note,
+            visibility=Visibility.PRIVATE,
+            client_time=client_time,
+        )
+        await self._sync.save_annotation(annotation)
+        await self._sync.record(
+            user_id,
+            EntityKind.ANNOTATION,
+            str(annotation_id),
+            ChangeOp.UPSERT,
+            annotation.as_data(),
+            device_id,
+        )
+        return OpOutcome.APPLIED
+
+    async def _delete_annotation(self, user_id: UUID, device_id: UUID, entity_id: str) -> OpOutcome:
+        stored = await self._sync.get_annotation(UUID(entity_id))
+        if stored is None or stored.user_id != user_id:
+            return OpOutcome.STALE  # already deleted, or never this reader's
+        await self._sync.delete_annotation(stored.id)
+        await self._sync.record(
+            user_id, EntityKind.ANNOTATION, entity_id, ChangeOp.DELETE, device_id=device_id
         )
         return OpOutcome.APPLIED
