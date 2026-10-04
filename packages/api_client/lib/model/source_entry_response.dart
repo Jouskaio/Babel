@@ -15,6 +15,7 @@ class SourceEntryResponse {
   SourceEntryResponse({
     this.authors = const [],
     this.coverPath,
+    this.format,
     required this.id,
     this.itemId,
     required this.name,
@@ -28,6 +29,9 @@ class SourceEntryResponse {
 
   String? coverPath;
 
+  /// epub, pdf, cbz or cbr, when known
+  String? format;
+
   String id;
 
   String? itemId;
@@ -40,13 +44,14 @@ class SourceEntryResponse {
 
   EntryStatus status;
 
-  /// Read from the file, once it is on Babel
+  /// Given by the source, or read from the file
   String? title;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is SourceEntryResponse &&
     _deepEquality.equals(other.authors, authors) &&
     other.coverPath == coverPath &&
+    other.format == format &&
     other.id == id &&
     other.itemId == itemId &&
     other.name == name &&
@@ -60,6 +65,7 @@ class SourceEntryResponse {
     // ignore: unnecessary_parenthesis
     (authors.hashCode) +
     (coverPath == null ? 0 : coverPath!.hashCode) +
+    (format == null ? 0 : format!.hashCode) +
     (id.hashCode) +
     (itemId == null ? 0 : itemId!.hashCode) +
     (name.hashCode) +
@@ -69,7 +75,7 @@ class SourceEntryResponse {
     (title == null ? 0 : title!.hashCode);
 
   @override
-  String toString() => 'SourceEntryResponse[authors=$authors, coverPath=$coverPath, id=$id, itemId=$itemId, name=$name, path=$path, size=$size, status=$status, title=$title]';
+  String toString() => 'SourceEntryResponse[authors=$authors, coverPath=$coverPath, format=$format, id=$id, itemId=$itemId, name=$name, path=$path, size=$size, status=$status, title=$title]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -78,6 +84,11 @@ class SourceEntryResponse {
       json[r'cover_path'] = this.coverPath;
     } else {
       json[r'cover_path'] = null;
+    }
+    if (this.format != null) {
+      json[r'format'] = this.format;
+    } else {
+      json[r'format'] = null;
     }
       json[r'id'] = this.id;
     if (this.itemId != null) {
@@ -120,6 +131,7 @@ class SourceEntryResponse {
             ? (json[r'authors'] as Iterable).cast<String>().toList(growable: false)
             : const [],
         coverPath: mapValueOfType<String>(json, r'cover_path'),
+        format: mapValueOfType<String>(json, r'format'),
         id: mapValueOfType<String>(json, r'id')!,
         itemId: mapValueOfType<String>(json, r'item_id'),
         name: mapValueOfType<String>(json, r'name')!,

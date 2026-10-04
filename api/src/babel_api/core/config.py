@@ -49,6 +49,9 @@ class Settings(BaseSettings):
     # Generate one with Fernet.generate_key() (see infra/README.md).
     secrets_key: SecretStr = SecretStr("")
     max_sources_per_user: int = 20
+    # Hosts on private networks that OPDS and WebDAV sources may reach (e.g. a home
+    # Calibre-Web or Nextcloud), as a JSON list: ["calibre.lan", "192.168.1.20"].
+    source_allowed_hosts: list[str] = []
 
     # Accounts with these emails are administrators (file withdrawal, blocking).
     admin_emails: list[str] = []

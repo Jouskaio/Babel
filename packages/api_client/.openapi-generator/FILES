@@ -3,6 +3,7 @@ README.md
 analysis_options.yaml
 doc/AccountApi.md
 doc/AdminApi.md
+doc/Ao3Config.md
 doc/AuthApi.md
 doc/BatchImportResponse.md
 doc/BookFormat.md
@@ -28,6 +29,7 @@ doc/LibraryApi.md
 doc/LibraryItemResponse.md
 doc/LoginRequest.md
 doc/OpOutcome.md
+doc/OpdsConfig.md
 doc/OperationRequest.md
 doc/OperationResult.md
 doc/ProviderLoginRequest.md
@@ -51,6 +53,7 @@ doc/TrendingWorkResponse.md
 doc/UpdateProfileRequest.md
 doc/UserResponse.md
 doc/VerifyEmailRequest.md
+doc/WebDavConfig.md
 doc/WithdrawRequest.md
 doc/WorkResponse.md
 doc/WorkSummaryResponse.md
@@ -71,6 +74,7 @@ lib/auth/authentication.dart
 lib/auth/http_basic_auth.dart
 lib/auth/http_bearer_auth.dart
 lib/auth/oauth.dart
+lib/model/ao3_config.dart
 lib/model/batch_import_response.dart
 lib/model/book_format.dart
 lib/model/change_op.dart
@@ -92,6 +96,7 @@ lib/model/isbn_lookup_response.dart
 lib/model/library_item_response.dart
 lib/model/login_request.dart
 lib/model/op_outcome.dart
+lib/model/opds_config.dart
 lib/model/operation_request.dart
 lib/model/operation_result.dart
 lib/model/provider_login_request.dart
@@ -113,6 +118,7 @@ lib/model/trending_work_response.dart
 lib/model/update_profile_request.dart
 lib/model/user_response.dart
 lib/model/verify_email_request.dart
+lib/model/web_dav_config.dart
 lib/model/withdraw_request.dart
 lib/model/work_response.dart
 lib/model/work_summary_response.dart

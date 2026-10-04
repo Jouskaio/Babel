@@ -6,6 +6,7 @@ from typing import Any
 
 import httpx
 
+from babel_api.adapters.sources.http import book_format
 from babel_api.domain.errors import SourceConnectionError, SourceRateLimitedError
 from babel_api.domain.sources import RemoteEntry
 
@@ -80,7 +81,10 @@ class GitHubConnector:
         prefix = f"{folder}/" if folder else ""
         return [
             RemoteEntry(
-                path=str(item["path"]), size=int(item.get("size", 0)), remote_id=str(item["sha"])
+                path=str(item["path"]),
+                size=int(item.get("size", 0)),
+                remote_id=str(item["sha"]),
+                format=book_format(str(item["path"])),
             )
             for item in response.json().get("tree", [])
             if item.get("type") == "blob"

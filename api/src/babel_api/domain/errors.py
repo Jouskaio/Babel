@@ -57,6 +57,13 @@ class SourceConnectionError(DomainError):
     """The source could not be reached or refused the credentials."""
 
 
+class SourceAddressBlockedError(SourceConnectionError):
+    """The address is on a private network the server may not reach for readers."""
+
+    def __init__(self) -> None:
+        super().__init__("private_address")
+
+
 class SourceRateLimitedError(SourceConnectionError):
     """The source refuses requests for a while (e.g. GitHub without a token: 60 per hour)."""
 

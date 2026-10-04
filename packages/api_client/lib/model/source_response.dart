@@ -21,8 +21,10 @@ class SourceResponse {
     required this.kind,
     this.lastError,
     this.lastScanAt,
+    required this.location,
     required this.name,
     this.repository,
+    this.username,
   });
 
   /// Book files found by the last scan
@@ -42,9 +44,14 @@ class SourceResponse {
 
   DateTime? lastScanAt;
 
+  /// Repository, address or account, for display
+  String location;
+
   String name;
 
   String? repository;
+
+  String? username;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is SourceResponse &&
@@ -56,8 +63,10 @@ class SourceResponse {
     other.kind == kind &&
     other.lastError == lastError &&
     other.lastScanAt == lastScanAt &&
+    other.location == location &&
     other.name == name &&
-    other.repository == repository;
+    other.repository == repository &&
+    other.username == username;
 
   @override
   int get hashCode =>
@@ -70,11 +79,13 @@ class SourceResponse {
     (kind.hashCode) +
     (lastError == null ? 0 : lastError!.hashCode) +
     (lastScanAt == null ? 0 : lastScanAt!.hashCode) +
+    (location.hashCode) +
     (name.hashCode) +
-    (repository == null ? 0 : repository!.hashCode);
+    (repository == null ? 0 : repository!.hashCode) +
+    (username == null ? 0 : username!.hashCode);
 
   @override
-  String toString() => 'SourceResponse[bookCount=$bookCount, createdAt=$createdAt, folder=$folder, hasToken=$hasToken, id=$id, kind=$kind, lastError=$lastError, lastScanAt=$lastScanAt, name=$name, repository=$repository]';
+  String toString() => 'SourceResponse[bookCount=$bookCount, createdAt=$createdAt, folder=$folder, hasToken=$hasToken, id=$id, kind=$kind, lastError=$lastError, lastScanAt=$lastScanAt, location=$location, name=$name, repository=$repository, username=$username]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -98,11 +109,17 @@ class SourceResponse {
     } else {
       json[r'last_scan_at'] = null;
     }
+      json[r'location'] = this.location;
       json[r'name'] = this.name;
     if (this.repository != null) {
       json[r'repository'] = this.repository;
     } else {
       json[r'repository'] = null;
+    }
+    if (this.username != null) {
+      json[r'username'] = this.username;
+    } else {
+      json[r'username'] = null;
     }
     return json;
   }
@@ -134,8 +151,10 @@ class SourceResponse {
         kind: SourceKind.fromJson(json[r'kind'])!,
         lastError: mapValueOfType<String>(json, r'last_error'),
         lastScanAt: mapDateTime(json, r'last_scan_at', r''),
+        location: mapValueOfType<String>(json, r'location')!,
         name: mapValueOfType<String>(json, r'name')!,
         repository: mapValueOfType<String>(json, r'repository'),
+        username: mapValueOfType<String>(json, r'username'),
       );
     }
     return null;
@@ -188,6 +207,7 @@ class SourceResponse {
     'has_token',
     'id',
     'kind',
+    'location',
     'name',
   };
 }

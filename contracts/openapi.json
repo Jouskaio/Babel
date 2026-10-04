@@ -1,6 +1,21 @@
 {
   "components": {
     "schemas": {
+      "Ao3Config": {
+        "properties": {
+          "username": {
+            "maxLength": 40,
+            "minLength": 3,
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username"
+        ],
+        "title": "Ao3Config",
+        "type": "object"
+      },
       "BatchImportResponse": {
         "properties": {
           "failed": {
@@ -140,9 +155,27 @@
         "type": "object"
       },
       "CreateSourceRequest": {
+        "description": "A source to connect; give the settings block matching ``kind``.",
         "properties": {
+          "ao3": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Ao3Config"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "github": {
-            "$ref": "#/components/schemas/GitHubConfig"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GitHubConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "kind": {
             "$ref": "#/components/schemas/SourceKind"
@@ -152,6 +185,16 @@
             "minLength": 1,
             "title": "Name",
             "type": "string"
+          },
+          "opds": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OpdsConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "token": {
             "anyOf": [
@@ -164,12 +207,21 @@
               }
             ],
             "title": "Token"
+          },
+          "webdav": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WebDavConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
           "kind",
-          "name",
-          "github"
+          "name"
         ],
         "title": "CreateSourceRequest",
         "type": "object"
@@ -557,6 +609,34 @@
         "title": "OpOutcome",
         "type": "string"
       },
+      "OpdsConfig": {
+        "properties": {
+          "url": {
+            "description": "Catalog address",
+            "maxLength": 1000,
+            "minLength": 8,
+            "title": "Url",
+            "type": "string"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "OpdsConfig",
+        "type": "object"
+      },
       "OperationRequest": {
         "properties": {
           "data": {
@@ -927,6 +1007,18 @@
             ],
             "title": "Cover Path"
           },
+          "format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "epub, pdf, cbz or cbr, when known",
+            "title": "Format"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -968,7 +1060,7 @@
                 "type": "null"
               }
             ],
-            "description": "Read from the file, once it is on Babel",
+            "description": "Given by the source, or read from the file",
             "title": "Title"
           }
         },
@@ -981,15 +1073,19 @@
           "item_id",
           "title",
           "authors",
-          "cover_path"
+          "cover_path",
+          "format"
         ],
         "title": "SourceEntryResponse",
         "type": "object"
       },
       "SourceKind": {
-        "description": "Implemented connectors. OPDS, WebDAV, fanfiction and generic will join this list.",
+        "description": "Implemented connectors. A generic manifest connector will join this list.",
         "enum": [
-          "github"
+          "github",
+          "opds",
+          "webdav",
+          "ao3"
         ],
         "title": "SourceKind",
         "type": "string"
@@ -1052,6 +1148,11 @@
             ],
             "title": "Last Scan At"
           },
+          "location": {
+            "description": "Repository, address or account, for display",
+            "title": "Location",
+            "type": "string"
+          },
           "name": {
             "title": "Name",
             "type": "string"
@@ -1066,14 +1167,27 @@
               }
             ],
             "title": "Repository"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
           }
         },
         "required": [
           "id",
           "kind",
           "name",
+          "location",
           "repository",
           "folder",
+          "username",
           "has_token",
           "created_at",
           "last_scan_at",
@@ -1314,6 +1428,34 @@
           "token"
         ],
         "title": "VerifyEmailRequest",
+        "type": "object"
+      },
+      "WebDavConfig": {
+        "properties": {
+          "url": {
+            "description": "Folder address",
+            "maxLength": 1000,
+            "minLength": 8,
+            "title": "Url",
+            "type": "string"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "WebDavConfig",
         "type": "object"
       },
       "WithdrawRequest": {

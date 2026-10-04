@@ -18,7 +18,6 @@ from babel_api.domain.files import LibraryItem
 from babel_api.domain.ports import FileRepository, SourceConnector, SourceRepository
 from babel_api.domain.sources import (
     EntryStatus,
-    RemoteEntry,
     Source,
     SourceDetail,
     SourceEntry,
@@ -89,7 +88,7 @@ class SourceService:
             await self._with_status(user_id, source.kind, e)
             for e in await self._sources.entries(source_id)
         ]
-        return SourceDetail(source, entries)
+        return SourceDetail(replace(source, entry_count=len(entries)), entries)
 
     async def delete(
         self,
@@ -145,9 +144,8 @@ class SourceService:
             if stored is not None and stored.available:
                 # Already on Babel: no download from the source.
                 return await self._library.add_existing(user_id, known, device_id)
-        remote = RemoteEntry(path=entry.path, size=entry.size, remote_id=entry.remote_id)
         chunks = self._connectors[source.kind].fetch(
-            source.config, await self._token(source), remote
+            source.config, await self._token(source), entry.remote()
         )
         try:
             result = await self._library.import_file(user_id, chunks, entry.name, device_id)
@@ -193,7 +191,10 @@ class SourceService:
         if sha256 is None or stored is None:
             return entry
         known = replace(
-            entry, title=stored.title, authors=stored.authors, cover_path=stored.cover_path
+            entry,
+            title=stored.title or entry.title,
+            authors=stored.authors or entry.authors,
+            cover_path=stored.cover_path,
         )
         item = await self._files.find_item(user_id, sha256)
         if item is not None:
