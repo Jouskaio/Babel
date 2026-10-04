@@ -8,18 +8,22 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.models import (
+    AnnotationRow,
     AppliedOperationRow,
     ChangeRow,
     DeviceRow,
     ReadingPositionRow,
 )
 from babel_api.domain.sync import (
+    Annotation,
     Change,
     ChangeOp,
     Device,
     DeviceKind,
     EntityKind,
+    HighlightColor,
     ReadingPosition,
+    Visibility,
 )
 
 
@@ -170,3 +174,38 @@ class SqlSyncRepository:
 
     async def rollback(self) -> None:
         await self._session.rollback()
+
+    async def get_annotation(self, annotation_id: UUID) -> Annotation | None:
+        row = await self._session.get(AnnotationRow, annotation_id)
+        if row is None:
+            return None
+        return Annotation(
+            id=row.id,
+            user_id=row.user_id,
+            file_sha256=row.file_sha256,
+            item_id=row.item_id,
+            chapter=row.chapter,
+            quote=row.quote,
+            color=HighlightColor(row.color),
+            note=row.note,
+            visibility=Visibility(row.visibility),
+            client_time=_aware(row.client_time),
+        )
+
+    async def save_annotation(self, annotation: Annotation) -> None:
+        row = await self._session.get(AnnotationRow, annotation.id)
+        if row is None:
+            row = AnnotationRow(id=annotation.id, user_id=annotation.user_id)
+            self._session.add(row)
+        row.file_sha256 = annotation.file_sha256
+        row.item_id = annotation.item_id
+        row.chapter = annotation.chapter
+        row.quote = annotation.quote
+        row.color = annotation.color.value
+        row.note = annotation.note
+        row.visibility = annotation.visibility.value
+        row.client_time = annotation.client_time
+        await self._session.flush()
+
+    async def delete_annotation(self, annotation_id: UUID) -> None:
+        await self._session.execute(delete(AnnotationRow).where(AnnotationRow.id == annotation_id))

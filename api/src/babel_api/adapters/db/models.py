@@ -295,3 +295,22 @@ class KnownSourceFileRow(Base):
     sha256: Mapped[str] = mapped_column(
         ForeignKey("stored_files.sha256", ondelete="CASCADE"), index=True
     )
+
+
+class AnnotationRow(Base):
+    """A highlight or margin note, on a stored file (it survives removing the book)."""
+
+    __tablename__ = "annotations"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True)  # chosen by the client (offline)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    file_sha256: Mapped[str] = mapped_column(
+        ForeignKey("stored_files.sha256", ondelete="CASCADE"), index=True
+    )
+    item_id: Mapped[UUID] = mapped_column()
+    chapter: Mapped[int] = mapped_column(Integer)
+    quote: Mapped[str] = mapped_column(Text)
+    color: Mapped[str] = mapped_column(String(16))
+    note: Mapped[str | None] = mapped_column(Text)
+    visibility: Mapped[str] = mapped_column(String(16), default="private")
+    client_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))

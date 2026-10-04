@@ -450,5 +450,19 @@
         "type": "String"
       }
     }
+  },
+  "noteHint": "Write in the margin…",
+  "removeAnnotation": "Remove",
+  "marginTitle": "In the margin",
+  "marginCount": "{count, plural, =0{No note} =1{1 note} other{{count} notes}}",
+  "marginEmpty": "Select text while reading to highlight it or write a note.",
+  "highlightNote": "Note",
+  "copy": "Copy",
+  "@marginCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

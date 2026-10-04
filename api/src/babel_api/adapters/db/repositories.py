@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.models import (
     AccountTokenRow,
+    AnnotationRow,
     AppliedOperationRow,
     ChangeRow,
     DeviceRow,
@@ -123,6 +124,7 @@ class SqlUserRepository:
             delete(SourceEntryRow).where(SourceEntryRow.source_id.in_(sources))
         )
         await self._session.execute(delete(SourceRow).where(SourceRow.user_id == user_id))
+        await self._session.execute(delete(AnnotationRow).where(AnnotationRow.user_id == user_id))
         for table in (ReadingPositionRow, ChangeRow, AppliedOperationRow, DeviceRow):
             await self._session.execute(delete(table).where(table.user_id == user_id))
         await self._session.execute(delete(LibraryItemRow).where(LibraryItemRow.user_id == user_id))

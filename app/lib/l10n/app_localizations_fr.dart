@@ -1114,4 +1114,35 @@ class AppLocalizationsFr extends AppLocalizations {
   String sourceGenericAt(String host) {
     return 'Connecteur · $host';
   }
+
+  @override
+  String get noteHint => 'Écrire en marge…';
+
+  @override
+  String get removeAnnotation => 'Retirer';
+
+  @override
+  String get marginTitle => 'En marge';
+
+  @override
+  String marginCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notes',
+      one: '1 note',
+      zero: 'Aucune note',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get marginEmpty =>
+      'Sélectionnez du texte pendant la lecture pour le surligner ou écrire une note.';
+
+  @override
+  String get highlightNote => 'Note';
+
+  @override
+  String get copy => 'Copier';
 }
