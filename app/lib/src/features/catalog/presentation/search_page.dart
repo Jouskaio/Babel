@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_providers.dart';
+import '../../../core/storage/local_database.dart';
+import '../../../core/sync/lookups.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
@@ -113,6 +115,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             onOpen: () => ref.read(recentSearchesProvider.notifier).add(_query),
           )
         else ...[
+          _Pending(onSearch: _search),
           _Recent(onSelect: _search),
           const _Trending(),
         ],
@@ -235,9 +238,14 @@ class _Results extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final results = ref.watch(
-      searchResultsProvider((query: query, lang: lang)),
-    );
+    final args = (query: query, lang: lang);
+    ref.listen(searchResultsProvider(args), (_, next) async {
+      if (next.error case ApiException(innerException: _?)) {
+        final db = await ref.read(localDatabaseProvider.future);
+        if (db != null) await queueLookup(db, LookupKind.search, query, lang);
+      }
+    });
+    final results = ref.watch(searchResultsProvider(args));
     return results.when(
       loading: () => const Padding(
         padding: EdgeInsets.only(top: 40),
@@ -245,7 +253,12 @@ class _Results extends ConsumerWidget {
           child: CircularProgressIndicator(color: BabelColors.gold),
         ),
       ),
-      error: (_, _) => Text(l10n.searchFailed, style: BabelText.body(15)),
+      error: (error, _) => Text(
+        error is ApiException && error.innerException != null
+            ? l10n.searchQueued
+            : l10n.searchFailed,
+        style: BabelText.body(15),
+      ),
       data: (works) => works.isEmpty
           ? Text(l10n.noResults(query), style: BabelText.body(15))
           : Column(
@@ -301,6 +314,77 @@ class WorkRow extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Searches and scans made offline, with their results once the network came back.
+class _Pending extends ConsumerWidget {
+  const _Pending({required this.onSearch});
+  final ValueChanged<String> onSearch;
+
+  Future<void> _dismiss(WidgetRef ref, Lookup lookup) async {
+    final db = await ref.read(localDatabaseProvider.future);
+    if (db != null) await dismissLookup(db, lookup.key);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final lookups = ref.watch(lookupsProvider).value ?? const <Lookup>[];
+    if (lookups.isEmpty) return const SizedBox.shrink();
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.pendingTitle, style: BabelText.title(30)),
+          const SizedBox(height: 8),
+          for (final lookup in lookups)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(
+                lookup.kind == LookupKind.isbn
+                    ? Icons.qr_code_scanner
+                    : Icons.search,
+                color: lookup.status == LookupStatus.ready
+                    ? BabelColors.gold
+                    : BabelColors.textSecondary,
+              ),
+              title: Text(
+                lookup.title ?? lookup.query,
+                style: BabelText.body(15, color: BabelColors.textPrimary),
+              ),
+              subtitle: Text(switch (lookup.status) {
+                LookupStatus.pending => l10n.lookupWaiting,
+                LookupStatus.notFound => l10n.lookupNotFound,
+                LookupStatus.ready =>
+                  lookup.kind == LookupKind.isbn
+                      ? lookup.query
+                      : l10n.lookupResults(lookup.count ?? 0),
+              }, style: BabelText.body(12)),
+              trailing: IconButton(
+                tooltip: l10n.dismiss,
+                icon: const Icon(
+                  Icons.close,
+                  size: 18,
+                  color: BabelColors.textSecondary,
+                ),
+                onPressed: () => _dismiss(ref, lookup),
+              ),
+              onTap: lookup.status != LookupStatus.ready
+                  ? null
+                  : () {
+                      _dismiss(ref, lookup);
+                      if (lookup.workId case final id?) {
+                        context.push(Routes.work(id));
+                      } else {
+                        onSearch(lookup.query);
+                      }
+                    },
+            ),
+        ],
       ),
     );
   }

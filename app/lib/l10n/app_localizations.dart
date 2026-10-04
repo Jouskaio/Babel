@@ -1057,6 +1057,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Réessayer'**
   String get retry;
+
+  /// No description provided for @offline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hors ligne'**
+  String get offline;
+
+  /// No description provided for @pendingOps.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 changement en attente} other{{count} changements en attente}}'**
+  String pendingOps(int count);
+
+  /// No description provided for @pendingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente'**
+  String get pendingTitle;
+
+  /// No description provided for @searchQueued.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hors ligne : la recherche sera lancée au retour du réseau.'**
+  String get searchQueued;
+
+  /// No description provided for @scanQueued.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hors ligne : cet ISBN sera recherché au retour du réseau.'**
+  String get scanQueued;
+
+  /// No description provided for @lookupWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente du réseau'**
+  String get lookupWaiting;
+
+  /// No description provided for @lookupResults.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun résultat} =1{1 résultat} other{{count} résultats}}'**
+  String lookupResults(int count);
+
+  /// No description provided for @lookupNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Introuvable'**
+  String get lookupNotFound;
+
+  /// No description provided for @dismiss.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get dismiss;
 }
 
 class _AppLocalizationsDelegate

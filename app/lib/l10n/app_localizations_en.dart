@@ -548,4 +548,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get retry => 'Retry';
+
+  @override
+  String get offline => 'Offline';
+
+  @override
+  String pendingOps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes waiting',
+      one: '1 change waiting',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pendingTitle => 'Waiting';
+
+  @override
+  String get searchQueued =>
+      'Offline: the search will run when the network is back.';
+
+  @override
+  String get scanQueued =>
+      'Offline: this ISBN will be looked up when the network is back.';
+
+  @override
+  String get lookupWaiting => 'Waiting for the network';
+
+  @override
+  String lookupResults(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+      zero: 'No results',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get lookupNotFound => 'Not found';
+
+  @override
+  String get dismiss => 'Dismiss';
 }

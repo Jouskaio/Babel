@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/api/api_providers.dart';
+import '../../../core/storage/local_database.dart';
+import '../../../core/sync/lookups.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
@@ -77,10 +79,17 @@ class _ScanPageState extends ConsumerState<ScanPage> {
             404 => l10n.isbnNotFound,
             _ =>
               error.innerException != null
-                  ? l10n.errorNetwork
+                  ? l10n.scanQueued
                   : l10n.errorGeneric,
           };
         });
+      }
+      if (error.innerException != null) {
+        // Offline: keep the scan, it is looked up when the network is back.
+        final db = await ref.read(localDatabaseProvider.future);
+        if (db != null) {
+          await queueLookup(db, LookupKind.isbn, isbn.trim(), lang);
+        }
       }
     } finally {
       if (mounted) setState(() => _busy = false);
