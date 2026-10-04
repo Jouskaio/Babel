@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
 
@@ -35,3 +36,12 @@ Future<String> saveBook(
   await partial.rename(path); // never leave a half-written book behind
   return path;
 }
+
+/// The local copy of a stored file, if it was downloaded on this device.
+Future<Uint8List?> readLocalBook(String sha256, String extension) async {
+  final file = File(await localBookPath(sha256, extension));
+  return await file.exists() ? file.readAsBytes() : null;
+}
+
+/// Devices keep the books they open, to read them offline.
+const keepsBooksOffline = true;

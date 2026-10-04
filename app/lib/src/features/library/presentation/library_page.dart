@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_providers.dart';
 import '../../../core/files/file_transfer.dart';
@@ -12,6 +13,7 @@ import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
+import '../../../routing/router.dart';
 import '../application/library_controller.dart';
 
 const _acceptedExtensions = ['epub', 'pdf', 'cbz', 'cbr'];
@@ -305,6 +307,18 @@ class _BookActionsState extends ConsumerState<_BookActions> {
               style: BabelText.label(10, color: BabelColors.textSecondary),
             ),
             const SizedBox(height: 24),
+            PillButton(
+              label: l10n.readBook,
+              large: true,
+              expand: true,
+              onPressed: _progress == null
+                  ? () {
+                      Navigator.of(context).pop();
+                      context.push(Routes.read(item.id));
+                    }
+                  : null,
+            ),
+            const SizedBox(height: 12),
             if (_progress case final progress?)
               LinearProgressIndicator(
                 value: progress,
@@ -316,6 +330,7 @@ class _BookActionsState extends ConsumerState<_BookActions> {
                 future: _onDevice,
                 builder: (context, snapshot) => PillButton(
                   label: snapshot.data == true ? l10n.onDevice : l10n.download,
+                  kind: PillButtonKind.secondary,
                   expand: true,
                   onPressed: snapshot.data == true ? null : _download,
                 ),

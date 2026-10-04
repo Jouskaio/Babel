@@ -988,4 +988,41 @@ class AppLocalizationsFr extends AppLocalizations {
   String sourceAo3Of(String username) {
     return 'AO3 · favoris de $username';
   }
+
+  @override
+  String get readBook => 'Lire';
+
+  @override
+  String get readerOpening => 'Ouverture du livre…';
+
+  @override
+  String get readerNotFound => 'Ce livre n\'est pas dans votre bibliothèque.';
+
+  @override
+  String get readerUnsupported =>
+      'Babel ne sait pas encore afficher ce format. Téléchargez le fichier pour le lire dans une autre application.';
+
+  @override
+  String get readerBroken => 'Ce fichier n\'a pas pu être ouvert.';
+
+  @override
+  String chapterNumber(int number) {
+    return 'Chapitre $number';
+  }
+
+  @override
+  String chapterOf(int number, int total) {
+    return 'Chapitre $number / $total';
+  }
+
+  @override
+  String get nextChapter => 'Chapitre suivant';
+
+  @override
+  String get textSize => 'Taille du texte';
+
+  @override
+  String pageOf(int page, int total) {
+    return 'Page $page / $total';
+  }
 }

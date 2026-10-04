@@ -40,7 +40,11 @@ origin is wasteful and sometimes impossible.
   notification) and push their own changes through the offline outbox (ADR 0008), with
   idempotency keys and client timestamps.
 - Conflicts resolve per field, latest change wins; reading progress keeps one position per
-  device and offers "continue where you stopped on <device>" when they disagree.
+  device and offers "continue where you stopped on <device>" when they disagree. A book
+  reopens at the most recent position of any device. Locators are opaque to the API:
+  `epub:<chapter>:<fraction>` (spine index, fraction of the chapter scrolled) or
+  `pages:<page>` (comics, PDF); the percent is weighted by the length of each chapter.
+  Only the latest position of a book waits in the outbox.
 - Each device registers itself (name, kind, capabilities). Files are downloaded per device
   on demand or marked "available offline"; the library shows which devices hold a copy.
   Removing a file from one device never removes it from the library or other devices.
