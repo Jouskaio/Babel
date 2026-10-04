@@ -46,6 +46,33 @@ jobs:
       - name: Contract is up to date
         run: uv run python -m babel_api.scripts.export_openapi --check
 
+  migrations:
+    name: Migrations on PostgreSQL
+    runs-on: ubuntu-latest
+    needs: quality
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: babel
+          POSTGRES_PASSWORD: babel
+          POSTGRES_DB: babel
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U babel" --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      BABEL_DATABASE_URL: postgresql+asyncpg://babel:babel@localhost:5432/babel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: api/uv.lock
+      - run: uv sync --frozen
+      # Tests run on SQLite; this applies the same migrations to the production engine.
+      - name: Apply migrations
+        run: uv run python -m babel_api.scripts.migrate
+
   image:
     name: Docker image builds
     runs-on: ubuntu-latest

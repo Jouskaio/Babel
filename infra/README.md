@@ -7,6 +7,7 @@ The API and the web build of the app run on their own server (Proxmox LXC contai
 | --- | --- | --- | --- |
 | `api` | `ghcr.io/jouskaio/babel-api` | 8000 | `https://babel.jouskaio.me/api` |
 | `web` | `ghcr.io/jouskaio/babel-web` | 8090 | `https://babel.jouskaio.me` |
+| `db` | `postgres:17-alpine` | internal | — |
 
 ```
 git tag api-vX.Y.Z / app-vX.Y.Z ─► GitHub Actions
@@ -57,6 +58,17 @@ pct reboot 107
 - Docker CE, Compose plugin and Tailscale from their official Debian repositories.
 - Unprivileged `deploy` user, member of the `docker` group.
 - `/opt/babel/` owned by `deploy`, containing `docker-compose.yml` and `.env` (mode 600).
+- `.env` holds the API settings (`BABEL_*`, see [`api/.env.example`](../api/.env.example)) and
+  two secrets generated on the server, never stored anywhere else:
+
+```bash
+cd /opt/babel
+echo "BABEL_JWT_SECRET=$(openssl rand -hex 32)" >> .env
+echo "BABEL_DB_PASSWORD=$(openssl rand -hex 24)" >> .env
+```
+
+PostgreSQL (`db` service) has no published port and keeps its data in the `db-data` volume.
+The API applies pending migrations each time it starts.
 - Tailscale joined with the server tag and Tailscale SSH:
 
 ```bash
