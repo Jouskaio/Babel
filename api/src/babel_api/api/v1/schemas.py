@@ -53,7 +53,8 @@ class RegisterRequest(BaseModel):
     password: Password
     display_name: DisplayName
     # Language of the emails sent to the user; the app sends its current language.
-    locale: Locale = "fr"
+    # Optional without default value: the Dart generator mishandles enums with defaults.
+    locale: Locale | None = None
 
 
 class LoginRequest(BaseModel):

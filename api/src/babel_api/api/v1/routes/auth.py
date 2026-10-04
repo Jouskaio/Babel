@@ -82,7 +82,7 @@ async def register(
     client: ClientHeader = None,
 ) -> TokenResponse:
     """Create an account with email and password, and sign in."""
-    session = await auth.register(body.email, body.password, body.display_name, body.locale)
+    session = await auth.register(body.email, body.password, body.display_name, body.locale or "fr")
     return _respond(session, response, container.settings, client)
 
 

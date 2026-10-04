@@ -15,7 +15,7 @@ class RegisterRequest {
   RegisterRequest({
     required this.displayName,
     required this.email,
-    this.locale = const RegisterRequestLocaleEnum._('fr'),
+    this.locale,
     required this.password,
   });
 
@@ -23,7 +23,7 @@ class RegisterRequest {
 
   String email;
 
-  RegisterRequestLocaleEnum locale;
+  RegisterRequestLocaleEnum? locale;
 
   String password;
 
@@ -39,7 +39,7 @@ class RegisterRequest {
     // ignore: unnecessary_parenthesis
     (displayName.hashCode) +
     (email.hashCode) +
-    (locale.hashCode) +
+    (locale == null ? 0 : locale!.hashCode) +
     (password.hashCode);
 
   @override
@@ -49,7 +49,11 @@ class RegisterRequest {
     final json = <String, dynamic>{};
       json[r'display_name'] = this.displayName;
       json[r'email'] = this.email;
+    if (this.locale != null) {
       json[r'locale'] = this.locale;
+    } else {
+      json[r'locale'] = null;
+    }
       json[r'password'] = this.password;
     return json;
   }
@@ -75,7 +79,7 @@ class RegisterRequest {
       return RegisterRequest(
         displayName: mapValueOfType<String>(json, r'display_name')!,
         email: mapValueOfType<String>(json, r'email')!,
-        locale: RegisterRequestLocaleEnum.fromJson(json[r'locale']) ?? 'fr',
+        locale: RegisterRequestLocaleEnum.fromJson(json[r'locale']),
         password: mapValueOfType<String>(json, r'password')!,
       );
     }

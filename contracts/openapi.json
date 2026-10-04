@@ -198,13 +198,19 @@
             "type": "string"
           },
           "locale": {
-            "default": "fr",
-            "enum": [
-              "fr",
-              "en"
+            "anyOf": [
+              {
+                "enum": [
+                  "fr",
+                  "en"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
             ],
-            "title": "Locale",
-            "type": "string"
+            "title": "Locale"
           },
           "password": {
             "maxLength": 128,
