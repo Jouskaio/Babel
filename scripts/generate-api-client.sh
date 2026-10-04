@@ -83,4 +83,10 @@ rm -rf "${ROOT:?}/$OUT"
 mv "$ROOT/$TMP" "$ROOT/$OUT"
 trap - EXIT
 
+# Resolve the package's own dependencies so IDEs analyzing it directly find them
+# (the folder is replaced on every run). Skipped where Dart is not installed (CI).
+if command -v dart >/dev/null 2>&1; then
+  (cd "$ROOT/$OUT" && dart pub get >/dev/null 2>&1) || true
+fi
+
 echo "Dart client regenerated in $OUT"
