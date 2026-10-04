@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     environment: Literal["development", "test", "production"] = "development"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     cors_origins: list[str] = []
+    # Path prefix added by the reverse proxy (e.g. "/api"), so docs and links stay correct.
+    root_path: str = ""
 
 
 @lru_cache
