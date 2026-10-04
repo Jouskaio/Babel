@@ -6,21 +6,16 @@ on:
     tags: ["app-v*"]
 
 permissions:
-  contents: write
+  contents: read
+
+env:
+  # Tailscale MagicDNS name of the server
+  DEPLOY_HOST: babel-api
 
 jobs:
-  build:
-    name: Build ${{ matrix.target }}
+  android:
+    name: Build Android
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - target: web
-            command: flutter build web --release --dart-define=BABEL_API_URL=${{ vars.BABEL_API_URL }}
-            artifact: app/build/web
-          - target: android
-            command: flutter build apk --release --dart-define=BABEL_API_URL=${{ vars.BABEL_API_URL }}
-            artifact: app/build/app/outputs/flutter-apk/app-release.apk
     defaults:
       run:
         working-directory: app
@@ -31,13 +26,101 @@ jobs:
           channel: stable
           cache: true
       - uses: actions/setup-java@v4
-        if: matrix.target == 'android'
         with:
           distribution: temurin
           java-version: "17"
       - run: flutter pub get
-      - run: ${{ matrix.command }}
+      - run: flutter build apk --release --dart-define=BABEL_API_URL=${{ vars.BABEL_API_URL }}
       - uses: actions/upload-artifact@v4
         with:
-          name: babel-${{ matrix.target }}-${{ github.ref_name }}
-          path: ${{ matrix.artifact }}
+          name: babel-android-${{ github.ref_name }}
+          path: app/build/app/outputs/flutter-apk/app-release.apk
+
+  web:
+    name: Publish web image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: version
+        run: echo "value=${GITHUB_REF_NAME#app-v}" >> "$GITHUB_OUTPUT"
+      # Image names must be lowercase, while the owner name may not be.
+      - name: Image name
+        run: echo "IMAGE=ghcr.io/$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')/babel-web" >> "$GITHUB_ENV"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      # No BABEL_API_URL: the web app calls the API on its own origin, under /api.
+      - name: Build
+        working-directory: app
+        run: |
+          flutter pub get
+          flutter build web --release
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: app
+          file: app/web.Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.version.outputs.value }}
+            ${{ env.IMAGE }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.version.outputs.value }}
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+
+  deploy:
+    name: Deploy the web app
+    runs-on: ubuntu-latest
+    needs: web
+    environment: production
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same access path as the API release: ephemeral tag:ci node + Tailscale SSH.
+      - uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: Upload the compose file
+        run: |
+          scp -o StrictHostKeyChecking=accept-new infra/docker-compose.yml \
+            "deploy@${DEPLOY_HOST}:/opt/babel/docker-compose.yml"
+
+      - name: Roll out the new version
+        env:
+          VERSION: ${{ needs.web.outputs.version }}
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$REGISTRY_TOKEN" | ssh -o StrictHostKeyChecking=accept-new "deploy@${DEPLOY_HOST}" \
+            "docker login ghcr.io -u ${{ github.actor }} --password-stdin >/dev/null \
+             && cd /opt/babel \
+             && BABEL_WEB_TAG=${VERSION} docker compose pull web; \
+             status=\$?; docker logout ghcr.io >/dev/null; [ \$status -eq 0 ] \
+             && BABEL_WEB_TAG=${VERSION} docker compose up -d web"
+
+      - name: Smoke test
+        run: |
+          for attempt in $(seq 1 15); do
+            if curl -fsS "http://${DEPLOY_HOST}:8090/healthz"; then exit 0; fi
+            sleep 4
+          done
+          echo "::error::The web app did not become healthy after deployment"
+          exit 1
