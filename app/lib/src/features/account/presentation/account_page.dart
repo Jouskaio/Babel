@@ -56,7 +56,25 @@ class AccountPage extends ConsumerWidget {
                     ),
                     style: BabelText.body(13),
                   ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(
+                    Icons.cloud_sync_outlined,
+                    color: BabelColors.gold,
+                  ),
+                  title: Text(l10n.sourcesTitle, style: BabelText.heading(20)),
+                  subtitle: Text(
+                    l10n.accountSourcesHint,
+                    style: BabelText.body(13),
+                  ),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                    color: BabelColors.textSecondary,
+                  ),
+                  onTap: () => context.push(Routes.sources),
+                ),
+                const SizedBox(height: 24),
                 _Section(
                   title: l10n.accountProfile,
                   child: _ProfileForm(user: user),

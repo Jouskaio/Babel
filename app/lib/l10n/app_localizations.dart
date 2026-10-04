@@ -1111,6 +1111,378 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Retirer'**
   String get dismiss;
+
+  /// No description provided for @sourcesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sources'**
+  String get sourcesTitle;
+
+  /// No description provided for @sourcesIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Branchez les endroits où vous rangez déjà vos livres. Babel les parcourt en lecture seule et vous propose d\'importer ce qui manque.'**
+  String get sourcesIntro;
+
+  /// No description provided for @sourcesEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune source pour l\'instant.'**
+  String get sourcesEmpty;
+
+  /// No description provided for @addSource.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une source'**
+  String get addSource;
+
+  /// No description provided for @sourcesPrivacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos jetons d\'accès sont chiffrés sur le serveur et ne sont jamais réaffichés. Supprimer une source ne supprime pas les livres déjà importés.'**
+  String get sourcesPrivacy;
+
+  /// No description provided for @sourceGitHubFolder.
+  ///
+  /// In fr, this message translates to:
+  /// **'GitHub · dossier /{folder}'**
+  String sourceGitHubFolder(String folder);
+
+  /// No description provided for @sourceGitHubRoot.
+  ///
+  /// In fr, this message translates to:
+  /// **'GitHub · dépôt entier'**
+  String get sourceGitHubRoot;
+
+  /// No description provided for @sourceNeverScanned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore parcourue'**
+  String get sourceNeverScanned;
+
+  /// No description provided for @sourceUnreachable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Injoignable'**
+  String get sourceUnreachable;
+
+  /// No description provided for @scannedAgo.
+  ///
+  /// In fr, this message translates to:
+  /// **'scanné {when}'**
+  String scannedAgo(String when);
+
+  /// No description provided for @justNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'à l\'instant'**
+  String get justNow;
+
+  /// No description provided for @minutesAgo.
+  ///
+  /// In fr, this message translates to:
+  /// **'il y a {count} min'**
+  String minutesAgo(int count);
+
+  /// No description provided for @hoursAgo.
+  ///
+  /// In fr, this message translates to:
+  /// **'il y a {count} h'**
+  String hoursAgo(int count);
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{hier} other{il y a {count} jours}}'**
+  String daysAgo(int count);
+
+  /// No description provided for @newSourceTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle source'**
+  String get newSourceTitle;
+
+  /// No description provided for @newSourceQuestion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Où sont vos livres ?'**
+  String get newSourceQuestion;
+
+  /// No description provided for @kindGitHubDescription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un dépôt (ou un dossier) d\'EPUB, PDF, CBZ, CBR'**
+  String get kindGitHubDescription;
+
+  /// No description provided for @kindOpds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catalogue OPDS'**
+  String get kindOpds;
+
+  /// No description provided for @kindOpdsDescription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Calibre-Web, Kavita, Komga, COPS…'**
+  String get kindOpdsDescription;
+
+  /// No description provided for @kindWebdav.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nextcloud / WebDAV'**
+  String get kindWebdav;
+
+  /// No description provided for @kindWebdavDescription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un dossier de votre cloud ou de votre NAS'**
+  String get kindWebdavDescription;
+
+  /// No description provided for @kindAo3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fanfictions'**
+  String get kindAo3;
+
+  /// No description provided for @kindAo3Description.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre compte AO3, avec vos favoris et abonnements'**
+  String get kindAo3Description;
+
+  /// No description provided for @kindCustom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connecteur personnalisé'**
+  String get kindCustom;
+
+  /// No description provided for @kindCustomDescription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toute adresse qui renvoie un manifeste Babel (JSON)'**
+  String get kindCustomDescription;
+
+  /// No description provided for @comingSoon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bientôt'**
+  String get comingSoon;
+
+  /// No description provided for @githubTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépôt GitHub'**
+  String get githubTitle;
+
+  /// No description provided for @githubSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture seule · EPUB, PDF, CBZ, CBR'**
+  String get githubSubtitle;
+
+  /// No description provided for @githubRepository.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépôt'**
+  String get githubRepository;
+
+  /// No description provided for @githubRepositoryInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utilisez la forme propriétaire/nom, par exemple jouskaio/ebooks.'**
+  String get githubRepositoryInvalid;
+
+  /// No description provided for @githubFolder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dossier (facultatif)'**
+  String get githubFolder;
+
+  /// No description provided for @githubToken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jeton d\'accès (facultatif)'**
+  String get githubToken;
+
+  /// No description provided for @githubTokenHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nécessaire pour un dépôt privé. Créez un jeton « fine-grained » limité à ce dépôt, en lecture seule (Contents : Read).'**
+  String get githubTokenHelp;
+
+  /// No description provided for @githubCreateToken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer un jeton sur GitHub'**
+  String get githubCreateToken;
+
+  /// No description provided for @paste.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coller'**
+  String get paste;
+
+  /// No description provided for @testSource.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tester'**
+  String get testSource;
+
+  /// No description provided for @sourceTestOk.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Connexion réussie · aucun livre trouvé} =1{Connexion réussie · 1 fichier trouvé} other{Connexion réussie · {count} fichiers trouvés}}'**
+  String sourceTestOk(int count);
+
+  /// No description provided for @sourceErrorUnreachable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel n\'a pas pu ouvrir ce dépôt. Vérifiez son nom et, s\'il est privé, le jeton.'**
+  String get sourceErrorUnreachable;
+
+  /// No description provided for @sourceErrorTooMany.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous avez atteint le nombre maximal de sources.'**
+  String get sourceErrorTooMany;
+
+  /// No description provided for @sourceErrorTokens.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les dépôts privés ne sont pas encore disponibles sur ce serveur.'**
+  String get sourceErrorTokens;
+
+  /// No description provided for @sourceBookCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun livre} =1{1 livre} other{{count} livres}}'**
+  String sourceBookCount(int count);
+
+  /// No description provided for @sourceNewCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{rien de nouveau} =1{1 nouveau} other{{count} nouveaux}}'**
+  String sourceNewCount(int count);
+
+  /// No description provided for @rescan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rescanner'**
+  String get rescan;
+
+  /// No description provided for @importAllNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Importer le nouveau} other{Importer les {count} nouveaux}}'**
+  String importAllNew(int count);
+
+  /// No description provided for @sectionNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveaux'**
+  String get sectionNew;
+
+  /// No description provided for @sectionInLibrary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans la bibliothèque'**
+  String get sectionInLibrary;
+
+  /// No description provided for @importEntry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer'**
+  String get importEntry;
+
+  /// No description provided for @addEntry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get addEntry;
+
+  /// No description provided for @onBabelBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà sur Babel · téléchargement direct'**
+  String get onBabelBadge;
+
+  /// No description provided for @importDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Rien d\'importé} =1{1 livre importé} other{{count} livres importés}}'**
+  String importDone(int count);
+
+  /// No description provided for @importFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 fichier n\'a pas pu être importé} other{{count} fichiers n\'ont pas pu être importés}}'**
+  String importFailed(int count);
+
+  /// No description provided for @importEntryFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier n\'a pas pu être importé.'**
+  String get importEntryFailed;
+
+  /// No description provided for @deleteSource.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer cette source'**
+  String get deleteSource;
+
+  /// No description provided for @deleteSourceTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer cette source ?'**
+  String get deleteSourceTitle;
+
+  /// No description provided for @deleteSourceBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel oublie la source et son jeton. Les livres déjà importés restent dans votre bibliothèque.'**
+  String get deleteSourceBody;
+
+  /// No description provided for @sourceScanFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le dernier scan a échoué : la source était injoignable.'**
+  String get sourceScanFailed;
+
+  /// No description provided for @accountSourcesHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépôts GitHub et autres endroits qui contiennent vos livres'**
+  String get accountSourcesHint;
+
+  /// No description provided for @unitKb.
+  ///
+  /// In fr, this message translates to:
+  /// **'{size} Ko'**
+  String unitKb(String size);
+
+  /// No description provided for @unitMb.
+  ///
+  /// In fr, this message translates to:
+  /// **'{size} Mo'**
+  String unitMb(String size);
+
+  /// No description provided for @sectionUnreadable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichiers illisibles'**
+  String get sectionUnreadable;
+
+  /// No description provided for @unreadableHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel n\'a pas pu lire ces fichiers comme des livres. Ils seront retentés s\'ils changent.'**
+  String get unreadableHint;
+
+  /// No description provided for @unreadable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Illisible'**
+  String get unreadable;
 }
 
 class _AppLocalizationsDelegate

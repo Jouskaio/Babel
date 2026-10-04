@@ -19,6 +19,15 @@ http.Response json(Object? data, [int status = 200]) => http.Response(
   headers: {'content-type': 'application/json; charset=utf-8'},
 );
 
+Map<String, Object?> sourceEntry(String id, String name, String status) => {
+  'id': id,
+  'name': name,
+  'path': 'romans/$name',
+  'size': 1200000,
+  'status': status,
+  'item_id': null,
+};
+
 Map<String, Object?> libraryItem(String id, String title) => {
   'id': id,
   'title': title,
@@ -53,6 +62,35 @@ class FakeServer {
   int devicesRegistered = 0;
   bool emailVerified = true;
   bool offline = false;
+
+  /// Sources: request bodies received, and the books of the single source "s1".
+  final sourceRequests = <Map<String, Object?>>[];
+  bool hasSource = true;
+  final entries = <Map<String, Object?>>[
+    sourceEntry('e1', 'Jane Eyre.epub', 'new'),
+    sourceEntry('e2', 'Emma.epub', 'on_babel'),
+    sourceEntry('e3', 'broken.epub', 'unreadable'),
+  ];
+
+  Map<String, Object?> get source => {
+    'id': 's1',
+    'kind': 'github',
+    'name': 'jouskaio/ebooks',
+    'repository': 'jouskaio/ebooks',
+    'folder': 'romans',
+    'has_token': false,
+    'created_at': '2026-10-04T10:00:00Z',
+    'last_scan_at': DateTime.now()
+        .subtract(const Duration(hours: 2))
+        .toUtc()
+        .toIso8601String(),
+    'last_error': null,
+  };
+
+  Map<String, Object?> get sourceDetail => {
+    'source': source,
+    'entries': entries,
+  };
 
   void addItem(String id, String title) => changes.add({
     'seq': changes.length + 1,
@@ -155,8 +193,32 @@ class FakeServer {
         },
       });
     }
+    if (path.startsWith('/v1/sources')) return _sources(request);
     return json(<Object>[]);
   });
+
+  http.Response _sources(http.Request request) {
+    final path = request.url.path;
+    if (request.body.isNotEmpty) {
+      sourceRequests.add(jsonDecode(request.body) as Map<String, Object?>);
+    }
+    if (path == '/v1/sources/check') {
+      final body = sourceRequests.last['github']! as Map<String, Object?>;
+      return body['repository'] == 'ada/missing'
+          ? json({'detail': 'unreachable'}, 400)
+          : json({'books': entries.length});
+    }
+    if (path == '/v1/sources') {
+      return request.method == 'POST'
+          ? json(sourceDetail, 201)
+          : json(hasSource ? [source] : <Object>[]);
+    }
+    if (path == '/v1/sources/s1/entries/e1/import') {
+      entries[0] = {...entries[0], 'status': 'in_library', 'item_id': 'i9'};
+      return json(libraryItem('i9', 'Jane Eyre'), 201);
+    }
+    return json(sourceDetail);
+  }
 
   List<Override> get overrides => [
     httpClientProvider.overrideWithValue(client),
