@@ -8,7 +8,7 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.models import KnownSourceFileRow, SourceEntryRow, SourceRow
-from babel_api.domain.sources import RemoteEntry, Source, SourceEntry, SourceKind
+from babel_api.domain.sources import EntryStatus, RemoteEntry, Source, SourceEntry, SourceKind
 
 
 def _aware(value: datetime | None) -> datetime | None:
@@ -109,8 +109,10 @@ class SqlSourceRepository:
                             remote_id=entry.remote_id,
                         )
                     )
-                else:
+                elif current.remote_id != entry.remote_id:
+                    # New content: worth trying again even if the old one was unreadable.
                     current.size, current.remote_id = entry.size, entry.remote_id
+                    current.unreadable = False
         await self._session.flush()
 
     async def entries(self, source_id: UUID) -> list[SourceEntry]:
@@ -126,6 +128,7 @@ class SqlSourceRepository:
                 path=row.path,
                 size=row.size,
                 remote_id=row.remote_id,
+                status=EntryStatus.UNREADABLE if row.unreadable else EntryStatus.NEW,
             )
             for row in rows
         ]
@@ -140,7 +143,12 @@ class SqlSourceRepository:
             path=row.path,
             size=row.size,
             remote_id=row.remote_id,
+            status=EntryStatus.UNREADABLE if row.unreadable else EntryStatus.NEW,
         )
+
+    async def mark_unreadable(self, entry_id: UUID) -> None:
+        row = await self._session.get_one(SourceEntryRow, entry_id)
+        row.unreadable = True
 
     async def known_file(self, kind: SourceKind, remote_id: str) -> str | None:
         row = await self._session.get(KnownSourceFileRow, (kind.value, remote_id))

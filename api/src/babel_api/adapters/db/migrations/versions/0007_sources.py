@@ -41,6 +41,7 @@ def upgrade() -> None:
         sa.Column("path", sa.String(length=1000), nullable=False),
         sa.Column("size", sa.BigInteger(), nullable=False),
         sa.Column("remote_id", sa.String(length=100), nullable=False),
+        sa.Column("unreadable", sa.Boolean(), server_default=sa.false(), nullable=False),
         sa.ForeignKeyConstraint(["source_id"], ["sources.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("source_id", "path", name="uq_source_entries_path"),

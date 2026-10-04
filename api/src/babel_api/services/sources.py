@@ -12,6 +12,7 @@ from babel_api.domain.errors import (
     NotFoundError,
     SourceConnectionError,
     TooManySourcesError,
+    UnsupportedFileError,
 )
 from babel_api.domain.files import LibraryItem
 from babel_api.domain.ports import FileRepository, SourceConnector, SourceRepository
@@ -127,7 +128,12 @@ class SourceService:
         chunks = self._connectors[source.kind].fetch(
             source.config, await self._token(source), remote
         )
-        result = await self._library.import_file(user_id, chunks, entry.name, device_id)
+        try:
+            result = await self._library.import_file(user_id, chunks, entry.name, device_id)
+        except UnsupportedFileError:
+            await self._sources.mark_unreadable(entry.id)
+            await self._sources.commit()
+            raise
         await self._sources.remember_file(source.kind, entry.remote_id, result.item.file.sha256)
         await self._sources.commit()
         return result.item
@@ -136,14 +142,14 @@ class SourceService:
         self, user_id: UUID, source_id: UUID, device_id: UUID | None = None
     ) -> BatchImport:
         detail = await self.detail(user_id, source_id)
-        pending = [e for e in detail.entries if e.status is not EntryStatus.IN_LIBRARY]
+        pending = [e for e in detail.entries if e.status in (EntryStatus.NEW, EntryStatus.ON_BABEL)]
         imported = failed = 0
         for entry in pending[:IMPORT_BATCH]:
             try:
                 await self.import_entry(user_id, source_id, entry.id, device_id)
                 imported += 1
-            except DomainError:
-                logger.warning("Import of %s failed", entry.path, exc_info=True)
+            except DomainError as error:
+                logger.warning("Import of %s failed: %s", entry.path, type(error).__name__)
                 failed += 1
         return BatchImport(imported, failed)
 

@@ -26,12 +26,14 @@ class EntryStatus {
   static const new_ = EntryStatus._(r'new');
   static const onBabel = EntryStatus._(r'on_babel');
   static const inLibrary = EntryStatus._(r'in_library');
+  static const unreadable = EntryStatus._(r'unreadable');
 
   /// List of all possible values in this [enum][EntryStatus].
   static const values = <EntryStatus>[
     new_,
     onBabel,
     inLibrary,
+    unreadable,
   ];
 
   static EntryStatus? fromJson(dynamic value) => EntryStatusTypeTransformer().decode(value);
@@ -73,6 +75,7 @@ class EntryStatusTypeTransformer {
         case r'new': return EntryStatus.new_;
         case r'on_babel': return EntryStatus.onBabel;
         case r'in_library': return EntryStatus.inLibrary;
+        case r'unreadable': return EntryStatus.unreadable;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

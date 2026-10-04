@@ -14,6 +14,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    false,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -273,6 +274,8 @@ class SourceEntryRow(Base):
     path: Mapped[str] = mapped_column(String(1000))
     size: Mapped[int] = mapped_column(BigInteger)
     remote_id: Mapped[str] = mapped_column(String(100))
+    # The import was refused (not a readable book): no retry until the content changes.
+    unreadable: Mapped[bool] = mapped_column(default=False, server_default=false())
 
 
 class KnownSourceFileRow(Base):

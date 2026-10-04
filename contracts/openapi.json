@@ -332,7 +332,8 @@
         "enum": [
           "new",
           "on_babel",
-          "in_library"
+          "in_library",
+          "unreadable"
         ],
         "title": "EntryStatus",
         "type": "string"

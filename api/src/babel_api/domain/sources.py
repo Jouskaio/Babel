@@ -17,6 +17,7 @@ class EntryStatus(StrEnum):
     NEW = "new"  # never imported by anyone: Babel downloads it from the source
     ON_BABEL = "on_babel"  # already stored: added without downloading it again
     IN_LIBRARY = "in_library"  # already in this reader's library
+    UNREADABLE = "unreadable"  # not a book Babel can read; tried again if the file changes
 
 
 @dataclass(frozen=True, slots=True)

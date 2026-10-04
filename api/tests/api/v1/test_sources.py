@@ -224,6 +224,16 @@ def test_files_that_are_not_books_fail_without_stopping_the_batch(
     source_id = connect(client, ada).json()["source"]["id"]
     result = client.post(f"/v1/sources/{source_id}/import", headers=ada).json()
     assert result == {"imported": 2, "failed": 1}
+    # Remembered as unreadable: not counted as new, not tried again...
+    detail = client.get(f"/v1/sources/{source_id}", headers=ada).json()
+    assert statuses(detail)["fake.epub"] == "unreadable"
+    again = client.post(f"/v1/sources/{source_id}/import", headers=ada).json()
+    assert again == {"imported": 0, "failed": 0}
+    assert github.fetched.count("sha-fake") == 1
+    # ...until its content changes.
+    github.files["books/fake.epub"] = ("sha-fixed", epub(title="Fixed", isbn=None))
+    detail = client.post(f"/v1/sources/{source_id}/scan", headers=ada).json()
+    assert statuses(detail)["fake.epub"] == "new"
 
 
 def test_a_failed_scan_is_reported_and_keeps_nothing_stale(
