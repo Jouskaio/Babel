@@ -9,6 +9,7 @@ import 'package:babel_api_client/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ao3** | [**Ao3Config**](Ao3Config.md) |  | [optional] 
+**generic** | [**GenericConfig**](GenericConfig.md) |  | [optional] 
 **github** | [**GitHubConfig**](GitHubConfig.md) |  | [optional] 
 **kind** | [**SourceKind**](SourceKind.md) |  | 
 **name** | **String** |  | 
