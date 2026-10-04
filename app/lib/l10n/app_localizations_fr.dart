@@ -1093,4 +1093,25 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get linkUnreachable =>
       'Cette page est injoignable, ou réservée aux membres connectés.';
+
+  @override
+  String get genericUrl => 'Adresse du manifeste';
+
+  @override
+  String get genericUrlHelp =>
+      'Toute adresse qui renvoie un manifeste Babel (JSON) : un simple fichier statique suffit.';
+
+  @override
+  String get genericToken => 'Jeton d\'accès (facultatif)';
+
+  @override
+  String get genericDocs => 'Le format du manifeste';
+
+  @override
+  String get genericSubtitle => 'Lecture seule · votre propre liste de livres';
+
+  @override
+  String sourceGenericAt(String host) {
+    return 'Connecteur · $host';
+  }
 }

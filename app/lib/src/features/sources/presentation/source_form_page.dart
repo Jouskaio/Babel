@@ -19,6 +19,11 @@ final _newTokenUrl = Uri.parse(
   'https://github.com/settings/personal-access-tokens/new',
 );
 
+/// The manifest format, documented in the repository.
+final _manifestDocs = Uri.parse(
+  'https://github.com/Jouskaio/Babel/blob/develop/docs/source-manifest.md',
+);
+
 final _httpUrl = RegExp(r'^https?://[^\s/]+', caseSensitive: false);
 
 /// Connecting a source of one kind (design: Penpot "sources / ajouter · github").
@@ -60,7 +65,8 @@ class _SourceFormPageState extends ConsumerState<SourceFormPage> {
     final token = _token.text.trim();
     final name = switch (_kind) {
       SourceKind.opds ||
-      SourceKind.webdav => Uri.tryParse(location)?.host ?? location,
+      SourceKind.webdav ||
+      SourceKind.generic => Uri.tryParse(location)?.host ?? location,
       SourceKind.ao3 => 'AO3 · $location',
       _ => location,
     };
@@ -83,6 +89,9 @@ class _SourceFormPageState extends ConsumerState<SourceFormPage> {
           ? WebDavConfig(url: location, username: username)
           : null,
       ao3: _kind == SourceKind.ao3 ? Ao3Config(username: location) : null,
+      generic: _kind == SourceKind.generic
+          ? GenericConfig(url: location)
+          : null,
       token: token.isEmpty ? null : token,
     );
   }
@@ -197,6 +206,40 @@ class _SourceFormPageState extends ConsumerState<SourceFormPage> {
               (value ?? '').trim().isEmpty ? l10n.errorRequired : null,
         ),
       ],
+      SourceKind.generic => [
+        BabelTextField(
+          label: l10n.genericUrl,
+          controller: _location,
+          hint: 'https://',
+          help: l10n.genericUrlHelp,
+          keyboardType: TextInputType.url,
+          validator: _validateUrl,
+        ),
+        gap,
+        BabelTextField(
+          label: l10n.genericToken,
+          controller: _token,
+          obscure: true,
+          suffix: paste,
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            style: TextButton.styleFrom(padding: EdgeInsets.zero),
+            onPressed: () => launchUrl(_manifestDocs),
+            iconAlignment: IconAlignment.end,
+            icon: const Icon(
+              Icons.north_east,
+              size: 14,
+              color: BabelColors.gold,
+            ),
+            label: Text(
+              l10n.genericDocs,
+              style: BabelText.body(14, color: BabelColors.gold),
+            ),
+          ),
+        ),
+      ],
       SourceKind.ao3 => [
         BabelTextField(
           label: l10n.ao3Username,
@@ -271,6 +314,7 @@ class _SourceFormPageState extends ConsumerState<SourceFormPage> {
       SourceKind.opds => (l10n.opdsTitle, l10n.opdsSubtitle, 'OPDS'),
       SourceKind.webdav => (l10n.webdavTitle, l10n.webdavSubtitle, 'WebDAV'),
       SourceKind.ao3 => (l10n.ao3Title, l10n.ao3Subtitle, 'AO3'),
+      SourceKind.generic => (l10n.kindCustom, l10n.genericSubtitle, 'API'),
       _ => (l10n.githubTitle, l10n.githubSubtitle, 'GitHub'),
     };
     return Scaffold(

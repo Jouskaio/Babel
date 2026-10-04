@@ -549,5 +549,18 @@
   "linkRateLimited": "AO3 demande une pause : réessayez dans quelques minutes.",
   "linkNotABook": "Ce lien ne mène pas à un livre EPUB, PDF ou CBZ.",
   "linkUnsupported": "Babel ne sait pas importer depuis ce lien.",
-  "linkUnreachable": "Cette page est injoignable, ou réservée aux membres connectés."
+  "linkUnreachable": "Cette page est injoignable, ou réservée aux membres connectés.",
+  "genericUrl": "Adresse du manifeste",
+  "genericUrlHelp": "Toute adresse qui renvoie un manifeste Babel (JSON) : un simple fichier statique suffit.",
+  "genericToken": "Jeton d'accès (facultatif)",
+  "genericDocs": "Le format du manifeste",
+  "genericSubtitle": "Lecture seule · votre propre liste de livres",
+  "sourceGenericAt": "Connecteur · {host}",
+  "@sourceGenericAt": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  }
 }
