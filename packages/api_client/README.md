@@ -127,6 +127,7 @@ Class | Method | HTTP request | Description
  - [EntityKind](doc//EntityKind.md)
  - [EntryStatus](doc//EntryStatus.md)
  - [ForgotPasswordRequest](doc//ForgotPasswordRequest.md)
+ - [GenericConfig](doc//GenericConfig.md)
  - [GitHubConfig](doc//GitHubConfig.md)
  - [HealthResponse](doc//HealthResponse.md)
  - [IdentityProvider](doc//IdentityProvider.md)

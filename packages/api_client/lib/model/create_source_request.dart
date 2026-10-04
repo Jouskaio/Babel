@@ -14,6 +14,7 @@ class CreateSourceRequest {
   /// Returns a new [CreateSourceRequest] instance.
   CreateSourceRequest({
     this.ao3,
+    this.generic,
     this.github,
     required this.kind,
     required this.name,
@@ -29,6 +30,14 @@ class CreateSourceRequest {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   Ao3Config? ao3;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  GenericConfig? generic;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -63,6 +72,7 @@ class CreateSourceRequest {
   @override
   bool operator ==(Object other) => identical(this, other) || other is CreateSourceRequest &&
     other.ao3 == ao3 &&
+    other.generic == generic &&
     other.github == github &&
     other.kind == kind &&
     other.name == name &&
@@ -74,6 +84,7 @@ class CreateSourceRequest {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (ao3 == null ? 0 : ao3!.hashCode) +
+    (generic == null ? 0 : generic!.hashCode) +
     (github == null ? 0 : github!.hashCode) +
     (kind.hashCode) +
     (name.hashCode) +
@@ -82,7 +93,7 @@ class CreateSourceRequest {
     (webdav == null ? 0 : webdav!.hashCode);
 
   @override
-  String toString() => 'CreateSourceRequest[ao3=$ao3, github=$github, kind=$kind, name=$name, opds=$opds, token=$token, webdav=$webdav]';
+  String toString() => 'CreateSourceRequest[ao3=$ao3, generic=$generic, github=$github, kind=$kind, name=$name, opds=$opds, token=$token, webdav=$webdav]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -90,6 +101,11 @@ class CreateSourceRequest {
       json[r'ao3'] = this.ao3;
     } else {
       json[r'ao3'] = null;
+    }
+    if (this.generic != null) {
+      json[r'generic'] = this.generic;
+    } else {
+      json[r'generic'] = null;
     }
     if (this.github != null) {
       json[r'github'] = this.github;
@@ -136,6 +152,7 @@ class CreateSourceRequest {
 
       return CreateSourceRequest(
         ao3: Ao3Config.fromJson(json[r'ao3']),
+        generic: GenericConfig.fromJson(json[r'generic']),
         github: GitHubConfig.fromJson(json[r'github']),
         kind: SourceKind.fromJson(json[r'kind'])!,
         name: mapValueOfType<String>(json, r'name')!,

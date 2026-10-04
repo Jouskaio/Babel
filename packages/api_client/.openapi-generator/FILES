@@ -19,6 +19,7 @@ doc/EditionResponse.md
 doc/EntityKind.md
 doc/EntryStatus.md
 doc/ForgotPasswordRequest.md
+doc/GenericConfig.md
 doc/GitHubConfig.md
 doc/HealthApi.md
 doc/HealthResponse.md
@@ -91,6 +92,7 @@ lib/model/edition_response.dart
 lib/model/entity_kind.dart
 lib/model/entry_status.dart
 lib/model/forgot_password_request.dart
+lib/model/generic_config.dart
 lib/model/git_hub_config.dart
 lib/model/health_response.dart
 lib/model/identity_provider.dart

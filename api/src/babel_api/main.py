@@ -22,6 +22,7 @@ from babel_api.adapters.security.tokens import AccessTokenIssuer
 from babel_api.adapters.sources.ao3 import Ao3Connector
 from babel_api.adapters.sources.github import GitHubConnector
 from babel_api.adapters.sources.links import LinkFetcher
+from babel_api.adapters.sources.manifest import ManifestConnector
 from babel_api.adapters.sources.opds import OpdsConnector
 from babel_api.adapters.sources.webdav import WebDavConnector
 from babel_api.api.dependencies import Container
@@ -51,6 +52,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         SourceKind.OPDS: OpdsConnector(allowed_hosts=allowed_hosts),
         SourceKind.WEBDAV: WebDavConnector(allowed_hosts=allowed_hosts),
         SourceKind.AO3: ao3,
+        SourceKind.GENERIC: ManifestConnector(allowed_hosts=allowed_hosts),
     }
     mailer = BackgroundMailer(
         SmtpMailer(

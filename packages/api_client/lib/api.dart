@@ -51,6 +51,7 @@ part 'model/edition_response.dart';
 part 'model/entity_kind.dart';
 part 'model/entry_status.dart';
 part 'model/forgot_password_request.dart';
+part 'model/generic_config.dart';
 part 'model/git_hub_config.dart';
 part 'model/health_response.dart';
 part 'model/identity_provider.dart';

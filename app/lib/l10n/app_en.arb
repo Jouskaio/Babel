@@ -437,5 +437,18 @@
   "linkRateLimited": "AO3 asks for a pause: try again in a few minutes.",
   "linkNotABook": "This link does not lead to an EPUB, PDF or CBZ book.",
   "linkUnsupported": "Babel cannot import from this link.",
-  "linkUnreachable": "This page could not be reached, or it is restricted to signed-in members."
+  "linkUnreachable": "This page could not be reached, or it is restricted to signed-in members.",
+  "genericUrl": "Manifest address",
+  "genericUrlHelp": "Any address serving a Babel manifest (JSON): a static file is enough.",
+  "genericToken": "Access token (optional)",
+  "genericDocs": "The manifest format",
+  "genericSubtitle": "Read-only · your own list of books",
+  "sourceGenericAt": "Custom connector · {host}",
+  "@sourceGenericAt": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  }
 }

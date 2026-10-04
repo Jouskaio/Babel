@@ -210,6 +210,8 @@ class ApiClient {
           return EntryStatusTypeTransformer().decode(value);
         case 'ForgotPasswordRequest':
           return ForgotPasswordRequest.fromJson(value);
+        case 'GenericConfig':
+          return GenericConfig.fromJson(value);
         case 'GitHubConfig':
           return GitHubConfig.fromJson(value);
         case 'HealthResponse':

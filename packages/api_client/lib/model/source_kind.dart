@@ -10,7 +10,7 @@
 
 part of babel_api_client;
 
-/// Implemented connectors. A generic manifest connector will join this list.
+/// Implemented connectors.
 class SourceKind {
   /// Instantiate a new enum with the provided [value].
   const SourceKind._(this.value);
@@ -27,6 +27,7 @@ class SourceKind {
   static const opds = SourceKind._(r'opds');
   static const webdav = SourceKind._(r'webdav');
   static const ao3 = SourceKind._(r'ao3');
+  static const generic = SourceKind._(r'generic');
 
   /// List of all possible values in this [enum][SourceKind].
   static const values = <SourceKind>[
@@ -34,6 +35,7 @@ class SourceKind {
     opds,
     webdav,
     ao3,
+    generic,
   ];
 
   static SourceKind? fromJson(dynamic value) => SourceKindTypeTransformer().decode(value);
@@ -76,6 +78,7 @@ class SourceKindTypeTransformer {
         case r'opds': return SourceKind.opds;
         case r'webdav': return SourceKind.webdav;
         case r'ao3': return SourceKind.ao3;
+        case r'generic': return SourceKind.generic;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
