@@ -32,6 +32,7 @@ def _respond(
 ) -> TokenResponse:
     body = TokenResponse(
         access_token=session.access_token,
+        token_type="bearer",  # noqa: S106 - OAuth token type, not a secret
         expires_in=session.expires_in,
         refresh_token=session.refresh_token,
         user=UserResponse.of(session.user),
