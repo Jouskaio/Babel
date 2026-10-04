@@ -417,5 +417,25 @@
       }
     }
   },
-  "importPaused": "the source asked for a pause: continue in a few minutes"
+  "importPaused": "the source asked for a pause: continue in a few minutes",
+  "linkTitle": "Import a link",
+  "linkHeading": "From a link",
+  "linkSubtitle": "AO3, Gutenberg or a link to a file",
+  "linkField": "Link",
+  "linkHelp": "Paste the link of an AO3 fanfiction, a Gutenberg book or an EPUB, PDF, CBZ file. A book already on Babel is added without downloading it again.",
+  "linkShareTip": "Tip: in your browser, Share → Babel",
+  "linkChecking": "Looking at the link…",
+  "linkAo3": "AO3 fanfiction",
+  "linkGutenberg": "Gutenberg book",
+  "linkFile": "File",
+  "linkOnBabel": "already on Babel",
+  "linkImport": "Import into my library",
+  "linkImporting": "Importing…",
+  "linkAo3Waiting": "AO3 spaces downloads: this can take a few seconds, nothing to do",
+  "linkDone": "Added to your library",
+  "readNow": "Read now",
+  "linkRateLimited": "AO3 asks for a pause: try again in a few minutes.",
+  "linkNotABook": "This link does not lead to an EPUB, PDF or CBZ book.",
+  "linkUnsupported": "Babel cannot import from this link.",
+  "linkUnreachable": "This page could not be reached, or it is restricted to signed-in members."
 }

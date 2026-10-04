@@ -106,6 +106,19 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                       ],
                     ),
                   ),
+                  IconButton(
+                    tooltip: l10n.linkTitle,
+                    onPressed: () => context.push(Routes.importLink),
+                    style: IconButton.styleFrom(
+                      fixedSize: const Size(48, 48),
+                      side: const BorderSide(color: BabelColors.border),
+                    ),
+                    icon: const Icon(
+                      Icons.link,
+                      color: BabelColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   IconButton.filled(
                     tooltip: l10n.importFile,
                     onPressed: _importing == null ? _import : null,
@@ -370,7 +383,18 @@ class _AddOwnBooks extends StatelessWidget {
           const SizedBox(height: 8),
           Text(l10n.addOwnBooksBody, style: BabelText.body(14)),
           const SizedBox(height: 18),
-          PillButton(label: l10n.importFile, onPressed: onImport),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              PillButton(label: l10n.importFile, onPressed: onImport),
+              PillButton(
+                label: l10n.linkTitle,
+                kind: PillButtonKind.secondary,
+                onPressed: () => context.push(Routes.importLink),
+              ),
+            ],
+          ),
         ],
       ),
     );

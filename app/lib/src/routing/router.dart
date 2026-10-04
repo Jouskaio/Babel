@@ -17,6 +17,7 @@ import '../features/catalog/presentation/work_page.dart';
 import '../features/home/presentation/home_page.dart';
 import '../features/landing/presentation/landing_page.dart';
 import '../features/library/presentation/library_page.dart';
+import '../features/library/presentation/link_import_page.dart';
 import '../features/reader/presentation/reader_page.dart';
 import '../features/shell/app_shell.dart';
 import '../features/sources/presentation/new_source_page.dart';
@@ -37,6 +38,7 @@ abstract final class Routes {
   static const scan = '/scan';
   static String work(String id) => '/works/$id';
   static String read(String itemId) => '/read/$itemId';
+  static const importLink = '/import-link';
   static const sources = '/sources';
   static const newSource = '/sources/new';
   static String newSourceOf(String kind) => '/sources/new/$kind';
@@ -121,6 +123,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/read/:id',
         builder: (_, state) => ReaderPage(itemId: state.pathParameters['id']!),
       ),
+      GoRoute(
+        path: Routes.importLink,
+        builder: (_, state) =>
+            LinkImportPage(initialUrl: sharedLink(state.uri.queryParameters)),
+      ),
       GoRoute(path: Routes.sources, builder: (_, _) => const SourcesPage()),
       GoRoute(path: Routes.newSource, builder: (_, _) => const NewSourcePage()),
       GoRoute(
@@ -188,4 +195,12 @@ String? redirectFor(AuthState session, Uri uri) {
       }
       return null;
   }
+}
+
+/// The link in a share: browsers send it as `url`, or inside `text` (Android Chrome).
+@visibleForTesting
+String? sharedLink(Map<String, String> params) {
+  if (params['url'] case final url? when url.isNotEmpty) return url;
+  final text = params['text'] ?? '';
+  return RegExp(r'https?://\S+').firstMatch(text)?.group(0);
 }

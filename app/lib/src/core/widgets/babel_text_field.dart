@@ -17,6 +17,7 @@ class BabelTextField extends StatefulWidget {
     this.autofillHints,
     this.textInputAction,
     this.onSubmitted,
+    this.onChanged,
     this.hint,
     this.suffix,
     super.key,
@@ -33,6 +34,7 @@ class BabelTextField extends StatefulWidget {
   final Iterable<String>? autofillHints;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
+  final ValueChanged<String>? onChanged;
   final String? hint;
 
   /// Replaces the show/hide toggle of password fields (e.g. a "Paste" button).
@@ -72,6 +74,7 @@ class _BabelTextFieldState extends State<BabelTextField> {
           autofillHints: widget.autofillHints,
           textInputAction: widget.textInputAction,
           onFieldSubmitted: widget.onSubmitted,
+          onChanged: widget.onChanged,
           style: BabelText.body(15, color: BabelColors.textPrimary),
           cursorColor: BabelColors.gold,
           decoration: InputDecoration(

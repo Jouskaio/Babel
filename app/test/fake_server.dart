@@ -75,6 +75,7 @@ class FakeServer {
   /// Answers to "import all", one per call.
   final importBatches = <Map<String, Object?>>[];
   int importCalls = 0;
+  int linkImports = 0;
   bool hasSource = true;
   final entries = <Map<String, Object?>>[
     sourceEntry('e1', 'Jane Eyre.epub', 'new'),
@@ -205,6 +206,19 @@ class FakeServer {
           'editions': <Object>[],
         },
       });
+    }
+    if (path == '/v1/library/links/preview') {
+      return json({
+        'kind': 'ao3',
+        'title': 'Home Is Where the Heart Is',
+        'authors': ['wintersong'],
+        'detail': '12/12',
+        'on_babel': false,
+      });
+    }
+    if (path == '/v1/library/links') {
+      linkImports++;
+      return json(libraryItem('i7', 'Home Is Where the Heart Is'), 201);
     }
     if (path.startsWith('/v1/sources')) return _sources(request);
     return json(<Object>[]);
