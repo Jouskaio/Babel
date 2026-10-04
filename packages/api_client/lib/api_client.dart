@@ -184,6 +184,8 @@ class ApiClient {
           return value is DateTime ? value : DateTime.tryParse(value);
         case 'ChangePasswordRequest':
           return ChangePasswordRequest.fromJson(value);
+        case 'ForgotPasswordRequest':
+          return ForgotPasswordRequest.fromJson(value);
         case 'HealthResponse':
           return HealthResponse.fromJson(value);
         case 'IdentityProvider':
@@ -198,6 +200,8 @@ class ApiClient {
           return RefreshRequest.fromJson(value);
         case 'RegisterRequest':
           return RegisterRequest.fromJson(value);
+        case 'ResetPasswordRequest':
+          return ResetPasswordRequest.fromJson(value);
         case 'TokenResponse':
           return TokenResponse.fromJson(value);
         case 'TrendingWorkResponse':

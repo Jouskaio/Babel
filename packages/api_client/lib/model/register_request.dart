@@ -15,6 +15,7 @@ class RegisterRequest {
   RegisterRequest({
     required this.displayName,
     required this.email,
+    this.locale = const RegisterRequestLocaleEnum._('fr'),
     required this.password,
   });
 
@@ -22,12 +23,15 @@ class RegisterRequest {
 
   String email;
 
+  RegisterRequestLocaleEnum locale;
+
   String password;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is RegisterRequest &&
     other.displayName == displayName &&
     other.email == email &&
+    other.locale == locale &&
     other.password == password;
 
   @override
@@ -35,15 +39,17 @@ class RegisterRequest {
     // ignore: unnecessary_parenthesis
     (displayName.hashCode) +
     (email.hashCode) +
+    (locale.hashCode) +
     (password.hashCode);
 
   @override
-  String toString() => 'RegisterRequest[displayName=$displayName, email=$email, password=$password]';
+  String toString() => 'RegisterRequest[displayName=$displayName, email=$email, locale=$locale, password=$password]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'display_name'] = this.displayName;
       json[r'email'] = this.email;
+      json[r'locale'] = this.locale;
       json[r'password'] = this.password;
     return json;
   }
@@ -69,6 +75,7 @@ class RegisterRequest {
       return RegisterRequest(
         displayName: mapValueOfType<String>(json, r'display_name')!,
         email: mapValueOfType<String>(json, r'email')!,
+        locale: RegisterRequestLocaleEnum.fromJson(json[r'locale']) ?? 'fr',
         password: mapValueOfType<String>(json, r'password')!,
       );
     }
@@ -122,4 +129,78 @@ class RegisterRequest {
     'password',
   };
 }
+
+
+class RegisterRequestLocaleEnum {
+  /// Instantiate a new enum with the provided [value].
+  const RegisterRequestLocaleEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const fr = RegisterRequestLocaleEnum._(r'fr');
+  static const en = RegisterRequestLocaleEnum._(r'en');
+
+  /// List of all possible values in this [enum][RegisterRequestLocaleEnum].
+  static const values = <RegisterRequestLocaleEnum>[
+    fr,
+    en,
+  ];
+
+  static RegisterRequestLocaleEnum? fromJson(dynamic value) => RegisterRequestLocaleEnumTypeTransformer().decode(value);
+
+  static List<RegisterRequestLocaleEnum> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <RegisterRequestLocaleEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = RegisterRequestLocaleEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [RegisterRequestLocaleEnum] to String,
+/// and [decode] dynamic data back to [RegisterRequestLocaleEnum].
+class RegisterRequestLocaleEnumTypeTransformer {
+  factory RegisterRequestLocaleEnumTypeTransformer() => _instance ??= const RegisterRequestLocaleEnumTypeTransformer._();
+
+  const RegisterRequestLocaleEnumTypeTransformer._();
+
+  String encode(RegisterRequestLocaleEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a RegisterRequestLocaleEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  RegisterRequestLocaleEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'fr': return RegisterRequestLocaleEnum.fr;
+        case r'en': return RegisterRequestLocaleEnum.en;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [RegisterRequestLocaleEnumTypeTransformer] instance.
+  static RegisterRequestLocaleEnumTypeTransformer? _instance;
+}
+
 

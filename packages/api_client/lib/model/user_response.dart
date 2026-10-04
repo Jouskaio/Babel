@@ -18,6 +18,7 @@ class UserResponse {
     required this.email,
     required this.hasPassword,
     required this.id,
+    required this.locale,
     this.providers = const [],
   });
 
@@ -31,6 +32,8 @@ class UserResponse {
 
   String id;
 
+  UserResponseLocaleEnum locale;
+
   List<IdentityProvider> providers;
 
   @override
@@ -40,6 +43,7 @@ class UserResponse {
     other.email == email &&
     other.hasPassword == hasPassword &&
     other.id == id &&
+    other.locale == locale &&
     _deepEquality.equals(other.providers, providers);
 
   @override
@@ -50,10 +54,11 @@ class UserResponse {
     (email.hashCode) +
     (hasPassword.hashCode) +
     (id.hashCode) +
+    (locale.hashCode) +
     (providers.hashCode);
 
   @override
-  String toString() => 'UserResponse[createdAt=$createdAt, displayName=$displayName, email=$email, hasPassword=$hasPassword, id=$id, providers=$providers]';
+  String toString() => 'UserResponse[createdAt=$createdAt, displayName=$displayName, email=$email, hasPassword=$hasPassword, id=$id, locale=$locale, providers=$providers]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -62,6 +67,7 @@ class UserResponse {
       json[r'email'] = this.email;
       json[r'has_password'] = this.hasPassword;
       json[r'id'] = this.id;
+      json[r'locale'] = this.locale;
       json[r'providers'] = this.providers;
     return json;
   }
@@ -90,6 +96,7 @@ class UserResponse {
         email: mapValueOfType<String>(json, r'email')!,
         hasPassword: mapValueOfType<bool>(json, r'has_password')!,
         id: mapValueOfType<String>(json, r'id')!,
+        locale: UserResponseLocaleEnum.fromJson(json[r'locale'])!,
         providers: IdentityProvider.listFromJson(json[r'providers']),
       );
     }
@@ -143,7 +150,82 @@ class UserResponse {
     'email',
     'has_password',
     'id',
+    'locale',
     'providers',
   };
 }
+
+
+class UserResponseLocaleEnum {
+  /// Instantiate a new enum with the provided [value].
+  const UserResponseLocaleEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const fr = UserResponseLocaleEnum._(r'fr');
+  static const en = UserResponseLocaleEnum._(r'en');
+
+  /// List of all possible values in this [enum][UserResponseLocaleEnum].
+  static const values = <UserResponseLocaleEnum>[
+    fr,
+    en,
+  ];
+
+  static UserResponseLocaleEnum? fromJson(dynamic value) => UserResponseLocaleEnumTypeTransformer().decode(value);
+
+  static List<UserResponseLocaleEnum> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <UserResponseLocaleEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = UserResponseLocaleEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [UserResponseLocaleEnum] to String,
+/// and [decode] dynamic data back to [UserResponseLocaleEnum].
+class UserResponseLocaleEnumTypeTransformer {
+  factory UserResponseLocaleEnumTypeTransformer() => _instance ??= const UserResponseLocaleEnumTypeTransformer._();
+
+  const UserResponseLocaleEnumTypeTransformer._();
+
+  String encode(UserResponseLocaleEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a UserResponseLocaleEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  UserResponseLocaleEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'fr': return UserResponseLocaleEnum.fr;
+        case r'en': return UserResponseLocaleEnum.en;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [UserResponseLocaleEnumTypeTransformer] instance.
+  static UserResponseLocaleEnumTypeTransformer? _instance;
+}
+
 

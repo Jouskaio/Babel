@@ -5,6 +5,7 @@ doc/AccountApi.md
 doc/AuthApi.md
 doc/CatalogApi.md
 doc/ChangePasswordRequest.md
+doc/ForgotPasswordRequest.md
 doc/HealthApi.md
 doc/HealthResponse.md
 doc/IdentityProvider.md
@@ -13,6 +14,7 @@ doc/ProviderLoginRequest.md
 doc/ProvidersResponse.md
 doc/RefreshRequest.md
 doc/RegisterRequest.md
+doc/ResetPasswordRequest.md
 doc/TokenResponse.md
 doc/TrendingWorkResponse.md
 doc/UpdateProfileRequest.md
@@ -31,6 +33,7 @@ lib/auth/http_basic_auth.dart
 lib/auth/http_bearer_auth.dart
 lib/auth/oauth.dart
 lib/model/change_password_request.dart
+lib/model/forgot_password_request.dart
 lib/model/health_response.dart
 lib/model/identity_provider.dart
 lib/model/login_request.dart
@@ -38,6 +41,7 @@ lib/model/provider_login_request.dart
 lib/model/providers_response.dart
 lib/model/refresh_request.dart
 lib/model/register_request.dart
+lib/model/reset_password_request.dart
 lib/model/token_response.dart
 lib/model/trending_work_response.dart
 lib/model/update_profile_request.dart
