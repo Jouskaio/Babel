@@ -54,6 +54,7 @@ def test_unknown_emails_get_the_same_answer(client: TestClient, mailer: Recordin
     response = client.post("/v1/auth/password/forgot", json={"email": "nobody@example.com"})
 
     assert response.status_code == 202
+    assert response.content == b""  # generated clients choke on a "null" body
     assert mailer.sent == []
 
 

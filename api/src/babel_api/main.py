@@ -1,5 +1,6 @@
 """Entry point: assembles the FastAPI application."""
 
+import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from datetime import timedelta
@@ -27,6 +28,10 @@ from babel_api.services.catalog import CatalogService
 def create_app(settings: Settings | None = None) -> FastAPI:
     """Build the application. ``settings`` can be injected by tests."""
     settings = settings or get_settings()
+    # Application loggers (emails, sync, sources…) follow BABEL_LOG_LEVEL; uvicorn keeps its own.
+    logging.basicConfig(
+        level=settings.log_level, format="%(levelname)s:     %(name)s - %(message)s"
+    )
     # The engine connects lazily: building the app (e.g. to export the contract) needs no DB.
     engine = create_engine(settings.database_url)
     open_library = OpenLibrarySource()
