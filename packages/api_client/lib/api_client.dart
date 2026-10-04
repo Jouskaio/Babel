@@ -222,6 +222,12 @@ class ApiClient {
           return IsbnLookupResponse.fromJson(value);
         case 'LibraryItemResponse':
           return LibraryItemResponse.fromJson(value);
+        case 'LinkKind':
+          return LinkKindTypeTransformer().decode(value);
+        case 'LinkPreviewResponse':
+          return LinkPreviewResponse.fromJson(value);
+        case 'LinkRequest':
+          return LinkRequest.fromJson(value);
         case 'LoginRequest':
           return LoginRequest.fromJson(value);
         case 'OpOutcome':

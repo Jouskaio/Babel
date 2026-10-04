@@ -180,6 +180,32 @@ class Ao3Connector:
             format="epub",
         )
 
+    async def work(self, work_id: str) -> RemoteEntry:
+        """A single work, from its page: what a pasted link points to."""
+        client = self._client()
+        response = await self._get(client, f"/works/{work_id}", view_adult="true")
+        if response.status_code == 404:
+            raise SourceConnectionError("404")
+        if response.status_code >= 400:
+            raise SourceConnectionError("unreachable")
+        page = _soup(response)
+        title = _text(page.select_one("h2.title"))
+        if not title:
+            # Restricted to signed-in members, or not a work page.
+            raise SourceConnectionError("restricted")
+        chapters = _text(page.select_one("dl.stats dd.chapters"))
+        updated = _text(page.select_one("dl.stats dd.status")) or _text(
+            page.select_one("dl.stats dd.published")
+        )
+        return RemoteEntry(
+            path=f"/works/{work_id}",
+            size=0,
+            remote_id=f"{work_id}:{chapters}|{updated}"[:100],
+            title=title,
+            authors=tuple(_text(a) for a in page.select("h3.byline a[rel=author]"))[:5],
+            format="epub",
+        )
+
     async def list_entries(self, config: dict[str, Any], token: str | None) -> list[RemoteEntry]:
         username = str(config["username"])
         client = await self._session(username, token)

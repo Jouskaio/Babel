@@ -92,6 +92,8 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**getLibrary**](doc//LibraryApi.md#getlibrary) | **GET** /v1/library | Get Library
 *LibraryApi* | [**getReadingPositions**](doc//LibraryApi.md#getreadingpositions) | **GET** /v1/library/{item_id}/positions | Get Positions
 *LibraryApi* | [**importFile**](doc//LibraryApi.md#importfile) | **POST** /v1/library/files | Import File
+*LibraryApi* | [**importLink**](doc//LibraryApi.md#importlink) | **POST** /v1/library/links | Import Link
+*LibraryApi* | [**previewLink**](doc//LibraryApi.md#previewlink) | **POST** /v1/library/links/preview | Preview Link
 *LibraryApi* | [**removeFromLibrary**](doc//LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
 *LibraryApi* | [**withdrawFile**](doc//LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
 *SourcesApi* | [**checkSource**](doc//SourcesApi.md#checksource) | **POST** /v1/sources/check | Check Source
@@ -131,6 +133,9 @@ Class | Method | HTTP request | Description
  - [ImportResponse](doc//ImportResponse.md)
  - [IsbnLookupResponse](doc//IsbnLookupResponse.md)
  - [LibraryItemResponse](doc//LibraryItemResponse.md)
+ - [LinkKind](doc//LinkKind.md)
+ - [LinkPreviewResponse](doc//LinkPreviewResponse.md)
+ - [LinkRequest](doc//LinkRequest.md)
  - [LoginRequest](doc//LoginRequest.md)
  - [OpOutcome](doc//OpOutcome.md)
  - [OpdsConfig](doc//OpdsConfig.md)

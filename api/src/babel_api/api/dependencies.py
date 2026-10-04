@@ -18,6 +18,8 @@ from babel_api.adapters.db.sync_repository import SqlSyncRepository
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
 from babel_api.adapters.security.secrets import SecretBox
 from babel_api.adapters.security.tokens import AccessTokenError, AccessTokenIssuer
+from babel_api.adapters.sources.ao3 import Ao3Connector
+from babel_api.adapters.sources.links import LinkFetcher
 from babel_api.core.config import Settings
 from babel_api.domain.ports import (
     BlobStore,
@@ -33,6 +35,7 @@ from babel_api.domain.users import IdentityProvider
 from babel_api.services.auth import AuthService
 from babel_api.services.catalog import CatalogService
 from babel_api.services.files import FileService
+from babel_api.services.links import LinkService
 from babel_api.services.sources import SourceService
 from babel_api.services.sync import SyncService
 from babel_api.services.works import WorkService
@@ -53,6 +56,8 @@ class Container:
     covers: CoverCache
     metadata_reader: MetadataReader
     connectors: dict[SourceKind, SourceConnector]
+    ao3: Ao3Connector
+    link_fetcher: LinkFetcher
     secrets: SecretBox
     mailer: Mailer
 
@@ -183,3 +188,20 @@ async def get_current_admin_id(
 
 
 CurrentAdminId = Annotated[UUID, Depends(get_current_admin_id)]
+
+
+def get_link_service(
+    container: ContainerDep,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    files: FileServiceDep,
+) -> LinkService:
+    return LinkService(
+        files,
+        SqlFileRepository(session),
+        SqlSourceRepository(session),
+        container.ao3,
+        container.link_fetcher,
+    )
+
+
+LinkServiceDep = Annotated[LinkService, Depends(get_link_service)]

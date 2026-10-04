@@ -168,14 +168,14 @@ class SqlSourceRepository:
         row = await self._session.get_one(SourceEntryRow, entry_id)
         row.unreadable = True
 
-    async def known_file(self, kind: SourceKind, remote_id: str) -> str | None:
-        row = await self._session.get(KnownSourceFileRow, (kind.value, remote_id))
+    async def known_file(self, kind: str, remote_id: str) -> str | None:
+        row = await self._session.get(KnownSourceFileRow, (str(kind), remote_id))
         return row.sha256 if row else None
 
-    async def remember_file(self, kind: SourceKind, remote_id: str, sha256: str) -> None:
-        if await self._session.get(KnownSourceFileRow, (kind.value, remote_id)) is None:
+    async def remember_file(self, kind: str, remote_id: str, sha256: str) -> None:
+        if await self._session.get(KnownSourceFileRow, (str(kind), remote_id)) is None:
             self._session.add(
-                KnownSourceFileRow(kind=kind.value, remote_id=remote_id, sha256=sha256)
+                KnownSourceFileRow(kind=str(kind), remote_id=remote_id, sha256=sha256)
             )
             await self._session.flush()
 

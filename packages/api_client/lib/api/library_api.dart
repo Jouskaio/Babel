@@ -364,6 +364,126 @@ class LibraryApi {
     return null;
   }
 
+  /// Import Link
+  ///
+  /// Import the book a link points to (AO3 works are fetched at AO3's pace).
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [LinkRequest] linkRequest (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<Response> importLinkWithHttpInfo(LinkRequest linkRequest, { String? xBabelDevice, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/links';
+
+    // ignore: prefer_final_locals
+    Object? postBody = linkRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (xBabelDevice != null) {
+      headerParams[r'X-Babel-Device'] = parameterToString(xBabelDevice);
+    }
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Import Link
+  ///
+  /// Import the book a link points to (AO3 works are fetched at AO3's pace).
+  ///
+  /// Parameters:
+  ///
+  /// * [LinkRequest] linkRequest (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<LibraryItemResponse?> importLink(LinkRequest linkRequest, { String? xBabelDevice, }) async {
+    final response = await importLinkWithHttpInfo(linkRequest,  xBabelDevice: xBabelDevice, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'LibraryItemResponse',) as LibraryItemResponse;
+    
+    }
+    return null;
+  }
+
+  /// Preview Link
+  ///
+  /// What a pasted link points to: an AO3 work, a Gutenberg book or a file.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [LinkRequest] linkRequest (required):
+  Future<Response> previewLinkWithHttpInfo(LinkRequest linkRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/links/preview';
+
+    // ignore: prefer_final_locals
+    Object? postBody = linkRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Preview Link
+  ///
+  /// What a pasted link points to: an AO3 work, a Gutenberg book or a file.
+  ///
+  /// Parameters:
+  ///
+  /// * [LinkRequest] linkRequest (required):
+  Future<LinkPreviewResponse?> previewLink(LinkRequest linkRequest,) async {
+    final response = await previewLinkWithHttpInfo(linkRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'LinkPreviewResponse',) as LinkPreviewResponse;
+    
+    }
+    return null;
+  }
+
   /// Remove From Library
   ///
   /// Remove a book from the library.
