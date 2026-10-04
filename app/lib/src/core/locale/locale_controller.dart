@@ -7,8 +7,9 @@ import '../../l10n.dart';
 /// Language used when the device language is not supported.
 const fallbackLocale = Locale('fr');
 
-final localeControllerProvider =
-    NotifierProvider<LocaleController, Locale?>(LocaleController.new);
+final localeControllerProvider = NotifierProvider<LocaleController, Locale?>(
+  LocaleController.new,
+);
 
 /// The language chosen by the user, remembered on the device. Null follows the device.
 class LocaleController extends Notifier<Locale?> {

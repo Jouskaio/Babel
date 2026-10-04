@@ -50,8 +50,11 @@ class PillButton extends StatelessWidget {
           )
         : Text(
             label,
-            style:
-                BabelText.body(15, color: foreground, weight: FontWeight.w500),
+            style: BabelText.body(
+              15,
+              color: foreground,
+              weight: FontWeight.w500,
+            ),
           );
     final content = loading
         ? SizedBox.square(

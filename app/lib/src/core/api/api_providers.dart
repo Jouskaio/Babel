@@ -8,8 +8,9 @@ import '../auth/auth_http_client.dart';
 import '../config/app_config.dart';
 
 /// Every request identifies the web client, so the API uses the refresh cookie.
-const _defaultHeaders =
-    kIsWeb ? {'X-Babel-Client': AuthController.webClient} : <String, String>{};
+const _defaultHeaders = kIsWeb
+    ? {'X-Babel-Client': AuthController.webClient}
+    : <String, String>{};
 
 /// Transport used by every API client; replaced in tests.
 final httpClientProvider = Provider<http.Client>((ref) => http.Client());
@@ -35,15 +36,18 @@ final apiClientProvider = Provider<ApiClient>((ref) {
     );
 });
 
-final authApiProvider =
-    Provider<AuthApi>((ref) => AuthApi(ref.watch(publicApiClientProvider)));
+final authApiProvider = Provider<AuthApi>(
+  (ref) => AuthApi(ref.watch(publicApiClientProvider)),
+);
 final catalogApiProvider = Provider<CatalogApi>(
   (ref) => CatalogApi(ref.watch(publicApiClientProvider)),
 );
-final healthApiProvider =
-    Provider<HealthApi>((ref) => HealthApi(ref.watch(publicApiClientProvider)));
-final accountApiProvider =
-    Provider<AccountApi>((ref) => AccountApi(ref.watch(apiClientProvider)));
+final healthApiProvider = Provider<HealthApi>(
+  (ref) => HealthApi(ref.watch(publicApiClientProvider)),
+);
+final accountApiProvider = Provider<AccountApi>(
+  (ref) => AccountApi(ref.watch(apiClientProvider)),
+);
 
 /// Absolute URL of a path returned by the API (e.g. a cover).
 String apiUrl(String path) => '${AppConfig.apiBaseUrl}$path';

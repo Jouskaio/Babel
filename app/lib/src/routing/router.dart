@@ -44,14 +44,14 @@ final routerProvider = Provider<GoRouter>((ref) {
     observers: Telemetry.navigatorObservers,
     redirect: (context, state) => redirectFor(session.value, state.uri),
     routes: [
-      GoRoute(path: Routes.landing, builder: (_, __) => const LandingPage()),
-      GoRoute(path: Routes.login, builder: (_, __) => const LoginPage()),
-      GoRoute(path: Routes.signup, builder: (_, __) => const SignupPage()),
-      GoRoute(path: Routes.splash, builder: (_, __) => const SplashPage()),
-      GoRoute(path: Routes.home, builder: (_, __) => const HomePage()),
+      GoRoute(path: Routes.landing, builder: (_, _) => const LandingPage()),
+      GoRoute(path: Routes.login, builder: (_, _) => const LoginPage()),
+      GoRoute(path: Routes.signup, builder: (_, _) => const SignupPage()),
+      GoRoute(path: Routes.splash, builder: (_, _) => const SplashPage()),
+      GoRoute(path: Routes.home, builder: (_, _) => const HomePage()),
       GoRoute(
         path: Routes.forgotPassword,
-        builder: (_, __) => const ForgotPasswordPage(),
+        builder: (_, _) => const ForgotPasswordPage(),
       ),
       GoRoute(
         path: Routes.resetPassword,
@@ -63,7 +63,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) =>
             VerifyEmailPage(token: state.uri.queryParameters['token'] ?? ''),
       ),
-      GoRoute(path: Routes.account, builder: (_, __) => const AccountPage()),
+      GoRoute(path: Routes.account, builder: (_, _) => const AccountPage()),
     ],
   );
 });
@@ -77,8 +77,9 @@ final routerProvider = Provider<GoRouter>((ref) {
 String? redirectFor(AuthState session, Uri uri) {
   final path = uri.path;
   final target = uri.queryParameters['from'];
-  final next =
-      target == null || target.isEmpty ? null : Uri.tryParse(target)?.path;
+  final next = target == null || target.isEmpty
+      ? null
+      : Uri.tryParse(target)?.path;
   String withFrom(String to) =>
       Uri(path: to, queryParameters: {'from': uri.toString()}).toString();
 

@@ -11,6 +11,9 @@ analyzer:
   exclude:
     - "**/*.g.dart"
     - "build/**"
+    - android/**
+    - ios/**
+    - web/**
 
 linter:
   rules:
@@ -22,7 +25,6 @@ linter:
     - prefer_const_declarations
     - prefer_final_locals
     - prefer_single_quotes
-    - require_trailing_commas
     - sort_child_properties_last
     - unawaited_futures
     - use_super_parameters

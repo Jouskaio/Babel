@@ -65,7 +65,7 @@ class BookCover extends StatelessWidget {
                 url!,
                 fit: BoxFit.cover,
                 semanticLabel: title,
-                errorBuilder: (_, __, ___) => placeholder,
+                errorBuilder: (_, _, _) => placeholder,
                 loadingBuilder: (_, child, progress) =>
                     progress == null ? child : placeholder,
               ),

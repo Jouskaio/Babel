@@ -44,10 +44,10 @@ class FakeApi {
         ? <String, Object?>{}
         : jsonDecode(request.body) as Map<String, Object?>;
     http.Response json(Object? data, [int status = 200]) => http.Response(
-          jsonEncode(data),
-          status,
-          headers: {'content-type': 'application/json'},
-        );
+      jsonEncode(data),
+      status,
+      headers: {'content-type': 'application/json'},
+    );
     switch (request.url.path) {
       case '/v1/auth/login':
         return body['password'] == 'correct horse battery'
@@ -127,26 +127,30 @@ void main() {
     expect(await settled(c), isA<SignedIn>());
   });
 
-  test('an expired access token is refreshed and the request retried',
-      () async {
-    final api = FakeApi();
-    final c = container(api, MemoryRefreshTokenStore());
-    await settled(c);
-    await c
-        .read(authControllerProvider.notifier)
-        .login('ada@example.com', 'correct horse battery');
-    api.validAccess = 'rotated-on-server';
+  test(
+    'an expired access token is refreshed and the request retried',
+    () async {
+      final api = FakeApi();
+      final c = container(api, MemoryRefreshTokenStore());
+      await settled(c);
+      await c
+          .read(authControllerProvider.notifier)
+          .login('ada@example.com', 'correct horse battery');
+      api.validAccess = 'rotated-on-server';
 
-    final me = await c.read(accountApiProvider).getMe();
+      final me = await c.read(accountApiProvider).getMe();
 
-    expect(me?.displayName, 'Ada');
-    expect(
-      api.requests,
-      containsAllInOrder(
-        ['GET /v1/me', 'POST /v1/auth/refresh', 'GET /v1/me'],
-      ),
-    );
-  });
+      expect(me?.displayName, 'Ada');
+      expect(
+        api.requests,
+        containsAllInOrder([
+          'GET /v1/me',
+          'POST /v1/auth/refresh',
+          'GET /v1/me',
+        ]),
+      );
+    },
+  );
 
   test('logout clears the session even when offline', () async {
     final api = FakeApi();

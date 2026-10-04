@@ -4,14 +4,11 @@ import 'package:http/http.dart' as http;
 /// rejected with 401 is retried once after refreshing the session.
 class AuthHttpClient extends http.BaseClient {
   AuthHttpClient({
-    required http.Client inner,
-    required Map<String, String> defaultHeaders,
-    String? Function()? accessToken,
-    Future<bool> Function()? refresh,
-  })  : _inner = inner,
-        _defaultHeaders = defaultHeaders,
-        _accessToken = accessToken,
-        _refresh = refresh;
+    required this._inner,
+    required this._defaultHeaders,
+    this._accessToken,
+    this._refresh,
+  });
 
   final http.Client _inner;
   final Map<String, String> _defaultHeaders;

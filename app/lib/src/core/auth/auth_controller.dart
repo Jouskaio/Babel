@@ -26,11 +26,13 @@ class SignedIn extends AuthState {
   final UserResponse user;
 }
 
-final refreshTokenStoreProvider =
-    Provider<RefreshTokenStore>((ref) => RefreshTokenStore.platform());
+final refreshTokenStoreProvider = Provider<RefreshTokenStore>(
+  (ref) => RefreshTokenStore.platform(),
+);
 
-final authControllerProvider =
-    NotifierProvider<AuthController, AuthState>(AuthController.new);
+final authControllerProvider = NotifierProvider<AuthController, AuthState>(
+  AuthController.new,
+);
 
 /// Owns the session: signs in and out, keeps the access token in memory and refreshes it.
 ///
@@ -79,7 +81,8 @@ class AuthController extends Notifier<AuthState> {
         email: email,
         password: password,
         displayName: displayName,
-        locale: RegisterRequestLocaleEnum.fromJson(locale) ??
+        locale:
+            RegisterRequestLocaleEnum.fromJson(locale) ??
             RegisterRequestLocaleEnum.fr,
       ),
       xBabelClient: _client,
@@ -108,8 +111,9 @@ class AuthController extends Notifier<AuthState> {
     try {
       final tokens = await _auth.refreshSession(
         xBabelClient: _client,
-        refreshRequest:
-            stored == null ? null : RefreshRequest(refreshToken: stored),
+        refreshRequest: stored == null
+            ? null
+            : RefreshRequest(refreshToken: stored),
       );
       await _apply(tokens);
       return true;
@@ -125,8 +129,9 @@ class AuthController extends Notifier<AuthState> {
       final stored = await _store.read();
       await _auth.logout(
         xBabelClient: _client,
-        refreshRequest:
-            stored == null ? null : RefreshRequest(refreshToken: stored),
+        refreshRequest: stored == null
+            ? null
+            : RefreshRequest(refreshToken: stored),
       );
     } on ApiException {
       // Signing out locally must always work, even offline.

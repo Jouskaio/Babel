@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 Widget wrap(Widget child, {List<Override> overrides = const []}) =>
     ProviderScope(
       // Riverpod retries failed providers by default; tests need deterministic errors.
-      retry: (_, __) => null,
+      retry: (_, _) => null,
       overrides: overrides,
       child: MaterialApp(
         locale: const Locale('fr'),
