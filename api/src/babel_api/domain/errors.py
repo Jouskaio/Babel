@@ -57,6 +57,13 @@ class SourceConnectionError(DomainError):
     """The source could not be reached or refused the credentials."""
 
 
+class SourceRateLimitedError(SourceConnectionError):
+    """The source refuses requests for a while (e.g. GitHub without a token: 60 per hour)."""
+
+    def __init__(self) -> None:
+        super().__init__("rate_limited")
+
+
 class TooManySourcesError(DomainError):
     """The account reached the maximum number of sources."""
 

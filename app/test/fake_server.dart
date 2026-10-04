@@ -204,9 +204,11 @@ class FakeServer {
     }
     if (path == '/v1/sources/check') {
       final body = sourceRequests.last['github']! as Map<String, Object?>;
-      return body['repository'] == 'ada/missing'
-          ? json({'detail': 'unreachable'}, 400)
-          : json({'books': entries.length});
+      return switch (body['repository']) {
+        'ada/missing' => json({'detail': 'unreachable'}, 400),
+        'ada/limited' => json({'detail': 'rate limited'}, 429),
+        _ => json({'books': entries.length}),
+      };
     }
     if (path == '/v1/sources') {
       return request.method == 'POST'

@@ -80,6 +80,11 @@ void main() {
     await tester.tap(find.text('TESTER'));
     await tester.pumpAndSettle();
     expect(find.textContaining("n'a pas pu ouvrir ce dépôt"), findsOneWidget);
+
+    await tester.enterText(fields.at(0), 'ada/limited');
+    await tester.tap(find.text('TESTER'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('GitHub limite les requêtes'), findsOneWidget);
   });
 
   testWidgets('a book is imported from the detail page', (tester) async {

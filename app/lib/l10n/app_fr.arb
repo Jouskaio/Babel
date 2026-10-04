@@ -433,5 +433,6 @@
   },
   "sectionUnreadable": "Fichiers illisibles",
   "unreadableHint": "Babel n'a pas pu lire ces fichiers comme des livres. Ils seront retentés s'ils changent.",
-  "unreadable": "Illisible"
+  "unreadable": "Illisible",
+  "sourceErrorRateLimited": "GitHub limite les requêtes sans jeton (60 par heure pour votre connexion). Réessayez dans quelques minutes, ou ajoutez un jeton d'accès."
 }
