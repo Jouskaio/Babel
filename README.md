@@ -7,7 +7,7 @@ annotated reading ("in the margin"), e-reader sync, statistics and monthly Wraps
 
 | Folder | Purpose | Stack |
 | --- | --- | --- |
-| [`api/`](api/) | Server API — the only component talking to Kavita, Audiobookshelf, Shelfmark, Chaptarr and metadata sources | Python · FastAPI · uv |
+| [`api/`](api/) | Server API — the only component talking to book sources, catalogs and metadata services | Python · FastAPI · uv |
 | [`app/`](app/) | Single client (mobile, tablet, desktop, web, Boox) — **no server logic** | Flutter |
 | [`packages/api_client/`](packages/api_client/) | Dart client **generated** from the OpenAPI contract | Dart (generated) |
 | [`contracts/`](contracts/) | Versioned OpenAPI contract of the API | OpenAPI 3.1 |

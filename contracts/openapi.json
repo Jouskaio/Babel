@@ -25,11 +25,23 @@
           "imported": {
             "title": "Imported",
             "type": "integer"
+          },
+          "paused": {
+            "description": "The source asked to slow down: wait before calling again",
+            "title": "Paused",
+            "type": "boolean"
+          },
+          "remaining": {
+            "description": "Books left to import: call again to continue",
+            "title": "Remaining",
+            "type": "integer"
           }
         },
         "required": [
           "imported",
-          "failed"
+          "failed",
+          "remaining",
+          "paused"
         ],
         "title": "BatchImportResponse",
         "type": "object"
@@ -3534,7 +3546,7 @@
     },
     "/v1/sources/{source_id}/import": {
       "post": {
-        "description": "Import every book not yet in the library (up to 50 per call).",
+        "description": "Import books not yet in the library, a batch per call (smaller for slow sources).",
         "operationId": "importSource",
         "parameters": [
           {

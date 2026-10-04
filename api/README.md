@@ -10,7 +10,7 @@ src/babel_api/
 ├── api/        # HTTP: versioned routes (/v1), schemas, FastAPI dependencies
 ├── services/   # use cases
 ├── domain/     # pure business models and rules
-├── adapters/   # Kavita, Audiobookshelf, Shelfmark, scrapers…
+├── adapters/   # database, file store, sources (GitHub, OPDS, WebDAV, AO3), catalogs…
 ├── core/       # configuration, logging
 └── scripts/    # maintenance (OpenAPI contract export)
 ```

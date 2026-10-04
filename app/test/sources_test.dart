@@ -247,4 +247,29 @@ void main() {
     expect(server.sourceRequests.single['token'], isNull);
     expect(server.sourceRequests.single['name'], 'AO3 · jouskaio');
   });
+
+  testWidgets('import all goes on batch after batch until a pause', (
+    tester,
+  ) async {
+    tallScreen(tester);
+    final server = FakeServer()
+      ..importBatches.addAll([
+        {'imported': 1, 'failed': 0, 'remaining': 1, 'paused': false},
+        {'imported': 0, 'failed': 0, 'remaining': 1, 'paused': true},
+      ]);
+    await tester.pumpWidget(
+      wrap(const SourceDetailPage(sourceId: 's1'), overrides: server.overrides),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('IMPORTER LES 2 NOUVEAUX'));
+    for (var i = 0; i < 3; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    expect(server.importCalls, 2);
+    expect(find.textContaining('demande une pause'), findsOneWidget);
+    expect(find.textContaining('1 livre importé'), findsOneWidget);
+  });
 }

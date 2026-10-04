@@ -15,9 +15,6 @@ import '../../library/application/library_controller.dart';
 import '../application/sources_providers.dart';
 import 'source_badge.dart';
 
-/// The server imports at most this many books per "import all" call.
-const _batch = 50;
-
 /// A source and its books (design: Penpot "sources / détail").
 class SourceDetailPage extends ConsumerStatefulWidget {
   const SourceDetailPage({required this.sourceId, super.key});
@@ -77,21 +74,26 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
     setState(() => _importingAll = true);
     var imported = 0;
     var failed = 0;
+    var paused = false;
     try {
-      // Batches of 50 until nothing more comes in (failed files stay pending).
-      while (true) {
+      // One batch per call (a couple of works for AO3) until done, stuck or paused.
+      while (mounted) {
         final result = (await _api.importSource(widget.sourceId))!;
         imported += result.imported;
-        failed = result.failed;
-        if (result.imported == 0 || result.imported + result.failed < _batch) {
+        failed += result.failed;
+        _refresh(); // books turn "in library" as they arrive
+        if (result.paused) {
+          paused = true;
           break;
         }
+        if (result.remaining == 0 || result.imported == 0) break;
       }
       if (mounted) {
         _say(
           [
             l10n.importDone(imported),
             if (failed > 0) l10n.importFailed(failed),
+            if (paused) l10n.importPaused,
           ].join(' · '),
         );
       }
