@@ -8,7 +8,13 @@ from fastapi import APIRouter, File, Path, UploadFile, status
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
-from babel_api.api.dependencies import CurrentAdminId, CurrentUserId, FileServiceDep
+from babel_api.api.dependencies import (
+    CurrentAdminId,
+    CurrentUserId,
+    DeviceHeader,
+    FileServiceDep,
+    SyncServiceDep,
+)
 from babel_api.domain.files import BookFormat, LibraryItem
 
 router = APIRouter(tags=["library"])
@@ -59,7 +65,10 @@ async def get_library(user_id: CurrentUserId, files: FileServiceDep) -> list[Lib
 
 @router.post("/library/files", operation_id="importFile", status_code=status.HTTP_201_CREATED)
 async def import_file(
-    user_id: CurrentUserId, files: FileServiceDep, file: Annotated[UploadFile, File()]
+    user_id: CurrentUserId,
+    files: FileServiceDep,
+    file: Annotated[UploadFile, File()],
+    device_id: DeviceHeader = None,
 ) -> ImportResponse:
     """Import an EPUB, PDF, CBZ or CBR file into the library."""
 
@@ -67,7 +76,7 @@ async def import_file(
         while chunk := await file.read(_CHUNK):
             yield chunk
 
-    result = await files.import_file(user_id, chunks(), file.filename or "book")
+    result = await files.import_file(user_id, chunks(), file.filename or "book", device_id)
     return ImportResponse(
         item=LibraryItemResponse.of(result.item), deduplicated=result.deduplicated
     )
@@ -77,18 +86,20 @@ async def import_file(
     "/library/files/{sha256}", operation_id="addStoredFile", status_code=status.HTTP_201_CREATED
 )
 async def add_stored_file(
-    user_id: CurrentUserId, files: FileServiceDep, sha256: Sha256
+    user_id: CurrentUserId, files: FileServiceDep, sha256: Sha256, device_id: DeviceHeader = None
 ) -> LibraryItemResponse:
     """Add a file already on Babel to the library, without uploading it again."""
-    return LibraryItemResponse.of(await files.add_existing(user_id, sha256))
+    return LibraryItemResponse.of(await files.add_existing(user_id, sha256, device_id))
 
 
 @router.delete(
     "/library/{item_id}", operation_id="removeFromLibrary", status_code=status.HTTP_204_NO_CONTENT
 )
-async def remove_from_library(user_id: CurrentUserId, files: FileServiceDep, item_id: UUID) -> None:
-    """Remove a book from the library. Progress and notes are kept with the work."""
-    await files.remove_from_library(user_id, item_id)
+async def remove_from_library(
+    user_id: CurrentUserId, files: FileServiceDep, item_id: UUID, device_id: DeviceHeader = None
+) -> None:
+    """Remove a book from the library."""
+    await files.remove_from_library(user_id, item_id, device_id)
 
 
 @router.get(
@@ -121,3 +132,23 @@ async def withdraw_file(
 ) -> None:
     """Withdraw a file from every library and delete it; by default its hash is blocked."""
     await files.withdraw(admin_id, sha256, body.reason, block=body.block)
+
+
+class ReadingPositionResponse(BaseModel):
+    device_id: UUID
+    locator: str
+    percent: float
+    client_time: datetime
+
+
+@router.get("/library/{item_id}/positions", operation_id="getReadingPositions")
+async def get_positions(
+    user_id: CurrentUserId, sync: SyncServiceDep, item_id: UUID
+) -> list[ReadingPositionResponse]:
+    """Where each device stopped in this book, most recent first."""
+    return [
+        ReadingPositionResponse(
+            device_id=p.device_id, locator=p.locator, percent=p.percent, client_time=p.client_time
+        )
+        for p in await sync.positions(user_id, item_id)
+    ]

@@ -6,13 +6,14 @@ from datetime import timedelta
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, Header, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from babel_api.adapters.db.catalog_repository import SqlCatalogRepository
 from babel_api.adapters.db.file_repository import SqlFileRepository
 from babel_api.adapters.db.repositories import SqlUserRepository
+from babel_api.adapters.db.sync_repository import SqlSyncRepository
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
 from babel_api.adapters.security.tokens import AccessTokenError, AccessTokenIssuer
 from babel_api.core.config import Settings
@@ -21,6 +22,7 @@ from babel_api.domain.users import IdentityProvider
 from babel_api.services.auth import AuthService
 from babel_api.services.catalog import CatalogService
 from babel_api.services.files import FileService
+from babel_api.services.sync import SyncService
 from babel_api.services.works import WorkService
 
 
@@ -86,6 +88,7 @@ def get_file_service(
     return FileService(
         SqlFileRepository(session),
         SqlCatalogRepository(session),
+        SqlSyncRepository(session),
         container.blob_store,
         container.metadata_reader,
         access=settings.file_access,
@@ -94,6 +97,18 @@ def get_file_service(
 
 
 FileServiceDep = Annotated[FileService, Depends(get_file_service)]
+
+
+def get_sync_service(
+    session: Annotated[AsyncSession, Depends(get_session)], files: FileServiceDep
+) -> SyncService:
+    return SyncService(SqlSyncRepository(session), SqlFileRepository(session), files)
+
+
+SyncServiceDep = Annotated[SyncService, Depends(get_sync_service)]
+
+# Devices identify themselves on every request, so changes they make are attributed.
+DeviceHeader = Annotated[UUID | None, Header(alias="X-Babel-Device")]
 
 _bearer = HTTPBearer(auto_error=False)
 

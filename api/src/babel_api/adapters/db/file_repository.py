@@ -6,7 +6,12 @@ from uuid import UUID
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from babel_api.adapters.db.models import BlockedFileRow, LibraryItemRow, StoredFileRow
+from babel_api.adapters.db.models import (
+    BlockedFileRow,
+    LibraryItemRow,
+    ReadingPositionRow,
+    StoredFileRow,
+)
 from babel_api.domain.files import BookFormat, LibraryItem, StoredFile
 
 
@@ -115,9 +120,22 @@ class SqlFileRepository:
         return [_to_item(row) for row in rows]
 
     async def delete_item(self, item_id: UUID) -> None:
+        await self._session.execute(
+            delete(ReadingPositionRow).where(ReadingPositionRow.item_id == item_id)
+        )
         await self._session.execute(delete(LibraryItemRow).where(LibraryItemRow.id == item_id))
 
+    async def items_of_file(self, sha256: str) -> list[LibraryItem]:
+        rows = await self._session.scalars(
+            select(LibraryItemRow).where(LibraryItemRow.file_sha256 == sha256)
+        )
+        return [_to_item(row) for row in rows]
+
     async def delete_items_of_file(self, sha256: str) -> None:
+        items = select(LibraryItemRow.id).where(LibraryItemRow.file_sha256 == sha256)
+        await self._session.execute(
+            delete(ReadingPositionRow).where(ReadingPositionRow.item_id.in_(items))
+        )
         await self._session.execute(
             delete(LibraryItemRow).where(LibraryItemRow.file_sha256 == sha256)
         )
