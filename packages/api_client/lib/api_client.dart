@@ -200,6 +200,8 @@ class ApiClient {
           return RegisterRequest.fromJson(value);
         case 'TokenResponse':
           return TokenResponse.fromJson(value);
+        case 'TrendingWorkResponse':
+          return TrendingWorkResponse.fromJson(value);
         case 'UpdateProfileRequest':
           return UpdateProfileRequest.fromJson(value);
         case 'UserResponse':
