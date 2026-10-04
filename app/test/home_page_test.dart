@@ -37,7 +37,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Bonsoir, Ada.'), findsOneWidget);
+    expect(find.textContaining(', Ada.'), findsOneWidget);
     expect(find.text('API connectée · v0.1.0'), findsOneWidget);
   });
 

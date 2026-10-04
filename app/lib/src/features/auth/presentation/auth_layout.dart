@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_providers.dart';
 import '../../../core/auth/auth_failure.dart';
+import '../../../core/locale/language_picker.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
@@ -61,7 +62,7 @@ class AuthLayout extends StatelessWidget {
                               style: BabelText.label(12, spacing: 5),
                             ),
                           ),
-                          const SizedBox(width: 48),
+                          const LanguagePicker(),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -85,7 +86,18 @@ class AuthLayout extends StatelessWidget {
           return Row(
             children: [
               const SizedBox(width: 640, child: _Visual()),
-              Expanded(child: content),
+              Expanded(
+                child: Stack(
+                  children: [
+                    content,
+                    const Positioned(
+                      top: 28,
+                      right: 32,
+                      child: LanguagePicker(),
+                    ),
+                  ],
+                ),
+              ),
             ],
           );
         },

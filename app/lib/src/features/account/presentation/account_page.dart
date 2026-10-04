@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/auth/auth_controller.dart';
 import '../../../core/auth/auth_failure.dart';
+import '../../../core/locale/language_picker.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/babel_text_field.dart';
@@ -27,6 +28,7 @@ class AccountPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: BabelColors.canvas,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: BabelColors.textPrimary),
           onPressed: () => context.go(Routes.home),
@@ -64,13 +66,28 @@ class AccountPage extends ConsumerWidget {
                   title: l10n.accountSecurity,
                   child: _PasswordForm(user: user),
                 ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.language.toUpperCase(),
+                        style: BabelText.label(11, spacing: 2),
+                      ),
+                    ),
+                    const LanguagePicker(),
+                  ],
+                ),
                 const SizedBox(height: 32),
                 PillButton(
                   label: l10n.signOut,
                   kind: PillButtonKind.secondary,
                   expand: true,
-                  onPressed: () =>
-                      ref.read(authControllerProvider.notifier).logout(),
+                  onPressed: () async {
+                    await ref.read(authControllerProvider.notifier).logout();
+                    // A deliberate sign-out ends on the landing page, not on the sign-in form.
+                    ref.read(routerProvider).go(Routes.landing);
+                  },
                 ),
                 const SizedBox(height: 12),
                 TextButton(

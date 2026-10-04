@@ -10,6 +10,7 @@ Widget wrap(Widget child, {List<Override> overrides = const []}) =>
       retry: (_, __) => null,
       overrides: overrides,
       child: MaterialApp(
+        locale: const Locale('fr'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: child,

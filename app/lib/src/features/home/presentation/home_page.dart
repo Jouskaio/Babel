@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_controller.dart';
+import '../../../core/locale/greeting.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
@@ -41,7 +42,10 @@ class HomePage extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 32),
-              Text(l10n.greeting(name), style: BabelText.title(52)),
+              Text(
+                greeting(l10n, name, DateTime.now()),
+                style: BabelText.title(52),
+              ),
               const SizedBox(height: 24),
               Text(
                 status.when(

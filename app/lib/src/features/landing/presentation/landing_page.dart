@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_providers.dart';
+import '../../../core/locale/language_picker.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
@@ -63,6 +64,8 @@ class _Nav extends StatelessWidget {
         children: [
           Text(l10n.brand, style: BabelText.label(13, spacing: 6)),
           const Spacer(),
+          const LanguagePicker(),
+          const SizedBox(width: 12),
           PillButton(
             label: l10n.signIn,
             kind: PillButtonKind.secondary,
