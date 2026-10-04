@@ -1,0 +1,4 @@
+# Only the web build and the nginx config are needed by web.Dockerfile
+*
+!build/web
+!web.nginx.conf
