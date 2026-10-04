@@ -49,15 +49,20 @@ class LibraryController extends StreamNotifier<List<LibraryItemResponse>> {
     final result = await ref
         .read(fileTransferProvider)
         .upload(file, onProgress: onProgress);
+    await keep(result.item);
+    return result;
+  }
+
+  /// Shows a book the server just added (upload, source import) without waiting for sync.
+  Future<void> keep(LibraryItemResponse item) async {
     final db = await ref.read(localDatabaseProvider.future);
     if (db != null) {
       // Through JSON: the generated model holds enum objects the database cannot store.
       final data =
-          jsonDecode(jsonEncode(result.item.toJson())) as Map<String, Object?>;
-      await LocalStores.library.record(result.item.id).put(db, data);
+          jsonDecode(jsonEncode(item.toJson())) as Map<String, Object?>;
+      await LocalStores.library.record(item.id).put(db, data);
     }
     unawaited(reload());
-    return result;
   }
 
   /// Removes a book at once, even offline; the removal is pushed when possible.

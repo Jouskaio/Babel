@@ -15,7 +15,10 @@ from babel_api.domain.errors import (
     NotFoundError,
     PasswordRequiredError,
     ProviderNotConfiguredError,
+    SecretsUnavailableError,
+    SourceConnectionError,
     SourceUnavailableError,
+    TooManySourcesError,
     UnsupportedFileError,
 )
 
@@ -34,6 +37,15 @@ _STATUS: dict[type[Exception], tuple[int, str]] = {
     ForbiddenError: (status.HTTP_403_FORBIDDEN, "Not allowed"),
     InvalidIsbnError: (status.HTTP_400_BAD_REQUEST, "Invalid ISBN"),
     NotFoundError: (status.HTTP_404_NOT_FOUND, "Not found"),
+    SourceConnectionError: (
+        status.HTTP_400_BAD_REQUEST,
+        "The source could not be reached: check its address and access token",
+    ),
+    TooManySourcesError: (status.HTTP_409_CONFLICT, "Too many sources on this account"),
+    SecretsUnavailableError: (
+        status.HTTP_503_SERVICE_UNAVAILABLE,
+        "Access tokens cannot be stored on this server yet",
+    ),
     InvalidLinkError: (status.HTTP_400_BAD_REQUEST, "This link is invalid or has expired"),
     PasswordRequiredError: (status.HTTP_403_FORBIDDEN, "The current password is incorrect"),
     ProviderNotConfiguredError: (status.HTTP_404_NOT_FOUND, "Sign-in method not available"),

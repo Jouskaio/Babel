@@ -51,3 +51,15 @@ class BlockedFileError(DomainError):
 
 class ForbiddenError(DomainError):
     """The account is not allowed to perform this action."""
+
+
+class SourceConnectionError(DomainError):
+    """The source could not be reached or refused the credentials."""
+
+
+class TooManySourcesError(DomainError):
+    """The account reached the maximum number of sources."""
+
+
+class SecretsUnavailableError(DomainError):
+    """Credentials cannot be stored: the server has no encryption key configured."""
