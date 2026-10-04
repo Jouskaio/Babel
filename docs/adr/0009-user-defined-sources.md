@@ -1,0 +1,60 @@
+# 0009 — User-defined sources
+
+- Status: proposed
+- Date: 2026-10-04
+
+## Context
+
+Readers keep books in many places: a GitHub repository of EPUBs, a Calibre-Web or Kavita
+library exposed over OPDS, a Nextcloud folder, a fanfiction account. Babel should let each
+user connect the places they already use instead of re-uploading everything.
+
+## Decision
+
+### Source kinds
+
+A **source** belongs to one user and is one of:
+
+| Kind | Connects to | Authentication |
+| --- | --- | --- |
+| `github` | a repository (and optional folder) containing book files | fine-grained personal access token, read-only, optional for public repositories |
+| `opds` | an OPDS 1.2 / 2.0 catalog (Calibre-Web, Kavita, Komga, COPS…) | none, HTTP Basic or API key |
+| `webdav` | a WebDAV folder (Nextcloud, ownCloud, NAS) | username + app password |
+| `fanfiction` | the user's account on a fanfiction site (AO3 first) | the user's own credentials or session |
+| `generic` | any HTTP endpoint returning a Babel source manifest (JSON) | optional bearer token or header |
+
+The generic manifest is a small, documented JSON format (title, authors, file URL, format,
+optional cover and identifiers) so anyone can expose a source without a dedicated connector.
+
+### Architecture
+
+- Connectors run in the API, never in the app. Each kind implements one port:
+  `list(cursor) → entries`, `fetch(entry) → file stream`, `test() → health`.
+- Sources are **read-only**: Babel lists and imports; it never writes back.
+- An entry is matched to the catalog (ADR 0007) by its identifiers, then by title and
+  authors; unmatched entries can still be imported as personal books.
+- Importing copies the file into the user's library; a source can also be re-scanned
+  (manually or on a schedule) to offer new entries. Removing a source never deletes books
+  already imported.
+- Fanfiction connectors only access works the user can access with their own account, at
+  a polite rate, and identify Babel in their user agent.
+
+### Secrets
+
+- Credentials are encrypted at rest with a server-side key (`BABEL_SECRETS_KEY`,
+  authenticated encryption), never returned by the API after creation and never logged.
+  The app only shows a hint (e.g. `ghp_…a1b2`).
+- Users are told to create dedicated, read-only, revocable tokens (GitHub fine-grained token,
+  Nextcloud app password) rather than their main password; the UI links to the right page.
+- Deleting a source or the account deletes its credentials immediately.
+
+### Limits
+
+Per-user limits on the number of sources, scan frequency and imported volume protect the
+server; outbound requests are restricted to public addresses (no access to the server's
+private network), with timeouts and size caps.
+
+## Consequences
+
+The API gains a connector registry, an encrypted secrets column and a background scan job.
+Adding a new kind is one adapter plus its form in the app.

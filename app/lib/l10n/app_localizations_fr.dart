@@ -67,11 +67,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Scannez vos livres papier, importez vos fichiers, téléchargez vos fanfictions depuis AO3 et retrouvez vos lectures en cours, à lire et terminées.';
 
   @override
-  String get featureSyncTitle => 'Vos fichiers, partout';
+  String get featureSyncTitle => 'Vos sources, partout';
 
   @override
   String get featureSyncBody =>
-      'Importez vos EPUB et reprenez à la bonne page sur liseuse, téléphone ou ordinateur, même hors ligne.';
+      'Importez vos EPUB ou branchez vos propres sources — GitHub, catalogue OPDS, Nextcloud — et reprenez à la bonne page sur liseuse, téléphone ou ordinateur.';
 
   @override
   String get featureNotesTitle => 'Annotez en marge';
