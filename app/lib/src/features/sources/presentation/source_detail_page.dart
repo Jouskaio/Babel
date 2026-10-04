@@ -33,6 +33,8 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
   final _importing = <String>{};
 
   SourcesApi get _api => ref.read(sourcesApiProvider);
+  SourceKind? get _kind =>
+      ref.read(sourceDetailProvider(widget.sourceId)).value?.source_.kind;
   void _refresh() => ref.invalidate(sourceDetailProvider(widget.sourceId));
 
   void _say(String message) =>
@@ -45,7 +47,7 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
       await _api.scanSource(widget.sourceId);
       _refresh();
     } on Object catch (error) {
-      if (mounted) _say(sourceError(context, error));
+      if (mounted) _say(sourceError(context, error, kind: _kind));
     } finally {
       if (mounted) setState(() => _scanning = false);
     }
@@ -61,7 +63,7 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
       if (mounted) {
         _say(
           error.innerException != null || error.code == 400
-              ? sourceError(context, error)
+              ? sourceError(context, error, kind: _kind)
               : context.l10n.importEntryFailed,
         );
       }
@@ -94,7 +96,7 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
         );
       }
     } on Object catch (error) {
-      if (mounted) _say(sourceError(context, error));
+      if (mounted) _say(sourceError(context, error, kind: _kind));
     } finally {
       if (imported > 0) {
         await ref.read(libraryControllerProvider.notifier).reload();
@@ -169,7 +171,7 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
       }
       if (mounted) context.pop();
     } on Object catch (error) {
-      if (mounted) _say(sourceError(context, error));
+      if (mounted) _say(sourceError(context, error, kind: _kind));
     }
   }
 
@@ -185,7 +187,7 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Text(
-              sourceError(context, error),
+              sourceError(context, error, kind: _kind),
               textAlign: TextAlign.center,
               style: BabelText.body(15),
             ),
@@ -224,7 +226,10 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
           SourceCard(
             child: Row(
               children: [
-                const SourceBadge('GH'),
+                SourceBadge(
+                  sourceBadge(source.kind).$1,
+                  color: sourceBadge(source.kind).$2,
+                ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -246,7 +251,9 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
                             child: Text(
                               failed
                                   ? (source.lastError!.contains('rate_limited')
-                                        ? l10n.sourceErrorRateLimited
+                                        ? (source.kind == SourceKind.github
+                                              ? l10n.sourceErrorRateLimited
+                                              : l10n.sourceErrorRateLimitedGeneric)
                                         : l10n.sourceScanFailed)
                                   : source.lastScanAt == null
                                   ? l10n.sourceNeverScanned
@@ -324,8 +331,9 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
 
   Widget _row(SourceEntryResponse entry) {
     final l10n = context.l10n;
-    final (fileTitle, format) = titleAndFormat(entry.name);
+    final (fileTitle, fileFormat) = titleAndFormat(entry.name);
     final title = entry.title ?? fileTitle;
+    final format = entry.format?.toUpperCase() ?? fileFormat;
     final onBabel = entry.status == EntryStatus.onBabel;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -347,7 +355,7 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
                     [
                       if (entry.authors.isNotEmpty) entry.authors.join(', '),
                       if (format.isNotEmpty) format,
-                      fileSize(context, entry.size),
+                      if (entry.size > 0) fileSize(context, entry.size),
                     ].join(' · '),
                     style: BabelText.body(12),
                   ),

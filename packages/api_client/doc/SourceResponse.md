@@ -16,8 +16,10 @@ Name | Type | Description | Notes
 **kind** | [**SourceKind**](SourceKind.md) |  | 
 **lastError** | **String** |  | [optional] 
 **lastScanAt** | [**DateTime**](DateTime.md) |  | [optional] 
+**location** | **String** | Repository, address or account, for display | 
 **name** | **String** |  | 
 **repository** | **String** |  | [optional] 
+**username** | **String** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

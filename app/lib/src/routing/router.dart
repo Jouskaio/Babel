@@ -1,3 +1,4 @@
+import 'package:babel_api_client/api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,9 +18,9 @@ import '../features/home/presentation/home_page.dart';
 import '../features/landing/presentation/landing_page.dart';
 import '../features/library/presentation/library_page.dart';
 import '../features/shell/app_shell.dart';
-import '../features/sources/presentation/github_source_page.dart';
 import '../features/sources/presentation/new_source_page.dart';
 import '../features/sources/presentation/source_detail_page.dart';
+import '../features/sources/presentation/source_form_page.dart';
 import '../features/sources/presentation/sources_page.dart';
 import 'splash_page.dart';
 
@@ -36,7 +37,7 @@ abstract final class Routes {
   static String work(String id) => '/works/$id';
   static const sources = '/sources';
   static const newSource = '/sources/new';
-  static const newGitHubSource = '/sources/new/github';
+  static String newSourceOf(String kind) => '/sources/new/$kind';
   static String source(String id) => '/sources/$id';
   static const forgotPassword = '/forgot-password';
   static const resetPassword = '/reset-password';
@@ -117,8 +118,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.sources, builder: (_, _) => const SourcesPage()),
       GoRoute(path: Routes.newSource, builder: (_, _) => const NewSourcePage()),
       GoRoute(
-        path: Routes.newGitHubSource,
-        builder: (_, _) => const GitHubSourcePage(),
+        path: '/sources/new/:kind',
+        builder: (_, state) => SourceFormPage(
+          kind:
+              SourceKind.fromJson(state.pathParameters['kind']) ??
+              SourceKind.github,
+        ),
       ),
       GoRoute(
         path: '/sources/:id',

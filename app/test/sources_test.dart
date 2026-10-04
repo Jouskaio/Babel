@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:babel/src/core/storage/local_database.dart';
 import 'package:babel/src/features/sources/application/sources_providers.dart';
-import 'package:babel/src/features/sources/presentation/github_source_page.dart';
 import 'package:babel/src/features/sources/presentation/source_detail_page.dart';
+import 'package:babel/src/features/sources/presentation/source_form_page.dart';
 import 'package:babel/src/features/sources/presentation/sources_page.dart';
 import 'package:babel/src/l10n.dart';
+import 'package:babel_api_client/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -57,7 +58,10 @@ void main() {
     tallScreen(tester);
     final server = FakeServer();
     await tester.pumpWidget(
-      wrap(const GitHubSourcePage(), overrides: server.overrides),
+      wrap(
+        const SourceFormPage(kind: SourceKind.github),
+        overrides: server.overrides,
+      ),
     );
     final fields = find.byType(TextFormField);
 
@@ -77,6 +81,9 @@ void main() {
       'kind': 'github',
       'name': 'jouskaio/ebooks',
       'github': {'repository': 'jouskaio/ebooks', 'folder': 'romans'},
+      'opds': null,
+      'webdav': null,
+      'ao3': null,
       'token': 'github_pat_test',
     });
 
@@ -188,5 +195,56 @@ void main() {
       'true',
     );
     expect(find.text('list'), findsOneWidget);
+  });
+
+  testWidgets('a WebDAV folder needs credentials and an address', (
+    tester,
+  ) async {
+    tallScreen(tester);
+    final server = FakeServer();
+    await tester.pumpWidget(
+      wrap(
+        const SourceFormPage(kind: SourceKind.webdav),
+        overrides: server.overrides,
+      ),
+    );
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), 'cloud.example.com');
+    await tester.tap(find.text('TESTER'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('https:// ou http://'), findsOneWidget);
+    expect(find.text('Ce champ est requis.'), findsNWidgets(2));
+    expect(server.sourceRequests, isEmpty);
+
+    await tester.enterText(
+      fields.at(0),
+      'https://cloud.example.com/dav/Livres',
+    );
+    await tester.enterText(fields.at(1), 'ada');
+    await tester.enterText(fields.at(2), 'app-password');
+    await tester.tap(find.text('TESTER'));
+    await tester.pumpAndSettle();
+    expect(server.sourceRequests.single['webdav'], {
+      'url': 'https://cloud.example.com/dav/Livres',
+      'username': 'ada',
+    });
+    expect(server.sourceRequests.single['token'], 'app-password');
+  });
+
+  testWidgets('an AO3 account works without a password', (tester) async {
+    tallScreen(tester);
+    final server = FakeServer();
+    await tester.pumpWidget(
+      wrap(
+        const SourceFormPage(kind: SourceKind.ao3),
+        overrides: server.overrides,
+      ),
+    );
+    await tester.enterText(find.byType(TextFormField).first, 'jouskaio');
+    await tester.tap(find.text('TESTER'));
+    await tester.pumpAndSettle();
+    expect(server.sourceRequests.single['ao3'], {'username': 'jouskaio'});
+    expect(server.sourceRequests.single['token'], isNull);
+    expect(server.sourceRequests.single['name'], 'AO3 · jouskaio');
   });
 }

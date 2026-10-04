@@ -56,12 +56,38 @@ class FakeGitHub:
         yield content
 
 
+class FakeCatalog(FakeGitHub):
+    """An OPDS catalog: entries come with their title, authors and location."""
+
+    async def check(self, config: dict[str, Any], token: str | None) -> dict[str, Any]:
+        return {"url": config["url"], "username": config.get("username")}
+
+    async def list_entries(self, config: dict[str, Any], token: str | None) -> list[RemoteEntry]:
+        return [
+            RemoteEntry(
+                path="https://books.example.com/get/1",
+                size=0,
+                remote_id="opds-jane",
+                title="Jane Eyre (catalog)",
+                authors=("Charlotte Brontë",),
+                locator="https://books.example.com/get/1",
+                format="epub",
+            )
+        ]
+
+    async def fetch(
+        self, config: dict[str, Any], token: str | None, entry: RemoteEntry
+    ) -> AsyncIterator[bytes]:
+        assert entry.locator == "https://books.example.com/get/1"
+        yield JANE
+
+
 @pytest.fixture
 def github(app: FastAPI) -> FakeGitHub:
     fake = FakeGitHub()
     app.state.container = replace(
         app.state.container,
-        connectors={SourceKind.GITHUB: fake},
+        connectors={SourceKind.GITHUB: fake, SourceKind.OPDS: FakeCatalog()},
         secrets=SecretBox(Fernet.generate_key().decode()),
     )
     return fake
@@ -97,6 +123,7 @@ def test_a_source_is_checked_and_scanned_when_connected(
     assert detail["source"]["repository"] == "ada/library"
     assert detail["source"]["folder"] == "books"
     assert detail["source"]["last_scan_at"] is not None
+    assert detail["source"]["book_count"] == 2
     assert statuses(detail) == {"Jane Eyre.epub": "new", "Emma.epub": "new"}
     assert client.get("/v1/sources", headers=ada).json()[0]["name"] == "My books"
 
@@ -120,6 +147,39 @@ def test_rate_limits_are_reported_as_such(
     response = connect(client, ada)
     assert response.status_code == 429
     assert "access token" in response.json()["detail"]
+
+
+def test_the_settings_must_match_the_kind(
+    client: TestClient, github: FakeGitHub, ada: dict[str, str]
+) -> None:
+    body = {"kind": "opds", "name": "x", "github": {"repository": "ada/library"}}
+    assert client.post("/v1/sources", json=body, headers=ada).status_code == 422
+
+
+def test_catalog_entries_keep_what_the_source_tells(
+    client: TestClient, github: FakeGitHub, ada: dict[str, str]
+) -> None:
+    body = {
+        "kind": "opds",
+        "name": "Calibre",
+        "opds": {"url": "https://books.example.com/opds", "username": "ada"},
+        "token": "pw",
+    }
+    detail = client.post("/v1/sources", json=body, headers=ada).json()
+    assert detail["source"]["location"] == "https://books.example.com/opds"
+    assert detail["source"]["username"] == "ada"
+    entry = detail["entries"][0]
+    assert (entry["title"], entry["authors"], entry["format"]) == (
+        "Jane Eyre (catalog)",
+        ["Charlotte Brontë"],
+        "epub",
+    )
+    source_id = detail["source"]["id"]
+    imported = client.post(f"/v1/sources/{source_id}/entries/{entry['id']}/import", headers=ada)
+    assert imported.status_code == 201
+    after = client.get(f"/v1/sources/{source_id}", headers=ada).json()["entries"][0]
+    # Once on Babel, the file's own metadata wins.
+    assert (after["status"], after["title"]) == ("in_library", "Jane Eyre")
 
 
 def test_unreachable_repositories_are_refused(

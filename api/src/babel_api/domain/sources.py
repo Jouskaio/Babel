@@ -8,9 +8,12 @@ from uuid import UUID
 
 
 class SourceKind(StrEnum):
-    """Implemented connectors. OPDS, WebDAV, fanfiction and generic will join this list."""
+    """Implemented connectors. A generic manifest connector will join this list."""
 
     GITHUB = "github"
+    OPDS = "opds"  # Calibre-Web, Kavita, Komga, COPS…
+    WEBDAV = "webdav"  # Nextcloud, ownCloud, NAS
+    AO3 = "ao3"  # Archive of Our Own: bookmarks and subscriptions
 
 
 class EntryStatus(StrEnum):
@@ -39,14 +42,22 @@ class Source:
 class RemoteEntry:
     """A book file found in a source."""
 
+    # Unique within the source; shown to the reader when nothing better is known.
     path: str
     size: int
-    # Identifies the content on the source side (the git blob SHA for GitHub).
+    # Identifies the content on the source side (the git blob SHA for GitHub, a hash of
+    # the URL and version elsewhere): the same id means the same file.
     remote_id: str
+    title: str | None = None
+    authors: tuple[str, ...] = ()
+    # Where the connector fetches the file from, when the path is not enough.
+    locator: str | None = None
+    # epub, pdf, cbz or cbr when the source says so (from the extension otherwise).
+    format: str | None = None
 
     @property
     def name(self) -> str:
-        return self.path.rsplit("/", 1)[-1]
+        return self.path.rstrip("/").rsplit("/", 1)[-1]
 
 
 @dataclass(frozen=True, slots=True)
@@ -58,14 +69,27 @@ class SourceEntry:
     remote_id: str
     status: EntryStatus = EntryStatus.NEW
     item_id: UUID | None = None
-    # Known once the file is on Babel (read from the file itself).
+    # Given by the source, or read from the file once it is on Babel.
     title: str | None = None
     authors: tuple[str, ...] = ()
     cover_path: str | None = None
+    locator: str | None = None
+    format: str | None = None
 
     @property
     def name(self) -> str:
-        return self.path.rsplit("/", 1)[-1]
+        return self.path.rstrip("/").rsplit("/", 1)[-1]
+
+    def remote(self) -> RemoteEntry:
+        return RemoteEntry(
+            path=self.path,
+            size=self.size,
+            remote_id=self.remote_id,
+            title=self.title,
+            authors=self.authors,
+            locator=self.locator,
+            format=self.format,
+        )
 
 
 @dataclass(frozen=True, slots=True)

@@ -182,6 +182,8 @@ class ApiClient {
           return valueString == 'true' || valueString == '1';
         case 'DateTime':
           return value is DateTime ? value : DateTime.tryParse(value);
+        case 'Ao3Config':
+          return Ao3Config.fromJson(value);
         case 'BatchImportResponse':
           return BatchImportResponse.fromJson(value);
         case 'BookFormat':
@@ -224,6 +226,8 @@ class ApiClient {
           return LoginRequest.fromJson(value);
         case 'OpOutcome':
           return OpOutcomeTypeTransformer().decode(value);
+        case 'OpdsConfig':
+          return OpdsConfig.fromJson(value);
         case 'OperationRequest':
           return OperationRequest.fromJson(value);
         case 'OperationResult':
@@ -266,6 +270,8 @@ class ApiClient {
           return UserResponse.fromJson(value);
         case 'VerifyEmailRequest':
           return VerifyEmailRequest.fromJson(value);
+        case 'WebDavConfig':
+          return WebDavConfig.fromJson(value);
         case 'WithdrawRequest':
           return WithdrawRequest.fromJson(value);
         case 'WorkResponse':
