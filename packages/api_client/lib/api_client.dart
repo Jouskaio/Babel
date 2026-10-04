@@ -184,12 +184,16 @@ class ApiClient {
           return value is DateTime ? value : DateTime.tryParse(value);
         case 'ChangePasswordRequest':
           return ChangePasswordRequest.fromJson(value);
+        case 'EditionResponse':
+          return EditionResponse.fromJson(value);
         case 'ForgotPasswordRequest':
           return ForgotPasswordRequest.fromJson(value);
         case 'HealthResponse':
           return HealthResponse.fromJson(value);
         case 'IdentityProvider':
           return IdentityProviderTypeTransformer().decode(value);
+        case 'IsbnLookupResponse':
+          return IsbnLookupResponse.fromJson(value);
         case 'LoginRequest':
           return LoginRequest.fromJson(value);
         case 'ProviderLoginRequest':
@@ -212,6 +216,10 @@ class ApiClient {
           return UserResponse.fromJson(value);
         case 'VerifyEmailRequest':
           return VerifyEmailRequest.fromJson(value);
+        case 'WorkResponse':
+          return WorkResponse.fromJson(value);
+        case 'WorkSummaryResponse':
+          return WorkSummaryResponse.fromJson(value);
         default:
           dynamic match;
           if (value is List && (match = _regList.firstMatch(targetType)?.group(1)) != null) {
