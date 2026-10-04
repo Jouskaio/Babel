@@ -12,13 +12,14 @@ Method | HTTP request | Description
 [**addStoredFile**](LibraryApi.md#addstoredfile) | **POST** /v1/library/files/{sha256} | Add Stored File
 [**downloadFile**](LibraryApi.md#downloadfile) | **GET** /v1/files/{sha256} | Download File
 [**getLibrary**](LibraryApi.md#getlibrary) | **GET** /v1/library | Get Library
+[**getReadingPositions**](LibraryApi.md#getreadingpositions) | **GET** /v1/library/{item_id}/positions | Get Positions
 [**importFile**](LibraryApi.md#importfile) | **POST** /v1/library/files | Import File
 [**removeFromLibrary**](LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
 [**withdrawFile**](LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
 
 
 # **addStoredFile**
-> LibraryItemResponse addStoredFile(sha256)
+> LibraryItemResponse addStoredFile(sha256, xBabelDevice)
 
 Add Stored File
 
@@ -36,9 +37,10 @@ import 'package:babel_api_client/api.dart';
 
 final api_instance = LibraryApi();
 final sha256 = sha256_example; // String | 
+final xBabelDevice = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
 
 try {
-    final result = api_instance.addStoredFile(sha256);
+    final result = api_instance.addStoredFile(sha256, xBabelDevice);
     print(result);
 } catch (e) {
     print('Exception when calling LibraryApi->addStoredFile: $e\n');
@@ -50,6 +52,7 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **sha256** | **String**|  | 
+ **xBabelDevice** | **String**|  | [optional] 
 
 ### Return type
 
@@ -159,8 +162,57 @@ This endpoint does not need any parameter.
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **getReadingPositions**
+> List<ReadingPositionResponse> getReadingPositions(itemId)
+
+Get Positions
+
+Where each device stopped in this book, most recent first.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = LibraryApi();
+final itemId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.getReadingPositions(itemId);
+    print(result);
+} catch (e) {
+    print('Exception when calling LibraryApi->getReadingPositions: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **itemId** | **String**|  | 
+
+### Return type
+
+[**List<ReadingPositionResponse>**](ReadingPositionResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **importFile**
-> ImportResponse importFile(file)
+> ImportResponse importFile(file, xBabelDevice)
 
 Import File
 
@@ -178,9 +230,10 @@ import 'package:babel_api_client/api.dart';
 
 final api_instance = LibraryApi();
 final file = file_example; // String | 
+final xBabelDevice = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
 
 try {
-    final result = api_instance.importFile(file);
+    final result = api_instance.importFile(file, xBabelDevice);
     print(result);
 } catch (e) {
     print('Exception when calling LibraryApi->importFile: $e\n');
@@ -192,6 +245,7 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **file** | **String**|  | 
+ **xBabelDevice** | **String**|  | [optional] 
 
 ### Return type
 
@@ -209,11 +263,11 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **removeFromLibrary**
-> removeFromLibrary(itemId)
+> removeFromLibrary(itemId, xBabelDevice)
 
 Remove From Library
 
-Remove a book from the library. Progress and notes are kept with the work.
+Remove a book from the library.
 
 ### Example
 ```dart
@@ -227,9 +281,10 @@ import 'package:babel_api_client/api.dart';
 
 final api_instance = LibraryApi();
 final itemId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final xBabelDevice = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
 
 try {
-    api_instance.removeFromLibrary(itemId);
+    api_instance.removeFromLibrary(itemId, xBabelDevice);
 } catch (e) {
     print('Exception when calling LibraryApi->removeFromLibrary: $e\n');
 }
@@ -240,6 +295,7 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **itemId** | **String**|  | 
+ **xBabelDevice** | **String**|  | [optional] 
 
 ### Return type
 

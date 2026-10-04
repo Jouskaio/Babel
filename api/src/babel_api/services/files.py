@@ -4,7 +4,7 @@ from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path, PurePath
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
 from babel_api.domain.catalog import IdentifierKind
@@ -15,9 +15,30 @@ from babel_api.domain.errors import (
     UnsupportedFileError,
 )
 from babel_api.domain.files import LibraryItem, StoredFile
-from babel_api.domain.ports import BlobStore, CatalogRepository, FileRepository, MetadataReader
+from babel_api.domain.ports import (
+    BlobStore,
+    CatalogRepository,
+    ChangeLog,
+    FileRepository,
+    MetadataReader,
+)
+from babel_api.domain.sync import ChangeOp, EntityKind
 
 FileAccess = Literal["everyone", "entitled"]
+
+
+def item_data(item: LibraryItem) -> dict[str, Any]:
+    """Library item as written in the change log (same shape as the API response)."""
+    return {
+        "id": str(item.id),
+        "title": item.title,
+        "authors": list(item.authors),
+        "format": item.file.format.value,
+        "size": item.file.size,
+        "sha256": item.file.sha256,
+        "edition_id": str(item.file.edition_id) if item.file.edition_id else None,
+        "added_at": item.added_at.isoformat(),
+    }
 
 
 @dataclass(frozen=True, slots=True)
@@ -38,6 +59,7 @@ class FileService:
         self,
         files: FileRepository,
         catalog: CatalogRepository,
+        changes: ChangeLog,
         store: BlobStore,
         reader: MetadataReader,
         *,
@@ -46,13 +68,18 @@ class FileService:
     ) -> None:
         self._files = files
         self._catalog = catalog
+        self._changes = changes
         self._store = store
         self._reader = reader
         self._access = access
         self._max_bytes = max_bytes
 
     async def import_file(
-        self, user_id: UUID, chunks: AsyncIterator[bytes], filename: str
+        self,
+        user_id: UUID,
+        chunks: AsyncIterator[bytes],
+        filename: str,
+        device_id: UUID | None = None,
     ) -> ImportResult:
         sha256, size, path = await self._store.put(chunks, self._max_bytes)
         existing = await self._files.get_file(sha256)
@@ -68,7 +95,7 @@ class FileService:
                 existing = await self._files.get_file(sha256) or existing
             item = await self._files.find_item(user_id, sha256)
             if item is None:
-                item = await self._add_item(user_id, existing, path, filename)
+                item = await self._add_item(user_id, existing, path, filename, device_id)
             return ImportResult(item, deduplicated=existing.uploaded_by != user_id)
 
         file_format = self._reader.detect(path)
@@ -91,13 +118,15 @@ class FileService:
             uploaded_by=user_id,
         )
         await self._files.add_file(stored)
-        item = await self._add_item(user_id, stored, path, filename)
+        item = await self._add_item(user_id, stored, path, filename, device_id)
         return ImportResult(item, deduplicated=False)
 
     async def library(self, user_id: UUID) -> list[LibraryItem]:
         return await self._files.list_items(user_id)
 
-    async def add_existing(self, user_id: UUID, sha256: str) -> LibraryItem:
+    async def add_existing(
+        self, user_id: UUID, sha256: str, device_id: UUID | None = None
+    ) -> LibraryItem:
         """Add a file already on Babel to the library, without uploading it again."""
         file = await self._files.get_file(sha256)
         path = self._store.path(sha256)
@@ -105,14 +134,19 @@ class FileService:
             raise NotFoundError
         await self._check_access(user_id, file)
         item = await self._files.find_item(user_id, sha256)
-        return item or await self._add_item(user_id, file, path, file.original_name)
+        return item or await self._add_item(user_id, file, path, file.original_name, device_id)
 
-    async def remove_from_library(self, user_id: UUID, item_id: UUID) -> None:
+    async def remove_from_library(
+        self, user_id: UUID, item_id: UUID, device_id: UUID | None = None
+    ) -> None:
         """The file itself stays stored: other readers may have it."""
         item = await self._files.get_item(item_id)
         if item is None or item.user_id != user_id:
             raise NotFoundError
         await self._files.delete_item(item_id)
+        await self._changes.record(
+            user_id, EntityKind.LIBRARY_ITEM, str(item_id), ChangeOp.DELETE, device_id=device_id
+        )
         await self._files.commit()
 
     async def download(self, user_id: UUID, sha256: str) -> Download:
@@ -130,6 +164,10 @@ class FileService:
             raise NotFoundError
         now = datetime.now(UTC)
         await self._files.withdraw_file(sha256, now)
+        for item in await self._files.items_of_file(sha256):
+            await self._changes.record(
+                item.user_id, EntityKind.LIBRARY_ITEM, str(item.id), ChangeOp.DELETE
+            )
         await self._files.delete_items_of_file(sha256)
         if block:
             await self._files.block(sha256, reason, admin_id, now)
@@ -144,10 +182,23 @@ class FileService:
             raise ForbiddenError
 
     async def _add_item(
-        self, user_id: UUID, file: StoredFile, path: Path, filename: str
+        self,
+        user_id: UUID,
+        file: StoredFile,
+        path: Path,
+        filename: str,
+        device_id: UUID | None,
     ) -> LibraryItem:
         metadata = self._reader.metadata(path, file.format)
         title = metadata.title or PurePath(filename).stem or file.original_name
         item = await self._files.add_item(user_id, file.sha256, title, metadata.authors)
+        await self._changes.record(
+            user_id,
+            EntityKind.LIBRARY_ITEM,
+            str(item.id),
+            ChangeOp.UPSERT,
+            item_data(item),
+            device_id,
+        )
         await self._files.commit()
         return item
