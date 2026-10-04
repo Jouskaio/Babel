@@ -33,6 +33,12 @@ class Ao3Config(BaseModel):
     username: Annotated[str, Field(min_length=3, max_length=40)]
 
 
+class GenericConfig(BaseModel):
+    url: Annotated[
+        str, Field(min_length=8, max_length=1000, description="Address of a Babel manifest")
+    ]
+
+
 class CreateSourceRequest(BaseModel):
     """A source to connect; give the settings block matching ``kind``."""
 
@@ -42,6 +48,7 @@ class CreateSourceRequest(BaseModel):
     opds: OpdsConfig | None = None
     webdav: WebDavConfig | None = None
     ao3: Ao3Config | None = None
+    generic: GenericConfig | None = None
     # Token or password (GitHub token, catalog or app password, AO3 password). Optional
     # for public sources. Stored encrypted, never returned.
     token: Annotated[str, Field(max_length=500)] | None = None
@@ -58,6 +65,7 @@ class CreateSourceRequest(BaseModel):
             SourceKind.OPDS: self.opds,
             SourceKind.WEBDAV: self.webdav,
             SourceKind.AO3: self.ao3,
+            SourceKind.GENERIC: self.generic,
         }[self.kind]
         return block.model_dump() if block is not None else None
 

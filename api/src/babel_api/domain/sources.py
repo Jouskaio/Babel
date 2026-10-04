@@ -8,12 +8,13 @@ from uuid import UUID
 
 
 class SourceKind(StrEnum):
-    """Implemented connectors. A generic manifest connector will join this list."""
+    """Implemented connectors."""
 
     GITHUB = "github"
     OPDS = "opds"  # Calibre-Web, Kavita, Komga, COPS…
     WEBDAV = "webdav"  # Nextcloud, ownCloud, NAS
     AO3 = "ao3"  # Archive of Our Own: bookmarks and subscriptions
+    GENERIC = "generic"  # any address serving a Babel source manifest
 
 
 class EntryStatus(StrEnum):

@@ -1085,4 +1085,25 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get linkUnreachable =>
       'This page could not be reached, or it is restricted to signed-in members.';
+
+  @override
+  String get genericUrl => 'Manifest address';
+
+  @override
+  String get genericUrlHelp =>
+      'Any address serving a Babel manifest (JSON): a static file is enough.';
+
+  @override
+  String get genericToken => 'Access token (optional)';
+
+  @override
+  String get genericDocs => 'The manifest format';
+
+  @override
+  String get genericSubtitle => 'Read-only · your own list of books';
+
+  @override
+  String sourceGenericAt(String host) {
+    return 'Custom connector · $host';
+  }
 }

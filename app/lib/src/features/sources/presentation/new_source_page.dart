@@ -20,6 +20,7 @@ class NewSourcePage extends StatelessWidget {
       (SourceKind.opds, l10n.kindOpds, l10n.kindOpdsDescription),
       (SourceKind.webdav, l10n.kindWebdav, l10n.kindWebdavDescription),
       (SourceKind.ao3, l10n.kindAo3, l10n.kindAo3Description),
+      (SourceKind.generic, l10n.kindCustom, l10n.kindCustomDescription),
     ];
     return Scaffold(
       appBar: sourcesAppBar(l10n.newSourceTitle),
@@ -44,12 +45,6 @@ class NewSourcePage extends StatelessWidget {
                 if (id != null && context.mounted) context.pop(id);
               },
             ),
-          _Kind(
-            badge: const SourceBadge('API', color: Color(0xFF2E5A45)),
-            title: l10n.kindCustom,
-            description: l10n.kindCustomDescription,
-            trailing: l10n.comingSoon,
-          ),
         ],
       ),
     );
@@ -62,7 +57,6 @@ class _Kind extends StatelessWidget {
     required this.title,
     required this.description,
     this.onTap,
-    this.trailing,
     this.highlighted = false,
   });
 
@@ -70,7 +64,6 @@ class _Kind extends StatelessWidget {
   final String title;
   final String description;
   final VoidCallback? onTap;
-  final String? trailing;
   final bool highlighted;
 
   @override
@@ -94,10 +87,6 @@ class _Kind extends StatelessWidget {
                 ],
               ),
             ),
-            if (trailing case final text?) ...[
-              const SizedBox(width: 10),
-              Text(text.toUpperCase(), style: BabelText.label(9, spacing: 1)),
-            ],
           ],
         ),
       ),

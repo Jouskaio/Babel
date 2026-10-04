@@ -1849,6 +1849,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Cette page est injoignable, ou réservée aux membres connectés.'**
   String get linkUnreachable;
+
+  /// No description provided for @genericUrl.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse du manifeste'**
+  String get genericUrl;
+
+  /// No description provided for @genericUrlHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toute adresse qui renvoie un manifeste Babel (JSON) : un simple fichier statique suffit.'**
+  String get genericUrlHelp;
+
+  /// No description provided for @genericToken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jeton d\'accès (facultatif)'**
+  String get genericToken;
+
+  /// No description provided for @genericDocs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le format du manifeste'**
+  String get genericDocs;
+
+  /// No description provided for @genericSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture seule · votre propre liste de livres'**
+  String get genericSubtitle;
+
+  /// No description provided for @sourceGenericAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connecteur · {host}'**
+  String sourceGenericAt(String host);
 }
 
 class _AppLocalizationsDelegate

@@ -41,6 +41,7 @@ String sourceError(BuildContext context, Object error, {SourceKind? kind}) {
   SourceKind.opds => ('OPDS', const Color(0xFF7D2638)),
   SourceKind.webdav => ('DAV', const Color(0xFF2F5D8A)),
   SourceKind.ao3 => ('AO3', const Color(0xFF990000)),
+  SourceKind.generic => ('API', const Color(0xFF2E5A45)),
   _ => ('GH', const Color(0xFF24292F)),
 };
 
@@ -55,6 +56,7 @@ String sourceSubtitle(BuildContext context, SourceResponse source) {
     SourceKind.opds => l10n.sourceOpdsAt(host),
     SourceKind.webdav => l10n.sourceWebdavAt(host),
     SourceKind.ao3 => l10n.sourceAo3Of(source.username ?? source.location),
+    SourceKind.generic => l10n.sourceGenericAt(host),
     _ =>
       source.folder == null || source.folder!.isEmpty
           ? l10n.sourceGitHubRoot

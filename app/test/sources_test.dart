@@ -84,6 +84,7 @@ void main() {
       'opds': null,
       'webdav': null,
       'ao3': null,
+      'generic': null,
       'token': 'github_pat_test',
     });
 
@@ -271,5 +272,28 @@ void main() {
     expect(server.importCalls, 2);
     expect(find.textContaining('demande une pause'), findsOneWidget);
     expect(find.textContaining('1 livre importé'), findsOneWidget);
+  });
+
+  testWidgets('a custom connector takes a manifest address', (tester) async {
+    tallScreen(tester);
+    final server = FakeServer();
+    await tester.pumpWidget(
+      wrap(
+        const SourceFormPage(kind: SourceKind.generic),
+        overrides: server.overrides,
+      ),
+    );
+    expect(find.text('Le format du manifeste'), findsOneWidget);
+    await tester.enterText(
+      find.byType(TextFormField).first,
+      'https://shelf.example.com/babel/manifest.json',
+    );
+    await tester.tap(find.text('TESTER'));
+    await tester.pumpAndSettle();
+    final request = server.sourceRequests.single;
+    expect(request['generic'], {
+      'url': 'https://shelf.example.com/babel/manifest.json',
+    });
+    expect(request['name'], 'shelf.example.com');
   });
 }
