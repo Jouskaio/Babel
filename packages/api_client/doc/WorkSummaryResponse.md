@@ -9,9 +9,9 @@ import 'package:babel_api_client/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **authors** | **List<String>** |  | [default to const []]
-**coverPath** | **String** |  | 
-**editionCount** | **int** |  | 
-**firstPublishYear** | **int** |  | 
+**coverPath** | **String** |  | [optional] 
+**editionCount** | **int** |  | [optional] 
+**firstPublishYear** | **int** |  | [optional] 
 **id** | **String** |  | 
 **originalTitle** | **String** |  | 
 **title** | **String** |  | 

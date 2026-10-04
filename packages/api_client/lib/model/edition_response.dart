@@ -13,14 +13,14 @@ part of babel_api_client;
 class EditionResponse {
   /// Returns a new [EditionResponse] instance.
   EditionResponse({
-    required this.coverPath,
-    required this.format,
+    this.coverPath,
+    this.format,
     required this.id,
     this.isbn13 = const [],
-    required this.language,
-    required this.pageCount,
-    required this.published,
-    required this.publisher,
+    this.language,
+    this.pageCount,
+    this.published,
+    this.publisher,
     required this.title,
   });
 
@@ -185,14 +185,8 @@ class EditionResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'cover_path',
-    'format',
     'id',
     'isbn13',
-    'language',
-    'page_count',
-    'published',
-    'publisher',
     'title',
   };
 }

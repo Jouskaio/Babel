@@ -14,11 +14,11 @@ class WorkResponse {
   /// Returns a new [WorkResponse] instance.
   WorkResponse({
     this.authors = const [],
-    required this.coverPath,
-    required this.description,
-    required this.editionCount,
+    this.coverPath,
+    this.description,
+    this.editionCount,
     this.editions = const [],
-    required this.firstPublishYear,
+    this.firstPublishYear,
     required this.id,
     required this.originalTitle,
     required this.title,
@@ -178,11 +178,7 @@ class WorkResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'authors',
-    'cover_path',
-    'description',
-    'edition_count',
     'editions',
-    'first_publish_year',
     'id',
     'original_title',
     'title',

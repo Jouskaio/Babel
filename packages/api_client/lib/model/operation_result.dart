@@ -13,7 +13,7 @@ part of babel_api_client;
 class OperationResult {
   /// Returns a new [OperationResult] instance.
   OperationResult({
-    required this.detail,
+    this.detail,
     required this.key,
     required this.outcome,
   });
@@ -121,7 +121,6 @@ class OperationResult {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'detail',
     'key',
     'outcome',
   };

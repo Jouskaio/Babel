@@ -9,7 +9,7 @@ import 'package:babel_api_client/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **data** | [**Map<String, Object>**](Object.md) |  | [default to const {}]
-**deviceId** | **String** |  | 
+**deviceId** | **String** |  | [optional] 
 **entity** | [**EntityKind**](EntityKind.md) |  | 
 **entityId** | **String** |  | 
 **op** | [**ChangeOp**](ChangeOp.md) |  | 

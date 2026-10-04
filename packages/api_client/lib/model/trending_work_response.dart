@@ -15,7 +15,7 @@ class TrendingWorkResponse {
   TrendingWorkResponse({
     this.authors = const [],
     required this.coverPath,
-    required this.firstPublishYear,
+    this.firstPublishYear,
     required this.title,
     required this.workId,
   });
@@ -139,7 +139,6 @@ class TrendingWorkResponse {
   static const requiredKeys = <String>{
     'authors',
     'cover_path',
-    'first_publish_year',
     'title',
     'work_id',
   };

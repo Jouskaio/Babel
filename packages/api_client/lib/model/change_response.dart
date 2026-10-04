@@ -14,7 +14,7 @@ class ChangeResponse {
   /// Returns a new [ChangeResponse] instance.
   ChangeResponse({
     this.data = const {},
-    required this.deviceId,
+    this.deviceId,
     required this.entity,
     required this.entityId,
     required this.op,
@@ -143,7 +143,6 @@ class ChangeResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'data',
-    'device_id',
     'entity',
     'entity_id',
     'op',

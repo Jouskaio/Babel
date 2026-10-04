@@ -9,11 +9,11 @@ import 'package:babel_api_client/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **authors** | **List<String>** |  | [default to const []]
-**coverPath** | **String** |  | 
-**description** | **String** |  | 
-**editionCount** | **int** |  | 
+**coverPath** | **String** |  | [optional] 
+**description** | **String** |  | [optional] 
+**editionCount** | **int** |  | [optional] 
 **editions** | [**List<EditionResponse>**](EditionResponse.md) |  | [default to const []]
-**firstPublishYear** | **int** |  | 
+**firstPublishYear** | **int** |  | [optional] 
 **id** | **String** |  | 
 **originalTitle** | **String** |  | 
 **title** | **String** |  | 

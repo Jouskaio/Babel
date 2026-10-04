@@ -14,9 +14,9 @@ class WorkSummaryResponse {
   /// Returns a new [WorkSummaryResponse] instance.
   WorkSummaryResponse({
     this.authors = const [],
-    required this.coverPath,
-    required this.editionCount,
-    required this.firstPublishYear,
+    this.coverPath,
+    this.editionCount,
+    this.firstPublishYear,
     required this.id,
     required this.originalTitle,
     required this.title,
@@ -160,9 +160,6 @@ class WorkSummaryResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'authors',
-    'cover_path',
-    'edition_count',
-    'first_publish_year',
     'id',
     'original_title',
     'title',
