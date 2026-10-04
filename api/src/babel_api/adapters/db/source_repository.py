@@ -17,7 +17,7 @@ def _aware(value: datetime | None) -> datetime | None:
     return value if value.tzinfo else value.replace(tzinfo=UTC)
 
 
-def _to_source(row: SourceRow) -> Source:
+def _to_source(row: SourceRow, entry_count: int = 0) -> Source:
     return Source(
         id=row.id,
         user_id=row.user_id,
@@ -28,6 +28,7 @@ def _to_source(row: SourceRow) -> Source:
         created_at=_aware(row.created_at) or datetime.now(UTC),
         last_scan_at=_aware(row.last_scan_at),
         last_error=row.last_error,
+        entry_count=entry_count,
     )
 
 
@@ -63,10 +64,19 @@ class SqlSourceRepository:
         return row.encrypted_token if row else None
 
     async def list_sources(self, user_id: UUID) -> list[Source]:
-        rows = await self._session.scalars(
-            select(SourceRow).where(SourceRow.user_id == user_id).order_by(SourceRow.created_at)
+        rows = (
+            await self._session.scalars(
+                select(SourceRow).where(SourceRow.user_id == user_id).order_by(SourceRow.created_at)
+            )
+        ).all()
+        result = await self._session.execute(
+            select(SourceEntryRow.source_id, func.count())
+            .join(SourceRow, SourceRow.id == SourceEntryRow.source_id)
+            .where(SourceRow.user_id == user_id)
+            .group_by(SourceEntryRow.source_id)
         )
-        return [_to_source(row) for row in rows]
+        counts: dict[UUID, int] = {source_id: count for source_id, count in result}
+        return [_to_source(row, counts.get(row.id, 0)) for row in rows]
 
     async def count(self, user_id: UUID) -> int:
         total = await self._session.scalar(

@@ -19,6 +19,7 @@ from babel_api.domain.ports import (
     BlobStore,
     CatalogRepository,
     ChangeLog,
+    CoverCache,
     FileRepository,
     MetadataReader,
 )
@@ -37,6 +38,7 @@ def item_data(item: LibraryItem) -> dict[str, Any]:
         "size": item.file.size,
         "sha256": item.file.sha256,
         "edition_id": str(item.file.edition_id) if item.file.edition_id else None,
+        "cover_path": item.file.cover_path,
         "added_at": item.added_at.isoformat(),
     }
 
@@ -62,6 +64,7 @@ class FileService:
         changes: ChangeLog,
         store: BlobStore,
         reader: MetadataReader,
+        covers: CoverCache,
         *,
         access: FileAccess,
         max_bytes: int,
@@ -71,6 +74,7 @@ class FileService:
         self._changes = changes
         self._store = store
         self._reader = reader
+        self._covers = covers
         self._access = access
         self._max_bytes = max_bytes
 
@@ -116,6 +120,8 @@ class FileService:
             created_at=datetime.now(UTC),
             edition_id=edition.id if edition else None,
             uploaded_by=user_id,
+            title=metadata.title,
+            authors=metadata.authors,
         )
         await self._files.add_file(stored)
         item = await self._add_item(user_id, stored, path, filename, device_id)
@@ -148,6 +154,21 @@ class FileService:
             user_id, EntityKind.LIBRARY_ITEM, str(item_id), ChangeOp.DELETE, device_id=device_id
         )
         await self._files.commit()
+
+    async def cover(self, sha256: str) -> tuple[Path, str]:
+        """The cover found in a stored file, extracted once then cached."""
+        file = await self._files.get_file(sha256)
+        path = self._store.path(sha256)
+        if file is None or not file.available or path is None or file.cover_path is None:
+            raise NotFoundError
+        cached = self._covers.get(sha256)
+        if cached is False:
+            raise NotFoundError
+        if cached is None:
+            cached = self._covers.put(sha256, self._reader.cover(path, file.format))
+        if cached is None:
+            raise NotFoundError
+        return cached
 
     async def download(self, user_id: UUID, sha256: str) -> Download:
         file = await self._files.get_file(sha256)

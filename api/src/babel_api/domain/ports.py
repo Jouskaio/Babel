@@ -15,7 +15,7 @@ from babel_api.domain.catalog import (
     TrendingWork,
     Work,
 )
-from babel_api.domain.files import BookFormat, BookMetadata, LibraryItem, StoredFile
+from babel_api.domain.files import BookFormat, BookMetadata, Cover, LibraryItem, StoredFile
 from babel_api.domain.mail import EmailMessage
 from babel_api.domain.sources import RemoteEntry, Source, SourceEntry, SourceKind
 from babel_api.domain.sync import (
@@ -177,6 +177,17 @@ class MetadataReader(Protocol):
 
     def detect(self, path: Path) -> BookFormat | None: ...
     def metadata(self, path: Path, file_format: BookFormat) -> BookMetadata: ...
+    def cover(self, path: Path, file_format: BookFormat) -> Cover | None: ...
+
+
+class CoverCache(Protocol):
+    """Covers extracted from stored files, kept so each file is opened once."""
+
+    def get(self, sha256: str) -> tuple[Path, str] | Literal[False] | None:
+        """The cover (path, media type), False when the file has none, None when unknown."""
+        ...
+
+    def put(self, sha256: str, cover: Cover | None) -> tuple[Path, str] | None: ...
 
 
 class ChangeLog(Protocol):

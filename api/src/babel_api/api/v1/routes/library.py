@@ -32,6 +32,9 @@ class LibraryItemResponse(BaseModel):
     sha256: str = Field(description="Identifies the file; download it from /v1/files/{sha256}")
     edition_id: UUID | None
     added_at: datetime
+    cover_path: str | None = Field(
+        description="Cover found in the file, relative to the API base URL (may answer 404)"
+    )
 
     @classmethod
     def of(cls, item: LibraryItem) -> "LibraryItemResponse":
@@ -44,6 +47,7 @@ class LibraryItemResponse(BaseModel):
             sha256=item.file.sha256,
             edition_id=item.file.edition_id,
             added_at=item.added_at,
+            cover_path=item.file.cover_path,
         )
 
 
@@ -118,6 +122,25 @@ async def download_file(
         media_type=download.file.format.media_type,
         filename=download.file.original_name,
         headers={"Cache-Control": "private, max-age=31536000, immutable"},
+    )
+
+
+@router.get(
+    "/files/{sha256}/cover",
+    operation_id="getFileCover",
+    response_class=FileResponse,
+    responses={
+        200: {"content": {"image/*": {}}},
+        404: {"description": "No such file, or no cover in it"},
+    },
+)
+async def get_file_cover(files: FileServiceDep, sha256: Sha256) -> FileResponse:
+    """The cover found in a stored file (EPUB, CBZ). Public, like catalog covers."""
+    path, media_type = await files.cover(sha256)
+    return FileResponse(
+        path,
+        media_type=media_type,
+        headers={"Cache-Control": "public, max-age=604800"},
     )
 
 

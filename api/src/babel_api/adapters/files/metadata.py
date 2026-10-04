@@ -1,16 +1,28 @@
 """Format detection from magic bytes and EPUB metadata, safe for untrusted uploads."""
 
+import posixpath
 import zipfile
 from pathlib import Path, PurePosixPath
+from typing import Any
+from urllib.parse import unquote
 
 from defusedxml import ElementTree
 
-from babel_api.domain.files import BookFormat, BookMetadata
+from babel_api.domain.files import BookFormat, BookMetadata, Cover
 from babel_api.domain.isbn import try_normalize_isbn
 
 _IMAGES = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif"}
 # Package files are small; anything bigger is refused (zip bombs).
 _MAX_XML_BYTES = 2 * 1024 * 1024
+_MAX_COVER_BYTES = 5 * 1024 * 1024
+_MEDIA_TYPES = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+    ".avif": "image/avif",
+}
 _NS = {
     "c": "urn:oasis:names:tc:opendocument:xmlns:container",
     "opf": "http://www.idpf.org/2007/opf",
@@ -18,14 +30,54 @@ _NS = {
 }
 
 
-def _read_small(archive: zipfile.ZipFile, name: str) -> bytes | None:
+def _read_small(archive: zipfile.ZipFile, name: str, limit: int = _MAX_XML_BYTES) -> bytes | None:
     try:
         info = archive.getinfo(name)
     except KeyError:
         return None
-    if info.file_size > _MAX_XML_BYTES:
+    if info.file_size > limit:
         return None
     return archive.read(info)
+
+
+def _package(archive: zipfile.ZipFile) -> tuple[str, Any] | None:
+    """The OPF package of an EPUB: its path in the archive and its parsed XML."""
+    container = _read_small(archive, "META-INF/container.xml")
+    if container is None:
+        return None
+    rootfile = ElementTree.fromstring(container).find(".//c:rootfile", _NS)
+    opf_path = rootfile.get("full-path") if rootfile is not None else None
+    opf = _read_small(archive, opf_path) if opf_path else None
+    if opf_path is None or opf is None:
+        return None
+    return opf_path, ElementTree.fromstring(opf)
+
+
+def _cover_href(package: Any) -> str | None:
+    """EPUB 3 cover-image property, then the EPUB 2 cover meta, then a likely name."""
+    items = [i for i in package.iterfind(".//opf:manifest/opf:item", _NS) if i.get("href")]
+    for item in items:
+        if "cover-image" in (item.get("properties") or "").split():
+            return item.get("href")
+    meta = package.find(".//opf:metadata/opf:meta[@name='cover']", _NS)
+    cover_id = meta.get("content") if meta is not None else None
+    for item in items:
+        if cover_id and item.get("id") == cover_id:
+            return item.get("href")
+    for item in items:
+        if (item.get("media-type") or "").startswith("image/") and "cover" in (
+            (item.get("id") or "") + (item.get("href") or "")
+        ).lower():
+            return item.get("href")
+    return None
+
+
+def _image(archive: zipfile.ZipFile, name: str) -> Cover | None:
+    media_type = _MEDIA_TYPES.get(PurePosixPath(name).suffix.lower())
+    content = _read_small(archive, name, _MAX_COVER_BYTES) if media_type else None
+    if media_type is None or not content:
+        return None
+    return Cover(content, media_type)
 
 
 class EbookMetadataReader:
@@ -54,20 +106,13 @@ class EbookMetadataReader:
             return BookMetadata()
         try:
             with zipfile.ZipFile(path) as archive:
-                container = _read_small(archive, "META-INF/container.xml")
-                if container is None:
-                    return BookMetadata()
-                rootfile = ElementTree.fromstring(container).find(".//c:rootfile", _NS)
-                opf_path = rootfile.get("full-path") if rootfile is not None else None
-                opf = _read_small(archive, opf_path) if opf_path else None
+                found = _package(archive)
+        # ValueError: defused XML attack
         except (zipfile.BadZipFile, ElementTree.ParseError, ValueError):
             return BookMetadata()
-        if opf is None:
+        if found is None:
             return BookMetadata()
-        try:
-            package = ElementTree.fromstring(opf)
-        except (ElementTree.ParseError, ValueError):  # ValueError: defused XML attack
-            return BookMetadata()
+        _, package = found
 
         def texts(tag: str) -> list[str]:
             return [
@@ -94,3 +139,29 @@ class EbookMetadataReader:
             isbn13=isbn,
             language=languages[0].split("-")[0].lower() if languages else None,
         )
+
+    def cover(self, path: Path, file_format: BookFormat) -> Cover | None:
+        try:
+            with zipfile.ZipFile(path) as archive:
+                if file_format is BookFormat.CBZ:
+                    # Comics: the first page, in reading order.
+                    pages = sorted(
+                        n
+                        for n in archive.namelist()
+                        if PurePosixPath(n).suffix.lower() in _MEDIA_TYPES
+                        and not n.startswith("__MACOSX/")
+                    )
+                    return _image(archive, pages[0]) if pages else None
+                if file_format is not BookFormat.EPUB:
+                    return None
+                found = _package(archive)
+                href = _cover_href(found[1]) if found else None
+                if found is None or href is None:
+                    return None
+                # Manifest paths are relative to the package file, and URL-encoded.
+                name = posixpath.normpath(
+                    posixpath.join(posixpath.dirname(found[0]), unquote(href))
+                )
+                return _image(archive, name)
+        except (zipfile.BadZipFile, ElementTree.ParseError, ValueError, OSError):
+            return None

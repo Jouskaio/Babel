@@ -11,6 +11,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**addStoredFile**](LibraryApi.md#addstoredfile) | **POST** /v1/library/files/{sha256} | Add Stored File
 [**downloadFile**](LibraryApi.md#downloadfile) | **GET** /v1/files/{sha256} | Download File
+[**getFileCover**](LibraryApi.md#getfilecover) | **GET** /v1/files/{sha256}/cover | Get File Cover
 [**getLibrary**](LibraryApi.md#getlibrary) | **GET** /v1/library | Get Library
 [**getReadingPositions**](LibraryApi.md#getreadingpositions) | **GET** /v1/library/{item_id}/positions | Get Positions
 [**importFile**](LibraryApi.md#importfile) | **POST** /v1/library/files | Import File
@@ -114,6 +115,48 @@ void (empty response body)
 
  - **Content-Type**: Not defined
  - **Accept**: application/octet-stream
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getFileCover**
+> getFileCover(sha256)
+
+Get File Cover
+
+The cover found in a stored file (EPUB, CBZ). Public, like catalog covers.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+
+final api_instance = LibraryApi();
+final sha256 = sha256_example; // String | 
+
+try {
+    api_instance.getFileCover(sha256);
+} catch (e) {
+    print('Exception when calling LibraryApi->getFileCover: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **sha256** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: image/*
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

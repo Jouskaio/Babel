@@ -88,6 +88,7 @@ Class | Method | HTTP request | Description
 *HealthApi* | [**getHealth**](doc//HealthApi.md#gethealth) | **GET** /v1/health | Get Health
 *LibraryApi* | [**addStoredFile**](doc//LibraryApi.md#addstoredfile) | **POST** /v1/library/files/{sha256} | Add Stored File
 *LibraryApi* | [**downloadFile**](doc//LibraryApi.md#downloadfile) | **GET** /v1/files/{sha256} | Download File
+*LibraryApi* | [**getFileCover**](doc//LibraryApi.md#getfilecover) | **GET** /v1/files/{sha256}/cover | Get File Cover
 *LibraryApi* | [**getLibrary**](doc//LibraryApi.md#getlibrary) | **GET** /v1/library | Get Library
 *LibraryApi* | [**getReadingPositions**](doc//LibraryApi.md#getreadingpositions) | **GET** /v1/library/{item_id}/positions | Get Positions
 *LibraryApi* | [**importFile**](doc//LibraryApi.md#importfile) | **POST** /v1/library/files | Import File

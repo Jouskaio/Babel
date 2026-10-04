@@ -1,7 +1,7 @@
 """Sources of book files: connecting, scanning and importing (ADR 0009)."""
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
@@ -91,11 +91,32 @@ class SourceService:
         ]
         return SourceDetail(source, entries)
 
-    async def delete(self, user_id: UUID, source_id: UUID) -> None:
-        """Forgets the source and its credentials; imported books stay in the library."""
-        await self._own(user_id, source_id)
+    async def delete(
+        self,
+        user_id: UUID,
+        source_id: UUID,
+        *,
+        remove_books: bool = False,
+        device_id: UUID | None = None,
+    ) -> int:
+        """Forgets the source and its credentials.
+
+        Imported books stay in the library unless ``remove_books``: then the books matching
+        the source's files leave the library (the stored files stay, for other readers).
+        Returns the number of books removed.
+        """
+        removed = 0
+        if remove_books:
+            detail = await self.detail(user_id, source_id)
+            item_ids = {e.item_id for e in detail.entries if e.item_id is not None}
+            for item_id in item_ids:
+                await self._library.remove_from_library(user_id, item_id, device_id)
+                removed += 1
+        else:
+            await self._own(user_id, source_id)
         await self._sources.delete(source_id)
         await self._sources.commit()
+        return removed
 
     async def scan(self, user_id: UUID, source_id: UUID) -> SourceDetail:
         source = await self._own(user_id, source_id)
@@ -168,24 +189,15 @@ class SourceService:
         self, user_id: UUID, kind: SourceKind, entry: SourceEntry
     ) -> SourceEntry:
         sha256 = await self._sources.known_file(kind, entry.remote_id)
-        if sha256 is None:
+        stored = await self._files.get_file(sha256) if sha256 else None
+        if sha256 is None or stored is None:
             return entry
+        known = replace(
+            entry, title=stored.title, authors=stored.authors, cover_path=stored.cover_path
+        )
         item = await self._files.find_item(user_id, sha256)
         if item is not None:
-            return _replace(entry, EntryStatus.IN_LIBRARY, item.id)
-        stored = await self._files.get_file(sha256)
-        if stored is not None and stored.available:
-            return _replace(entry, EntryStatus.ON_BABEL, None)
+            return replace(known, status=EntryStatus.IN_LIBRARY, item_id=item.id)
+        if stored.available:
+            return replace(known, status=EntryStatus.ON_BABEL)
         return entry
-
-
-def _replace(entry: SourceEntry, status: EntryStatus, item_id: UUID | None) -> SourceEntry:
-    return SourceEntry(
-        id=entry.id,
-        source_id=entry.source_id,
-        path=entry.path,
-        size=entry.size,
-        remote_id=entry.remote_id,
-        status=status,
-        item_id=item_id,
-    )

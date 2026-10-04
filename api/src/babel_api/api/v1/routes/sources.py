@@ -37,6 +37,7 @@ class SourceResponse(BaseModel):
     created_at: datetime
     last_scan_at: datetime | None
     last_error: str | None
+    book_count: int = Field(description="Book files found by the last scan")
 
     @classmethod
     def of(cls, source: Source) -> "SourceResponse":
@@ -51,6 +52,7 @@ class SourceResponse(BaseModel):
             created_at=source.created_at,
             last_scan_at=source.last_scan_at,
             last_error=source.last_error,
+            book_count=source.entry_count,
         )
 
 
@@ -61,6 +63,9 @@ class SourceEntryResponse(BaseModel):
     size: int
     status: EntryStatus
     item_id: UUID | None
+    title: str | None = Field(description="Read from the file, once it is on Babel")
+    authors: list[str]
+    cover_path: str | None
 
 
 class SourceDetailResponse(BaseModel):
@@ -79,6 +84,9 @@ class SourceDetailResponse(BaseModel):
                     size=e.size,
                     status=e.status,
                     item_id=e.item_id,
+                    title=e.title,
+                    authors=list(e.authors),
+                    cover_path=e.cover_path,
                 )
                 for e in detail.entries
             ],
@@ -127,9 +135,18 @@ async def get_source(
 
 
 @router.delete("/{source_id}", operation_id="deleteSource", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_source(user_id: CurrentUserId, sources: SourceServiceDep, source_id: UUID) -> None:
-    """Forget the source and its token. Imported books stay in the library."""
-    await sources.delete(user_id, source_id)
+async def delete_source(
+    user_id: CurrentUserId,
+    sources: SourceServiceDep,
+    source_id: UUID,
+    remove_books: bool = False,
+    device_id: DeviceHeader = None,
+) -> None:
+    """Forget the source and its token.
+
+    Imported books stay in the library, unless ``remove_books`` is set.
+    """
+    await sources.delete(user_id, source_id, remove_books=remove_books, device_id=device_id)
 
 
 @router.post("/{source_id}/scan", operation_id="scanSource")

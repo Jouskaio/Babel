@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 from babel_api.core.config import Settings
 from tests.api.v1.test_works import FakeBooks
-from tests.books import NOT_A_BOOK, PDF, epub
+from tests.books import JPEG, NOT_A_BOOK, PDF, epub
 
 PASSWORD = "correct horse battery"
 
@@ -201,3 +201,22 @@ def test_entitled_policy_limits_downloads_to_owners(
     assert client.get(f"/v1/files/{sha}", headers=ada).status_code == 200
     assert client.get(f"/v1/files/{sha}", headers=bob).status_code == 403
     assert client.post(f"/v1/library/files/{sha}", headers=bob).status_code == 403
+
+
+def test_covers_are_served_from_the_file(client: TestClient, ada: dict[str, str]) -> None:
+    item = upload(client, ada, epub(title="Covered", cover=JPEG)).json()["item"]
+    assert item["cover_path"] == f"/v1/files/{item['sha256']}/cover"
+    # Public, like catalog covers: images are loaded without the access token.
+    response = client.get(item["cover_path"])
+    assert response.status_code == 200
+    assert response.content == JPEG
+    assert response.headers["content-type"] == "image/jpeg"
+    assert client.get(item["cover_path"]).content == JPEG  # from the cache
+
+
+def test_files_without_cover_answer_404(client: TestClient, ada: dict[str, str]) -> None:
+    epub_item = upload(client, ada, epub(title="Plain")).json()["item"]
+    assert client.get(epub_item["cover_path"]).status_code == 404
+    pdf_item = upload(client, ada, PDF, "book.pdf").json()["item"]
+    assert pdf_item["cover_path"] is None
+    assert client.get(f"/v1/files/{pdf_item['sha256']}/cover").status_code == 404

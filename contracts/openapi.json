@@ -467,6 +467,18 @@
             "title": "Authors",
             "type": "array"
           },
+          "cover_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Cover found in the file, relative to the API base URL (may answer 404)",
+            "title": "Cover Path"
+          },
           "edition_id": {
             "anyOf": [
               {
@@ -509,7 +521,8 @@
           "size",
           "sha256",
           "edition_id",
-          "added_at"
+          "added_at",
+          "cover_path"
         ],
         "title": "LibraryItemResponse",
         "type": "object"
@@ -896,6 +909,24 @@
       },
       "SourceEntryResponse": {
         "properties": {
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
+          "cover_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover Path"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -927,6 +958,18 @@
           },
           "status": {
             "$ref": "#/components/schemas/EntryStatus"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Read from the file, once it is on Babel",
+            "title": "Title"
           }
         },
         "required": [
@@ -935,7 +978,10 @@
           "path",
           "size",
           "status",
-          "item_id"
+          "item_id",
+          "title",
+          "authors",
+          "cover_path"
         ],
         "title": "SourceEntryResponse",
         "type": "object"
@@ -950,6 +996,11 @@
       },
       "SourceResponse": {
         "properties": {
+          "book_count": {
+            "description": "Book files found by the last scan",
+            "title": "Book Count",
+            "type": "integer"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -1026,7 +1077,8 @@
           "has_token",
           "created_at",
           "last_scan_at",
-          "last_error"
+          "last_error",
+          "book_count"
         ],
         "title": "SourceResponse",
         "type": "object"
@@ -2534,6 +2586,49 @@
         ]
       }
     },
+    "/v1/files/{sha256}/cover": {
+      "get": {
+        "description": "The cover found in a stored file (EPUB, CBZ). Public, like catalog covers.",
+        "operationId": "getFileCover",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sha256",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Sha256",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/*": {}
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "No such file, or no cover in it"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get File Cover",
+        "tags": [
+          "library"
+        ]
+      }
+    },
     "/v1/health": {
       "get": {
         "description": "Report that the API is up, with its version.",
@@ -3105,7 +3200,7 @@
     },
     "/v1/sources/{source_id}": {
       "delete": {
-        "description": "Forget the source and its token. Imported books stay in the library.",
+        "description": "Forget the source and its token.\n\nImported books stay in the library, unless ``remove_books`` is set.",
         "operationId": "deleteSource",
         "parameters": [
           {
@@ -3116,6 +3211,33 @@
               "format": "uuid",
               "title": "Source Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "remove_books",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Remove Books",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
             }
           }
         ],

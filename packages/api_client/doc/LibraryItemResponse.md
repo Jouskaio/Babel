@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **addedAt** | [**DateTime**](DateTime.md) |  | 
 **authors** | **List<String>** |  | [default to const []]
+**coverPath** | **String** | Cover found in the file, relative to the API base URL (may answer 404) | [optional] 
 **editionId** | **String** |  | [optional] 
 **format** | [**BookFormat**](BookFormat.md) |  | 
 **id** | **String** |  | 
