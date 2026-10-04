@@ -10,6 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from babel_api import __version__
 from babel_api.adapters.catalog.open_library import OpenLibrarySource
 from babel_api.adapters.db.session import create_engine, create_session_factory
+from babel_api.adapters.files.blob_store import LocalBlobStore
+from babel_api.adapters.files.metadata import EbookMetadataReader
 from babel_api.adapters.mail.mailers import BackgroundMailer, LogMailer, SmtpMailer
 from babel_api.adapters.security.identity import apple_verifier, google_verifier
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
@@ -68,6 +70,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         },
         catalog=CatalogService(open_library),
         books=open_library,
+        blob_store=LocalBlobStore(settings.files_dir),
+        metadata_reader=EbookMetadataReader(),
         mailer=mailer,
     )
     if settings.cors_origins:

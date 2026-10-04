@@ -11,14 +11,16 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from babel_api.adapters.db.catalog_repository import SqlCatalogRepository
+from babel_api.adapters.db.file_repository import SqlFileRepository
 from babel_api.adapters.db.repositories import SqlUserRepository
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
 from babel_api.adapters.security.tokens import AccessTokenError, AccessTokenIssuer
 from babel_api.core.config import Settings
-from babel_api.domain.ports import BookSource, IdentityVerifier, Mailer
+from babel_api.domain.ports import BlobStore, BookSource, IdentityVerifier, Mailer, MetadataReader
 from babel_api.domain.users import IdentityProvider
 from babel_api.services.auth import AuthService
 from babel_api.services.catalog import CatalogService
+from babel_api.services.files import FileService
 from babel_api.services.works import WorkService
 
 
@@ -33,6 +35,8 @@ class Container:
     verifiers: dict[IdentityProvider, IdentityVerifier]
     catalog: CatalogService
     books: BookSource
+    blob_store: BlobStore
+    metadata_reader: MetadataReader
     mailer: Mailer
 
 
@@ -74,6 +78,23 @@ def get_work_service(
 
 WorkServiceDep = Annotated[WorkService, Depends(get_work_service)]
 
+
+def get_file_service(
+    container: ContainerDep, session: Annotated[AsyncSession, Depends(get_session)]
+) -> FileService:
+    settings = container.settings
+    return FileService(
+        SqlFileRepository(session),
+        SqlCatalogRepository(session),
+        container.blob_store,
+        container.metadata_reader,
+        access=settings.file_access,
+        max_bytes=settings.max_upload_mb * 1024 * 1024,
+    )
+
+
+FileServiceDep = Annotated[FileService, Depends(get_file_service)]
+
 _bearer = HTTPBearer(auto_error=False)
 
 
@@ -99,3 +120,17 @@ def _unauthorized() -> HTTPException:
         "Not authenticated",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+
+async def get_current_admin_id(
+    user_id: CurrentUserId, auth: AuthServiceDep, container: ContainerDep
+) -> UUID:
+    """The caller, provided their email is listed in ``BABEL_ADMIN_EMAILS``."""
+    user = await auth.get_user(user_id)
+    admins = {email.strip().lower() for email in container.settings.admin_emails}
+    if user.email not in admins:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Administrators only")
+    return user_id
+
+
+CurrentAdminId = Annotated[UUID, Depends(get_current_admin_id)]

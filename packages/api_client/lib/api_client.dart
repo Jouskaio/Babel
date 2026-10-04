@@ -182,6 +182,8 @@ class ApiClient {
           return valueString == 'true' || valueString == '1';
         case 'DateTime':
           return value is DateTime ? value : DateTime.tryParse(value);
+        case 'BookFormat':
+          return BookFormatTypeTransformer().decode(value);
         case 'ChangePasswordRequest':
           return ChangePasswordRequest.fromJson(value);
         case 'EditionResponse':
@@ -192,8 +194,12 @@ class ApiClient {
           return HealthResponse.fromJson(value);
         case 'IdentityProvider':
           return IdentityProviderTypeTransformer().decode(value);
+        case 'ImportResponse':
+          return ImportResponse.fromJson(value);
         case 'IsbnLookupResponse':
           return IsbnLookupResponse.fromJson(value);
+        case 'LibraryItemResponse':
+          return LibraryItemResponse.fromJson(value);
         case 'LoginRequest':
           return LoginRequest.fromJson(value);
         case 'ProviderLoginRequest':
@@ -216,6 +222,8 @@ class ApiClient {
           return UserResponse.fromJson(value);
         case 'VerifyEmailRequest':
           return VerifyEmailRequest.fromJson(value);
+        case 'WithdrawRequest':
+          return WithdrawRequest.fromJson(value);
         case 'WorkResponse':
           return WorkResponse.fromJson(value);
         case 'WorkSummaryResponse':

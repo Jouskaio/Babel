@@ -20,30 +20,34 @@ class LandingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final wide = constraints.maxWidth >= 960;
-          final gutter = wide ? 64.0 : 24.0;
-          return SingleChildScrollView(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1440),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _Nav(wide: wide, gutter: gutter),
-                    _Hero(wide: wide, gutter: gutter),
-                    _Features(wide: wide, gutter: gutter),
-                    _Devices(wide: wide, gutter: gutter),
-                    _Quote(wide: wide, gutter: gutter),
-                    _CallToAction(wide: wide, gutter: gutter),
-                    _Footer(gutter: gutter),
-                  ],
+      // Content scrolls under the status bar, but never starts behind it.
+      body: SafeArea(
+        bottom: false,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final wide = constraints.maxWidth >= 960;
+            final gutter = wide ? 64.0 : 24.0;
+            return SingleChildScrollView(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1440),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _Nav(wide: wide, gutter: gutter),
+                      _Hero(wide: wide, gutter: gutter),
+                      _Features(wide: wide, gutter: gutter),
+                      _Devices(wide: wide, gutter: gutter),
+                      _Quote(wide: wide, gutter: gutter),
+                      _CallToAction(wide: wide, gutter: gutter),
+                      _Footer(gutter: gutter),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -58,9 +62,12 @@ class _Nav extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: gutter,
-        vertical: wide ? 28 : 20,
+      // Phones get 16 px more at the top, below the status bar icons.
+      padding: EdgeInsets.fromLTRB(
+        gutter,
+        wide ? 28 : 36,
+        gutter,
+        wide ? 28 : 20,
       ),
       child: Row(
         children: [

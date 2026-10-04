@@ -3,7 +3,16 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    BigInteger,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -125,3 +134,49 @@ class EditionIdentifierRow(Base):
     )
     kind: Mapped[str] = mapped_column(String(20))
     value: Mapped[str] = mapped_column(String(64))
+
+
+class StoredFileRow(Base):
+    """A file of the shared, content-addressed store (ADR 0010)."""
+
+    __tablename__ = "stored_files"
+
+    sha256: Mapped[str] = mapped_column(String(64), primary_key=True)
+    size: Mapped[int] = mapped_column(BigInteger)
+    format: Mapped[str] = mapped_column(String(8))
+    original_name: Mapped[str] = mapped_column(String(255))
+    edition_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("editions.id", ondelete="SET NULL"), index=True
+    )
+    uploaded_by: Mapped[UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class BlockedFileRow(Base):
+    """Hashes withdrawn by an administrator; they cannot be imported again."""
+
+    __tablename__ = "blocked_files"
+
+    sha256: Mapped[str] = mapped_column(String(64), primary_key=True)
+    reason: Mapped[str] = mapped_column(String(500))
+    blocked_by: Mapped[UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    blocked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class LibraryItemRow(Base):
+    """A book in a reader's library."""
+
+    __tablename__ = "library_items"
+    __table_args__ = (UniqueConstraint("user_id", "file_sha256", name="uq_library_items_file"),)
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    file_sha256: Mapped[str] = mapped_column(
+        ForeignKey("stored_files.sha256", ondelete="CASCADE"), index=True
+    )
+    title: Mapped[str] = mapped_column(String(500))
+    authors: Mapped[list[str]] = mapped_column(JSON, default=list)
+    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+    file: Mapped[StoredFileRow] = relationship(lazy="joined")
