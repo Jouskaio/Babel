@@ -51,6 +51,11 @@ void main() {
     expect(go(signedIn, '/reset-password?token=abc'), isNull);
     expect(go(signedIn, '/forgot-password'), isNull);
     expect(go(const SignedOut(), '/verify-email?token=abc'), isNull);
+    // Opening the link first waits for the session, then comes back to the page.
+    const link = '/reset-password?token=abc';
+    final splash = go(const AuthRestoring(), link)!;
+    expect(go(const SignedOut(), splash), link);
+    expect(go(signedIn, splash), link);
     expect(go(signedIn, '/verify-email?token=abc'), isNull);
   });
 

@@ -130,6 +130,13 @@ String? redirectFor(AuthState session, Uri uri) {
       Uri(path: to, queryParameters: {'from': uri.toString()}).toString();
 
   if (Routes.open.contains(path) && session is! AuthRestoring) return null;
+  // Links opened from an email come back to their page once the session is known.
+  if (path == Routes.splash &&
+      session is! AuthRestoring &&
+      next != null &&
+      Routes.open.contains(next)) {
+    return target;
+  }
   switch (session) {
     case AuthRestoring():
       return path == Routes.splash ? null : withFrom(Routes.splash);
