@@ -1723,6 +1723,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Page {page} / {total}'**
   String pageOf(int page, int total);
+
+  /// No description provided for @importPaused.
+  ///
+  /// In fr, this message translates to:
+  /// **'la source demande une pause : reprenez dans quelques minutes'**
+  String get importPaused;
 }
 
 class _AppLocalizationsDelegate

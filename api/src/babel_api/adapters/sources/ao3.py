@@ -1,7 +1,9 @@
 """Archive of Our Own: a reader's bookmarks (and subscriptions when signed in).
 
-AO3 has no API: pages are read like a browser would, slowly (one request at a time with
-a pause) and identified by Babel's user agent. Without a password only public bookmarks
+AO3 has no API: pages are read like a browser would, slowly and identified by Babel's
+user agent. Requests are spaced for the whole server (readers share its address), and
+downloads even more: AO3 blocks addresses downloading many works in a row. When it asks
+for a pause (429), every reader waits. Without a password only public bookmarks
 are visible; with it, Babel signs in as the reader to also see private bookmarks,
 subscriptions and works restricted to signed-in users. Sessions are kept per reader and
 never shared between readers.
@@ -11,12 +13,12 @@ import asyncio
 import re
 import time
 from collections.abc import AsyncIterator
-from typing import Any
+from typing import Any, NoReturn
 
 import httpx
 from bs4 import BeautifulSoup, Tag
 
-from babel_api.adapters.sources.http import TIMEOUT, USER_AGENT
+from babel_api.adapters.sources.http import TIMEOUT, USER_AGENT, Throttle, retry_after
 from babel_api.domain.errors import SourceConnectionError, SourceRateLimitedError
 from babel_api.domain.sources import RemoteEntry
 
@@ -26,6 +28,9 @@ _WORK = re.compile(r"^/works/(\d+)$")
 MAX_PAGES = 30
 SESSION_SECONDS = 30 * 60
 RETRIES = 2
+# Pause asked by AO3 when it gives no Retry-After, and the longest one honored.
+COOL_DOWN = 120.0
+MAX_COOL_DOWN = 600.0
 
 
 def _soup(response: httpx.Response) -> BeautifulSoup:
@@ -37,11 +42,20 @@ def _text(tag: Tag | None) -> str:
 
 
 class Ao3Connector:
+    # Works imported per "import all" call: each one waits for the download throttle.
+    batch_size = 2
+
     def __init__(
-        self, transport: httpx.AsyncBaseTransport | None = None, *, pause: float = 1.5
+        self,
+        transport: httpx.AsyncBaseTransport | None = None,
+        *,
+        pause: float = 3.0,
+        download_pause: float = 15.0,
     ) -> None:
         self._transport = transport or httpx.AsyncHTTPTransport(retries=1)
         self._pause = pause
+        self._requests = Throttle(pause)
+        self._downloads = Throttle(download_pause)
         # Signed-in sessions, per reader: username -> (cookies, expiry).
         self._sessions: dict[str, tuple[httpx.Cookies, float]] = {}
 
@@ -59,7 +73,9 @@ class Ao3Connector:
     async def _get(self, client: httpx.AsyncClient, url: str, **params: Any) -> httpx.Response:
         # AO3 often answers 502/525 for a moment (its Cloudflare front): try a few times.
         for attempt in range(RETRIES + 1):
-            await asyncio.sleep(self._pause * (1 + 2 * attempt))
+            if attempt:
+                await asyncio.sleep(self._pause * 2 * attempt)
+            await self._requests.wait()
             try:
                 response = await client.get(url, params=params or None)
             except httpx.HTTPError as error:
@@ -67,10 +83,17 @@ class Ao3Connector:
                     raise SourceConnectionError("unreachable") from error
                 continue
             if response.status_code == 429:
-                raise SourceRateLimitedError
+                self._limited(response)
             if response.status_code < 500 or attempt == RETRIES:
                 return response
         raise SourceConnectionError("unreachable")  # pragma: no cover - loop always returns
+
+    def _limited(self, response: httpx.Response) -> NoReturn:
+        """AO3 asks for a pause: every reader of the server waits."""
+        seconds = retry_after(response, COOL_DOWN, MAX_COOL_DOWN)
+        self._requests.cool_down(seconds)
+        self._downloads.cool_down(seconds)
+        raise SourceRateLimitedError
 
     async def _session(self, username: str, password: str | None) -> httpx.AsyncClient:
         """A client signed in as the reader when a password is given."""
@@ -84,7 +107,7 @@ class Ao3Connector:
         token = form.find("input", attrs={"name": "authenticity_token"})
         if not isinstance(token, Tag):
             raise SourceConnectionError("unreachable")
-        await asyncio.sleep(self._pause)
+        await self._requests.wait()
         try:
             response = await client.post(
                 "/users/login",
@@ -182,11 +205,14 @@ class Ao3Connector:
             raise SourceConnectionError("no_download")  # restricted, or not available
         url = str(link.get("href"))
         for attempt in range(RETRIES + 1):
-            await asyncio.sleep(self._pause * (1 + 2 * attempt))
+            if attempt:
+                await asyncio.sleep(self._pause * 2 * attempt)
+            await self._downloads.wait()
+            await self._requests.wait()
             try:
                 async with client.stream("GET", url) as response:
                     if response.status_code == 429:
-                        raise SourceRateLimitedError
+                        self._limited(response)
                     if response.status_code >= 500 and attempt < RETRIES:
                         continue  # a passing error, before any byte was sent
                     if response.status_code >= 400:

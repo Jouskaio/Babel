@@ -528,5 +528,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "importPaused": "la source demande une pause : reprenez dans quelques minutes"
 }

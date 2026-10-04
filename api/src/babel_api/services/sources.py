@@ -11,6 +11,7 @@ from babel_api.domain.errors import (
     DomainError,
     NotFoundError,
     SourceConnectionError,
+    SourceRateLimitedError,
     TooManySourcesError,
     UnsupportedFileError,
 )
@@ -35,6 +36,10 @@ IMPORT_BATCH = 50
 class BatchImport:
     imported: int
     failed: int
+    # Books still waiting for another "import all" call.
+    remaining: int = 0
+    # The source asked to slow down: the next call should wait a few minutes.
+    paused: bool = False
 
 
 class SourceService:
@@ -162,15 +167,21 @@ class SourceService:
     ) -> BatchImport:
         detail = await self.detail(user_id, source_id)
         pending = [e for e in detail.entries if e.status in (EntryStatus.NEW, EntryStatus.ON_BABEL)]
+        # Slow sources (AO3) import a few books per call; the app calls again.
+        batch = int(getattr(self._connectors[detail.source.kind], "batch_size", IMPORT_BATCH))
         imported = failed = 0
-        for entry in pending[:IMPORT_BATCH]:
+        paused = False
+        for entry in pending[:batch]:
             try:
                 await self.import_entry(user_id, source_id, entry.id, device_id)
                 imported += 1
+            except SourceRateLimitedError:
+                paused = True
+                break
             except DomainError as error:
                 logger.warning("Import of %s failed: %s", entry.path, type(error).__name__)
                 failed += 1
-        return BatchImport(imported, failed)
+        return BatchImport(imported, failed, max(len(pending) - imported - failed, 0), paused)
 
     # ------------------------------------------------------------ internals
     async def _own(self, user_id: UUID, source_id: UUID) -> Source:

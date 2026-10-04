@@ -1,8 +1,9 @@
 import asyncio
+import time
 
 import pytest
 
-from babel_api.adapters.sources.http import book_format, check_url
+from babel_api.adapters.sources.http import Throttle, book_format, check_url
 from babel_api.domain.errors import SourceAddressBlockedError, SourceConnectionError
 
 
@@ -42,3 +43,25 @@ def test_formats_come_from_media_types_or_names() -> None:
     assert book_format("Book.PDF") == "pdf"
     assert book_format("comic.cbz") == "cbz"
     assert book_format("notes.txt") is None
+
+
+def test_the_throttle_spaces_requests() -> None:
+    async def three() -> float:
+        throttle = Throttle(0.05)
+        start = time.monotonic()
+        for _ in range(3):
+            await throttle.wait()
+        return time.monotonic() - start
+
+    assert asyncio.run(three()) >= 0.1
+
+
+def test_a_cool_down_delays_the_next_request() -> None:
+    async def run() -> float:
+        throttle = Throttle(0)
+        throttle.cool_down(0.1)
+        start = time.monotonic()
+        await throttle.wait()
+        return time.monotonic() - start
+
+    assert asyncio.run(run()) >= 0.09

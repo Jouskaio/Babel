@@ -71,6 +71,10 @@ class FakeServer {
   /// Sources: request bodies received, and the books of the single source "s1".
   final sourceRequests = <Map<String, Object?>>[];
   final deletedSources = <Uri>[];
+
+  /// Answers to "import all", one per call.
+  final importBatches = <Map<String, Object?>>[];
+  int importCalls = 0;
   bool hasSource = true;
   final entries = <Map<String, Object?>>[
     sourceEntry('e1', 'Jane Eyre.epub', 'new'),
@@ -229,6 +233,14 @@ class FakeServer {
       return request.method == 'POST'
           ? json(sourceDetail, 201)
           : json(hasSource ? [source] : <Object>[]);
+    }
+    if (path == '/v1/sources/s1/import') {
+      importCalls++;
+      return json(
+        importBatches.isEmpty
+            ? {'imported': 0, 'failed': 0, 'remaining': 0, 'paused': false}
+            : importBatches.removeAt(0),
+      );
     }
     if (path == '/v1/sources/s1/entries/e1/import') {
       entries[0] = {...entries[0], 'status': 'in_library', 'item_id': 'i9'};

@@ -1025,4 +1025,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String pageOf(int page, int total) {
     return 'Page $page / $total';
   }
+
+  @override
+  String get importPaused =>
+      'la source demande une pause : reprenez dans quelques minutes';
 }
