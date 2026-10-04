@@ -7,7 +7,9 @@ from sqlalchemy import (
     JSON,
     BigInteger,
     DateTime,
+    Float,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -180,3 +182,62 @@ class LibraryItemRow(Base):
     added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     file: Mapped[StoredFileRow] = relationship(lazy="joined")
+
+
+class DeviceRow(Base):
+    __tablename__ = "devices"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    name: Mapped[str] = mapped_column(String(80))
+    kind: Mapped[str] = mapped_column(String(16))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class ChangeRow(Base):
+    """The change log. ``seq`` is global and only grows; reads filter by user."""
+
+    __tablename__ = "changes"
+    __table_args__ = (Index("ix_changes_user_seq", "user_id", "seq"),)
+
+    # SQLite only auto-increments INTEGER primary keys.
+    seq: Mapped[int] = mapped_column(
+        BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True
+    )
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    entity: Mapped[str] = mapped_column(String(32))
+    entity_id: Mapped[str] = mapped_column(String(64))
+    op: Mapped[str] = mapped_column(String(8))
+    data: Mapped[dict[str, object]] = mapped_column(JSON, default=dict)
+    device_id: Mapped[UUID | None] = mapped_column(ForeignKey("devices.id", ondelete="SET NULL"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class AppliedOperationRow(Base):
+    """Idempotency keys of operations pushed by devices (replays are ignored)."""
+
+    __tablename__ = "applied_operations"
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    applied_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class ReadingPositionRow(Base):
+    """One position per (library item, device)."""
+
+    __tablename__ = "reading_positions"
+
+    item_id: Mapped[UUID] = mapped_column(
+        ForeignKey("library_items.id", ondelete="CASCADE"), primary_key=True
+    )
+    device_id: Mapped[UUID] = mapped_column(
+        ForeignKey("devices.id", ondelete="CASCADE"), primary_key=True
+    )
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    locator: Mapped[str] = mapped_column(String(1000))
+    percent: Mapped[float] = mapped_column(Float)
+    client_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))

@@ -58,8 +58,20 @@ String parameterToString(dynamic value) {
   if (value is BookFormat) {
     return BookFormatTypeTransformer().encode(value).toString();
   }
+  if (value is ChangeOp) {
+    return ChangeOpTypeTransformer().encode(value).toString();
+  }
+  if (value is DeviceKind) {
+    return DeviceKindTypeTransformer().encode(value).toString();
+  }
+  if (value is EntityKind) {
+    return EntityKindTypeTransformer().encode(value).toString();
+  }
   if (value is IdentityProvider) {
     return IdentityProviderTypeTransformer().encode(value).toString();
+  }
+  if (value is OpOutcome) {
+    return OpOutcomeTypeTransformer().encode(value).toString();
   }
   return value.toString();
 }

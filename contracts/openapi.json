@@ -26,6 +26,14 @@
         "title": "BookFormat",
         "type": "string"
       },
+      "ChangeOp": {
+        "enum": [
+          "upsert",
+          "delete"
+        ],
+        "title": "ChangeOp",
+        "type": "string"
+      },
       "ChangePasswordRequest": {
         "description": "``current_password`` is required unless the account has no password yet.",
         "properties": {
@@ -52,6 +60,98 @@
           "new_password"
         ],
         "title": "ChangePasswordRequest",
+        "type": "object"
+      },
+      "ChangeResponse": {
+        "description": "One change of the log. ``data`` has the shape of the matching API resource.",
+        "properties": {
+          "data": {
+            "additionalProperties": true,
+            "title": "Data",
+            "type": "object"
+          },
+          "device_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Id"
+          },
+          "entity": {
+            "$ref": "#/components/schemas/EntityKind"
+          },
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "op": {
+            "$ref": "#/components/schemas/ChangeOp"
+          },
+          "seq": {
+            "title": "Seq",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "seq",
+          "entity",
+          "entity_id",
+          "op",
+          "data",
+          "device_id"
+        ],
+        "title": "ChangeResponse",
+        "type": "object"
+      },
+      "DeviceKind": {
+        "enum": [
+          "phone",
+          "tablet",
+          "ereader",
+          "desktop",
+          "web"
+        ],
+        "title": "DeviceKind",
+        "type": "string"
+      },
+      "DeviceResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/DeviceKind"
+          },
+          "last_seen_at": {
+            "format": "date-time",
+            "title": "Last Seen At",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "created_at",
+          "last_seen_at"
+        ],
+        "title": "DeviceResponse",
         "type": "object"
       },
       "EditionResponse": {
@@ -152,6 +252,15 @@
         ],
         "title": "EditionResponse",
         "type": "object"
+      },
+      "EntityKind": {
+        "description": "What a change is about. Shelves and annotations will join this list.",
+        "enum": [
+          "library_item",
+          "reading_position"
+        ],
+        "title": "EntityKind",
+        "type": "string"
       },
       "ForgotPasswordRequest": {
         "properties": {
@@ -327,6 +436,87 @@
         "title": "LoginRequest",
         "type": "object"
       },
+      "OpOutcome": {
+        "enum": [
+          "applied",
+          "duplicate",
+          "stale",
+          "rejected"
+        ],
+        "title": "OpOutcome",
+        "type": "string"
+      },
+      "OperationRequest": {
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "entity": {
+            "$ref": "#/components/schemas/EntityKind"
+          },
+          "entity_id": {
+            "maxLength": 100,
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "key": {
+            "description": "Idempotency key",
+            "maxLength": 64,
+            "minLength": 8,
+            "title": "Key",
+            "type": "string"
+          },
+          "op": {
+            "$ref": "#/components/schemas/ChangeOp"
+          }
+        },
+        "required": [
+          "key",
+          "entity",
+          "entity_id",
+          "op"
+        ],
+        "title": "OperationRequest",
+        "type": "object"
+      },
+      "OperationResult": {
+        "properties": {
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/OpOutcome"
+          }
+        },
+        "required": [
+          "key",
+          "outcome",
+          "detail"
+        ],
+        "title": "OperationResult",
+        "type": "object"
+      },
       "ProviderLoginRequest": {
         "properties": {
           "display_name": {
@@ -388,6 +578,102 @@
         "title": "ProvidersResponse",
         "type": "object"
       },
+      "PullResponse": {
+        "properties": {
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/ChangeResponse"
+            },
+            "title": "Changes",
+            "type": "array"
+          },
+          "cursor": {
+            "description": "Pass it as `since` next time",
+            "title": "Cursor",
+            "type": "integer"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "changes",
+          "cursor",
+          "has_more"
+        ],
+        "title": "PullResponse",
+        "type": "object"
+      },
+      "PushRequest": {
+        "properties": {
+          "operations": {
+            "items": {
+              "$ref": "#/components/schemas/OperationRequest"
+            },
+            "maxItems": 500,
+            "title": "Operations",
+            "type": "array"
+          }
+        },
+        "required": [
+          "operations"
+        ],
+        "title": "PushRequest",
+        "type": "object"
+      },
+      "PushResponse": {
+        "properties": {
+          "cursor": {
+            "description": "Latest change of the account after these operations",
+            "title": "Cursor",
+            "type": "integer"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/OperationResult"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "required": [
+          "results",
+          "cursor"
+        ],
+        "title": "PushResponse",
+        "type": "object"
+      },
+      "ReadingPositionResponse": {
+        "properties": {
+          "client_time": {
+            "format": "date-time",
+            "title": "Client Time",
+            "type": "string"
+          },
+          "device_id": {
+            "format": "uuid",
+            "title": "Device Id",
+            "type": "string"
+          },
+          "locator": {
+            "title": "Locator",
+            "type": "string"
+          },
+          "percent": {
+            "title": "Percent",
+            "type": "number"
+          }
+        },
+        "required": [
+          "device_id",
+          "locator",
+          "percent",
+          "client_time"
+        ],
+        "title": "ReadingPositionResponse",
+        "type": "object"
+      },
       "RefreshRequest": {
         "description": "Mobile apps send the token in the body; the web app relies on the cookie.",
         "properties": {
@@ -404,6 +690,25 @@
           }
         },
         "title": "RefreshRequest",
+        "type": "object"
+      },
+      "RegisterDeviceRequest": {
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/DeviceKind"
+          },
+          "name": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "kind"
+        ],
+        "title": "RegisterDeviceRequest",
         "type": "object"
       },
       "RegisterRequest": {
@@ -893,7 +1198,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.8.0"
+    "version": "0.9.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -1816,6 +2121,124 @@
         ]
       }
     },
+    "/v1/devices": {
+      "get": {
+        "description": "The account's devices, most recently seen first.",
+        "operationId": "getDevices",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DeviceResponse"
+                  },
+                  "title": "Response Getdevices",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Devices",
+        "tags": [
+          "sync"
+        ]
+      },
+      "post": {
+        "description": "Register this device once; send its id in the X-Babel-Device header afterwards.",
+        "operationId": "registerDevice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDeviceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Register Device",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/v1/devices/{device_id}": {
+      "delete": {
+        "description": "Forget a device and its reading positions.",
+        "operationId": "removeDevice",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "device_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Device Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove Device",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
     "/v1/files/{sha256}": {
       "get": {
         "description": "Download a stored file. Supports HTTP range requests to resume downloads.",
@@ -1918,6 +2341,25 @@
       "post": {
         "description": "Import an EPUB, PDF, CBZ or CBR file into the library.",
         "operationId": "importFile",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -1975,6 +2417,23 @@
               "title": "Sha256",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
           }
         ],
         "responses": {
@@ -2012,7 +2471,7 @@
     },
     "/v1/library/{item_id}": {
       "delete": {
-        "description": "Remove a book from the library. Progress and notes are kept with the work.",
+        "description": "Remove a book from the library.",
         "operationId": "removeFromLibrary",
         "parameters": [
           {
@@ -2023,6 +2482,23 @@
               "format": "uuid",
               "title": "Item Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
             }
           }
         ],
@@ -2047,6 +2523,59 @@
           }
         ],
         "summary": "Remove From Library",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/v1/library/{item_id}/positions": {
+      "get": {
+        "description": "Where each device stopped in this book, most recent first.",
+        "operationId": "getReadingPositions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingPositionResponse"
+                  },
+                  "title": "Response Getreadingpositions",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Positions",
         "tags": [
           "library"
         ]
@@ -2204,6 +2733,144 @@
         "summary": "Change Password",
         "tags": [
           "account"
+        ]
+      }
+    },
+    "/v1/sync": {
+      "get": {
+        "description": "Changes of the account after ``since``, oldest first.",
+        "operationId": "pullChanges",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Since",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PullResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pull Changes",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/v1/sync/{device_id}": {
+      "post": {
+        "description": "Apply changes made on a device (possibly offline), in order. Replays are harmless.",
+        "operationId": "pushOperations",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "device_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Device Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Push Operations",
+        "tags": [
+          "sync"
         ]
       }
     }

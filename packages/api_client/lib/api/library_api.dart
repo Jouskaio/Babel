@@ -25,7 +25,9 @@ class LibraryApi {
   /// Parameters:
   ///
   /// * [String] sha256 (required):
-  Future<Response> addStoredFileWithHttpInfo(String sha256,) async {
+  ///
+  /// * [String] xBabelDevice:
+  Future<Response> addStoredFileWithHttpInfo(String sha256, { String? xBabelDevice, }) async {
     // ignore: prefer_const_declarations
     final path = r'/v1/library/files/{sha256}'
       .replaceAll('{sha256}', sha256);
@@ -36,6 +38,10 @@ class LibraryApi {
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
+
+    if (xBabelDevice != null) {
+      headerParams[r'X-Babel-Device'] = parameterToString(xBabelDevice);
+    }
 
     const contentTypes = <String>[];
 
@@ -58,8 +64,10 @@ class LibraryApi {
   /// Parameters:
   ///
   /// * [String] sha256 (required):
-  Future<LibraryItemResponse?> addStoredFile(String sha256,) async {
-    final response = await addStoredFileWithHttpInfo(sha256,);
+  ///
+  /// * [String] xBabelDevice:
+  Future<LibraryItemResponse?> addStoredFile(String sha256, { String? xBabelDevice, }) async {
+    final response = await addStoredFileWithHttpInfo(sha256,  xBabelDevice: xBabelDevice, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -173,6 +181,66 @@ class LibraryApi {
     return null;
   }
 
+  /// Get Positions
+  ///
+  /// Where each device stopped in this book, most recent first.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  Future<Response> getReadingPositionsWithHttpInfo(String itemId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/{item_id}/positions'
+      .replaceAll('{item_id}', itemId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Positions
+  ///
+  /// Where each device stopped in this book, most recent first.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  Future<List<ReadingPositionResponse>?> getReadingPositions(String itemId,) async {
+    final response = await getReadingPositionsWithHttpInfo(itemId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<ReadingPositionResponse>') as List)
+        .cast<ReadingPositionResponse>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
   /// Import File
   ///
   /// Import an EPUB, PDF, CBZ or CBR file into the library.
@@ -182,7 +250,9 @@ class LibraryApi {
   /// Parameters:
   ///
   /// * [String] file (required):
-  Future<Response> importFileWithHttpInfo(String file,) async {
+  ///
+  /// * [String] xBabelDevice:
+  Future<Response> importFileWithHttpInfo(String file, { String? xBabelDevice, }) async {
     // ignore: prefer_const_declarations
     final path = r'/v1/library/files';
 
@@ -192,6 +262,10 @@ class LibraryApi {
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
+
+    if (xBabelDevice != null) {
+      headerParams[r'X-Babel-Device'] = parameterToString(xBabelDevice);
+    }
 
     const contentTypes = <String>['multipart/form-data'];
 
@@ -223,8 +297,10 @@ class LibraryApi {
   /// Parameters:
   ///
   /// * [String] file (required):
-  Future<ImportResponse?> importFile(String file,) async {
-    final response = await importFileWithHttpInfo(file,);
+  ///
+  /// * [String] xBabelDevice:
+  Future<ImportResponse?> importFile(String file, { String? xBabelDevice, }) async {
+    final response = await importFileWithHttpInfo(file,  xBabelDevice: xBabelDevice, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -240,14 +316,16 @@ class LibraryApi {
 
   /// Remove From Library
   ///
-  /// Remove a book from the library. Progress and notes are kept with the work.
+  /// Remove a book from the library.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
   /// * [String] itemId (required):
-  Future<Response> removeFromLibraryWithHttpInfo(String itemId,) async {
+  ///
+  /// * [String] xBabelDevice:
+  Future<Response> removeFromLibraryWithHttpInfo(String itemId, { String? xBabelDevice, }) async {
     // ignore: prefer_const_declarations
     final path = r'/v1/library/{item_id}'
       .replaceAll('{item_id}', itemId);
@@ -258,6 +336,10 @@ class LibraryApi {
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
+
+    if (xBabelDevice != null) {
+      headerParams[r'X-Babel-Device'] = parameterToString(xBabelDevice);
+    }
 
     const contentTypes = <String>[];
 
@@ -275,13 +357,15 @@ class LibraryApi {
 
   /// Remove From Library
   ///
-  /// Remove a book from the library. Progress and notes are kept with the work.
+  /// Remove a book from the library.
   ///
   /// Parameters:
   ///
   /// * [String] itemId (required):
-  Future<void> removeFromLibrary(String itemId,) async {
-    final response = await removeFromLibraryWithHttpInfo(itemId,);
+  ///
+  /// * [String] xBabelDevice:
+  Future<void> removeFromLibrary(String itemId, { String? xBabelDevice, }) async {
+    final response = await removeFromLibraryWithHttpInfo(itemId,  xBabelDevice: xBabelDevice, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
