@@ -8,12 +8,14 @@ class AuthHttpClient extends http.BaseClient {
     required this._defaultHeaders,
     this._accessToken,
     this._refresh,
+    this._deviceId,
   });
 
   final http.Client _inner;
   final Map<String, String> _defaultHeaders;
   final String? Function()? _accessToken;
   final Future<bool> Function()? _refresh;
+  final String? Function()? _deviceId;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
@@ -29,6 +31,8 @@ class AuthHttpClient extends http.BaseClient {
 
   http.BaseRequest _prepare(http.BaseRequest request) {
     request.headers.addAll(_defaultHeaders);
+    final device = _deviceId?.call();
+    if (device != null) request.headers['X-Babel-Device'] = device;
     final token = _accessToken?.call();
     if (token != null) request.headers['Authorization'] = 'Bearer $token';
     return request;
