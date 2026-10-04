@@ -7,12 +7,18 @@ from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.models import (
+    AccountTokenRow,
     IdentityRow,
-    PasswordResetTokenRow,
     RefreshTokenRow,
     UserRow,
 )
-from babel_api.domain.users import IdentityProvider, PasswordResetToken, RefreshToken, User
+from babel_api.domain.users import (
+    AccountToken,
+    IdentityProvider,
+    RefreshToken,
+    TokenPurpose,
+    User,
+)
 
 
 def _aware(value: datetime) -> datetime:
@@ -28,6 +34,7 @@ def _to_user(row: UserRow) -> User:
         created_at=_aware(row.created_at),
         password_hash=row.password_hash,
         locale=row.locale,
+        email_verified_at=_aware(row.email_verified_at) if row.email_verified_at else None,
         providers=frozenset(IdentityProvider(identity.provider) for identity in row.identities),
     )
 
@@ -87,6 +94,7 @@ class SqlUserRepository:
         display_name: str | None = None,
         password_hash: str | None = None,
         locale: str | None = None,
+        email_verified_at: datetime | None = None,
     ) -> User:
         row = await self._session.get_one(UserRow, user_id)
         if display_name is not None:
@@ -95,6 +103,8 @@ class SqlUserRepository:
             row.password_hash = password_hash
         if locale is not None:
             row.locale = locale
+        if email_verified_at is not None:
+            row.email_verified_at = email_verified_at
         await self._session.flush()
         await self._session.refresh(row, ["identities"])
         return _to_user(row)
@@ -102,7 +112,7 @@ class SqlUserRepository:
     async def delete(self, user_id: UUID) -> None:
         # Explicit deletes: SQLite does not enforce ON DELETE CASCADE by default.
         await self._session.execute(
-            delete(PasswordResetTokenRow).where(PasswordResetTokenRow.user_id == user_id)
+            delete(AccountTokenRow).where(AccountTokenRow.user_id == user_id)
         )
         await self._session.execute(
             delete(RefreshTokenRow).where(RefreshTokenRow.user_id == user_id)
@@ -142,11 +152,17 @@ class SqlUserRepository:
             .values(revoked_at=at)
         )
 
-    async def add_reset_token(self, token: PasswordResetToken) -> None:
+    async def clear_password(self, user_id: UUID) -> None:
+        row = await self._session.get_one(UserRow, user_id)
+        row.password_hash = None
+        await self._session.flush()
+
+    async def add_account_token(self, token: AccountToken) -> None:
         self._session.add(
-            PasswordResetTokenRow(
+            AccountTokenRow(
                 id=token.id,
                 user_id=token.user_id,
+                purpose=token.purpose.value,
                 secret_hash=token.secret_hash,
                 created_at=token.created_at,
                 expires_at=token.expires_at,
@@ -154,32 +170,35 @@ class SqlUserRepository:
         )
         await self._session.flush()
 
-    async def get_reset_token(self, token_id: UUID) -> PasswordResetToken | None:
-        row = await self._session.get(PasswordResetTokenRow, token_id)
+    async def get_account_token(self, token_id: UUID) -> AccountToken | None:
+        row = await self._session.get(AccountTokenRow, token_id)
         if row is None:
             return None
-        return PasswordResetToken(
+        return AccountToken(
             id=row.id,
             user_id=row.user_id,
+            purpose=TokenPurpose(row.purpose),
             secret_hash=row.secret_hash,
             created_at=_aware(row.created_at),
             expires_at=_aware(row.expires_at),
             used_at=_aware(row.used_at) if row.used_at else None,
         )
 
-    async def last_reset_request(self, user_id: UUID) -> datetime | None:
+    async def last_account_token(self, user_id: UUID, purpose: TokenPurpose) -> datetime | None:
         latest = await self._session.scalar(
-            select(func.max(PasswordResetTokenRow.created_at)).where(
-                PasswordResetTokenRow.user_id == user_id
+            select(func.max(AccountTokenRow.created_at)).where(
+                AccountTokenRow.user_id == user_id, AccountTokenRow.purpose == purpose.value
             )
         )
         return _aware(latest) if latest else None
 
-    async def use_reset_tokens(self, user_id: UUID, at: datetime) -> None:
+    async def use_account_tokens(self, user_id: UUID, purpose: TokenPurpose, at: datetime) -> None:
         await self._session.execute(
-            update(PasswordResetTokenRow)
+            update(AccountTokenRow)
             .where(
-                PasswordResetTokenRow.user_id == user_id, PasswordResetTokenRow.used_at.is_(None)
+                AccountTokenRow.user_id == user_id,
+                AccountTokenRow.purpose == purpose.value,
+                AccountTokenRow.used_at.is_(None),
             )
             .values(used_at=at)
         )

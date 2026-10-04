@@ -9,6 +9,7 @@ import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../application/server_status_provider.dart';
+import 'verify_email_banner.dart';
 
 /// Home screen of a signed-in user. For now: greeting, account link and API status.
 class HomePage extends ConsumerWidget {
@@ -41,6 +42,8 @@ class HomePage extends ConsumerWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 24),
+              const VerifyEmailBanner(),
               const SizedBox(height: 32),
               Text(
                 greeting(l10n, name, DateTime.now()),

@@ -385,6 +385,10 @@
             "title": "Email",
             "type": "string"
           },
+          "email_verified": {
+            "title": "Email Verified",
+            "type": "boolean"
+          },
           "has_password": {
             "title": "Has Password",
             "type": "boolean"
@@ -415,6 +419,7 @@
           "email",
           "display_name",
           "has_password",
+          "email_verified",
           "locale",
           "providers",
           "created_at"
@@ -461,6 +466,21 @@
         ],
         "title": "ValidationError",
         "type": "object"
+      },
+      "VerifyEmailRequest": {
+        "description": "``token`` comes from the link sent by email.",
+        "properties": {
+          "token": {
+            "maxLength": 200,
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "title": "VerifyEmailRequest",
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -473,7 +493,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.5.0"
+    "version": "0.6.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -532,6 +552,41 @@
           }
         },
         "summary": "Login With Apple",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/email/verify": {
+      "post": {
+        "description": "Confirm the email address with the link sent at sign-up.",
+        "operationId": "verifyEmail",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyEmailRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Verify Email",
         "tags": [
           "auth"
         ]
@@ -1190,6 +1245,31 @@
           }
         ],
         "summary": "Update Me",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/v1/me/email/verification": {
+      "post": {
+        "description": "Send the confirmation link again (at most once a minute).",
+        "operationId": "resendVerificationEmail",
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Resend Verification",
         "tags": [
           "account"
         ]

@@ -19,6 +19,7 @@ doc/TokenResponse.md
 doc/TrendingWorkResponse.md
 doc/UpdateProfileRequest.md
 doc/UserResponse.md
+doc/VerifyEmailRequest.md
 lib/api.dart
 lib/api/account_api.dart
 lib/api/auth_api.dart
@@ -46,4 +47,5 @@ lib/model/token_response.dart
 lib/model/trending_work_response.dart
 lib/model/update_profile_request.dart
 lib/model/user_response.dart
+lib/model/verify_email_request.dart
 pubspec.yaml

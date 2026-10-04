@@ -47,6 +47,7 @@ part 'model/token_response.dart';
 part 'model/trending_work_response.dart';
 part 'model/update_profile_request.dart';
 part 'model/user_response.dart';
+part 'model/verify_email_request.dart';
 
 
 /// An [ApiClient] instance that uses the default values obtained from

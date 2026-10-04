@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **createdAt** | [**DateTime**](DateTime.md) |  | 
 **displayName** | **String** |  | 
 **email** | **String** |  | 
+**emailVerified** | **bool** |  | 
 **hasPassword** | **bool** |  | 
 **id** | **String** |  | 
 **locale** | **String** |  | 

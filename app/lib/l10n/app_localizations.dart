@@ -715,6 +715,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Retour à la connexion'**
   String get backToSignIn;
+
+  /// No description provided for @verifyEyebrow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmation'**
+  String get verifyEyebrow;
+
+  /// No description provided for @verifyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmation de votre adresse'**
+  String get verifyTitle;
+
+  /// No description provided for @verifyChecking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification du lien…'**
+  String get verifyChecking;
+
+  /// No description provided for @verifyDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre adresse est confirmée. Merci !'**
+  String get verifyDone;
+
+  /// No description provided for @continueAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get continueAction;
+
+  /// No description provided for @verifyBanner.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmez votre adresse email : nous vous avons envoyé un lien.'**
+  String get verifyBanner;
+
+  /// No description provided for @verifyResend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer'**
+  String get verifyResend;
+
+  /// No description provided for @verifyResent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lien envoyé. Pensez à vérifier vos spams.'**
+  String get verifyResent;
 }
 
 class _AppLocalizationsDelegate

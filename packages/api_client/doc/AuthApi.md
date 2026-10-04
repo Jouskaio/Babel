@@ -18,6 +18,7 @@ Method | HTTP request | Description
 [**refreshSession**](AuthApi.md#refreshsession) | **POST** /v1/auth/refresh | Refresh
 [**register**](AuthApi.md#register) | **POST** /v1/auth/register | Register
 [**resetPassword**](AuthApi.md#resetpassword) | **POST** /v1/auth/password/reset | Reset Password
+[**verifyEmail**](AuthApi.md#verifyemail) | **POST** /v1/auth/email/verify | Verify Email
 
 
 # **forgotPassword**
@@ -401,6 +402,48 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **resetPasswordRequest** | [**ResetPasswordRequest**](ResetPasswordRequest.md)|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **verifyEmail**
+> verifyEmail(verifyEmailRequest)
+
+Verify Email
+
+Confirm the email address with the link sent at sign-up.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+
+final api_instance = AuthApi();
+final verifyEmailRequest = VerifyEmailRequest(); // VerifyEmailRequest | 
+
+try {
+    api_instance.verifyEmail(verifyEmailRequest);
+} catch (e) {
+    print('Exception when calling AuthApi->verifyEmail: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **verifyEmailRequest** | [**VerifyEmailRequest**](VerifyEmailRequest.md)|  | 
 
 ### Return type
 

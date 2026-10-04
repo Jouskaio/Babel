@@ -34,3 +34,13 @@ async def change_password(
 async def delete_me(user_id: CurrentUserId, auth: AuthServiceDep) -> None:
     """Delete the account and all its data. This cannot be undone."""
     await auth.delete_account(user_id)
+
+
+@router.post(
+    "/email/verification",
+    operation_id="resendVerificationEmail",
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def resend_verification(user_id: CurrentUserId, auth: AuthServiceDep) -> None:
+    """Send the confirmation link again (at most once a minute)."""
+    await auth.resend_verification(user_id)
