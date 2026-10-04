@@ -182,8 +182,34 @@ class ApiClient {
           return valueString == 'true' || valueString == '1';
         case 'DateTime':
           return value is DateTime ? value : DateTime.tryParse(value);
+        case 'ChangePasswordRequest':
+          return ChangePasswordRequest.fromJson(value);
+        case 'HTTPValidationError':
+          return HTTPValidationError.fromJson(value);
         case 'HealthResponse':
           return HealthResponse.fromJson(value);
+        case 'IdentityProvider':
+          return IdentityProviderTypeTransformer().decode(value);
+        case 'LoginRequest':
+          return LoginRequest.fromJson(value);
+        case 'ProviderLoginRequest':
+          return ProviderLoginRequest.fromJson(value);
+        case 'ProvidersResponse':
+          return ProvidersResponse.fromJson(value);
+        case 'RefreshRequest':
+          return RefreshRequest.fromJson(value);
+        case 'RegisterRequest':
+          return RegisterRequest.fromJson(value);
+        case 'TokenResponse':
+          return TokenResponse.fromJson(value);
+        case 'UpdateProfileRequest':
+          return UpdateProfileRequest.fromJson(value);
+        case 'UserResponse':
+          return UserResponse.fromJson(value);
+        case 'ValidationError':
+          return ValidationError.fromJson(value);
+        case 'ValidationErrorLocInner':
+          return ValidationErrorLocInner.fromJson(value);
         default:
           dynamic match;
           if (value is List && (match = _regList.firstMatch(targetType)?.group(1)) != null) {
