@@ -7,7 +7,7 @@
 │  web · Boox          │               │                           │
 └──────────────────────┘               │  services ─► domain       │
                                        │  adapters ─┬─► Kavita / ABS (media VM)
- Kobo e-reader ── Kobo sync protocol ─►│            ├─► Shelfmark / Chaptarr / qBittorrent
+ Kobo e-reader ── Kobo sync protocol ─►│            ├─► GitHub / OPDS / WebDAV / AO3 (sources)
  KOReader / Boox ── kosync protocol ──►│            ├─► Hardcover / Open Library / Wikidata / TMDB
                                        │            └─► Goodreads / Booknode / Pagebound (scraping)
                                        └───────────────────────────┘
