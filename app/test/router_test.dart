@@ -65,4 +65,13 @@ void main() {
       expect(go(signedIn, page), isNull);
     }
   });
+
+  test('shared links are found in the url or the text', () {
+    expect(sharedLink({'url': 'https://a.org/x'}), 'https://a.org/x');
+    expect(
+      sharedLink({'text': 'Read this! https://archiveofourown.org/works/1 ♥'}),
+      'https://archiveofourown.org/works/1',
+    );
+    expect(sharedLink({'text': 'no link'}), isNull);
+  });
 }

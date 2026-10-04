@@ -1020,4 +1020,69 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get importPaused =>
       'the source asked for a pause: continue in a few minutes';
+
+  @override
+  String get linkTitle => 'Import a link';
+
+  @override
+  String get linkHeading => 'From a link';
+
+  @override
+  String get linkSubtitle => 'AO3, Gutenberg or a link to a file';
+
+  @override
+  String get linkField => 'Link';
+
+  @override
+  String get linkHelp =>
+      'Paste the link of an AO3 fanfiction, a Gutenberg book or an EPUB, PDF, CBZ file. A book already on Babel is added without downloading it again.';
+
+  @override
+  String get linkShareTip => 'Tip: in your browser, Share → Babel';
+
+  @override
+  String get linkChecking => 'Looking at the link…';
+
+  @override
+  String get linkAo3 => 'AO3 fanfiction';
+
+  @override
+  String get linkGutenberg => 'Gutenberg book';
+
+  @override
+  String get linkFile => 'File';
+
+  @override
+  String get linkOnBabel => 'already on Babel';
+
+  @override
+  String get linkImport => 'Import into my library';
+
+  @override
+  String get linkImporting => 'Importing…';
+
+  @override
+  String get linkAo3Waiting =>
+      'AO3 spaces downloads: this can take a few seconds, nothing to do';
+
+  @override
+  String get linkDone => 'Added to your library';
+
+  @override
+  String get readNow => 'Read now';
+
+  @override
+  String get linkRateLimited =>
+      'AO3 asks for a pause: try again in a few minutes.';
+
+  @override
+  String get linkNotABook =>
+      'This link does not lead to an EPUB, PDF or CBZ book.';
+
+  @override
+  String get linkUnsupported => 'Babel cannot import from this link.';
+
+  @override
+  String get linkUnreachable =>
+      'This page could not be reached, or it is restricted to signed-in members.';
 }

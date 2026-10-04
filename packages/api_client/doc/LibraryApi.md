@@ -15,6 +15,8 @@ Method | HTTP request | Description
 [**getLibrary**](LibraryApi.md#getlibrary) | **GET** /v1/library | Get Library
 [**getReadingPositions**](LibraryApi.md#getreadingpositions) | **GET** /v1/library/{item_id}/positions | Get Positions
 [**importFile**](LibraryApi.md#importfile) | **POST** /v1/library/files | Import File
+[**importLink**](LibraryApi.md#importlink) | **POST** /v1/library/links | Import Link
+[**previewLink**](LibraryApi.md#previewlink) | **POST** /v1/library/links/preview | Preview Link
 [**removeFromLibrary**](LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
 [**withdrawFile**](LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
 
@@ -301,6 +303,106 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: multipart/form-data
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **importLink**
+> LibraryItemResponse importLink(linkRequest, xBabelDevice)
+
+Import Link
+
+Import the book a link points to (AO3 works are fetched at AO3's pace).
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = LibraryApi();
+final linkRequest = LinkRequest(); // LinkRequest | 
+final xBabelDevice = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.importLink(linkRequest, xBabelDevice);
+    print(result);
+} catch (e) {
+    print('Exception when calling LibraryApi->importLink: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **linkRequest** | [**LinkRequest**](LinkRequest.md)|  | 
+ **xBabelDevice** | **String**|  | [optional] 
+
+### Return type
+
+[**LibraryItemResponse**](LibraryItemResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **previewLink**
+> LinkPreviewResponse previewLink(linkRequest)
+
+Preview Link
+
+What a pasted link points to: an AO3 work, a Gutenberg book or a file.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = LibraryApi();
+final linkRequest = LinkRequest(); // LinkRequest | 
+
+try {
+    final result = api_instance.previewLink(linkRequest);
+    print(result);
+} catch (e) {
+    print('Exception when calling LibraryApi->previewLink: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **linkRequest** | [**LinkRequest**](LinkRequest.md)|  | 
+
+### Return type
+
+[**LinkPreviewResponse**](LinkPreviewResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

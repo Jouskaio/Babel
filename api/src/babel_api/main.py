@@ -21,6 +21,7 @@ from babel_api.adapters.security.secrets import SecretBox
 from babel_api.adapters.security.tokens import AccessTokenIssuer
 from babel_api.adapters.sources.ao3 import Ao3Connector
 from babel_api.adapters.sources.github import GitHubConnector
+from babel_api.adapters.sources.links import LinkFetcher
 from babel_api.adapters.sources.opds import OpdsConnector
 from babel_api.adapters.sources.webdav import WebDavConnector
 from babel_api.api.dependencies import Container
@@ -43,11 +44,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     engine = create_engine(settings.database_url)
     open_library = OpenLibrarySource()
     allowed_hosts = tuple(settings.source_allowed_hosts)
+    ao3 = Ao3Connector()
+    link_fetcher = LinkFetcher(allowed_hosts=allowed_hosts)
     connectors = {
         SourceKind.GITHUB: GitHubConnector(),
         SourceKind.OPDS: OpdsConnector(allowed_hosts=allowed_hosts),
         SourceKind.WEBDAV: WebDavConnector(allowed_hosts=allowed_hosts),
-        SourceKind.AO3: Ao3Connector(),
+        SourceKind.AO3: ao3,
     }
     mailer = BackgroundMailer(
         SmtpMailer(
@@ -68,6 +71,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         await open_library.aclose()
         for connector in connectors.values():
             await connector.aclose()
+        await link_fetcher.aclose()
         await engine.dispose()
 
     app = FastAPI(
@@ -95,6 +99,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         covers=LocalCoverCache(settings.files_dir),
         metadata_reader=EbookMetadataReader(),
         connectors=dict(connectors),
+        ao3=ao3,
+        link_fetcher=link_fetcher,
         secrets=SecretBox(settings.secrets_key.get_secret_value()),
         mailer=mailer,
     )

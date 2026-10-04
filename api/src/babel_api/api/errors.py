@@ -22,6 +22,7 @@ from babel_api.domain.errors import (
     SourceUnavailableError,
     TooManySourcesError,
     UnsupportedFileError,
+    UnsupportedLinkError,
 )
 
 _STATUS: dict[type[Exception], tuple[int, str]] = {
@@ -60,6 +61,7 @@ _STATUS: dict[type[Exception], tuple[int, str]] = {
     PasswordRequiredError: (status.HTTP_403_FORBIDDEN, "The current password is incorrect"),
     ProviderNotConfiguredError: (status.HTTP_404_NOT_FOUND, "Sign-in method not available"),
     SourceUnavailableError: (status.HTTP_503_SERVICE_UNAVAILABLE, "Try again later"),
+    UnsupportedLinkError: (status.HTTP_400_BAD_REQUEST, "Babel cannot import from this link"),
 }
 
 

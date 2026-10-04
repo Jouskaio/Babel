@@ -1729,6 +1729,126 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'la source demande une pause : reprenez dans quelques minutes'**
   String get importPaused;
+
+  /// No description provided for @linkTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer un lien'**
+  String get linkTitle;
+
+  /// No description provided for @linkHeading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par lien'**
+  String get linkHeading;
+
+  /// No description provided for @linkSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'AO3, Gutenberg ou lien vers un fichier'**
+  String get linkSubtitle;
+
+  /// No description provided for @linkField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lien'**
+  String get linkField;
+
+  /// No description provided for @linkHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collez le lien d\'une fanfiction AO3, d\'un livre Gutenberg ou d\'un fichier EPUB, PDF, CBZ. Un livre déjà sur Babel est ajouté sans être retéléchargé.'**
+  String get linkHelp;
+
+  /// No description provided for @linkShareTip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Astuce : depuis le navigateur, Partager → Babel'**
+  String get linkShareTip;
+
+  /// No description provided for @linkChecking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture du lien…'**
+  String get linkChecking;
+
+  /// No description provided for @linkAo3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fanfiction AO3'**
+  String get linkAo3;
+
+  /// No description provided for @linkGutenberg.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livre Gutenberg'**
+  String get linkGutenberg;
+
+  /// No description provided for @linkFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier'**
+  String get linkFile;
+
+  /// No description provided for @linkOnBabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'déjà sur Babel'**
+  String get linkOnBabel;
+
+  /// No description provided for @linkImport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer dans ma bibliothèque'**
+  String get linkImport;
+
+  /// No description provided for @linkImporting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importation…'**
+  String get linkImporting;
+
+  /// No description provided for @linkAo3Waiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'AO3 espace les téléchargements : cela peut prendre quelques secondes, rien à faire'**
+  String get linkAo3Waiting;
+
+  /// No description provided for @linkDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouté à votre bibliothèque'**
+  String get linkDone;
+
+  /// No description provided for @readNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lire maintenant'**
+  String get readNow;
+
+  /// No description provided for @linkRateLimited.
+  ///
+  /// In fr, this message translates to:
+  /// **'AO3 demande une pause : réessayez dans quelques minutes.'**
+  String get linkRateLimited;
+
+  /// No description provided for @linkNotABook.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce lien ne mène pas à un livre EPUB, PDF ou CBZ.'**
+  String get linkNotABook;
+
+  /// No description provided for @linkUnsupported.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel ne sait pas importer depuis ce lien.'**
+  String get linkUnsupported;
+
+  /// No description provided for @linkUnreachable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette page est injoignable, ou réservée aux membres connectés.'**
+  String get linkUnreachable;
 }
 
 class _AppLocalizationsDelegate

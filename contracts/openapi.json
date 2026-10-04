@@ -591,6 +591,81 @@
         "title": "LibraryItemResponse",
         "type": "object"
       },
+      "LinkKind": {
+        "enum": [
+          "ao3",
+          "gutenberg",
+          "file"
+        ],
+        "title": "LinkKind",
+        "type": "string"
+      },
+      "LinkPreviewResponse": {
+        "properties": {
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Chapters of an AO3 work",
+            "title": "Detail"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/LinkKind"
+          },
+          "on_babel": {
+            "description": "Already on Babel: imported without downloading",
+            "title": "On Babel",
+            "type": "boolean"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "required": [
+          "kind",
+          "title",
+          "authors",
+          "detail",
+          "on_babel"
+        ],
+        "title": "LinkPreviewResponse",
+        "type": "object"
+      },
+      "LinkRequest": {
+        "properties": {
+          "url": {
+            "maxLength": 2000,
+            "minLength": 8,
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "LinkRequest",
+        "type": "object"
+      },
       "LoginRequest": {
         "properties": {
           "email": {
@@ -2963,6 +3038,119 @@
           }
         ],
         "summary": "Add Stored File",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/v1/library/links": {
+      "post": {
+        "description": "Import the book a link points to (AO3 works are fetched at AO3's pace).",
+        "operationId": "importLink",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Import Link",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/v1/library/links/preview": {
+      "post": {
+        "description": "What a pasted link points to: an AO3 work, a Gutenberg book or a file.",
+        "operationId": "previewLink",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkPreviewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Preview Link",
         "tags": [
           "library"
         ]
