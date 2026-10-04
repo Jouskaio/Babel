@@ -165,11 +165,16 @@ async def logout(
 
 
 @router.post(
-    "/password/forgot", operation_id="forgotPassword", status_code=status.HTTP_202_ACCEPTED
+    "/password/forgot",
+    operation_id="forgotPassword",
+    status_code=status.HTTP_202_ACCEPTED,
+    response_class=Response,
 )
-async def forgot_password(body: ForgotPasswordRequest, auth: AuthServiceDep) -> None:
+async def forgot_password(body: ForgotPasswordRequest, auth: AuthServiceDep) -> Response:
     """Email a reset link. The answer is the same whether the account exists or not."""
     await auth.request_password_reset(body.email)
+    # No body: "null" breaks generated clients that expect an object for 2xx bodies.
+    return Response(status_code=status.HTTP_202_ACCEPTED)
 
 
 @router.post(

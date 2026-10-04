@@ -22,7 +22,7 @@ Method | HTTP request | Description
 
 
 # **forgotPassword**
-> Object forgotPassword(forgotPasswordRequest)
+> forgotPassword(forgotPasswordRequest)
 
 Forgot Password
 
@@ -36,8 +36,7 @@ final api_instance = AuthApi();
 final forgotPasswordRequest = ForgotPasswordRequest(); // ForgotPasswordRequest | 
 
 try {
-    final result = api_instance.forgotPassword(forgotPasswordRequest);
-    print(result);
+    api_instance.forgotPassword(forgotPasswordRequest);
 } catch (e) {
     print('Exception when calling AuthApi->forgotPassword: $e\n');
 }
@@ -51,7 +50,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Object**](Object.md)
+void (empty response body)
 
 ### Authorization
 
@@ -60,7 +59,7 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

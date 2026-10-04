@@ -1,6 +1,6 @@
 """The signed-in user's account."""
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Response, status
 
 from babel_api.api.dependencies import AuthServiceDep, CurrentUserId
 from babel_api.api.v1.schemas import ChangePasswordRequest, UpdateProfileRequest, UserResponse
@@ -40,7 +40,9 @@ async def delete_me(user_id: CurrentUserId, auth: AuthServiceDep) -> None:
     "/email/verification",
     operation_id="resendVerificationEmail",
     status_code=status.HTTP_202_ACCEPTED,
+    response_class=Response,
 )
-async def resend_verification(user_id: CurrentUserId, auth: AuthServiceDep) -> None:
+async def resend_verification(user_id: CurrentUserId, auth: AuthServiceDep) -> Response:
     """Send the confirmation link again (at most once a minute)."""
     await auth.resend_verification(user_id)
+    return Response(status_code=status.HTTP_202_ACCEPTED)
