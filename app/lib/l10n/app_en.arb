@@ -416,5 +416,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "importPaused": "the source asked for a pause: continue in a few minutes"
 }
