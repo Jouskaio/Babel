@@ -20,6 +20,7 @@ class UserResponse(BaseModel):
     email: str
     display_name: str
     has_password: bool
+    email_verified: bool
     locale: Locale
     providers: list[IdentityProvider]
     created_at: datetime
@@ -31,6 +32,7 @@ class UserResponse(BaseModel):
             email=user.email,
             display_name=user.display_name,
             has_password=user.has_password,
+            email_verified=user.email_verified,
             locale="en" if user.locale == "en" else "fr",
             providers=sorted(user.providers),
             created_at=user.created_at,
@@ -106,3 +108,9 @@ class ResetPasswordRequest(BaseModel):
 
     token: Annotated[str, Field(max_length=200)]
     new_password: Password
+
+
+class VerifyEmailRequest(BaseModel):
+    """``token`` comes from the link sent by email."""
+
+    token: Annotated[str, Field(max_length=200)]

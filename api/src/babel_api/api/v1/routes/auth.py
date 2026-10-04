@@ -15,6 +15,7 @@ from babel_api.api.v1.schemas import (
     ResetPasswordRequest,
     TokenResponse,
     UserResponse,
+    VerifyEmailRequest,
 )
 from babel_api.core.config import Settings
 from babel_api.domain.users import IdentityProvider
@@ -177,3 +178,9 @@ async def forgot_password(body: ForgotPasswordRequest, auth: AuthServiceDep) -> 
 async def reset_password(body: ResetPasswordRequest, auth: AuthServiceDep) -> None:
     """Set a new password from an emailed link. Every session is signed out."""
     await auth.reset_password(body.token, body.new_password)
+
+
+@router.post("/email/verify", operation_id="verifyEmail", status_code=status.HTTP_204_NO_CONTENT)
+async def verify_email(body: VerifyEmailRequest, auth: AuthServiceDep) -> None:
+    """Confirm the email address with the link sent at sign-up."""
+    await auth.verify_email(body.token)
