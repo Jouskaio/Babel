@@ -229,7 +229,7 @@ import 'package:babel_api_client/api.dart';
 //defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
 
 final api_instance = LibraryApi();
-final file = file_example; // String | 
+final file = BINARY_DATA_HERE; // MultipartFile | 
 final xBabelDevice = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
 
 try {
@@ -244,7 +244,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **file** | **String**|  | 
+ **file** | **MultipartFile**|  | 
  **xBabelDevice** | **String**|  | [optional] 
 
 ### Return type

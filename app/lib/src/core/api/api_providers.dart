@@ -45,6 +45,12 @@ final catalogApiProvider = Provider<CatalogApi>(
 final healthApiProvider = Provider<HealthApi>(
   (ref) => HealthApi(ref.watch(publicApiClientProvider)),
 );
+final libraryApiProvider = Provider<LibraryApi>(
+  (ref) => LibraryApi(ref.watch(apiClientProvider)),
+);
+final authedCatalogApiProvider = Provider<CatalogApi>(
+  (ref) => CatalogApi(ref.watch(apiClientProvider)),
+);
 final accountApiProvider = Provider<AccountApi>(
   (ref) => AccountApi(ref.watch(apiClientProvider)),
 );

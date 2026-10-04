@@ -15,7 +15,7 @@ class LibraryItemResponse {
   LibraryItemResponse({
     required this.addedAt,
     this.authors = const [],
-    required this.editionId,
+    this.editionId,
     required this.format,
     required this.id,
     required this.sha256,
@@ -161,7 +161,6 @@ class LibraryItemResponse {
   static const requiredKeys = <String>{
     'added_at',
     'authors',
-    'edition_id',
     'format',
     'id',
     'sha256',

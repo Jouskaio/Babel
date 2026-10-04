@@ -249,10 +249,10 @@ class LibraryApi {
   ///
   /// Parameters:
   ///
-  /// * [String] file (required):
+  /// * [MultipartFile] file (required):
   ///
   /// * [String] xBabelDevice:
-  Future<Response> importFileWithHttpInfo(String file, { String? xBabelDevice, }) async {
+  Future<Response> importFileWithHttpInfo(MultipartFile file, { String? xBabelDevice, }) async {
     // ignore: prefer_const_declarations
     final path = r'/v1/library/files';
 
@@ -273,7 +273,8 @@ class LibraryApi {
     final mp = MultipartRequest('POST', Uri.parse(path));
     if (file != null) {
       hasFields = true;
-      mp.fields[r'file'] = parameterToString(file);
+      mp.fields[r'file'] = file.field;
+      mp.files.add(file);
     }
     if (hasFields) {
       postBody = mp;
@@ -296,10 +297,10 @@ class LibraryApi {
   ///
   /// Parameters:
   ///
-  /// * [String] file (required):
+  /// * [MultipartFile] file (required):
   ///
   /// * [String] xBabelDevice:
-  Future<ImportResponse?> importFile(String file, { String? xBabelDevice, }) async {
+  Future<ImportResponse?> importFile(MultipartFile file, { String? xBabelDevice, }) async {
     final response = await importFileWithHttpInfo(file,  xBabelDevice: xBabelDevice, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));

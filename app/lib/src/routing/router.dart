@@ -10,8 +10,13 @@ import '../features/auth/presentation/login_page.dart';
 import '../features/auth/presentation/reset_password_page.dart';
 import '../features/auth/presentation/signup_page.dart';
 import '../features/auth/presentation/verify_email_page.dart';
+import '../features/catalog/presentation/scan_page.dart';
+import '../features/catalog/presentation/search_page.dart';
+import '../features/catalog/presentation/work_page.dart';
 import '../features/home/presentation/home_page.dart';
 import '../features/landing/presentation/landing_page.dart';
+import '../features/library/presentation/library_page.dart';
+import '../features/shell/app_shell.dart';
 import 'splash_page.dart';
 
 abstract final class Routes {
@@ -21,6 +26,10 @@ abstract final class Routes {
   static const splash = '/splash';
   static const home = '/home';
   static const account = '/account';
+  static const search = '/search';
+  static const library = '/library';
+  static const scan = '/scan';
+  static String work(String id) => '/works/$id';
   static const forgotPassword = '/forgot-password';
   static const resetPassword = '/reset-password';
   static const verifyEmail = '/verify-email';
@@ -48,7 +57,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.login, builder: (_, _) => const LoginPage()),
       GoRoute(path: Routes.signup, builder: (_, _) => const SignupPage()),
       GoRoute(path: Routes.splash, builder: (_, _) => const SplashPage()),
-      GoRoute(path: Routes.home, builder: (_, _) => const HomePage()),
       GoRoute(
         path: Routes.forgotPassword,
         builder: (_, _) => const ForgotPasswordPage(),
@@ -63,7 +71,45 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) =>
             VerifyEmailPage(token: state.uri.queryParameters['token'] ?? ''),
       ),
-      GoRoute(path: Routes.account, builder: (_, _) => const AccountPage()),
+      StatefulShellRoute.indexedStack(
+        builder: (_, _, shell) => AppShell(shell: shell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(path: Routes.home, builder: (_, _) => const HomePage()),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.search,
+                builder: (_, _) => const SearchPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.library,
+                builder: (_, _) => const LibraryPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.account,
+                builder: (_, _) => const AccountPage(),
+              ),
+            ],
+          ),
+        ],
+      ),
+      GoRoute(path: Routes.scan, builder: (_, _) => const ScanPage()),
+      GoRoute(
+        path: '/works/:id',
+        builder: (_, state) => WorkPage(workId: state.pathParameters['id']!),
+      ),
     ],
   );
 });

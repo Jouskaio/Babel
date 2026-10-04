@@ -136,3 +136,18 @@ def test_titles_follow_the_requested_language(
 
     work = client.get(f"/v1/catalog/works/{hit['id']}", params={"lang": "fr"}, headers=auth).json()
     assert work["cover_path"] == "/v1/catalog/covers/123/M"  # cover of the French edition
+
+
+def test_details_do_not_override_the_year_and_cover_from_search(
+    client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    async def later_work(open_library_id: str) -> SourceWork | None:
+        return replace(JANE, first_publish_year=1996, cover_id=999, description="A governess.")
+
+    books.work = later_work  # type: ignore[method-assign]
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=auth).json()
+
+    work = client.get(f"/v1/catalog/works/{hit['id']}", headers=auth).json()
+
+    assert work["first_publish_year"] == 1847
+    assert work["cover_path"] == "/v1/catalog/covers/8235363/M"
