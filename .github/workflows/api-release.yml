@@ -59,7 +59,7 @@ jobs:
       # Joins the tailnet as an ephemeral tag:ci node, removed when the job ends.
       # Access to the server is granted by the Tailscale policy (Tailscale SSH),
       # so no SSH key is stored in GitHub.
-      - uses: tailscale/github-action@v3
+      - uses: tailscale/github-action@v4
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
