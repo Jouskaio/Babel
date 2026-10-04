@@ -19,8 +19,12 @@ services:
       BABEL_SMTP_PORT: "587"
       BABEL_SMTP_USERNAME: contact@jouskaio.me
       BABEL_MAIL_FROM: Babel <contact@jouskaio.me>
+      # Book files (ADR 0010), on the NAS share mounted at /srv/babel-files.
+      BABEL_FILES_DIR: /data/files
     ports:
       - "8000:8000"
+    volumes:
+      - /srv/babel-files:/data/files
     depends_on:
       db:
         condition: service_healthy

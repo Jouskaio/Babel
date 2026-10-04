@@ -8,6 +8,7 @@ The API and the web build of the app run on their own server (Proxmox LXC contai
 | `api` | `ghcr.io/jouskaio/babel-api` | 8000 | `https://babel.jouskaio.me/api` |
 | `web` | `ghcr.io/jouskaio/babel-web` | 8090 | `https://babel.jouskaio.me` |
 | `db` | `postgres:17-alpine` | internal | — |
+| files | NAS `Babel` share | `/srv/babel-files` | via `/api/v1/files/…` |
 
 ```
 git tag api-vX.Y.Z / app-vX.Y.Z ─► GitHub Actions
@@ -68,6 +69,22 @@ echo "BABEL_DB_PASSWORD=$(openssl rand -hex 24)" >> .env
 ```
 
 PostgreSQL (`db` service) has no published port and keeps its data in the `db-data` volume.
+
+### Book files (NAS)
+
+Book files live on the Synology shared folder `Babel` (`/volume1/Babel`, own quota and
+snapshots, no recycle bin). The container is unprivileged and cannot mount NFS itself, so the
+Proxmox host mounts it and passes it to the container:
+
+```bash
+# Proxmox host — the NFS rule on the NAS allows the host (192.168.1.183), maps all users to admin
+echo "192.168.1.19:/volume1/Babel /mnt/babel nfs defaults,_netdev,hard,vers=3 0 0" >> /etc/fstab
+mount /mnt/babel
+pct set 107 -mp0 /mnt/babel,mp=/srv/babel-files && pct reboot 107
+```
+
+The `api` service mounts `/srv/babel-files` at `/data/files`. Administrators are listed in
+`.env` (`BABEL_ADMIN_EMAILS=["you@example.com"]`).
 The API applies pending migrations each time it starts.
 - Tailscale joined with the server tag and Tailscale SSH:
 
