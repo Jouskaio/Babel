@@ -24,15 +24,30 @@ final publicApiClientProvider = Provider<ApiClient>(
     ),
 );
 
+/// The id this device got from the API (set by the sync engine once registered).
+class DeviceSession {
+  String? id;
+}
+
+/// A new session per account: a device id belongs to one account only.
+final deviceSessionProvider = Provider<DeviceSession>((ref) {
+  ref.watch(
+    authControllerProvider.select((s) => s is SignedIn ? s.user.id : null),
+  );
+  return DeviceSession();
+});
+
 /// Client for the signed-in user's endpoints: adds the access token and refreshes it on 401.
 final apiClientProvider = Provider<ApiClient>((ref) {
   final auth = ref.read(authControllerProvider.notifier);
+  final device = ref.watch(deviceSessionProvider);
   return ApiClient(basePath: AppConfig.apiBaseUrl)
     ..client = AuthHttpClient(
       inner: ref.watch(httpClientProvider),
       defaultHeaders: _defaultHeaders,
       accessToken: () => auth.accessToken,
       refresh: auth.refresh,
+      deviceId: () => device.id,
     );
 });
 
@@ -44,6 +59,9 @@ final catalogApiProvider = Provider<CatalogApi>(
 );
 final healthApiProvider = Provider<HealthApi>(
   (ref) => HealthApi(ref.watch(publicApiClientProvider)),
+);
+final syncApiProvider = Provider<SyncApi>(
+  (ref) => SyncApi(ref.watch(apiClientProvider)),
 );
 final libraryApiProvider = Provider<LibraryApi>(
   (ref) => LibraryApi(ref.watch(apiClientProvider)),

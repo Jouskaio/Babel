@@ -257,5 +257,28 @@
   "isbnNotFound": "Aucun livre trouvé pour cet ISBN.",
   "isbnInvalid": "Cet ISBN n’est pas valide.",
   "cameraUnavailable": "Caméra indisponible : saisissez l’ISBN ci-dessous.",
-  "retry": "Réessayer"
+  "retry": "Réessayer",
+  "offline": "Hors ligne",
+  "pendingOps": "{count, plural, =1{1 changement en attente} other{{count} changements en attente}}",
+  "@pendingOps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pendingTitle": "En attente",
+  "searchQueued": "Hors ligne : la recherche sera lancée au retour du réseau.",
+  "scanQueued": "Hors ligne : cet ISBN sera recherché au retour du réseau.",
+  "lookupWaiting": "En attente du réseau",
+  "lookupResults": "{count, plural, =0{Aucun résultat} =1{1 résultat} other{{count} résultats}}",
+  "@lookupResults": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lookupNotFound": "Introuvable",
+  "dismiss": "Retirer"
 }

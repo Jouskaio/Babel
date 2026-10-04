@@ -80,6 +80,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.1"
+  connectivity_plus:
+    dependency: "direct main"
+    description:
+      name: connectivity_plus
+      sha256: d7749fd36d8b404a4935612b94eca7c3ce3705377ab678e24ff2a4301436f741
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.3.2"
+  connectivity_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: connectivity_plus_platform_interface
+      sha256: "3c09627c536d22fd24691a905cdd8b14520de69da52c7a97499c8be5284a32ed"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   cross_file:
     dependency: "direct main"
     description:
@@ -380,6 +396,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  idb_shim:
+    dependency: transitive
+    description:
+      name: idb_shim
+      sha256: "1495b1bca25088ab05be682ba32532e62f1559b7cd781141c96130b7654ac9f7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.9.10"
   intl:
     dependency: "direct main"
     description:
@@ -500,6 +524,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.4.2"
+  nm:
+    dependency: transitive
+    description:
+      name: nm
+      sha256: "2ae480aa3379716b8bb58dfebb168e2919394c92b629efaaa0baaa5d140786e6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.0"
   objective_c:
     dependency: transitive
     description:
@@ -620,6 +652,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.4.3"
+  sembast:
+    dependency: "direct main"
+    description:
+      name: sembast
+      sha256: a976f04d492b82b06c74b3c654795ca5bbf9b670468081a339f6035f121359a3
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.8.11"
+  sembast_web:
+    dependency: "direct main"
+    description:
+      name: sembast_web
+      sha256: "0dc954ffa88ae75958f4750892e86b29289bb1d0cb16b8f5b27b9fdb84d5d2ee"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.6"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -721,6 +769,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
+  synchronized:
+    dependency: transitive
+    description:
+      name: synchronized
+      sha256: "397b146f97613b83d84bdccb439bc8d0f3aebb6c1d14a9641e6f24201c490b2d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.4.2"
   term_glyph:
     dependency: transitive
     description:
@@ -746,7 +802,7 @@ packages:
     source: hosted
     version: "1.4.0"
   uuid:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: uuid
       sha256: "9b129329f58692f6e6578329498a8fe9fbe98f090beb764ffbb8ee2eadd01dcd"

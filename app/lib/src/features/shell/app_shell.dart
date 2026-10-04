@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/sync/sync_engine.dart';
 import '../../core/theme/babel_colors.dart';
 import '../../core/theme/babel_text.dart';
 import '../../l10n.dart';
@@ -15,7 +17,7 @@ class _Destination {
 }
 
 /// Signed-in frame: floating bottom bar on phones, sidebar on wide screens.
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({required this.shell, super.key});
   final StatefulNavigationShell shell;
 
@@ -39,7 +41,9 @@ class AppShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watching the engine keeps it running while signed in.
+    final sync = ref.watch(syncEngineProvider);
     final destinations = _destinations(context.l10n);
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -52,7 +56,16 @@ class AppShell extends StatelessWidget {
                   current: shell.currentIndex,
                   onOpen: (d) => _open(context, d),
                 ),
-                Expanded(child: SafeArea(child: shell)),
+                Expanded(
+                  child: SafeArea(
+                    child: Column(
+                      children: [
+                        if (!sync.online) _OfflinePill(pending: sync.pending),
+                        Expanded(child: shell),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           );
@@ -62,10 +75,16 @@ class AppShell extends StatelessWidget {
           body: SafeArea(bottom: false, child: shell),
           bottomNavigationBar: SafeArea(
             minimum: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: _BottomBar(
-              destinations: destinations,
-              current: shell.currentIndex,
-              onOpen: (d) => _open(context, d),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (!sync.online) _OfflinePill(pending: sync.pending),
+                _BottomBar(
+                  destinations: destinations,
+                  current: shell.currentIndex,
+                  onOpen: (d) => _open(context, d),
+                ),
+              ],
             ),
           ),
         );
@@ -202,6 +221,46 @@ class _Sidebar extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// "Offline · 2 changes waiting": changes are kept and pushed when the network is back.
+class _OfflinePill extends StatelessWidget {
+  const _OfflinePill({required this.pending});
+  final int pending;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final text = [
+      l10n.offline,
+      if (pending > 0) l10n.pendingOps(pending),
+    ].join(' · ');
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, top: 8),
+      child: DecoratedBox(
+        decoration: ShapeDecoration(
+          color: BabelColors.sunken,
+          shape: StadiumBorder(
+            side: BorderSide(color: BabelColors.gold.withValues(alpha: 0.5)),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.cloud_off, size: 14, color: BabelColors.gold),
+              const SizedBox(width: 8),
+              Text(
+                text,
+                style: BabelText.body(12, color: BabelColors.textPrimary),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
