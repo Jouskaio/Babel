@@ -17,6 +17,10 @@ import '../features/home/presentation/home_page.dart';
 import '../features/landing/presentation/landing_page.dart';
 import '../features/library/presentation/library_page.dart';
 import '../features/shell/app_shell.dart';
+import '../features/sources/presentation/github_source_page.dart';
+import '../features/sources/presentation/new_source_page.dart';
+import '../features/sources/presentation/source_detail_page.dart';
+import '../features/sources/presentation/sources_page.dart';
 import 'splash_page.dart';
 
 abstract final class Routes {
@@ -30,6 +34,10 @@ abstract final class Routes {
   static const library = '/library';
   static const scan = '/scan';
   static String work(String id) => '/works/$id';
+  static const sources = '/sources';
+  static const newSource = '/sources/new';
+  static const newGitHubSource = '/sources/new/github';
+  static String source(String id) => '/sources/$id';
   static const forgotPassword = '/forgot-password';
   static const resetPassword = '/reset-password';
   static const verifyEmail = '/verify-email';
@@ -106,6 +114,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(path: Routes.scan, builder: (_, _) => const ScanPage()),
+      GoRoute(path: Routes.sources, builder: (_, _) => const SourcesPage()),
+      GoRoute(path: Routes.newSource, builder: (_, _) => const NewSourcePage()),
+      GoRoute(
+        path: Routes.newGitHubSource,
+        builder: (_, _) => const GitHubSourcePage(),
+      ),
+      GoRoute(
+        path: '/sources/:id',
+        builder: (_, state) =>
+            SourceDetailPage(sourceId: state.pathParameters['id']!),
+      ),
       GoRoute(
         path: '/works/:id',
         builder: (_, state) => WorkPage(workId: state.pathParameters['id']!),

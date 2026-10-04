@@ -45,6 +45,11 @@ class Settings(BaseSettings):
     files_dir: str = "./data/files"
     file_access: Literal["everyone", "entitled"] = "everyone"
     max_upload_mb: int = 300
+    # Fernet key encrypting source credentials. Without it, sources work without tokens only.
+    # Generate one with Fernet.generate_key() (see infra/README.md).
+    secrets_key: SecretStr = SecretStr("")
+    max_sources_per_user: int = 20
+
     # Accounts with these emails are administrators (file withdrawal, blocking).
     admin_emails: list[str] = []
 

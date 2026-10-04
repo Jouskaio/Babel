@@ -280,5 +280,158 @@
     }
   },
   "lookupNotFound": "Introuvable",
-  "dismiss": "Retirer"
+  "dismiss": "Retirer",
+  "sourcesTitle": "Sources",
+  "sourcesIntro": "Branchez les endroits où vous rangez déjà vos livres. Babel les parcourt en lecture seule et vous propose d'importer ce qui manque.",
+  "sourcesEmpty": "Aucune source pour l'instant.",
+  "addSource": "Ajouter une source",
+  "sourcesPrivacy": "Vos jetons d'accès sont chiffrés sur le serveur et ne sont jamais réaffichés. Supprimer une source ne supprime pas les livres déjà importés.",
+  "sourceGitHubFolder": "GitHub · dossier /{folder}",
+  "@sourceGitHubFolder": {
+    "placeholders": {
+      "folder": {
+        "type": "String"
+      }
+    }
+  },
+  "sourceGitHubRoot": "GitHub · dépôt entier",
+  "sourceNeverScanned": "Pas encore parcourue",
+  "sourceUnreachable": "Injoignable",
+  "scannedAgo": "scanné {when}",
+  "@scannedAgo": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "justNow": "à l'instant",
+  "minutesAgo": "il y a {count} min",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "il y a {count} h",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count, plural, =1{hier} other{il y a {count} jours}}",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newSourceTitle": "Nouvelle source",
+  "newSourceQuestion": "Où sont vos livres ?",
+  "kindGitHubDescription": "Un dépôt (ou un dossier) d'EPUB, PDF, CBZ, CBR",
+  "kindOpds": "Catalogue OPDS",
+  "kindOpdsDescription": "Calibre-Web, Kavita, Komga, COPS…",
+  "kindWebdav": "Nextcloud / WebDAV",
+  "kindWebdavDescription": "Un dossier de votre cloud ou de votre NAS",
+  "kindAo3": "Fanfictions",
+  "kindAo3Description": "Votre compte AO3, avec vos favoris et abonnements",
+  "kindCustom": "Connecteur personnalisé",
+  "kindCustomDescription": "Toute adresse qui renvoie un manifeste Babel (JSON)",
+  "comingSoon": "Bientôt",
+  "githubTitle": "Dépôt GitHub",
+  "githubSubtitle": "Lecture seule · EPUB, PDF, CBZ, CBR",
+  "githubRepository": "Dépôt",
+  "githubRepositoryInvalid": "Utilisez la forme propriétaire/nom, par exemple jouskaio/ebooks.",
+  "githubFolder": "Dossier (facultatif)",
+  "githubToken": "Jeton d'accès (facultatif)",
+  "githubTokenHelp": "Nécessaire pour un dépôt privé. Créez un jeton « fine-grained » limité à ce dépôt, en lecture seule (Contents : Read).",
+  "githubCreateToken": "Créer un jeton sur GitHub",
+  "paste": "Coller",
+  "testSource": "Tester",
+  "sourceTestOk": "{count, plural, =0{Connexion réussie · aucun livre trouvé} =1{Connexion réussie · 1 fichier trouvé} other{Connexion réussie · {count} fichiers trouvés}}",
+  "@sourceTestOk": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sourceErrorUnreachable": "Babel n'a pas pu ouvrir ce dépôt. Vérifiez son nom et, s'il est privé, le jeton.",
+  "sourceErrorTooMany": "Vous avez atteint le nombre maximal de sources.",
+  "sourceErrorTokens": "Les dépôts privés ne sont pas encore disponibles sur ce serveur.",
+  "sourceBookCount": "{count, plural, =0{Aucun livre} =1{1 livre} other{{count} livres}}",
+  "@sourceBookCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sourceNewCount": "{count, plural, =0{rien de nouveau} =1{1 nouveau} other{{count} nouveaux}}",
+  "@sourceNewCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rescan": "Rescanner",
+  "importAllNew": "{count, plural, =1{Importer le nouveau} other{Importer les {count} nouveaux}}",
+  "@importAllNew": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sectionNew": "Nouveaux",
+  "sectionInLibrary": "Dans la bibliothèque",
+  "importEntry": "Importer",
+  "addEntry": "Ajouter",
+  "onBabelBadge": "Déjà sur Babel · téléchargement direct",
+  "importDone": "{count, plural, =0{Rien d'importé} =1{1 livre importé} other{{count} livres importés}}",
+  "@importDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importFailed": "{count, plural, =1{1 fichier n'a pas pu être importé} other{{count} fichiers n'ont pas pu être importés}}",
+  "@importFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importEntryFailed": "Ce fichier n'a pas pu être importé.",
+  "deleteSource": "Supprimer cette source",
+  "deleteSourceTitle": "Supprimer cette source ?",
+  "deleteSourceBody": "Babel oublie la source et son jeton. Les livres déjà importés restent dans votre bibliothèque.",
+  "sourceScanFailed": "Le dernier scan a échoué : la source était injoignable.",
+  "accountSourcesHint": "Dépôts GitHub et autres endroits qui contiennent vos livres",
+  "unitKb": "{size} Ko",
+  "@unitKb": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "unitMb": "{size} Mo",
+  "@unitMb": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionUnreadable": "Fichiers illisibles",
+  "unreadableHint": "Babel n'a pas pu lire ces fichiers comme des livres. Ils seront retentés s'ils changent.",
+  "unreadable": "Illisible"
 }

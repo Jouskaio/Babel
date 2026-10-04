@@ -60,12 +60,14 @@ pct reboot 107
 - Unprivileged `deploy` user, member of the `docker` group.
 - `/opt/babel/` owned by `deploy`, containing `docker-compose.yml` and `.env` (mode 600).
 - `.env` holds the API settings (`BABEL_*`, see [`api/.env.example`](../api/.env.example)) and
-  two secrets generated on the server, never stored anywhere else:
+  three secrets generated on the server, never stored anywhere else:
 
 ```bash
 cd /opt/babel
 echo "BABEL_JWT_SECRET=$(openssl rand -hex 32)" >> .env
 echo "BABEL_DB_PASSWORD=$(openssl rand -hex 24)" >> .env
+# Encrypts source access tokens: keep it, or every stored token must be entered again.
+echo "BABEL_SECRETS_KEY=$(openssl rand -base64 32 | tr '+/' '-_')" >> .env
 ```
 
 PostgreSQL (`db` service) has no published port and keeps its data in the `db-data` volume.

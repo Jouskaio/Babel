@@ -594,4 +594,276 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dismiss => 'Dismiss';
+
+  @override
+  String get sourcesTitle => 'Sources';
+
+  @override
+  String get sourcesIntro =>
+      'Connect the places where you already keep your books. Babel browses them read-only and offers to import what is missing.';
+
+  @override
+  String get sourcesEmpty => 'No source yet.';
+
+  @override
+  String get addSource => 'Add a source';
+
+  @override
+  String get sourcesPrivacy =>
+      'Your access tokens are encrypted on the server and never shown again. Deleting a source does not delete the books already imported.';
+
+  @override
+  String sourceGitHubFolder(String folder) {
+    return 'GitHub · folder /$folder';
+  }
+
+  @override
+  String get sourceGitHubRoot => 'GitHub · whole repository';
+
+  @override
+  String get sourceNeverScanned => 'Not scanned yet';
+
+  @override
+  String get sourceUnreachable => 'Cannot be reached';
+
+  @override
+  String scannedAgo(String when) {
+    return 'scanned $when';
+  }
+
+  @override
+  String get justNow => 'just now';
+
+  @override
+  String minutesAgo(int count) {
+    return '$count min ago';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return '$count h ago';
+  }
+
+  @override
+  String daysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days ago',
+      one: 'yesterday',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get newSourceTitle => 'New source';
+
+  @override
+  String get newSourceQuestion => 'Where are your books?';
+
+  @override
+  String get kindGitHubDescription =>
+      'A repository (or a folder) of EPUB, PDF, CBZ, CBR';
+
+  @override
+  String get kindOpds => 'OPDS catalog';
+
+  @override
+  String get kindOpdsDescription => 'Calibre-Web, Kavita, Komga, COPS…';
+
+  @override
+  String get kindWebdav => 'Nextcloud / WebDAV';
+
+  @override
+  String get kindWebdavDescription => 'A folder on your cloud or your NAS';
+
+  @override
+  String get kindAo3 => 'Fanfictions';
+
+  @override
+  String get kindAo3Description =>
+      'Your AO3 account, with your bookmarks and subscriptions';
+
+  @override
+  String get kindCustom => 'Custom connector';
+
+  @override
+  String get kindCustomDescription =>
+      'Any address returning a Babel manifest (JSON)';
+
+  @override
+  String get comingSoon => 'Coming soon';
+
+  @override
+  String get githubTitle => 'GitHub repository';
+
+  @override
+  String get githubSubtitle => 'Read-only · EPUB, PDF, CBZ, CBR';
+
+  @override
+  String get githubRepository => 'Repository';
+
+  @override
+  String get githubRepositoryInvalid =>
+      'Use the owner/name form, e.g. jouskaio/ebooks.';
+
+  @override
+  String get githubFolder => 'Folder (optional)';
+
+  @override
+  String get githubToken => 'Access token (optional)';
+
+  @override
+  String get githubTokenHelp =>
+      'Needed for a private repository. Create a fine-grained token limited to this repository, read-only (Contents: Read).';
+
+  @override
+  String get githubCreateToken => 'Create a token on GitHub';
+
+  @override
+  String get paste => 'Paste';
+
+  @override
+  String get testSource => 'Test';
+
+  @override
+  String sourceTestOk(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Connection successful · $count files found',
+      one: 'Connection successful · 1 file found',
+      zero: 'Connection successful · no book found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sourceErrorUnreachable =>
+      'Babel could not open this repository. Check its name and, if it is private, the token.';
+
+  @override
+  String get sourceErrorTooMany =>
+      'You have reached the maximum number of sources.';
+
+  @override
+  String get sourceErrorTokens =>
+      'Private repositories are not available on this server yet.';
+
+  @override
+  String sourceBookCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count books',
+      one: '1 book',
+      zero: 'No book',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sourceNewCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count new',
+      one: '1 new',
+      zero: 'nothing new',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rescan => 'Rescan';
+
+  @override
+  String importAllNew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Import the $count new',
+      one: 'Import the new one',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sectionNew => 'New';
+
+  @override
+  String get sectionInLibrary => 'In the library';
+
+  @override
+  String get importEntry => 'Import';
+
+  @override
+  String get addEntry => 'Add';
+
+  @override
+  String get onBabelBadge => 'Already on Babel · direct download';
+
+  @override
+  String importDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count books imported',
+      one: '1 book imported',
+      zero: 'Nothing imported',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files could not be imported',
+      one: '1 file could not be imported',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importEntryFailed => 'This file could not be imported.';
+
+  @override
+  String get deleteSource => 'Delete this source';
+
+  @override
+  String get deleteSourceTitle => 'Delete this source?';
+
+  @override
+  String get deleteSourceBody =>
+      'Babel forgets the source and its token. Books already imported stay in your library.';
+
+  @override
+  String get sourceScanFailed =>
+      'The last scan failed: the source could not be reached.';
+
+  @override
+  String get accountSourcesHint =>
+      'GitHub repositories and other places that hold your books';
+
+  @override
+  String unitKb(String size) {
+    return '$size KB';
+  }
+
+  @override
+  String unitMb(String size) {
+    return '$size MB';
+  }
+
+  @override
+  String get sectionUnreadable => 'Unreadable files';
+
+  @override
+  String get unreadableHint =>
+      'Babel could not read these files as books. They will be tried again if they change.';
+
+  @override
+  String get unreadable => 'Unreadable';
 }

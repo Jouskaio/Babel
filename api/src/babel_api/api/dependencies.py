@@ -13,15 +13,26 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from babel_api.adapters.db.catalog_repository import SqlCatalogRepository
 from babel_api.adapters.db.file_repository import SqlFileRepository
 from babel_api.adapters.db.repositories import SqlUserRepository
+from babel_api.adapters.db.source_repository import SqlSourceRepository
 from babel_api.adapters.db.sync_repository import SqlSyncRepository
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
+from babel_api.adapters.security.secrets import SecretBox
 from babel_api.adapters.security.tokens import AccessTokenError, AccessTokenIssuer
 from babel_api.core.config import Settings
-from babel_api.domain.ports import BlobStore, BookSource, IdentityVerifier, Mailer, MetadataReader
+from babel_api.domain.ports import (
+    BlobStore,
+    BookSource,
+    IdentityVerifier,
+    Mailer,
+    MetadataReader,
+    SourceConnector,
+)
+from babel_api.domain.sources import SourceKind
 from babel_api.domain.users import IdentityProvider
 from babel_api.services.auth import AuthService
 from babel_api.services.catalog import CatalogService
 from babel_api.services.files import FileService
+from babel_api.services.sources import SourceService
 from babel_api.services.sync import SyncService
 from babel_api.services.works import WorkService
 
@@ -39,6 +50,8 @@ class Container:
     books: BookSource
     blob_store: BlobStore
     metadata_reader: MetadataReader
+    connectors: dict[SourceKind, SourceConnector]
+    secrets: SecretBox
     mailer: Mailer
 
 
@@ -106,6 +119,24 @@ def get_sync_service(
 
 
 SyncServiceDep = Annotated[SyncService, Depends(get_sync_service)]
+
+
+def get_source_service(
+    container: ContainerDep,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    files: FileServiceDep,
+) -> SourceService:
+    return SourceService(
+        SqlSourceRepository(session),
+        SqlFileRepository(session),
+        files,
+        container.connectors,
+        container.secrets,
+        max_sources=container.settings.max_sources_per_user,
+    )
+
+
+SourceServiceDep = Annotated[SourceService, Depends(get_source_service)]
 
 # Devices identify themselves on every request, so changes they make are attributed.
 DeviceHeader = Annotated[UUID | None, Header(alias="X-Babel-Device")]

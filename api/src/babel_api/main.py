@@ -16,11 +16,14 @@ from babel_api.adapters.files.metadata import EbookMetadataReader
 from babel_api.adapters.mail.mailers import BackgroundMailer, LogMailer, SmtpMailer
 from babel_api.adapters.security.identity import apple_verifier, google_verifier
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
+from babel_api.adapters.security.secrets import SecretBox
 from babel_api.adapters.security.tokens import AccessTokenIssuer
+from babel_api.adapters.sources.github import GitHubConnector
 from babel_api.api.dependencies import Container
 from babel_api.api.errors import install_error_handlers
 from babel_api.api.v1.router import router as v1_router
 from babel_api.core.config import Settings, get_settings
+from babel_api.domain.sources import SourceKind
 from babel_api.domain.users import IdentityProvider
 from babel_api.services.catalog import CatalogService
 
@@ -35,6 +38,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     # The engine connects lazily: building the app (e.g. to export the contract) needs no DB.
     engine = create_engine(settings.database_url)
     open_library = OpenLibrarySource()
+    github = GitHubConnector()
     mailer = BackgroundMailer(
         SmtpMailer(
             settings.smtp_host,
@@ -52,6 +56,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         yield
         await mailer.drain()
         await open_library.aclose()
+        await github.aclose()
         await engine.dispose()
 
     app = FastAPI(
@@ -77,6 +82,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         books=open_library,
         blob_store=LocalBlobStore(settings.files_dir),
         metadata_reader=EbookMetadataReader(),
+        connectors={SourceKind.GITHUB: github},
+        secrets=SecretBox(settings.secrets_key.get_secret_value()),
         mailer=mailer,
     )
     if settings.cors_origins:
