@@ -209,13 +209,13 @@ abstract class AppLocalizations {
   /// No description provided for @featureSyncTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Vos fichiers, partout'**
+  /// **'Vos sources, partout'**
   String get featureSyncTitle;
 
   /// No description provided for @featureSyncBody.
   ///
   /// In fr, this message translates to:
-  /// **'Importez vos EPUB et reprenez à la bonne page sur liseuse, téléphone ou ordinateur, même hors ligne.'**
+  /// **'Importez vos EPUB ou branchez vos propres sources — GitHub, catalogue OPDS, Nextcloud — et reprenez à la bonne page sur liseuse, téléphone ou ordinateur.'**
   String get featureSyncBody;
 
   /// No description provided for @featureNotesTitle.

@@ -67,11 +67,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Scan your paper books, import your files, download your fanfiction from AO3 and find what you are reading, want to read and have finished.';
 
   @override
-  String get featureSyncTitle => 'Your files, everywhere';
+  String get featureSyncTitle => 'Your sources, everywhere';
 
   @override
   String get featureSyncBody =>
-      'Import your EPUBs and pick up at the right page on your e-reader, phone or computer, even offline.';
+      'Import your EPUBs or connect your own sources — GitHub, OPDS catalogs, Nextcloud — and pick up at the right page on your e-reader, phone or computer.';
 
   @override
   String get featureNotesTitle => 'Notes in the margin';

@@ -132,4 +132,209 @@ class CatalogApi {
     }
     return null;
   }
+
+  /// Get Work
+  ///
+  /// A work with its description and editions.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] workId (required):
+  ///
+  /// * [String] lang:
+  Future<Response> getWorkWithHttpInfo(String workId, { String? lang, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/catalog/works/{work_id}'
+      .replaceAll('{work_id}', workId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (lang != null) {
+      queryParams.addAll(_queryParams('', 'lang', lang));
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Work
+  ///
+  /// A work with its description and editions.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] workId (required):
+  ///
+  /// * [String] lang:
+  Future<WorkResponse?> getWork(String workId, { String? lang, }) async {
+    final response = await getWorkWithHttpInfo(workId,  lang: lang, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'WorkResponse',) as WorkResponse;
+    
+    }
+    return null;
+  }
+
+  /// Lookup Isbn
+  ///
+  /// Find the edition (and its work) of an ISBN-10 or ISBN-13, e.g. from a barcode scan.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] isbn (required):
+  ///
+  /// * [String] lang:
+  Future<Response> lookupIsbnWithHttpInfo(String isbn, { String? lang, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/catalog/isbn/{isbn}'
+      .replaceAll('{isbn}', isbn);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (lang != null) {
+      queryParams.addAll(_queryParams('', 'lang', lang));
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Lookup Isbn
+  ///
+  /// Find the edition (and its work) of an ISBN-10 or ISBN-13, e.g. from a barcode scan.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] isbn (required):
+  ///
+  /// * [String] lang:
+  Future<IsbnLookupResponse?> lookupIsbn(String isbn, { String? lang, }) async {
+    final response = await lookupIsbnWithHttpInfo(isbn,  lang: lang, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'IsbnLookupResponse',) as IsbnLookupResponse;
+    
+    }
+    return null;
+  }
+
+  /// Search Works
+  ///
+  /// Search works by title, author or keywords, titled in ``lang`` when possible.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] q (required):
+  ///
+  /// * [int] limit:
+  ///
+  /// * [String] lang:
+  Future<Response> searchWorksWithHttpInfo(String q, { int? limit, String? lang, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/catalog/search';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+      queryParams.addAll(_queryParams('', 'q', q));
+    if (limit != null) {
+      queryParams.addAll(_queryParams('', 'limit', limit));
+    }
+    if (lang != null) {
+      queryParams.addAll(_queryParams('', 'lang', lang));
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Search Works
+  ///
+  /// Search works by title, author or keywords, titled in ``lang`` when possible.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] q (required):
+  ///
+  /// * [int] limit:
+  ///
+  /// * [String] lang:
+  Future<List<WorkSummaryResponse>?> searchWorks(String q, { int? limit, String? lang, }) async {
+    final response = await searchWorksWithHttpInfo(q,  limit: limit, lang: lang, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<WorkSummaryResponse>') as List)
+        .cast<WorkSummaryResponse>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
 }
