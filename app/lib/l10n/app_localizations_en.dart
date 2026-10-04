@@ -366,4 +366,186 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get verifyResent => 'Link sent. Check your spam folder too.';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navSearch => 'Search';
+
+  @override
+  String get navScan => 'Scan';
+
+  @override
+  String get navLibrary => 'Library';
+
+  @override
+  String get navProfile => 'Profile';
+
+  @override
+  String get searchTitle => 'Search';
+
+  @override
+  String get searchHint => 'Title, author, ISBN…';
+
+  @override
+  String get recentTitle => 'Recent';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get trendingTitle => 'Trending';
+
+  @override
+  String noResults(String query) {
+    return 'No results for “$query”.';
+  }
+
+  @override
+  String get searchFailed =>
+      'The search did not go through. Try again in a moment.';
+
+  @override
+  String get libraryTitle => 'Library';
+
+  @override
+  String libraryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count titles',
+      one: '1 title',
+      zero: 'No titles',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get libraryEmpty => 'Your library is empty for now.';
+
+  @override
+  String get addOwnBooksTitle => 'Add your own books';
+
+  @override
+  String get addOwnBooksBody =>
+      'EPUB, PDF, CBZ or CBR: your files follow you on all your devices.';
+
+  @override
+  String get importFile => 'Import a file';
+
+  @override
+  String importing(String name) {
+    return 'Importing “$name”…';
+  }
+
+  @override
+  String imported(String title) {
+    return '“$title” joined your library.';
+  }
+
+  @override
+  String importDeduplicated(String title) {
+    return '“$title” was already on Babel: added without uploading it again.';
+  }
+
+  @override
+  String get importUnsupported => 'This file is not an EPUB, PDF, CBZ or CBR.';
+
+  @override
+  String get importTooLarge => 'This file is too large.';
+
+  @override
+  String get importBlocked =>
+      'This file was withdrawn from Babel and cannot be imported.';
+
+  @override
+  String get download => 'Download';
+
+  @override
+  String get downloading => 'Downloading…';
+
+  @override
+  String get downloaded => 'Downloaded to this device.';
+
+  @override
+  String get downloadedWeb => 'Download started.';
+
+  @override
+  String get onDevice => 'On this device';
+
+  @override
+  String get removeFromLibrary => 'Remove from library';
+
+  @override
+  String removed(String title) {
+    return '“$title” was removed from your library.';
+  }
+
+  @override
+  String get workSummary => 'Summary';
+
+  @override
+  String get readMore => 'Read more';
+
+  @override
+  String get readLess => 'Show less';
+
+  @override
+  String get workEditions => 'Editions & languages';
+
+  @override
+  String editionsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count editions',
+      one: '1 edition',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pages(int count) {
+    return '$count p.';
+  }
+
+  @override
+  String get getThisBook => 'Get this book';
+
+  @override
+  String get importOwnCopy =>
+      'Import your own file (EPUB, PDF…): it will join your library.';
+
+  @override
+  String get scanTitle => 'Scan a book';
+
+  @override
+  String get scanHint => 'Place the barcode inside the frame';
+
+  @override
+  String scanFound(String isbn) {
+    return 'Found · ISBN $isbn';
+  }
+
+  @override
+  String get seeWork => 'See the book';
+
+  @override
+  String get isbnManualHint => 'Enter an ISBN';
+
+  @override
+  String get isbnLookup => 'Search';
+
+  @override
+  String get isbnNotFound => 'No book found for this ISBN.';
+
+  @override
+  String get isbnInvalid => 'This ISBN is not valid.';
+
+  @override
+  String get cameraUnavailable => 'Camera unavailable: enter the ISBN below.';
+
+  @override
+  String get retry => 'Retry';
 }

@@ -25,6 +25,48 @@ for path in spec["paths"].values():
         operation.get("responses", {}).pop("422", None)
 for schema in ("HTTPValidationError", "ValidationError"):
     spec["components"]["schemas"].pop(schema, None)
+# FastAPI describes uploads the OpenAPI 3.1 way (contentMediaType); the dart generator
+# only recognizes `format: binary`, without which file parameters become strings.
+for schema in spec["components"]["schemas"].values():
+    for prop in schema.get("properties", {}).values():
+        if prop.get("contentMediaType") == "application/octet-stream":
+            prop["format"] = "binary"
+
+
+# Optional values are `anyOf: [X, {"type": "null"}]` in OpenAPI 3.1, which the generator
+# reads as required and non-null (debug builds then assert on every null). Rewrite them
+# the OpenAPI 3.0 way, `X` + `nullable: true`, and present the copy as 3.0.
+def denull(node):
+    if isinstance(node, dict):
+        options = node.get("anyOf")
+        if isinstance(options, list) and {"type": "null"} in options:
+            rest = [o for o in options if o != {"type": "null"}]
+            del node["anyOf"]
+            if len(rest) == 1:
+                node.update(rest[0])
+            else:
+                node["anyOf"] = rest
+            node["nullable"] = True
+        # Other OpenAPI 3.1-only keywords.
+        if "const" in node:
+            node["enum"] = [node.pop("const")]
+        node.pop("contentMediaType", None)
+        for value in node.values():
+            denull(value)
+    elif isinstance(node, list):
+        for value in node:
+            denull(value)
+
+
+denull(spec)
+# The dart generator asserts that required keys are non-null even when nullable:
+# nullable fields are presented as optional instead.
+for schema in spec["components"]["schemas"].values():
+    props = schema.get("properties", {})
+    if "required" in schema:
+        schema["required"] = [k for k in schema["required"] if not props.get(k, {}).get("nullable")]
+spec["openapi"] = "3.0.3"
+spec["info"].pop("summary", None)
 json.dump(spec, open(sys.argv[2], "w", encoding="utf-8"))
 PY
 

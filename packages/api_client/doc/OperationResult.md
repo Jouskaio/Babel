@@ -8,7 +8,7 @@ import 'package:babel_api_client/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**detail** | **String** |  | 
+**detail** | **String** |  | [optional] 
 **key** | **String** |  | 
 **outcome** | [**OpOutcome**](OpOutcome.md) |  | 
 

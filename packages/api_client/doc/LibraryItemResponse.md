@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **addedAt** | [**DateTime**](DateTime.md) |  | 
 **authors** | **List<String>** |  | [default to const []]
-**editionId** | **String** |  | 
+**editionId** | **String** |  | [optional] 
 **format** | [**BookFormat**](BookFormat.md) |  | 
 **id** | **String** |  | 
 **sha256** | **String** | Identifies the file; download it from /v1/files/{sha256} | 

@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **authors** | **List<String>** |  | [default to const []]
 **coverPath** | **String** |  | 
-**firstPublishYear** | **int** |  | 
+**firstPublishYear** | **int** |  | [optional] 
 **title** | **String** |  | 
 **workId** | **String** |  | 
 

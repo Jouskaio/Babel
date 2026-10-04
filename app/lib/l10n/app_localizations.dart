@@ -763,6 +763,300 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Lien envoyé. Pensez à vérifier vos spams.'**
   String get verifyResent;
+
+  /// No description provided for @navHome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accueil'**
+  String get navHome;
+
+  /// No description provided for @navSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chercher'**
+  String get navSearch;
+
+  /// No description provided for @navScan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scan'**
+  String get navScan;
+
+  /// No description provided for @navLibrary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Biblio'**
+  String get navLibrary;
+
+  /// No description provided for @navProfile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil'**
+  String get navProfile;
+
+  /// No description provided for @searchTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chercher'**
+  String get searchTitle;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Titre, auteur, ISBN…'**
+  String get searchHint;
+
+  /// No description provided for @recentTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récemment'**
+  String get recentTitle;
+
+  /// No description provided for @clear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Effacer'**
+  String get clear;
+
+  /// No description provided for @trendingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tendances'**
+  String get trendingTitle;
+
+  /// No description provided for @noResults.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun résultat pour « {query} ».'**
+  String noResults(String query);
+
+  /// No description provided for @searchFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La recherche n’a pas abouti. Réessayez dans un instant.'**
+  String get searchFailed;
+
+  /// No description provided for @libraryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bibliothèque'**
+  String get libraryTitle;
+
+  /// No description provided for @libraryCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun titre} =1{1 titre} other{{count} titres}}'**
+  String libraryCount(int count);
+
+  /// No description provided for @libraryEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre bibliothèque est vide pour l’instant.'**
+  String get libraryEmpty;
+
+  /// No description provided for @addOwnBooksTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter vos propres livres'**
+  String get addOwnBooksTitle;
+
+  /// No description provided for @addOwnBooksBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'EPUB, PDF, CBZ ou CBR : vos fichiers vous suivent sur tous vos appareils.'**
+  String get addOwnBooksBody;
+
+  /// No description provided for @importFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer un fichier'**
+  String get importFile;
+
+  /// No description provided for @importing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Import de « {name} »…'**
+  String importing(String name);
+
+  /// No description provided for @imported.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {title} » a rejoint votre bibliothèque.'**
+  String imported(String title);
+
+  /// No description provided for @importDeduplicated.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {title} » était déjà sur Babel : ajouté sans le renvoyer.'**
+  String importDeduplicated(String title);
+
+  /// No description provided for @importUnsupported.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier n’est pas un EPUB, PDF, CBZ ou CBR.'**
+  String get importUnsupported;
+
+  /// No description provided for @importTooLarge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier est trop volumineux.'**
+  String get importTooLarge;
+
+  /// No description provided for @importBlocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier a été retiré de Babel et ne peut pas être importé.'**
+  String get importBlocked;
+
+  /// No description provided for @download.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger'**
+  String get download;
+
+  /// No description provided for @downloading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargement…'**
+  String get downloading;
+
+  /// No description provided for @downloaded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargé sur cet appareil.'**
+  String get downloaded;
+
+  /// No description provided for @downloadedWeb.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargement lancé.'**
+  String get downloadedWeb;
+
+  /// No description provided for @onDevice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur cet appareil'**
+  String get onDevice;
+
+  /// No description provided for @removeFromLibrary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer de la bibliothèque'**
+  String get removeFromLibrary;
+
+  /// No description provided for @removed.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {title} » a été retiré de votre bibliothèque.'**
+  String removed(String title);
+
+  /// No description provided for @workSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résumé'**
+  String get workSummary;
+
+  /// No description provided for @readMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lire la suite'**
+  String get readMore;
+
+  /// No description provided for @readLess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réduire'**
+  String get readLess;
+
+  /// No description provided for @workEditions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Éditions & langues'**
+  String get workEditions;
+
+  /// No description provided for @editionsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 édition} other{{count} éditions}}'**
+  String editionsCount(int count);
+
+  /// No description provided for @pages.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} p.'**
+  String pages(int count);
+
+  /// No description provided for @getThisBook.
+  ///
+  /// In fr, this message translates to:
+  /// **'Obtenir ce livre'**
+  String get getThisBook;
+
+  /// No description provided for @importOwnCopy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importez votre propre fichier (EPUB, PDF…) : il rejoindra votre bibliothèque.'**
+  String get importOwnCopy;
+
+  /// No description provided for @scanTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scanner un livre'**
+  String get scanTitle;
+
+  /// No description provided for @scanHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placez le code-barres dans le cadre'**
+  String get scanHint;
+
+  /// No description provided for @scanFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trouvé · ISBN {isbn}'**
+  String scanFound(String isbn);
+
+  /// No description provided for @seeWork.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir la fiche'**
+  String get seeWork;
+
+  /// No description provided for @isbnManualHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisir un ISBN'**
+  String get isbnManualHint;
+
+  /// No description provided for @isbnLookup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chercher'**
+  String get isbnLookup;
+
+  /// No description provided for @isbnNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun livre trouvé pour cet ISBN.'**
+  String get isbnNotFound;
+
+  /// No description provided for @isbnInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cet ISBN n’est pas valide.'**
+  String get isbnInvalid;
+
+  /// No description provided for @cameraUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caméra indisponible : saisissez l’ISBN ci-dessous.'**
+  String get cameraUnavailable;
+
+  /// No description provided for @retry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get retry;
 }
 
 class _AppLocalizationsDelegate
