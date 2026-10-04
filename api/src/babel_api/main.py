@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from babel_api import __version__
+from babel_api.adapters.catalog.open_library import OpenLibrarySource
 from babel_api.adapters.db.session import create_engine, create_session_factory
 from babel_api.adapters.security.identity import apple_verifier, google_verifier
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
@@ -17,6 +18,7 @@ from babel_api.api.errors import install_error_handlers
 from babel_api.api.v1.router import router as v1_router
 from babel_api.core.config import Settings, get_settings
 from babel_api.domain.users import IdentityProvider
+from babel_api.services.catalog import CatalogService
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -24,10 +26,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     # The engine connects lazily: building the app (e.g. to export the contract) needs no DB.
     engine = create_engine(settings.database_url)
+    open_library = OpenLibrarySource()
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
         yield
+        await open_library.aclose()
         await engine.dispose()
 
     app = FastAPI(
@@ -49,6 +53,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             IdentityProvider.GOOGLE: google_verifier(settings.google_client_ids),
             IdentityProvider.APPLE: apple_verifier(settings.apple_client_ids),
         },
+        catalog=CatalogService(open_library),
     )
     if settings.cors_origins:
         app.add_middleware(

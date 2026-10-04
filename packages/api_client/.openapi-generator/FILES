@@ -3,6 +3,7 @@ README.md
 analysis_options.yaml
 doc/AccountApi.md
 doc/AuthApi.md
+doc/CatalogApi.md
 doc/ChangePasswordRequest.md
 doc/HealthApi.md
 doc/HealthResponse.md
@@ -13,11 +14,13 @@ doc/ProvidersResponse.md
 doc/RefreshRequest.md
 doc/RegisterRequest.md
 doc/TokenResponse.md
+doc/TrendingWorkResponse.md
 doc/UpdateProfileRequest.md
 doc/UserResponse.md
 lib/api.dart
 lib/api/account_api.dart
 lib/api/auth_api.dart
+lib/api/catalog_api.dart
 lib/api/health_api.dart
 lib/api_client.dart
 lib/api_exception.dart
@@ -36,6 +39,7 @@ lib/model/providers_response.dart
 lib/model/refresh_request.dart
 lib/model/register_request.dart
 lib/model/token_response.dart
+lib/model/trending_work_response.dart
 lib/model/update_profile_request.dart
 lib/model/user_response.dart
 pubspec.yaml
