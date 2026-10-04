@@ -8,6 +8,7 @@ import 'package:babel_api_client/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**bookCount** | **int** | Book files found by the last scan | 
 **createdAt** | [**DateTime**](DateTime.md) |  | 
 **folder** | **String** |  | [optional] 
 **hasToken** | **bool** |  | 

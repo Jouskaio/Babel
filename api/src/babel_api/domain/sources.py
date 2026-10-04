@@ -31,6 +31,8 @@ class Source:
     created_at: datetime
     last_scan_at: datetime | None = None
     last_error: str | None = None
+    # Book files found by the last scan.
+    entry_count: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,6 +58,10 @@ class SourceEntry:
     remote_id: str
     status: EntryStatus = EntryStatus.NEW
     item_id: UUID | None = None
+    # Known once the file is on Babel (read from the file itself).
+    title: str | None = None
+    authors: tuple[str, ...] = ()
+    cover_path: str | None = None
 
     @property
     def name(self) -> str:

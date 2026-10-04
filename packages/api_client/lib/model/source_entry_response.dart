@@ -13,13 +13,20 @@ part of babel_api_client;
 class SourceEntryResponse {
   /// Returns a new [SourceEntryResponse] instance.
   SourceEntryResponse({
+    this.authors = const [],
+    this.coverPath,
     required this.id,
     this.itemId,
     required this.name,
     required this.path,
     required this.size,
     required this.status,
+    this.title,
   });
+
+  List<String> authors;
+
+  String? coverPath;
 
   String id;
 
@@ -33,30 +40,45 @@ class SourceEntryResponse {
 
   EntryStatus status;
 
+  /// Read from the file, once it is on Babel
+  String? title;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is SourceEntryResponse &&
+    _deepEquality.equals(other.authors, authors) &&
+    other.coverPath == coverPath &&
     other.id == id &&
     other.itemId == itemId &&
     other.name == name &&
     other.path == path &&
     other.size == size &&
-    other.status == status;
+    other.status == status &&
+    other.title == title;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (authors.hashCode) +
+    (coverPath == null ? 0 : coverPath!.hashCode) +
     (id.hashCode) +
     (itemId == null ? 0 : itemId!.hashCode) +
     (name.hashCode) +
     (path.hashCode) +
     (size.hashCode) +
-    (status.hashCode);
+    (status.hashCode) +
+    (title == null ? 0 : title!.hashCode);
 
   @override
-  String toString() => 'SourceEntryResponse[id=$id, itemId=$itemId, name=$name, path=$path, size=$size, status=$status]';
+  String toString() => 'SourceEntryResponse[authors=$authors, coverPath=$coverPath, id=$id, itemId=$itemId, name=$name, path=$path, size=$size, status=$status, title=$title]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'authors'] = this.authors;
+    if (this.coverPath != null) {
+      json[r'cover_path'] = this.coverPath;
+    } else {
+      json[r'cover_path'] = null;
+    }
       json[r'id'] = this.id;
     if (this.itemId != null) {
       json[r'item_id'] = this.itemId;
@@ -67,6 +89,11 @@ class SourceEntryResponse {
       json[r'path'] = this.path;
       json[r'size'] = this.size;
       json[r'status'] = this.status;
+    if (this.title != null) {
+      json[r'title'] = this.title;
+    } else {
+      json[r'title'] = null;
+    }
     return json;
   }
 
@@ -89,12 +116,17 @@ class SourceEntryResponse {
       }());
 
       return SourceEntryResponse(
+        authors: json[r'authors'] is Iterable
+            ? (json[r'authors'] as Iterable).cast<String>().toList(growable: false)
+            : const [],
+        coverPath: mapValueOfType<String>(json, r'cover_path'),
         id: mapValueOfType<String>(json, r'id')!,
         itemId: mapValueOfType<String>(json, r'item_id'),
         name: mapValueOfType<String>(json, r'name')!,
         path: mapValueOfType<String>(json, r'path')!,
         size: mapValueOfType<int>(json, r'size')!,
         status: EntryStatus.fromJson(json[r'status'])!,
+        title: mapValueOfType<String>(json, r'title'),
       );
     }
     return null;
@@ -142,6 +174,7 @@ class SourceEntryResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'authors',
     'id',
     'name',
     'path',

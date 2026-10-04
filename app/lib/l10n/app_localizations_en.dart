@@ -870,4 +870,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get sourceErrorRateLimited =>
       'GitHub limits requests without a token (60 per hour for your connection). Try again in a few minutes, or add an access token.';
+
+  @override
+  String deleteSourceBooks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Also remove the $count books imported from it',
+      one: 'Also remove the book imported from it',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteSourceBodyWithBooks =>
+      'Babel forgets the source and its token, and removes its books from your library. Other readers keep their copies.';
 }

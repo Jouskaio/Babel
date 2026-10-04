@@ -127,7 +127,8 @@ class _SourceTile extends ConsumerWidget {
                             ? l10n.sourceUnreachable
                             : scanned == null
                             ? l10n.sourceNeverScanned
-                            : scannedAgo(context, scanned),
+                            : '${l10n.sourceBookCount(source.bookCount)}'
+                                  ' · ${scannedAgo(context, scanned)}',
                         style: BabelText.body(
                           13,
                           color: failed

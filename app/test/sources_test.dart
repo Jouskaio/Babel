@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:babel/src/core/storage/local_database.dart';
 import 'package:babel/src/features/sources/application/sources_providers.dart';
 import 'package:babel/src/features/sources/presentation/github_source_page.dart';
 import 'package:babel/src/features/sources/presentation/source_detail_page.dart';
 import 'package:babel/src/features/sources/presentation/sources_page.dart';
+import 'package:babel/src/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sembast/sembast.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
@@ -36,7 +40,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('jouskaio/ebooks'), findsOneWidget);
     expect(find.text('GitHub · dossier /romans'), findsOneWidget);
-    expect(find.text('scanné il y a 2 h'), findsOneWidget);
+    expect(find.text('3 livres · scanné il y a 2 h'), findsOneWidget);
   });
 
   testWidgets('without sources, the list says so', (tester) async {
@@ -108,7 +112,8 @@ void main() {
     expect(find.text('Illisible'), findsOneWidget);
     expect(find.text('Déjà sur Babel · téléchargement direct'), findsOneWidget);
     expect(find.text('Emma'), findsWidgets); // row title and placeholder cover
-    expect(find.text('EPUB · 1,2 Mo'), findsNWidgets(3));
+    expect(find.text('Jane Austen · EPUB · 1,2 Mo'), findsOneWidget);
+    expect(find.text('EPUB · 1,2 Mo'), findsNWidgets(2));
 
     await tester.tap(find.text('IMPORTER'));
     // The local database works outside the fake clock.
@@ -128,5 +133,60 @@ void main() {
   test('file names give a title and a format', () {
     expect(titleAndFormat('Jane Eyre.epub'), ('Jane Eyre', 'EPUB'));
     expect(titleAndFormat('README'), ('README', ''));
+  });
+
+  testWidgets('deleting a source can remove its books too', (tester) async {
+    tallScreen(tester);
+    final server = FakeServer();
+    server.entries[0] = {
+      ...server.entries[0],
+      'status': 'in_library',
+      'item_id': 'i9',
+    };
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(path: '/', builder: (_, _) => const Text('list')),
+        GoRoute(
+          path: '/sources/:id',
+          builder: (_, state) =>
+              SourceDetailPage(sourceId: state.pathParameters['id']!),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        retry: (_, _) => null,
+        overrides: server.overrides,
+        child: MaterialApp.router(
+          locale: const Locale('fr'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      ),
+    );
+    unawaited(router.push('/sources/s1'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Supprimer cette source'));
+    await tester.pumpAndSettle();
+    expect(find.text('Retirer aussi le livre importé'), findsOneWidget);
+    await tester.tap(find.byType(Checkbox));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('retire ses livres'), findsOneWidget);
+    await tester.tap(find.text('Supprimer'));
+    for (var i = 0; i < 5; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 200)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    expect(
+      server.deletedSources.single.queryParameters['remove_books'],
+      'true',
+    );
+    expect(find.text('list'), findsOneWidget);
   });
 }

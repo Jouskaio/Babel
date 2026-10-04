@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_providers.dart';
 import '../../../core/files/file_transfer.dart';
 import '../../../core/files/save_file.dart';
 import '../../../core/theme/babel_colors.dart';
@@ -209,8 +210,11 @@ class _BookTile extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           LayoutBuilder(
-            builder: (context, c) =>
-                BookCover(width: c.maxWidth, title: item.title),
+            builder: (context, c) => BookCover(
+              width: c.maxWidth,
+              url: libraryCoverUrl(item),
+              title: item.title,
+            ),
           ),
           const SizedBox(height: 10),
           Text(
@@ -356,4 +360,15 @@ class _AddOwnBooks extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The cover found in the book file, if its format can hold one. Books synced before
+/// covers existed have no `cover_path`: it is derived from the file.
+String? libraryCoverUrl(LibraryItemResponse item) {
+  final path =
+      item.coverPath ??
+      (item.format == BookFormat.epub || item.format == BookFormat.cbz
+          ? '/v1/files/${item.sha256}/cover'
+          : null);
+  return path == null ? null : apiUrl(path);
 }

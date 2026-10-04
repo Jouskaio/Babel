@@ -15,6 +15,7 @@ class LibraryItemResponse {
   LibraryItemResponse({
     required this.addedAt,
     this.authors = const [],
+    this.coverPath,
     this.editionId,
     required this.format,
     required this.id,
@@ -26,6 +27,9 @@ class LibraryItemResponse {
   DateTime addedAt;
 
   List<String> authors;
+
+  /// Cover found in the file, relative to the API base URL (may answer 404)
+  String? coverPath;
 
   String? editionId;
 
@@ -44,6 +48,7 @@ class LibraryItemResponse {
   bool operator ==(Object other) => identical(this, other) || other is LibraryItemResponse &&
     other.addedAt == addedAt &&
     _deepEquality.equals(other.authors, authors) &&
+    other.coverPath == coverPath &&
     other.editionId == editionId &&
     other.format == format &&
     other.id == id &&
@@ -56,6 +61,7 @@ class LibraryItemResponse {
     // ignore: unnecessary_parenthesis
     (addedAt.hashCode) +
     (authors.hashCode) +
+    (coverPath == null ? 0 : coverPath!.hashCode) +
     (editionId == null ? 0 : editionId!.hashCode) +
     (format.hashCode) +
     (id.hashCode) +
@@ -64,12 +70,17 @@ class LibraryItemResponse {
     (title.hashCode);
 
   @override
-  String toString() => 'LibraryItemResponse[addedAt=$addedAt, authors=$authors, editionId=$editionId, format=$format, id=$id, sha256=$sha256, size=$size, title=$title]';
+  String toString() => 'LibraryItemResponse[addedAt=$addedAt, authors=$authors, coverPath=$coverPath, editionId=$editionId, format=$format, id=$id, sha256=$sha256, size=$size, title=$title]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'added_at'] = this.addedAt.toUtc().toIso8601String();
       json[r'authors'] = this.authors;
+    if (this.coverPath != null) {
+      json[r'cover_path'] = this.coverPath;
+    } else {
+      json[r'cover_path'] = null;
+    }
     if (this.editionId != null) {
       json[r'edition_id'] = this.editionId;
     } else {
@@ -106,6 +117,7 @@ class LibraryItemResponse {
         authors: json[r'authors'] is Iterable
             ? (json[r'authors'] as Iterable).cast<String>().toList(growable: false)
             : const [],
+        coverPath: mapValueOfType<String>(json, r'cover_path'),
         editionId: mapValueOfType<String>(json, r'edition_id'),
         format: BookFormat.fromJson(json[r'format'])!,
         id: mapValueOfType<String>(json, r'id')!,

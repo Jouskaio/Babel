@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:babel_api_client/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -104,30 +106,67 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
 
   Future<void> _delete() async {
     final l10n = context.l10n;
+    final inLibrary =
+        (ref.read(sourceDetailProvider(widget.sourceId)).value?.entries ?? [])
+            .where((e) => e.status == EntryStatus.inLibrary)
+            .length;
+    var removeBooks = false;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: BabelColors.surface,
-        title: Text(l10n.deleteSourceTitle, style: BabelText.heading(24)),
-        content: Text(l10n.deleteSourceBody, style: BabelText.body(14)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: BabelColors.surface,
+          title: Text(l10n.deleteSourceTitle, style: BabelText.heading(24)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                removeBooks
+                    ? l10n.deleteSourceBodyWithBooks
+                    : l10n.deleteSourceBody,
+                style: BabelText.body(14),
+              ),
+              if (inLibrary > 0) ...[
+                const SizedBox(height: 12),
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  activeColor: BabelColors.dustyRose,
+                  value: removeBooks,
+                  onChanged: (value) =>
+                      setDialogState(() => removeBooks = value ?? false),
+                  title: Text(
+                    l10n.deleteSourceBooks(inLibrary),
+                    style: BabelText.body(14, color: BabelColors.textPrimary),
+                  ),
+                ),
+              ],
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              l10n.delete,
-              style: BabelText.body(14, color: BabelColors.dustyRose),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(l10n.cancel),
             ),
-          ),
-        ],
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(
+                l10n.delete,
+                style: BabelText.body(14, color: BabelColors.dustyRose),
+              ),
+            ),
+          ],
+        ),
       ),
     );
     if (confirmed != true) return;
     try {
-      await _api.deleteSource(widget.sourceId);
+      await _api.deleteSource(widget.sourceId, removeBooks: removeBooks);
+      // The removals arrive through sync, like any other change.
+      if (removeBooks) {
+        unawaited(ref.read(libraryControllerProvider.notifier).reload());
+      }
       if (mounted) context.pop();
     } on Object catch (error) {
       if (mounted) _say(sourceError(context, error));
@@ -285,14 +324,19 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
 
   Widget _row(SourceEntryResponse entry) {
     final l10n = context.l10n;
-    final (title, format) = titleAndFormat(entry.name);
+    final (fileTitle, format) = titleAndFormat(entry.name);
+    final title = entry.title ?? fileTitle;
     final onBabel = entry.status == EntryStatus.onBabel;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: SourceCard(
         child: Row(
           children: [
-            BookCover(width: 44, url: null, title: title),
+            BookCover(
+              width: 44,
+              url: entry.coverPath == null ? null : apiUrl(entry.coverPath!),
+              title: title,
+            ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -301,6 +345,7 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
                   Text(title, style: BabelText.heading(18)),
                   Text(
                     [
+                      if (entry.authors.isNotEmpty) entry.authors.join(', '),
                       if (format.isNotEmpty) format,
                       fileSize(context, entry.size),
                     ].join(' · '),

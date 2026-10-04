@@ -130,14 +130,18 @@ class SourcesApi {
 
   /// Delete Source
   ///
-  /// Forget the source and its token. Imported books stay in the library.
+  /// Forget the source and its token.  Imported books stay in the library, unless ``remove_books`` is set.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
   /// * [String] sourceId (required):
-  Future<Response> deleteSourceWithHttpInfo(String sourceId,) async {
+  ///
+  /// * [bool] removeBooks:
+  ///
+  /// * [String] xBabelDevice:
+  Future<Response> deleteSourceWithHttpInfo(String sourceId, { bool? removeBooks, String? xBabelDevice, }) async {
     // ignore: prefer_const_declarations
     final path = r'/v1/sources/{source_id}'
       .replaceAll('{source_id}', sourceId);
@@ -148,6 +152,14 @@ class SourcesApi {
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
+
+    if (removeBooks != null) {
+      queryParams.addAll(_queryParams('', 'remove_books', removeBooks));
+    }
+
+    if (xBabelDevice != null) {
+      headerParams[r'X-Babel-Device'] = parameterToString(xBabelDevice);
+    }
 
     const contentTypes = <String>[];
 
@@ -165,13 +177,17 @@ class SourcesApi {
 
   /// Delete Source
   ///
-  /// Forget the source and its token. Imported books stay in the library.
+  /// Forget the source and its token.  Imported books stay in the library, unless ``remove_books`` is set.
   ///
   /// Parameters:
   ///
   /// * [String] sourceId (required):
-  Future<void> deleteSource(String sourceId,) async {
-    final response = await deleteSourceWithHttpInfo(sourceId,);
+  ///
+  /// * [bool] removeBooks:
+  ///
+  /// * [String] xBabelDevice:
+  Future<void> deleteSource(String sourceId, { bool? removeBooks, String? xBabelDevice, }) async {
+    final response = await deleteSourceWithHttpInfo(sourceId,  removeBooks: removeBooks, xBabelDevice: xBabelDevice, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

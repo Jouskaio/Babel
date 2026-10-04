@@ -13,6 +13,7 @@ part of babel_api_client;
 class SourceResponse {
   /// Returns a new [SourceResponse] instance.
   SourceResponse({
+    required this.bookCount,
     required this.createdAt,
     this.folder,
     required this.hasToken,
@@ -23,6 +24,9 @@ class SourceResponse {
     required this.name,
     this.repository,
   });
+
+  /// Book files found by the last scan
+  int bookCount;
 
   DateTime createdAt;
 
@@ -44,6 +48,7 @@ class SourceResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is SourceResponse &&
+    other.bookCount == bookCount &&
     other.createdAt == createdAt &&
     other.folder == folder &&
     other.hasToken == hasToken &&
@@ -57,6 +62,7 @@ class SourceResponse {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (bookCount.hashCode) +
     (createdAt.hashCode) +
     (folder == null ? 0 : folder!.hashCode) +
     (hasToken.hashCode) +
@@ -68,10 +74,11 @@ class SourceResponse {
     (repository == null ? 0 : repository!.hashCode);
 
   @override
-  String toString() => 'SourceResponse[createdAt=$createdAt, folder=$folder, hasToken=$hasToken, id=$id, kind=$kind, lastError=$lastError, lastScanAt=$lastScanAt, name=$name, repository=$repository]';
+  String toString() => 'SourceResponse[bookCount=$bookCount, createdAt=$createdAt, folder=$folder, hasToken=$hasToken, id=$id, kind=$kind, lastError=$lastError, lastScanAt=$lastScanAt, name=$name, repository=$repository]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'book_count'] = this.bookCount;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
     if (this.folder != null) {
       json[r'folder'] = this.folder;
@@ -119,6 +126,7 @@ class SourceResponse {
       }());
 
       return SourceResponse(
+        bookCount: mapValueOfType<int>(json, r'book_count')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
         folder: mapValueOfType<String>(json, r'folder'),
         hasToken: mapValueOfType<bool>(json, r'has_token')!,
@@ -175,6 +183,7 @@ class SourceResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'book_count',
     'created_at',
     'has_token',
     'id',

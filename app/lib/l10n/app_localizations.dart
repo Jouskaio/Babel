@@ -1489,6 +1489,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'GitHub limite les requêtes sans jeton (60 par heure pour votre connexion). Réessayez dans quelques minutes, ou ajoutez un jeton d\'accès.'**
   String get sourceErrorRateLimited;
+
+  /// No description provided for @deleteSourceBooks.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Retirer aussi le livre importé} other{Retirer aussi les {count} livres importés}}'**
+  String deleteSourceBooks(int count);
+
+  /// No description provided for @deleteSourceBodyWithBooks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel oublie la source et son jeton, et retire ses livres de votre bibliothèque. Les autres lecteurs gardent leurs exemplaires.'**
+  String get deleteSourceBodyWithBooks;
 }
 
 class _AppLocalizationsDelegate

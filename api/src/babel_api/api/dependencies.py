@@ -22,6 +22,7 @@ from babel_api.core.config import Settings
 from babel_api.domain.ports import (
     BlobStore,
     BookSource,
+    CoverCache,
     IdentityVerifier,
     Mailer,
     MetadataReader,
@@ -49,6 +50,7 @@ class Container:
     catalog: CatalogService
     books: BookSource
     blob_store: BlobStore
+    covers: CoverCache
     metadata_reader: MetadataReader
     connectors: dict[SourceKind, SourceConnector]
     secrets: SecretBox
@@ -104,6 +106,7 @@ def get_file_service(
         SqlSyncRepository(session),
         container.blob_store,
         container.metadata_reader,
+        container.covers,
         access=settings.file_access,
         max_bytes=settings.max_upload_mb * 1024 * 1024,
     )

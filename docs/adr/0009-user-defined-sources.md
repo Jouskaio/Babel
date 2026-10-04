@@ -34,8 +34,11 @@ optional cover and identifiers) so anyone can expose a source without a dedicate
 - An entry is matched to the catalog (ADR 0007) by its identifiers, then by title and
   authors; unmatched entries can still be imported as personal books.
 - Importing copies the file into the user's library; a source can also be re-scanned
-  (manually or on a schedule) to offer new entries. Removing a source never deletes books
-  already imported.
+  (manually or on a schedule) to offer new entries. Removing a source keeps the books
+  already imported, unless the reader asks to remove them too (their stored files stay, for
+  other readers).
+- Files that are not readable books are remembered as such and not retried until their
+  content changes.
 - Fanfiction connectors only access works the user can access with their own account, at
   a polite rate, and identify Babel in their user agent.
 

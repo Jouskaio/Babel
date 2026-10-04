@@ -19,6 +19,8 @@ http.Response json(Object? data, [int status = 200]) => http.Response(
   headers: {'content-type': 'application/json; charset=utf-8'},
 );
 
+bool _known(String status) => status == 'on_babel' || status == 'in_library';
+
 Map<String, Object?> sourceEntry(String id, String name, String status) => {
   'id': id,
   'name': name,
@@ -26,6 +28,9 @@ Map<String, Object?> sourceEntry(String id, String name, String status) => {
   'size': 1200000,
   'status': status,
   'item_id': null,
+  'title': _known(status) ? name.replaceAll('.epub', '') : null,
+  'authors': _known(status) ? ['Jane Austen'] : <String>[],
+  'cover_path': null,
 };
 
 Map<String, Object?> libraryItem(String id, String title) => {
@@ -65,6 +70,7 @@ class FakeServer {
 
   /// Sources: request bodies received, and the books of the single source "s1".
   final sourceRequests = <Map<String, Object?>>[];
+  final deletedSources = <Uri>[];
   bool hasSource = true;
   final entries = <Map<String, Object?>>[
     sourceEntry('e1', 'Jane Eyre.epub', 'new'),
@@ -85,6 +91,7 @@ class FakeServer {
         .toUtc()
         .toIso8601String(),
     'last_error': null,
+    'book_count': entries.length,
   };
 
   Map<String, Object?> get sourceDetail => {
@@ -201,6 +208,10 @@ class FakeServer {
     final path = request.url.path;
     if (request.body.isNotEmpty) {
       sourceRequests.add(jsonDecode(request.body) as Map<String, Object?>);
+    }
+    if (request.method == 'DELETE') {
+      deletedSources.add(request.url);
+      return http.Response('', 204);
     }
     if (path == '/v1/sources/check') {
       final body = sourceRequests.last['github']! as Map<String, Object?>;

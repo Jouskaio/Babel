@@ -29,6 +29,8 @@ def _to_file(row: StoredFileRow) -> StoredFile:
         edition_id=row.edition_id,
         uploaded_by=row.uploaded_by,
         withdrawn_at=_aware(row.withdrawn_at) if row.withdrawn_at else None,
+        title=row.title,
+        authors=tuple(row.authors or ()),
     )
 
 
@@ -61,6 +63,8 @@ class SqlFileRepository:
                 edition_id=file.edition_id,
                 uploaded_by=file.uploaded_by,
                 created_at=file.created_at,
+                title=file.title,
+                authors=list(file.authors),
             )
         )
         await self._session.flush()
