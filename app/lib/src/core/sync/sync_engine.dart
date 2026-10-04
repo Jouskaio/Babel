@@ -252,6 +252,17 @@ class SyncEngine extends Notifier<SyncStatus> {
           .put(txn, data);
       return;
     }
+    if (change['entity'] == EntityKind.annotation.value) {
+      final record = LocalStores.annotations.record(
+        change['entity_id'] as String,
+      );
+      if (change['op'] == ChangeOp.delete.value) {
+        await record.delete(txn);
+      } else {
+        await record.put(txn, (change['data'] as Map).cast<String, Object?>());
+      }
+      return;
+    }
     if (change['entity'] != EntityKind.libraryItem.value) return;
     final record = LocalStores.library.record(change['entity_id'] as String);
     if (change['op'] == ChangeOp.delete.value) {

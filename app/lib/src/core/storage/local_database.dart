@@ -43,6 +43,9 @@ abstract final class LocalStores {
   /// Reading positions by "item:device", this device's and the others' (from sync).
   static final positions = stringMapStoreFactory.store('positions');
 
+  /// Highlights and margin notes by id (from this device and from sync).
+  static final annotations = stringMapStoreFactory.store('annotations');
+
   /// Sync cursor, device id…
   static final meta = StoreRef<String, Object?>('meta');
 }

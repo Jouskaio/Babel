@@ -562,5 +562,19 @@
         "type": "String"
       }
     }
+  },
+  "noteHint": "Écrire en marge…",
+  "removeAnnotation": "Retirer",
+  "marginTitle": "En marge",
+  "marginCount": "{count, plural, =0{Aucune note} =1{1 note} other{{count} notes}}",
+  "marginEmpty": "Sélectionnez du texte pendant la lecture pour le surligner ou écrire une note.",
+  "highlightNote": "Note",
+  "copy": "Copier",
+  "@marginCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }
