@@ -81,7 +81,6 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [ChangePasswordRequest](doc//ChangePasswordRequest.md)
- - [HTTPValidationError](doc//HTTPValidationError.md)
  - [HealthResponse](doc//HealthResponse.md)
  - [IdentityProvider](doc//IdentityProvider.md)
  - [LoginRequest](doc//LoginRequest.md)
@@ -92,8 +91,6 @@ Class | Method | HTTP request | Description
  - [TokenResponse](doc//TokenResponse.md)
  - [UpdateProfileRequest](doc//UpdateProfileRequest.md)
  - [UserResponse](doc//UserResponse.md)
- - [ValidationError](doc//ValidationError.md)
- - [ValidationErrorLocInner](doc//ValidationErrorLocInner.md)
 
 
 ## Documentation For Authorization

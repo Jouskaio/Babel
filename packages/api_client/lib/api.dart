@@ -33,7 +33,6 @@ part 'api/auth_api.dart';
 part 'api/health_api.dart';
 
 part 'model/change_password_request.dart';
-part 'model/http_validation_error.dart';
 part 'model/health_response.dart';
 part 'model/identity_provider.dart';
 part 'model/login_request.dart';
@@ -44,8 +43,6 @@ part 'model/register_request.dart';
 part 'model/token_response.dart';
 part 'model/update_profile_request.dart';
 part 'model/user_response.dart';
-part 'model/validation_error.dart';
-part 'model/validation_error_loc_inner.dart';
 
 
 /// An [ApiClient] instance that uses the default values obtained from

@@ -38,7 +38,8 @@ class TokenResponse(BaseModel):
     """Tokens of a new session. ``refresh_token`` is omitted for the web app (cookie)."""
 
     access_token: str
-    token_type: Literal["bearer"] = "bearer"  # noqa: S105 - OAuth token type, not a secret
+    # No default: the Dart generator cannot handle an enum with a default value.
+    token_type: Literal["bearer"]
     expires_in: int = Field(description="Access-token lifetime in seconds")
     refresh_token: str | None = None
     user: UserResponse
