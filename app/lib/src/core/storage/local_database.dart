@@ -17,12 +17,13 @@ final databasePathProvider = Provider<Future<String> Function(String name)>(
 /// The signed-in account's local database (one per account, so signing in as someone
 /// else never mixes libraries). Null while signed out.
 final localDatabaseProvider = FutureProvider<Database?>((ref) async {
-  final session = ref.watch(authControllerProvider);
-  if (session is! SignedIn) return null;
-  final factory = ref.watch(databaseFactoryProvider);
-  final path = await ref.watch(databasePathProvider)(
-    'babel_${session.user.id}.db',
+  // Only the account id matters: profile updates must not reopen the database.
+  final userId = ref.watch(
+    authControllerProvider.select((s) => s is SignedIn ? s.user.id : null),
   );
+  if (userId == null) return null;
+  final factory = ref.watch(databaseFactoryProvider);
+  final path = await ref.watch(databasePathProvider)('babel_$userId.db');
   final db = await factory.openDatabase(path);
   ref.onDispose(db.close);
   return db;

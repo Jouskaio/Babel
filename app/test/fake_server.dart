@@ -51,6 +51,7 @@ class FakeServer {
   final pushed = <Map<String, Object?>>[];
   final connectivity = StreamController<List<ConnectivityResult>>.broadcast();
   int devicesRegistered = 0;
+  bool emailVerified = true;
   bool offline = false;
 
   void addItem(String id, String title) => changes.add({
@@ -111,6 +112,18 @@ class FakeServer {
             {'key': op['key'], 'outcome': 'applied', 'detail': null},
         ],
         'cursor': changes.length,
+      });
+    }
+    if (path == '/v1/me') {
+      return json({
+        'id': 'u1',
+        'email': 'ada@example.com',
+        'display_name': 'Ada',
+        'has_password': true,
+        'email_verified': emailVerified,
+        'locale': 'fr',
+        'providers': <String>[],
+        'created_at': '2026-01-01T00:00:00Z',
       });
     }
     if (path == '/v1/catalog/search') {

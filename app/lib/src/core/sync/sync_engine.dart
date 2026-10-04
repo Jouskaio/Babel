@@ -9,6 +9,7 @@ import 'package:sembast/sembast.dart';
 import 'package:uuid/uuid.dart';
 
 import '../api/api_providers.dart';
+import '../auth/auth_controller.dart';
 import '../storage/local_database.dart';
 import 'lookups.dart';
 
@@ -119,6 +120,7 @@ class SyncEngine extends Notifier<SyncStatus> {
       await _push(db);
       await _pull(db);
       await resolveLookups(db, ref.read(authedCatalogApiProvider));
+      await _refreshAccount();
       state = state.copyWith(online: true, lastSync: DateTime.now());
     } on ApiException catch (error) {
       // Transport errors mean offline; anything else will be retried next time.
@@ -126,6 +128,15 @@ class SyncEngine extends Notifier<SyncStatus> {
     } finally {
       await _refreshPending(db);
       state = state.copyWith(syncing: false);
+    }
+  }
+
+  /// Picks up account changes made elsewhere (e.g. the email confirmed on another
+  /// device), so banners and profile stay current.
+  Future<void> _refreshAccount() async {
+    final user = await ref.read(accountApiProvider).getMe();
+    if (user != null) {
+      ref.read(authControllerProvider.notifier).updateUser(user);
     }
   }
 
