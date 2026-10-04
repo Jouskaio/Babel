@@ -25,6 +25,7 @@ String sourceError(BuildContext context, Object error) {
   return switch (error.code) {
     400 => l10n.sourceErrorUnreachable,
     409 => l10n.sourceErrorTooMany,
+    429 => l10n.sourceErrorRateLimited,
     503 => l10n.sourceErrorTokens,
     _ => l10n.errorGeneric,
   };

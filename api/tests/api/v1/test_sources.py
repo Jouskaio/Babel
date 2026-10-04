@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from babel_api.adapters.security.secrets import SecretBox
-from babel_api.domain.errors import SourceConnectionError
+from babel_api.domain.errors import SourceConnectionError, SourceRateLimitedError
 from babel_api.domain.sources import RemoteEntry, SourceKind
 from tests.api.v1.test_library import account, upload
 from tests.books import NOT_A_BOOK, epub
@@ -29,9 +29,12 @@ class FakeGitHub:
         self.fetched: list[str] = []
         self.tokens: list[str | None] = []
         self.down = False
+        self.limited = False
 
     async def check(self, config: dict[str, Any], token: str | None) -> dict[str, Any]:
         self.tokens.append(token)
+        if self.limited:
+            raise SourceRateLimitedError
         if config["repository"] == "ada/missing":
             raise SourceConnectionError("404")
         return {"repository": config["repository"], "folder": "books", "branch": "main"}
@@ -108,6 +111,15 @@ def test_a_source_can_be_tried_without_saving_it(
     assert client.get("/v1/sources", headers=ada).json() == []
     body["github"] = {"repository": "ada/missing"}
     assert client.post("/v1/sources/check", json=body, headers=ada).status_code == 400
+
+
+def test_rate_limits_are_reported_as_such(
+    client: TestClient, github: FakeGitHub, ada: dict[str, str]
+) -> None:
+    github.limited = True
+    response = connect(client, ada)
+    assert response.status_code == 429
+    assert "access token" in response.json()["detail"]
 
 
 def test_unreachable_repositories_are_refused(

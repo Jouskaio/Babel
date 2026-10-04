@@ -4,7 +4,7 @@ import httpx
 import pytest
 
 from babel_api.adapters.sources.github import GitHubConnector
-from babel_api.domain.errors import SourceConnectionError
+from babel_api.domain.errors import SourceConnectionError, SourceRateLimitedError
 from babel_api.domain.sources import RemoteEntry
 
 TREE = {
@@ -100,3 +100,27 @@ def test_errors_while_listing_are_connection_errors() -> None:
     config = {"repository": "ada/library", "branch": "main"}
     with pytest.raises(SourceConnectionError):
         asyncio.run(connector(down).list_entries(config, None))
+
+
+@pytest.mark.parametrize(
+    ("status", "headers"),
+    [(403, {"x-ratelimit-remaining": "0"}), (429, {})],
+)
+def test_rate_limits_are_told_apart(status: int, headers: dict[str, str]) -> None:
+    def limited(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(status, headers=headers, json={"message": "rate limit"})
+
+    with pytest.raises(SourceRateLimitedError):
+        asyncio.run(connector(limited).check({"repository": "ada/library"}, None))
+    config = {"repository": "ada/library", "branch": "main"}
+    with pytest.raises(SourceRateLimitedError):
+        asyncio.run(connector(limited).list_entries(config, None))
+
+
+def test_a_403_with_requests_left_is_a_refusal() -> None:
+    def forbidden(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(403, headers={"x-ratelimit-remaining": "42"})
+
+    with pytest.raises(SourceConnectionError) as raised:
+        asyncio.run(connector(forbidden).check({"repository": "ada/library"}, None))
+    assert not isinstance(raised.value, SourceRateLimitedError)
