@@ -1,0 +1,179 @@
+"""Sources of book files: connecting, scanning and importing (ADR 0009)."""
+
+import logging
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from typing import Any
+from uuid import UUID
+
+from babel_api.adapters.security.secrets import SecretBox
+from babel_api.domain.errors import (
+    DomainError,
+    NotFoundError,
+    SourceConnectionError,
+    TooManySourcesError,
+)
+from babel_api.domain.files import LibraryItem
+from babel_api.domain.ports import FileRepository, SourceConnector, SourceRepository
+from babel_api.domain.sources import (
+    EntryStatus,
+    RemoteEntry,
+    Source,
+    SourceDetail,
+    SourceEntry,
+    SourceKind,
+)
+from babel_api.services.files import FileService
+
+logger = logging.getLogger(__name__)
+
+# At most this many books per "import all" call, to keep requests short.
+IMPORT_BATCH = 50
+
+
+@dataclass(frozen=True, slots=True)
+class BatchImport:
+    imported: int
+    failed: int
+
+
+class SourceService:
+    def __init__(
+        self,
+        sources: SourceRepository,
+        files: FileRepository,
+        library: FileService,
+        connectors: dict[SourceKind, SourceConnector],
+        secrets: SecretBox,
+        *,
+        max_sources: int,
+    ) -> None:
+        self._sources = sources
+        self._files = files
+        self._library = library
+        self._connectors = connectors
+        self._secrets = secrets
+        self._max_sources = max_sources
+
+    # ------------------------------------------------------------ sources
+    async def create(
+        self,
+        user_id: UUID,
+        kind: SourceKind,
+        name: str,
+        config: dict[str, Any],
+        token: str | None,
+    ) -> SourceDetail:
+        if await self._sources.count(user_id) >= self._max_sources:
+            raise TooManySourcesError
+        token = (token or "").strip() or None
+        encrypted = self._secrets.encrypt(token) if token else None
+        checked = await self._connectors[kind].check(config, token)
+        source = await self._sources.add(user_id, kind, name.strip()[:120], checked, encrypted)
+        await self._sources.commit()
+        return await self.scan(user_id, source.id)
+
+    async def list_sources(self, user_id: UUID) -> list[Source]:
+        return await self._sources.list_sources(user_id)
+
+    async def detail(self, user_id: UUID, source_id: UUID) -> SourceDetail:
+        source = await self._own(user_id, source_id)
+        entries = [
+            await self._with_status(user_id, source.kind, e)
+            for e in await self._sources.entries(source_id)
+        ]
+        return SourceDetail(source, entries)
+
+    async def delete(self, user_id: UUID, source_id: UUID) -> None:
+        """Forgets the source and its credentials; imported books stay in the library."""
+        await self._own(user_id, source_id)
+        await self._sources.delete(source_id)
+        await self._sources.commit()
+
+    async def scan(self, user_id: UUID, source_id: UUID) -> SourceDetail:
+        source = await self._own(user_id, source_id)
+        now = datetime.now(UTC)
+        try:
+            found = await self._connectors[source.kind].list_entries(
+                source.config, await self._token(source)
+            )
+            await self._sources.record_scan(source_id, found, now, None)
+        except SourceConnectionError as error:
+            await self._sources.record_scan(source_id, [], now, f"connection: {error}")
+        await self._sources.commit()
+        return await self.detail(user_id, source_id)
+
+    # ------------------------------------------------------------ import
+    async def import_entry(
+        self, user_id: UUID, source_id: UUID, entry_id: UUID, device_id: UUID | None = None
+    ) -> LibraryItem:
+        source = await self._own(user_id, source_id)
+        entry = await self._sources.get_entry(entry_id)
+        if entry is None or entry.source_id != source_id:
+            raise NotFoundError
+        known = await self._sources.known_file(source.kind, entry.remote_id)
+        if known is not None:
+            stored = await self._files.get_file(known)
+            if stored is not None and stored.available:
+                # Already on Babel: no download from the source.
+                return await self._library.add_existing(user_id, known, device_id)
+        remote = RemoteEntry(path=entry.path, size=entry.size, remote_id=entry.remote_id)
+        chunks = self._connectors[source.kind].fetch(
+            source.config, await self._token(source), remote
+        )
+        result = await self._library.import_file(user_id, chunks, entry.name, device_id)
+        await self._sources.remember_file(source.kind, entry.remote_id, result.item.file.sha256)
+        await self._sources.commit()
+        return result.item
+
+    async def import_new(
+        self, user_id: UUID, source_id: UUID, device_id: UUID | None = None
+    ) -> BatchImport:
+        detail = await self.detail(user_id, source_id)
+        pending = [e for e in detail.entries if e.status is not EntryStatus.IN_LIBRARY]
+        imported = failed = 0
+        for entry in pending[:IMPORT_BATCH]:
+            try:
+                await self.import_entry(user_id, source_id, entry.id, device_id)
+                imported += 1
+            except DomainError:
+                logger.warning("Import of %s failed", entry.path, exc_info=True)
+                failed += 1
+        return BatchImport(imported, failed)
+
+    # ------------------------------------------------------------ internals
+    async def _own(self, user_id: UUID, source_id: UUID) -> Source:
+        source = await self._sources.get(source_id)
+        if source is None or source.user_id != user_id:
+            raise NotFoundError
+        return source
+
+    async def _token(self, source: Source) -> str | None:
+        encrypted = await self._sources.encrypted_token(source.id)
+        return self._secrets.decrypt(encrypted) if encrypted else None
+
+    async def _with_status(
+        self, user_id: UUID, kind: SourceKind, entry: SourceEntry
+    ) -> SourceEntry:
+        sha256 = await self._sources.known_file(kind, entry.remote_id)
+        if sha256 is None:
+            return entry
+        item = await self._files.find_item(user_id, sha256)
+        if item is not None:
+            return _replace(entry, EntryStatus.IN_LIBRARY, item.id)
+        stored = await self._files.get_file(sha256)
+        if stored is not None and stored.available:
+            return _replace(entry, EntryStatus.ON_BABEL, None)
+        return entry
+
+
+def _replace(entry: SourceEntry, status: EntryStatus, item_id: UUID | None) -> SourceEntry:
+    return SourceEntry(
+        id=entry.id,
+        source_id=entry.source_id,
+        path=entry.path,
+        size=entry.size,
+        remote_id=entry.remote_id,
+        status=status,
+        item_id=item_id,
+    )

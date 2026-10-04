@@ -67,11 +67,17 @@ String parameterToString(dynamic value) {
   if (value is EntityKind) {
     return EntityKindTypeTransformer().encode(value).toString();
   }
+  if (value is EntryStatus) {
+    return EntryStatusTypeTransformer().encode(value).toString();
+  }
   if (value is IdentityProvider) {
     return IdentityProviderTypeTransformer().encode(value).toString();
   }
   if (value is OpOutcome) {
     return OpOutcomeTypeTransformer().encode(value).toString();
+  }
+  if (value is SourceKind) {
+    return SourceKindTypeTransformer().encode(value).toString();
   }
   return value.toString();
 }

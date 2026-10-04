@@ -1,6 +1,24 @@
 {
   "components": {
     "schemas": {
+      "BatchImportResponse": {
+        "properties": {
+          "failed": {
+            "title": "Failed",
+            "type": "integer"
+          },
+          "imported": {
+            "title": "Imported",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "imported",
+          "failed"
+        ],
+        "title": "BatchImportResponse",
+        "type": "object"
+      },
       "Body_importFile": {
         "properties": {
           "file": {
@@ -106,6 +124,41 @@
           "device_id"
         ],
         "title": "ChangeResponse",
+        "type": "object"
+      },
+      "CreateSourceRequest": {
+        "properties": {
+          "github": {
+            "$ref": "#/components/schemas/GitHubConfig"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/SourceKind"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "token": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Token"
+          }
+        },
+        "required": [
+          "kind",
+          "name",
+          "github"
+        ],
+        "title": "CreateSourceRequest",
         "type": "object"
       },
       "DeviceKind": {
@@ -262,6 +315,15 @@
         "title": "EntityKind",
         "type": "string"
       },
+      "EntryStatus": {
+        "enum": [
+          "new",
+          "on_babel",
+          "in_library"
+        ],
+        "title": "EntryStatus",
+        "type": "string"
+      },
       "ForgotPasswordRequest": {
         "properties": {
           "email": {
@@ -274,6 +336,28 @@
           "email"
         ],
         "title": "ForgotPasswordRequest",
+        "type": "object"
+      },
+      "GitHubConfig": {
+        "properties": {
+          "folder": {
+            "default": "",
+            "maxLength": 500,
+            "title": "Folder",
+            "type": "string"
+          },
+          "repository": {
+            "description": "owner/name",
+            "maxLength": 140,
+            "minLength": 3,
+            "title": "Repository",
+            "type": "string"
+          }
+        },
+        "required": [
+          "repository"
+        ],
+        "title": "GitHubConfig",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -774,6 +858,163 @@
           "new_password"
         ],
         "title": "ResetPasswordRequest",
+        "type": "object"
+      },
+      "SourceDetailResponse": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/SourceEntryResponse"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceResponse"
+          }
+        },
+        "required": [
+          "source",
+          "entries"
+        ],
+        "title": "SourceDetailResponse",
+        "type": "object"
+      },
+      "SourceEntryResponse": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "item_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Item Id"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "size": {
+            "title": "Size",
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EntryStatus"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "path",
+          "size",
+          "status",
+          "item_id"
+        ],
+        "title": "SourceEntryResponse",
+        "type": "object"
+      },
+      "SourceKind": {
+        "description": "Implemented connectors. OPDS, WebDAV, fanfiction and generic will join this list.",
+        "enum": [
+          "github"
+        ],
+        "title": "SourceKind",
+        "type": "string"
+      },
+      "SourceResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "folder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Folder"
+          },
+          "has_token": {
+            "title": "Has Token",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/SourceKind"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error"
+          },
+          "last_scan_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Scan At"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "repository": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repository"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "name",
+          "repository",
+          "folder",
+          "has_token",
+          "created_at",
+          "last_scan_at",
+          "last_error"
+        ],
+        "title": "SourceResponse",
         "type": "object"
       },
       "TokenResponse": {
@@ -2723,6 +2964,361 @@
         "summary": "Change Password",
         "tags": [
           "account"
+        ]
+      }
+    },
+    "/v1/sources": {
+      "get": {
+        "operationId": "getSources",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SourceResponse"
+                  },
+                  "title": "Response Getsources",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Sources",
+        "tags": [
+          "sources"
+        ]
+      },
+      "post": {
+        "description": "Connect a source: access is checked, then it is scanned right away.",
+        "operationId": "createSource",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSourceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Source",
+        "tags": [
+          "sources"
+        ]
+      }
+    },
+    "/v1/sources/{source_id}": {
+      "delete": {
+        "description": "Forget the source and its token. Imported books stay in the library.",
+        "operationId": "deleteSource",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Source",
+        "tags": [
+          "sources"
+        ]
+      },
+      "get": {
+        "description": "The source and the books found by its last scan.",
+        "operationId": "getSource",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Source",
+        "tags": [
+          "sources"
+        ]
+      }
+    },
+    "/v1/sources/{source_id}/entries/{entry_id}/import": {
+      "post": {
+        "description": "Import one book; a file already on Babel is not downloaded again.",
+        "operationId": "importSourceEntry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entry_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entry Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Import Entry",
+        "tags": [
+          "sources"
+        ]
+      }
+    },
+    "/v1/sources/{source_id}/import": {
+      "post": {
+        "description": "Import every book not yet in the library (up to 50 per call).",
+        "operationId": "importSource",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchImportResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Import All",
+        "tags": [
+          "sources"
+        ]
+      }
+    },
+    "/v1/sources/{source_id}/scan": {
+      "post": {
+        "description": "Look for new books in the source.",
+        "operationId": "scanSource",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Scan Source",
+        "tags": [
+          "sources"
         ]
       }
     },

@@ -93,6 +93,13 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**importFile**](doc//LibraryApi.md#importfile) | **POST** /v1/library/files | Import File
 *LibraryApi* | [**removeFromLibrary**](doc//LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
 *LibraryApi* | [**withdrawFile**](doc//LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
+*SourcesApi* | [**createSource**](doc//SourcesApi.md#createsource) | **POST** /v1/sources | Create Source
+*SourcesApi* | [**deleteSource**](doc//SourcesApi.md#deletesource) | **DELETE** /v1/sources/{source_id} | Delete Source
+*SourcesApi* | [**getSource**](doc//SourcesApi.md#getsource) | **GET** /v1/sources/{source_id} | Get Source
+*SourcesApi* | [**getSources**](doc//SourcesApi.md#getsources) | **GET** /v1/sources | Get Sources
+*SourcesApi* | [**importSource**](doc//SourcesApi.md#importsource) | **POST** /v1/sources/{source_id}/import | Import All
+*SourcesApi* | [**importSourceEntry**](doc//SourcesApi.md#importsourceentry) | **POST** /v1/sources/{source_id}/entries/{entry_id}/import | Import Entry
+*SourcesApi* | [**scanSource**](doc//SourcesApi.md#scansource) | **POST** /v1/sources/{source_id}/scan | Scan Source
 *SyncApi* | [**getDevices**](doc//SyncApi.md#getdevices) | **GET** /v1/devices | Get Devices
 *SyncApi* | [**pullChanges**](doc//SyncApi.md#pullchanges) | **GET** /v1/sync | Pull Changes
 *SyncApi* | [**pushOperations**](doc//SyncApi.md#pushoperations) | **POST** /v1/sync/{device_id} | Push Operations
@@ -102,15 +109,19 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [BatchImportResponse](doc//BatchImportResponse.md)
  - [BookFormat](doc//BookFormat.md)
  - [ChangeOp](doc//ChangeOp.md)
  - [ChangePasswordRequest](doc//ChangePasswordRequest.md)
  - [ChangeResponse](doc//ChangeResponse.md)
+ - [CreateSourceRequest](doc//CreateSourceRequest.md)
  - [DeviceKind](doc//DeviceKind.md)
  - [DeviceResponse](doc//DeviceResponse.md)
  - [EditionResponse](doc//EditionResponse.md)
  - [EntityKind](doc//EntityKind.md)
+ - [EntryStatus](doc//EntryStatus.md)
  - [ForgotPasswordRequest](doc//ForgotPasswordRequest.md)
+ - [GitHubConfig](doc//GitHubConfig.md)
  - [HealthResponse](doc//HealthResponse.md)
  - [IdentityProvider](doc//IdentityProvider.md)
  - [ImportResponse](doc//ImportResponse.md)
@@ -130,6 +141,10 @@ Class | Method | HTTP request | Description
  - [RegisterDeviceRequest](doc//RegisterDeviceRequest.md)
  - [RegisterRequest](doc//RegisterRequest.md)
  - [ResetPasswordRequest](doc//ResetPasswordRequest.md)
+ - [SourceDetailResponse](doc//SourceDetailResponse.md)
+ - [SourceEntryResponse](doc//SourceEntryResponse.md)
+ - [SourceKind](doc//SourceKind.md)
+ - [SourceResponse](doc//SourceResponse.md)
  - [TokenResponse](doc//TokenResponse.md)
  - [TrendingWorkResponse](doc//TrendingWorkResponse.md)
  - [UpdateProfileRequest](doc//UpdateProfileRequest.md)

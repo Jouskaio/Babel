@@ -15,6 +15,8 @@ from babel_api.adapters.db.models import (
     LibraryItemRow,
     ReadingPositionRow,
     RefreshTokenRow,
+    SourceEntryRow,
+    SourceRow,
     UserRow,
 )
 from babel_api.domain.users import (
@@ -116,6 +118,11 @@ class SqlUserRepository:
 
     async def delete(self, user_id: UUID) -> None:
         # Explicit deletes: SQLite does not enforce ON DELETE CASCADE by default.
+        sources = select(SourceRow.id).where(SourceRow.user_id == user_id)
+        await self._session.execute(
+            delete(SourceEntryRow).where(SourceEntryRow.source_id.in_(sources))
+        )
+        await self._session.execute(delete(SourceRow).where(SourceRow.user_id == user_id))
         for table in (ReadingPositionRow, ChangeRow, AppliedOperationRow, DeviceRow):
             await self._session.execute(delete(table).where(table.user_id == user_id))
         await self._session.execute(delete(LibraryItemRow).where(LibraryItemRow.user_id == user_id))

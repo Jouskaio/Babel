@@ -182,6 +182,8 @@ class ApiClient {
           return valueString == 'true' || valueString == '1';
         case 'DateTime':
           return value is DateTime ? value : DateTime.tryParse(value);
+        case 'BatchImportResponse':
+          return BatchImportResponse.fromJson(value);
         case 'BookFormat':
           return BookFormatTypeTransformer().decode(value);
         case 'ChangeOp':
@@ -190,6 +192,8 @@ class ApiClient {
           return ChangePasswordRequest.fromJson(value);
         case 'ChangeResponse':
           return ChangeResponse.fromJson(value);
+        case 'CreateSourceRequest':
+          return CreateSourceRequest.fromJson(value);
         case 'DeviceKind':
           return DeviceKindTypeTransformer().decode(value);
         case 'DeviceResponse':
@@ -198,8 +202,12 @@ class ApiClient {
           return EditionResponse.fromJson(value);
         case 'EntityKind':
           return EntityKindTypeTransformer().decode(value);
+        case 'EntryStatus':
+          return EntryStatusTypeTransformer().decode(value);
         case 'ForgotPasswordRequest':
           return ForgotPasswordRequest.fromJson(value);
+        case 'GitHubConfig':
+          return GitHubConfig.fromJson(value);
         case 'HealthResponse':
           return HealthResponse.fromJson(value);
         case 'IdentityProvider':
@@ -238,6 +246,14 @@ class ApiClient {
           return RegisterRequest.fromJson(value);
         case 'ResetPasswordRequest':
           return ResetPasswordRequest.fromJson(value);
+        case 'SourceDetailResponse':
+          return SourceDetailResponse.fromJson(value);
+        case 'SourceEntryResponse':
+          return SourceEntryResponse.fromJson(value);
+        case 'SourceKind':
+          return SourceKindTypeTransformer().decode(value);
+        case 'SourceResponse':
+          return SourceResponse.fromJson(value);
         case 'TokenResponse':
           return TokenResponse.fromJson(value);
         case 'TrendingWorkResponse':

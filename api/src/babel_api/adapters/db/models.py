@@ -241,3 +241,48 @@ class ReadingPositionRow(Base):
     locator: Mapped[str] = mapped_column(String(1000))
     percent: Mapped[float] = mapped_column(Float)
     client_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class SourceRow(Base):
+    """A source of book files owned by a user (ADR 0009)."""
+
+    __tablename__ = "sources"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    kind: Mapped[str] = mapped_column(String(20))
+    name: Mapped[str] = mapped_column(String(120))
+    config: Mapped[dict[str, object]] = mapped_column(JSON, default=dict)
+    # Encrypted with BABEL_SECRETS_KEY; never returned by the API.
+    encrypted_token: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    last_scan_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_error: Mapped[str | None] = mapped_column(String(200))
+
+
+class SourceEntryRow(Base):
+    """A book file found during the last scan of a source."""
+
+    __tablename__ = "source_entries"
+    __table_args__ = (UniqueConstraint("source_id", "path", name="uq_source_entries_path"),)
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    source_id: Mapped[UUID] = mapped_column(
+        ForeignKey("sources.id", ondelete="CASCADE"), index=True
+    )
+    path: Mapped[str] = mapped_column(String(1000))
+    size: Mapped[int] = mapped_column(BigInteger)
+    remote_id: Mapped[str] = mapped_column(String(100))
+
+
+class KnownSourceFileRow(Base):
+    """Maps a file of a source (e.g. a git blob) to the stored file it produced, so the
+    same file is never downloaded twice, whoever imports it."""
+
+    __tablename__ = "known_source_files"
+
+    kind: Mapped[str] = mapped_column(String(20), primary_key=True)
+    remote_id: Mapped[str] = mapped_column(String(100), primary_key=True)
+    sha256: Mapped[str] = mapped_column(
+        ForeignKey("stored_files.sha256", ondelete="CASCADE"), index=True
+    )
