@@ -111,25 +111,25 @@ class SqlSourceRepository:
             for path, entry in found.items():
                 current = existing.get(path)
                 if current is None:
-                    self._session.add(
-                        SourceEntryRow(
-                            source_id=source_id,
-                            path=path,
-                            size=entry.size,
-                            remote_id=entry.remote_id,
-                        )
+                    current = SourceEntryRow(
+                        source_id=source_id, path=path, size=entry.size, remote_id=entry.remote_id
                     )
+                    self._session.add(current)
                 elif current.remote_id != entry.remote_id:
                     # New content: worth trying again even if the old one was unreadable.
                     current.size, current.remote_id = entry.size, entry.remote_id
                     current.unreadable = False
+                current.title = entry.title[:500] if entry.title else None
+                current.authors = list(entry.authors[:5])
+                current.locator = entry.locator
+                current.format = entry.format
         await self._session.flush()
 
     async def entries(self, source_id: UUID) -> list[SourceEntry]:
         rows = await self._session.scalars(
             select(SourceEntryRow)
             .where(SourceEntryRow.source_id == source_id)
-            .order_by(SourceEntryRow.path)
+            .order_by(func.coalesce(SourceEntryRow.title, SourceEntryRow.path))
         )
         return [
             SourceEntry(
@@ -139,6 +139,10 @@ class SqlSourceRepository:
                 size=row.size,
                 remote_id=row.remote_id,
                 status=EntryStatus.UNREADABLE if row.unreadable else EntryStatus.NEW,
+                title=row.title,
+                authors=tuple(row.authors or ()),
+                locator=row.locator,
+                format=row.format,
             )
             for row in rows
         ]
@@ -154,6 +158,10 @@ class SqlSourceRepository:
             size=row.size,
             remote_id=row.remote_id,
             status=EntryStatus.UNREADABLE if row.unreadable else EntryStatus.NEW,
+            title=row.title,
+            authors=tuple(row.authors or ()),
+            locator=row.locator,
+            format=row.format,
         )
 
     async def mark_unreadable(self, entry_id: UUID) -> None:

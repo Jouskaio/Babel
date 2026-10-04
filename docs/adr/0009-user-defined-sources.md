@@ -20,7 +20,7 @@ A **source** belongs to one user and is one of:
 | `github` | a repository (and optional folder) containing book files | fine-grained personal access token, read-only, optional for public repositories |
 | `opds` | an OPDS 1.2 / 2.0 catalog (Calibre-Web, Kavita, Komga, COPS…) | none, HTTP Basic or API key |
 | `webdav` | a WebDAV folder (Nextcloud, ownCloud, NAS) | username + app password |
-| `fanfiction` | the user's account on a fanfiction site (AO3 first) | the user's own credentials or session |
+| `ao3` | the user's Archive of Our Own bookmarks (and subscriptions when signed in) | none for public bookmarks, or the user's own password |
 | `generic` | any HTTP endpoint returning a Babel source manifest (JSON) | optional bearer token or header |
 
 The generic manifest is a small, documented JSON format (title, authors, file URL, format,
@@ -55,7 +55,8 @@ optional cover and identifiers) so anyone can expose a source without a dedicate
 
 Per-user limits on the number of sources, scan frequency and imported volume protect the
 server; outbound requests are restricted to public addresses (no access to the server's
-private network), with timeouts and size caps.
+private network), with timeouts and size caps. The operator can allow specific private
+hosts (`BABEL_SOURCE_ALLOWED_HOSTS`), e.g. a Calibre-Web or Nextcloud on the same LAN.
 
 ## Consequences
 

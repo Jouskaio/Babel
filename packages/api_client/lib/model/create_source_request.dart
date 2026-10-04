@@ -13,47 +13,105 @@ part of babel_api_client;
 class CreateSourceRequest {
   /// Returns a new [CreateSourceRequest] instance.
   CreateSourceRequest({
-    required this.github,
+    this.ao3,
+    this.github,
     required this.kind,
     required this.name,
+    this.opds,
     this.token,
+    this.webdav,
   });
 
-  GitHubConfig github;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  Ao3Config? ao3;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  GitHubConfig? github;
 
   SourceKind kind;
 
   String name;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  OpdsConfig? opds;
+
   String? token;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  WebDavConfig? webdav;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CreateSourceRequest &&
+    other.ao3 == ao3 &&
     other.github == github &&
     other.kind == kind &&
     other.name == name &&
-    other.token == token;
+    other.opds == opds &&
+    other.token == token &&
+    other.webdav == webdav;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (github.hashCode) +
+    (ao3 == null ? 0 : ao3!.hashCode) +
+    (github == null ? 0 : github!.hashCode) +
     (kind.hashCode) +
     (name.hashCode) +
-    (token == null ? 0 : token!.hashCode);
+    (opds == null ? 0 : opds!.hashCode) +
+    (token == null ? 0 : token!.hashCode) +
+    (webdav == null ? 0 : webdav!.hashCode);
 
   @override
-  String toString() => 'CreateSourceRequest[github=$github, kind=$kind, name=$name, token=$token]';
+  String toString() => 'CreateSourceRequest[ao3=$ao3, github=$github, kind=$kind, name=$name, opds=$opds, token=$token, webdav=$webdav]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.ao3 != null) {
+      json[r'ao3'] = this.ao3;
+    } else {
+      json[r'ao3'] = null;
+    }
+    if (this.github != null) {
       json[r'github'] = this.github;
+    } else {
+      json[r'github'] = null;
+    }
       json[r'kind'] = this.kind;
       json[r'name'] = this.name;
+    if (this.opds != null) {
+      json[r'opds'] = this.opds;
+    } else {
+      json[r'opds'] = null;
+    }
     if (this.token != null) {
       json[r'token'] = this.token;
     } else {
       json[r'token'] = null;
+    }
+    if (this.webdav != null) {
+      json[r'webdav'] = this.webdav;
+    } else {
+      json[r'webdav'] = null;
     }
     return json;
   }
@@ -77,10 +135,13 @@ class CreateSourceRequest {
       }());
 
       return CreateSourceRequest(
-        github: GitHubConfig.fromJson(json[r'github'])!,
+        ao3: Ao3Config.fromJson(json[r'ao3']),
+        github: GitHubConfig.fromJson(json[r'github']),
         kind: SourceKind.fromJson(json[r'kind'])!,
         name: mapValueOfType<String>(json, r'name')!,
+        opds: OpdsConfig.fromJson(json[r'opds']),
         token: mapValueOfType<String>(json, r'token'),
+        webdav: WebDavConfig.fromJson(json[r'webdav']),
       );
     }
     return null;
@@ -128,7 +189,6 @@ class CreateSourceRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'github',
     'kind',
     'name',
   };

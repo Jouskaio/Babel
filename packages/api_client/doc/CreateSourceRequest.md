@@ -8,10 +8,13 @@ import 'package:babel_api_client/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**github** | [**GitHubConfig**](GitHubConfig.md) |  | 
+**ao3** | [**Ao3Config**](Ao3Config.md) |  | [optional] 
+**github** | [**GitHubConfig**](GitHubConfig.md) |  | [optional] 
 **kind** | [**SourceKind**](SourceKind.md) |  | 
 **name** | **String** |  | 
+**opds** | [**OpdsConfig**](OpdsConfig.md) |  | [optional] 
 **token** | **String** |  | [optional] 
+**webdav** | [**WebDavConfig**](WebDavConfig.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

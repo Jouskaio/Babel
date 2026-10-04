@@ -82,6 +82,8 @@ class FakeServer {
     'id': 's1',
     'kind': 'github',
     'name': 'jouskaio/ebooks',
+    'location': 'jouskaio/ebooks',
+    'username': null,
     'repository': 'jouskaio/ebooks',
     'folder': 'romans',
     'has_token': false,
@@ -214,7 +216,9 @@ class FakeServer {
       return http.Response('', 204);
     }
     if (path == '/v1/sources/check') {
-      final body = sourceRequests.last['github']! as Map<String, Object?>;
+      final body =
+          (sourceRequests.last['github'] ?? const <String, Object?>{})
+              as Map<String, Object?>;
       return switch (body['repository']) {
         'ada/missing' => json({'detail': 'unreachable'}, 400),
         'ada/limited' => json({'detail': 'rate limited'}, 429),

@@ -19,7 +19,10 @@ from babel_api.adapters.security.identity import apple_verifier, google_verifier
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
 from babel_api.adapters.security.secrets import SecretBox
 from babel_api.adapters.security.tokens import AccessTokenIssuer
+from babel_api.adapters.sources.ao3 import Ao3Connector
 from babel_api.adapters.sources.github import GitHubConnector
+from babel_api.adapters.sources.opds import OpdsConnector
+from babel_api.adapters.sources.webdav import WebDavConnector
 from babel_api.api.dependencies import Container
 from babel_api.api.errors import install_error_handlers
 from babel_api.api.v1.router import router as v1_router
@@ -39,7 +42,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     # The engine connects lazily: building the app (e.g. to export the contract) needs no DB.
     engine = create_engine(settings.database_url)
     open_library = OpenLibrarySource()
-    github = GitHubConnector()
+    allowed_hosts = tuple(settings.source_allowed_hosts)
+    connectors = {
+        SourceKind.GITHUB: GitHubConnector(),
+        SourceKind.OPDS: OpdsConnector(allowed_hosts=allowed_hosts),
+        SourceKind.WEBDAV: WebDavConnector(allowed_hosts=allowed_hosts),
+        SourceKind.AO3: Ao3Connector(),
+    }
     mailer = BackgroundMailer(
         SmtpMailer(
             settings.smtp_host,
@@ -57,7 +66,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         yield
         await mailer.drain()
         await open_library.aclose()
-        await github.aclose()
+        for connector in connectors.values():
+            await connector.aclose()
         await engine.dispose()
 
     app = FastAPI(
@@ -84,7 +94,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         blob_store=LocalBlobStore(settings.files_dir),
         covers=LocalCoverCache(settings.files_dir),
         metadata_reader=EbookMetadataReader(),
-        connectors={SourceKind.GITHUB: github},
+        connectors=dict(connectors),
         secrets=SecretBox(settings.secrets_key.get_secret_value()),
         mailer=mailer,
     )

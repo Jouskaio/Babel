@@ -276,6 +276,10 @@ class SourceEntryRow(Base):
     path: Mapped[str] = mapped_column(String(1000))
     size: Mapped[int] = mapped_column(BigInteger)
     remote_id: Mapped[str] = mapped_column(String(100))
+    title: Mapped[str | None] = mapped_column(String(500))
+    authors: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
+    locator: Mapped[str | None] = mapped_column(String(2000))
+    format: Mapped[str | None] = mapped_column(String(8))
     # The import was refused (not a readable book): no retry until the content changes.
     unreadable: Mapped[bool] = mapped_column(default=False, server_default=false())
 

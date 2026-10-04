@@ -892,4 +892,100 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get deleteSourceBodyWithBooks =>
       'Babel oublie la source et son jeton, et retire ses livres de votre bibliothèque. Les autres lecteurs gardent leurs exemplaires.';
+
+  @override
+  String get opdsTitle => 'Catalogue OPDS';
+
+  @override
+  String get opdsSubtitle =>
+      'Lecture seule · Calibre-Web, Kavita, Komga, COPS…';
+
+  @override
+  String get opdsUrl => 'Adresse du catalogue';
+
+  @override
+  String get opdsUrlHelp => 'Par exemple https://calibre.example.com/opds';
+
+  @override
+  String get webdavTitle => 'Dossier WebDAV';
+
+  @override
+  String get webdavSubtitle => 'Lecture seule · Nextcloud, ownCloud, NAS';
+
+  @override
+  String get webdavUrl => 'Adresse du dossier';
+
+  @override
+  String get webdavUrlHelp =>
+      'Nextcloud : Fichiers → Paramètres → adresse WebDAV, suivie du dossier de vos livres.';
+
+  @override
+  String get webdavPassword => 'Mot de passe d\'application';
+
+  @override
+  String get webdavPasswordHelp =>
+      'Créez un mot de passe d\'application dédié (Nextcloud : Paramètres → Sécurité) plutôt que votre mot de passe principal.';
+
+  @override
+  String get ao3Title => 'Fanfictions AO3';
+
+  @override
+  String get ao3Subtitle => 'Archive of Our Own · vos favoris';
+
+  @override
+  String get ao3Username => 'Pseudo AO3';
+
+  @override
+  String get ao3Password => 'Mot de passe AO3 (facultatif)';
+
+  @override
+  String get ao3PasswordHelp =>
+      'Sans mot de passe, seuls vos favoris publics sont visibles. Avec, Babel voit aussi vos favoris privés, vos abonnements et les œuvres réservées aux membres. Il est chiffré sur le serveur.';
+
+  @override
+  String get ao3SlowHint =>
+      'Babel lit AO3 lentement, par politesse : le scan peut prendre une minute.';
+
+  @override
+  String get sourceUsernameOptional => 'Identifiant (facultatif)';
+
+  @override
+  String get sourceUsername => 'Identifiant';
+
+  @override
+  String get sourcePasswordOptional => 'Mot de passe (facultatif)';
+
+  @override
+  String get urlInvalid =>
+      'Saisissez une adresse commençant par https:// ou http://';
+
+  @override
+  String get usernameInvalid => 'Saisissez votre pseudo';
+
+  @override
+  String get sourceErrorUnreachableGeneric =>
+      'Babel n\'a pas pu ouvrir cette source. Vérifiez l\'adresse et les identifiants.';
+
+  @override
+  String get sourceErrorPrivate =>
+      'Cette adresse est sur un réseau privé : l\'administrateur du serveur doit d\'abord l\'autoriser.';
+
+  @override
+  String get sourceErrorRateLimitedGeneric =>
+      'La source limite les requêtes pour l\'instant. Réessayez dans quelques minutes.';
+
+  @override
+  String sourceOpdsAt(String host) {
+    return 'Catalogue OPDS · $host';
+  }
+
+  @override
+  String sourceWebdavAt(String host) {
+    return 'WebDAV · $host';
+  }
+
+  @override
+  String sourceAo3Of(String username) {
+    return 'AO3 · favoris de $username';
+  }
 }

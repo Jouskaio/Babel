@@ -69,8 +69,8 @@ def test_only_books_inside_the_folder_are_listed() -> None:
     config = {"repository": "ada/library", "folder": "books", "branch": "main"}
     entries = asyncio.run(connector(github).list_entries(config, None))
     assert entries == [
-        RemoteEntry(path="books/Jane Eyre.epub", size=1200, remote_id="b1"),
-        RemoteEntry(path="books/manga/One.CBZ", size=3400, remote_id="b2"),
+        RemoteEntry(path="books/Jane Eyre.epub", size=1200, remote_id="b1", format="epub"),
+        RemoteEntry(path="books/manga/One.CBZ", size=3400, remote_id="b2", format="cbz"),
     ]
     assert entries[0].name == "Jane Eyre.epub"
 

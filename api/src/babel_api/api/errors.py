@@ -16,6 +16,7 @@ from babel_api.domain.errors import (
     PasswordRequiredError,
     ProviderNotConfiguredError,
     SecretsUnavailableError,
+    SourceAddressBlockedError,
     SourceConnectionError,
     SourceRateLimitedError,
     SourceUnavailableError,
@@ -41,6 +42,10 @@ _STATUS: dict[type[Exception], tuple[int, str]] = {
     SourceConnectionError: (
         status.HTTP_400_BAD_REQUEST,
         "The source could not be reached: check its address and access token",
+    ),
+    SourceAddressBlockedError: (
+        status.HTTP_400_BAD_REQUEST,
+        "This address is on a private network: the server administrator must allow it",
     ),
     SourceRateLimitedError: (
         status.HTTP_429_TOO_MANY_REQUESTS,
