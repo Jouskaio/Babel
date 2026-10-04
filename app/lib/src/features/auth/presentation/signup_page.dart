@@ -41,7 +41,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
       _failure = null;
     });
     try {
-      await ref.read(authControllerProvider.notifier).register(
+      await ref
+          .read(authControllerProvider.notifier)
+          .register(
             _email.text.trim(),
             _password.text,
             _name.text.trim(),

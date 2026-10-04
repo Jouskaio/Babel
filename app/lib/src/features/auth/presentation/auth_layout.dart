@@ -203,37 +203,38 @@ class AuthSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Wrap(
-        alignment: WrapAlignment.center,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          Text(text, style: BabelText.body(14)),
-          TextButton(
-            onPressed: () => context.go(route),
-            child: Text(
-              action,
-              style: BabelText.body(
-                14,
-                color: BabelColors.gold,
-                weight: FontWeight.w500,
-              ),
-            ),
+    alignment: WrapAlignment.center,
+    crossAxisAlignment: WrapCrossAlignment.center,
+    children: [
+      Text(text, style: BabelText.body(14)),
+      TextButton(
+        onPressed: () => context.go(route),
+        child: Text(
+          action,
+          style: BabelText.body(
+            14,
+            color: BabelColors.gold,
+            weight: FontWeight.w500,
           ),
-        ],
-      );
+        ),
+      ),
+    ],
+  );
 }
 
 /// Shared field validators.
 abstract final class Validators {
   static final _email = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
-  static String? Function(String?) required(BuildContext context) => (value) =>
-      (value ?? '').trim().isEmpty ? context.l10n.errorRequired : null;
+  static String? Function(String?) required(BuildContext context) =>
+      (value) =>
+          (value ?? '').trim().isEmpty ? context.l10n.errorRequired : null;
 
   static String? Function(String?) email(BuildContext context) => (value) {
-        final v = (value ?? '').trim();
-        if (v.isEmpty) return context.l10n.errorRequired;
-        return _email.hasMatch(v) ? null : context.l10n.errorEmail;
-      };
+    final v = (value ?? '').trim();
+    if (v.isEmpty) return context.l10n.errorRequired;
+    return _email.hasMatch(v) ? null : context.l10n.errorEmail;
+  };
 
   static String? Function(String?) newPassword(BuildContext context) =>
       (value) =>

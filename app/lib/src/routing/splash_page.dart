@@ -9,11 +9,8 @@ class SplashPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: Center(
-          child: Text(
-            context.l10n.brand,
-            style: BabelText.label(14, spacing: 6),
-          ),
-        ),
-      );
+    body: Center(
+      child: Text(context.l10n.brand, style: BabelText.label(14, spacing: 6)),
+    ),
+  );
 }

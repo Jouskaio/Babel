@@ -45,6 +45,15 @@ Scopes: `api`, `app`, `client`, `contract`, `infra`, `ci`, `docs`.
 Code, identifiers, comments, docstrings, commits and documentation are written in **English**.
 User-facing UI copy is localized through the app's localization files.
 
+## Toolchain
+
+| Tool | Version |
+| --- | --- |
+| Python | 3.13, managed by [uv](https://docs.astral.sh/uv/) |
+| Flutter | latest **stable** (3.47+, Dart 3.13+) — the CI always uses the latest stable |
+| Java (Android builds) | 25 (Temurin); Gradle 9.3 and AGP 9.1 also accept 17 or newer |
+| Docker | to regenerate the API client (OpenAPI Generator image) |
+
 ## Quality
 
 Run the same checks as the CI before opening a PR:
@@ -54,7 +63,7 @@ Run the same checks as the CI before opening a PR:
 cd api && uv run ruff format --check && uv run ruff check && uv run pyright && uv run pytest
 
 # App
-cd app && dart format --set-exit-if-changed lib test && flutter analyze && flutter test
+cd app && dart format --set-exit-if-changed lib test && flutter analyze --fatal-infos && flutter test
 ```
 
 [pre-commit](https://pre-commit.com) hooks automate formatting and linting:

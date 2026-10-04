@@ -40,9 +40,9 @@ class _BabelTextFieldState extends State<BabelTextField> {
   late bool _hidden = widget.obscure;
 
   OutlineInputBorder _border(Color color) => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: color),
-      );
+    borderRadius: BorderRadius.circular(14),
+    borderSide: BorderSide(color: color),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -71,8 +71,10 @@ class _BabelTextFieldState extends State<BabelTextField> {
           decoration: InputDecoration(
             filled: true,
             fillColor: BabelColors.surface,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 16,
+            ),
             enabledBorder: _border(BabelColors.border),
             focusedBorder: _border(BabelColors.gold),
             errorBorder: _border(BabelColors.dustyRose),

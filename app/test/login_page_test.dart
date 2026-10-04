@@ -34,8 +34,9 @@ void main() {
         const LoginPage(),
         overrides: [
           httpClientProvider.overrideWithValue(client),
-          refreshTokenStoreProvider
-              .overrideWithValue(MemoryRefreshTokenStore()),
+          refreshTokenStoreProvider.overrideWithValue(
+            MemoryRefreshTokenStore(),
+          ),
         ],
       ),
     );

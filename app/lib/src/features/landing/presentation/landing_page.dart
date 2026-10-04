@@ -58,8 +58,10 @@ class _Nav extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Padding(
-      padding:
-          EdgeInsets.symmetric(horizontal: gutter, vertical: wide ? 28 : 20),
+      padding: EdgeInsets.symmetric(
+        horizontal: gutter,
+        vertical: wide ? 28 : 20,
+      ),
       child: Row(
         children: [
           Text(l10n.brand, style: BabelText.label(13, spacing: 6)),
@@ -92,7 +94,8 @@ class _Hero extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final trending = ref.watch(trendingWorksProvider).value ??
+    final trending =
+        ref.watch(trendingWorksProvider).value ??
         const <TrendingWorkResponse>[];
     final copy = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,8 +154,12 @@ class _Hero extends ConsumerWidget {
     );
     final covers = _CoverFan(works: trending, scale: wide ? 1 : 0.6);
     return Padding(
-      padding:
-          EdgeInsets.fromLTRB(gutter, wide ? 72 : 8, gutter, wide ? 72 : 24),
+      padding: EdgeInsets.fromLTRB(
+        gutter,
+        wide ? 72 : 8,
+        gutter,
+        wide ? 72 : 24,
+      ),
       child: wide
           ? Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -297,19 +304,19 @@ class _SectionHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            eyebrow.toUpperCase(),
-            style: BabelText.label(wide ? 11 : 10, spacing: 2.4),
-          ),
-          const SizedBox(height: 16),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
-            child: Text(title, style: BabelText.title(wide ? 52 : 34)),
-          ),
-        ],
-      );
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        eyebrow.toUpperCase(),
+        style: BabelText.label(wide ? 11 : 10, spacing: 2.4),
+      ),
+      const SizedBox(height: 16),
+      ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 760),
+        child: Text(title, style: BabelText.title(wide ? 52 : 34)),
+      ),
+    ],
+  );
 }
 
 class _Features extends StatelessWidget {
@@ -327,43 +334,45 @@ class _Features extends StatelessWidget {
       (l10n.featureStatsTitle, l10n.featureStatsBody, const Color(0xFF36584A)),
     ];
     Widget card((String, String, Color) item) => Container(
-          padding: wide
-              ? const EdgeInsets.fromLTRB(28, 32, 28, 32)
-              : const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: BabelColors.surface,
-            borderRadius: BorderRadius.circular(wide ? 28 : 22),
-            border: Border.all(color: BabelColors.border),
+      padding: wide
+          ? const EdgeInsets.fromLTRB(28, 32, 28, 32)
+          : const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: BabelColors.surface,
+        borderRadius: BorderRadius.circular(wide ? 28 : 22),
+        border: Border.all(color: BabelColors.border),
+      ),
+      child: Flex(
+        direction: wide ? Axis.vertical : Axis.horizontal,
+        crossAxisAlignment: wide
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: wide ? 36 : 28,
+            height: wide ? 36 : 28,
+            decoration: BoxDecoration(color: item.$3, shape: BoxShape.circle),
           ),
-          child: Flex(
-            direction: wide ? Axis.vertical : Axis.horizontal,
-            crossAxisAlignment:
-                wide ? CrossAxisAlignment.start : CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: wide ? 36 : 28,
-                height: wide ? 36 : 28,
-                decoration:
-                    BoxDecoration(color: item.$3, shape: BoxShape.circle),
-              ),
-              SizedBox(width: 16, height: wide ? 24 : 0),
-              Flexible(
-                fit: wide ? FlexFit.loose : FlexFit.tight,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(item.$1, style: BabelText.heading(wide ? 26 : 20)),
-                    SizedBox(height: wide ? 14 : 4),
-                    Text(item.$2, style: BabelText.body(wide ? 15 : 13)),
-                  ],
-                ),
-              ),
-            ],
+          SizedBox(width: 16, height: wide ? 24 : 0),
+          Flexible(
+            fit: wide ? FlexFit.loose : FlexFit.tight,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(item.$1, style: BabelText.heading(wide ? 26 : 20)),
+                SizedBox(height: wide ? 14 : 4),
+                Text(item.$2, style: BabelText.body(wide ? 15 : 13)),
+              ],
+            ),
           ),
-        );
+        ],
+      ),
+    );
     return Padding(
-      padding:
-          EdgeInsets.symmetric(horizontal: gutter, vertical: wide ? 96 : 56),
+      padding: EdgeInsets.symmetric(
+        horizontal: gutter,
+        vertical: wide ? 96 : 56,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -425,8 +434,10 @@ class _Devices extends StatelessWidget {
           children: [
             for (final platform in ['Kobo', 'Android', 'iPhone', 'Web'])
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: const ShapeDecoration(
                   shape: StadiumBorder(
                     side: BorderSide(color: BabelColors.border),
@@ -478,8 +489,10 @@ class _Devices extends StatelessWidget {
     );
     return Container(
       color: BabelColors.surface,
-      padding:
-          EdgeInsets.symmetric(horizontal: gutter, vertical: wide ? 96 : 56),
+      padding: EdgeInsets.symmetric(
+        horizontal: gutter,
+        vertical: wide ? 96 : 56,
+      ),
       child: wide
           ? Row(
               children: [
@@ -500,27 +513,29 @@ class _Quote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding:
-            EdgeInsets.symmetric(horizontal: gutter, vertical: wide ? 120 : 48),
-        child: Column(
-          children: [
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 820),
-              child: Text(
-                context.l10n.quote,
-                textAlign: TextAlign.center,
-                style: BabelText.reading(wide ? 30 : 20, italic: true),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              context.l10n.quoteAuthor.toUpperCase(),
-              textAlign: TextAlign.center,
-              style: BabelText.label(11),
-            ),
-          ],
+    padding: EdgeInsets.symmetric(
+      horizontal: gutter,
+      vertical: wide ? 120 : 48,
+    ),
+    child: Column(
+      children: [
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 820),
+          child: Text(
+            context.l10n.quote,
+            textAlign: TextAlign.center,
+            style: BabelText.reading(wide ? 30 : 20, italic: true),
+          ),
         ),
-      );
+        const SizedBox(height: 20),
+        Text(
+          context.l10n.quoteAuthor.toUpperCase(),
+          textAlign: TextAlign.center,
+          style: BabelText.label(11),
+        ),
+      ],
+    ),
+  );
 }
 
 class _CallToAction extends StatelessWidget {

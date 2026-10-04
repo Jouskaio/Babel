@@ -9,10 +9,10 @@ void main() {
 
   test('the first supported device language is used', () {
     expect(
-      LocaleController.resolve(
-        const [Locale('de'), Locale('en', 'GB')],
-        supported,
-      ),
+      LocaleController.resolve(const [
+        Locale('de'),
+        Locale('en', 'GB'),
+      ], supported),
       const Locale('en'),
     );
   });
