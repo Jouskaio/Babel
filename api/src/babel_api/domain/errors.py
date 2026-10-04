@@ -37,6 +37,10 @@ class NotFoundError(DomainError):
     """The requested resource does not exist."""
 
 
+class UnsupportedLinkError(DomainError):
+    """The pasted link points to nothing Babel can import."""
+
+
 class UnsupportedFileError(DomainError):
     """The upload is not an EPUB, PDF, CBZ or CBR file."""
 

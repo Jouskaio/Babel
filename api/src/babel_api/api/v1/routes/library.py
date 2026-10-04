@@ -13,9 +13,11 @@ from babel_api.api.dependencies import (
     CurrentUserId,
     DeviceHeader,
     FileServiceDep,
+    LinkServiceDep,
     SyncServiceDep,
 )
 from babel_api.domain.files import BookFormat, LibraryItem
+from babel_api.services.links import LinkKind
 
 router = APIRouter(tags=["library"])
 
@@ -142,6 +144,44 @@ async def get_file_cover(files: FileServiceDep, sha256: Sha256) -> FileResponse:
         media_type=media_type,
         headers={"Cache-Control": "public, max-age=604800"},
     )
+
+
+class LinkRequest(BaseModel):
+    url: Annotated[str, Field(min_length=8, max_length=2000)]
+
+
+class LinkPreviewResponse(BaseModel):
+    kind: LinkKind
+    title: str | None
+    authors: list[str]
+    detail: str | None = Field(description="Chapters of an AO3 work")
+    on_babel: bool = Field(description="Already on Babel: imported without downloading")
+
+
+@router.post("/library/links/preview", operation_id="previewLink")
+async def preview_link(
+    _: CurrentUserId, links: LinkServiceDep, body: LinkRequest
+) -> LinkPreviewResponse:
+    """What a pasted link points to: an AO3 work, a Gutenberg book or a file."""
+    preview = await links.preview(body.url)
+    return LinkPreviewResponse(
+        kind=preview.kind,
+        title=preview.title,
+        authors=list(preview.authors),
+        detail=preview.detail,
+        on_babel=preview.on_babel,
+    )
+
+
+@router.post("/library/links", operation_id="importLink", status_code=status.HTTP_201_CREATED)
+async def import_link(
+    user_id: CurrentUserId,
+    links: LinkServiceDep,
+    body: LinkRequest,
+    device_id: DeviceHeader = None,
+) -> LibraryItemResponse:
+    """Import the book a link points to (AO3 works are fetched at AO3's pace)."""
+    return LibraryItemResponse.of(await links.import_link(user_id, body.url, device_id))
 
 
 @router.post(
