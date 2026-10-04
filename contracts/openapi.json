@@ -1,6 +1,31 @@
 {
   "components": {
     "schemas": {
+      "Body_importFile": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_importFile",
+        "type": "object"
+      },
+      "BookFormat": {
+        "description": "File formats accepted for import, detected from the content, not the name.",
+        "enum": [
+          "epub",
+          "pdf",
+          "cbz",
+          "cbr"
+        ],
+        "title": "BookFormat",
+        "type": "string"
+      },
       "ChangePasswordRequest": {
         "description": "``current_password`` is required unless the account has no password yet.",
         "properties": {
@@ -184,6 +209,24 @@
         "title": "IdentityProvider",
         "type": "string"
       },
+      "ImportResponse": {
+        "properties": {
+          "deduplicated": {
+            "description": "True when the file was already on Babel",
+            "title": "Deduplicated",
+            "type": "boolean"
+          },
+          "item": {
+            "$ref": "#/components/schemas/LibraryItemResponse"
+          }
+        },
+        "required": [
+          "item",
+          "deduplicated"
+        ],
+        "title": "ImportResponse",
+        "type": "object"
+      },
       "IsbnLookupResponse": {
         "description": "The work an ISBN belongs to, and which of its editions it is.",
         "properties": {
@@ -201,6 +244,67 @@
           "work"
         ],
         "title": "IsbnLookupResponse",
+        "type": "object"
+      },
+      "LibraryItemResponse": {
+        "properties": {
+          "added_at": {
+            "format": "date-time",
+            "title": "Added At",
+            "type": "string"
+          },
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
+          "edition_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edition Id"
+          },
+          "format": {
+            "$ref": "#/components/schemas/BookFormat"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "sha256": {
+            "description": "Identifies the file; download it from /v1/files/{sha256}",
+            "title": "Sha256",
+            "type": "string"
+          },
+          "size": {
+            "title": "Size",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "authors",
+          "format",
+          "size",
+          "sha256",
+          "edition_id",
+          "added_at"
+        ],
+        "title": "LibraryItemResponse",
         "type": "object"
       },
       "LoginRequest": {
@@ -600,6 +704,26 @@
         "title": "VerifyEmailRequest",
         "type": "object"
       },
+      "WithdrawRequest": {
+        "properties": {
+          "block": {
+            "default": true,
+            "title": "Block",
+            "type": "boolean"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "WithdrawRequest",
+        "type": "object"
+      },
       "WorkResponse": {
         "description": "A work with its description and known editions.",
         "properties": {
@@ -773,6 +897,59 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/v1/admin/files/{sha256}/withdraw": {
+      "post": {
+        "description": "Withdraw a file from every library and delete it; by default its hash is blocked.",
+        "operationId": "withdrawFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sha256",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Sha256",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Withdraw File",
+        "tags": [
+          "library",
+          "admin"
+        ]
+      }
+    },
     "/v1/auth/apple": {
       "post": {
         "description": "Sign in (or sign up) with an Apple ID token.",
@@ -1639,6 +1816,51 @@
         ]
       }
     },
+    "/v1/files/{sha256}": {
+      "get": {
+        "description": "Download a stored file. Supports HTTP range requests to resume downloads.",
+        "operationId": "downloadFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sha256",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Sha256",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Download File",
+        "tags": [
+          "library"
+        ]
+      }
+    },
     "/v1/health": {
       "get": {
         "description": "Report that the API is up, with its version.",
@@ -1658,6 +1880,175 @@
         "summary": "Get Health",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/v1/library": {
+      "get": {
+        "description": "The books of the signed-in reader, most recent first.",
+        "operationId": "getLibrary",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LibraryItemResponse"
+                  },
+                  "title": "Response Getlibrary",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Library",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/v1/library/files": {
+      "post": {
+        "description": "Import an EPUB, PDF, CBZ or CBR file into the library.",
+        "operationId": "importFile",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_importFile"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Import File",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/v1/library/files/{sha256}": {
+      "post": {
+        "description": "Add a file already on Babel to the library, without uploading it again.",
+        "operationId": "addStoredFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sha256",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Sha256",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Add Stored File",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/v1/library/{item_id}": {
+      "delete": {
+        "description": "Remove a book from the library. Progress and notes are kept with the work.",
+        "operationId": "removeFromLibrary",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove From Library",
+        "tags": [
+          "library"
         ]
       }
     },

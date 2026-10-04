@@ -29,16 +29,21 @@ part 'auth/http_basic_auth.dart';
 part 'auth/http_bearer_auth.dart';
 
 part 'api/account_api.dart';
+part 'api/admin_api.dart';
 part 'api/auth_api.dart';
 part 'api/catalog_api.dart';
 part 'api/health_api.dart';
+part 'api/library_api.dart';
 
+part 'model/book_format.dart';
 part 'model/change_password_request.dart';
 part 'model/edition_response.dart';
 part 'model/forgot_password_request.dart';
 part 'model/health_response.dart';
 part 'model/identity_provider.dart';
+part 'model/import_response.dart';
 part 'model/isbn_lookup_response.dart';
+part 'model/library_item_response.dart';
 part 'model/login_request.dart';
 part 'model/provider_login_request.dart';
 part 'model/providers_response.dart';
@@ -50,6 +55,7 @@ part 'model/trending_work_response.dart';
 part 'model/update_profile_request.dart';
 part 'model/user_response.dart';
 part 'model/verify_email_request.dart';
+part 'model/withdraw_request.dart';
 part 'model/work_response.dart';
 part 'model/work_summary_response.dart';
 
