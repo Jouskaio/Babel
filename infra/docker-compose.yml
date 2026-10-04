@@ -13,6 +13,12 @@ services:
     env_file: .env
     environment:
       BABEL_DATABASE_URL: postgresql+asyncpg://babel:${BABEL_DB_PASSWORD:?set BABEL_DB_PASSWORD in .env}@db:5432/babel
+      BABEL_PUBLIC_URL: https://babel.jouskaio.me
+      # IONOS mailbox; the password (BABEL_SMTP_PASSWORD) stays in .env on the server.
+      BABEL_SMTP_HOST: smtp.ionos.fr
+      BABEL_SMTP_PORT: "587"
+      BABEL_SMTP_USERNAME: contact@jouskaio.me
+      BABEL_MAIL_FROM: Babel <contact@jouskaio.me>
     ports:
       - "8000:8000"
     depends_on:
