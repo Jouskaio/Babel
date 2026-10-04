@@ -35,3 +35,19 @@ class InvalidIsbnError(DomainError):
 
 class NotFoundError(DomainError):
     """The requested resource does not exist."""
+
+
+class UnsupportedFileError(DomainError):
+    """The upload is not an EPUB, PDF, CBZ or CBR file."""
+
+
+class FileTooLargeError(DomainError):
+    """The upload exceeds the size limit."""
+
+
+class BlockedFileError(DomainError):
+    """The file was withdrawn by an administrator and cannot be imported again."""
+
+
+class ForbiddenError(DomainError):
+    """The account is not allowed to perform this action."""

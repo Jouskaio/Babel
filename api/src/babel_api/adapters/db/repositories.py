@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from babel_api.adapters.db.models import (
     AccountTokenRow,
     IdentityRow,
+    LibraryItemRow,
     RefreshTokenRow,
     UserRow,
 )
@@ -111,6 +112,7 @@ class SqlUserRepository:
 
     async def delete(self, user_id: UUID) -> None:
         # Explicit deletes: SQLite does not enforce ON DELETE CASCADE by default.
+        await self._session.execute(delete(LibraryItemRow).where(LibraryItemRow.user_id == user_id))
         await self._session.execute(
             delete(AccountTokenRow).where(AccountTokenRow.user_id == user_id)
         )

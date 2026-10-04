@@ -41,6 +41,13 @@ class Settings(BaseSettings):
     smtp_password: SecretStr = SecretStr("")
     mail_from: str = "Babel <contact@jouskaio.me>"
 
+    # Book files (ADR 0010): content-addressed store, who may download, upload size cap.
+    files_dir: str = "./data/files"
+    file_access: Literal["everyone", "entitled"] = "everyone"
+    max_upload_mb: int = 300
+    # Accounts with these emails are administrators (file withdrawal, blocking).
+    admin_emails: list[str] = []
+
     # Social sign-in: accepted audiences (OAuth client IDs). Empty disables the provider.
     google_client_ids: list[str] = []
     apple_client_ids: list[str] = []

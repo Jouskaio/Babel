@@ -19,6 +19,8 @@ def settings(tmp_path: Path) -> Settings:
     test_settings = Settings(
         environment="test",
         database_url=f"sqlite+aiosqlite:///{tmp_path / 'babel.db'}",
+        files_dir=str(tmp_path / "files"),
+        admin_emails=["admin@example.com"],
     )
     command.upgrade(alembic_config(test_settings.database_url), "head")
     return test_settings
