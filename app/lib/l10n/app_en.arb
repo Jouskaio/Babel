@@ -322,5 +322,14 @@
   "sectionUnreadable": "Unreadable files",
   "unreadableHint": "Babel could not read these files as books. They will be tried again if they change.",
   "unreadable": "Unreadable",
-  "sourceErrorRateLimited": "GitHub limits requests without a token (60 per hour for your connection). Try again in a few minutes, or add an access token."
+  "sourceErrorRateLimited": "GitHub limits requests without a token (60 per hour for your connection). Try again in a few minutes, or add an access token.",
+  "deleteSourceBooks": "{count, plural, =1{Also remove the book imported from it} other{Also remove the {count} books imported from it}}",
+  "deleteSourceBodyWithBooks": "Babel forgets the source and its token, and removes its books from your library. Other readers keep their copies.",
+  "@deleteSourceBooks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
