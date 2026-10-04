@@ -107,7 +107,10 @@ class _SourceTile extends ConsumerWidget {
       },
       child: Row(
         children: [
-          const SourceBadge('GH'),
+          SourceBadge(
+            sourceBadge(source.kind).$1,
+            color: sourceBadge(source.kind).$2,
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(

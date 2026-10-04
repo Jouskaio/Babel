@@ -331,5 +331,53 @@
         "type": "int"
       }
     }
+  },
+  "opdsTitle": "OPDS catalog",
+  "opdsSubtitle": "Read-only · Calibre-Web, Kavita, Komga, COPS…",
+  "opdsUrl": "Catalog address",
+  "opdsUrlHelp": "For example https://calibre.example.com/opds",
+  "webdavTitle": "WebDAV folder",
+  "webdavSubtitle": "Read-only · Nextcloud, ownCloud, NAS",
+  "webdavUrl": "Folder address",
+  "webdavUrlHelp": "Nextcloud: Files → Settings → WebDAV address, followed by the folder of your books.",
+  "webdavPassword": "App password",
+  "webdavPasswordHelp": "Create a dedicated app password (Nextcloud: Settings → Security) rather than using your main password.",
+  "ao3Title": "AO3 fanfiction",
+  "ao3Subtitle": "Archive of Our Own · your bookmarks",
+  "ao3Username": "AO3 username",
+  "ao3Password": "AO3 password (optional)",
+  "ao3PasswordHelp": "Without it, only your public bookmarks are visible. With it, Babel also sees your private bookmarks, your subscriptions and works restricted to members. It is encrypted on the server.",
+  "ao3SlowHint": "Babel reads AO3 slowly, out of politeness: scanning can take a minute.",
+  "sourceUsernameOptional": "Username (optional)",
+  "sourceUsername": "Username",
+  "sourcePasswordOptional": "Password (optional)",
+  "urlInvalid": "Enter an address starting with https:// or http://",
+  "usernameInvalid": "Enter your username",
+  "sourceErrorUnreachableGeneric": "Babel could not open this source. Check the address and the credentials.",
+  "sourceErrorPrivate": "This address is on a private network: the server administrator must allow it first.",
+  "sourceErrorRateLimitedGeneric": "The source limits requests for now. Try again in a few minutes.",
+  "sourceOpdsAt": "OPDS catalog · {host}",
+  "@sourceOpdsAt": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "sourceWebdavAt": "WebDAV · {host}",
+  "@sourceWebdavAt": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "sourceAo3Of": "AO3 · bookmarks of {username}",
+  "@sourceAo3Of": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
   }
 }

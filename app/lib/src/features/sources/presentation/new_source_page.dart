@@ -1,9 +1,11 @@
+import 'package:babel_api_client/api.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
+import '../application/sources_providers.dart';
 import 'source_badge.dart';
 
 /// Choosing the kind of source (design: Penpot "sources / ajouter · type").
@@ -13,26 +15,11 @@ class NewSourcePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final soon = [
-      (
-        'OPDS',
-        const Color(0xFF7D2638),
-        l10n.kindOpds,
-        l10n.kindOpdsDescription,
-      ),
-      (
-        'DAV',
-        const Color(0xFF2F5D8A),
-        l10n.kindWebdav,
-        l10n.kindWebdavDescription,
-      ),
-      ('AO3', const Color(0xFF990000), l10n.kindAo3, l10n.kindAo3Description),
-      (
-        'API',
-        const Color(0xFF2E5A45),
-        l10n.kindCustom,
-        l10n.kindCustomDescription,
-      ),
+    final kinds = [
+      (SourceKind.github, 'GitHub', l10n.kindGitHubDescription),
+      (SourceKind.opds, l10n.kindOpds, l10n.kindOpdsDescription),
+      (SourceKind.webdav, l10n.kindWebdav, l10n.kindWebdavDescription),
+      (SourceKind.ao3, l10n.kindAo3, l10n.kindAo3Description),
     ];
     return Scaffold(
       appBar: sourcesAppBar(l10n.newSourceTitle),
@@ -41,23 +28,28 @@ class NewSourcePage extends StatelessWidget {
         children: [
           Text(l10n.newSourceQuestion, style: BabelText.title(34)),
           const SizedBox(height: 20),
-          _Kind(
-            badge: const SourceBadge('GH'),
-            title: 'GitHub',
-            description: l10n.kindGitHubDescription,
-            highlighted: true,
-            onTap: () async {
-              final id = await context.push<String>(Routes.newGitHubSource);
-              if (id != null && context.mounted) context.pop(id);
-            },
-          ),
-          for (final (badge, color, title, description) in soon)
+          for (final (kind, title, description) in kinds)
             _Kind(
-              badge: SourceBadge(badge, color: color),
+              badge: SourceBadge(
+                sourceBadge(kind).$1,
+                color: sourceBadge(kind).$2,
+              ),
               title: title,
               description: description,
-              trailing: l10n.comingSoon,
+              highlighted: kind == SourceKind.github,
+              onTap: () async {
+                final id = await context.push<String>(
+                  Routes.newSourceOf(kind.value),
+                );
+                if (id != null && context.mounted) context.pop(id);
+              },
             ),
+          _Kind(
+            badge: const SourceBadge('API', color: Color(0xFF2E5A45)),
+            title: l10n.kindCustom,
+            description: l10n.kindCustomDescription,
+            trailing: l10n.comingSoon,
+          ),
         ],
       ),
     );

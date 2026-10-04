@@ -1501,6 +1501,168 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Babel oublie la source et son jeton, et retire ses livres de votre bibliothèque. Les autres lecteurs gardent leurs exemplaires.'**
   String get deleteSourceBodyWithBooks;
+
+  /// No description provided for @opdsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catalogue OPDS'**
+  String get opdsTitle;
+
+  /// No description provided for @opdsSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture seule · Calibre-Web, Kavita, Komga, COPS…'**
+  String get opdsSubtitle;
+
+  /// No description provided for @opdsUrl.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse du catalogue'**
+  String get opdsUrl;
+
+  /// No description provided for @opdsUrlHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par exemple https://calibre.example.com/opds'**
+  String get opdsUrlHelp;
+
+  /// No description provided for @webdavTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dossier WebDAV'**
+  String get webdavTitle;
+
+  /// No description provided for @webdavSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture seule · Nextcloud, ownCloud, NAS'**
+  String get webdavSubtitle;
+
+  /// No description provided for @webdavUrl.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse du dossier'**
+  String get webdavUrl;
+
+  /// No description provided for @webdavUrlHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nextcloud : Fichiers → Paramètres → adresse WebDAV, suivie du dossier de vos livres.'**
+  String get webdavUrlHelp;
+
+  /// No description provided for @webdavPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe d\'application'**
+  String get webdavPassword;
+
+  /// No description provided for @webdavPasswordHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créez un mot de passe d\'application dédié (Nextcloud : Paramètres → Sécurité) plutôt que votre mot de passe principal.'**
+  String get webdavPasswordHelp;
+
+  /// No description provided for @ao3Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fanfictions AO3'**
+  String get ao3Title;
+
+  /// No description provided for @ao3Subtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Archive of Our Own · vos favoris'**
+  String get ao3Subtitle;
+
+  /// No description provided for @ao3Username.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pseudo AO3'**
+  String get ao3Username;
+
+  /// No description provided for @ao3Password.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe AO3 (facultatif)'**
+  String get ao3Password;
+
+  /// No description provided for @ao3PasswordHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans mot de passe, seuls vos favoris publics sont visibles. Avec, Babel voit aussi vos favoris privés, vos abonnements et les œuvres réservées aux membres. Il est chiffré sur le serveur.'**
+  String get ao3PasswordHelp;
+
+  /// No description provided for @ao3SlowHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel lit AO3 lentement, par politesse : le scan peut prendre une minute.'**
+  String get ao3SlowHint;
+
+  /// No description provided for @sourceUsernameOptional.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant (facultatif)'**
+  String get sourceUsernameOptional;
+
+  /// No description provided for @sourceUsername.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant'**
+  String get sourceUsername;
+
+  /// No description provided for @sourcePasswordOptional.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe (facultatif)'**
+  String get sourcePasswordOptional;
+
+  /// No description provided for @urlInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez une adresse commençant par https:// ou http://'**
+  String get urlInvalid;
+
+  /// No description provided for @usernameInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez votre pseudo'**
+  String get usernameInvalid;
+
+  /// No description provided for @sourceErrorUnreachableGeneric.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel n\'a pas pu ouvrir cette source. Vérifiez l\'adresse et les identifiants.'**
+  String get sourceErrorUnreachableGeneric;
+
+  /// No description provided for @sourceErrorPrivate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette adresse est sur un réseau privé : l\'administrateur du serveur doit d\'abord l\'autoriser.'**
+  String get sourceErrorPrivate;
+
+  /// No description provided for @sourceErrorRateLimitedGeneric.
+  ///
+  /// In fr, this message translates to:
+  /// **'La source limite les requêtes pour l\'instant. Réessayez dans quelques minutes.'**
+  String get sourceErrorRateLimitedGeneric;
+
+  /// No description provided for @sourceOpdsAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catalogue OPDS · {host}'**
+  String sourceOpdsAt(String host);
+
+  /// No description provided for @sourceWebdavAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'WebDAV · {host}'**
+  String sourceWebdavAt(String host);
+
+  /// No description provided for @sourceAo3Of.
+  ///
+  /// In fr, this message translates to:
+  /// **'AO3 · favoris de {username}'**
+  String sourceAo3Of(String username);
 }
 
 class _AppLocalizationsDelegate

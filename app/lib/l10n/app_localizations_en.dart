@@ -885,4 +885,98 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteSourceBodyWithBooks =>
       'Babel forgets the source and its token, and removes its books from your library. Other readers keep their copies.';
+
+  @override
+  String get opdsTitle => 'OPDS catalog';
+
+  @override
+  String get opdsSubtitle => 'Read-only · Calibre-Web, Kavita, Komga, COPS…';
+
+  @override
+  String get opdsUrl => 'Catalog address';
+
+  @override
+  String get opdsUrlHelp => 'For example https://calibre.example.com/opds';
+
+  @override
+  String get webdavTitle => 'WebDAV folder';
+
+  @override
+  String get webdavSubtitle => 'Read-only · Nextcloud, ownCloud, NAS';
+
+  @override
+  String get webdavUrl => 'Folder address';
+
+  @override
+  String get webdavUrlHelp =>
+      'Nextcloud: Files → Settings → WebDAV address, followed by the folder of your books.';
+
+  @override
+  String get webdavPassword => 'App password';
+
+  @override
+  String get webdavPasswordHelp =>
+      'Create a dedicated app password (Nextcloud: Settings → Security) rather than using your main password.';
+
+  @override
+  String get ao3Title => 'AO3 fanfiction';
+
+  @override
+  String get ao3Subtitle => 'Archive of Our Own · your bookmarks';
+
+  @override
+  String get ao3Username => 'AO3 username';
+
+  @override
+  String get ao3Password => 'AO3 password (optional)';
+
+  @override
+  String get ao3PasswordHelp =>
+      'Without it, only your public bookmarks are visible. With it, Babel also sees your private bookmarks, your subscriptions and works restricted to members. It is encrypted on the server.';
+
+  @override
+  String get ao3SlowHint =>
+      'Babel reads AO3 slowly, out of politeness: scanning can take a minute.';
+
+  @override
+  String get sourceUsernameOptional => 'Username (optional)';
+
+  @override
+  String get sourceUsername => 'Username';
+
+  @override
+  String get sourcePasswordOptional => 'Password (optional)';
+
+  @override
+  String get urlInvalid => 'Enter an address starting with https:// or http://';
+
+  @override
+  String get usernameInvalid => 'Enter your username';
+
+  @override
+  String get sourceErrorUnreachableGeneric =>
+      'Babel could not open this source. Check the address and the credentials.';
+
+  @override
+  String get sourceErrorPrivate =>
+      'This address is on a private network: the server administrator must allow it first.';
+
+  @override
+  String get sourceErrorRateLimitedGeneric =>
+      'The source limits requests for now. Try again in a few minutes.';
+
+  @override
+  String sourceOpdsAt(String host) {
+    return 'OPDS catalog · $host';
+  }
+
+  @override
+  String sourceWebdavAt(String host) {
+    return 'WebDAV · $host';
+  }
+
+  @override
+  String sourceAo3Of(String username) {
+    return 'AO3 · bookmarks of $username';
+  }
 }

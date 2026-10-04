@@ -443,5 +443,53 @@
         "type": "int"
       }
     }
+  },
+  "opdsTitle": "Catalogue OPDS",
+  "opdsSubtitle": "Lecture seule · Calibre-Web, Kavita, Komga, COPS…",
+  "opdsUrl": "Adresse du catalogue",
+  "opdsUrlHelp": "Par exemple https://calibre.example.com/opds",
+  "webdavTitle": "Dossier WebDAV",
+  "webdavSubtitle": "Lecture seule · Nextcloud, ownCloud, NAS",
+  "webdavUrl": "Adresse du dossier",
+  "webdavUrlHelp": "Nextcloud : Fichiers → Paramètres → adresse WebDAV, suivie du dossier de vos livres.",
+  "webdavPassword": "Mot de passe d'application",
+  "webdavPasswordHelp": "Créez un mot de passe d'application dédié (Nextcloud : Paramètres → Sécurité) plutôt que votre mot de passe principal.",
+  "ao3Title": "Fanfictions AO3",
+  "ao3Subtitle": "Archive of Our Own · vos favoris",
+  "ao3Username": "Pseudo AO3",
+  "ao3Password": "Mot de passe AO3 (facultatif)",
+  "ao3PasswordHelp": "Sans mot de passe, seuls vos favoris publics sont visibles. Avec, Babel voit aussi vos favoris privés, vos abonnements et les œuvres réservées aux membres. Il est chiffré sur le serveur.",
+  "ao3SlowHint": "Babel lit AO3 lentement, par politesse : le scan peut prendre une minute.",
+  "sourceUsernameOptional": "Identifiant (facultatif)",
+  "sourceUsername": "Identifiant",
+  "sourcePasswordOptional": "Mot de passe (facultatif)",
+  "urlInvalid": "Saisissez une adresse commençant par https:// ou http://",
+  "usernameInvalid": "Saisissez votre pseudo",
+  "sourceErrorUnreachableGeneric": "Babel n'a pas pu ouvrir cette source. Vérifiez l'adresse et les identifiants.",
+  "sourceErrorPrivate": "Cette adresse est sur un réseau privé : l'administrateur du serveur doit d'abord l'autoriser.",
+  "sourceErrorRateLimitedGeneric": "La source limite les requêtes pour l'instant. Réessayez dans quelques minutes.",
+  "sourceOpdsAt": "Catalogue OPDS · {host}",
+  "@sourceOpdsAt": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "sourceWebdavAt": "WebDAV · {host}",
+  "@sourceWebdavAt": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "sourceAo3Of": "AO3 · favoris de {username}",
+  "@sourceAo3Of": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
   }
 }

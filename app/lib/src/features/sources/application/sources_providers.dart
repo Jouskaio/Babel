@@ -18,28 +18,48 @@ final sourceDetailProvider = FutureProvider.autoDispose
     );
 
 /// Why a source request failed, in the reader's words.
-String sourceError(BuildContext context, Object error) {
+String sourceError(BuildContext context, Object error, {SourceKind? kind}) {
   final l10n = context.l10n;
   if (error is! ApiException) return l10n.errorGeneric;
   if (error.innerException != null) return l10n.errorNetwork;
+  final github = kind == null || kind == SourceKind.github;
   return switch (error.code) {
-    400 => l10n.sourceErrorUnreachable,
+    400 when (error.message ?? '').contains('private network') =>
+      l10n.sourceErrorPrivate,
+    400 =>
+      github ? l10n.sourceErrorUnreachable : l10n.sourceErrorUnreachableGeneric,
     409 => l10n.sourceErrorTooMany,
-    429 => l10n.sourceErrorRateLimited,
+    429 =>
+      github ? l10n.sourceErrorRateLimited : l10n.sourceErrorRateLimitedGeneric,
     503 => l10n.sourceErrorTokens,
     _ => l10n.errorGeneric,
   };
 }
 
+/// How a kind of source looks: badge label and color.
+(String, Color) sourceBadge(SourceKind kind) => switch (kind) {
+  SourceKind.opds => ('OPDS', const Color(0xFF7D2638)),
+  SourceKind.webdav => ('DAV', const Color(0xFF2F5D8A)),
+  SourceKind.ao3 => ('AO3', const Color(0xFF990000)),
+  _ => ('GH', const Color(0xFF24292F)),
+};
+
 /// "owner/name": GitHub user or organization, then repository.
 final githubRepository = RegExp(r'^[A-Za-z0-9-]{1,39}/[A-Za-z0-9._-]{1,100}$');
 
-/// "GitHub · folder /novels" under a source's name.
+/// "GitHub · folder /novels", "OPDS catalog · calibre.example.com"… under a source's name.
 String sourceSubtitle(BuildContext context, SourceResponse source) {
-  final folder = source.folder;
-  return folder == null || folder.isEmpty
-      ? context.l10n.sourceGitHubRoot
-      : context.l10n.sourceGitHubFolder(folder);
+  final l10n = context.l10n;
+  final host = Uri.tryParse(source.location)?.host ?? source.location;
+  return switch (source.kind) {
+    SourceKind.opds => l10n.sourceOpdsAt(host),
+    SourceKind.webdav => l10n.sourceWebdavAt(host),
+    SourceKind.ao3 => l10n.sourceAo3Of(source.username ?? source.location),
+    _ =>
+      source.folder == null || source.folder!.isEmpty
+          ? l10n.sourceGitHubRoot
+          : l10n.sourceGitHubFolder(source.folder!),
+  };
 }
 
 /// "scanned 2 h ago".
