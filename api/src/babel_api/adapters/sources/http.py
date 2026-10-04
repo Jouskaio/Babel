@@ -9,6 +9,7 @@ to probe what the server can reach (ADR 0009, Limits).
 import asyncio
 import ipaddress
 import socket
+import time
 from collections.abc import Iterable
 from urllib.parse import urlsplit
 
@@ -74,3 +75,34 @@ def book_format(name: str, media_type: str | None = None) -> str | None:
         return by_media[media]
     suffix = name.lower().rsplit(".", 1)[-1] if "." in name else ""
     return suffix if suffix in ("epub", "pdf", "cbz", "cbr") else None
+
+
+class Throttle:
+    """Spaces requests to one site, for every reader of the server (they share its IP).
+
+    ``wait`` returns once ``interval`` seconds have passed since the previous request and
+    any pause asked by the site (``cool_down``, e.g. after a 429) is over.
+    """
+
+    def __init__(self, interval: float) -> None:
+        self._interval = interval
+        self._next = 0.0
+        self._lock = asyncio.Lock()
+
+    async def wait(self) -> None:
+        async with self._lock:
+            delay = self._next - time.monotonic()
+            if delay > 0:
+                await asyncio.sleep(delay)
+            self._next = time.monotonic() + self._interval
+
+    def cool_down(self, seconds: float) -> None:
+        self._next = max(self._next, time.monotonic() + seconds)
+
+
+def retry_after(response: httpx.Response, default: float, cap: float) -> float:
+    """Seconds asked by a ``Retry-After`` header (in seconds), within ``cap``."""
+    try:
+        return min(float(response.headers.get("retry-after", default)), cap)
+    except ValueError:
+        return default

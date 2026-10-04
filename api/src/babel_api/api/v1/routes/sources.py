@@ -143,6 +143,8 @@ class CheckSourceResponse(BaseModel):
 class BatchImportResponse(BaseModel):
     imported: int
     failed: int
+    remaining: int = Field(description="Books left to import: call again to continue")
+    paused: bool = Field(description="The source asked to slow down: wait before calling again")
 
 
 @router.get("", operation_id="getSources")
@@ -223,6 +225,11 @@ async def import_all(
     source_id: UUID,
     device_id: DeviceHeader = None,
 ) -> BatchImportResponse:
-    """Import every book not yet in the library (up to 50 per call)."""
+    """Import books not yet in the library, a batch per call (smaller for slow sources)."""
     result = await sources.import_new(user_id, source_id, device_id)
-    return BatchImportResponse(imported=result.imported, failed=result.failed)
+    return BatchImportResponse(
+        imported=result.imported,
+        failed=result.failed,
+        remaining=result.remaining,
+        paused=result.paused,
+    )

@@ -15,30 +15,44 @@ class BatchImportResponse {
   BatchImportResponse({
     required this.failed,
     required this.imported,
+    required this.paused,
+    required this.remaining,
   });
 
   int failed;
 
   int imported;
 
+  /// The source asked to slow down: wait before calling again
+  bool paused;
+
+  /// Books left to import: call again to continue
+  int remaining;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is BatchImportResponse &&
     other.failed == failed &&
-    other.imported == imported;
+    other.imported == imported &&
+    other.paused == paused &&
+    other.remaining == remaining;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (failed.hashCode) +
-    (imported.hashCode);
+    (imported.hashCode) +
+    (paused.hashCode) +
+    (remaining.hashCode);
 
   @override
-  String toString() => 'BatchImportResponse[failed=$failed, imported=$imported]';
+  String toString() => 'BatchImportResponse[failed=$failed, imported=$imported, paused=$paused, remaining=$remaining]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'failed'] = this.failed;
       json[r'imported'] = this.imported;
+      json[r'paused'] = this.paused;
+      json[r'remaining'] = this.remaining;
     return json;
   }
 
@@ -63,6 +77,8 @@ class BatchImportResponse {
       return BatchImportResponse(
         failed: mapValueOfType<int>(json, r'failed')!,
         imported: mapValueOfType<int>(json, r'imported')!,
+        paused: mapValueOfType<bool>(json, r'paused')!,
+        remaining: mapValueOfType<int>(json, r'remaining')!,
       );
     }
     return null;
@@ -112,6 +128,8 @@ class BatchImportResponse {
   static const requiredKeys = <String>{
     'failed',
     'imported',
+    'paused',
+    'remaining',
   };
 }
 

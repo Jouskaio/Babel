@@ -88,7 +88,7 @@ class FakeAo3:
 
 
 def connector(fake: FakeAo3) -> Ao3Connector:
-    return Ao3Connector(httpx.MockTransport(fake), pause=0)
+    return Ao3Connector(httpx.MockTransport(fake), pause=0, download_pause=0)
 
 
 def test_public_bookmarks_are_listed_page_by_page() -> None:
@@ -163,3 +163,21 @@ def test_passing_server_errors_are_retried() -> None:
     fake.flaky = 3
     with pytest.raises(SourceConnectionError):
         asyncio.run(connector(fake).check({"username": "ada"}, None))
+
+
+def test_a_rate_limit_pauses_every_request() -> None:
+    fake = FakeAo3()
+    ao3 = connector(fake)
+    fake.limited = True
+    with pytest.raises(SourceRateLimitedError):
+        asyncio.run(ao3.check({"username": "ada"}, None))
+    fake.limited = False
+    fake.requests.clear()
+
+    async def soon() -> None:
+        # Retry-After absent: two minutes. Nothing is sent meanwhile.
+        await asyncio.wait_for(ao3.check({"username": "ada"}, None), timeout=0.2)
+
+    with pytest.raises(TimeoutError):
+        asyncio.run(soon())
+    assert fake.requests == []

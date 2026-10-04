@@ -30,6 +30,8 @@ class FakeGitHub:
         self.tokens: list[str | None] = []
         self.down = False
         self.limited = False
+        self.limited_downloads = False
+        self.batch_size = 50
 
     async def check(self, config: dict[str, Any], token: str | None) -> dict[str, Any]:
         self.tokens.append(token)
@@ -51,6 +53,8 @@ class FakeGitHub:
     async def fetch(
         self, config: dict[str, Any], token: str | None, entry: RemoteEntry
     ) -> AsyncIterator[bytes]:
+        if self.limited_downloads:
+            raise SourceRateLimitedError
         self.fetched.append(entry.remote_id)
         content = next(c for sha, c in self.files.values() if sha == entry.remote_id)
         yield content
@@ -261,13 +265,15 @@ def test_files_already_on_babel_are_not_downloaded_again(
     assert client.post(f"/v1/sources/{ada_source}/import", headers=ada).json() == {
         "imported": 2,
         "failed": 0,
+        "remaining": 0,
+        "paused": False,
     }
     assert sorted(github.fetched) == ["sha-emma", "sha-jane"]
     # Bob connects a fork of the same repository: same blobs, nothing to download.
     bob_detail = connect(client, bob, "bob/fork").json()
     assert set(statuses(bob_detail).values()) == {"on_babel"}
     result = client.post(f"/v1/sources/{bob_detail['source']['id']}/import", headers=bob)
-    assert result.json() == {"imported": 2, "failed": 0}
+    assert result.json()["imported"] == 2
     assert len(github.fetched) == 2
     assert len(client.get("/v1/library", headers=bob).json()) == 2
 
@@ -278,7 +284,7 @@ def test_import_all_skips_books_already_in_the_library(
     source_id = connect(client, ada).json()["source"]["id"]
     client.post(f"/v1/sources/{source_id}/import", headers=ada)
     again = client.post(f"/v1/sources/{source_id}/import", headers=ada)
-    assert again.json() == {"imported": 0, "failed": 0}
+    assert again.json() == {"imported": 0, "failed": 0, "remaining": 0, "paused": False}
 
 
 def test_a_book_uploaded_by_hand_is_not_mistaken_for_a_source_file(
@@ -300,12 +306,12 @@ def test_files_that_are_not_books_fail_without_stopping_the_batch(
     github.files["books/fake.epub"] = ("sha-fake", NOT_A_BOOK)
     source_id = connect(client, ada).json()["source"]["id"]
     result = client.post(f"/v1/sources/{source_id}/import", headers=ada).json()
-    assert result == {"imported": 2, "failed": 1}
+    assert (result["imported"], result["failed"]) == (2, 1)
     # Remembered as unreadable: not counted as new, not tried again...
     detail = client.get(f"/v1/sources/{source_id}", headers=ada).json()
     assert statuses(detail)["fake.epub"] == "unreadable"
     again = client.post(f"/v1/sources/{source_id}/import", headers=ada).json()
-    assert again == {"imported": 0, "failed": 0}
+    assert (again["imported"], again["failed"], again["remaining"]) == (0, 0, 0)
     assert github.fetched.count("sha-fake") == 1
     # ...until its content changes.
     github.files["books/fake.epub"] = ("sha-fixed", epub(title="Fixed", isbn=None))
@@ -325,6 +331,26 @@ def test_a_failed_scan_is_reported_and_keeps_nothing_stale(
     detail = client.post(f"/v1/sources/{source_id}/scan", headers=ada).json()
     assert detail["source"]["last_error"] is None
     assert list(statuses(detail)) == ["Jane Eyre.epub"]
+
+
+def test_slow_sources_import_a_few_books_per_call(
+    client: TestClient, github: FakeGitHub, ada: dict[str, str]
+) -> None:
+    github.batch_size = 1  # like AO3
+    source_id = connect(client, ada).json()["source"]["id"]
+    first = client.post(f"/v1/sources/{source_id}/import", headers=ada).json()
+    assert (first["imported"], first["remaining"]) == (1, 1)
+    second = client.post(f"/v1/sources/{source_id}/import", headers=ada).json()
+    assert (second["imported"], second["remaining"]) == (1, 0)
+
+
+def test_a_rate_limit_pauses_the_batch(
+    client: TestClient, github: FakeGitHub, ada: dict[str, str]
+) -> None:
+    source_id = connect(client, ada).json()["source"]["id"]
+    github.limited_downloads = True
+    result = client.post(f"/v1/sources/{source_id}/import", headers=ada).json()
+    assert result == {"imported": 0, "failed": 0, "remaining": 2, "paused": True}
 
 
 def test_deleting_a_source_keeps_imported_books(

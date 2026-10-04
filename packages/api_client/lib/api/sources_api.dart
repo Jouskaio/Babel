@@ -299,7 +299,7 @@ class SourcesApi {
 
   /// Import All
   ///
-  /// Import every book not yet in the library (up to 50 per call).
+  /// Import books not yet in the library, a batch per call (smaller for slow sources).
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -340,7 +340,7 @@ class SourcesApi {
 
   /// Import All
   ///
-  /// Import every book not yet in the library (up to 50 per call).
+  /// Import books not yet in the library, a batch per call (smaller for slow sources).
   ///
   /// Parameters:
   ///
