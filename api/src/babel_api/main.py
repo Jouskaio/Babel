@@ -15,6 +15,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         title="Babel API",
         version=__version__,
         summary="Library, annotated reading, sync and statistics.",
+        root_path=settings.root_path,
     )
     if settings.cors_origins:
         app.add_middleware(

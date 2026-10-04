@@ -1,5 +1,11 @@
-# Babel API deployment on the server VM (copied to /opt/babel).
-# The image tag is set by the release workflow through BABEL_API_TAG.
+# Babel deployment on the server (copied to /opt/babel by the release workflows).
+# Image tags are set by the release workflows through BABEL_API_TAG and BABEL_WEB_TAG.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   api:
     image: ghcr.io/jouskaio/babel-api:${BABEL_API_TAG:-latest}
@@ -9,8 +15,13 @@ services:
       - "8000:8000"
     restart: unless-stopped
     mem_limit: 512m
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    logging: *logging
+
+  web:
+    image: ghcr.io/jouskaio/babel-web:${BABEL_WEB_TAG:-latest}
+    container_name: babel-web
+    ports:
+      - "8090:8080"
+    restart: unless-stopped
+    mem_limit: 64m
+    logging: *logging
