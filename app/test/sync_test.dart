@@ -1,3 +1,4 @@
+import 'package:babel/src/core/auth/auth_controller.dart';
 import 'package:babel/src/core/storage/local_database.dart';
 import 'package:babel/src/core/sync/lookups.dart';
 import 'package:babel/src/core/sync/sync_engine.dart';
@@ -104,4 +105,24 @@ void main() {
     expect(op['entity'], 'library_item');
     expect((op['key']! as String).length, greaterThanOrEqualTo(8));
   });
+
+  test(
+    'an email confirmed on another device is picked up by the next sync',
+    () async {
+      final server = FakeServer()..emailVerified = false;
+      final container = await start(server);
+      expect(
+        (container.read(authControllerProvider) as SignedIn).user.emailVerified,
+        isFalse,
+      );
+
+      server.emailVerified = true;
+      await container.read(syncEngineProvider.notifier).sync();
+
+      expect(
+        (container.read(authControllerProvider) as SignedIn).user.emailVerified,
+        isTrue,
+      );
+    },
+  );
 }
