@@ -1885,6 +1885,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Connecteur · {host}'**
   String sourceGenericAt(String host);
+
+  /// No description provided for @noteHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire en marge…'**
+  String get noteHint;
+
+  /// No description provided for @removeAnnotation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get removeAnnotation;
+
+  /// No description provided for @marginTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'En marge'**
+  String get marginTitle;
+
+  /// No description provided for @marginCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune note} =1{1 note} other{{count} notes}}'**
+  String marginCount(int count);
+
+  /// No description provided for @marginEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionnez du texte pendant la lecture pour le surligner ou écrire une note.'**
+  String get marginEmpty;
+
+  /// No description provided for @highlightNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note'**
+  String get highlightNote;
+
+  /// No description provided for @copy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copier'**
+  String get copy;
 }
 
 class _AppLocalizationsDelegate

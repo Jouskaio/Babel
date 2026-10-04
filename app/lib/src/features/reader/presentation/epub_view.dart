@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:html/dom.dart' as dom;
@@ -9,15 +10,20 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
+import '../application/annotations.dart';
 import '../application/reader_settings.dart';
 import '../application/reading_position.dart';
 import '../data/epub_book.dart';
+import '../data/highlights.dart';
+import 'annotation_sheets.dart';
 import 'reader_chrome.dart';
 
 /// Reads an EPUB one chapter at a time, as continuous text (design: "screen / lecture").
 class EpubView extends ConsumerStatefulWidget {
   const EpubView({
     required this.book,
+    required this.itemId,
+    required this.fileSha256,
     required this.title,
     required this.start,
     required this.onPosition,
@@ -26,6 +32,8 @@ class EpubView extends ConsumerStatefulWidget {
   });
 
   final EpubBook book;
+  final String itemId;
+  final String fileSha256;
   final String title;
   final ReadingLocator? start;
   final void Function(ReadingLocator locator, double percent) onPosition;
@@ -44,6 +52,7 @@ class _EpubViewState extends ConsumerState<EpubView> {
   ScrollController _scroll = ScrollController();
   bool _chrome = true;
   Timer? _saveTimer;
+  String? _selection;
 
   late final List<int> _before = [
     for (var i = 0, sum = 0; i < widget.book.chapters.length; i++)
@@ -131,6 +140,18 @@ class _EpubViewState extends ConsumerState<EpubView> {
   }
 
   Future<bool> _onTapUrl(String url) async {
+    if (url.startsWith(annotationScheme)) {
+      final id = url.substring(annotationScheme.length);
+      final annotation = ref
+          .read(annotationsProvider(widget.fileSha256))
+          .value
+          ?.where((a) => a.id == id)
+          .firstOrNull;
+      if (annotation != null && mounted) {
+        await showAnnotationEditor(context, annotation);
+      }
+      return true;
+    }
     final uri = Uri.tryParse(url);
     if (uri != null && uri.hasScheme) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -140,6 +161,98 @@ class _EpubViewState extends ConsumerState<EpubView> {
     final index = widget.book.chapters.indexWhere((c) => c.path == target);
     if (index >= 0) _open(index);
     return true;
+  }
+
+  /// Highlights the selected text, and opens the note editor when [withNote].
+  Future<void> _annotate(
+    SelectableRegionState region,
+    HighlightColor color, {
+    bool withNote = false,
+  }) async {
+    final quote = _selection;
+    region
+      ..hideToolbar()
+      ..clearSelection();
+    if (quote == null || quote.trim().isEmpty) return;
+    final annotation = await ref
+        .read(annotationsControllerProvider)
+        .create(
+          itemId: widget.itemId,
+          fileSha256: widget.fileSha256,
+          chapter: _chapter,
+          quote: quote,
+          color: color,
+        );
+    if (withNote && annotation != null && mounted) {
+      await showAnnotationEditor(context, annotation, focusNote: true);
+    }
+  }
+
+  Widget _selectionMenu(BuildContext context, SelectableRegionState region) =>
+      AdaptiveTextSelectionToolbar(
+        anchors: region.contextMenuAnchors,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            decoration: BoxDecoration(
+              color: BabelColors.surface,
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: BabelColors.border),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final color in highlightChoices)
+                  ColorDot(color: color, onTap: () => _annotate(region, color)),
+                IconButton(
+                  tooltip: context.l10n.highlightNote,
+                  onPressed: () =>
+                      _annotate(region, HighlightColor.gold, withNote: true),
+                  icon: const Icon(
+                    Icons.chat_bubble_outline,
+                    size: 18,
+                    color: BabelColors.textPrimary,
+                  ),
+                ),
+                IconButton(
+                  tooltip: context.l10n.copy,
+                  onPressed: () {
+                    final text = _selection;
+                    if (text != null) {
+                      unawaited(Clipboard.setData(ClipboardData(text: text)));
+                    }
+                    region.hideToolbar();
+                  },
+                  icon: const Icon(
+                    Icons.copy,
+                    size: 18,
+                    color: BabelColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+
+  Map<String, String>? _styles(dom.Element element) {
+    if (element.localName == 'mark') {
+      final color = HighlightColor.parse(element.attributes['data-color'])
+          .color;
+      return {
+        'background-color':
+            'rgba(${(color.r * 255).round()}, ${(color.g * 255).round()}, '
+            '${(color.b * 255).round()}, 0.35)',
+        'color': '#EFE4D0',
+      };
+    }
+    if (element.localName == 'a') {
+      final href = element.attributes['href'] ?? '';
+      return href.startsWith(annotationScheme)
+          ? {'color': 'inherit', 'text-decoration': 'none'}
+          : {'color': '#C8A465'};
+    }
+    return null;
   }
 
   Widget? _image(dom.Element element) {
@@ -165,6 +278,12 @@ class _EpubViewState extends ConsumerState<EpubView> {
     final chapters = widget.book.chapters;
     final chapter = chapters[_chapter];
     final chapterLabel = chapter.title ?? l10n.chapterNumber(_chapter + 1);
+    final annotations =
+        ref.watch(annotationsProvider(widget.fileSha256)).value ?? const [];
+    final html = applyHighlights(chapter.html, [
+      for (final a in annotations)
+        if (a.chapter == _chapter && a.color != HighlightColor.none) a,
+    ]);
     return Scaffold(
       backgroundColor: BabelColors.canvas,
       body: Column(
@@ -207,20 +326,21 @@ class _EpubViewState extends ConsumerState<EpubView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          HtmlWidget(
-                            chapter.html,
-                            textStyle: BabelText.reading(size),
-                            onTapUrl: _onTapUrl,
-                            customStylesBuilder: (element) =>
-                                switch (element.localName) {
-                                  'a' => {'color': '#C8A465'},
-                                  _ => null,
-                                },
-                            customWidgetBuilder: (element) =>
-                                switch (element.localName) {
-                                  'img' || 'image' => _image(element),
-                                  _ => null,
-                                },
+                          SelectionArea(
+                            onSelectionChanged: (content) =>
+                                _selection = content?.plainText,
+                            contextMenuBuilder: _selectionMenu,
+                            child: HtmlWidget(
+                              html,
+                              textStyle: BabelText.reading(size),
+                              onTapUrl: _onTapUrl,
+                              customStylesBuilder: _styles,
+                              customWidgetBuilder: (element) =>
+                                  switch (element.localName) {
+                                    'img' || 'image' => _image(element),
+                                    _ => null,
+                                  },
+                            ),
                           ),
                           if (_chapter < chapters.length - 1) ...[
                             const SizedBox(height: 40),
@@ -255,6 +375,18 @@ class _EpubViewState extends ConsumerState<EpubView> {
               ),
             ),
           ),
+          if (_chrome)
+            _MarginButton(
+              count: annotations.length,
+              onTap: () => showMarginPanel(
+                context,
+                fileSha256: widget.fileSha256,
+                chapterName: (index) =>
+                    chapters[index.clamp(0, chapters.length - 1)].title ??
+                    l10n.chapterNumber(index + 1),
+                onOpenChapter: _open,
+              ),
+            ),
           if (_chrome)
             ReaderProgressBar(
               percent: _percent,
@@ -316,4 +448,51 @@ class _EpubViewState extends ConsumerState<EpubView> {
       ),
     );
   }
+}
+
+/// "En marge · 3 notes" above the progress bar (design: "screen / lecture").
+class _MarginButton extends StatelessWidget {
+  const _MarginButton({required this.count, required this.onTap});
+  final int count;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(24, 8, 24, 4),
+    child: Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 680),
+        child: Material(
+          color: BabelColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: const BorderSide(color: BabelColors.border),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(18),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${context.l10n.marginTitle} · '
+                      '${context.l10n.marginCount(count)}',
+                      style: BabelText.heading(17),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.arrow_upward,
+                    size: 18,
+                    color: BabelColors.gold,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }

@@ -117,6 +117,8 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
       return switch (item.format) {
         BookFormat.epub => EpubView(
           book: EpubBook.open(opened.bytes),
+          itemId: item.id,
+          fileSha256: item.sha256,
           title: item.title,
           start: opened.start,
           onPosition: _savePosition,

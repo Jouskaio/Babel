@@ -45,6 +45,10 @@ origin is wasteful and sometimes impossible.
   `epub:<chapter>:<fraction>` (spine index, fraction of the chapter scrolled) or
   `pages:<page>` (comics, PDF); the percent is weighted by the length of each chapter.
   Only the latest position of a book waits in the outbox.
+- Highlights and margin notes are synced the same way (`annotation` changes, ids chosen by
+  the device so they can be created offline, latest edit wins). They belong to the stored
+  file, not the library item, so removing a book and adding it back keeps them. They are
+  private for now; a visibility field is ready for friends.
 - Each device registers itself (name, kind, capabilities). Files are downloaded per device
   on demand or marked "available offline"; the library shows which devices hold a copy.
   Removing a file from one device never removes it from the library or other devices.

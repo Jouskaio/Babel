@@ -10,7 +10,7 @@
 
 part of babel_api_client;
 
-/// What a change is about. Shelves and annotations will join this list.
+/// What a change is about. Shelves will join this list.
 class EntityKind {
   /// Instantiate a new enum with the provided [value].
   const EntityKind._(this.value);
@@ -25,11 +25,13 @@ class EntityKind {
 
   static const libraryItem = EntityKind._(r'library_item');
   static const readingPosition = EntityKind._(r'reading_position');
+  static const annotation = EntityKind._(r'annotation');
 
   /// List of all possible values in this [enum][EntityKind].
   static const values = <EntityKind>[
     libraryItem,
     readingPosition,
+    annotation,
   ];
 
   static EntityKind? fromJson(dynamic value) => EntityKindTypeTransformer().decode(value);
@@ -70,6 +72,7 @@ class EntityKindTypeTransformer {
       switch (data) {
         case r'library_item': return EntityKind.libraryItem;
         case r'reading_position': return EntityKind.readingPosition;
+        case r'annotation': return EntityKind.annotation;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

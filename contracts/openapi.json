@@ -394,10 +394,11 @@
         "type": "object"
       },
       "EntityKind": {
-        "description": "What a change is about. Shelves and annotations will join this list.",
+        "description": "What a change is about. Shelves will join this list.",
         "enum": [
           "library_item",
-          "reading_position"
+          "reading_position",
+          "annotation"
         ],
         "title": "EntityKind",
         "type": "string"
