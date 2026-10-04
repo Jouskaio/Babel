@@ -7,7 +7,7 @@ from babel_api.domain.errors import (
     DomainError,
     EmailAlreadyUsedError,
     InvalidCredentialsError,
-    InvalidResetTokenError,
+    InvalidLinkError,
     PasswordRequiredError,
     ProviderNotConfiguredError,
     SourceUnavailableError,
@@ -16,7 +16,7 @@ from babel_api.domain.errors import (
 _STATUS: dict[type[Exception], tuple[int, str]] = {
     EmailAlreadyUsedError: (status.HTTP_409_CONFLICT, "An account already uses this email"),
     InvalidCredentialsError: (status.HTTP_401_UNAUTHORIZED, "Invalid credentials"),
-    InvalidResetTokenError: (status.HTTP_400_BAD_REQUEST, "This link is invalid or has expired"),
+    InvalidLinkError: (status.HTTP_400_BAD_REQUEST, "This link is invalid or has expired"),
     PasswordRequiredError: (status.HTTP_403_FORBIDDEN, "The current password is incorrect"),
     ProviderNotConfiguredError: (status.HTTP_404_NOT_FOUND, "Sign-in method not available"),
     SourceUnavailableError: (status.HTTP_503_SERVICE_UNAVAILABLE, "Try again later"),

@@ -12,7 +12,7 @@ from babel_api.adapters.security.tokens import (
 from babel_api.domain.errors import (
     EmailAlreadyUsedError,
     InvalidCredentialsError,
-    InvalidResetTokenError,
+    InvalidLinkError,
     PasswordRequiredError,
 )
 from babel_api.domain.ports import (
@@ -22,12 +22,19 @@ from babel_api.domain.ports import (
     PasswordHasher,
     UserRepository,
 )
-from babel_api.domain.users import IdentityProvider, PasswordResetToken, RefreshToken, User
+from babel_api.domain.users import (
+    AccountToken,
+    IdentityProvider,
+    RefreshToken,
+    TokenPurpose,
+    User,
+)
 from babel_api.services import emails
 
 RESET_TTL = timedelta(hours=1)
-# At most one reset email per account in this interval, to prevent mail bombing.
-RESET_THROTTLE = timedelta(minutes=1)
+VERIFICATION_TTL = timedelta(hours=48)
+# At most one email of each kind per account in this interval, to prevent mail bombing.
+EMAIL_THROTTLE = timedelta(minutes=1)
 
 
 @dataclass(frozen=True, slots=True)
@@ -77,7 +84,9 @@ class AuthService:
         user = await self._users.add(
             email, display_name.strip(), self._hasher.hash(password), locale
         )
-        return await self._open_session(user)
+        session = await self._open_session(user)
+        await self._send_verification(user)
+        return session
 
     async def login(self, email: str, password: str) -> AuthSession:
         user = await self._users.get_by_email(normalize_email(email))
@@ -104,10 +113,17 @@ class AuthService:
                 # Without a verified email we cannot create or link an account safely.
                 raise InvalidCredentialsError
             email = normalize_email(identity.email)
+            now = datetime.now(UTC)
             user = await self._users.get_by_email(email)
             if user is None:
                 name = display_name or identity.display_name or email.split("@")[0]
                 user = await self._users.add(email, name.strip()[:80], None)
+            elif not user.email_verified:
+                # Someone may have registered this address before its owner: the provider
+                # proves ownership, so the unverified password and its sessions are dropped.
+                await self._users.clear_password(user.id)
+                await self._users.revoke_user_refresh_tokens(user.id, now)
+            await self._users.update(user.id, email_verified_at=now)
             await self._users.link_identity(user.id, provider, identity.subject)
             user = await self._users.get_by_id(user.id) or user
         return await self._open_session(user)
@@ -168,57 +184,99 @@ class AuthService:
             raise PasswordRequiredError
         await self._set_password(user, new_password)
 
-    # ------------------------------------------------------------ password reset
+    # ------------------------------------------------------------ emailed links
     async def request_password_reset(self, email: str) -> None:
         """Email a reset link. Says nothing about whether the account exists."""
         user = await self._users.get_by_email(normalize_email(email))
         if user is None:
             return
+        link = await self._issue_link(user, TokenPurpose.PASSWORD_RESET, RESET_TTL)
+        if link:
+            await self._mailer.send(
+                emails.password_reset(
+                    user.email,
+                    user.display_name,
+                    user.locale,
+                    f"{self._public_url}/reset-password?token={link}",
+                )
+            )
+
+    async def reset_password(self, token: str, new_password: str) -> None:
+        user = await self._redeem_link(token, TokenPurpose.PASSWORD_RESET)
+        # Receiving the link proves the address belongs to the user.
+        if not user.email_verified:
+            await self._users.update(user.id, email_verified_at=datetime.now(UTC))
+        await self._set_password(user, new_password)
+
+    async def resend_verification(self, user_id: UUID) -> None:
+        user = await self.get_user(user_id)
+        if not user.email_verified:
+            await self._send_verification(user)
+
+    async def verify_email(self, token: str) -> None:
+        user = await self._redeem_link(token, TokenPurpose.EMAIL_VERIFICATION)
         now = datetime.now(UTC)
-        last = await self._users.last_reset_request(user.id)
-        if last is not None and now - last < RESET_THROTTLE:
-            return
+        await self._users.update(user.id, email_verified_at=now)
+        await self._users.use_account_tokens(user.id, TokenPurpose.EMAIL_VERIFICATION, now)
+        await self._users.commit()
+
+    async def _send_verification(self, user: User) -> None:
+        link = await self._issue_link(user, TokenPurpose.EMAIL_VERIFICATION, VERIFICATION_TTL)
+        if link:
+            await self._mailer.send(
+                emails.verify_email(
+                    user.email,
+                    user.display_name,
+                    user.locale,
+                    f"{self._public_url}/verify-email?token={link}",
+                )
+            )
+
+    async def _issue_link(self, user: User, purpose: TokenPurpose, ttl: timedelta) -> str | None:
+        """Create a single-use token and return it, or None when one was sent just before."""
+        now = datetime.now(UTC)
+        last = await self._users.last_account_token(user.id, purpose)
+        if last is not None and now - last < EMAIL_THROTTLE:
+            return None
         token_id, secret = uuid4(), new_refresh_secret()
-        await self._users.add_reset_token(
-            PasswordResetToken(
+        await self._users.add_account_token(
+            AccountToken(
                 id=token_id,
                 user_id=user.id,
+                purpose=purpose,
                 secret_hash=hash_refresh_secret(secret),
                 created_at=now,
-                expires_at=now + RESET_TTL,
+                expires_at=now + ttl,
             )
         )
         await self._users.commit()
-        link = f"{self._public_url}/reset-password?token={token_id}.{secret}"
-        await self._mailer.send(
-            emails.password_reset(user.email, user.display_name, user.locale, link)
-        )
+        return f"{token_id}.{secret}"
 
-    async def reset_password(self, token: str, new_password: str) -> None:
+    async def _redeem_link(self, token: str, purpose: TokenPurpose) -> User:
         token_id, _, secret = token.partition(".")
         try:
-            stored = await self._users.get_reset_token(UUID(token_id))
+            stored = await self._users.get_account_token(UUID(token_id))
         except ValueError as error:
-            raise InvalidResetTokenError from error
-        now = datetime.now(UTC)
+            raise InvalidLinkError from error
         if (
             stored is None
+            or stored.purpose is not purpose
             or stored.used_at is not None
-            or stored.expires_at <= now
+            or stored.expires_at <= datetime.now(UTC)
             or not refresh_secret_matches(secret, stored.secret_hash)
         ):
-            raise InvalidResetTokenError
+            raise InvalidLinkError
         user = await self._users.get_by_id(stored.user_id)
         if user is None:
-            raise InvalidResetTokenError
-        await self._set_password(user, new_password)
+            raise InvalidLinkError
+        return user
 
     async def _set_password(self, user: User, new_password: str) -> None:
         """Store the new password, end every session and every pending reset, notify."""
         now = datetime.now(UTC)
         await self._users.update(user.id, password_hash=self._hasher.hash(new_password))
         await self._users.revoke_user_refresh_tokens(user.id, now)
-        await self._users.use_reset_tokens(user.id, now)
+        await self._users.use_account_tokens(user.id, TokenPurpose.PASSWORD_RESET, now)
         await self._users.commit()
         await self._mailer.send(emails.password_changed(user.email, user.display_name, user.locale))
 

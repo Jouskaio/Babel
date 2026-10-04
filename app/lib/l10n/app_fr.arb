@@ -137,5 +137,13 @@
         "type": "String"
       }
     }
-  }
+  },
+  "verifyEyebrow": "Confirmation",
+  "verifyTitle": "Confirmation de votre adresse",
+  "verifyChecking": "Vérification du lien…",
+  "verifyDone": "Votre adresse est confirmée. Merci !",
+  "continueAction": "Continuer",
+  "verifyBanner": "Confirmez votre adresse email : nous vous avons envoyé un lien.",
+  "verifyResend": "Renvoyer",
+  "verifyResent": "Lien envoyé. Pensez à vérifier vos spams."
 }

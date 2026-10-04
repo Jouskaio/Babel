@@ -30,6 +30,7 @@ class FakeApi {
         'email': 'ada@example.com',
         'display_name': 'Ada',
         'has_password': true,
+        'email_verified': true,
         'locale': 'fr',
         'providers': <String>[],
         'created_at': '2026-10-04T00:00:00Z',

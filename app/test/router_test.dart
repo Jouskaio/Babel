@@ -10,6 +10,7 @@ void main() {
       email: 'ada@example.com',
       displayName: 'Ada',
       hasPassword: true,
+      emailVerified: true,
       locale: UserResponseLocaleEnum.fr,
       createdAt: DateTime(2026),
     ),
@@ -45,5 +46,7 @@ void main() {
     expect(go(const SignedOut(), '/reset-password?token=abc'), isNull);
     expect(go(signedIn, '/reset-password?token=abc'), isNull);
     expect(go(signedIn, '/forgot-password'), isNull);
+    expect(go(const SignedOut(), '/verify-email?token=abc'), isNull);
+    expect(go(signedIn, '/verify-email?token=abc'), isNull);
   });
 }

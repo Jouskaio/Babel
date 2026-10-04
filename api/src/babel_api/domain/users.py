@@ -23,7 +23,13 @@ class User:
     created_at: datetime
     password_hash: str | None = None
     locale: str = "fr"
+    email_verified_at: datetime | None = None
     providers: frozenset[IdentityProvider] = field(default_factory=frozenset[IdentityProvider])
+
+    @property
+    def email_verified(self) -> bool:
+        """Whether the user proved they own the email address."""
+        return self.email_verified_at is not None
 
     @property
     def has_password(self) -> bool:
@@ -54,12 +60,20 @@ class ExternalIdentity:
     display_name: str | None = None
 
 
+class TokenPurpose(StrEnum):
+    """What a single-use emailed link is for."""
+
+    PASSWORD_RESET = "password_reset"  # noqa: S105 - a purpose name, not a secret
+    EMAIL_VERIFICATION = "email_verification"
+
+
 @dataclass(frozen=True, slots=True)
-class PasswordResetToken:
-    """A single-use password reset link. Only a hash of its secret is kept."""
+class AccountToken:
+    """A single-use link sent by email. Only a hash of its secret is kept."""
 
     id: UUID
     user_id: UUID
+    purpose: TokenPurpose
     secret_hash: str
     created_at: datetime
     expires_at: datetime

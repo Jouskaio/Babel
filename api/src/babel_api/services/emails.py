@@ -26,6 +26,14 @@ _TEXTS: dict[str, dict[str, str]] = {
             "Si vous n’êtes pas à l’origine de ce changement, réinitialisez votre mot de passe "
             "sans attendre et répondez à cet email."
         ),
+        "verify_subject": "Confirmez votre adresse email",
+        "verify_body": (
+            "Bienvenue sur Babel ! Confirmez votre adresse pour sécuriser votre compte : "
+            "elle sert à retrouver l’accès si vous oubliez votre mot de passe. "
+            "Ce lien est valable 48 heures."
+        ),
+        "verify_button": "Confirmer mon adresse",
+        "verify_ignore": "Si vous n’avez pas créé de compte Babel, ignorez cet email.",
         "signature": "— Babel",
     },
     "en": {
@@ -48,6 +56,13 @@ _TEXTS: dict[str, dict[str, str]] = {
             "If you did not make this change, reset your password right away and reply to "
             "this email."
         ),
+        "verify_subject": "Confirm your email address",
+        "verify_body": (
+            "Welcome to Babel! Confirm your address to secure your account: it lets you get "
+            "back in if you forget your password. This link is valid for 48 hours."
+        ),
+        "verify_button": "Confirm my address",
+        "verify_ignore": "If you did not create a Babel account, ignore this email.",
         "signature": "— Babel",
     },
 }
@@ -79,16 +94,27 @@ def _html(paragraphs: list[str], button: tuple[str, str] | None = None) -> str:
     )
 
 
-def password_reset(to: str, name: str, locale: str, link: str) -> EmailMessage:
-    t = _texts(locale)
-    paragraphs = [t["reset_intro"].format(name=name), t["reset_body"]]
-    text = "\n\n".join([*paragraphs, link, t["reset_ignore"], t["signature"]])
-    html = _html(paragraphs, (t["reset_button"], link)).replace(
+def _footer(html: str, note: str) -> str:
+    return html.replace(
         "</div></div>",
-        f'<p style="margin:0;color:#B59A8E;font-size:13px">{escape(t["reset_ignore"])}</p>'
-        "</div></div>",
+        f'<p style="margin:0;color:#B59A8E;font-size:13px">{escape(note)}</p></div></div>',
     )
-    return EmailMessage(to=to, subject=t["reset_subject"], text=text, html=html)
+
+
+def _link_email(to: str, name: str, locale: str, link: str, kind: str) -> EmailMessage:
+    t = _texts(locale)
+    paragraphs = [t["reset_intro"].format(name=name), t[f"{kind}_body"]]
+    text = "\n\n".join([*paragraphs, link, t[f"{kind}_ignore"], t["signature"]])
+    html = _footer(_html(paragraphs, (t[f"{kind}_button"], link)), t[f"{kind}_ignore"])
+    return EmailMessage(to=to, subject=t[f"{kind}_subject"], text=text, html=html)
+
+
+def password_reset(to: str, name: str, locale: str, link: str) -> EmailMessage:
+    return _link_email(to, name, locale, link, "reset")
+
+
+def verify_email(to: str, name: str, locale: str, link: str) -> EmailMessage:
+    return _link_email(to, name, locale, link, "verify")
 
 
 def password_changed(to: str, name: str, locale: str) -> EmailMessage:

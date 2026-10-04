@@ -28,7 +28,7 @@ def mailer(app: FastAPI) -> RecordingMailer:
     return recording
 
 
-def register(client: TestClient, locale: str = "fr") -> dict[str, str]:
+def register(client: TestClient, mailer: RecordingMailer, locale: str = "fr") -> dict[str, str]:
     response = client.post(
         "/v1/auth/register",
         json={
@@ -39,6 +39,8 @@ def register(client: TestClient, locale: str = "fr") -> dict[str, str]:
         },
     )
     assert response.status_code == 201
+    # Sign-up sends a confirmation email; these tests look at what comes after.
+    mailer.sent.clear()
     return response.json()
 
 
@@ -56,7 +58,7 @@ def test_unknown_emails_get_the_same_answer(client: TestClient, mailer: Recordin
 
 
 def test_a_reset_link_sets_a_new_password_once(client: TestClient, mailer: RecordingMailer) -> None:
-    session = register(client)
+    session = register(client, mailer)
 
     assert (
         client.post("/v1/auth/password/forgot", json={"email": "ADA@example.com"}).status_code
@@ -88,7 +90,7 @@ def test_a_reset_link_sets_a_new_password_once(client: TestClient, mailer: Recor
 
 
 def test_emails_follow_the_user_language(client: TestClient, mailer: RecordingMailer) -> None:
-    register(client, locale="en")
+    register(client, mailer, locale="en")
 
     client.post("/v1/auth/password/forgot", json={"email": "ada@example.com"})
 
@@ -96,7 +98,7 @@ def test_emails_follow_the_user_language(client: TestClient, mailer: RecordingMa
 
 
 def test_reset_requests_are_throttled(client: TestClient, mailer: RecordingMailer) -> None:
-    register(client)
+    register(client, mailer)
 
     client.post("/v1/auth/password/forgot", json={"email": "ada@example.com"})
     client.post("/v1/auth/password/forgot", json={"email": "ada@example.com"})
@@ -107,7 +109,7 @@ def test_reset_requests_are_throttled(client: TestClient, mailer: RecordingMaile
 def test_expired_or_forged_links_are_refused(
     client: TestClient, mailer: RecordingMailer, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    register(client)
+    register(client, mailer)
     monkeypatch.setattr(auth_service, "RESET_TTL", timedelta(seconds=-1))
     client.post("/v1/auth/password/forgot", json={"email": "ada@example.com"})
     expired = reset_token(mailer.sent[0])
@@ -122,7 +124,7 @@ def test_expired_or_forged_links_are_refused(
 def test_changing_the_password_notifies_the_user(
     client: TestClient, mailer: RecordingMailer
 ) -> None:
-    session = register(client)
+    session = register(client, mailer)
 
     client.post(
         "/v1/me/password",
@@ -133,8 +135,8 @@ def test_changing_the_password_notifies_the_user(
     assert [m.subject for m in mailer.sent] == ["Votre mot de passe Babel a été modifié"]
 
 
-def test_the_language_can_be_changed(client: TestClient) -> None:
-    session = register(client)
+def test_the_language_can_be_changed(client: TestClient, mailer: RecordingMailer) -> None:
+    session = register(client, mailer)
 
     response = client.patch(
         "/v1/me",

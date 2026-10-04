@@ -551,4 +551,52 @@ class AuthApi {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
   }
+
+  /// Verify Email
+  ///
+  /// Confirm the email address with the link sent at sign-up.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [VerifyEmailRequest] verifyEmailRequest (required):
+  Future<Response> verifyEmailWithHttpInfo(VerifyEmailRequest verifyEmailRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/auth/email/verify';
+
+    // ignore: prefer_final_locals
+    Object? postBody = verifyEmailRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Verify Email
+  ///
+  /// Confirm the email address with the link sent at sign-up.
+  ///
+  /// Parameters:
+  ///
+  /// * [VerifyEmailRequest] verifyEmailRequest (required):
+  Future<void> verifyEmail(VerifyEmailRequest verifyEmailRequest,) async {
+    final response = await verifyEmailWithHttpInfo(verifyEmailRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
 }

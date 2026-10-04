@@ -102,5 +102,13 @@
   "resetPasswordAction": "Save the password",
   "resetDone": "Password saved. You can now sign in.",
   "errorResetLink": "This link is no longer valid. Ask for a new one.",
-  "backToSignIn": "Back to sign in"
+  "backToSignIn": "Back to sign in",
+  "verifyEyebrow": "Confirmation",
+  "verifyTitle": "Confirming your address",
+  "verifyChecking": "Checking the link…",
+  "verifyDone": "Your address is confirmed. Thank you!",
+  "continueAction": "Continue",
+  "verifyBanner": "Confirm your email address: we sent you a link.",
+  "verifyResend": "Resend",
+  "verifyResent": "Link sent. Check your spam folder too."
 }
