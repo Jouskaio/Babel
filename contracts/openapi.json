@@ -867,6 +867,9 @@
               }
             },
             "description": "Validation Error"
+          },
+          "503": {
+            "description": "Cover source unreachable, retry later"
           }
         },
         "summary": "Get Cover",
