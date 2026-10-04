@@ -3,9 +3,12 @@ import 'package:babel/src/features/home/presentation/home_page.dart';
 import 'package:babel_api_client/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
+// Riverpod retries failed providers by default; tests need a deterministic error state.
 Widget _wrap(Override override) => ProviderScope(
+      retry: (_, __) => null,
       overrides: [override],
       child: const MaterialApp(home: HomePage()),
     );
