@@ -12,10 +12,22 @@ from babel_api.adapters.security.tokens import (
 from babel_api.domain.errors import (
     EmailAlreadyUsedError,
     InvalidCredentialsError,
+    InvalidResetTokenError,
     PasswordRequiredError,
 )
-from babel_api.domain.ports import AccessTokens, IdentityVerifier, PasswordHasher, UserRepository
-from babel_api.domain.users import IdentityProvider, RefreshToken, User
+from babel_api.domain.ports import (
+    AccessTokens,
+    IdentityVerifier,
+    Mailer,
+    PasswordHasher,
+    UserRepository,
+)
+from babel_api.domain.users import IdentityProvider, PasswordResetToken, RefreshToken, User
+from babel_api.services import emails
+
+RESET_TTL = timedelta(hours=1)
+# At most one reset email per account in this interval, to prevent mail bombing.
+RESET_THROTTLE = timedelta(minutes=1)
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,8 +54,12 @@ class AuthService:
         access_tokens: AccessTokens,
         refresh_ttl: timedelta,
         verifiers: dict[IdentityProvider, IdentityVerifier],
+        mailer: Mailer,
+        public_url: str,
     ) -> None:
         self._users = users
+        self._mailer = mailer
+        self._public_url = public_url.rstrip("/")
         self._hasher = hasher
         self._access = access_tokens
         self._refresh_ttl = refresh_ttl
@@ -52,11 +68,15 @@ class AuthService:
         self._dummy_hash = hasher.hash("timing-equalizer")
 
     # ------------------------------------------------------------ sign-up / sign-in
-    async def register(self, email: str, password: str, display_name: str) -> AuthSession:
+    async def register(
+        self, email: str, password: str, display_name: str, locale: str = "fr"
+    ) -> AuthSession:
         email = normalize_email(email)
         if await self._users.get_by_email(email):
             raise EmailAlreadyUsedError
-        user = await self._users.add(email, display_name.strip(), self._hasher.hash(password))
+        user = await self._users.add(
+            email, display_name.strip(), self._hasher.hash(password), locale
+        )
         return await self._open_session(user)
 
     async def login(self, email: str, password: str) -> AuthSession:
@@ -128,8 +148,11 @@ class AuthService:
             raise InvalidCredentialsError
         return user
 
-    async def update_profile(self, user_id: UUID, display_name: str) -> User:
-        user = await self._users.update(user_id, display_name=display_name.strip())
+    async def update_profile(
+        self, user_id: UUID, display_name: str | None = None, locale: str | None = None
+    ) -> User:
+        name = display_name.strip() if display_name is not None else None
+        user = await self._users.update(user_id, display_name=name, locale=locale)
         await self._users.commit()
         return user
 
@@ -143,9 +166,61 @@ class AuthService:
             or not self._hasher.verify(user.password_hash, current_password)
         ):
             raise PasswordRequiredError
-        await self._users.update(user_id, password_hash=self._hasher.hash(new_password))
-        await self._users.revoke_user_refresh_tokens(user_id, datetime.now(UTC))
+        await self._set_password(user, new_password)
+
+    # ------------------------------------------------------------ password reset
+    async def request_password_reset(self, email: str) -> None:
+        """Email a reset link. Says nothing about whether the account exists."""
+        user = await self._users.get_by_email(normalize_email(email))
+        if user is None:
+            return
+        now = datetime.now(UTC)
+        last = await self._users.last_reset_request(user.id)
+        if last is not None and now - last < RESET_THROTTLE:
+            return
+        token_id, secret = uuid4(), new_refresh_secret()
+        await self._users.add_reset_token(
+            PasswordResetToken(
+                id=token_id,
+                user_id=user.id,
+                secret_hash=hash_refresh_secret(secret),
+                created_at=now,
+                expires_at=now + RESET_TTL,
+            )
+        )
         await self._users.commit()
+        link = f"{self._public_url}/reset-password?token={token_id}.{secret}"
+        await self._mailer.send(
+            emails.password_reset(user.email, user.display_name, user.locale, link)
+        )
+
+    async def reset_password(self, token: str, new_password: str) -> None:
+        token_id, _, secret = token.partition(".")
+        try:
+            stored = await self._users.get_reset_token(UUID(token_id))
+        except ValueError as error:
+            raise InvalidResetTokenError from error
+        now = datetime.now(UTC)
+        if (
+            stored is None
+            or stored.used_at is not None
+            or stored.expires_at <= now
+            or not refresh_secret_matches(secret, stored.secret_hash)
+        ):
+            raise InvalidResetTokenError
+        user = await self._users.get_by_id(stored.user_id)
+        if user is None:
+            raise InvalidResetTokenError
+        await self._set_password(user, new_password)
+
+    async def _set_password(self, user: User, new_password: str) -> None:
+        """Store the new password, end every session and every pending reset, notify."""
+        now = datetime.now(UTC)
+        await self._users.update(user.id, password_hash=self._hasher.hash(new_password))
+        await self._users.revoke_user_refresh_tokens(user.id, now)
+        await self._users.use_reset_tokens(user.id, now)
+        await self._users.commit()
+        await self._mailer.send(emails.password_changed(user.email, user.display_name, user.locale))
 
     async def delete_account(self, user_id: UUID) -> None:
         await self._users.delete(user_id)

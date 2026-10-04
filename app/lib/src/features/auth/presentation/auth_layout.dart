@@ -173,6 +173,7 @@ class AuthError extends StatelessWidget {
       AuthFailure.invalidCredentials => l10n.errorInvalidCredentials,
       AuthFailure.emailTaken => l10n.errorEmailTaken,
       AuthFailure.wrongPassword => l10n.errorWrongPassword,
+      AuthFailure.invalidResetLink => l10n.errorResetLink,
       AuthFailure.network => l10n.errorNetwork,
       AuthFailure.generic => l10n.errorGeneric,
     };

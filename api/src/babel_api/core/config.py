@@ -31,6 +31,16 @@ class Settings(BaseSettings):
     # The refresh cookie used by the web app is only sent over HTTPS when true.
     cookie_secure: bool = True
 
+    # Public address of the web app, used in links sent by email.
+    public_url: str = "http://localhost:8080"
+
+    # Outgoing email (SMTP with STARTTLS). Without a host, emails are only logged.
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: SecretStr = SecretStr("")
+    mail_from: str = "Babel <contact@jouskaio.me>"
+
     # Social sign-in: accepted audiences (OAuth client IDs). Empty disables the provider.
     google_client_ids: list[str] = []
     apple_client_ids: list[str] = []

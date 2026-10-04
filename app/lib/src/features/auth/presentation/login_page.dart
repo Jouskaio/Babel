@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_controller.dart';
 import '../../../core/auth/auth_failure.dart';
+import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/babel_text_field.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
@@ -81,7 +84,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _submit(),
               ),
-              const SizedBox(height: 28),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => context.go(Routes.forgotPassword),
+                  child: Text(
+                    l10n.forgotPassword,
+                    style: BabelText.body(
+                      13,
+                      color: BabelColors.gold,
+                      weight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
               AuthError(_failure),
               PillButton(
                 label: l10n.signIn,

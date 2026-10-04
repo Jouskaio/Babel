@@ -637,6 +637,84 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Français'**
   String get languageName;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe oublié ?'**
+  String get forgotPassword;
+
+  /// No description provided for @forgotEyebrow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe oublié'**
+  String get forgotEyebrow;
+
+  /// No description provided for @forgotTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrouvez l’accès à votre bibliothèque.'**
+  String get forgotTitle;
+
+  /// No description provided for @forgotLede.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez l’email de votre compte : nous vous enverrons un lien pour choisir un nouveau mot de passe.'**
+  String get forgotLede;
+
+  /// No description provided for @sendResetLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le lien'**
+  String get sendResetLink;
+
+  /// No description provided for @resetLinkSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Si un compte existe pour {email}, un email vient de lui être envoyé. Le lien est valable une heure.'**
+  String resetLinkSent(String email);
+
+  /// No description provided for @resetEyebrow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau mot de passe'**
+  String get resetEyebrow;
+
+  /// No description provided for @resetTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez un nouveau mot de passe.'**
+  String get resetTitle;
+
+  /// No description provided for @resetLede.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos autres appareils seront déconnectés.'**
+  String get resetLede;
+
+  /// No description provided for @resetPasswordAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer le mot de passe'**
+  String get resetPasswordAction;
+
+  /// No description provided for @resetDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe enregistré. Vous pouvez vous connecter.'**
+  String get resetDone;
+
+  /// No description provided for @errorResetLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce lien n’est plus valable. Demandez-en un nouveau.'**
+  String get errorResetLink;
+
+  /// No description provided for @backToSignIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour à la connexion'**
+  String get backToSignIn;
 }
 
 class _AppLocalizationsDelegate

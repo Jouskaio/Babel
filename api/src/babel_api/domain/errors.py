@@ -23,3 +23,7 @@ class PasswordRequiredError(DomainError):
 
 class SourceUnavailableError(DomainError):
     """An external catalog source could not be reached. Retrying later may work."""
+
+
+class InvalidResetTokenError(DomainError):
+    """The password reset link is unknown, expired or already used."""

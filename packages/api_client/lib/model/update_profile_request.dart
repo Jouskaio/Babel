@@ -13,26 +13,40 @@ part of babel_api_client;
 class UpdateProfileRequest {
   /// Returns a new [UpdateProfileRequest] instance.
   UpdateProfileRequest({
-    required this.displayName,
+    this.displayName,
+    this.locale,
   });
 
-  String displayName;
+  String? displayName;
+
+  UpdateProfileRequestLocaleEnum? locale;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UpdateProfileRequest &&
-    other.displayName == displayName;
+    other.displayName == displayName &&
+    other.locale == locale;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (displayName.hashCode);
+    (displayName == null ? 0 : displayName!.hashCode) +
+    (locale == null ? 0 : locale!.hashCode);
 
   @override
-  String toString() => 'UpdateProfileRequest[displayName=$displayName]';
+  String toString() => 'UpdateProfileRequest[displayName=$displayName, locale=$locale]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.displayName != null) {
       json[r'display_name'] = this.displayName;
+    } else {
+      json[r'display_name'] = null;
+    }
+    if (this.locale != null) {
+      json[r'locale'] = this.locale;
+    } else {
+      json[r'locale'] = null;
+    }
     return json;
   }
 
@@ -55,7 +69,8 @@ class UpdateProfileRequest {
       }());
 
       return UpdateProfileRequest(
-        displayName: mapValueOfType<String>(json, r'display_name')!,
+        displayName: mapValueOfType<String>(json, r'display_name'),
+        locale: UpdateProfileRequestLocaleEnum.fromJson(json[r'locale']),
       );
     }
     return null;
@@ -103,7 +118,80 @@ class UpdateProfileRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'display_name',
   };
 }
+
+
+class UpdateProfileRequestLocaleEnum {
+  /// Instantiate a new enum with the provided [value].
+  const UpdateProfileRequestLocaleEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const fr = UpdateProfileRequestLocaleEnum._(r'fr');
+  static const en = UpdateProfileRequestLocaleEnum._(r'en');
+
+  /// List of all possible values in this [enum][UpdateProfileRequestLocaleEnum].
+  static const values = <UpdateProfileRequestLocaleEnum>[
+    fr,
+    en,
+  ];
+
+  static UpdateProfileRequestLocaleEnum? fromJson(dynamic value) => UpdateProfileRequestLocaleEnumTypeTransformer().decode(value);
+
+  static List<UpdateProfileRequestLocaleEnum> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <UpdateProfileRequestLocaleEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = UpdateProfileRequestLocaleEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [UpdateProfileRequestLocaleEnum] to String,
+/// and [decode] dynamic data back to [UpdateProfileRequestLocaleEnum].
+class UpdateProfileRequestLocaleEnumTypeTransformer {
+  factory UpdateProfileRequestLocaleEnumTypeTransformer() => _instance ??= const UpdateProfileRequestLocaleEnumTypeTransformer._();
+
+  const UpdateProfileRequestLocaleEnumTypeTransformer._();
+
+  String encode(UpdateProfileRequestLocaleEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a UpdateProfileRequestLocaleEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  UpdateProfileRequestLocaleEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'fr': return UpdateProfileRequestLocaleEnum.fr;
+        case r'en': return UpdateProfileRequestLocaleEnum.en;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [UpdateProfileRequestLocaleEnumTypeTransformer] instance.
+  static UpdateProfileRequestLocaleEnumTypeTransformer? _instance;
+}
+
 

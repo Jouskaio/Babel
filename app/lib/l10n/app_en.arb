@@ -89,5 +89,18 @@
   "greetingMorning": "Good morning, {name}.",
   "greetingEvening": "Good evening, {name}.",
   "language": "Language",
-  "languageName": "English"
+  "languageName": "English",
+  "forgotPassword": "Forgot your password?",
+  "forgotEyebrow": "Forgot password",
+  "forgotTitle": "Get back into your library.",
+  "forgotLede": "Enter your account email: we will send you a link to choose a new password.",
+  "sendResetLink": "Send the link",
+  "resetLinkSent": "If an account exists for {email}, an email is on its way. The link is valid for one hour.",
+  "resetEyebrow": "New password",
+  "resetTitle": "Choose a new password.",
+  "resetLede": "Your other devices will be signed out.",
+  "resetPasswordAction": "Save the password",
+  "resetDone": "Password saved. You can now sign in.",
+  "errorResetLink": "This link is no longer valid. Ask for a new one.",
+  "backToSignIn": "Back to sign in"
 }

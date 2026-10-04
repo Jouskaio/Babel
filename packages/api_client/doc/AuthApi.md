@@ -9,6 +9,7 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**forgotPassword**](AuthApi.md#forgotpassword) | **POST** /v1/auth/password/forgot | Forgot Password
 [**getAuthProviders**](AuthApi.md#getauthproviders) | **GET** /v1/auth/providers | Get Providers
 [**login**](AuthApi.md#login) | **POST** /v1/auth/login | Login
 [**loginWithApple**](AuthApi.md#loginwithapple) | **POST** /v1/auth/apple | Login With Apple
@@ -16,7 +17,51 @@ Method | HTTP request | Description
 [**logout**](AuthApi.md#logout) | **POST** /v1/auth/logout | Logout
 [**refreshSession**](AuthApi.md#refreshsession) | **POST** /v1/auth/refresh | Refresh
 [**register**](AuthApi.md#register) | **POST** /v1/auth/register | Register
+[**resetPassword**](AuthApi.md#resetpassword) | **POST** /v1/auth/password/reset | Reset Password
 
+
+# **forgotPassword**
+> Object forgotPassword(forgotPasswordRequest)
+
+Forgot Password
+
+Email a reset link. The answer is the same whether the account exists or not.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+
+final api_instance = AuthApi();
+final forgotPasswordRequest = ForgotPasswordRequest(); // ForgotPasswordRequest | 
+
+try {
+    final result = api_instance.forgotPassword(forgotPasswordRequest);
+    print(result);
+} catch (e) {
+    print('Exception when calling AuthApi->forgotPassword: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **forgotPasswordRequest** | [**ForgotPasswordRequest**](ForgotPasswordRequest.md)|  | 
+
+### Return type
+
+[**Object**](Object.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getAuthProviders**
 > ProvidersResponse getAuthProviders()
@@ -327,6 +372,48 @@ No authorization required
 
  - **Content-Type**: application/json
  - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **resetPassword**
+> resetPassword(resetPasswordRequest)
+
+Reset Password
+
+Set a new password from an emailed link. Every session is signed out.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+
+final api_instance = AuthApi();
+final resetPasswordRequest = ResetPasswordRequest(); // ResetPasswordRequest | 
+
+try {
+    api_instance.resetPassword(resetPasswordRequest);
+} catch (e) {
+    print('Exception when calling AuthApi->resetPassword: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **resetPasswordRequest** | [**ResetPasswordRequest**](ResetPasswordRequest.md)|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

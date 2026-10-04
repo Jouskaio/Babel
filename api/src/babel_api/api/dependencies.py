@@ -14,7 +14,7 @@ from babel_api.adapters.db.repositories import SqlUserRepository
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
 from babel_api.adapters.security.tokens import AccessTokenError, AccessTokenIssuer
 from babel_api.core.config import Settings
-from babel_api.domain.ports import IdentityVerifier
+from babel_api.domain.ports import IdentityVerifier, Mailer
 from babel_api.domain.users import IdentityProvider
 from babel_api.services.auth import AuthService
 from babel_api.services.catalog import CatalogService
@@ -30,6 +30,7 @@ class Container:
     access_tokens: AccessTokenIssuer
     verifiers: dict[IdentityProvider, IdentityVerifier]
     catalog: CatalogService
+    mailer: Mailer
 
 
 def get_container(request: Request) -> Container:
@@ -54,6 +55,8 @@ def get_auth_service(
         container.access_tokens,
         timedelta(days=container.settings.refresh_token_ttl_days),
         container.verifiers,
+        container.mailer,
+        container.settings.public_url,
     )
 
 

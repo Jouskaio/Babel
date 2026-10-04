@@ -10,6 +10,7 @@ void main() {
       email: 'ada@example.com',
       displayName: 'Ada',
       hasPassword: true,
+      locale: UserResponseLocaleEnum.fr,
       createdAt: DateTime(2026),
     ),
   );
@@ -38,5 +39,11 @@ void main() {
     expect(go(signedIn, '/splash?from=%2Faccount'), '/account');
     expect(go(signedIn, '/splash?from=%2Flogin'), '/home');
     expect(go(signedIn, '/account'), isNull);
+  });
+
+  test('emailed links open whether signed in or not', () {
+    expect(go(const SignedOut(), '/reset-password?token=abc'), isNull);
+    expect(go(signedIn, '/reset-password?token=abc'), isNull);
+    expect(go(signedIn, '/forgot-password'), isNull);
   });
 }

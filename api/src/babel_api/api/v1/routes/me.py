@@ -19,7 +19,7 @@ async def update_me(
     body: UpdateProfileRequest, user_id: CurrentUserId, auth: AuthServiceDep
 ) -> UserResponse:
     """Update the profile."""
-    return UserResponse.of(await auth.update_profile(user_id, body.display_name))
+    return UserResponse.of(await auth.update_profile(user_id, body.display_name, body.locale))
 
 
 @router.post("/password", operation_id="changePassword", status_code=status.HTTP_204_NO_CONTENT)

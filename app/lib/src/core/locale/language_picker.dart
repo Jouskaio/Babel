@@ -1,7 +1,10 @@
+import 'package:babel_api_client/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n.dart';
+import '../api/api_providers.dart';
+import '../auth/auth_controller.dart';
 import '../theme/babel_colors.dart';
 import '../theme/babel_text.dart';
 import 'locale_controller.dart';
@@ -16,8 +19,7 @@ class LanguagePicker extends ConsumerWidget {
     return PopupMenuButton<Locale>(
       tooltip: context.l10n.language,
       color: BabelColors.surface,
-      onSelected: (locale) =>
-          ref.read(localeControllerProvider.notifier).select(locale),
+      onSelected: (locale) => _select(ref, locale),
       itemBuilder: (_) => [
         for (final locale in AppLocalizations.supportedLocales)
           PopupMenuItem(
@@ -59,5 +61,23 @@ class LanguagePicker extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// Applies the language and, when signed in, saves it to the account so emails use it.
+  Future<void> _select(WidgetRef ref, Locale locale) async {
+    await ref.read(localeControllerProvider.notifier).select(locale);
+    if (ref.read(authControllerProvider) is! SignedIn) return;
+    final value = UpdateProfileRequestLocaleEnum.fromJson(locale.languageCode);
+    if (value == null) return;
+    try {
+      final user = await ref
+          .read(accountApiProvider)
+          .updateMe(UpdateProfileRequest(locale: value));
+      if (user != null) {
+        ref.read(authControllerProvider.notifier).updateUser(user);
+      }
+    } on ApiException {
+      // Offline: the language still applies on this device.
+    }
   }
 }
