@@ -1663,6 +1663,66 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'AO3 · favoris de {username}'**
   String sourceAo3Of(String username);
+
+  /// No description provided for @readBook.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lire'**
+  String get readBook;
+
+  /// No description provided for @readerOpening.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouverture du livre…'**
+  String get readerOpening;
+
+  /// No description provided for @readerNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce livre n\'est pas dans votre bibliothèque.'**
+  String get readerNotFound;
+
+  /// No description provided for @readerUnsupported.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel ne sait pas encore afficher ce format. Téléchargez le fichier pour le lire dans une autre application.'**
+  String get readerUnsupported;
+
+  /// No description provided for @readerBroken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier n\'a pas pu être ouvert.'**
+  String get readerBroken;
+
+  /// No description provided for @chapterNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chapitre {number}'**
+  String chapterNumber(int number);
+
+  /// No description provided for @chapterOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chapitre {number} / {total}'**
+  String chapterOf(int number, int total);
+
+  /// No description provided for @nextChapter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chapitre suivant'**
+  String get nextChapter;
+
+  /// No description provided for @textSize.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taille du texte'**
+  String get textSize;
+
+  /// No description provided for @pageOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Page {page} / {total}'**
+  String pageOf(int page, int total);
 }
 
 class _AppLocalizationsDelegate

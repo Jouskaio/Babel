@@ -379,5 +379,42 @@
         "type": "String"
       }
     }
+  },
+  "readBook": "Read",
+  "readerOpening": "Opening the book…",
+  "readerNotFound": "This book is not in your library.",
+  "readerUnsupported": "Babel cannot show this format yet. Download the file to read it in another app.",
+  "readerBroken": "This file could not be opened.",
+  "chapterNumber": "Chapter {number}",
+  "@chapterNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "chapterOf": "Chapter {number} / {total}",
+  "@chapterOf": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "nextChapter": "Next chapter",
+  "textSize": "Text size",
+  "pageOf": "Page {page} / {total}",
+  "@pageOf": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   }
 }
