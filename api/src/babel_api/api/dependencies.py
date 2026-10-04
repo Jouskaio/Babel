@@ -10,14 +10,16 @@ from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from babel_api.adapters.db.catalog_repository import SqlCatalogRepository
 from babel_api.adapters.db.repositories import SqlUserRepository
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
 from babel_api.adapters.security.tokens import AccessTokenError, AccessTokenIssuer
 from babel_api.core.config import Settings
-from babel_api.domain.ports import IdentityVerifier, Mailer
+from babel_api.domain.ports import BookSource, IdentityVerifier, Mailer
 from babel_api.domain.users import IdentityProvider
 from babel_api.services.auth import AuthService
 from babel_api.services.catalog import CatalogService
+from babel_api.services.works import WorkService
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,6 +32,7 @@ class Container:
     access_tokens: AccessTokenIssuer
     verifiers: dict[IdentityProvider, IdentityVerifier]
     catalog: CatalogService
+    books: BookSource
     mailer: Mailer
 
 
@@ -61,6 +64,15 @@ def get_auth_service(
 
 
 AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
+
+
+def get_work_service(
+    container: ContainerDep, session: Annotated[AsyncSession, Depends(get_session)]
+) -> WorkService:
+    return WorkService(SqlCatalogRepository(session), container.books)
+
+
+WorkServiceDep = Annotated[WorkService, Depends(get_work_service)]
 
 _bearer = HTTPBearer(auto_error=False)
 

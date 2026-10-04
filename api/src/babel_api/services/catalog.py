@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 from babel_api.domain.catalog import CoverImage, TrendingWork
 from babel_api.domain.errors import SourceUnavailableError
-from babel_api.domain.ports import CatalogSource, CoverSize
+from babel_api.domain.ports import CoverSize, TrendingSource
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class CatalogService:
 
     def __init__(
         self,
-        source: CatalogSource,
+        source: TrendingSource,
         *,
         trending_ttl: float = 6 * 3600,
         max_cached_covers: int = 300,

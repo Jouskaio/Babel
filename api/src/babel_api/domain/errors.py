@@ -27,3 +27,11 @@ class SourceUnavailableError(DomainError):
 
 class InvalidLinkError(DomainError):
     """The emailed link is unknown, expired or already used."""
+
+
+class InvalidIsbnError(DomainError):
+    """The value is not a valid ISBN-10 or ISBN-13."""
+
+
+class NotFoundError(DomainError):
+    """The requested resource does not exist."""
