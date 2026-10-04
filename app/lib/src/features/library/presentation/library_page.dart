@@ -1,0 +1,359 @@
+import 'package:babel_api_client/api.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/files/file_transfer.dart';
+import '../../../core/files/save_file.dart';
+import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/book_cover.dart';
+import '../../../core/widgets/pill_button.dart';
+import '../../../l10n.dart';
+import '../application/library_controller.dart';
+
+const _acceptedExtensions = ['epub', 'pdf', 'cbz', 'cbr'];
+
+/// The reader's library (design: Penpot "screen / bibliotheque").
+class LibraryPage extends ConsumerStatefulWidget {
+  const LibraryPage({super.key});
+
+  @override
+  ConsumerState<LibraryPage> createState() => _LibraryPageState();
+}
+
+class _LibraryPageState extends ConsumerState<LibraryPage> {
+  String? _importing;
+  double _progress = 0;
+
+  Future<void> _import() async {
+    final picked = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: _acceptedExtensions,
+    );
+    if (picked.isEmpty || !mounted) return;
+    final file = picked.first.xFile;
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() {
+      _importing = file.name;
+      _progress = 0;
+    });
+    try {
+      final result = await ref
+          .read(libraryControllerProvider.notifier)
+          .import(
+            file,
+            onProgress: (p) => mounted ? setState(() => _progress = p) : null,
+          );
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            result.deduplicated
+                ? l10n.importDeduplicated(result.item.title)
+                : l10n.imported(result.item.title),
+          ),
+        ),
+      );
+    } on ApiException catch (error) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(_importError(l10n, error))),
+      );
+    } finally {
+      if (mounted) setState(() => _importing = null);
+    }
+  }
+
+  String _importError(AppLocalizations l10n, ApiException error) =>
+      switch (error.code) {
+        413 => l10n.importTooLarge,
+        415 => l10n.importUnsupported,
+        451 => l10n.importBlocked,
+        _ =>
+          error.innerException != null ? l10n.errorNetwork : l10n.errorGeneric,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final library = ref.watch(libraryControllerProvider);
+    final items = library.value ?? const <LibraryItemResponse>[];
+    return RefreshIndicator(
+      onRefresh: ref.read(libraryControllerProvider.notifier).reload,
+      color: BabelColors.gold,
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+            sliver: SliverToBoxAdapter(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(l10n.libraryTitle, style: BabelText.title(44)),
+                        const SizedBox(height: 4),
+                        Text(
+                          l10n.libraryCount(items.length).toUpperCase(),
+                          style: BabelText.label(10, color: BabelColors.gold),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton.filled(
+                    tooltip: l10n.importFile,
+                    onPressed: _importing == null ? _import : null,
+                    style: IconButton.styleFrom(
+                      backgroundColor: BabelColors.textPrimary,
+                      foregroundColor: BabelColors.canvas,
+                      fixedSize: const Size(48, 48),
+                    ),
+                    icon: const Icon(Icons.upload),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_importing case final name?)
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.importing(name), style: BabelText.body(13)),
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(
+                      value: _progress,
+                      color: BabelColors.gold,
+                      backgroundColor: BabelColors.sunken,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (library.isLoading && items.isEmpty)
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: CircularProgressIndicator(color: BabelColors.gold),
+              ),
+            )
+          else if (library.hasError && items.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: TextButton(
+                  onPressed: ref
+                      .read(libraryControllerProvider.notifier)
+                      .reload,
+                  child: Text(l10n.retry),
+                ),
+              ),
+            )
+          else ...[
+            if (items.isEmpty)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+                sliver: SliverToBoxAdapter(
+                  child: Text(l10n.libraryEmpty, style: BabelText.body(15)),
+                ),
+              ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 140,
+                  mainAxisSpacing: 24,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 0.48,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) => _BookTile(item: items[i]),
+                  childCount: items.length,
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 120),
+              sliver: SliverToBoxAdapter(
+                child: _AddOwnBooks(
+                  onImport: _importing == null ? _import : null,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _BookTile extends ConsumerWidget {
+  const _BookTile({required this.item});
+  final LibraryItemResponse item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: () => showModalBottomSheet<void>(
+        context: context,
+        backgroundColor: BabelColors.surface,
+        builder: (_) => _BookActions(item: item),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LayoutBuilder(
+            builder: (context, c) =>
+                BookCover(width: c.maxWidth, title: item.title),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            item.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: BabelText.heading(16),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            item.format.value.toUpperCase(),
+            style: BabelText.label(
+              9,
+              color: BabelColors.textSecondary,
+              spacing: 1.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BookActions extends ConsumerStatefulWidget {
+  const _BookActions({required this.item});
+  final LibraryItemResponse item;
+
+  @override
+  ConsumerState<_BookActions> createState() => _BookActionsState();
+}
+
+class _BookActionsState extends ConsumerState<_BookActions> {
+  double? _progress;
+  late final Future<bool> _onDevice = isOnDevice(
+    widget.item.sha256,
+    widget.item.format.value,
+  );
+
+  Future<void> _download() async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    setState(() => _progress = 0);
+    try {
+      await ref
+          .read(fileTransferProvider)
+          .download(
+            widget.item,
+            onProgress: (p) => mounted ? setState(() => _progress = p) : null,
+          );
+      navigator.pop();
+      messenger.showSnackBar(
+        SnackBar(content: Text(kIsWeb ? l10n.downloadedWeb : l10n.downloaded)),
+      );
+    } on ApiException {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.errorNetwork)));
+      if (mounted) setState(() => _progress = null);
+    }
+  }
+
+  Future<void> _remove() async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    Navigator.of(context).pop();
+    await ref.read(libraryControllerProvider.notifier).remove(widget.item);
+    messenger.showSnackBar(
+      SnackBar(content: Text(l10n.removed(widget.item.title))),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final item = widget.item;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(item.title, style: BabelText.title(28)),
+            if (item.authors.isNotEmpty)
+              Text(item.authors.join(', '), style: BabelText.body(14)),
+            const SizedBox(height: 6),
+            Text(
+              '${item.format.value.toUpperCase()} · ${(item.size / 1024 / 1024).toStringAsFixed(1)} Mo',
+              style: BabelText.label(10, color: BabelColors.textSecondary),
+            ),
+            const SizedBox(height: 24),
+            if (_progress case final progress?)
+              LinearProgressIndicator(
+                value: progress,
+                color: BabelColors.gold,
+                backgroundColor: BabelColors.sunken,
+              )
+            else
+              FutureBuilder<bool>(
+                future: _onDevice,
+                builder: (context, snapshot) => PillButton(
+                  label: snapshot.data == true ? l10n.onDevice : l10n.download,
+                  expand: true,
+                  onPressed: snapshot.data == true ? null : _download,
+                ),
+              ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: _progress == null ? _remove : null,
+              child: Text(
+                l10n.removeFromLibrary,
+                style: BabelText.body(14, color: BabelColors.dustyRose),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AddOwnBooks extends StatelessWidget {
+  const _AddOwnBooks({required this.onImport});
+  final VoidCallback? onImport;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: BabelColors.gold.withValues(alpha: 0.6)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.addOwnBooksTitle, style: BabelText.heading(24)),
+          const SizedBox(height: 8),
+          Text(l10n.addOwnBooksBody, style: BabelText.body(14)),
+          const SizedBox(height: 18),
+          PillButton(label: l10n.importFile, onPressed: onImport),
+        ],
+      ),
+    );
+  }
+}

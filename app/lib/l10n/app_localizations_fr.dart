@@ -370,4 +370,188 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get verifyResent => 'Lien envoyé. Pensez à vérifier vos spams.';
+
+  @override
+  String get navHome => 'Accueil';
+
+  @override
+  String get navSearch => 'Chercher';
+
+  @override
+  String get navScan => 'Scan';
+
+  @override
+  String get navLibrary => 'Biblio';
+
+  @override
+  String get navProfile => 'Profil';
+
+  @override
+  String get searchTitle => 'Chercher';
+
+  @override
+  String get searchHint => 'Titre, auteur, ISBN…';
+
+  @override
+  String get recentTitle => 'Récemment';
+
+  @override
+  String get clear => 'Effacer';
+
+  @override
+  String get trendingTitle => 'Tendances';
+
+  @override
+  String noResults(String query) {
+    return 'Aucun résultat pour « $query ».';
+  }
+
+  @override
+  String get searchFailed =>
+      'La recherche n’a pas abouti. Réessayez dans un instant.';
+
+  @override
+  String get libraryTitle => 'Bibliothèque';
+
+  @override
+  String libraryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count titres',
+      one: '1 titre',
+      zero: 'Aucun titre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get libraryEmpty => 'Votre bibliothèque est vide pour l’instant.';
+
+  @override
+  String get addOwnBooksTitle => 'Ajouter vos propres livres';
+
+  @override
+  String get addOwnBooksBody =>
+      'EPUB, PDF, CBZ ou CBR : vos fichiers vous suivent sur tous vos appareils.';
+
+  @override
+  String get importFile => 'Importer un fichier';
+
+  @override
+  String importing(String name) {
+    return 'Import de « $name »…';
+  }
+
+  @override
+  String imported(String title) {
+    return '« $title » a rejoint votre bibliothèque.';
+  }
+
+  @override
+  String importDeduplicated(String title) {
+    return '« $title » était déjà sur Babel : ajouté sans le renvoyer.';
+  }
+
+  @override
+  String get importUnsupported =>
+      'Ce fichier n’est pas un EPUB, PDF, CBZ ou CBR.';
+
+  @override
+  String get importTooLarge => 'Ce fichier est trop volumineux.';
+
+  @override
+  String get importBlocked =>
+      'Ce fichier a été retiré de Babel et ne peut pas être importé.';
+
+  @override
+  String get download => 'Télécharger';
+
+  @override
+  String get downloading => 'Téléchargement…';
+
+  @override
+  String get downloaded => 'Téléchargé sur cet appareil.';
+
+  @override
+  String get downloadedWeb => 'Téléchargement lancé.';
+
+  @override
+  String get onDevice => 'Sur cet appareil';
+
+  @override
+  String get removeFromLibrary => 'Retirer de la bibliothèque';
+
+  @override
+  String removed(String title) {
+    return '« $title » a été retiré de votre bibliothèque.';
+  }
+
+  @override
+  String get workSummary => 'Résumé';
+
+  @override
+  String get readMore => 'Lire la suite';
+
+  @override
+  String get readLess => 'Réduire';
+
+  @override
+  String get workEditions => 'Éditions & langues';
+
+  @override
+  String editionsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count éditions',
+      one: '1 édition',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pages(int count) {
+    return '$count p.';
+  }
+
+  @override
+  String get getThisBook => 'Obtenir ce livre';
+
+  @override
+  String get importOwnCopy =>
+      'Importez votre propre fichier (EPUB, PDF…) : il rejoindra votre bibliothèque.';
+
+  @override
+  String get scanTitle => 'Scanner un livre';
+
+  @override
+  String get scanHint => 'Placez le code-barres dans le cadre';
+
+  @override
+  String scanFound(String isbn) {
+    return 'Trouvé · ISBN $isbn';
+  }
+
+  @override
+  String get seeWork => 'Voir la fiche';
+
+  @override
+  String get isbnManualHint => 'Saisir un ISBN';
+
+  @override
+  String get isbnLookup => 'Chercher';
+
+  @override
+  String get isbnNotFound => 'Aucun livre trouvé pour cet ISBN.';
+
+  @override
+  String get isbnInvalid => 'Cet ISBN n’est pas valide.';
+
+  @override
+  String get cameraUnavailable =>
+      'Caméra indisponible : saisissez l’ISBN ci-dessous.';
+
+  @override
+  String get retry => 'Réessayer';
 }

@@ -53,4 +53,11 @@ void main() {
     expect(go(const SignedOut(), '/verify-email?token=abc'), isNull);
     expect(go(signedIn, '/verify-email?token=abc'), isNull);
   });
+
+  test('app pages are private', () {
+    for (final page in ['/search', '/library', '/scan', '/works/abc']) {
+      expect(go(const SignedOut(), page), startsWith('/login'));
+      expect(go(signedIn, page), isNull);
+    }
+  });
 }

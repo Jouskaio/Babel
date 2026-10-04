@@ -145,5 +145,117 @@
   "continueAction": "Continuer",
   "verifyBanner": "Confirmez votre adresse email : nous vous avons envoyé un lien.",
   "verifyResend": "Renvoyer",
-  "verifyResent": "Lien envoyé. Pensez à vérifier vos spams."
+  "verifyResent": "Lien envoyé. Pensez à vérifier vos spams.",
+  "navHome": "Accueil",
+  "navSearch": "Chercher",
+  "navScan": "Scan",
+  "navLibrary": "Biblio",
+  "navProfile": "Profil",
+  "searchTitle": "Chercher",
+  "searchHint": "Titre, auteur, ISBN…",
+  "recentTitle": "Récemment",
+  "clear": "Effacer",
+  "trendingTitle": "Tendances",
+  "noResults": "Aucun résultat pour « {query} ».",
+  "@noResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "searchFailed": "La recherche n’a pas abouti. Réessayez dans un instant.",
+  "libraryTitle": "Bibliothèque",
+  "libraryCount": "{count, plural, =0{Aucun titre} =1{1 titre} other{{count} titres}}",
+  "@libraryCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryEmpty": "Votre bibliothèque est vide pour l’instant.",
+  "addOwnBooksTitle": "Ajouter vos propres livres",
+  "addOwnBooksBody": "EPUB, PDF, CBZ ou CBR : vos fichiers vous suivent sur tous vos appareils.",
+  "importFile": "Importer un fichier",
+  "importing": "Import de « {name} »…",
+  "@importing": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "imported": "« {title} » a rejoint votre bibliothèque.",
+  "@imported": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "importDeduplicated": "« {title} » était déjà sur Babel : ajouté sans le renvoyer.",
+  "@importDeduplicated": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "importUnsupported": "Ce fichier n’est pas un EPUB, PDF, CBZ ou CBR.",
+  "importTooLarge": "Ce fichier est trop volumineux.",
+  "importBlocked": "Ce fichier a été retiré de Babel et ne peut pas être importé.",
+  "download": "Télécharger",
+  "downloading": "Téléchargement…",
+  "downloaded": "Téléchargé sur cet appareil.",
+  "downloadedWeb": "Téléchargement lancé.",
+  "onDevice": "Sur cet appareil",
+  "removeFromLibrary": "Retirer de la bibliothèque",
+  "removed": "« {title} » a été retiré de votre bibliothèque.",
+  "@removed": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "workSummary": "Résumé",
+  "readMore": "Lire la suite",
+  "readLess": "Réduire",
+  "workEditions": "Éditions & langues",
+  "editionsCount": "{count, plural, =1{1 édition} other{{count} éditions}}",
+  "@editionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pages": "{count} p.",
+  "@pages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "getThisBook": "Obtenir ce livre",
+  "importOwnCopy": "Importez votre propre fichier (EPUB, PDF…) : il rejoindra votre bibliothèque.",
+  "scanTitle": "Scanner un livre",
+  "scanHint": "Placez le code-barres dans le cadre",
+  "scanFound": "Trouvé · ISBN {isbn}",
+  "@scanFound": {
+    "placeholders": {
+      "isbn": {
+        "type": "String"
+      }
+    }
+  },
+  "seeWork": "Voir la fiche",
+  "isbnManualHint": "Saisir un ISBN",
+  "isbnLookup": "Chercher",
+  "isbnNotFound": "Aucun livre trouvé pour cet ISBN.",
+  "isbnInvalid": "Cet ISBN n’est pas valide.",
+  "cameraUnavailable": "Caméra indisponible : saisissez l’ISBN ci-dessous.",
+  "retry": "Réessayer"
 }

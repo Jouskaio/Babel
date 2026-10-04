@@ -1,0 +1,95 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:babel_api_client/api.dart';
+import 'package:cross_file/cross_file.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+
+import '../api/api_providers.dart';
+import '../auth/auth_controller.dart';
+import '../config/app_config.dart';
+import 'save_file.dart';
+
+final fileTransferProvider = Provider<FileTransfer>(
+  (ref) => FileTransfer(
+    client: ref.watch(apiClientProvider).client,
+    refresh: ref.read(authControllerProvider.notifier).refresh,
+  ),
+);
+
+/// Uploads and downloads book files. The generated client handles neither streamed
+/// uploads with progress nor binary downloads, so this goes through HTTP directly — still
+/// with the authenticated client (token, refresh, device header).
+class FileTransfer {
+  FileTransfer({required this._client, required this._refresh});
+
+  final http.Client _client;
+  final Future<bool> Function() _refresh;
+
+  Uri _uri(String path) => Uri.parse('${AppConfig.apiBaseUrl}$path');
+
+  /// Imports [file] into the library. [onProgress] receives a value between 0 and 1.
+  Future<ImportResponse> upload(
+    XFile file, {
+    void Function(double)? onProgress,
+  }) async {
+    var response = await _sendUpload(file, onProgress);
+    if (response.statusCode == 401 && await _refresh()) {
+      response = await _sendUpload(file, onProgress);
+    }
+    final body = await response.stream.bytesToString();
+    if (response.statusCode >= 400) {
+      throw ApiException(response.statusCode, body);
+    }
+    return ImportResponse.fromJson(jsonDecode(body))!;
+  }
+
+  Future<http.StreamedResponse> _sendUpload(
+    XFile file,
+    void Function(double)? onProgress,
+  ) async {
+    final length = await file.length();
+    var sent = 0;
+    final stream = file.openRead().map((chunk) {
+      sent += chunk.length;
+      onProgress?.call(length == 0 ? 1 : sent / length);
+      return chunk;
+    });
+    final request = http.MultipartRequest('POST', _uri('/v1/library/files'))
+      ..files.add(
+        http.MultipartFile('file', stream, length, filename: file.name),
+      );
+    return _client.send(request);
+  }
+
+  /// Downloads a stored file and saves it on this device (or in the browser's downloads).
+  Future<String> download(
+    LibraryItemResponse item, {
+    void Function(double)? onProgress,
+  }) async {
+    final response = await _client.send(
+      http.Request('GET', _uri('/v1/files/${item.sha256}')),
+    );
+    if (response.statusCode >= 400) {
+      throw ApiException(
+        response.statusCode,
+        await response.stream.bytesToString(),
+      );
+    }
+    final total = response.contentLength ?? item.size;
+    var received = 0;
+    final bytes = response.stream.map((chunk) {
+      received += chunk.length;
+      onProgress?.call(total == 0 ? 1 : received / total);
+      return chunk;
+    });
+    final extension = item.format.value;
+    return saveBook(
+      bytes,
+      sha256: item.sha256,
+      extension: extension,
+      fileName: '${item.title}.$extension',
+    );
+  }
+}

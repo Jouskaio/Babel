@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_controller.dart';
 import '../../../core/locale/greeting.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
-import '../../../routing/router.dart';
 import '../application/server_status_provider.dart';
 import 'verify_email_banner.dart';
 
@@ -28,20 +26,7 @@ class HomePage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Text(l10n.brand, style: BabelText.label(12, spacing: 5)),
-                  const Spacer(),
-                  IconButton(
-                    tooltip: l10n.accountTitle,
-                    onPressed: () => context.go(Routes.account),
-                    icon: const Icon(
-                      Icons.person_outline,
-                      color: BabelColors.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
+              Text(l10n.brand, style: BabelText.label(12, spacing: 5)),
               const SizedBox(height: 24),
               const VerifyEmailBanner(),
               const SizedBox(height: 32),
