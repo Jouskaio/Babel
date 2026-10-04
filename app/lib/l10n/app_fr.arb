@@ -66,14 +66,6 @@
   "errorWrongPassword": "Le mot de passe actuel est incorrect.",
   "errorNetwork": "Impossible de joindre Babel. Vérifiez votre connexion.",
   "errorGeneric": "Une erreur est survenue. Réessayez.",
-  "greeting": "Bonsoir, {name}.",
-  "@greeting": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "apiConnected": "API connectée · v{version}",
   "@apiConnected": {
     "placeholders": {
@@ -107,5 +99,23 @@
   "deleteAccountTitle": "Supprimer votre compte ?",
   "deleteAccountBody": "Votre bibliothèque, vos notes et vos statistiques seront définitivement effacées. Cette action est irréversible.",
   "cancel": "Annuler",
-  "delete": "Supprimer"
+  "delete": "Supprimer",
+  "greetingMorning": "Bonjour, {name}.",
+  "@greetingMorning": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingEvening": "Bonsoir, {name}.",
+  "@greetingEvening": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "language": "Langue",
+  "languageName": "Français"
 }

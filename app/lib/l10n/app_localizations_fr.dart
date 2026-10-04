@@ -220,11 +220,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get errorGeneric => 'Une erreur est survenue. Réessayez.';
 
   @override
-  String greeting(String name) {
-    return 'Bonsoir, $name.';
-  }
-
-  @override
   String apiConnected(String version) {
     return 'API connectée · v$version';
   }
@@ -289,4 +284,20 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get delete => 'Supprimer';
+
+  @override
+  String greetingMorning(String name) {
+    return 'Bonjour, $name.';
+  }
+
+  @override
+  String greetingEvening(String name) {
+    return 'Bonsoir, $name.';
+  }
+
+  @override
+  String get language => 'Langue';
+
+  @override
+  String get languageName => 'Français';
 }

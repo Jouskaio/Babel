@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_en.dart';
 import 'app_localizations_fr.dart';
 
 // ignore_for_file: type=lint
@@ -92,7 +93,10 @@ abstract class AppLocalizations {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('fr')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('fr')
+  ];
 
   /// No description provided for @brand.
   ///
@@ -490,12 +494,6 @@ abstract class AppLocalizations {
   /// **'Une erreur est survenue. Réessayez.'**
   String get errorGeneric;
 
-  /// No description provided for @greeting.
-  ///
-  /// In fr, this message translates to:
-  /// **'Bonsoir, {name}.'**
-  String greeting(String name);
-
   /// No description provided for @apiConnected.
   ///
   /// In fr, this message translates to:
@@ -615,6 +613,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Supprimer'**
   String get delete;
+
+  /// No description provided for @greetingMorning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour, {name}.'**
+  String greetingMorning(String name);
+
+  /// No description provided for @greetingEvening.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonsoir, {name}.'**
+  String greetingEvening(String name);
+
+  /// No description provided for @language.
+  ///
+  /// In fr, this message translates to:
+  /// **'Langue'**
+  String get language;
+
+  /// No description provided for @languageName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Français'**
+  String get languageName;
 }
 
 class _AppLocalizationsDelegate
@@ -628,7 +650,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['fr'].contains(locale.languageCode);
+      <String>['en', 'fr'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -637,6 +659,8 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
     case 'fr':
       return AppLocalizationsFr();
   }
