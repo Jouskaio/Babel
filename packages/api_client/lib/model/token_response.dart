@@ -16,7 +16,7 @@ class TokenResponse {
     required this.accessToken,
     required this.expiresIn,
     this.refreshToken,
-    this.tokenType = const TokenResponseTokenTypeEnum._('bearer'),
+    required this.tokenType,
     required this.user,
   });
 
@@ -87,7 +87,7 @@ class TokenResponse {
         accessToken: mapValueOfType<String>(json, r'access_token')!,
         expiresIn: mapValueOfType<int>(json, r'expires_in')!,
         refreshToken: mapValueOfType<String>(json, r'refresh_token'),
-        tokenType: TokenResponseTokenTypeEnum.fromJson(json[r'token_type']) ?? 'bearer',
+        tokenType: TokenResponseTokenTypeEnum.fromJson(json[r'token_type'])!,
         user: UserResponse.fromJson(json[r'user'])!,
       );
     }
@@ -138,6 +138,7 @@ class TokenResponse {
   static const requiredKeys = <String>{
     'access_token',
     'expires_in',
+    'token_type',
     'user',
   };
 }

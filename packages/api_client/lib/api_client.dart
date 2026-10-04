@@ -184,8 +184,6 @@ class ApiClient {
           return value is DateTime ? value : DateTime.tryParse(value);
         case 'ChangePasswordRequest':
           return ChangePasswordRequest.fromJson(value);
-        case 'HTTPValidationError':
-          return HTTPValidationError.fromJson(value);
         case 'HealthResponse':
           return HealthResponse.fromJson(value);
         case 'IdentityProvider':
@@ -206,10 +204,6 @@ class ApiClient {
           return UpdateProfileRequest.fromJson(value);
         case 'UserResponse':
           return UserResponse.fromJson(value);
-        case 'ValidationError':
-          return ValidationError.fromJson(value);
-        case 'ValidationErrorLocInner':
-          return ValidationErrorLocInner.fromJson(value);
         default:
           dynamic match;
           if (value is List && (match = _regList.firstMatch(targetType)?.group(1)) != null) {
