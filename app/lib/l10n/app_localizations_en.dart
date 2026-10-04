@@ -341,4 +341,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backToSignIn => 'Back to sign in';
+
+  @override
+  String get verifyEyebrow => 'Confirmation';
+
+  @override
+  String get verifyTitle => 'Confirming your address';
+
+  @override
+  String get verifyChecking => 'Checking the link…';
+
+  @override
+  String get verifyDone => 'Your address is confirmed. Thank you!';
+
+  @override
+  String get continueAction => 'Continue';
+
+  @override
+  String get verifyBanner => 'Confirm your email address: we sent you a link.';
+
+  @override
+  String get verifyResend => 'Resend';
+
+  @override
+  String get verifyResent => 'Link sent. Check your spam folder too.';
 }

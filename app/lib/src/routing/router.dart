@@ -9,6 +9,7 @@ import '../features/auth/presentation/forgot_password_page.dart';
 import '../features/auth/presentation/login_page.dart';
 import '../features/auth/presentation/reset_password_page.dart';
 import '../features/auth/presentation/signup_page.dart';
+import '../features/auth/presentation/verify_email_page.dart';
 import '../features/home/presentation/home_page.dart';
 import '../features/landing/presentation/landing_page.dart';
 import 'splash_page.dart';
@@ -22,11 +23,12 @@ abstract final class Routes {
   static const account = '/account';
   static const forgotPassword = '/forgot-password';
   static const resetPassword = '/reset-password';
+  static const verifyEmail = '/verify-email';
 
   static const public = {landing, login, signup};
 
   /// Reachable whether signed in or not (e.g. links opened from an email).
-  static const open = {forgotPassword, resetPassword};
+  static const open = {forgotPassword, resetPassword, verifyEmail};
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -55,6 +57,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.resetPassword,
         builder: (_, state) =>
             ResetPasswordPage(token: state.uri.queryParameters['token'] ?? ''),
+      ),
+      GoRoute(
+        path: Routes.verifyEmail,
+        builder: (_, state) =>
+            VerifyEmailPage(token: state.uri.queryParameters['token'] ?? ''),
       ),
       GoRoute(path: Routes.account, builder: (_, __) => const AccountPage()),
     ],
