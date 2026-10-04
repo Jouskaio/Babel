@@ -14,7 +14,9 @@ Thumbs.db
 # --- Python (api/) ---
 __pycache__/
 *.py[cod]
+.venv
 .venv/
+*.nosync/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
@@ -70,3 +72,6 @@ GEMINI.md
 * [0-9].*
 * [0-9][0-9]
 * [0-9][0-9].*
+
+# Local SQLite database
+api/*.db

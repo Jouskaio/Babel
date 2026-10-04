@@ -11,10 +11,34 @@ services:
     image: ghcr.io/jouskaio/babel-api:${BABEL_API_TAG:-latest}
     container_name: babel-api
     env_file: .env
+    environment:
+      BABEL_DATABASE_URL: postgresql+asyncpg://babel:${BABEL_DB_PASSWORD:?set BABEL_DB_PASSWORD in .env}@db:5432/babel
     ports:
       - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
     mem_limit: 512m
+    logging: *logging
+
+  # Only reachable by the API, on the internal compose network: no published port.
+  db:
+    image: postgres:17-alpine
+    container_name: babel-db
+    environment:
+      POSTGRES_USER: babel
+      POSTGRES_DB: babel
+      POSTGRES_PASSWORD: ${BABEL_DB_PASSWORD:?set BABEL_DB_PASSWORD in .env}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U babel -d babel"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+    mem_limit: 256m
     logging: *logging
 
   web:
@@ -25,3 +49,6 @@ services:
     restart: unless-stopped
     mem_limit: 64m
     logging: *logging
+
+volumes:
+  db-data:
