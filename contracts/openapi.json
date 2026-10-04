@@ -1198,7 +1198,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.9.1"
+    "version": "0.9.2"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -1562,11 +1562,6 @@
         },
         "responses": {
           "202": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
             "description": "Successful Response"
           },
           "422": {
@@ -2677,11 +2672,6 @@
         "operationId": "resendVerificationEmail",
         "responses": {
           "202": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
             "description": "Successful Response"
           }
         },

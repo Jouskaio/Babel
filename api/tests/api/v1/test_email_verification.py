@@ -73,7 +73,9 @@ def test_the_link_can_be_sent_again_once_a_minute(
     session = register(client)
     headers = {"Authorization": f"Bearer {session['access_token']}"}
 
-    assert client.post("/v1/me/email/verification", headers=headers).status_code == 202
+    resent = client.post("/v1/me/email/verification", headers=headers)
+    assert resent.status_code == 202
+    assert resent.content == b""
 
     assert len(mailer.sent) == 1
 
