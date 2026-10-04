@@ -42,7 +42,11 @@ async def get_trending(
     "/covers/{cover_id}/{size}",
     operation_id="getCover",
     response_class=Response,
-    responses={200: {"content": {"image/jpeg": {}}}, 404: {"description": "No such cover"}},
+    responses={
+        200: {"content": {"image/jpeg": {}}},
+        404: {"description": "No such cover"},
+        503: {"description": "Cover source unreachable, retry later"},
+    },
 )
 async def get_cover(
     container: ContainerDep,

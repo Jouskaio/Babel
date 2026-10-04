@@ -5,6 +5,7 @@ import time
 from collections import OrderedDict
 
 from babel_api.domain.catalog import CoverImage, TrendingWork
+from babel_api.domain.errors import SourceUnavailableError
 from babel_api.domain.ports import CatalogSource, CoverSize
 
 logger = logging.getLogger(__name__)
@@ -47,7 +48,11 @@ class CatalogService:
         if key in self._covers:
             self._covers.move_to_end(key)
             return self._covers[key]
-        image = await self._source.cover(cover_id, size)
+        try:
+            image = await self._source.cover(cover_id, size)
+        except Exception as error:
+            logger.warning("Cover %s-%s unavailable", cover_id, size, exc_info=True)
+            raise SourceUnavailableError from error
         if image is not None:
             self._covers[key] = image
             if len(self._covers) > self._max_covers:

@@ -1,6 +1,9 @@
 import asyncio
 
+import pytest
+
 from babel_api.domain.catalog import CoverImage, TrendingWork
+from babel_api.domain.errors import SourceUnavailableError
 from babel_api.domain.ports import CoverSize
 from babel_api.services.catalog import CatalogService
 
@@ -23,6 +26,8 @@ class FakeSource:
 
     async def cover(self, cover_id: int, size: CoverSize) -> CoverImage | None:
         self.cover_calls += 1
+        if self.fail:
+            raise RuntimeError("source down")
         return None if cover_id == 404 else CoverImage(f"{cover_id}{size}".encode(), "image/jpeg")
 
 
@@ -77,3 +82,15 @@ def test_missing_covers_are_not_cached() -> None:
     assert asyncio.run(service.cover(404, "M")) is None
     assert asyncio.run(service.cover(404, "M")) is None
     assert source.cover_calls == 2
+
+
+def test_unreachable_cover_sources_are_reported_and_not_cached() -> None:
+    source = FakeSource()
+    service = CatalogService(source)
+    source.fail = True
+
+    with pytest.raises(SourceUnavailableError):
+        asyncio.run(service.cover(1, "M"))
+
+    source.fail = False
+    assert asyncio.run(service.cover(1, "M")) is not None

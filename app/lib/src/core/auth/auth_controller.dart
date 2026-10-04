@@ -1,0 +1,144 @@
+import 'dart:async';
+
+import 'package:babel_api_client/api.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../api/api_providers.dart';
+import 'refresh_token_store.dart';
+
+/// Session state.
+sealed class AuthState {
+  const AuthState();
+}
+
+/// The previous session is being restored at start-up.
+class AuthRestoring extends AuthState {
+  const AuthRestoring();
+}
+
+class SignedOut extends AuthState {
+  const SignedOut();
+}
+
+class SignedIn extends AuthState {
+  const SignedIn(this.user);
+  final UserResponse user;
+}
+
+final refreshTokenStoreProvider =
+    Provider<RefreshTokenStore>((ref) => RefreshTokenStore.platform());
+
+final authControllerProvider =
+    NotifierProvider<AuthController, AuthState>(AuthController.new);
+
+/// Owns the session: signs in and out, keeps the access token in memory and refreshes it.
+///
+/// Errors from sign-in methods are rethrown as [ApiException]; map them with
+/// `AuthFailure.of`.
+class AuthController extends Notifier<AuthState> {
+  String? _accessToken;
+  Future<bool>? _refreshing;
+
+  /// Header value telling the API to use the HttpOnly refresh cookie.
+  static const webClient = 'web';
+  String? get _client => kIsWeb ? webClient : null;
+
+  AuthApi get _auth => ref.read(authApiProvider);
+  RefreshTokenStore get _store => ref.read(refreshTokenStoreProvider);
+
+  /// Current access token, attached to authenticated requests.
+  String? get accessToken => _accessToken;
+
+  @override
+  AuthState build() {
+    Future.microtask(_restore);
+    return const AuthRestoring();
+  }
+
+  Future<void> _restore() async {
+    if (!await refresh()) state = const SignedOut();
+  }
+
+  Future<void> login(String email, String password) async {
+    final tokens = await _auth.login(
+      LoginRequest(email: email, password: password),
+      xBabelClient: _client,
+    );
+    await _apply(tokens);
+  }
+
+  Future<void> register(
+    String email,
+    String password,
+    String displayName,
+  ) async {
+    final tokens = await _auth.register(
+      RegisterRequest(
+        email: email,
+        password: password,
+        displayName: displayName,
+      ),
+      xBabelClient: _client,
+    );
+    await _apply(tokens);
+  }
+
+  /// Exchanges the refresh token for new tokens. Concurrent callers share one request.
+  /// Returns false, and signs out, when the session cannot be renewed.
+  Future<bool> refresh() =>
+      _refreshing ??= _doRefresh().whenComplete(() => _refreshing = null);
+
+  Future<bool> _doRefresh() async {
+    final stored = await _store.read();
+    if (!kIsWeb && stored == null) return false;
+    try {
+      final tokens = await _auth.refreshSession(
+        xBabelClient: _client,
+        refreshRequest:
+            stored == null ? null : RefreshRequest(refreshToken: stored),
+      );
+      await _apply(tokens);
+      return true;
+    } on ApiException catch (error) {
+      // Offline: keep the stored token, the session may still be valid later.
+      if (error.innerException == null) await _clear();
+      return false;
+    }
+  }
+
+  Future<void> logout() async {
+    try {
+      final stored = await _store.read();
+      await _auth.logout(
+        xBabelClient: _client,
+        refreshRequest:
+            stored == null ? null : RefreshRequest(refreshToken: stored),
+      );
+    } on ApiException {
+      // Signing out locally must always work, even offline.
+    }
+    await _clear();
+  }
+
+  /// Updates the cached user after a profile change.
+  void updateUser(UserResponse user) {
+    if (state is SignedIn) state = SignedIn(user);
+  }
+
+  /// Called after the account was deleted or the session revoked.
+  Future<void> signOutLocally() => _clear();
+
+  Future<void> _apply(TokenResponse? tokens) async {
+    if (tokens == null) throw ApiException(500, 'Empty response');
+    _accessToken = tokens.accessToken;
+    await _store.write(tokens.refreshToken);
+    state = SignedIn(tokens.user);
+  }
+
+  Future<void> _clear() async {
+    _accessToken = null;
+    await _store.write(null);
+    state = const SignedOut();
+  }
+}
