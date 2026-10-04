@@ -1,9 +1,57 @@
 """Open Library: trending works and cover images (https://openlibrary.org/developers/api)."""
 
+import asyncio
+from typing import Any
+
 import httpx
 
-from babel_api.domain.catalog import CoverImage, TrendingWork
+from babel_api.domain.catalog import CoverImage, SourceEdition, SourceWork, TrendingWork
+from babel_api.domain.isbn import try_normalize_isbn
 from babel_api.domain.ports import CoverSize
+
+_BASE = "https://openlibrary.org"
+
+# Open Library uses MARC language codes; the app works with ISO 639-1 when one exists.
+_LANGUAGES = {
+    "fre": "fr", "eng": "en", "ger": "de", "spa": "es", "ita": "it", "por": "pt", "rus": "ru",
+    "jpn": "ja", "chi": "zh", "dut": "nl", "pol": "pl", "swe": "sv", "dan": "da", "nor": "no",
+    "fin": "fi", "gre": "el", "tur": "tr", "ara": "ar", "heb": "he", "kor": "ko", "cze": "cs",
+    "hun": "hu", "rum": "ro", "ukr": "uk", "cat": "ca", "lat": "la",
+}  # fmt: skip
+
+
+def _key(value: Any, prefix: str) -> str:
+    return str(value).removeprefix(prefix)
+
+
+def _text(value: Any) -> str | None:
+    """Descriptions are either a string or ``{"type": "/type/text", "value": "..."}``."""
+    if isinstance(value, dict):
+        value = value.get("value")  # type: ignore[union-attr]
+    return value.strip() if isinstance(value, str) and value.strip() else None
+
+
+def _items(value: Any) -> list[Any]:
+    """A JSON list, or an empty one when the field is missing or not a list."""
+    return list(value) if isinstance(value, list) else []  # type: ignore[arg-type]
+
+
+def _dicts(value: Any) -> list[dict[str, Any]]:
+    return [item for item in _items(value) if isinstance(item, dict)]
+
+
+def _first_int(values: Any) -> int | None:
+    if isinstance(values, list):
+        for item in values:  # type: ignore[union-attr]
+            if isinstance(item, int) and item > 0:
+                return item
+    return None
+
+
+def _year(value: Any) -> int | None:
+    digits = "".join(c for c in str(value or "") if c.isdigit())
+    return int(digits[-4:]) if len(digits) >= 4 else None
+
 
 _USER_AGENT = "Babel/1.0 (https://babel.jouskaio.me)"
 
@@ -21,7 +69,7 @@ class OpenLibrarySource:
     async def trending(self, limit: int) -> list[TrendingWork]:
         # Ask for more than needed: works without a cover are skipped.
         response = await self._client.get(
-            "https://openlibrary.org/trending/weekly.json", params={"limit": limit * 2}
+            f"{_BASE}/trending/weekly.json", params={"limit": limit * 2}
         )
         response.raise_for_status()
         works: list[TrendingWork] = []
@@ -41,6 +89,111 @@ class OpenLibrarySource:
             if len(works) == limit:
                 break
         return works
+
+    async def search(self, query: str, limit: int, language: str | None = None) -> list[SourceWork]:
+        fields = "key,title,author_name,first_publish_year,cover_i,edition_count"
+        params: dict[str, str | int] = {"q": query, "limit": limit, "fields": fields}
+        if language:
+            # Open Library then returns, per work, its best edition in that language.
+            params["lang"] = language
+            params["fields"] = f"{fields},editions,editions.title,editions.cover_i"
+        response = await self._client.get(f"{_BASE}/search.json", params=params)
+        response.raise_for_status()
+        works: list[SourceWork] = []
+        for doc in _dicts(response.json().get("docs")):
+            if not doc.get("title") or not str(doc.get("key", "")).startswith("/works/"):
+                continue
+            editions: dict[str, Any] = doc.get("editions") or {}
+            best = _dicts(editions.get("docs"))[:1]
+            works.append(
+                SourceWork(
+                    open_library_id=_key(doc["key"], "/works/"),
+                    title=str(doc["title"]),
+                    authors=tuple(str(a) for a in _items(doc.get("author_name"))[:3]),
+                    first_publish_year=doc.get("first_publish_year"),
+                    cover_id=doc.get("cover_i"),
+                    edition_count=doc.get("edition_count"),
+                    localized_title=str(best[0]["title"])
+                    if best and best[0].get("title")
+                    else None,
+                    localized_cover_id=best[0].get("cover_i") if best else None,
+                )
+            )
+        return works
+
+    async def work(self, open_library_id: str) -> SourceWork | None:
+        response = await self._client.get(f"{_BASE}/works/{open_library_id}.json")
+        if response.status_code == 404:
+            return None
+        response.raise_for_status()
+        doc: dict[str, Any] = response.json()
+        author_keys = [
+            _key(a["author"].get("key", ""), "/authors/")
+            for a in _dicts(doc.get("authors"))[:3]
+            if isinstance(a.get("author"), dict)
+        ]
+        names = await asyncio.gather(*(self._author_name(k) for k in author_keys))
+        return SourceWork(
+            open_library_id=open_library_id,
+            title=str(doc.get("title", "")),
+            authors=tuple(n for n in names if n),
+            first_publish_year=_year(doc.get("first_publish_date")),
+            cover_id=_first_int(doc.get("covers")),
+            description=_text(doc.get("description")),
+        )
+
+    async def editions(self, work_open_library_id: str, limit: int) -> list[SourceEdition]:
+        response = await self._client.get(
+            f"{_BASE}/works/{work_open_library_id}/editions.json", params={"limit": limit}
+        )
+        response.raise_for_status()
+        return [
+            self._edition(doc, work_open_library_id) for doc in response.json().get("entries", [])
+        ]
+
+    async def edition_by_isbn(self, isbn13: str) -> SourceEdition | None:
+        response = await self._client.get(f"{_BASE}/isbn/{isbn13}.json")
+        if response.status_code == 404:
+            return None
+        response.raise_for_status()
+        doc: dict[str, Any] = response.json()
+        works = _dicts(doc.get("works"))
+        if not works:
+            return None
+        return self._edition(doc, _key(works[0].get("key", ""), "/works/"))
+
+    async def _author_name(self, key: str) -> str | None:
+        try:
+            response = await self._client.get(f"{_BASE}/authors/{key}.json")
+            response.raise_for_status()
+        except httpx.HTTPError:
+            return None
+        name = response.json().get("name")
+        return str(name) if name else None
+
+    @staticmethod
+    def _edition(doc: dict[str, Any], work_id: str) -> SourceEdition:
+        languages = [
+            _key(lang.get("key", ""), "/languages/") for lang in _dicts(doc.get("languages"))
+        ]
+        language = _LANGUAGES.get(languages[0], languages[0]) if languages else None
+        isbn13 = {try_normalize_isbn(str(i)) for i in _items(doc.get("isbn_13"))}
+        isbn13 |= {try_normalize_isbn(str(i)) for i in _items(doc.get("isbn_10"))}
+        publishers = _items(doc.get("publishers"))
+        pages = doc.get("number_of_pages")
+        return SourceEdition(
+            open_library_id=_key(doc["key"], "/books/"),
+            work_open_library_id=work_id,
+            title=str(doc.get("title", "")),
+            language=language,
+            publisher=str(publishers[0]) if publishers else None,
+            published=str(doc["publish_date"]) if doc.get("publish_date") else None,
+            page_count=pages if isinstance(pages, int) and pages > 0 else None,
+            format=str(doc["physical_format"]) if doc.get("physical_format") else None,
+            cover_id=_first_int(doc.get("covers")),
+            isbn13=tuple(sorted(i for i in isbn13 if i)),
+            isbn10=tuple(str(i) for i in _items(doc.get("isbn_10"))),
+        )
 
     async def cover(self, cover_id: int, size: CoverSize) -> CoverImage | None:
         # default=false: a missing cover is a 404 instead of a blank placeholder image.

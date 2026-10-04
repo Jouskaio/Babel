@@ -5,10 +5,12 @@ doc/AccountApi.md
 doc/AuthApi.md
 doc/CatalogApi.md
 doc/ChangePasswordRequest.md
+doc/EditionResponse.md
 doc/ForgotPasswordRequest.md
 doc/HealthApi.md
 doc/HealthResponse.md
 doc/IdentityProvider.md
+doc/IsbnLookupResponse.md
 doc/LoginRequest.md
 doc/ProviderLoginRequest.md
 doc/ProvidersResponse.md
@@ -20,6 +22,8 @@ doc/TrendingWorkResponse.md
 doc/UpdateProfileRequest.md
 doc/UserResponse.md
 doc/VerifyEmailRequest.md
+doc/WorkResponse.md
+doc/WorkSummaryResponse.md
 lib/api.dart
 lib/api/account_api.dart
 lib/api/auth_api.dart
@@ -34,9 +38,11 @@ lib/auth/http_basic_auth.dart
 lib/auth/http_bearer_auth.dart
 lib/auth/oauth.dart
 lib/model/change_password_request.dart
+lib/model/edition_response.dart
 lib/model/forgot_password_request.dart
 lib/model/health_response.dart
 lib/model/identity_provider.dart
+lib/model/isbn_lookup_response.dart
 lib/model/login_request.dart
 lib/model/provider_login_request.dart
 lib/model/providers_response.dart
@@ -48,4 +54,6 @@ lib/model/trending_work_response.dart
 lib/model/update_profile_request.dart
 lib/model/user_response.dart
 lib/model/verify_email_request.dart
+lib/model/work_response.dart
+lib/model/work_summary_response.dart
 pubspec.yaml

@@ -4,7 +4,15 @@ from datetime import datetime, timedelta
 from typing import Literal, Protocol
 from uuid import UUID
 
-from babel_api.domain.catalog import CoverImage, TrendingWork
+from babel_api.domain.catalog import (
+    CoverImage,
+    Edition,
+    IdentifierKind,
+    SourceEdition,
+    SourceWork,
+    TrendingWork,
+    Work,
+)
 from babel_api.domain.mail import EmailMessage
 from babel_api.domain.users import (
     AccountToken,
@@ -83,11 +91,35 @@ class AccessTokens(Protocol):
 CoverSize = Literal["S", "M", "L"]
 
 
-class CatalogSource(Protocol):
-    """An external book catalog (Open Library, Google Books…)."""
+class TrendingSource(Protocol):
+    """Popular works and cover images of an external catalog."""
 
     async def trending(self, limit: int) -> list[TrendingWork]: ...
     async def cover(self, cover_id: int, size: CoverSize) -> CoverImage | None: ...
+
+
+class BookSource(Protocol):
+    """Work and edition records of an external catalog (Open Library, Google Books…)."""
+
+    async def search(
+        self, query: str, limit: int, language: str | None = None
+    ) -> list[SourceWork]: ...
+    async def work(self, open_library_id: str) -> SourceWork | None: ...
+    async def editions(self, work_open_library_id: str, limit: int) -> list[SourceEdition]: ...
+    async def edition_by_isbn(self, isbn13: str) -> SourceEdition | None: ...
+
+
+class CatalogRepository(Protocol):
+    """Persistence of works and editions fetched from external catalogs."""
+
+    async def upsert_work(self, work: SourceWork) -> Work: ...
+    async def get_work(self, work_id: UUID) -> Work | None: ...
+    async def get_work_by_open_library_id(self, open_library_id: str) -> Work | None: ...
+    async def upsert_editions(self, work_id: UUID, editions: list[SourceEdition]) -> None: ...
+    async def list_editions(self, work_id: UUID) -> list[Edition]: ...
+    async def find_edition(self, kind: IdentifierKind, value: str) -> Edition | None: ...
+    async def mark_editions_synced(self, work_id: UUID, at: datetime) -> None: ...
+    async def commit(self) -> None: ...
 
 
 class Mailer(Protocol):

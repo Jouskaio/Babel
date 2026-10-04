@@ -81,15 +81,20 @@ Class | Method | HTTP request | Description
 *AuthApi* | [**verifyEmail**](doc//AuthApi.md#verifyemail) | **POST** /v1/auth/email/verify | Verify Email
 *CatalogApi* | [**getCover**](doc//CatalogApi.md#getcover) | **GET** /v1/catalog/covers/{cover_id}/{size} | Get Cover
 *CatalogApi* | [**getTrendingWorks**](doc//CatalogApi.md#gettrendingworks) | **GET** /v1/catalog/trending | Get Trending
+*CatalogApi* | [**getWork**](doc//CatalogApi.md#getwork) | **GET** /v1/catalog/works/{work_id} | Get Work
+*CatalogApi* | [**lookupIsbn**](doc//CatalogApi.md#lookupisbn) | **GET** /v1/catalog/isbn/{isbn} | Lookup Isbn
+*CatalogApi* | [**searchWorks**](doc//CatalogApi.md#searchworks) | **GET** /v1/catalog/search | Search Works
 *HealthApi* | [**getHealth**](doc//HealthApi.md#gethealth) | **GET** /v1/health | Get Health
 
 
 ## Documentation For Models
 
  - [ChangePasswordRequest](doc//ChangePasswordRequest.md)
+ - [EditionResponse](doc//EditionResponse.md)
  - [ForgotPasswordRequest](doc//ForgotPasswordRequest.md)
  - [HealthResponse](doc//HealthResponse.md)
  - [IdentityProvider](doc//IdentityProvider.md)
+ - [IsbnLookupResponse](doc//IsbnLookupResponse.md)
  - [LoginRequest](doc//LoginRequest.md)
  - [ProviderLoginRequest](doc//ProviderLoginRequest.md)
  - [ProvidersResponse](doc//ProvidersResponse.md)
@@ -101,6 +106,8 @@ Class | Method | HTTP request | Description
  - [UpdateProfileRequest](doc//UpdateProfileRequest.md)
  - [UserResponse](doc//UserResponse.md)
  - [VerifyEmailRequest](doc//VerifyEmailRequest.md)
+ - [WorkResponse](doc//WorkResponse.md)
+ - [WorkSummaryResponse](doc//WorkSummaryResponse.md)
 
 
 ## Documentation For Authorization

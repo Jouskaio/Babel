@@ -67,6 +67,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             IdentityProvider.APPLE: apple_verifier(settings.apple_client_ids),
         },
         catalog=CatalogService(open_library),
+        books=open_library,
         mailer=mailer,
     )
     if settings.cors_origins:
