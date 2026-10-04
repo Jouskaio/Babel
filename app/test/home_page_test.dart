@@ -9,16 +9,16 @@ import 'helpers.dart';
 class _SignedInAs extends AuthController {
   @override
   AuthState build() => SignedIn(
-        UserResponse(
-          id: 'u1',
-          email: 'ada@example.com',
-          displayName: 'Ada',
-          hasPassword: true,
-          emailVerified: true,
-          locale: UserResponseLocaleEnum.fr,
-          createdAt: DateTime(2026),
-        ),
-      );
+    UserResponse(
+      id: 'u1',
+      email: 'ada@example.com',
+      displayName: 'Ada',
+      hasPassword: true,
+      emailVerified: true,
+      locale: UserResponseLocaleEnum.fr,
+      createdAt: DateTime(2026),
+    ),
+  );
 }
 
 void main() {
@@ -49,8 +49,9 @@ void main() {
         const HomePage(),
         overrides: [
           authControllerProvider.overrideWith(_SignedInAs.new),
-          serverStatusProvider
-              .overrideWith((ref) async => throw Exception('offline')),
+          serverStatusProvider.overrideWith(
+            (ref) async => throw Exception('offline'),
+          ),
         ],
       ),
     );

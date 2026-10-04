@@ -54,7 +54,7 @@ class HomePage extends ConsumerWidget {
                 status.when(
                   data: (health) => l10n.apiConnected(health?.version ?? '?'),
                   loading: () => l10n.apiConnecting,
-                  error: (_, __) => l10n.apiUnreachable,
+                  error: (_, _) => l10n.apiUnreachable,
                 ),
                 style: BabelText.label(
                   10,

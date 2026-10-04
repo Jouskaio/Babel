@@ -18,11 +18,13 @@ void main() {
   String? go(AuthState session, String location) =>
       redirectFor(session, Uri.parse(location));
 
-  test('everything waits on the splash screen while the session is restored',
-      () {
-    expect(go(const AuthRestoring(), '/account'), '/splash?from=%2Faccount');
-    expect(go(const AuthRestoring(), '/splash?from=%2Faccount'), isNull);
-  });
+  test(
+    'everything waits on the splash screen while the session is restored',
+    () {
+      expect(go(const AuthRestoring(), '/account'), '/splash?from=%2Faccount');
+      expect(go(const AuthRestoring(), '/splash?from=%2Faccount'), isNull);
+    },
+  );
 
   test('signed-out users only reach public pages', () {
     expect(go(const SignedOut(), '/'), isNull);
@@ -32,15 +34,17 @@ void main() {
     expect(go(const SignedOut(), '/splash?from=%2Fsignup'), '/signup');
   });
 
-  test('signed-in users skip public pages and return where they were going',
-      () {
-    expect(go(signedIn, '/'), '/home');
-    expect(go(signedIn, '/login'), '/home');
-    expect(go(signedIn, '/login?from=%2Faccount'), '/account');
-    expect(go(signedIn, '/splash?from=%2Faccount'), '/account');
-    expect(go(signedIn, '/splash?from=%2Flogin'), '/home');
-    expect(go(signedIn, '/account'), isNull);
-  });
+  test(
+    'signed-in users skip public pages and return where they were going',
+    () {
+      expect(go(signedIn, '/'), '/home');
+      expect(go(signedIn, '/login'), '/home');
+      expect(go(signedIn, '/login?from=%2Faccount'), '/account');
+      expect(go(signedIn, '/splash?from=%2Faccount'), '/account');
+      expect(go(signedIn, '/splash?from=%2Flogin'), '/home');
+      expect(go(signedIn, '/account'), isNull);
+    },
+  );
 
   test('emailed links open whether signed in or not', () {
     expect(go(const SignedOut(), '/reset-password?token=abc'), isNull);

@@ -144,7 +144,8 @@ class AccountPage extends ConsumerWidget {
 
 void _snack(BuildContext context, AuthFailure? failure, [String? success]) {
   final l10n = context.l10n;
-  final text = success ??
+  final text =
+      success ??
       switch (failure) {
         AuthFailure.wrongPassword => l10n.errorWrongPassword,
         AuthFailure.network => l10n.errorNetwork,
@@ -160,21 +161,21 @@ class _Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: BabelColors.surface,
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: BabelColors.border),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(title.toUpperCase(), style: BabelText.label(11, spacing: 2)),
-            const SizedBox(height: 18),
-            child,
-          ],
-        ),
-      );
+    padding: const EdgeInsets.all(24),
+    decoration: BoxDecoration(
+      color: BabelColors.surface,
+      borderRadius: BorderRadius.circular(28),
+      border: Border.all(color: BabelColors.border),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(title.toUpperCase(), style: BabelText.label(11, spacing: 2)),
+        const SizedBox(height: 18),
+        child,
+      ],
+    ),
+  );
 }
 
 class _ProfileForm extends ConsumerStatefulWidget {
@@ -260,7 +261,9 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
     if (!_form.currentState!.validate()) return;
     setState(() => _busy = true);
     try {
-      await ref.read(accountApiProvider).changePassword(
+      await ref
+          .read(accountApiProvider)
+          .changePassword(
             ChangePasswordRequest(
               currentPassword: widget.user.hasPassword ? _current.text : null,
               newPassword: _next.text,

@@ -12,60 +12,55 @@ abstract final class BabelText {
     double size, {
     Color color = BabelColors.textPrimary,
     bool italic = false,
-  }) =>
-      GoogleFonts.cormorantGaramond(
-        fontSize: size,
-        height: 1.05,
-        color: color,
-        fontWeight: FontWeight.w400,
-        fontStyle: italic ? FontStyle.italic : FontStyle.normal,
-      );
+  }) => GoogleFonts.cormorantGaramond(
+    fontSize: size,
+    height: 1.05,
+    color: color,
+    fontWeight: FontWeight.w400,
+    fontStyle: italic ? FontStyle.italic : FontStyle.normal,
+  );
 
   static TextStyle heading(
     double size, {
     Color color = BabelColors.textPrimary,
-  }) =>
-      GoogleFonts.cormorantGaramond(
-        fontSize: size,
-        height: 1.1,
-        color: color,
-        fontWeight: FontWeight.w600,
-      );
+  }) => GoogleFonts.cormorantGaramond(
+    fontSize: size,
+    height: 1.1,
+    color: color,
+    fontWeight: FontWeight.w600,
+  );
 
   static TextStyle body(
     double size, {
     Color color = BabelColors.textSecondary,
     FontWeight weight = FontWeight.w400,
-  }) =>
-      GoogleFonts.interTight(
-        fontSize: size,
-        height: 1.55,
-        color: color,
-        fontWeight: weight,
-      );
+  }) => GoogleFonts.interTight(
+    fontSize: size,
+    height: 1.55,
+    color: color,
+    fontWeight: weight,
+  );
 
   /// Uppercase, letter-spaced label. Pass the text already upper-cased.
   static TextStyle label(
     double size, {
     Color color = BabelColors.gold,
     double spacing = 2,
-  }) =>
-      GoogleFonts.dmMono(
-        fontSize: size,
-        letterSpacing: spacing,
-        color: color,
-        fontWeight: FontWeight.w500,
-      );
+  }) => GoogleFonts.dmMono(
+    fontSize: size,
+    letterSpacing: spacing,
+    color: color,
+    fontWeight: FontWeight.w500,
+  );
 
   static TextStyle reading(
     double size, {
     Color color = BabelColors.textPrimary,
     bool italic = false,
-  }) =>
-      GoogleFonts.literata(
-        fontSize: size,
-        height: 1.6,
-        color: color,
-        fontStyle: italic ? FontStyle.italic : FontStyle.normal,
-      );
+  }) => GoogleFonts.literata(
+    fontSize: size,
+    height: 1.6,
+    color: color,
+    fontStyle: italic ? FontStyle.italic : FontStyle.normal,
+  );
 }
