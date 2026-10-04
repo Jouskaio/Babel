@@ -554,4 +554,50 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get retry => 'Réessayer';
+
+  @override
+  String get offline => 'Hors ligne';
+
+  @override
+  String pendingOps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changements en attente',
+      one: '1 changement en attente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pendingTitle => 'En attente';
+
+  @override
+  String get searchQueued =>
+      'Hors ligne : la recherche sera lancée au retour du réseau.';
+
+  @override
+  String get scanQueued =>
+      'Hors ligne : cet ISBN sera recherché au retour du réseau.';
+
+  @override
+  String get lookupWaiting => 'En attente du réseau';
+
+  @override
+  String lookupResults(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count résultats',
+      one: '1 résultat',
+      zero: 'Aucun résultat',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get lookupNotFound => 'Introuvable';
+
+  @override
+  String get dismiss => 'Retirer';
 }

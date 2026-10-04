@@ -159,5 +159,14 @@
   "isbnNotFound": "No book found for this ISBN.",
   "isbnInvalid": "This ISBN is not valid.",
   "cameraUnavailable": "Camera unavailable: enter the ISBN below.",
-  "retry": "Retry"
+  "retry": "Retry",
+  "offline": "Offline",
+  "pendingOps": "{count, plural, =1{1 change waiting} other{{count} changes waiting}}",
+  "pendingTitle": "Waiting",
+  "searchQueued": "Offline: the search will run when the network is back.",
+  "scanQueued": "Offline: this ISBN will be looked up when the network is back.",
+  "lookupWaiting": "Waiting for the network",
+  "lookupResults": "{count, plural, =0{No results} =1{1 result} other{{count} results}}",
+  "lookupNotFound": "Not found",
+  "dismiss": "Dismiss"
 }
