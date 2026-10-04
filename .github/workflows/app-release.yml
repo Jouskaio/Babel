@@ -20,7 +20,7 @@ jobs:
       run:
         working-directory: app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -45,7 +45,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.value }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: version
         run: echo "value=${GITHUB_REF_NAME#app-v}" >> "$GITHUB_OUTPUT"
       # Image names must be lowercase, while the owner name may not be.
@@ -90,7 +90,7 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Same access path as the API release: ephemeral tag:ci node + Tailscale SSH.
       - uses: tailscale/github-action@v3

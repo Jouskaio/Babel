@@ -20,7 +20,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.value }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: version
         run: echo "value=${GITHUB_REF_NAME#api-v}" >> "$GITHUB_OUTPUT"
       # Image names must be lowercase, while the owner name may not be.
@@ -54,7 +54,7 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Joins the tailnet as an ephemeral tag:ci node, removed when the job ends.
       # Access to the server is granted by the Tailscale policy (Tailscale SSH),
