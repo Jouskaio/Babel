@@ -126,6 +126,19 @@
         "title": "ChangeResponse",
         "type": "object"
       },
+      "CheckSourceResponse": {
+        "properties": {
+          "books": {
+            "title": "Books",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "books"
+        ],
+        "title": "CheckSourceResponse",
+        "type": "object"
+      },
       "CreateSourceRequest": {
         "properties": {
           "github": {
@@ -3037,6 +3050,53 @@
           }
         ],
         "summary": "Create Source",
+        "tags": [
+          "sources"
+        ]
+      }
+    },
+    "/v1/sources/check": {
+      "post": {
+        "description": "Try a source before adding it: nothing is saved.",
+        "operationId": "checkSource",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSourceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckSourceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Check Source",
         "tags": [
           "sources"
         ]

@@ -9,6 +9,7 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**checkSource**](SourcesApi.md#checksource) | **POST** /v1/sources/check | Check Source
 [**createSource**](SourcesApi.md#createsource) | **POST** /v1/sources | Create Source
 [**deleteSource**](SourcesApi.md#deletesource) | **DELETE** /v1/sources/{source_id} | Delete Source
 [**getSource**](SourcesApi.md#getsource) | **GET** /v1/sources/{source_id} | Get Source
@@ -17,6 +18,55 @@ Method | HTTP request | Description
 [**importSourceEntry**](SourcesApi.md#importsourceentry) | **POST** /v1/sources/{source_id}/entries/{entry_id}/import | Import Entry
 [**scanSource**](SourcesApi.md#scansource) | **POST** /v1/sources/{source_id}/scan | Scan Source
 
+
+# **checkSource**
+> CheckSourceResponse checkSource(createSourceRequest)
+
+Check Source
+
+Try a source before adding it: nothing is saved.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SourcesApi();
+final createSourceRequest = CreateSourceRequest(); // CreateSourceRequest | 
+
+try {
+    final result = api_instance.checkSource(createSourceRequest);
+    print(result);
+} catch (e) {
+    print('Exception when calling SourcesApi->checkSource: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **createSourceRequest** | [**CreateSourceRequest**](CreateSourceRequest.md)|  | 
+
+### Return type
+
+[**CheckSourceResponse**](CheckSourceResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **createSource**
 > SourceDetailResponse createSource(createSourceRequest)

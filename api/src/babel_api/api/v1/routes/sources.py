@@ -85,6 +85,10 @@ class SourceDetailResponse(BaseModel):
         )
 
 
+class CheckSourceResponse(BaseModel):
+    books: int
+
+
 class BatchImportResponse(BaseModel):
     imported: int
     failed: int
@@ -103,6 +107,15 @@ async def create_source(
     config = body.github.model_dump()
     detail = await sources.create(user_id, body.kind, body.name, config, body.token)
     return SourceDetailResponse.of(detail)
+
+
+@router.post("/check", operation_id="checkSource")
+async def check_source(
+    _: CurrentUserId, sources: SourceServiceDep, body: CreateSourceRequest
+) -> CheckSourceResponse:
+    """Try a source before adding it: nothing is saved."""
+    books = await sources.check(body.kind, body.github.model_dump(), body.token)
+    return CheckSourceResponse(books=books)
 
 
 @router.get("/{source_id}", operation_id="getSource")

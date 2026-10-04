@@ -10,6 +10,7 @@ doc/CatalogApi.md
 doc/ChangeOp.md
 doc/ChangePasswordRequest.md
 doc/ChangeResponse.md
+doc/CheckSourceResponse.md
 doc/CreateSourceRequest.md
 doc/DeviceKind.md
 doc/DeviceResponse.md
@@ -75,6 +76,7 @@ lib/model/book_format.dart
 lib/model/change_op.dart
 lib/model/change_password_request.dart
 lib/model/change_response.dart
+lib/model/check_source_response.dart
 lib/model/create_source_request.dart
 lib/model/device_kind.dart
 lib/model/device_response.dart

@@ -98,6 +98,18 @@ def test_a_source_is_checked_and_scanned_when_connected(
     assert client.get("/v1/sources", headers=ada).json()[0]["name"] == "My books"
 
 
+def test_a_source_can_be_tried_without_saving_it(
+    client: TestClient, github: FakeGitHub, ada: dict[str, str]
+) -> None:
+    body = {"kind": "github", "name": "x", "github": {"repository": "ada/library"}, "token": TOKEN}
+    response = client.post("/v1/sources/check", json=body, headers=ada)
+    assert response.json() == {"books": 2}
+    assert github.tokens == [TOKEN, TOKEN]
+    assert client.get("/v1/sources", headers=ada).json() == []
+    body["github"] = {"repository": "ada/missing"}
+    assert client.post("/v1/sources/check", json=body, headers=ada).status_code == 400
+
+
 def test_unreachable_repositories_are_refused(
     client: TestClient, github: FakeGitHub, ada: dict[str, str]
 ) -> None:

@@ -192,6 +192,8 @@ class ApiClient {
           return ChangePasswordRequest.fromJson(value);
         case 'ChangeResponse':
           return ChangeResponse.fromJson(value);
+        case 'CheckSourceResponse':
+          return CheckSourceResponse.fromJson(value);
         case 'CreateSourceRequest':
           return CreateSourceRequest.fromJson(value);
         case 'DeviceKind':

@@ -73,6 +73,12 @@ class SourceService:
         await self._sources.commit()
         return await self.scan(user_id, source.id)
 
+    async def check(self, kind: SourceKind, config: dict[str, Any], token: str | None) -> int:
+        """Tries a source without saving it: the number of books it holds."""
+        token = (token or "").strip() or None
+        connector = self._connectors[kind]
+        return len(await connector.list_entries(await connector.check(config, token), token))
+
     async def list_sources(self, user_id: UUID) -> list[Source]:
         return await self._sources.list_sources(user_id)
 

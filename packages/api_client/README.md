@@ -93,6 +93,7 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**importFile**](doc//LibraryApi.md#importfile) | **POST** /v1/library/files | Import File
 *LibraryApi* | [**removeFromLibrary**](doc//LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
 *LibraryApi* | [**withdrawFile**](doc//LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
+*SourcesApi* | [**checkSource**](doc//SourcesApi.md#checksource) | **POST** /v1/sources/check | Check Source
 *SourcesApi* | [**createSource**](doc//SourcesApi.md#createsource) | **POST** /v1/sources | Create Source
 *SourcesApi* | [**deleteSource**](doc//SourcesApi.md#deletesource) | **DELETE** /v1/sources/{source_id} | Delete Source
 *SourcesApi* | [**getSource**](doc//SourcesApi.md#getsource) | **GET** /v1/sources/{source_id} | Get Source
@@ -114,6 +115,7 @@ Class | Method | HTTP request | Description
  - [ChangeOp](doc//ChangeOp.md)
  - [ChangePasswordRequest](doc//ChangePasswordRequest.md)
  - [ChangeResponse](doc//ChangeResponse.md)
+ - [CheckSourceResponse](doc//CheckSourceResponse.md)
  - [CreateSourceRequest](doc//CreateSourceRequest.md)
  - [DeviceKind](doc//DeviceKind.md)
  - [DeviceResponse](doc//DeviceResponse.md)

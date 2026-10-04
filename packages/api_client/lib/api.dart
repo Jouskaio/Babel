@@ -42,6 +42,7 @@ part 'model/book_format.dart';
 part 'model/change_op.dart';
 part 'model/change_password_request.dart';
 part 'model/change_response.dart';
+part 'model/check_source_response.dart';
 part 'model/create_source_request.dart';
 part 'model/device_kind.dart';
 part 'model/device_response.dart';
