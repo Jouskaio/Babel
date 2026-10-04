@@ -239,6 +239,50 @@
         "title": "TokenResponse",
         "type": "object"
       },
+      "TrendingWorkResponse": {
+        "description": "A popular work. ``cover_path`` is relative to the API base URL.",
+        "properties": {
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
+          "cover_path": {
+            "title": "Cover Path",
+            "type": "string"
+          },
+          "first_publish_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Publish Year"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "work_id": {
+            "title": "Work Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "work_id",
+          "title",
+          "authors",
+          "cover_path",
+          "first_publish_year"
+        ],
+        "title": "TrendingWorkResponse",
+        "type": "object"
+      },
       "UpdateProfileRequest": {
         "properties": {
           "display_name": {
@@ -349,7 +393,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.3.0"
+    "version": "0.4.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -771,6 +815,116 @@
         "summary": "Register",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/v1/catalog/covers/{cover_id}/{size}": {
+      "get": {
+        "description": "Cover image, proxied and cached so clients never call third parties directly.",
+        "operationId": "getCover",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cover_id",
+            "required": true,
+            "schema": {
+              "minimum": 1,
+              "title": "Cover Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "size",
+            "required": true,
+            "schema": {
+              "enum": [
+                "S",
+                "M",
+                "L"
+              ],
+              "title": "Size",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/jpeg": {}
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "No such cover"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Cover source unreachable, retry later"
+          }
+        },
+        "summary": "Get Cover",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/trending": {
+      "get": {
+        "description": "Works that are popular this week. Empty when no source is reachable.",
+        "operationId": "getTrendingWorks",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 12,
+              "maximum": 48,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TrendingWorkResponse"
+                  },
+                  "title": "Response Gettrendingworks",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Trending",
+        "tags": [
+          "catalog"
         ]
       }
     },

@@ -17,6 +17,12 @@ dependencies:
   firebase_analytics: ^12.6.0
   babel_api_client:
     path: ../packages/api_client
+  flutter_secure_storage: ^11.2.0
+  http: ^1.6.0
+  intl: ^0.20.2
+  flutter_localizations:
+    sdk: flutter
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:
@@ -25,3 +31,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true

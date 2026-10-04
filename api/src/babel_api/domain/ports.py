@@ -1,9 +1,10 @@
 """Interfaces the services depend on, implemented by the adapters."""
 
 from datetime import datetime, timedelta
-from typing import Protocol
+from typing import Literal, Protocol
 from uuid import UUID
 
+from babel_api.domain.catalog import CoverImage, TrendingWork
 from babel_api.domain.users import (
     ExternalIdentity,
     IdentityProvider,
@@ -58,3 +59,13 @@ class AccessTokens(Protocol):
     @property
     def ttl(self) -> timedelta: ...
     def issue(self, user_id: UUID, now: datetime | None = None) -> str: ...
+
+
+CoverSize = Literal["S", "M", "L"]
+
+
+class CatalogSource(Protocol):
+    """An external book catalog (Open Library, Google Books…)."""
+
+    async def trending(self, limit: int) -> list[TrendingWork]: ...
+    async def cover(self, cover_id: int, size: CoverSize) -> CoverImage | None: ...

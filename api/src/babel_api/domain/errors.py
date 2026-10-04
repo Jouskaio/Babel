@@ -19,3 +19,7 @@ class ProviderNotConfiguredError(DomainError):
 
 class PasswordRequiredError(DomainError):
     """The current password is needed to perform this change."""
+
+
+class SourceUnavailableError(DomainError):
+    """An external catalog source could not be reached. Retrying later may work."""
