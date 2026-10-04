@@ -866,4 +866,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unreadable => 'Unreadable';
+
+  @override
+  String get sourceErrorRateLimited =>
+      'GitHub limits requests without a token (60 per hour for your connection). Try again in a few minutes, or add an access token.';
 }

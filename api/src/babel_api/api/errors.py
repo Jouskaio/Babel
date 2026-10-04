@@ -17,6 +17,7 @@ from babel_api.domain.errors import (
     ProviderNotConfiguredError,
     SecretsUnavailableError,
     SourceConnectionError,
+    SourceRateLimitedError,
     SourceUnavailableError,
     TooManySourcesError,
     UnsupportedFileError,
@@ -40,6 +41,10 @@ _STATUS: dict[type[Exception], tuple[int, str]] = {
     SourceConnectionError: (
         status.HTTP_400_BAD_REQUEST,
         "The source could not be reached: check its address and access token",
+    ),
+    SourceRateLimitedError: (
+        status.HTTP_429_TOO_MANY_REQUESTS,
+        "The source limits requests for now: try again later, or add an access token",
     ),
     TooManySourcesError: (status.HTTP_409_CONFLICT, "Too many sources on this account"),
     SecretsUnavailableError: (

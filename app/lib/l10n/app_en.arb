@@ -321,5 +321,6 @@
   },
   "sectionUnreadable": "Unreadable files",
   "unreadableHint": "Babel could not read these files as books. They will be tried again if they change.",
-  "unreadable": "Unreadable"
+  "unreadable": "Unreadable",
+  "sourceErrorRateLimited": "GitHub limits requests without a token (60 per hour for your connection). Try again in a few minutes, or add an access token."
 }

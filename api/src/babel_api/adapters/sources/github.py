@@ -6,7 +6,7 @@ from typing import Any
 
 import httpx
 
-from babel_api.domain.errors import SourceConnectionError
+from babel_api.domain.errors import SourceConnectionError, SourceRateLimitedError
 from babel_api.domain.sources import RemoteEntry
 
 _API = "https://api.github.com"
@@ -23,6 +23,17 @@ def _headers(token: str | None) -> dict[str, str]:
     if token:
         headers["Authorization"] = f"Bearer {token}"
     return headers
+
+
+def _refuse(response: httpx.Response, *refused: int) -> None:
+    """Raises the domain error matching a GitHub refusal, if any."""
+    # Rate limits come as 403 or 429 with no request left (60 per hour without a token).
+    if response.status_code == 429 or (
+        response.status_code == 403 and response.headers.get("x-ratelimit-remaining") == "0"
+    ):
+        raise SourceRateLimitedError
+    if response.status_code in refused:
+        raise SourceConnectionError(str(response.status_code))
 
 
 def normalize_folder(folder: str | None) -> str:
@@ -44,8 +55,7 @@ class GitHubConnector:
         except httpx.HTTPError as error:
             raise SourceConnectionError("unreachable") from error
         # 404 also covers private repositories the token cannot see.
-        if response.status_code in (401, 403, 404):
-            raise SourceConnectionError(str(response.status_code))
+        _refuse(response, 401, 403, 404)
         response.raise_for_status()
         branch = config.get("branch") or response.json().get("default_branch", "main")
         return {
@@ -65,8 +75,7 @@ class GitHubConnector:
             )
         except httpx.HTTPError as error:
             raise SourceConnectionError("unreachable") from error
-        if response.status_code in (401, 403, 404, 409):  # 409: empty repository
-            raise SourceConnectionError(str(response.status_code))
+        _refuse(response, 401, 403, 404, 409)  # 409: empty repository
         response.raise_for_status()
         prefix = f"{folder}/" if folder else ""
         return [
@@ -87,6 +96,7 @@ class GitHubConnector:
         url = f"{_API}/repos/{config['repository']}/git/blobs/{entry.remote_id}"
         try:
             async with self._client.stream("GET", url, headers=headers) as response:
+                _refuse(response)
                 if response.status_code >= 400:
                     raise SourceConnectionError(str(response.status_code))
                 async for chunk in response.aiter_bytes(1024 * 1024):

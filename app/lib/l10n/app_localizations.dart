@@ -1483,6 +1483,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Illisible'**
   String get unreadable;
+
+  /// No description provided for @sourceErrorRateLimited.
+  ///
+  /// In fr, this message translates to:
+  /// **'GitHub limite les requêtes sans jeton (60 par heure pour votre connexion). Réessayez dans quelques minutes, ou ajoutez un jeton d\'accès.'**
+  String get sourceErrorRateLimited;
 }
 
 class _AppLocalizationsDelegate

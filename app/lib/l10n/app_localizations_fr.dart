@@ -873,4 +873,8 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get unreadable => 'Illisible';
+
+  @override
+  String get sourceErrorRateLimited =>
+      'GitHub limite les requêtes sans jeton (60 par heure pour votre connexion). Réessayez dans quelques minutes, ou ajoutez un jeton d\'accès.';
 }

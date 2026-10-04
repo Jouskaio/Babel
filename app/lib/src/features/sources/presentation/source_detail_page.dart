@@ -206,7 +206,9 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
                           Flexible(
                             child: Text(
                               failed
-                                  ? l10n.sourceScanFailed
+                                  ? (source.lastError!.contains('rate_limited')
+                                        ? l10n.sourceErrorRateLimited
+                                        : l10n.sourceScanFailed)
                                   : source.lastScanAt == null
                                   ? l10n.sourceNeverScanned
                                   : scannedAgo(context, source.lastScanAt!),
