@@ -11,9 +11,9 @@ from babel_api.adapters.security.secrets import SecretBox
 from babel_api.domain.errors import SourceConnectionError, SourceRateLimitedError
 from babel_api.domain.sources import RemoteEntry, SourceKind
 from tests.api.v1.test_library import account, upload
-from tests.books import NOT_A_BOOK, epub
+from tests.books import JPEG, NOT_A_BOOK, epub
 
-JANE = epub(title="Jane Eyre", isbn=None)
+JANE = epub(title="Jane Eyre", isbn=None, cover=JPEG)
 EMMA = epub(title="Emma", author="Jane Austen", isbn=None)
 TOKEN = "ghp_secret_token_1234"
 
@@ -182,6 +182,11 @@ def test_a_book_is_imported_into_the_library(
     assert imported.json()["title"] == "Jane Eyre"
     after = client.get(f"/v1/sources/{source_id}", headers=ada).json()
     assert statuses(after)["Jane Eyre.epub"] == "in_library"
+    entry = next(e for e in after["entries"] if e["name"] == "Jane Eyre.epub")
+    assert entry["title"] == "Jane Eyre"
+    assert entry["authors"] == ["Charlotte Brontë"]
+    assert client.get(entry["cover_path"]).content == JPEG
+    assert client.get("/v1/sources", headers=ada).json()[0]["book_count"] == 2
     assert (
         next(e for e in after["entries"] if e["id"] == jane["id"])["item_id"]
         == (imported.json()["id"])
@@ -269,6 +274,34 @@ def test_deleting_a_source_keeps_imported_books(
     client.post(f"/v1/sources/{source_id}/import", headers=ada)
     assert client.delete(f"/v1/sources/{source_id}", headers=ada).status_code == 204
     assert client.get(f"/v1/sources/{source_id}", headers=ada).status_code == 404
+    assert len(client.get("/v1/library", headers=ada).json()) == 2
+
+
+def test_deleting_a_source_can_remove_its_books_too(
+    client: TestClient, github: FakeGitHub, ada: dict[str, str], bob: dict[str, str]
+) -> None:
+    upload(client, ada, epub(title="Kept", isbn=None))
+    source_id = connect(client, ada).json()["source"]["id"]
+    client.post(f"/v1/sources/{source_id}/import", headers=ada)
+    bob_source = connect(client, bob, "bob/fork").json()["source"]["id"]
+    client.post(f"/v1/sources/{bob_source}/import", headers=bob)
+
+    response = client.delete(f"/v1/sources/{source_id}?remove_books=true", headers=ada)
+    assert response.status_code == 204
+    assert [i["title"] for i in client.get("/v1/library", headers=ada).json()] == ["Kept"]
+    # The stored files stay for other readers.
+    assert len(client.get("/v1/library", headers=bob).json()) == 2
+    for item in client.get("/v1/library", headers=bob).json():
+        assert client.get(f"/v1/files/{item['sha256']}", headers=bob).status_code == 200
+
+
+def test_removing_books_needs_the_source_owner(
+    client: TestClient, github: FakeGitHub, ada: dict[str, str], bob: dict[str, str]
+) -> None:
+    source_id = connect(client, ada).json()["source"]["id"]
+    client.post(f"/v1/sources/{source_id}/import", headers=ada)
+    response = client.delete(f"/v1/sources/{source_id}?remove_books=true", headers=bob)
+    assert response.status_code == 404
     assert len(client.get("/v1/library", headers=ada).json()) == 2
 
 

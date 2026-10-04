@@ -434,5 +434,14 @@
   "sectionUnreadable": "Fichiers illisibles",
   "unreadableHint": "Babel n'a pas pu lire ces fichiers comme des livres. Ils seront retentés s'ils changent.",
   "unreadable": "Illisible",
-  "sourceErrorRateLimited": "GitHub limite les requêtes sans jeton (60 par heure pour votre connexion). Réessayez dans quelques minutes, ou ajoutez un jeton d'accès."
+  "sourceErrorRateLimited": "GitHub limite les requêtes sans jeton (60 par heure pour votre connexion). Réessayez dans quelques minutes, ou ajoutez un jeton d'accès.",
+  "deleteSourceBooks": "{count, plural, =1{Retirer aussi le livre importé} other{Retirer aussi les {count} livres importés}}",
+  "deleteSourceBodyWithBooks": "Babel oublie la source et son jeton, et retire ses livres de votre bibliothèque. Les autres lecteurs gardent leurs exemplaires.",
+  "@deleteSourceBooks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

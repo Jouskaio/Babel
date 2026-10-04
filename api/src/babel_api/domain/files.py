@@ -46,10 +46,28 @@ class StoredFile:
     edition_id: UUID | None = None
     uploaded_by: UUID | None = None
     withdrawn_at: datetime | None = None
+    # Read from the file itself when it was first imported.
+    title: str | None = None
+    authors: tuple[str, ...] = ()
 
     @property
     def available(self) -> bool:
         return self.withdrawn_at is None
+
+    @property
+    def cover_path(self) -> str | None:
+        """Where the API serves the cover found in the file (it may still have none)."""
+        if self.format in (BookFormat.EPUB, BookFormat.CBZ):
+            return f"/v1/files/{self.sha256}/cover"
+        return None
+
+
+@dataclass(frozen=True, slots=True)
+class Cover:
+    """A cover image read from a book file."""
+
+    content: bytes
+    media_type: str
 
 
 @dataclass(frozen=True, slots=True)

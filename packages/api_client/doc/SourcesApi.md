@@ -118,11 +118,11 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **deleteSource**
-> deleteSource(sourceId)
+> deleteSource(sourceId, removeBooks, xBabelDevice)
 
 Delete Source
 
-Forget the source and its token. Imported books stay in the library.
+Forget the source and its token.  Imported books stay in the library, unless ``remove_books`` is set.
 
 ### Example
 ```dart
@@ -136,9 +136,11 @@ import 'package:babel_api_client/api.dart';
 
 final api_instance = SourcesApi();
 final sourceId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final removeBooks = true; // bool | 
+final xBabelDevice = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
 
 try {
-    api_instance.deleteSource(sourceId);
+    api_instance.deleteSource(sourceId, removeBooks, xBabelDevice);
 } catch (e) {
     print('Exception when calling SourcesApi->deleteSource: $e\n');
 }
@@ -149,6 +151,8 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **sourceId** | **String**|  | 
+ **removeBooks** | **bool**|  | [optional] [default to false]
+ **xBabelDevice** | **String**|  | [optional] 
 
 ### Return type
 

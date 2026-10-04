@@ -877,4 +877,19 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get sourceErrorRateLimited =>
       'GitHub limite les requêtes sans jeton (60 par heure pour votre connexion). Réessayez dans quelques minutes, ou ajoutez un jeton d\'accès.';
+
+  @override
+  String deleteSourceBooks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Retirer aussi les $count livres importés',
+      one: 'Retirer aussi le livre importé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteSourceBodyWithBooks =>
+      'Babel oublie la source et son jeton, et retire ses livres de votre bibliothèque. Les autres lecteurs gardent leurs exemplaires.';
 }

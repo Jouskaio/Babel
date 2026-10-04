@@ -154,6 +154,8 @@ class StoredFileRow(Base):
     uploaded_by: Mapped[UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    title: Mapped[str | None] = mapped_column(String(500))
+    authors: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
 
 
 class BlockedFileRow(Base):
