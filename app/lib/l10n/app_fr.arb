@@ -117,5 +117,25 @@
     }
   },
   "language": "Langue",
-  "languageName": "Français"
+  "languageName": "Français",
+  "forgotPassword": "Mot de passe oublié ?",
+  "forgotEyebrow": "Mot de passe oublié",
+  "forgotTitle": "Retrouvez l’accès à votre bibliothèque.",
+  "forgotLede": "Indiquez l’email de votre compte : nous vous enverrons un lien pour choisir un nouveau mot de passe.",
+  "sendResetLink": "Envoyer le lien",
+  "resetLinkSent": "Si un compte existe pour {email}, un email vient de lui être envoyé. Le lien est valable une heure.",
+  "resetEyebrow": "Nouveau mot de passe",
+  "resetTitle": "Choisissez un nouveau mot de passe.",
+  "resetLede": "Vos autres appareils seront déconnectés.",
+  "resetPasswordAction": "Enregistrer le mot de passe",
+  "resetDone": "Mot de passe enregistré. Vous pouvez vous connecter.",
+  "errorResetLink": "Ce lien n’est plus valable. Demandez-en un nouveau.",
+  "backToSignIn": "Retour à la connexion",
+  "@resetLinkSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  }
 }

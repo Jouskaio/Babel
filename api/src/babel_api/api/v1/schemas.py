@@ -10,6 +10,7 @@ from babel_api.domain.users import IdentityProvider, User
 
 Password = Annotated[str, Field(min_length=10, max_length=128)]
 DisplayName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=80)]
+Locale = Literal["fr", "en"]
 
 
 class UserResponse(BaseModel):
@@ -19,6 +20,7 @@ class UserResponse(BaseModel):
     email: str
     display_name: str
     has_password: bool
+    locale: Locale
     providers: list[IdentityProvider]
     created_at: datetime
 
@@ -29,6 +31,7 @@ class UserResponse(BaseModel):
             email=user.email,
             display_name=user.display_name,
             has_password=user.has_password,
+            locale="en" if user.locale == "en" else "fr",
             providers=sorted(user.providers),
             created_at=user.created_at,
         )
@@ -49,6 +52,9 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: Password
     display_name: DisplayName
+    # Language of the emails sent to the user; the app sends its current language.
+    # Optional without default value: the Dart generator mishandles enums with defaults.
+    locale: Locale | None = None
 
 
 class LoginRequest(BaseModel):
@@ -78,11 +84,25 @@ class ProvidersResponse(BaseModel):
 
 
 class UpdateProfileRequest(BaseModel):
-    display_name: DisplayName
+    """Only the fields that are set are changed."""
+
+    display_name: DisplayName | None = None
+    locale: Locale | None = None
 
 
 class ChangePasswordRequest(BaseModel):
     """``current_password`` is required unless the account has no password yet."""
 
     current_password: Annotated[str, Field(max_length=128)] | None = None
+    new_password: Password
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    """``token`` comes from the link sent by email."""
+
+    token: Annotated[str, Field(max_length=200)]
     new_password: Password

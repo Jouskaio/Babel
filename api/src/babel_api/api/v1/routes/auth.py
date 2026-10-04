@@ -6,11 +6,13 @@ from fastapi import APIRouter, Cookie, Header, HTTPException, Response, status
 
 from babel_api.api.dependencies import AuthServiceDep, ContainerDep
 from babel_api.api.v1.schemas import (
+    ForgotPasswordRequest,
     LoginRequest,
     ProviderLoginRequest,
     ProvidersResponse,
     RefreshRequest,
     RegisterRequest,
+    ResetPasswordRequest,
     TokenResponse,
     UserResponse,
 )
@@ -80,7 +82,7 @@ async def register(
     client: ClientHeader = None,
 ) -> TokenResponse:
     """Create an account with email and password, and sign in."""
-    session = await auth.register(body.email, body.password, body.display_name)
+    session = await auth.register(body.email, body.password, body.display_name, body.locale or "fr")
     return _respond(session, response, container.settings, client)
 
 
@@ -159,3 +161,19 @@ async def logout(
         await auth.logout(token)
     if client == "web":
         _clear_cookie(response, container.settings)
+
+
+@router.post(
+    "/password/forgot", operation_id="forgotPassword", status_code=status.HTTP_202_ACCEPTED
+)
+async def forgot_password(body: ForgotPasswordRequest, auth: AuthServiceDep) -> None:
+    """Email a reset link. The answer is the same whether the account exists or not."""
+    await auth.request_password_reset(body.email)
+
+
+@router.post(
+    "/password/reset", operation_id="resetPassword", status_code=status.HTTP_204_NO_CONTENT
+)
+async def reset_password(body: ResetPasswordRequest, auth: AuthServiceDep) -> None:
+    """Set a new password from an emailed link. Every session is signed out."""
+    await auth.reset_password(body.token, body.new_password)

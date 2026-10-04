@@ -71,18 +71,31 @@ class AuthController extends Notifier<AuthState> {
   Future<void> register(
     String email,
     String password,
-    String displayName,
-  ) async {
+    String displayName, {
+    String locale = 'fr',
+  }) async {
     final tokens = await _auth.register(
       RegisterRequest(
         email: email,
         password: password,
         displayName: displayName,
+        locale: RegisterRequestLocaleEnum.fromJson(locale) ??
+            RegisterRequestLocaleEnum.fr,
       ),
       xBabelClient: _client,
     );
     await _apply(tokens);
   }
+
+  /// Asks for a reset link by email. Succeeds whether or not the account exists.
+  Future<void> forgotPassword(String email) =>
+      _auth.forgotPassword(ForgotPasswordRequest(email: email));
+
+  /// Sets a new password from an emailed link; the user then signs in again.
+  Future<void> resetPassword(String token, String newPassword) =>
+      _auth.resetPassword(
+        ResetPasswordRequest(token: token, newPassword: newPassword),
+      );
 
   /// Exchanges the refresh token for new tokens. Concurrent callers share one request.
   /// Returns false, and signs out, when the session cannot be renewed.

@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from babel_api import __version__
 from babel_api.adapters.catalog.open_library import OpenLibrarySource
 from babel_api.adapters.db.session import create_engine, create_session_factory
+from babel_api.adapters.mail.mailers import BackgroundMailer, LogMailer, SmtpMailer
 from babel_api.adapters.security.identity import apple_verifier, google_verifier
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
 from babel_api.adapters.security.tokens import AccessTokenIssuer
@@ -27,10 +28,22 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     # The engine connects lazily: building the app (e.g. to export the contract) needs no DB.
     engine = create_engine(settings.database_url)
     open_library = OpenLibrarySource()
+    mailer = BackgroundMailer(
+        SmtpMailer(
+            settings.smtp_host,
+            settings.smtp_port,
+            settings.smtp_username,
+            settings.smtp_password.get_secret_value(),
+            settings.mail_from,
+        )
+        if settings.smtp_host
+        else LogMailer()
+    )
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
         yield
+        await mailer.drain()
         await open_library.aclose()
         await engine.dispose()
 
@@ -54,6 +67,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             IdentityProvider.APPLE: apple_verifier(settings.apple_client_ids),
         },
         catalog=CatalogService(open_library),
+        mailer=mailer,
     )
     if settings.cors_origins:
         app.add_middleware(

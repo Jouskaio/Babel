@@ -298,4 +298,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageName => 'English';
+
+  @override
+  String get forgotPassword => 'Forgot your password?';
+
+  @override
+  String get forgotEyebrow => 'Forgot password';
+
+  @override
+  String get forgotTitle => 'Get back into your library.';
+
+  @override
+  String get forgotLede =>
+      'Enter your account email: we will send you a link to choose a new password.';
+
+  @override
+  String get sendResetLink => 'Send the link';
+
+  @override
+  String resetLinkSent(String email) {
+    return 'If an account exists for $email, an email is on its way. The link is valid for one hour.';
+  }
+
+  @override
+  String get resetEyebrow => 'New password';
+
+  @override
+  String get resetTitle => 'Choose a new password.';
+
+  @override
+  String get resetLede => 'Your other devices will be signed out.';
+
+  @override
+  String get resetPasswordAction => 'Save the password';
+
+  @override
+  String get resetDone => 'Password saved. You can now sign in.';
+
+  @override
+  String get errorResetLink =>
+      'This link is no longer valid. Ask for a new one.';
+
+  @override
+  String get backToSignIn => 'Back to sign in';
 }

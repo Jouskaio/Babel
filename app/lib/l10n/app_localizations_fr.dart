@@ -300,4 +300,48 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get languageName => 'Français';
+
+  @override
+  String get forgotPassword => 'Mot de passe oublié ?';
+
+  @override
+  String get forgotEyebrow => 'Mot de passe oublié';
+
+  @override
+  String get forgotTitle => 'Retrouvez l’accès à votre bibliothèque.';
+
+  @override
+  String get forgotLede =>
+      'Indiquez l’email de votre compte : nous vous enverrons un lien pour choisir un nouveau mot de passe.';
+
+  @override
+  String get sendResetLink => 'Envoyer le lien';
+
+  @override
+  String resetLinkSent(String email) {
+    return 'Si un compte existe pour $email, un email vient de lui être envoyé. Le lien est valable une heure.';
+  }
+
+  @override
+  String get resetEyebrow => 'Nouveau mot de passe';
+
+  @override
+  String get resetTitle => 'Choisissez un nouveau mot de passe.';
+
+  @override
+  String get resetLede => 'Vos autres appareils seront déconnectés.';
+
+  @override
+  String get resetPasswordAction => 'Enregistrer le mot de passe';
+
+  @override
+  String get resetDone =>
+      'Mot de passe enregistré. Vous pouvez vous connecter.';
+
+  @override
+  String get errorResetLink =>
+      'Ce lien n’est plus valable. Demandez-en un nouveau.';
+
+  @override
+  String get backToSignIn => 'Retour à la connexion';
 }

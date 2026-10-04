@@ -5,6 +5,7 @@ enum AuthFailure {
   invalidCredentials,
   emailTaken,
   wrongPassword,
+  invalidResetLink,
   network,
   generic;
 
@@ -13,6 +14,7 @@ enum AuthFailure {
     // The generated client wraps transport errors (offline, DNS, TLS) with an inner exception.
     if (error.innerException != null) return AuthFailure.network;
     return switch (error.code) {
+      400 => AuthFailure.invalidResetLink,
       401 => AuthFailure.invalidCredentials,
       403 => AuthFailure.wrongPassword,
       409 => AuthFailure.emailTaken,

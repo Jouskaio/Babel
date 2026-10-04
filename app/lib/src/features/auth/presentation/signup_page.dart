@@ -41,9 +41,12 @@ class _SignupPageState extends ConsumerState<SignupPage> {
       _failure = null;
     });
     try {
-      await ref
-          .read(authControllerProvider.notifier)
-          .register(_email.text.trim(), _password.text, _name.text.trim());
+      await ref.read(authControllerProvider.notifier).register(
+            _email.text.trim(),
+            _password.text,
+            _name.text.trim(),
+            locale: Localizations.localeOf(context).languageCode,
+          );
     } on Object catch (error) {
       if (mounted) setState(() => _failure = AuthFailure.of(error));
     } finally {

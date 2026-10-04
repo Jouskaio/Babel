@@ -14,6 +14,7 @@ class _SignedInAs extends AuthController {
           email: 'ada@example.com',
           displayName: 'Ada',
           hasPassword: true,
+          locale: UserResponseLocaleEnum.fr,
           createdAt: DateTime(2026),
         ),
       );

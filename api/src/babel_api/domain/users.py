@@ -22,6 +22,7 @@ class User:
     display_name: str
     created_at: datetime
     password_hash: str | None = None
+    locale: str = "fr"
     providers: frozenset[IdentityProvider] = field(default_factory=frozenset[IdentityProvider])
 
     @property
@@ -51,3 +52,15 @@ class ExternalIdentity:
     email: str | None
     email_verified: bool
     display_name: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class PasswordResetToken:
+    """A single-use password reset link. Only a hash of its secret is kept."""
+
+    id: UUID
+    user_id: UUID
+    secret_hash: str
+    created_at: datetime
+    expires_at: datetime
+    used_at: datetime | None = None
