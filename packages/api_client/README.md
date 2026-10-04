@@ -89,16 +89,27 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**addStoredFile**](doc//LibraryApi.md#addstoredfile) | **POST** /v1/library/files/{sha256} | Add Stored File
 *LibraryApi* | [**downloadFile**](doc//LibraryApi.md#downloadfile) | **GET** /v1/files/{sha256} | Download File
 *LibraryApi* | [**getLibrary**](doc//LibraryApi.md#getlibrary) | **GET** /v1/library | Get Library
+*LibraryApi* | [**getReadingPositions**](doc//LibraryApi.md#getreadingpositions) | **GET** /v1/library/{item_id}/positions | Get Positions
 *LibraryApi* | [**importFile**](doc//LibraryApi.md#importfile) | **POST** /v1/library/files | Import File
 *LibraryApi* | [**removeFromLibrary**](doc//LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
 *LibraryApi* | [**withdrawFile**](doc//LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
+*SyncApi* | [**getDevices**](doc//SyncApi.md#getdevices) | **GET** /v1/devices | Get Devices
+*SyncApi* | [**pullChanges**](doc//SyncApi.md#pullchanges) | **GET** /v1/sync | Pull Changes
+*SyncApi* | [**pushOperations**](doc//SyncApi.md#pushoperations) | **POST** /v1/sync/{device_id} | Push Operations
+*SyncApi* | [**registerDevice**](doc//SyncApi.md#registerdevice) | **POST** /v1/devices | Register Device
+*SyncApi* | [**removeDevice**](doc//SyncApi.md#removedevice) | **DELETE** /v1/devices/{device_id} | Remove Device
 
 
 ## Documentation For Models
 
  - [BookFormat](doc//BookFormat.md)
+ - [ChangeOp](doc//ChangeOp.md)
  - [ChangePasswordRequest](doc//ChangePasswordRequest.md)
+ - [ChangeResponse](doc//ChangeResponse.md)
+ - [DeviceKind](doc//DeviceKind.md)
+ - [DeviceResponse](doc//DeviceResponse.md)
  - [EditionResponse](doc//EditionResponse.md)
+ - [EntityKind](doc//EntityKind.md)
  - [ForgotPasswordRequest](doc//ForgotPasswordRequest.md)
  - [HealthResponse](doc//HealthResponse.md)
  - [IdentityProvider](doc//IdentityProvider.md)
@@ -106,9 +117,17 @@ Class | Method | HTTP request | Description
  - [IsbnLookupResponse](doc//IsbnLookupResponse.md)
  - [LibraryItemResponse](doc//LibraryItemResponse.md)
  - [LoginRequest](doc//LoginRequest.md)
+ - [OpOutcome](doc//OpOutcome.md)
+ - [OperationRequest](doc//OperationRequest.md)
+ - [OperationResult](doc//OperationResult.md)
  - [ProviderLoginRequest](doc//ProviderLoginRequest.md)
  - [ProvidersResponse](doc//ProvidersResponse.md)
+ - [PullResponse](doc//PullResponse.md)
+ - [PushRequest](doc//PushRequest.md)
+ - [PushResponse](doc//PushResponse.md)
+ - [ReadingPositionResponse](doc//ReadingPositionResponse.md)
  - [RefreshRequest](doc//RefreshRequest.md)
+ - [RegisterDeviceRequest](doc//RegisterDeviceRequest.md)
  - [RegisterRequest](doc//RegisterRequest.md)
  - [ResetPasswordRequest](doc//ResetPasswordRequest.md)
  - [TokenResponse](doc//TokenResponse.md)

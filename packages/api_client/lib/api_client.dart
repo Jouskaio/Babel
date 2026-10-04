@@ -184,10 +184,20 @@ class ApiClient {
           return value is DateTime ? value : DateTime.tryParse(value);
         case 'BookFormat':
           return BookFormatTypeTransformer().decode(value);
+        case 'ChangeOp':
+          return ChangeOpTypeTransformer().decode(value);
         case 'ChangePasswordRequest':
           return ChangePasswordRequest.fromJson(value);
+        case 'ChangeResponse':
+          return ChangeResponse.fromJson(value);
+        case 'DeviceKind':
+          return DeviceKindTypeTransformer().decode(value);
+        case 'DeviceResponse':
+          return DeviceResponse.fromJson(value);
         case 'EditionResponse':
           return EditionResponse.fromJson(value);
+        case 'EntityKind':
+          return EntityKindTypeTransformer().decode(value);
         case 'ForgotPasswordRequest':
           return ForgotPasswordRequest.fromJson(value);
         case 'HealthResponse':
@@ -202,12 +212,28 @@ class ApiClient {
           return LibraryItemResponse.fromJson(value);
         case 'LoginRequest':
           return LoginRequest.fromJson(value);
+        case 'OpOutcome':
+          return OpOutcomeTypeTransformer().decode(value);
+        case 'OperationRequest':
+          return OperationRequest.fromJson(value);
+        case 'OperationResult':
+          return OperationResult.fromJson(value);
         case 'ProviderLoginRequest':
           return ProviderLoginRequest.fromJson(value);
         case 'ProvidersResponse':
           return ProvidersResponse.fromJson(value);
+        case 'PullResponse':
+          return PullResponse.fromJson(value);
+        case 'PushRequest':
+          return PushRequest.fromJson(value);
+        case 'PushResponse':
+          return PushResponse.fromJson(value);
+        case 'ReadingPositionResponse':
+          return ReadingPositionResponse.fromJson(value);
         case 'RefreshRequest':
           return RefreshRequest.fromJson(value);
+        case 'RegisterDeviceRequest':
+          return RegisterDeviceRequest.fromJson(value);
         case 'RegisterRequest':
           return RegisterRequest.fromJson(value);
         case 'ResetPasswordRequest':
