@@ -1,0 +1,111 @@
+{
+  "@@locale": "fr",
+  "brand": "BABEL",
+  "navFeatures": "Fonctionnalités",
+  "navDevices": "Appareils",
+  "navPrivacy": "Confidentialité",
+  "signIn": "Se connecter",
+  "createAccount": "Créer un compte",
+  "heroEyebrow": "Bibliothèque · Lecture · Annotations",
+  "heroTitleLead": "Toute votre bibliothèque, ",
+  "heroTitleEmphasis": "au même endroit.",
+  "heroLede": "Livres papier ou numériques, BD, audio et fanfictions : rangez toute votre bibliothèque, suivez vos lectures et partagez-les avec vos amis. Importez vos propres fichiers pour les lire où que vous soyez.",
+  "startFree": "Commencer — c’est gratuit",
+  "haveAccount": "J’ai déjà un compte",
+  "heroNote": "Sans publicité. Vos données restent les vôtres.",
+  "trendingLabel": "Tendance cette semaine",
+  "featuresEyebrow": "Fonctionnalités",
+  "featuresTitle": "Une bibliothèque qui vous ressemble, pas un catalogue.",
+  "featureAllTitle": "Tout au même endroit",
+  "featureAllBody": "Scannez vos livres papier, importez vos fichiers, téléchargez vos fanfictions depuis AO3 et retrouvez vos lectures en cours, à lire et terminées.",
+  "featureSyncTitle": "Vos fichiers, partout",
+  "featureSyncBody": "Importez vos EPUB et reprenez à la bonne page sur liseuse, téléphone ou ordinateur, même hors ligne.",
+  "featureNotesTitle": "Annotez en marge",
+  "featureNotesBody": "Surlignez, commentez, retrouvez vos passages préférés et ceux de vos amis.",
+  "featureStatsTitle": "Vos lectures, en chiffres",
+  "featureStatsBody": "Statistiques, objectifs et un bilan de fin d’année que vous aurez envie de partager.",
+  "devicesEyebrow": "Appareils",
+  "devicesTitle": "Lisez où vous voulez. Babel suit.",
+  "devicesBody": "Votre progression, vos notes et vos étagères se synchronisent entre vos appareils. Commencez un chapitre au lit sur votre liseuse, finissez-le dans le métro.",
+  "deviceChapter": "Chapitre XII",
+  "deviceExcerpt": "Marguerite ouvrit la fenêtre. La lune, au-dessus des toits, éclairait la rue d’une lumière blanche et nette, comme si quelqu’un avait tendu un drap sur toute la ville…",
+  "deviceSynced": "Synchronisé",
+  "quote": "« Quoi que nos âmes soient faites, la sienne et la mienne sont pareilles. »",
+  "quoteAuthor": "Emily Brontë · Les Hauts de Hurle-Vent",
+  "ctaTitle": "Ouvrez votre bibliothèque.",
+  "ctaBody": "Créez votre compte en une minute.",
+  "footerPrivacy": "Confidentialité",
+  "footerTerms": "Conditions",
+  "footerContact": "Contact",
+  "authQuote": "« Un lecteur vit mille vies avant de mourir. »",
+  "authQuoteAuthor": "George R. R. Martin",
+  "loginEyebrow": "Connexion",
+  "loginTitle": "Bon retour parmi nous.",
+  "loginLede": "Reprenez votre lecture là où vous l’aviez laissée.",
+  "signupEyebrow": "Inscription",
+  "signupTitle": "Ouvrez votre bibliothèque.",
+  "signupLede": "Un compte pour retrouver vos livres, vos notes et vos amis sur tous vos appareils.",
+  "continueWithApple": "Continuer avec Apple",
+  "continueWithGoogle": "Continuer avec Google",
+  "or": "ou",
+  "displayNameLabel": "Nom affiché",
+  "emailLabel": "Email",
+  "passwordLabel": "Mot de passe",
+  "showPassword": "Afficher",
+  "hidePassword": "Masquer",
+  "passwordHelp": "10 caractères minimum. Une phrase de passe est idéale.",
+  "termsNotice": "En créant un compte, vous acceptez les Conditions d’utilisation et la Politique de confidentialité.",
+  "createMyAccount": "Créer mon compte",
+  "noAccount": "Pas encore de compte ?",
+  "alreadyAccount": "Déjà un compte ?",
+  "errorRequired": "Ce champ est requis.",
+  "errorEmail": "Adresse email invalide.",
+  "errorPasswordLength": "10 caractères minimum.",
+  "errorInvalidCredentials": "Email ou mot de passe incorrect.",
+  "errorEmailTaken": "Un compte existe déjà avec cet email.",
+  "errorWrongPassword": "Le mot de passe actuel est incorrect.",
+  "errorNetwork": "Impossible de joindre Babel. Vérifiez votre connexion.",
+  "errorGeneric": "Une erreur est survenue. Réessayez.",
+  "greeting": "Bonsoir, {name}.",
+  "@greeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "apiConnected": "API connectée · v{version}",
+  "@apiConnected": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "apiConnecting": "Connexion à l’API…",
+  "apiUnreachable": "API injoignable",
+  "accountTitle": "Compte",
+  "accountProfile": "Profil",
+  "accountSecurity": "Sécurité",
+  "save": "Enregistrer",
+  "saved": "Enregistré.",
+  "currentPasswordLabel": "Mot de passe actuel",
+  "newPasswordLabel": "Nouveau mot de passe",
+  "setPassword": "Définir un mot de passe",
+  "changePassword": "Changer le mot de passe",
+  "passwordChanged": "Mot de passe modifié. Vos autres appareils ont été déconnectés.",
+  "signedInWith": "Connecté avec {providers}",
+  "@signedInWith": {
+    "placeholders": {
+      "providers": {
+        "type": "String"
+      }
+    }
+  },
+  "signOut": "Se déconnecter",
+  "deleteAccount": "Supprimer mon compte",
+  "deleteAccountTitle": "Supprimer votre compte ?",
+  "deleteAccountBody": "Votre bibliothèque, vos notes et vos statistiques seront définitivement effacées. Cette action est irréversible.",
+  "cancel": "Annuler",
+  "delete": "Supprimer"
+}
