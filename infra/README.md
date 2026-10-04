@@ -1,18 +1,45 @@
 # Infrastructure
 
-The API runs on its own server (Proxmox LXC container `babel`), separate from the media server.
-The Flutter app is never deployed here: it ships as store, web and desktop builds.
+The API and the web build of the app run on their own server (Proxmox LXC container `babel`,
+192.168.1.106), separate from the media server. Store builds (Android, iOS) are not deployed here.
+
+| Service | Image | Port | Public URL |
+| --- | --- | --- | --- |
+| `api` | `ghcr.io/jouskaio/babel-api` | 8000 | `https://babel.jouskaio.me/api` |
+| `web` | `ghcr.io/jouskaio/babel-web` | 8090 | `https://babel.jouskaio.me` |
 
 ```
-git tag api-vX.Y.Z ─► GitHub Actions
+git tag api-vX.Y.Z / app-vX.Y.Z ─► GitHub Actions
                         1. build + push image to GHCR
                         2. join the tailnet as an ephemeral tag:ci node
-                        3. Tailscale SSH as deploy@babel-api ─► docker compose pull && up -d
-                        4. smoke test GET /v1/health
+                        3. Tailscale SSH as deploy@babel-api ─► docker compose pull && up -d <service>
+                        4. smoke test GET /v1/health (api) or /healthz (web)
 ```
 
-No port is opened to the Internet and no SSH key is stored in GitHub: access is granted by
+No SSH port is opened to the Internet and no SSH key is stored in GitHub: access is granted by
 the Tailscale policy in [`tailscale-policy.hujson`](tailscale-policy.hujson).
+
+## Public access (Nginx Proxy Manager)
+
+Proxy host `babel.jouskaio.me` → `http://192.168.1.106:8090` (web app), with Let's Encrypt,
+*Force SSL*, *Block Common Exploits* and *Websockets Support*. The API is published under `/api`
+through the host's *Advanced* configuration:
+
+```nginx
+location /api/ {
+    proxy_pass http://192.168.1.106:8000/;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Prefix /api;
+}
+```
+
+The proxy strips the prefix; `BABEL_ROOT_PATH=/api` in `/opt/babel/.env` keeps the OpenAPI
+document and `/api/docs` consistent. Create the host without SSL first, check it over HTTP, then
+request the certificate: Let's Encrypt validation needs the plain-HTTP host to work.
 
 ## Server setup (one time)
 
