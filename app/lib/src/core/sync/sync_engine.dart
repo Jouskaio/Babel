@@ -66,7 +66,7 @@ class SyncEngine extends Notifier<SyncStatus> {
       results,
     ) {
       final online = !results.contains(ConnectivityResult.none);
-      state = state.copyWith(online: online);
+      _update((s) => s.copyWith(online: online));
       if (online) unawaited(sync());
     });
     ref.onDispose(subscription.cancel);
@@ -82,9 +82,21 @@ class SyncEngine extends Notifier<SyncStatus> {
     required String entityId,
     required ChangeOp op,
     Map<String, Object>? data,
+    bool replacePending = false,
   }) async {
     final db = await _db;
     if (db == null) return;
+    if (replacePending) {
+      // Only the latest state matters (a reading position): drop older queued ones.
+      await LocalStores.outbox.delete(
+        db,
+        finder: Finder(
+          filter:
+              Filter.equals('entity', entity.value) &
+              Filter.equals('entity_id', entityId),
+        ),
+      );
+    }
     await LocalStores.outbox.add(db, {
       'key': const Uuid().v4(),
       'entity': entity.value,
@@ -93,7 +105,7 @@ class SyncEngine extends Notifier<SyncStatus> {
       'data': ?data,
     });
     await _refreshPending(db);
-    unawaited(sync());
+    if (ref.mounted) unawaited(sync());
   }
 
   /// Runs one synchronization; calls made meanwhile schedule exactly one more run.
@@ -104,30 +116,45 @@ class SyncEngine extends Notifier<SyncStatus> {
     }
     return _running = _run().whenComplete(() {
       _running = null;
-      if (_again) {
+      if (_again && ref.mounted) {
         _again = false;
         unawaited(sync());
       }
     });
   }
 
+  /// Updates the status, unless the engine was disposed meanwhile (signed out).
+  void _update(SyncStatus Function(SyncStatus) change) {
+    if (ref.mounted) state = change(state);
+  }
+
   Future<void> _run() async {
     final db = await _db;
-    if (db == null) return;
-    state = state.copyWith(syncing: true);
+    if (db == null || !ref.mounted) return;
+    _update((s) => s.copyWith(syncing: true));
     try {
-      await _ensureDevice(db);
-      await _push(db);
-      await _pull(db);
-      await resolveLookups(db, ref.read(authedCatalogApiProvider));
-      await _refreshAccount();
-      state = state.copyWith(online: true, lastSync: DateTime.now());
+      // Each step needs the engine alive: a sign-out stops the run between steps.
+      for (final step in <Future<void> Function()>[
+        () => _ensureDevice(db),
+        () => _push(db),
+        () => _pull(db),
+        () => resolveLookups(db, ref.read(authedCatalogApiProvider)),
+        _refreshAccount,
+      ]) {
+        if (!ref.mounted) return;
+        await step();
+      }
+      _update((s) => s.copyWith(online: true, lastSync: DateTime.now()));
     } on ApiException catch (error) {
       // Transport errors mean offline; anything else will be retried next time.
-      if (error.innerException != null) state = state.copyWith(online: false);
+      if (error.innerException != null) {
+        _update((s) => s.copyWith(online: false));
+      }
     } finally {
-      await _refreshPending(db);
-      state = state.copyWith(syncing: false);
+      if (ref.mounted) {
+        await _refreshPending(db);
+        _update((s) => s.copyWith(syncing: false));
+      }
     }
   }
 
@@ -135,7 +162,7 @@ class SyncEngine extends Notifier<SyncStatus> {
   /// device), so banners and profile stay current.
   Future<void> _refreshAccount() async {
     final user = await ref.read(accountApiProvider).getMe();
-    if (user != null) {
+    if (user != null && ref.mounted) {
       ref.read(authControllerProvider.notifier).updateUser(user);
     }
   }
@@ -218,9 +245,14 @@ class SyncEngine extends Notifier<SyncStatus> {
     Transaction txn,
     Map<String, dynamic> change,
   ) async {
-    if (change['entity'] != EntityKind.libraryItem.value) {
-      return; // positions: with the reader
+    if (change['entity'] == EntityKind.readingPosition.value) {
+      final data = (change['data'] as Map).cast<String, Object?>();
+      await LocalStores.positions
+          .record('${data['item_id']}:${data['device_id']}')
+          .put(txn, data);
+      return;
     }
+    if (change['entity'] != EntityKind.libraryItem.value) return;
     final record = LocalStores.library.record(change['entity_id'] as String);
     if (change['op'] == ChangeOp.delete.value) {
       await record.delete(txn);
@@ -230,7 +262,8 @@ class SyncEngine extends Notifier<SyncStatus> {
   }
 
   Future<void> _refreshPending(Database db) async {
-    state = state.copyWith(pending: await LocalStores.outbox.count(db));
+    final pending = await LocalStores.outbox.count(db);
+    _update((s) => s.copyWith(pending: pending));
   }
 
   static String get _deviceName {

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:babel_api_client/api.dart';
 import 'package:cross_file/cross_file.dart';
@@ -91,5 +92,36 @@ class FileTransfer {
       extension: extension,
       fileName: '${item.title}.$extension',
     );
+  }
+
+  /// The content of a book, to read it: the local copy when there is one, otherwise
+  /// downloaded (and kept on devices, so the book can be read offline next time).
+  Future<Uint8List> open(
+    LibraryItemResponse item, {
+    void Function(double)? onProgress,
+  }) async {
+    final extension = item.format.value;
+    final local = await readLocalBook(item.sha256, extension);
+    if (local != null) return local;
+    if (keepsBooksOffline) {
+      await download(item, onProgress: onProgress);
+      return (await readLocalBook(item.sha256, extension))!;
+    }
+    final response = await _client.send(
+      http.Request('GET', _uri('/v1/files/${item.sha256}')),
+    );
+    if (response.statusCode >= 400) {
+      throw ApiException(
+        response.statusCode,
+        await response.stream.bytesToString(),
+      );
+    }
+    final total = response.contentLength ?? item.size;
+    final builder = BytesBuilder(copy: false);
+    await for (final chunk in response.stream) {
+      builder.add(chunk);
+      onProgress?.call(total == 0 ? 1 : builder.length / total);
+    }
+    return builder.takeBytes();
   }
 }

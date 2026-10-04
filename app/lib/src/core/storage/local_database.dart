@@ -40,6 +40,9 @@ abstract final class LocalStores {
   /// Searches and ISBN scans made offline, run when the network is back.
   static final lookups = intMapStoreFactory.store('lookups');
 
+  /// Reading positions by "item:device", this device's and the others' (from sync).
+  static final positions = stringMapStoreFactory.store('positions');
+
   /// Sync cursor, device id…
   static final meta = StoreRef<String, Object?>('meta');
 }

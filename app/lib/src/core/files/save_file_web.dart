@@ -28,3 +28,9 @@ Future<String> saveBook(
   web.URL.revokeObjectURL(url);
   return fileName;
 }
+
+/// Browsers keep no local copy: books are read from the server.
+Future<Uint8List?> readLocalBook(String sha256, String extension) async => null;
+
+/// Browsers do not keep the books they open.
+const keepsBooksOffline = false;

@@ -17,6 +17,7 @@ import '../features/catalog/presentation/work_page.dart';
 import '../features/home/presentation/home_page.dart';
 import '../features/landing/presentation/landing_page.dart';
 import '../features/library/presentation/library_page.dart';
+import '../features/reader/presentation/reader_page.dart';
 import '../features/shell/app_shell.dart';
 import '../features/sources/presentation/new_source_page.dart';
 import '../features/sources/presentation/source_detail_page.dart';
@@ -35,6 +36,7 @@ abstract final class Routes {
   static const library = '/library';
   static const scan = '/scan';
   static String work(String id) => '/works/$id';
+  static String read(String itemId) => '/read/$itemId';
   static const sources = '/sources';
   static const newSource = '/sources/new';
   static String newSourceOf(String kind) => '/sources/new/$kind';
@@ -115,6 +117,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(path: Routes.scan, builder: (_, _) => const ScanPage()),
+      GoRoute(
+        path: '/read/:id',
+        builder: (_, state) => ReaderPage(itemId: state.pathParameters['id']!),
+      ),
       GoRoute(path: Routes.sources, builder: (_, _) => const SourcesPage()),
       GoRoute(path: Routes.newSource, builder: (_, _) => const NewSourcePage()),
       GoRoute(
