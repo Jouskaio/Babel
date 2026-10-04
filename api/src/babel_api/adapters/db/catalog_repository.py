@@ -70,8 +70,12 @@ class SqlCatalogRepository:
         row.title = work.title or row.title
         if work.authors:
             row.authors = list(work.authors)
-        row.first_publish_year = work.first_publish_year or row.first_publish_year
-        row.cover_id = work.cover_id or row.cover_id
+        # The earliest known year wins: search results compute it over every edition,
+        # while a work record may carry the date of a later edition.
+        years = [y for y in (work.first_publish_year, row.first_publish_year) if y]
+        row.first_publish_year = min(years) if years else None
+        # Keep the first cover found (search ranks the most representative one first).
+        row.cover_id = row.cover_id or work.cover_id
         row.description = work.description or row.description
         row.edition_count = work.edition_count or row.edition_count
         row.updated_at = datetime.now(UTC)
