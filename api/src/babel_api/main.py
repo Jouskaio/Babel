@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from babel_api import __version__
 from babel_api.adapters.catalog.open_library import OpenLibrarySource
+from babel_api.adapters.db.migrations.config import upgrade_database
 from babel_api.adapters.db.session import create_engine, create_session_factory
 from babel_api.adapters.files.blob_store import LocalBlobStore
 from babel_api.adapters.files.covers import LocalCoverCache
@@ -78,6 +79,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+        migrate = settings.migrate_on_startup
+        if migrate is None:
+            migrate = settings.environment == "development"
+        if migrate:
+            # Alembic runs its own event loop: off this one.
+            await asyncio.to_thread(upgrade_database, settings.database_url)
         follow_task: asyncio.Task[None] | None = None
         if settings.follow_interval_hours > 0:
             container: Container = app.state.container
