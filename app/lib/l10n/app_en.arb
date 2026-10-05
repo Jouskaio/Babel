@@ -464,5 +464,34 @@
         "type": "int"
       }
     }
-  }
+  },
+  "followActive": "New chapters checked every day · {chapters}",
+  "@followActive": {
+    "placeholders": {
+      "chapters": {
+        "type": "String"
+      }
+    }
+  },
+  "followComplete": "Finished work · {chapters}",
+  "@followComplete": {
+    "placeholders": {
+      "chapters": {
+        "type": "String"
+      }
+    }
+  },
+  "followHint": "When the author posts a chapter, the book is updated on all your devices; your place and notes stay.",
+  "followCheckNow": "Check now",
+  "followStop": "Stop following",
+  "followNewChapters": "New version: {chapters}",
+  "@followNewChapters": {
+    "placeholders": {
+      "chapters": {
+        "type": "String"
+      }
+    }
+  },
+  "followNothingNew": "No new chapter for now",
+  "linkFollowed": "new chapters will arrive by themselves"
 }

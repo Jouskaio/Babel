@@ -76,6 +76,11 @@ class FakeServer {
   final importBatches = <Map<String, Object?>>[];
   int importCalls = 0;
   int linkImports = 0;
+
+  /// Library items followed for new chapters.
+  final followed = <String>[];
+  String followChapters = '3/?';
+  int followChecks = 0;
   bool hasSource = true;
   final entries = <Map<String, Object?>>[
     sourceEntry('e1', 'Jane Eyre.epub', 'new'),
@@ -205,6 +210,33 @@ class FakeServer {
           'description': null,
           'editions': <Object>[],
         },
+      });
+    }
+    if (path == '/v1/library/follows') {
+      return json([
+        for (final itemId in followed)
+          {
+            'id': 'f-$itemId',
+            'item_id': itemId,
+            'url': 'https://archiveofourown.org/works/77',
+            'chapters': followChapters,
+            'complete': false,
+            'last_checked_at': '2026-10-05T08:00:00Z',
+            'last_error': null,
+          },
+      ]);
+    }
+    if (path.startsWith('/v1/library/follows/') && path.endsWith('/check')) {
+      followChecks++;
+      followChapters = '4/?';
+      return json({
+        'id': 'f-i1',
+        'item_id': 'i1',
+        'url': 'https://archiveofourown.org/works/77',
+        'chapters': followChapters,
+        'complete': false,
+        'last_checked_at': '2026-10-05T09:00:00Z',
+        'last_error': null,
       });
     }
     if (path == '/v1/library/links/preview') {

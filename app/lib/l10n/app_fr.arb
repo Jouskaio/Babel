@@ -576,5 +576,34 @@
         "type": "int"
       }
     }
-  }
+  },
+  "followActive": "Nouveaux chapitres vérifiés chaque jour · {chapters}",
+  "@followActive": {
+    "placeholders": {
+      "chapters": {
+        "type": "String"
+      }
+    }
+  },
+  "followComplete": "Œuvre terminée · {chapters}",
+  "@followComplete": {
+    "placeholders": {
+      "chapters": {
+        "type": "String"
+      }
+    }
+  },
+  "followHint": "Quand l'autrice publie un chapitre, le livre est mis à jour sur tous vos appareils ; votre position et vos notes restent.",
+  "followCheckNow": "Vérifier maintenant",
+  "followStop": "Arrêter le suivi",
+  "followNewChapters": "Nouvelle version : {chapters}",
+  "@followNewChapters": {
+    "placeholders": {
+      "chapters": {
+        "type": "String"
+      }
+    }
+  },
+  "followNothingNew": "Pas de nouveau chapitre pour l'instant",
+  "linkFollowed": "les nouveaux chapitres arriveront tout seuls"
 }

@@ -127,6 +127,14 @@ class _LinkImportPageState extends ConsumerState<LinkImportPage> {
     });
   }
 
+  /// Unfinished AO3 works are followed by the server for new chapters.
+  bool _followed(LinkPreviewResponse? preview) {
+    final chapters = preview?.detail;
+    if (preview?.kind != LinkKind.ao3 || chapters == null) return false;
+    final parts = chapters.split('/');
+    return parts.length == 2 && (parts[1] == '?' || parts[0] != parts[1]);
+  }
+
   String _describe(LinkPreviewResponse preview) {
     final l10n = context.l10n;
     final title = preview.title == null ? '' : ' · « ${preview.title} »';
@@ -159,7 +167,12 @@ class _LinkImportPageState extends ConsumerState<LinkImportPage> {
             : l10n.linkImporting,
         true,
       ),
-      _Step.done => (l10n.linkDone, true),
+      _Step.done => (
+        _followed(preview)
+            ? '${l10n.linkDone} · ${l10n.linkFollowed}'
+            : l10n.linkDone,
+        true,
+      ),
       _Step.failed => (_error ?? l10n.errorGeneric, false),
       _ => (null, true),
     };
