@@ -611,5 +611,6 @@
   "linkKindGutenberg": "gutenberg.org/ebooks/… : le livre du domaine public en EPUB, avec ses illustrations.",
   "linkKindFile": "Un lien direct vers un fichier EPUB, PDF ou CBZ, sur n'importe quel site.",
   "linkKindsElse": "Les autres pages (sites de lecture en ligne, boutiques) ne sont pas prises en charge.",
-  "linkWillFollow": "en cours : nouveaux chapitres vérifiés chaque jour"
+  "linkWillFollow": "en cours : nouveaux chapitres vérifiés chaque jour",
+  "libraryNewChapters": "Nouveau chapitre"
 }

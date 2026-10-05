@@ -86,6 +86,9 @@ class FakeServer {
   /// Library items followed for new chapters.
   final followed = <String>[];
   String followChapters = '3/?';
+
+  /// When new chapters of followed books last arrived.
+  String? followUpdated;
   String linkChapters = '12/12';
   int followChecks = 0;
   bool hasSource = true;
@@ -245,6 +248,7 @@ class FakeServer {
             'complete': false,
             'last_checked_at': '2026-10-05T08:00:00Z',
             'last_error': null,
+            'updated_at': followUpdated,
           },
       ]);
     }

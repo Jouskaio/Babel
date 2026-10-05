@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_providers.dart';
+import '../../../core/sync/sync_engine.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
+import '../../reader/application/reading_position.dart';
 import '../application/library_controller.dart';
 
 /// Works followed for new chapters (unfinished AO3 fanfictions imported by link).
@@ -135,3 +137,28 @@ class _FollowPanelState extends ConsumerState<FollowPanel> {
     );
   }
 }
+
+/// Followed books whose latest chapters arrived after they were last read (on any
+/// device): the library marks them "new chapter" until they are opened.
+final newChaptersProvider = FutureProvider.autoDispose<Set<String>>((
+  ref,
+) async {
+  // Recomputed when the library changes and after each synchronization (positions).
+  ref.watch(libraryControllerProvider);
+  ref.watch(syncEngineProvider.select((s) => s.lastSync));
+  final List<FollowResponse> follows;
+  try {
+    follows = await ref.watch(followsProvider.future);
+  } on Object {
+    return const {}; // offline: no badge rather than an error
+  }
+  final positions = ref.read(readingPositionsProvider);
+  final fresh = <String>{};
+  for (final follow in follows) {
+    final updated = follow.updatedAt;
+    if (updated == null) continue;
+    final read = await positions.latest(follow.itemId);
+    if (read == null || read.time.isBefore(updated)) fresh.add(follow.itemId);
+  }
+  return fresh;
+});

@@ -238,6 +238,8 @@ class _BookTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final fresh =
+        ref.watch(newChaptersProvider).value?.contains(item.id) ?? false;
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: () => showModalBottomSheet<void>(
@@ -248,12 +250,39 @@ class _BookTile extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          LayoutBuilder(
-            builder: (context, c) => BookCover(
-              width: c.maxWidth,
-              url: libraryCoverUrl(item),
-              title: item.title,
-            ),
+          Stack(
+            children: [
+              LayoutBuilder(
+                builder: (context, c) => BookCover(
+                  width: c.maxWidth,
+                  url: libraryCoverUrl(item),
+                  title: item.title,
+                ),
+              ),
+              if (fresh)
+                Positioned(
+                  left: 6,
+                  top: 6,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: BabelColors.gold,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    child: Text(
+                      context.l10n.libraryNewChapters.toUpperCase(),
+                      style: BabelText.label(
+                        8,
+                        color: BabelColors.canvas,
+                        spacing: 1,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 10),
           Text(

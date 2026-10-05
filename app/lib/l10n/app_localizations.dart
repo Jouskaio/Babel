@@ -2011,6 +2011,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'en cours : nouveaux chapitres vérifiés chaque jour'**
   String get linkWillFollow;
+
+  /// No description provided for @libraryNewChapters.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau chapitre'**
+  String get libraryNewChapters;
 }
 
 class _AppLocalizationsDelegate

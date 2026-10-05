@@ -1199,4 +1199,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get linkWillFollow =>
       'en cours : nouveaux chapitres vérifiés chaque jour';
+
+  @override
+  String get libraryNewChapters => 'Nouveau chapitre';
 }
