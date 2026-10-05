@@ -12,8 +12,10 @@ Method | HTTP request | Description
 [**changePassword**](AccountApi.md#changepassword) | **POST** /v1/me/password | Change Password
 [**deleteMe**](AccountApi.md#deleteme) | **DELETE** /v1/me | Delete Me
 [**getMe**](AccountApi.md#getme) | **GET** /v1/me | Get Me
+[**getSocialProfile**](AccountApi.md#getsocialprofile) | **GET** /v1/me/profile | Get Profile
 [**resendVerificationEmail**](AccountApi.md#resendverificationemail) | **POST** /v1/me/email/verification | Resend Verification
 [**updateMe**](AccountApi.md#updateme) | **PATCH** /v1/me | Update Me
+[**updateSocialProfile**](AccountApi.md#updatesocialprofile) | **PATCH** /v1/me/profile | Update Profile
 
 
 # **changePassword**
@@ -153,6 +155,51 @@ This endpoint does not need any parameter.
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **getSocialProfile**
+> SocialProfileResponse getSocialProfile()
+
+Get Profile
+
+Your handle and what you share.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = AccountApi();
+
+try {
+    final result = api_instance.getSocialProfile();
+    print(result);
+} catch (e) {
+    print('Exception when calling AccountApi->getSocialProfile: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**SocialProfileResponse**](SocialProfileResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **resendVerificationEmail**
 > resendVerificationEmail()
 
@@ -234,6 +281,55 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**UserResponse**](UserResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **updateSocialProfile**
+> SocialProfileResponse updateSocialProfile(updateSocialProfileRequest)
+
+Update Profile
+
+Choose a handle (3 to 30 letters, digits, dots, underscores) and what you share.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = AccountApi();
+final updateSocialProfileRequest = UpdateSocialProfileRequest(); // UpdateSocialProfileRequest | 
+
+try {
+    final result = api_instance.updateSocialProfile(updateSocialProfileRequest);
+    print(result);
+} catch (e) {
+    print('Exception when calling AccountApi->updateSocialProfile: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **updateSocialProfileRequest** | [**UpdateSocialProfileRequest**](UpdateSocialProfileRequest.md)|  | 
+
+### Return type
+
+[**SocialProfileResponse**](SocialProfileResponse.md)
 
 ### Authorization
 

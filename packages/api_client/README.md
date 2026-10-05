@@ -67,8 +67,10 @@ Class | Method | HTTP request | Description
 *AccountApi* | [**changePassword**](doc//AccountApi.md#changepassword) | **POST** /v1/me/password | Change Password
 *AccountApi* | [**deleteMe**](doc//AccountApi.md#deleteme) | **DELETE** /v1/me | Delete Me
 *AccountApi* | [**getMe**](doc//AccountApi.md#getme) | **GET** /v1/me | Get Me
+*AccountApi* | [**getSocialProfile**](doc//AccountApi.md#getsocialprofile) | **GET** /v1/me/profile | Get Profile
 *AccountApi* | [**resendVerificationEmail**](doc//AccountApi.md#resendverificationemail) | **POST** /v1/me/email/verification | Resend Verification
 *AccountApi* | [**updateMe**](doc//AccountApi.md#updateme) | **PATCH** /v1/me | Update Me
+*AccountApi* | [**updateSocialProfile**](doc//AccountApi.md#updatesocialprofile) | **PATCH** /v1/me/profile | Update Profile
 *AdminApi* | [**withdrawFile**](doc//AdminApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
 *AuthApi* | [**forgotPassword**](doc//AuthApi.md#forgotpassword) | **POST** /v1/auth/password/forgot | Forgot Password
 *AuthApi* | [**getAuthProviders**](doc//AuthApi.md#getauthproviders) | **GET** /v1/auth/providers | Get Providers
@@ -88,17 +90,36 @@ Class | Method | HTTP request | Description
 *HealthApi* | [**getHealth**](doc//HealthApi.md#gethealth) | **GET** /v1/health | Get Health
 *LibraryApi* | [**addStoredFile**](doc//LibraryApi.md#addstoredfile) | **POST** /v1/library/files/{sha256} | Add Stored File
 *LibraryApi* | [**checkFollow**](doc//LibraryApi.md#checkfollow) | **POST** /v1/library/follows/{follow_id}/check | Check Follow
+*LibraryApi* | [**deleteReview**](doc//LibraryApi.md#deletereview) | **DELETE** /v1/library/{item_id}/review | Delete Review
 *LibraryApi* | [**downloadFile**](doc//LibraryApi.md#downloadfile) | **GET** /v1/files/{sha256} | Download File
 *LibraryApi* | [**getFileCover**](doc//LibraryApi.md#getfilecover) | **GET** /v1/files/{sha256}/cover | Get File Cover
 *LibraryApi* | [**getFollows**](doc//LibraryApi.md#getfollows) | **GET** /v1/library/follows | Get Follows
 *LibraryApi* | [**getLibrary**](doc//LibraryApi.md#getlibrary) | **GET** /v1/library | Get Library
 *LibraryApi* | [**getReadingPositions**](doc//LibraryApi.md#getreadingpositions) | **GET** /v1/library/{item_id}/positions | Get Positions
+*LibraryApi* | [**getReview**](doc//LibraryApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
 *LibraryApi* | [**importFile**](doc//LibraryApi.md#importfile) | **POST** /v1/library/files | Import File
 *LibraryApi* | [**importLink**](doc//LibraryApi.md#importlink) | **POST** /v1/library/links | Import Link
 *LibraryApi* | [**previewLink**](doc//LibraryApi.md#previewlink) | **POST** /v1/library/links/preview | Preview Link
 *LibraryApi* | [**removeFromLibrary**](doc//LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
+*LibraryApi* | [**saveReview**](doc//LibraryApi.md#savereview) | **PUT** /v1/library/{item_id}/review | Save Review
 *LibraryApi* | [**stopFollow**](doc//LibraryApi.md#stopfollow) | **DELETE** /v1/library/follows/{follow_id} | Stop Follow
 *LibraryApi* | [**withdrawFile**](doc//LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
+*SocialApi* | [**addFriend**](doc//SocialApi.md#addfriend) | **PUT** /v1/social/friends/{handle} | Add Friend
+*SocialApi* | [**deleteReview**](doc//SocialApi.md#deletereview) | **DELETE** /v1/library/{item_id}/review | Delete Review
+*SocialApi* | [**followReader**](doc//SocialApi.md#followreader) | **PUT** /v1/social/following/{handle} | Follow Reader
+*SocialApi* | [**getFeed**](doc//SocialApi.md#getfeed) | **GET** /v1/social/feed | Get Feed
+*SocialApi* | [**getFriends**](doc//SocialApi.md#getfriends) | **GET** /v1/social/friends | Get Friends
+*SocialApi* | [**getReader**](doc//SocialApi.md#getreader) | **GET** /v1/social/readers/{handle} | Get Reader
+*SocialApi* | [**getRecommendations**](doc//SocialApi.md#getrecommendations) | **GET** /v1/social/recommendations | Get Recommendations
+*SocialApi* | [**getReview**](doc//SocialApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
+*SocialApi* | [**getSocialProfile**](doc//SocialApi.md#getsocialprofile) | **GET** /v1/me/profile | Get Profile
+*SocialApi* | [**markRecommendationRead**](doc//SocialApi.md#markrecommendationread) | **POST** /v1/social/recommendations/{recommendation_id}/read | Mark Read
+*SocialApi* | [**recommend**](doc//SocialApi.md#recommend) | **POST** /v1/social/recommendations | Recommend
+*SocialApi* | [**removeFriend**](doc//SocialApi.md#removefriend) | **DELETE** /v1/social/friends/{handle} | Remove Friend
+*SocialApi* | [**saveReview**](doc//SocialApi.md#savereview) | **PUT** /v1/library/{item_id}/review | Save Review
+*SocialApi* | [**searchReaders**](doc//SocialApi.md#searchreaders) | **GET** /v1/social/readers | Search Readers
+*SocialApi* | [**unfollowReader**](doc//SocialApi.md#unfollowreader) | **DELETE** /v1/social/following/{handle} | Unfollow Reader
+*SocialApi* | [**updateSocialProfile**](doc//SocialApi.md#updatesocialprofile) | **PATCH** /v1/me/profile | Update Profile
 *SourcesApi* | [**checkSource**](doc//SourcesApi.md#checksource) | **POST** /v1/sources/check | Check Source
 *SourcesApi* | [**createSource**](doc//SourcesApi.md#createsource) | **POST** /v1/sources | Create Source
 *SourcesApi* | [**deleteSource**](doc//SourcesApi.md#deletesource) | **DELETE** /v1/sources/{source_id} | Delete Source
@@ -118,8 +139,11 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [Ao3Config](doc//Ao3Config.md)
+ - [Audience](doc//Audience.md)
+ - [AuthorResponse](doc//AuthorResponse.md)
  - [BatchImportResponse](doc//BatchImportResponse.md)
  - [BookFormat](doc//BookFormat.md)
+ - [BookTitleResponse](doc//BookTitleResponse.md)
  - [ChangeOp](doc//ChangeOp.md)
  - [ChangePasswordRequest](doc//ChangePasswordRequest.md)
  - [ChangeResponse](doc//ChangeResponse.md)
@@ -130,8 +154,12 @@ Class | Method | HTTP request | Description
  - [EditionResponse](doc//EditionResponse.md)
  - [EntityKind](doc//EntityKind.md)
  - [EntryStatus](doc//EntryStatus.md)
+ - [FeedEntryResponse](doc//FeedEntryResponse.md)
+ - [FeedKind](doc//FeedKind.md)
  - [FollowResponse](doc//FollowResponse.md)
  - [ForgotPasswordRequest](doc//ForgotPasswordRequest.md)
+ - [FriendStatus](doc//FriendStatus.md)
+ - [FriendsResponse](doc//FriendsResponse.md)
  - [GenericConfig](doc//GenericConfig.md)
  - [GitHubConfig](doc//GitHubConfig.md)
  - [HealthResponse](doc//HealthResponse.md)
@@ -153,11 +181,21 @@ Class | Method | HTTP request | Description
  - [PushRequest](doc//PushRequest.md)
  - [PushResponse](doc//PushResponse.md)
  - [PushTokenRequest](doc//PushTokenRequest.md)
+ - [ReaderPageResponse](doc//ReaderPageResponse.md)
+ - [ReaderResponse](doc//ReaderResponse.md)
  - [ReadingPositionResponse](doc//ReadingPositionResponse.md)
+ - [ReadingResponse](doc//ReadingResponse.md)
+ - [RecommendRequest](doc//RecommendRequest.md)
+ - [RecommendationResponse](doc//RecommendationResponse.md)
  - [RefreshRequest](doc//RefreshRequest.md)
  - [RegisterDeviceRequest](doc//RegisterDeviceRequest.md)
  - [RegisterRequest](doc//RegisterRequest.md)
+ - [RelationResponse](doc//RelationResponse.md)
  - [ResetPasswordRequest](doc//ResetPasswordRequest.md)
+ - [ReviewRequest](doc//ReviewRequest.md)
+ - [ReviewResponse](doc//ReviewResponse.md)
+ - [SharedNoteResponse](doc//SharedNoteResponse.md)
+ - [SocialProfileResponse](doc//SocialProfileResponse.md)
  - [SourceDetailResponse](doc//SourceDetailResponse.md)
  - [SourceEntryResponse](doc//SourceEntryResponse.md)
  - [SourceKind](doc//SourceKind.md)
@@ -165,6 +203,7 @@ Class | Method | HTTP request | Description
  - [TokenResponse](doc//TokenResponse.md)
  - [TrendingWorkResponse](doc//TrendingWorkResponse.md)
  - [UpdateProfileRequest](doc//UpdateProfileRequest.md)
+ - [UpdateSocialProfileRequest](doc//UpdateSocialProfileRequest.md)
  - [UserResponse](doc//UserResponse.md)
  - [VerifyEmailRequest](doc//VerifyEmailRequest.md)
  - [WebDavConfig](doc//WebDavConfig.md)
