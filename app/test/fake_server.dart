@@ -80,6 +80,7 @@ class FakeServer {
   /// Library items followed for new chapters.
   final followed = <String>[];
   String followChapters = '3/?';
+  String linkChapters = '12/12';
   int followChecks = 0;
   bool hasSource = true;
   final entries = <Map<String, Object?>>[
@@ -244,7 +245,7 @@ class FakeServer {
         'kind': 'ao3',
         'title': 'Home Is Where the Heart Is',
         'authors': ['wintersong'],
-        'detail': '12/12',
+        'detail': linkChapters,
         'on_babel': false,
       });
     }

@@ -1757,7 +1757,7 @@ abstract class AppLocalizations {
   /// No description provided for @linkHelp.
   ///
   /// In fr, this message translates to:
-  /// **'Collez le lien d\'une fanfiction AO3, d\'un livre Gutenberg ou d\'un fichier EPUB, PDF, CBZ. Un livre déjà sur Babel est ajouté sans être retéléchargé.'**
+  /// **'Un livre déjà sur Babel est ajouté sans être retéléchargé.'**
   String get linkHelp;
 
   /// No description provided for @linkShareTip.
@@ -1975,6 +1975,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'les nouveaux chapitres arriveront tout seuls'**
   String get linkFollowed;
+
+  /// No description provided for @linkKindsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que Babel sait importer'**
+  String get linkKindsTitle;
+
+  /// No description provided for @linkKindAo3.
+  ///
+  /// In fr, this message translates to:
+  /// **'archiveofourown.org/works/… : la fanfiction en EPUB. Si elle n\'est pas terminée, Babel vérifie chaque jour les nouveaux chapitres et met le livre à jour.'**
+  String get linkKindAo3;
+
+  /// No description provided for @linkKindGutenberg.
+  ///
+  /// In fr, this message translates to:
+  /// **'gutenberg.org/ebooks/… : le livre du domaine public en EPUB, avec ses illustrations.'**
+  String get linkKindGutenberg;
+
+  /// No description provided for @linkKindFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un lien direct vers un fichier EPUB, PDF ou CBZ, sur n\'importe quel site.'**
+  String get linkKindFile;
+
+  /// No description provided for @linkKindsElse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les autres pages (sites de lecture en ligne, boutiques) ne sont pas prises en charge.'**
+  String get linkKindsElse;
+
+  /// No description provided for @linkWillFollow.
+  ///
+  /// In fr, this message translates to:
+  /// **'en cours : nouveaux chapitres vérifiés chaque jour'**
+  String get linkWillFollow;
 }
 
 class _AppLocalizationsDelegate

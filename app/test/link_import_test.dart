@@ -64,6 +64,35 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 300));
     }
-    expect(find.textContaining('Fanfiction AO3'), findsOneWidget);
+    expect(find.textContaining('Fanfiction AO3 ·'), findsOneWidget);
+    expect(
+      find.text('Ce que Babel sait importer'.toUpperCase()),
+      findsOneWidget,
+    );
+    expect(find.textContaining('nouveaux chapitres vérifiés'), findsNothing);
+  });
+
+  testWidgets('an unfinished AO3 work says it will be followed', (
+    tester,
+  ) async {
+    final server = FakeServer()..linkChapters = '3/?';
+    await tester.pumpWidget(
+      wrap(
+        const LinkImportPage(
+          initialUrl: 'https://archiveofourown.org/works/48213345',
+        ),
+        overrides: server.overrides,
+      ),
+    );
+    for (var i = 0; i < 3; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    expect(
+      find.textContaining('3/? · en cours : nouveaux chapitres vérifiés'),
+      findsOneWidget,
+    );
   });
 }
