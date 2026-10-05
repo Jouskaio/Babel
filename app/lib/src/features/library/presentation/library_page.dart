@@ -15,6 +15,7 @@ import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../application/library_controller.dart';
+import 'follow_panel.dart';
 
 const _acceptedExtensions = ['epub', 'pdf', 'cbz', 'cbr'];
 
@@ -320,6 +321,7 @@ class _BookActionsState extends ConsumerState<_BookActions> {
               style: BabelText.label(10, color: BabelColors.textSecondary),
             ),
             const SizedBox(height: 24),
+            FollowPanel(itemId: item.id),
             PillButton(
               label: l10n.readBook,
               large: true,

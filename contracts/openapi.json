@@ -413,6 +413,76 @@
         "title": "EntryStatus",
         "type": "string"
       },
+      "FollowResponse": {
+        "description": "A book whose source is checked every day for new chapters.",
+        "properties": {
+          "chapters": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Chapters posted / planned, e.g. 3/? or 12/12",
+            "title": "Chapters"
+          },
+          "complete": {
+            "description": "Finished: no longer checked",
+            "title": "Complete",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "item_id": {
+            "format": "uuid",
+            "title": "Item Id",
+            "type": "string"
+          },
+          "last_checked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Checked At"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "item_id",
+          "url",
+          "chapters",
+          "complete",
+          "last_checked_at",
+          "last_error"
+        ],
+        "title": "FollowResponse",
+        "type": "object"
+      },
       "ForgotPasswordRequest": {
         "properties": {
           "email": {
@@ -1762,7 +1832,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.16.0"
+    "version": "0.17.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -3066,6 +3136,128 @@
           }
         ],
         "summary": "Add Stored File",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/v1/library/follows": {
+      "get": {
+        "description": "Unfinished AO3 works imported by link, checked daily for new chapters.",
+        "operationId": "getFollows",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FollowResponse"
+                  },
+                  "title": "Response Getfollows",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Follows",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/v1/library/follows/{follow_id}": {
+      "delete": {
+        "description": "Stop checking this book for new chapters (the book stays).",
+        "operationId": "stopFollow",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "follow_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Follow Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Stop Follow",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/v1/library/follows/{follow_id}/check": {
+      "post": {
+        "description": "Look for new chapters now; a new version replaces the book's file.",
+        "operationId": "checkFollow",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "follow_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Follow Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Check Follow",
         "tags": [
           "library"
         ]

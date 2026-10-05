@@ -1927,6 +1927,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Copier'**
   String get copy;
+
+  /// No description provided for @followActive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveaux chapitres vérifiés chaque jour · {chapters}'**
+  String followActive(String chapters);
+
+  /// No description provided for @followComplete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Œuvre terminée · {chapters}'**
+  String followComplete(String chapters);
+
+  /// No description provided for @followHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quand l\'autrice publie un chapitre, le livre est mis à jour sur tous vos appareils ; votre position et vos notes restent.'**
+  String get followHint;
+
+  /// No description provided for @followCheckNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier maintenant'**
+  String get followCheckNow;
+
+  /// No description provided for @followStop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrêter le suivi'**
+  String get followStop;
+
+  /// No description provided for @followNewChapters.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle version : {chapters}'**
+  String followNewChapters(String chapters);
+
+  /// No description provided for @followNothingNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de nouveau chapitre pour l\'instant'**
+  String get followNothingNew;
+
+  /// No description provided for @linkFollowed.
+  ///
+  /// In fr, this message translates to:
+  /// **'les nouveaux chapitres arriveront tout seuls'**
+  String get linkFollowed;
 }
 
 class _AppLocalizationsDelegate

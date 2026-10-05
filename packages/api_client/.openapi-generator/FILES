@@ -18,6 +18,7 @@ doc/DeviceResponse.md
 doc/EditionResponse.md
 doc/EntityKind.md
 doc/EntryStatus.md
+doc/FollowResponse.md
 doc/ForgotPasswordRequest.md
 doc/GenericConfig.md
 doc/GitHubConfig.md
@@ -91,6 +92,7 @@ lib/model/device_response.dart
 lib/model/edition_response.dart
 lib/model/entity_kind.dart
 lib/model/entry_status.dart
+lib/model/follow_response.dart
 lib/model/forgot_password_request.dart
 lib/model/generic_config.dart
 lib/model/git_hub_config.dart

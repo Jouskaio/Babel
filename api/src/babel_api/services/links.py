@@ -24,6 +24,7 @@ from babel_api.domain.files import LibraryItem
 from babel_api.domain.ports import FileRepository, SourceRepository
 from babel_api.domain.sources import RemoteEntry
 from babel_api.services.files import FileService
+from babel_api.services.follows import FollowService
 
 
 class LinkKind(StrEnum):
@@ -51,12 +52,14 @@ class LinkService:
         known: SourceRepository,
         ao3: Ao3Connector,
         fetcher: LinkFetcher,
+        follows: FollowService,
     ) -> None:
         self._library = library
         self._files = files
         self._sources = known
         self._ao3 = ao3
         self._fetcher = fetcher
+        self._follows = follows
 
     async def _resolve(self, url: str) -> tuple[LinkKind, RemoteEntry]:
         url = url.strip()
@@ -106,7 +109,9 @@ class LinkService:
     ) -> LibraryItem:
         kind, entry = await self._resolve(url)
         if sha256 := await self._known(kind, entry):
-            return await self._library.add_existing(user_id, sha256, device_id)
+            item = await self._library.add_existing(user_id, sha256, device_id)
+            await self._follow(kind, item, url, entry)
+            return item
         config: dict[str, Any] = {"username": ""}
         chunks = (
             self._ao3.fetch(config, None, entry)
@@ -117,4 +122,13 @@ class LinkService:
         result = await self._library.import_file(user_id, chunks, name, device_id)
         await self._sources.remember_file(kind.value, entry.remote_id, result.item.file.sha256)
         await self._sources.commit()
+        await self._follow(kind, result.item, url, entry)
         return result.item
+
+    async def _follow(
+        self, kind: LinkKind, item: LibraryItem, url: str, entry: RemoteEntry
+    ) -> None:
+        """Unfinished AO3 works are followed: new chapters arrive by themselves."""
+        if kind is LinkKind.AO3:
+            await self._follows.follow_ao3(item, entry.path.rsplit("/", 1)[-1], url, entry)
+            await self._sources.commit()

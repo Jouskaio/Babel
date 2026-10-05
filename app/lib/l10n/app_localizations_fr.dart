@@ -1145,4 +1145,35 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get copy => 'Copier';
+
+  @override
+  String followActive(String chapters) {
+    return 'Nouveaux chapitres vérifiés chaque jour · $chapters';
+  }
+
+  @override
+  String followComplete(String chapters) {
+    return 'Œuvre terminée · $chapters';
+  }
+
+  @override
+  String get followHint =>
+      'Quand l\'autrice publie un chapitre, le livre est mis à jour sur tous vos appareils ; votre position et vos notes restent.';
+
+  @override
+  String get followCheckNow => 'Vérifier maintenant';
+
+  @override
+  String get followStop => 'Arrêter le suivi';
+
+  @override
+  String followNewChapters(String chapters) {
+    return 'Nouvelle version : $chapters';
+  }
+
+  @override
+  String get followNothingNew => 'Pas de nouveau chapitre pour l\'instant';
+
+  @override
+  String get linkFollowed => 'les nouveaux chapitres arriveront tout seuls';
 }

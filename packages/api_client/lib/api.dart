@@ -50,6 +50,7 @@ part 'model/device_response.dart';
 part 'model/edition_response.dart';
 part 'model/entity_kind.dart';
 part 'model/entry_status.dart';
+part 'model/follow_response.dart';
 part 'model/forgot_password_request.dart';
 part 'model/generic_config.dart';
 part 'model/git_hub_config.dart';

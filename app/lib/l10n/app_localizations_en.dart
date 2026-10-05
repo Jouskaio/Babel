@@ -1137,4 +1137,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get copy => 'Copy';
+
+  @override
+  String followActive(String chapters) {
+    return 'New chapters checked every day · $chapters';
+  }
+
+  @override
+  String followComplete(String chapters) {
+    return 'Finished work · $chapters';
+  }
+
+  @override
+  String get followHint =>
+      'When the author posts a chapter, the book is updated on all your devices; your place and notes stay.';
+
+  @override
+  String get followCheckNow => 'Check now';
+
+  @override
+  String get followStop => 'Stop following';
+
+  @override
+  String followNewChapters(String chapters) {
+    return 'New version: $chapters';
+  }
+
+  @override
+  String get followNothingNew => 'No new chapter for now';
+
+  @override
+  String get linkFollowed => 'new chapters will arrive by themselves';
 }

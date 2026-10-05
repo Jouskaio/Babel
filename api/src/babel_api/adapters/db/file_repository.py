@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.models import (
     BlockedFileRow,
+    FollowRow,
     LibraryItemRow,
     ReadingPositionRow,
     StoredFileRow,
@@ -127,7 +128,19 @@ class SqlFileRepository:
         await self._session.execute(
             delete(ReadingPositionRow).where(ReadingPositionRow.item_id == item_id)
         )
+        await self._session.execute(delete(FollowRow).where(FollowRow.item_id == item_id))
         await self._session.execute(delete(LibraryItemRow).where(LibraryItemRow.id == item_id))
+
+    async def replace_item_file(
+        self, item_id: UUID, sha256: str, title: str, authors: tuple[str, ...]
+    ) -> LibraryItem:
+        row = await self._session.get_one(LibraryItemRow, item_id)
+        row.file_sha256 = sha256
+        row.title = title[:500]
+        row.authors = list(authors)
+        await self._session.flush()
+        await self._session.refresh(row, ["file"])
+        return _to_item(row)
 
     async def items_of_file(self, sha256: str) -> list[LibraryItem]:
         rows = await self._session.scalars(

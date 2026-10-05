@@ -12,6 +12,7 @@ from babel_api.adapters.db.models import (
     AppliedOperationRow,
     ChangeRow,
     DeviceRow,
+    FollowRow,
     IdentityRow,
     LibraryItemRow,
     ReadingPositionRow,
@@ -125,6 +126,7 @@ class SqlUserRepository:
         )
         await self._session.execute(delete(SourceRow).where(SourceRow.user_id == user_id))
         await self._session.execute(delete(AnnotationRow).where(AnnotationRow.user_id == user_id))
+        await self._session.execute(delete(FollowRow).where(FollowRow.user_id == user_id))
         for table in (ReadingPositionRow, ChangeRow, AppliedOperationRow, DeviceRow):
             await self._session.execute(delete(table).where(table.user_id == user_id))
         await self._session.execute(delete(LibraryItemRow).where(LibraryItemRow.user_id == user_id))
