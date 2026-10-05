@@ -16,6 +16,41 @@
         "title": "Ao3Config",
         "type": "object"
       },
+      "Audience": {
+        "enum": [
+          "private",
+          "friends",
+          "public"
+        ],
+        "title": "Audience",
+        "type": "string"
+      },
+      "AuthorResponse": {
+        "description": "Who wrote a feed entry or sent a recommendation.",
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "handle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Handle"
+          }
+        },
+        "required": [
+          "handle",
+          "display_name"
+        ],
+        "title": "AuthorResponse",
+        "type": "object"
+      },
       "BatchImportResponse": {
         "properties": {
           "failed": {
@@ -70,6 +105,27 @@
         ],
         "title": "BookFormat",
         "type": "string"
+      },
+      "BookTitleResponse": {
+        "properties": {
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "authors"
+        ],
+        "title": "BookTitleResponse",
+        "type": "object"
       },
       "ChangeOp": {
         "enum": [
@@ -413,6 +469,98 @@
         "title": "EntryStatus",
         "type": "string"
       },
+      "FeedEntryResponse": {
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/FeedKind"
+          },
+          "percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Percent"
+          },
+          "quote": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quote"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "reader": {
+            "$ref": "#/components/schemas/AuthorResponse"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "reader",
+          "at",
+          "title",
+          "authors",
+          "percent",
+          "rating",
+          "text",
+          "quote"
+        ],
+        "title": "FeedEntryResponse",
+        "type": "object"
+      },
+      "FeedKind": {
+        "enum": [
+          "reading",
+          "review",
+          "note"
+        ],
+        "title": "FeedKind",
+        "type": "string"
+      },
       "FollowResponse": {
         "description": "A book whose source is checked every day for new chapters.",
         "properties": {
@@ -509,6 +657,59 @@
           "email"
         ],
         "title": "ForgotPasswordRequest",
+        "type": "object"
+      },
+      "FriendStatus": {
+        "description": "Between the viewer and another reader.",
+        "enum": [
+          "none",
+          "requested",
+          "incoming",
+          "friends"
+        ],
+        "title": "FriendStatus",
+        "type": "string"
+      },
+      "FriendsResponse": {
+        "properties": {
+          "following": {
+            "items": {
+              "$ref": "#/components/schemas/ReaderResponse"
+            },
+            "title": "Following",
+            "type": "array"
+          },
+          "friends": {
+            "items": {
+              "$ref": "#/components/schemas/ReaderResponse"
+            },
+            "title": "Friends",
+            "type": "array"
+          },
+          "incoming": {
+            "description": "Requests waiting for your answer",
+            "items": {
+              "$ref": "#/components/schemas/ReaderResponse"
+            },
+            "title": "Incoming",
+            "type": "array"
+          },
+          "outgoing": {
+            "description": "Requests you sent",
+            "items": {
+              "$ref": "#/components/schemas/ReaderResponse"
+            },
+            "title": "Outgoing",
+            "type": "array"
+          }
+        },
+        "required": [
+          "friends",
+          "incoming",
+          "outgoing",
+          "following"
+        ],
+        "title": "FriendsResponse",
         "type": "object"
       },
       "GenericConfig": {
@@ -1055,6 +1256,109 @@
         "title": "PushTokenRequest",
         "type": "object"
       },
+      "ReaderPageResponse": {
+        "properties": {
+          "books": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null when the library is not shared with you",
+            "title": "Books"
+          },
+          "followers": {
+            "title": "Followers",
+            "type": "integer"
+          },
+          "friends": {
+            "title": "Friends",
+            "type": "integer"
+          },
+          "library": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BookTitleResponse"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Library"
+          },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/SharedNoteResponse"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "reader": {
+            "$ref": "#/components/schemas/ReaderResponse"
+          },
+          "reading": {
+            "items": {
+              "$ref": "#/components/schemas/ReadingResponse"
+            },
+            "title": "Reading",
+            "type": "array"
+          },
+          "reviews": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewResponse"
+            },
+            "title": "Reviews",
+            "type": "array"
+          }
+        },
+        "required": [
+          "reader",
+          "friends",
+          "followers",
+          "books",
+          "reading",
+          "library",
+          "reviews",
+          "notes"
+        ],
+        "title": "ReaderPageResponse",
+        "type": "object"
+      },
+      "ReaderResponse": {
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "handle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Handle"
+          },
+          "relation": {
+            "$ref": "#/components/schemas/RelationResponse"
+          }
+        },
+        "required": [
+          "handle",
+          "display_name",
+          "relation"
+        ],
+        "title": "ReaderResponse",
+        "type": "object"
+      },
       "ReadingPositionResponse": {
         "properties": {
           "client_time": {
@@ -1083,6 +1387,177 @@
           "client_time"
         ],
         "title": "ReadingPositionResponse",
+        "type": "object"
+      },
+      "ReadingResponse": {
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
+          "percent": {
+            "title": "Percent",
+            "type": "number"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "authors",
+          "percent",
+          "at"
+        ],
+        "title": "ReadingResponse",
+        "type": "object"
+      },
+      "RecommendRequest": {
+        "properties": {
+          "authors": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 5,
+            "title": "Authors",
+            "type": "array"
+          },
+          "item_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A book of your library",
+            "title": "Item Id"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "to": {
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "To",
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          }
+        },
+        "required": [
+          "to"
+        ],
+        "title": "RecommendRequest",
+        "type": "object"
+      },
+      "RecommendationResponse": {
+        "properties": {
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "read": {
+            "title": "Read",
+            "type": "boolean"
+          },
+          "sender": {
+            "$ref": "#/components/schemas/AuthorResponse"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          }
+        },
+        "required": [
+          "id",
+          "sender",
+          "title",
+          "authors",
+          "url",
+          "message",
+          "created_at",
+          "read"
+        ],
+        "title": "RecommendationResponse",
         "type": "object"
       },
       "RefreshRequest": {
@@ -1165,6 +1640,28 @@
         "title": "RegisterRequest",
         "type": "object"
       },
+      "RelationResponse": {
+        "properties": {
+          "following": {
+            "title": "Following",
+            "type": "boolean"
+          },
+          "follows_you": {
+            "title": "Follows You",
+            "type": "boolean"
+          },
+          "friend": {
+            "$ref": "#/components/schemas/FriendStatus"
+          }
+        },
+        "required": [
+          "friend",
+          "following",
+          "follows_you"
+        ],
+        "title": "RelationResponse",
+        "type": "object"
+      },
       "ResetPasswordRequest": {
         "description": "``token`` comes from the link sent by email.",
         "properties": {
@@ -1185,6 +1682,202 @@
           "new_password"
         ],
         "title": "ResetPasswordRequest",
+        "type": "object"
+      },
+      "ReviewRequest": {
+        "properties": {
+          "audience": {
+            "$ref": "#/components/schemas/Audience",
+            "default": "public"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "maximum": 5.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "title": "ReviewRequest",
+        "type": "object"
+      },
+      "ReviewResponse": {
+        "properties": {
+          "audience": {
+            "$ref": "#/components/schemas/Audience"
+          },
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
+          "item_id": {
+            "format": "uuid",
+            "title": "Item Id",
+            "type": "string"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_id",
+          "title",
+          "authors",
+          "rating",
+          "text",
+          "audience",
+          "updated_at"
+        ],
+        "title": "ReviewResponse",
+        "type": "object"
+      },
+      "SharedNoteResponse": {
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Comic page notes: the page, from 0",
+            "title": "Page"
+          },
+          "quote": {
+            "description": "Empty for a note on a comic page",
+            "title": "Quote",
+            "type": "string"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Comic page notes: x,y,w,h in fractions of the page",
+            "title": "Region"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "quote",
+          "note",
+          "at",
+          "page",
+          "region"
+        ],
+        "title": "SharedNoteResponse",
+        "type": "object"
+      },
+      "SocialProfileResponse": {
+        "description": "The signed-in reader's public side.",
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "handle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique, how other readers find you",
+            "title": "Handle"
+          },
+          "share_library": {
+            "$ref": "#/components/schemas/Audience",
+            "description": "Who sees the titles of your library"
+          },
+          "share_reading": {
+            "$ref": "#/components/schemas/Audience",
+            "description": "Who sees what you are reading"
+          }
+        },
+        "required": [
+          "handle",
+          "display_name",
+          "share_reading",
+          "share_library"
+        ],
+        "title": "SocialProfileResponse",
         "type": "object"
       },
       "SourceDetailResponse": {
@@ -1538,6 +2231,45 @@
         "title": "UpdateProfileRequest",
         "type": "object"
       },
+      "UpdateSocialProfileRequest": {
+        "properties": {
+          "handle": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Handle"
+          },
+          "share_library": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Audience"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "share_reading": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Audience"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "UpdateSocialProfileRequest",
+        "type": "object"
+      },
       "UserResponse": {
         "description": "The signed-in account.",
         "properties": {
@@ -1868,7 +2600,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.18.0"
+    "version": "0.19.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -3576,6 +4308,162 @@
         ]
       }
     },
+    "/v1/library/{item_id}/review": {
+      "delete": {
+        "operationId": "deleteReview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Review",
+        "tags": [
+          "social",
+          "library"
+        ]
+      },
+      "get": {
+        "description": "Your review of this book, if any.",
+        "operationId": "getReview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ReviewResponse"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Getreview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Review",
+        "tags": [
+          "social",
+          "library"
+        ]
+      },
+      "put": {
+        "description": "Rate and review a book of your library, and choose who sees it.",
+        "operationId": "saveReview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Save Review",
+        "tags": [
+          "social",
+          "library"
+        ]
+      }
+    },
     "/v1/me": {
       "delete": {
         "description": "Delete the account and all its data. This cannot be undone.",
@@ -3723,6 +4611,543 @@
         "summary": "Change Password",
         "tags": [
           "account"
+        ]
+      }
+    },
+    "/v1/me/profile": {
+      "get": {
+        "description": "Your handle and what you share.",
+        "operationId": "getSocialProfile",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocialProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Profile",
+        "tags": [
+          "social",
+          "account"
+        ]
+      },
+      "patch": {
+        "description": "Choose a handle (3 to 30 letters, digits, dots, underscores) and what you share.",
+        "operationId": "updateSocialProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSocialProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocialProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Profile",
+        "tags": [
+          "social",
+          "account"
+        ]
+      }
+    },
+    "/v1/social/feed": {
+      "get": {
+        "description": "What friends and followed readers shared lately, newest first.",
+        "operationId": "getFeed",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FeedEntryResponse"
+                  },
+                  "title": "Response Getfeed",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Feed",
+        "tags": [
+          "social"
+        ]
+      }
+    },
+    "/v1/social/following/{handle}": {
+      "delete": {
+        "operationId": "unfollowReader",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "handle",
+            "required": true,
+            "schema": {
+              "title": "Handle",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReaderResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unfollow Reader",
+        "tags": [
+          "social"
+        ]
+      },
+      "put": {
+        "description": "Follow a reader's public activity (no request needed).",
+        "operationId": "followReader",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "handle",
+            "required": true,
+            "schema": {
+              "title": "Handle",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReaderResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Follow Reader",
+        "tags": [
+          "social"
+        ]
+      }
+    },
+    "/v1/social/friends": {
+      "get": {
+        "operationId": "getFriends",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FriendsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Friends",
+        "tags": [
+          "social"
+        ]
+      }
+    },
+    "/v1/social/friends/{handle}": {
+      "delete": {
+        "description": "Cancel or decline a request, or end a friendship.",
+        "operationId": "removeFriend",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "handle",
+            "required": true,
+            "schema": {
+              "title": "Handle",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReaderResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove Friend",
+        "tags": [
+          "social"
+        ]
+      },
+      "put": {
+        "description": "Send a friend request, or accept the one this reader sent you.",
+        "operationId": "addFriend",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "handle",
+            "required": true,
+            "schema": {
+              "title": "Handle",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReaderResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Add Friend",
+        "tags": [
+          "social"
+        ]
+      }
+    },
+    "/v1/social/readers": {
+      "get": {
+        "description": "Readers whose handle starts with ``q``.",
+        "operationId": "searchReaders",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "maxLength": 40,
+              "minLength": 2,
+              "title": "Q",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReaderResponse"
+                  },
+                  "title": "Response Searchreaders",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Search Readers",
+        "tags": [
+          "social"
+        ]
+      }
+    },
+    "/v1/social/readers/{handle}": {
+      "get": {
+        "description": "A reader's page: only what they share with you.",
+        "operationId": "getReader",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "handle",
+            "required": true,
+            "schema": {
+              "title": "Handle",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReaderPageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Reader",
+        "tags": [
+          "social"
+        ]
+      }
+    },
+    "/v1/social/recommendations": {
+      "get": {
+        "description": "Books your friends recommended to you, newest first.",
+        "operationId": "getRecommendations",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RecommendationResponse"
+                  },
+                  "title": "Response Getrecommendations",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Recommendations",
+        "tags": [
+          "social"
+        ]
+      },
+      "post": {
+        "description": "Recommend a book of your library, or a title or link, to a friend.",
+        "operationId": "recommend",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecommendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Recommend",
+        "tags": [
+          "social"
+        ]
+      }
+    },
+    "/v1/social/recommendations/{recommendation_id}/read": {
+      "post": {
+        "operationId": "markRecommendationRead",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "recommendation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Recommendation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mark Read",
+        "tags": [
+          "social"
         ]
       }
     },

@@ -55,6 +55,9 @@ String parameterToString(dynamic value) {
   if (value is DateTime) {
     return value.toUtc().toIso8601String();
   }
+  if (value is Audience) {
+    return AudienceTypeTransformer().encode(value).toString();
+  }
   if (value is BookFormat) {
     return BookFormatTypeTransformer().encode(value).toString();
   }
@@ -69,6 +72,12 @@ String parameterToString(dynamic value) {
   }
   if (value is EntryStatus) {
     return EntryStatusTypeTransformer().encode(value).toString();
+  }
+  if (value is FeedKind) {
+    return FeedKindTypeTransformer().encode(value).toString();
+  }
+  if (value is FriendStatus) {
+    return FriendStatusTypeTransformer().encode(value).toString();
   }
   if (value is IdentityProvider) {
     return IdentityProviderTypeTransformer().encode(value).toString();

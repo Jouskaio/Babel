@@ -19,6 +19,7 @@ import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
+import '../../social/presentation/book_social_sheets.dart';
 import '../application/library_controller.dart';
 import 'follow_panel.dart';
 
@@ -422,7 +423,28 @@ class _BookActionsState extends ConsumerState<_BookActions> {
                         onPressed: _download,
                       ),
               ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 4),
+            Wrap(
+              alignment: WrapAlignment.center,
+              children: [
+                TextButton.icon(
+                  onPressed: () => showReviewSheet(context, item),
+                  icon: Icon(Icons.star_border, color: BabelColors.gold),
+                  label: Text(
+                    l10n.myReview,
+                    style: BabelText.body(14, color: BabelColors.textPrimary),
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () => showRecommendSheet(context, item),
+                  icon: Icon(Icons.send_outlined, color: BabelColors.gold),
+                  label: Text(
+                    l10n.recommendAction,
+                    style: BabelText.body(14, color: BabelColors.textPrimary),
+                  ),
+                ),
+              ],
+            ),
             TextButton(
               onPressed: _progress == null ? _remove : null,
               child: Text(

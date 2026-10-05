@@ -184,10 +184,16 @@ class ApiClient {
           return value is DateTime ? value : DateTime.tryParse(value);
         case 'Ao3Config':
           return Ao3Config.fromJson(value);
+        case 'Audience':
+          return AudienceTypeTransformer().decode(value);
+        case 'AuthorResponse':
+          return AuthorResponse.fromJson(value);
         case 'BatchImportResponse':
           return BatchImportResponse.fromJson(value);
         case 'BookFormat':
           return BookFormatTypeTransformer().decode(value);
+        case 'BookTitleResponse':
+          return BookTitleResponse.fromJson(value);
         case 'ChangeOp':
           return ChangeOpTypeTransformer().decode(value);
         case 'ChangePasswordRequest':
@@ -208,10 +214,18 @@ class ApiClient {
           return EntityKindTypeTransformer().decode(value);
         case 'EntryStatus':
           return EntryStatusTypeTransformer().decode(value);
+        case 'FeedEntryResponse':
+          return FeedEntryResponse.fromJson(value);
+        case 'FeedKind':
+          return FeedKindTypeTransformer().decode(value);
         case 'FollowResponse':
           return FollowResponse.fromJson(value);
         case 'ForgotPasswordRequest':
           return ForgotPasswordRequest.fromJson(value);
+        case 'FriendStatus':
+          return FriendStatusTypeTransformer().decode(value);
+        case 'FriendsResponse':
+          return FriendsResponse.fromJson(value);
         case 'GenericConfig':
           return GenericConfig.fromJson(value);
         case 'GitHubConfig':
@@ -254,16 +268,36 @@ class ApiClient {
           return PushResponse.fromJson(value);
         case 'PushTokenRequest':
           return PushTokenRequest.fromJson(value);
+        case 'ReaderPageResponse':
+          return ReaderPageResponse.fromJson(value);
+        case 'ReaderResponse':
+          return ReaderResponse.fromJson(value);
         case 'ReadingPositionResponse':
           return ReadingPositionResponse.fromJson(value);
+        case 'ReadingResponse':
+          return ReadingResponse.fromJson(value);
+        case 'RecommendRequest':
+          return RecommendRequest.fromJson(value);
+        case 'RecommendationResponse':
+          return RecommendationResponse.fromJson(value);
         case 'RefreshRequest':
           return RefreshRequest.fromJson(value);
         case 'RegisterDeviceRequest':
           return RegisterDeviceRequest.fromJson(value);
         case 'RegisterRequest':
           return RegisterRequest.fromJson(value);
+        case 'RelationResponse':
+          return RelationResponse.fromJson(value);
         case 'ResetPasswordRequest':
           return ResetPasswordRequest.fromJson(value);
+        case 'ReviewRequest':
+          return ReviewRequest.fromJson(value);
+        case 'ReviewResponse':
+          return ReviewResponse.fromJson(value);
+        case 'SharedNoteResponse':
+          return SharedNoteResponse.fromJson(value);
+        case 'SocialProfileResponse':
+          return SocialProfileResponse.fromJson(value);
         case 'SourceDetailResponse':
           return SourceDetailResponse.fromJson(value);
         case 'SourceEntryResponse':
@@ -278,6 +312,8 @@ class ApiClient {
           return TrendingWorkResponse.fromJson(value);
         case 'UpdateProfileRequest':
           return UpdateProfileRequest.fromJson(value);
+        case 'UpdateSocialProfileRequest':
+          return UpdateSocialProfileRequest.fromJson(value);
         case 'UserResponse':
           return UserResponse.fromJson(value);
         case 'VerifyEmailRequest':

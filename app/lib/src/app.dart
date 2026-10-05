@@ -24,7 +24,7 @@ class BabelApp extends ConsumerStatefulWidget {
 
 class _BabelAppState extends ConsumerState<BabelApp> {
   StreamSubscription<Shared>? _shares;
-  StreamSubscription<String>? _notifications;
+  StreamSubscription<Map<String, String>>? _notifications;
 
   @override
   void initState() {
@@ -43,16 +43,28 @@ class _BabelAppState extends ConsumerState<BabelApp> {
         unawaited(ref.read(pushRegistrationProvider)?.start());
       }
     }, fireImmediately: true);
-    _notifications = messaging.opened.listen(_openBook);
+    _notifications = messaging.opened.listen(_openNotification);
     unawaited(
-      messaging.openedAtLaunch().then((item) {
-        if (item != null && mounted) _openBook(item);
+      messaging.openedAtLaunch().then((data) {
+        if (data != null && mounted) _openNotification(data);
       }),
     );
   }
 
-  void _openBook(String itemId) =>
-      ref.read(routerProvider).go(Routes.read(itemId));
+  /// A new chapter opens its book; friend requests the friends; recommendations home.
+  void _openNotification(Map<String, String> data) {
+    final router = ref.read(routerProvider);
+    switch (data['kind']) {
+      case 'friend_request':
+        router.go(Routes.friends);
+      case 'friend_accepted' when data['handle'] != null:
+        router.go(Routes.reader(data['handle']!));
+      case 'recommendation':
+        router.go(Routes.home);
+      case _ when data['item_id'] != null:
+        router.go(Routes.read(data['item_id']!));
+    }
+  }
 
   void _listenToShares() {
     final source = ref.read(shareSourceProvider);

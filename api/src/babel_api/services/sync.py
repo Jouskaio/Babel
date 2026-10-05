@@ -19,6 +19,7 @@ from babel_api.domain.sync import (
     HighlightColor,
     ReadingPosition,
     Visibility,
+    parse_region,
 )
 from babel_api.services.files import FileService
 
@@ -201,10 +202,17 @@ class SyncService:
         item = await self._files.get_item(UUID(str(data["item_id"])))
         if item is None or item.user_id != user_id:
             raise NotFoundError
-        quote = str(data["quote"]).strip()
+        quote = str(data.get("quote") or "").strip()
         note = str(data["note"]).strip() if data.get("note") else None
         chapter = int(data["chapter"])
-        if not quote or len(quote) > MAX_QUOTE or (note and len(note) > MAX_NOTE) or chapter < 0:
+        # Text books quote a passage; comic pages point at an area of the page instead.
+        region = parse_region(data.get("region"))
+        if (
+            (not quote and region is None)
+            or len(quote) > MAX_QUOTE
+            or (note and len(note) > MAX_NOTE)
+            or chapter < 0
+        ):
             raise ValueError("annotation")
         client_time = datetime.fromisoformat(str(data["client_time"]))
         if client_time.tzinfo is None:
@@ -223,8 +231,9 @@ class SyncService:
             quote=quote,
             color=HighlightColor(str(data.get("color") or HighlightColor.NONE.value)),
             note=note,
-            visibility=Visibility.PRIVATE,
+            visibility=Visibility(str(data.get("visibility") or Visibility.PRIVATE.value)),
             client_time=client_time,
+            region=region,
         )
         await self._sync.save_annotation(annotation)
         await self._sync.record(

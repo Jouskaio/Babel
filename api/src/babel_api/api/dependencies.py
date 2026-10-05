@@ -14,6 +14,7 @@ from babel_api.adapters.db.catalog_repository import SqlCatalogRepository
 from babel_api.adapters.db.file_repository import SqlFileRepository
 from babel_api.adapters.db.follow_repository import SqlFollowRepository
 from babel_api.adapters.db.repositories import SqlUserRepository
+from babel_api.adapters.db.social_repository import SqlSocialRepository
 from babel_api.adapters.db.source_repository import SqlSourceRepository
 from babel_api.adapters.db.sync_repository import SqlSyncRepository
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
@@ -40,6 +41,7 @@ from babel_api.services.files import FileService
 from babel_api.services.follows import FollowService
 from babel_api.services.links import LinkService
 from babel_api.services.notifications import Notifier
+from babel_api.services.social import SocialService
 from babel_api.services.sources import SourceService
 from babel_api.services.sync import SyncService
 from babel_api.services.works import WorkService
@@ -240,3 +242,16 @@ def get_follow_service(
 
 
 FollowServiceDep = Annotated[FollowService, Depends(get_follow_service)]
+
+
+def get_social_service(
+    container: ContainerDep, session: Annotated[AsyncSession, Depends(get_session)]
+) -> SocialService:
+    return SocialService(
+        SqlSocialRepository(session),
+        SqlFileRepository(session),
+        Notifier(SqlSyncRepository(session), SqlUserRepository(session), container.pusher),
+    )
+
+
+SocialServiceDep = Annotated[SocialService, Depends(get_social_service)]

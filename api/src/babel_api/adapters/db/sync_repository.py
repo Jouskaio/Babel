@@ -203,6 +203,7 @@ class SqlSyncRepository:
             note=row.note,
             visibility=Visibility(row.visibility),
             client_time=_aware(row.client_time),
+            region=row.region,
         )
 
     async def save_annotation(self, annotation: Annotation) -> None:
@@ -218,6 +219,7 @@ class SqlSyncRepository:
         row.note = annotation.note
         row.visibility = annotation.visibility.value
         row.client_time = annotation.client_time
+        row.region = annotation.region
         await self._session.flush()
 
     async def delete_annotation(self, annotation_id: UUID) -> None:

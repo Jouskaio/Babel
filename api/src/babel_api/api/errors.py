@@ -9,10 +9,13 @@ from babel_api.domain.errors import (
     EmailAlreadyUsedError,
     FileTooLargeError,
     ForbiddenError,
+    HandleTakenError,
     InvalidCredentialsError,
+    InvalidHandleError,
     InvalidIsbnError,
     InvalidLinkError,
     NotFoundError,
+    NotFriendsError,
     PasswordRequiredError,
     ProviderNotConfiguredError,
     SecretsUnavailableError,
@@ -27,6 +30,9 @@ from babel_api.domain.errors import (
 
 _STATUS: dict[type[Exception], tuple[int, str]] = {
     EmailAlreadyUsedError: (status.HTTP_409_CONFLICT, "An account already uses this email"),
+    HandleTakenError: (status.HTTP_409_CONFLICT, "This handle is taken"),
+    InvalidHandleError: (status.HTTP_400_BAD_REQUEST, "Invalid handle"),
+    NotFriendsError: (status.HTTP_403_FORBIDDEN, "Only friends can be sent recommendations"),
     InvalidCredentialsError: (status.HTTP_401_UNAUTHORIZED, "Invalid credentials"),
     UnsupportedFileError: (
         status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,

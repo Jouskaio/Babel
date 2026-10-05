@@ -6,10 +6,11 @@ import '../../../core/locale/greeting.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
+import '../../social/presentation/feed_section.dart';
 import '../application/server_status_provider.dart';
 import 'verify_email_banner.dart';
 
-/// Home screen of a signed-in user. For now: greeting, account link and API status.
+/// Home screen of a signed-in user: greeting, recommendations and friends' activity.
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
@@ -21,34 +22,33 @@ class HomePage extends ConsumerWidget {
     final status = ref.watch(serverStatusProvider);
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(l10n.brand, style: BabelText.label(12, spacing: 5)),
-              const SizedBox(height: 24),
-              const VerifyEmailBanner(),
-              const SizedBox(height: 32),
-              Text(
-                greeting(l10n, name, DateTime.now()),
-                style: BabelText.title(52),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
+          children: [
+            Text(l10n.brand, style: BabelText.label(12, spacing: 5)),
+            const SizedBox(height: 24),
+            const VerifyEmailBanner(),
+            const SizedBox(height: 32),
+            Text(
+              greeting(l10n, name, DateTime.now()),
+              style: BabelText.title(52),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              status.when(
+                data: (health) => l10n.apiConnected(health?.version ?? '?'),
+                loading: () => l10n.apiConnecting,
+                error: (_, _) => l10n.apiUnreachable,
               ),
-              const SizedBox(height: 24),
-              Text(
-                status.when(
-                  data: (health) => l10n.apiConnected(health?.version ?? '?'),
-                  loading: () => l10n.apiConnecting,
-                  error: (_, _) => l10n.apiUnreachable,
-                ),
-                style: BabelText.label(
-                  10,
-                  color: BabelColors.textSecondary,
-                  spacing: 0.8,
-                ),
+              style: BabelText.label(
+                10,
+                color: BabelColors.textSecondary,
+                spacing: 0.8,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 32),
+            const FeedSection(),
+          ],
         ),
       ),
     );

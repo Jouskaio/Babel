@@ -20,6 +20,9 @@ import '../features/library/presentation/library_page.dart';
 import '../features/library/presentation/link_import_page.dart';
 import '../features/reader/presentation/reader_page.dart';
 import '../features/shell/app_shell.dart';
+import '../features/social/presentation/friends_page.dart';
+import '../features/social/presentation/profile_page.dart';
+import '../features/social/presentation/reader_profile_page.dart';
 import '../features/sources/presentation/new_source_page.dart';
 import '../features/sources/presentation/source_detail_page.dart';
 import '../features/sources/presentation/source_form_page.dart';
@@ -33,6 +36,9 @@ abstract final class Routes {
   static const splash = '/splash';
   static const home = '/home';
   static const account = '/account';
+  static const profile = '/profile';
+  static const friends = '/friends';
+  static String reader(String handle) => '/readers/$handle';
   static const search = '/search';
   static const library = '/library';
   static const scan = '/scan';
@@ -111,12 +117,19 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: Routes.account,
-                builder: (_, _) => const AccountPage(),
+                path: Routes.profile,
+                builder: (_, _) => const ProfilePage(),
               ),
             ],
           ),
         ],
+      ),
+      GoRoute(path: Routes.account, builder: (_, _) => const AccountPage()),
+      GoRoute(path: Routes.friends, builder: (_, _) => const FriendsPage()),
+      GoRoute(
+        path: '/readers/:handle',
+        builder: (_, state) =>
+            ReaderProfilePage(handle: state.pathParameters['handle']!),
       ),
       GoRoute(path: Routes.scan, builder: (_, _) => const ScanPage()),
       GoRoute(

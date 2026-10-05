@@ -637,5 +637,165 @@
   "einkOff": "Désactivé",
   "einkDetected": "Cet appareil est une liseuse.",
   "offlineReady": "Disponible hors ligne sur cet appareil",
-  "downloadOffline": "Télécharger pour lire hors ligne"
+  "downloadOffline": "Télécharger pour lire hors ligne",
+  "friendAdd": "Ajouter",
+  "friendAccept": "Accepter",
+  "friendRequested": "Demande envoyée",
+  "friendsWith": "Amis ✓",
+  "friendDecline": "Refuser",
+  "follow": "Suivre",
+  "unfollow": "Ne plus suivre",
+  "friendRemoveConfirm": "Retirer {name} de vos amis ?",
+  "@friendRemoveConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendRemove": "Retirer",
+  "handleTitle": "Votre pseudo",
+  "handleHint": "Vos amis vous trouvent grâce à lui. Sans pseudo, personne ne peut vous trouver.",
+  "handleLabel": "Pseudo",
+  "handleRules": "3 à 30 lettres, chiffres, points ou tirets bas",
+  "handleTaken": "Ce pseudo est déjà pris.",
+  "handleInvalid": "Pseudo invalide : 3 à 30 lettres, chiffres, points ou tirets bas.",
+  "readerSince": "Membre depuis {year}",
+  "@readerSince": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "statBooks": "Livres",
+  "statFriends": "Amis",
+  "statFollowers": "Abonnés",
+  "friendsTitle": "Amis",
+  "seeAll": "Tout voir",
+  "searchReaders": "Pseudo d'un lecteur…",
+  "noReaderFound": "Aucun lecteur avec ce pseudo.",
+  "friendInvitesYou": "Vous invite à devenir amis",
+  "noFriendsYet": "Pas encore d'amis : cherchez le pseudo d'un lecteur.",
+  "friendReading": "Lit {title} · {percent} %",
+  "@friendReading": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "seeMyFriends": "Voir mes {count} amis",
+  "@seeMyFriends": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "friendRequests": "Demandes reçues",
+  "followingTitle": "Abonnements",
+  "requestsSent": "Demandes envoyées",
+  "readerNotFoundSocial": "Ce lecteur n'existe pas.",
+  "followsYou": "Vous suit",
+  "readingNow": "En cours de lecture",
+  "reviewsTitle": "Avis",
+  "sharedNotes": "Notes partagées",
+  "comicPageNote": "Note sur la page {page}",
+  "@comicPageNote": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryTitleShared": "Bibliothèque",
+  "nothingShared": "Ce lecteur ne partage rien avec vous pour l'instant.",
+  "recommendationsTitle": "Recommandé pour vous",
+  "feedTitle": "Activité",
+  "feedEmpty": "Rien pour l'instant : ajoutez des amis ou suivez des lecteurs.",
+  "feedReading": "{name} lit {title}",
+  "@feedReading": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "feedReview": "{name} a donné son avis sur {title}",
+  "@feedReview": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "feedNote": "{name} a partagé une note de {title}",
+  "@feedNote": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "recommendedBy": "Recommandé par {name}",
+  "@recommendedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "markRead": "Vu",
+  "audiencePrivate": "Moi",
+  "audienceFriends": "Amis",
+  "audiencePublic": "Tous",
+  "shareReading": "Qui voit ce que je lis",
+  "shareLibrary": "Qui voit ma bibliothèque",
+  "publicProfile": "Profil public",
+  "myReview": "Mon avis",
+  "ratingStars": "{count} étoiles",
+  "@ratingStars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewHint": "Ce que vous en avez pensé…",
+  "whoSees": "Qui le voit",
+  "reviewSaved": "Avis enregistré.",
+  "reviewDelete": "Supprimer mon avis",
+  "recommendTitle": "Recommander",
+  "recommendAction": "Recommander",
+  "recommendNoFriends": "Ajoutez d'abord des amis pour leur recommander des livres.",
+  "recommendMessage": "Un mot pour votre ami (facultatif)",
+  "recommendSend": "Envoyer",
+  "recommendationSent": "Recommandation envoyée.",
+  "comicPage": "Page {page}",
+  "@comicPage": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "comicDirection": "Sens de lecture",
+  "directionLtr": "Gauche → droite (BD)",
+  "directionRtl": "Droite → gauche (manga)",
+  "directionVertical": "Vertical (webtoon)",
+  "comicAnnotate": "Annoter une case",
+  "comicAnnotateHint": "Tracez un cadre autour de la case à annoter."
 }

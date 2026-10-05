@@ -17,11 +17,11 @@ abstract interface class PushMessaging {
   Future<String?> token();
   Stream<String> get tokenRefresh;
 
-  /// The library item of the notification that launched the app, if any.
-  Future<String?> openedAtLaunch();
+  /// The data of the notification that launched the app, if any.
+  Future<Map<String, String>?> openedAtLaunch();
 
-  /// Library items of notifications tapped while the app runs.
-  Stream<String> get opened;
+  /// Data of notifications tapped while the app runs (`kind`, `item_id`, `handle`).
+  Stream<Map<String, String>> get opened;
 }
 
 class FirebasePushMessaging implements PushMessaging {
@@ -41,17 +41,16 @@ class FirebasePushMessaging implements PushMessaging {
   Stream<String> get tokenRefresh => _messaging.onTokenRefresh;
 
   @override
-  Future<String?> openedAtLaunch() async =>
-      _itemOf(await _messaging.getInitialMessage());
+  Future<Map<String, String>?> openedAtLaunch() async =>
+      _dataOf(await _messaging.getInitialMessage());
 
   @override
-  Stream<String> get opened => FirebaseMessaging.onMessageOpenedApp
-      .map(_itemOf)
-      .where((id) => id != null)
-      .cast<String>();
+  Stream<Map<String, String>> get opened =>
+      FirebaseMessaging.onMessageOpenedApp.map((m) => _dataOf(m)!);
 
-  static String? _itemOf(RemoteMessage? message) =>
-      message?.data['item_id'] as String?;
+  static Map<String, String>? _dataOf(RemoteMessage? message) => message == null
+      ? null
+      : {for (final e in message.data.entries) e.key: '${e.value}'};
 }
 
 /// Firebase Messaging where Firebase runs (Android, and iOS/macOS once configured).
