@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/files/file_transfer.dart';
 import '../../../core/files/save_file.dart';
+import '../../../core/locale/file_size.dart';
 import '../../../core/share/share_intake.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
@@ -366,7 +367,7 @@ class _BookActionsState extends ConsumerState<_BookActions> {
               Text(item.authors.join(', '), style: BabelText.body(14)),
             const SizedBox(height: 6),
             Text(
-              '${item.format.value.toUpperCase()} · ${(item.size / 1024 / 1024).toStringAsFixed(1)} Mo',
+              '${item.format.value.toUpperCase()} · ${fileSize(context, item.size)}',
               style: BabelText.label(10, color: BabelColors.textSecondary),
             ),
             const SizedBox(height: 24),
@@ -392,12 +393,34 @@ class _BookActionsState extends ConsumerState<_BookActions> {
             else
               FutureBuilder<bool>(
                 future: _onDevice,
-                builder: (context, snapshot) => PillButton(
-                  label: snapshot.data == true ? l10n.onDevice : l10n.download,
-                  kind: PillButtonKind.secondary,
-                  expand: true,
-                  onPressed: snapshot.data == true ? null : _download,
-                ),
+                builder: (context, snapshot) => snapshot.data == true
+                    // Already kept here: a status, not a button.
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.offline_pin_outlined,
+                              size: 18,
+                              color: BabelColors.gold,
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                l10n.offlineReady,
+                                style: BabelText.body(14),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : PillButton(
+                        label: l10n.downloadOffline,
+                        kind: PillButtonKind.secondary,
+                        expand: true,
+                        onPressed: _download,
+                      ),
               ),
             const SizedBox(height: 12),
             TextButton(

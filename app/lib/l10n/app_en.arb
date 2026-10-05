@@ -139,7 +139,6 @@
   "downloading": "Downloading…",
   "downloaded": "Downloaded to this device.",
   "downloadedWeb": "Download started.",
-  "onDevice": "On this device",
   "removeFromLibrary": "Remove from library",
   "removed": "“{title}” was removed from your library.",
   "workSummary": "Summary",
@@ -524,5 +523,7 @@
   "einkAuto": "Automatic",
   "einkOn": "On",
   "einkOff": "Off",
-  "einkDetected": "This device is an e-reader."
+  "einkDetected": "This device is an e-reader.",
+  "offlineReady": "Available offline on this device",
+  "downloadOffline": "Download to read offline"
 }

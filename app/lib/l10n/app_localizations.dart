@@ -932,12 +932,6 @@ abstract class AppLocalizations {
   /// **'Téléchargement lancé.'**
   String get downloadedWeb;
 
-  /// No description provided for @onDevice.
-  ///
-  /// In fr, this message translates to:
-  /// **'Sur cet appareil'**
-  String get onDevice;
-
   /// No description provided for @removeFromLibrary.
   ///
   /// In fr, this message translates to:
@@ -2161,6 +2155,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Cet appareil est une liseuse.'**
   String get einkDetected;
+
+  /// No description provided for @offlineReady.
+  ///
+  /// In fr, this message translates to:
+  /// **'Disponible hors ligne sur cet appareil'**
+  String get offlineReady;
+
+  /// No description provided for @downloadOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger pour lire hors ligne'**
+  String get downloadOffline;
 }
 
 class _AppLocalizationsDelegate

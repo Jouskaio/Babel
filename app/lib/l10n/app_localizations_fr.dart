@@ -477,9 +477,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get downloadedWeb => 'Téléchargement lancé.';
 
   @override
-  String get onDevice => 'Sur cet appareil';
-
-  @override
   String get removeFromLibrary => 'Retirer de la bibliothèque';
 
   @override
@@ -1277,4 +1274,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get einkDetected => 'Cet appareil est une liseuse.';
+
+  @override
+  String get offlineReady => 'Disponible hors ligne sur cet appareil';
+
+  @override
+  String get downloadOffline => 'Télécharger pour lire hors ligne';
 }

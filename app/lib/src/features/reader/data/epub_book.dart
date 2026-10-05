@@ -41,9 +41,19 @@ class EpubBook {
     return file == null ? null : Uint8List.fromList(file.content as List<int>);
   }
 
+  /// URL-decodes [path]; a stray "%" (not followed by two hex digits) is kept as is.
+  static String _decode(String path) {
+    final escaped = path.replaceAll(RegExp('%(?![0-9A-Fa-f]{2})'), '%25');
+    try {
+      return Uri.decodeFull(escaped);
+    } on ArgumentError {
+      return path; // invalid UTF-8 sequences: the name as written
+    }
+  }
+
   /// Resolves [href] found in [from] (relative, maybe URL-encoded) to an archive path.
   static String resolve(String from, String href) {
-    final clean = Uri.decodeFull(href.split('#').first);
+    final clean = _decode(href.split('#').first);
     final base = from.contains('/')
         ? from.substring(0, from.lastIndexOf('/'))
         : '';

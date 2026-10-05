@@ -209,7 +209,6 @@
   "downloading": "Téléchargement…",
   "downloaded": "Téléchargé sur cet appareil.",
   "downloadedWeb": "Téléchargement lancé.",
-  "onDevice": "Sur cet appareil",
   "removeFromLibrary": "Retirer de la bibliothèque",
   "removed": "« {title} » a été retiré de votre bibliothèque.",
   "@removed": {
@@ -636,5 +635,7 @@
   "einkAuto": "Automatique",
   "einkOn": "Activé",
   "einkOff": "Désactivé",
-  "einkDetected": "Cet appareil est une liseuse."
+  "einkDetected": "Cet appareil est une liseuse.",
+  "offlineReady": "Disponible hors ligne sur cet appareil",
+  "downloadOffline": "Télécharger pour lire hors ligne"
 }
