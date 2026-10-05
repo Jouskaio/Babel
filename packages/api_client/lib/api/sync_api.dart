@@ -307,4 +307,57 @@ class SyncApi {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
   }
+
+  /// Set Push Token
+  ///
+  /// Where to send this device's notifications, such as new chapters of followed works.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] deviceId (required):
+  ///
+  /// * [PushTokenRequest] pushTokenRequest (required):
+  Future<Response> setPushTokenWithHttpInfo(String deviceId, PushTokenRequest pushTokenRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/devices/{device_id}/push-token'
+      .replaceAll('{device_id}', deviceId);
+
+    // ignore: prefer_final_locals
+    Object? postBody = pushTokenRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'PUT',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Set Push Token
+  ///
+  /// Where to send this device's notifications, such as new chapters of followed works.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] deviceId (required):
+  ///
+  /// * [PushTokenRequest] pushTokenRequest (required):
+  Future<void> setPushToken(String deviceId, PushTokenRequest pushTokenRequest,) async {
+    final response = await setPushTokenWithHttpInfo(deviceId, pushTokenRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
 }

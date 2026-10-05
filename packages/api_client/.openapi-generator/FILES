@@ -42,6 +42,7 @@ doc/ProvidersResponse.md
 doc/PullResponse.md
 doc/PushRequest.md
 doc/PushResponse.md
+doc/PushTokenRequest.md
 doc/ReadingPositionResponse.md
 doc/RefreshRequest.md
 doc/RegisterDeviceRequest.md
@@ -114,6 +115,7 @@ lib/model/providers_response.dart
 lib/model/pull_response.dart
 lib/model/push_request.dart
 lib/model/push_response.dart
+lib/model/push_token_request.dart
 lib/model/reading_position_response.dart
 lib/model/refresh_request.dart
 lib/model/register_device_request.dart

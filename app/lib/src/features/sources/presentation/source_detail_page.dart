@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_providers.dart';
+import '../../../core/locale/file_size.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
@@ -195,9 +196,7 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
             ),
           ),
         ),
-        _ => const Center(
-          child: CircularProgressIndicator(color: BabelColors.gold),
-        ),
+        _ => Center(child: CircularProgressIndicator(color: BabelColors.gold)),
       },
     );
   }

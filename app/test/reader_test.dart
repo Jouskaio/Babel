@@ -59,6 +59,17 @@ void main() {
       expect(book.resource(path), isNotNull);
     });
 
+    test('links with a stray % still resolve', () {
+      expect(
+        EpubBook.resolve('OEBPS/text/one.xhtml', '../images/100%.png'),
+        'OEBPS/images/100%.png',
+      );
+      expect(
+        EpubBook.resolve('OEBPS/text/one.xhtml', 'caf%C3%A9 50%.xhtml#top'),
+        'OEBPS/text/café 50%.xhtml',
+      );
+    });
+
     test('files that are not EPUBs are refused', () {
       expect(
         () => EpubBook.open(Uint8List.fromList([1, 2, 3])),

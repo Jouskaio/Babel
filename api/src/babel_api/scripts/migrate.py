@@ -9,7 +9,7 @@ import argparse
 
 from alembic import command
 
-from babel_api.adapters.db.migrations.config import alembic_config
+from babel_api.adapters.db.migrations.config import alembic_config, upgrade_database
 from babel_api.core.config import get_settings
 
 
@@ -24,7 +24,7 @@ def main() -> int:
     if args.action == "revision":
         command.revision(config, message=args.message, autogenerate=True)
     else:
-        command.upgrade(config, "head")
+        upgrade_database(get_settings().database_url)
     return 0
 
 

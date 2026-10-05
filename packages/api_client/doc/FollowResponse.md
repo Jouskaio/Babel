@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **itemId** | **String** |  | 
 **lastCheckedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **lastError** | **String** |  | [optional] 
+**updatedAt** | [**DateTime**](DateTime.md) | When new chapters last arrived | [optional] 
 **url** | **String** |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

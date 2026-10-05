@@ -29,6 +29,9 @@ uv run pyright                                        # strict type checking
 uv run python -m babel_api.scripts.export_openapi     # regenerate contracts/openapi.json
 ```
 
+In development the API applies pending migrations when it starts (`BABEL_MIGRATE_ON_STARTUP`
+turns this on or off); `uv run python -m babel_api.scripts.migrate` does it by hand.
+
 ## Developing on a copy of production
 
 Local development uses `api/babel.db` (SQLite) by default. To work on real data, copy

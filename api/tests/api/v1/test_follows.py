@@ -188,3 +188,102 @@ def test_the_daily_round_checks_due_works(
     # …due with a zero interval.
     assert asyncio.run(check_due_follows(services, timedelta(0))) == 1
     assert follows(client, ada)[0]["chapters"] == "4/?"
+
+
+class Pushes:
+    """Records notifications; tokens in ``gone`` no longer reach a device."""
+
+    def __init__(self) -> None:
+        self.sent: list[tuple[str, str, str, dict[str, str]]] = []
+        self.gone: set[str] = set()
+
+    async def send(self, token: str, title: str, body: str, data: dict[str, str]) -> bool:
+        if token in self.gone:
+            return False
+        self.sent.append((token, title, body, data))
+        return True
+
+    async def aclose(self) -> None:
+        pass
+
+
+@pytest.fixture
+def pushes(app: FastAPI, ao3: Ao3) -> Pushes:
+    fake = Pushes()
+    app.state.container = replace(app.state.container, pusher=fake)
+    return fake
+
+
+def set_token(client: TestClient, auth: dict[str, str], device_id: str, token: str | None) -> None:
+    response = client.put(
+        f"/v1/devices/{device_id}/push-token", json={"token": token}, headers=auth
+    )
+    assert response.status_code == 204, response.text
+
+
+def check(client: TestClient, auth: dict[str, str]) -> dict[str, object]:
+    follow_id = follows(client, auth)[0]["id"]
+    return client.post(f"/v1/library/follows/{follow_id}/check", headers=auth).json()
+
+
+def test_new_chapters_are_pushed_to_the_readers_devices(
+    client: TestClient, ao3: Ao3, pushes: Pushes, ada: dict[str, str]
+) -> None:
+    item = import_link(client, ada)
+    phone, mac, web = (device(client, ada, name) for name in ("Phone", "Mac", "Web"))
+    set_token(client, ada, phone, "phone-token")
+    set_token(client, ada, mac, "mac-token")
+    assert web
+
+    check(client, ada)
+    assert pushes.sent == []  # nothing new yet
+
+    ao3.chapters, ao3.updated = "4/?", "2026-10-05"
+    checked = check(client, ada)
+
+    assert checked["updated_at"] is not None
+    assert sorted(token for token, *_ in pushes.sent) == ["mac-token", "phone-token"]
+    _, title, body, data = pushes.sent[0]
+    assert (title, body) == ("Nouveau chapitre", "Arcane · 4/? chapitres")
+    assert data == {"kind": "new_chapters", "item_id": item["id"]}
+
+
+def test_a_token_that_no_longer_works_is_forgotten(
+    client: TestClient, ao3: Ao3, pushes: Pushes, ada: dict[str, str]
+) -> None:
+    import_link(client, ada)
+    set_token(client, ada, device(client, ada, "Phone"), "old-token")
+    pushes.gone.add("old-token")
+
+    ao3.chapters, ao3.updated = "4/?", "2026-10-05"
+    check(client, ada)
+    pushes.gone.clear()
+    ao3.chapters, ao3.updated = "5/?", "2026-10-06"
+    check(client, ada)
+
+    assert pushes.sent == []
+
+
+def test_a_token_moves_with_the_app_and_can_be_turned_off(
+    client: TestClient, ao3: Ao3, pushes: Pushes, ada: dict[str, str]
+) -> None:
+    import_link(client, ada)
+    first, second = device(client, ada, "Phone"), device(client, ada, "Phone again")
+    set_token(client, ada, first, "token")
+    set_token(client, ada, second, "token")  # same install, registered again
+
+    ao3.chapters, ao3.updated = "4/?", "2026-10-05"
+    check(client, ada)
+    assert len(pushes.sent) == 1
+
+    set_token(client, ada, second, None)
+    ao3.chapters, ao3.updated = "5/?", "2026-10-06"
+    check(client, ada)
+    assert len(pushes.sent) == 1
+
+
+def test_only_the_owner_sets_a_device_token(client: TestClient, ada: dict[str, str]) -> None:
+    phone = device(client, ada, "Phone")
+    bob = account(client, "bob@example.com")
+    response = client.put(f"/v1/devices/{phone}/push-token", json={"token": "x"}, headers=bob)
+    assert response.status_code == 404

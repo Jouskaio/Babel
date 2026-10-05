@@ -80,6 +80,6 @@ PreferredSizeWidget sourcesAppBar(String title) => AppBar(
   backgroundColor: BabelColors.canvas,
   scrolledUnderElevation: 0,
   centerTitle: true,
-  iconTheme: const IconThemeData(color: BabelColors.textPrimary),
+  iconTheme: IconThemeData(color: BabelColors.textPrimary),
   title: Text(title, style: BabelText.heading(22)),
 );

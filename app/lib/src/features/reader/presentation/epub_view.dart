@@ -7,6 +7,7 @@ import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart
 import 'package:html/dom.dart' as dom;
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/display/eink.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
@@ -17,6 +18,7 @@ import '../data/epub_book.dart';
 import '../data/highlights.dart';
 import 'annotation_sheets.dart';
 import 'reader_chrome.dart';
+import 'reader_settings_sheet.dart';
 
 /// Reads an EPUB one chapter at a time, as continuous text (design: "screen / lecture").
 class EpubView extends ConsumerStatefulWidget {
@@ -43,7 +45,8 @@ class EpubView extends ConsumerStatefulWidget {
   ConsumerState<EpubView> createState() => _EpubViewState();
 }
 
-class _EpubViewState extends ConsumerState<EpubView> {
+class _EpubViewState extends ConsumerState<EpubView>
+    with SingleTickerProviderStateMixin {
   late int _chapter = (widget.start?.chapter ?? 0).clamp(
     0,
     widget.book.chapters.length - 1,
@@ -53,6 +56,13 @@ class _EpubViewState extends ConsumerState<EpubView> {
   bool _chrome = true;
   Timer? _saveTimer;
   String? _selection;
+
+  /// Fades the text in after a page turn, like a new page (not on e-ink).
+  late final AnimationController _pageIn = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 220),
+    value: 1,
+  );
 
   late final List<int> _before = [
     for (var i = 0, sum = 0; i < widget.book.chapters.length; i++)
@@ -70,6 +80,7 @@ class _EpubViewState extends ConsumerState<EpubView> {
     _saveTimer?.cancel();
     _save();
     _scroll.dispose();
+    _pageIn.dispose();
     super.dispose();
   }
 
@@ -118,6 +129,61 @@ class _EpubViewState extends ConsumerState<EpubView> {
     });
     _attach(fraction);
     _save();
+  }
+
+  /// Pages layout: turns a screenful, going on to the next or previous chapter at
+  /// either end. E-ink jumps at once (animations leave ghosts on e-ink screens).
+  void _turnPage({required bool forward}) {
+    if (!_scroll.hasClients) return;
+    final position = _scroll.position;
+    // A line of overlap keeps the reader's place.
+    final step = position.viewportDimension - 48;
+    if (forward && position.pixels >= position.maxScrollExtent - 1) {
+      _open(_chapter + 1);
+    } else if (!forward && position.pixels <= 0) {
+      if (_chapter > 0) _open(_chapter - 1, fraction: 1);
+    } else {
+      final target = position.pixels + (forward ? step : -step);
+      _scroll.jumpTo(target.clamp(0, position.maxScrollExtent));
+    }
+    if (!ref.read(einkDisplayProvider).active) _pageIn.forward(from: 0.2);
+  }
+
+  /// Pages layout: taps on the outer thirds turn pages; elsewhere they show the
+  /// controls.
+  void _onTap(TapUpDetails details, double width, {required bool pages}) {
+    final x = details.localPosition.dx;
+    if (pages && x < width / 3) {
+      _turnPage(forward: false);
+    } else if (pages && x > width * 2 / 3) {
+      _turnPage(forward: true);
+    } else {
+      setState(() => _chrome = !_chrome);
+    }
+  }
+
+  void _onSwipe(DragEndDetails details) {
+    final velocity = details.primaryVelocity ?? 0;
+    if (velocity.abs() > 200) _turnPage(forward: velocity < 0);
+  }
+
+  /// Page keys of e-readers, and keyboard arrows, turn pages.
+  KeyEventResult _onKey(FocusNode _, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    final key = event.logicalKey;
+    if (key == LogicalKeyboardKey.pageDown ||
+        key == LogicalKeyboardKey.arrowRight) {
+      _turnPage(forward: true);
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.pageUp ||
+        key == LogicalKeyboardKey.arrowLeft) {
+      _turnPage(forward: false);
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
   }
 
   /// Seeking on the progress bar: to the chapter and place holding [percent].
@@ -208,7 +274,7 @@ class _EpubViewState extends ConsumerState<EpubView> {
                   tooltip: context.l10n.highlightNote,
                   onPressed: () =>
                       _annotate(region, HighlightColor.gold, withNote: true),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.chat_bubble_outline,
                     size: 18,
                     color: BabelColors.textPrimary,
@@ -223,7 +289,7 @@ class _EpubViewState extends ConsumerState<EpubView> {
                     }
                     region.hideToolbar();
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.copy,
                     size: 18,
                     color: BabelColors.textPrimary,
@@ -235,22 +301,99 @@ class _EpubViewState extends ConsumerState<EpubView> {
         ],
       );
 
+  /// The chapter's text; in the pages layout it only moves by page turns.
+  Widget _content(
+    BuildContext context, {
+    required String html,
+    required ReaderSettings settings,
+    required bool pages,
+  }) {
+    final l10n = context.l10n;
+    final chapters = widget.book.chapters;
+    return Scrollbar(
+      controller: _scroll,
+      child: SingleChildScrollView(
+        key: ValueKey(_chapter),
+        controller: _scroll,
+        physics: pages ? const NeverScrollableScrollPhysics() : null,
+        padding: const EdgeInsets.fromLTRB(28, 16, 28, 48),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SelectionArea(
+                  onSelectionChanged: (content) =>
+                      _selection = content?.plainText,
+                  contextMenuBuilder: _selectionMenu,
+                  child: HtmlWidget(
+                    html,
+                    textStyle: settings.textStyle(BabelColors.textPrimary),
+                    onTapUrl: _onTapUrl,
+                    customStylesBuilder: _styles,
+                    customWidgetBuilder: (element) =>
+                        switch (element.localName) {
+                          'img' || 'image' => _image(element),
+                          _ => null,
+                        },
+                  ),
+                ),
+                if (_chapter < chapters.length - 1) ...[
+                  const SizedBox(height: 40),
+                  Center(
+                    child: OutlinedButton(
+                      onPressed: () => _open(_chapter + 1),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: BabelColors.border),
+                        shape: const StadiumBorder(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 14,
+                        ),
+                      ),
+                      child: Text(
+                        l10n.nextChapter.toUpperCase(),
+                        style: BabelText.label(
+                          11,
+                          color: BabelColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Map<String, String>? _styles(dom.Element element) {
     if (element.localName == 'mark') {
+      if (ref.read(einkDisplayProvider).active) {
+        // No colors on e-ink: a light gray band, underlined.
+        return {
+          'background-color': '#DDDDDD',
+          'color': '#000000',
+          'text-decoration': 'underline',
+        };
+      }
       final color = HighlightColor.parse(element.attributes['data-color'])
           .color;
       return {
         'background-color':
             'rgba(${(color.r * 255).round()}, ${(color.g * 255).round()}, '
             '${(color.b * 255).round()}, 0.35)',
-        'color': '#EFE4D0',
+        'color': BabelColors.css(BabelColors.textPrimary),
       };
     }
     if (element.localName == 'a') {
       final href = element.attributes['href'] ?? '';
       return href.startsWith(annotationScheme)
           ? {'color': 'inherit', 'text-decoration': 'none'}
-          : {'color': '#C8A465'};
+          : {'color': BabelColors.css(BabelColors.gold)};
     }
     return null;
   }
@@ -274,7 +417,9 @@ class _EpubViewState extends ConsumerState<EpubView> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final size = ref.watch(readerTextSizeProvider);
+    final settings = ref.watch(readerSettingsProvider);
+    final eink = ref.watch(einkDisplayProvider.select((d) => d.active));
+    final pages = settings.layout == ReaderLayout.pages;
     final chapters = widget.book.chapters;
     final chapter = chapters[_chapter];
     final chapterLabel = chapter.title ?? l10n.chapterNumber(_chapter + 1);
@@ -289,15 +434,15 @@ class _EpubViewState extends ConsumerState<EpubView> {
       body: Column(
         children: [
           AnimatedSize(
-            duration: const Duration(milliseconds: 200),
+            duration: eink ? Duration.zero : const Duration(milliseconds: 200),
             child: _chrome
                 ? ReaderTopBar(
                     title: widget.title,
                     subtitle: chapterLabel,
                     onBack: widget.onBack,
                     action: IconButton(
-                      tooltip: l10n.textSize,
-                      onPressed: () => _textSizeSheet(context),
+                      tooltip: l10n.readerSettings,
+                      onPressed: () => showReaderSettings(context),
                       style: IconButton.styleFrom(
                         fixedSize: const Size(44, 44),
                         backgroundColor: BabelColors.textPrimary,
@@ -311,64 +456,22 @@ class _EpubViewState extends ConsumerState<EpubView> {
                 : const SafeArea(bottom: false, child: SizedBox(height: 8)),
           ),
           Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () => setState(() => _chrome = !_chrome),
-              child: Scrollbar(
-                controller: _scroll,
-                child: SingleChildScrollView(
-                  key: ValueKey(_chapter),
-                  controller: _scroll,
-                  padding: const EdgeInsets.fromLTRB(28, 16, 28, 48),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 680),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SelectionArea(
-                            onSelectionChanged: (content) =>
-                                _selection = content?.plainText,
-                            contextMenuBuilder: _selectionMenu,
-                            child: HtmlWidget(
-                              html,
-                              textStyle: BabelText.reading(size),
-                              onTapUrl: _onTapUrl,
-                              customStylesBuilder: _styles,
-                              customWidgetBuilder: (element) =>
-                                  switch (element.localName) {
-                                    'img' || 'image' => _image(element),
-                                    _ => null,
-                                  },
-                            ),
-                          ),
-                          if (_chapter < chapters.length - 1) ...[
-                            const SizedBox(height: 40),
-                            Center(
-                              child: OutlinedButton(
-                                onPressed: () => _open(_chapter + 1),
-                                style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(
-                                    color: BabelColors.border,
-                                  ),
-                                  shape: const StadiumBorder(),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 14,
-                                  ),
-                                ),
-                                child: Text(
-                                  l10n.nextChapter.toUpperCase(),
-                                  style: BabelText.label(
-                                    11,
-                                    color: BabelColors.textPrimary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
+            child: LayoutBuilder(
+              builder: (context, box) => Focus(
+                autofocus: true,
+                onKeyEvent: _onKey,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTapUp: (details) =>
+                      _onTap(details, box.maxWidth, pages: pages),
+                  onHorizontalDragEnd: pages ? _onSwipe : null,
+                  child: FadeTransition(
+                    opacity: _pageIn,
+                    child: _content(
+                      context,
+                      html: html,
+                      settings: settings,
+                      pages: pages,
                     ),
                   ),
                 ),
@@ -403,51 +506,6 @@ class _EpubViewState extends ConsumerState<EpubView> {
       ),
     );
   }
-
-  void _textSizeSheet(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: BabelColors.surface,
-      builder: (context) => Consumer(
-        builder: (context, ref, _) {
-          final size = ref.watch(readerTextSizeProvider);
-          return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.textSize.toUpperCase(),
-                    style: BabelText.label(10),
-                  ),
-                  Row(
-                    children: [
-                      Text('A', style: BabelText.reading(14)),
-                      Expanded(
-                        child: Slider(
-                          value: size,
-                          min: ReaderTextSize.min,
-                          max: ReaderTextSize.max,
-                          divisions: 8,
-                          activeColor: BabelColors.gold,
-                          onChanged: ref
-                              .read(readerTextSizeProvider.notifier)
-                              .set,
-                        ),
-                      ),
-                      Text('A', style: BabelText.reading(26)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
 }
 
 /// "En marge · 3 notes" above the progress bar (design: "screen / lecture").
@@ -466,7 +524,7 @@ class _MarginButton extends StatelessWidget {
           color: BabelColors.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18),
-            side: const BorderSide(color: BabelColors.border),
+            side: BorderSide(color: BabelColors.border),
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(18),
@@ -482,11 +540,7 @@ class _MarginButton extends StatelessWidget {
                       style: BabelText.heading(17),
                     ),
                   ),
-                  const Icon(
-                    Icons.arrow_upward,
-                    size: 18,
-                    color: BabelColors.gold,
-                  ),
+                  Icon(Icons.arrow_upward, size: 18, color: BabelColors.gold),
                 ],
               ),
             ),

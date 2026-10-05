@@ -247,7 +247,7 @@ Future<void> showMarginPanel(
                             InkResponse(
                               onTap: () =>
                                   showAnnotationEditor(context, annotation),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.edit_outlined,
                                 size: 16,
                                 color: BabelColors.textSecondary,

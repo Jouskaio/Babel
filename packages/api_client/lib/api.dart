@@ -72,6 +72,7 @@ part 'model/providers_response.dart';
 part 'model/pull_response.dart';
 part 'model/push_request.dart';
 part 'model/push_response.dart';
+part 'model/push_token_request.dart';
 part 'model/reading_position_response.dart';
 part 'model/refresh_request.dart';
 part 'model/register_device_request.dart';

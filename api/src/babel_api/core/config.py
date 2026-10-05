@@ -63,6 +63,12 @@ class Settings(BaseSettings):
     # How often unfinished AO3 works imported by link are checked for new chapters
     # (hours; 0 turns the follow-up off).
     follow_interval_hours: float = 24
+    # Apply pending database migrations when the API starts. Default: in development
+    # only (the production image migrates before starting the server).
+    migrate_on_startup: bool | None = None
+    # Firebase service account JSON (Project settings → Service accounts) used to send
+    # push notifications. Empty: notifications are only logged.
+    fcm_credentials_file: str = ""
 
     # Accounts with these emails are administrators (file withdrawal, blocking).
     admin_emails: list[str] = []

@@ -1,7 +1,6 @@
 import 'package:babel_api_client/api.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/api/api_providers.dart';
 import '../../../l10n.dart';
@@ -75,16 +74,6 @@ String scannedAgo(BuildContext context, DateTime at, {DateTime? now}) {
     _ => l10n.daysAgo(elapsed.inDays),
   };
   return l10n.scannedAgo(when);
-}
-
-/// "1.2 MB" / "1,2 Mo".
-String fileSize(BuildContext context, int bytes) {
-  final l10n = context.l10n;
-  final locale = Localizations.localeOf(context).toLanguageTag();
-  if (bytes < 1000 * 1000) {
-    return l10n.unitKb(NumberFormat('#,##0', locale).format(bytes / 1000));
-  }
-  return l10n.unitMb(NumberFormat('#,##0.#', locale).format(bytes / 1e6));
 }
 
 /// "Jane Eyre.epub" → ("Jane Eyre", "EPUB").

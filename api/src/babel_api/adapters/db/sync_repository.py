@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.models import (
@@ -39,6 +39,7 @@ def _to_device(row: DeviceRow) -> Device:
         kind=DeviceKind(row.kind),
         created_at=_aware(row.created_at),
         last_seen_at=_aware(row.last_seen_at),
+        push_token=row.push_token,
     )
 
 
@@ -128,6 +129,18 @@ class SqlSyncRepository:
         if row is not None:
             row.last_seen_at = at
             await self._session.flush()
+
+    async def set_push_token(self, device_id: UUID, token: str | None) -> None:
+        # A token belongs to one app install: drop it from a device that had it before.
+        if token is not None:
+            await self._session.execute(
+                update(DeviceRow)
+                .where(DeviceRow.push_token == token, DeviceRow.id != device_id)
+                .values(push_token=None)
+            )
+        row = await self._session.get_one(DeviceRow, device_id)
+        row.push_token = token
+        await self._session.flush()
 
     async def delete_device(self, device_id: UUID) -> None:
         # Explicit: SQLite does not enforce ON DELETE CASCADE by default.

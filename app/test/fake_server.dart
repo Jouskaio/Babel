@@ -77,9 +77,18 @@ class FakeServer {
   int importCalls = 0;
   int linkImports = 0;
 
+  /// Notification tokens given for this device (null: turned off).
+  final pushTokens = <String?>[];
+
+  /// Names of the files uploaded to the library.
+  final uploads = <String>[];
+
   /// Library items followed for new chapters.
   final followed = <String>[];
   String followChapters = '3/?';
+
+  /// When new chapters of followed books last arrived.
+  String? followUpdated;
   String linkChapters = '12/12';
   int followChecks = 0;
   bool hasSource = true;
@@ -129,6 +138,21 @@ class FakeServer {
   late final client = MockClient((request) async {
     if (offline) throw http.ClientException('offline');
     final path = request.url.path;
+    if (path == '/v1/devices/device-1/push-token') {
+      pushTokens.add(
+        (jsonDecode(request.body) as Map<String, Object?>)['token'] as String?,
+      );
+      return http.Response('', 204);
+    }
+    if (path == '/v1/library/files' && request.method == 'POST') {
+      final name = RegExp('filename="([^"]+)"')
+          .firstMatch(latin1.decode(request.bodyBytes, allowInvalid: true));
+      uploads.add(name?.group(1) ?? '?');
+      return json({
+        'item': libraryItem('i-up', 'Arcane'),
+        'deduplicated': false,
+      }, 201);
+    }
     if (path == '/v1/devices' && request.method == 'POST') {
       devicesRegistered++;
       return json({
@@ -224,6 +248,7 @@ class FakeServer {
             'complete': false,
             'last_checked_at': '2026-10-05T08:00:00Z',
             'last_error': null,
+            'updated_at': followUpdated,
           },
       ]);
     }

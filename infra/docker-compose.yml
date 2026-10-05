@@ -25,6 +25,8 @@ services:
       - "8000:8000"
     volumes:
       - /srv/babel-files:/data/files
+      # Files only the server holds, such as the Firebase service account (push).
+      - /opt/babel/secrets:/run/babel-secrets:ro
     depends_on:
       db:
         condition: service_healthy

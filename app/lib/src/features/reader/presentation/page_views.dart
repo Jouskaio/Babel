@@ -8,6 +8,7 @@ import '../../../core/theme/babel_colors.dart';
 import '../../../l10n.dart';
 import '../application/reading_position.dart';
 import 'reader_chrome.dart';
+import 'reader_settings_sheet.dart';
 
 const _images = {'.jpg', '.jpeg', '.png', '.gif', '.webp'};
 
@@ -69,7 +70,24 @@ class _PagedFrame extends StatelessWidget {
       backgroundColor: BabelColors.canvas,
       body: Column(
         children: [
-          ReaderTopBar(title: title, subtitle: null, onBack: onBack),
+          ReaderTopBar(
+            title: title,
+            subtitle: null,
+            onBack: onBack,
+            action: IconButton(
+              tooltip: context.l10n.readerSettings,
+              onPressed: () => showReaderSettings(context, text: false),
+              style: IconButton.styleFrom(
+                fixedSize: const Size(44, 44),
+                side: BorderSide(color: BabelColors.border),
+              ),
+              icon: Icon(
+                Icons.contrast,
+                color: BabelColors.textPrimary,
+                size: 20,
+              ),
+            ),
+          ),
           Expanded(child: child),
           ReaderProgressBar(
             percent: percent,

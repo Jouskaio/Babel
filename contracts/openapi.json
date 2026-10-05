@@ -466,6 +466,19 @@
             ],
             "title": "Last Error"
           },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When new chapters last arrived",
+            "title": "Updated At"
+          },
           "url": {
             "title": "Url",
             "type": "string"
@@ -478,7 +491,8 @@
           "chapters",
           "complete",
           "last_checked_at",
-          "last_error"
+          "last_error",
+          "updated_at"
         ],
         "title": "FollowResponse",
         "type": "object"
@@ -1017,6 +1031,28 @@
           "cursor"
         ],
         "title": "PushResponse",
+        "type": "object"
+      },
+      "PushTokenRequest": {
+        "properties": {
+          "token": {
+            "anyOf": [
+              {
+                "maxLength": 512,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Firebase Cloud Messaging token of the app; null turns notifications off",
+            "title": "Token"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "title": "PushTokenRequest",
         "type": "object"
       },
       "ReadingPositionResponse": {
@@ -1832,7 +1868,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.17.1"
+    "version": "0.18.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -2863,6 +2899,58 @@
           }
         ],
         "summary": "Remove Device",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/v1/devices/{device_id}/push-token": {
+      "put": {
+        "description": "Where to send this device's notifications, such as new chapters of followed works.",
+        "operationId": "setPushToken",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "device_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Device Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Set Push Token",
         "tags": [
           "sync"
         ]
