@@ -37,23 +37,48 @@ class ReaderSettingsSheet extends ConsumerWidget {
             Text(l10n.readerSettings, style: BabelText.title(26)),
             if (text) ...[
               _Section(l10n.textSize),
-              Row(
-                children: [
-                  Text('A', style: BabelText.reading(14)),
-                  Expanded(
-                    child: Slider(
-                      value: settings.textSize,
-                      min: ReaderSettings.minSize,
-                      max: ReaderSettings.maxSize,
-                      divisions: 8,
-                      activeColor: BabelColors.gold,
-                      inactiveColor: BabelColors.border,
-                      onChanged: controller.setTextSize,
+              if (eink)
+                // E-ink: steps instead of a slider, which drags poorly there.
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    _Pill(
+                      label: 'A−',
+                      selected: false,
+                      onTap: () =>
+                          controller.setTextSize(settings.textSize - 2),
                     ),
-                  ),
-                  Text('A', style: BabelText.reading(26)),
-                ],
-              ),
+                    _Pill(
+                      label: settings.textSize.round().toString(),
+                      selected: true,
+                      onTap: () {},
+                    ),
+                    _Pill(
+                      label: 'A+',
+                      selected: false,
+                      onTap: () =>
+                          controller.setTextSize(settings.textSize + 2),
+                    ),
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Text('A', style: BabelText.reading(14)),
+                    Expanded(
+                      child: Slider(
+                        value: settings.textSize,
+                        min: ReaderSettings.minSize,
+                        max: ReaderSettings.maxSize,
+                        divisions: 8,
+                        activeColor: BabelColors.gold,
+                        inactiveColor: BabelColors.border,
+                        onChanged: controller.setTextSize,
+                      ),
+                    ),
+                    Text('A', style: BabelText.reading(26)),
+                  ],
+                ),
             ],
             _Section(l10n.readerTheme),
             if (eink)

@@ -373,10 +373,10 @@ class _EpubViewState extends ConsumerState<EpubView>
   Map<String, String>? _styles(dom.Element element) {
     if (element.localName == 'mark') {
       if (ref.read(einkDisplayProvider).active) {
-        // No colors on e-ink: a light gray band, underlined.
+        // No colors on e-ink: italic and underlined (design: "eink / lecture").
         return {
-          'background-color': '#DDDDDD',
           'color': '#000000',
+          'font-style': 'italic',
           'text-decoration': 'underline',
         };
       }
