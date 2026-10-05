@@ -138,6 +138,51 @@ class LibraryApi {
     return null;
   }
 
+  /// Delete Review
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  Future<Response> deleteReviewWithHttpInfo(String itemId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/{item_id}/review'
+      .replaceAll('{item_id}', itemId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'DELETE',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Delete Review
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  Future<void> deleteReview(String itemId,) async {
+    final response = await deleteReviewWithHttpInfo(itemId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Download File
   ///
   /// Download a stored file. Supports HTTP range requests to resume downloads.
@@ -398,6 +443,63 @@ class LibraryApi {
     return null;
   }
 
+  /// Get Review
+  ///
+  /// Your review of this book, if any.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  Future<Response> getReviewWithHttpInfo(String itemId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/{item_id}/review'
+      .replaceAll('{item_id}', itemId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Review
+  ///
+  /// Your review of this book, if any.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  Future<ReviewResponse?> getReview(String itemId,) async {
+    final response = await getReviewWithHttpInfo(itemId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ReviewResponse',) as ReviewResponse;
+    
+    }
+    return null;
+  }
+
   /// Import File
   ///
   /// Import an EPUB, PDF, CBZ or CBR file into the library.
@@ -647,6 +749,67 @@ class LibraryApi {
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
+  }
+
+  /// Save Review
+  ///
+  /// Rate and review a book of your library, and choose who sees it.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [ReviewRequest] reviewRequest (required):
+  Future<Response> saveReviewWithHttpInfo(String itemId, ReviewRequest reviewRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/{item_id}/review'
+      .replaceAll('{item_id}', itemId);
+
+    // ignore: prefer_final_locals
+    Object? postBody = reviewRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'PUT',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Save Review
+  ///
+  /// Rate and review a book of your library, and choose who sees it.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [ReviewRequest] reviewRequest (required):
+  Future<ReviewResponse?> saveReview(String itemId, ReviewRequest reviewRequest,) async {
+    final response = await saveReviewWithHttpInfo(itemId, reviewRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ReviewResponse',) as ReviewResponse;
+    
+    }
+    return null;
   }
 
   /// Stop Follow

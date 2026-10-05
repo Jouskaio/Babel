@@ -138,13 +138,17 @@ void notificationTests() {
     );
     await settle(tester);
 
-    messaging.taps.add('i1');
+    messaging.taps.add({'kind': 'new_chapters', 'item_id': 'i1'});
     await settle(tester);
 
     final router = ProviderScope.containerOf(
       tester.element(find.byType(MaterialApp)),
     ).read(routerProvider);
     expect(router.routeInformationProvider.value.uri.path, Routes.read('i1'));
+
+    messaging.taps.add({'kind': 'friend_request', 'handle': 'lea'});
+    await settle(tester);
+    expect(router.routeInformationProvider.value.uri.path, Routes.friends);
   });
 }
 

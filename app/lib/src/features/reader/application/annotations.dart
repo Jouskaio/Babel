@@ -33,6 +33,8 @@ class Annotation {
     required this.color,
     required this.note,
     required this.time,
+    this.visibility = 'private',
+    this.region,
   });
 
   factory Annotation.fromJson(Map<String, Object?> data) => Annotation(
@@ -44,6 +46,8 @@ class Annotation {
     color: HighlightColor.parse(data['color']),
     note: data['note'] as String?,
     time: DateTime.parse(data['client_time']! as String),
+    visibility: data['visibility'] as String? ?? 'private',
+    region: data['region'] as String?,
   );
 
   final String id;
@@ -55,6 +59,16 @@ class Annotation {
   final String? note;
   final DateTime time;
 
+  /// Who sees it: `private`, `friends` or `public` (ADR 0011).
+  final String visibility;
+
+  /// Comic pages: the area ("x,y,w,h", fractions of the page) instead of a quote;
+  /// [chapter] is then the page index.
+  final String? region;
+
+  /// A note on an area of a comic page rather than on a passage of text.
+  bool get onPage => region != null;
+
   Map<String, Object> toJson() => {
     'id': id,
     'item_id': itemId,
@@ -64,6 +78,8 @@ class Annotation {
     'color': color.name,
     'note': ?note,
     'client_time': time.toUtc().toIso8601String(),
+    'visibility': visibility,
+    'region': ?region,
   };
 }
 
@@ -104,9 +120,10 @@ class AnnotationsController {
     required String quote,
     HighlightColor color = HighlightColor.gold,
     String? note,
+    String? region,
   }) async {
     final text = quote.trim();
-    if (text.isEmpty) return null;
+    if (text.isEmpty && region == null) return null;
     final annotation = Annotation(
       id: const Uuid().v4(),
       itemId: itemId,
@@ -116,6 +133,7 @@ class AnnotationsController {
       color: color,
       note: note,
       time: DateTime.now(),
+      region: region,
     );
     await _save(annotation);
     return annotation;
@@ -126,6 +144,7 @@ class AnnotationsController {
     HighlightColor? color,
     String? note,
     bool clearNote = false,
+    String? visibility,
   }) => _save(
     Annotation(
       id: annotation.id,
@@ -136,6 +155,8 @@ class AnnotationsController {
       color: color ?? annotation.color,
       note: clearNote ? null : (note ?? annotation.note),
       time: DateTime.now(),
+      visibility: visibility ?? annotation.visibility,
+      region: annotation.region,
     ),
   );
 

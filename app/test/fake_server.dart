@@ -77,6 +77,17 @@ class FakeServer {
   int importCalls = 0;
   int linkImports = 0;
 
+  /// Social: the reader's handle, requests made, and what other readers share.
+  String? handle;
+  final socialCalls = <String>[];
+  final recommendations = <Map<String, Object?>>[];
+
+  Map<String, Object?> reader(String handle, String name, String friend) => {
+    'handle': handle,
+    'display_name': name,
+    'relation': {'friend': friend, 'following': false, 'follows_you': false},
+  };
+
   /// Notification tokens given for this device (null: turned off).
   final pushTokens = <String?>[];
 
@@ -138,6 +149,106 @@ class FakeServer {
   late final client = MockClient((request) async {
     if (offline) throw http.ClientException('offline');
     final path = request.url.path;
+    if (path == '/v1/me/profile') {
+      if (request.method == 'PATCH') {
+        final wanted =
+            (jsonDecode(request.body) as Map<String, Object?>)['handle']
+                as String?;
+        if (wanted == 'taken') {
+          return json({'detail': 'This handle is taken'}, 409);
+        }
+        handle = wanted ?? handle;
+      }
+      return json({
+        'handle': handle,
+        'display_name': 'Ada',
+        'share_reading': 'friends',
+        'share_library': 'friends',
+      });
+    }
+    if (path.startsWith('/v1/social/')) {
+      socialCalls.add('${request.method} $path');
+      if (path == '/v1/social/friends' && request.method == 'GET') {
+        return json({
+          'friends': [reader('camille', 'Camille', 'friends')],
+          'incoming': [reader('lea', 'Léa', 'incoming')],
+          'outgoing': <Object>[],
+          'following': <Object>[],
+        });
+      }
+      if (path == '/v1/social/feed') {
+        return json([
+          {
+            'kind': 'reading',
+            'reader': {'handle': 'camille', 'display_name': 'Camille'},
+            'at': '2026-10-05T10:00:00Z',
+            'title': 'Arcane',
+            'authors': ['ittybittyzz'],
+            'percent': 40.0,
+            'rating': null,
+            'text': null,
+            'quote': null,
+          },
+        ]);
+      }
+      if (path == '/v1/social/recommendations' && request.method == 'GET') {
+        return json(recommendations);
+      }
+      if (path == '/v1/social/readers') {
+        return json([reader('leo', 'Léo', 'none')]);
+      }
+      if (path == '/v1/social/readers/camille') {
+        return json({
+          'reader': reader('camille', 'Camille', 'friends'),
+          'friends': 3,
+          'followers': 1,
+          'books': 12,
+          'reading': [
+            {
+              'title': 'Arcane',
+              'authors': ['ittybittyzz'],
+              'percent': 40.0,
+              'at': '2026-10-05T10:00:00Z',
+            },
+          ],
+          'library': [
+            {
+              'title': 'Jane Eyre',
+              'authors': ['Charlotte Brontë'],
+            },
+          ],
+          'reviews': [
+            {
+              'item_id': 'x',
+              'title': 'Jane Eyre',
+              'authors': ['Charlotte Brontë'],
+              'rating': 4,
+              'text': 'Reader, I loved it.',
+              'audience': 'public',
+              'updated_at': '2026-10-05T10:00:00Z',
+            },
+          ],
+          'notes': [
+            {
+              'title': 'Akira',
+              'quote': '',
+              'note': 'Cette case !',
+              'at': '2026-10-05T10:00:00Z',
+              'page': 11,
+              'region': '0.1,0.1,0.5,0.5',
+            },
+          ],
+        });
+      }
+      if (path.startsWith('/v1/social/friends/')) {
+        final who = path.split('/').last;
+        final status = request.method == 'DELETE'
+            ? 'none'
+            : (who == 'lea' ? 'friends' : 'requested');
+        return json(reader(who, who, status));
+      }
+      return http.Response('', 204);
+    }
     if (path == '/v1/devices/device-1/push-token') {
       pushTokens.add(
         (jsonDecode(request.body) as Map<String, Object?>)['token'] as String?,

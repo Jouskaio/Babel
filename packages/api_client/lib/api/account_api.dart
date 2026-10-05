@@ -152,6 +152,54 @@ class AccountApi {
     return null;
   }
 
+  /// Get Profile
+  ///
+  /// Your handle and what you share.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> getSocialProfileWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/me/profile';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Profile
+  ///
+  /// Your handle and what you share.
+  Future<SocialProfileResponse?> getSocialProfile() async {
+    final response = await getSocialProfileWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'SocialProfileResponse',) as SocialProfileResponse;
+    
+    }
+    return null;
+  }
+
   /// Resend Verification
   ///
   /// Send the confirmation link again (at most once a minute).
@@ -243,6 +291,62 @@ class AccountApi {
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UserResponse',) as UserResponse;
+    
+    }
+    return null;
+  }
+
+  /// Update Profile
+  ///
+  /// Choose a handle (3 to 30 letters, digits, dots, underscores) and what you share.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [UpdateSocialProfileRequest] updateSocialProfileRequest (required):
+  Future<Response> updateSocialProfileWithHttpInfo(UpdateSocialProfileRequest updateSocialProfileRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/me/profile';
+
+    // ignore: prefer_final_locals
+    Object? postBody = updateSocialProfileRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'PATCH',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Update Profile
+  ///
+  /// Choose a handle (3 to 30 letters, digits, dots, underscores) and what you share.
+  ///
+  /// Parameters:
+  ///
+  /// * [UpdateSocialProfileRequest] updateSocialProfileRequest (required):
+  Future<SocialProfileResponse?> updateSocialProfile(UpdateSocialProfileRequest updateSocialProfileRequest,) async {
+    final response = await updateSocialProfileWithHttpInfo(updateSocialProfileRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'SocialProfileResponse',) as SocialProfileResponse;
     
     }
     return null;

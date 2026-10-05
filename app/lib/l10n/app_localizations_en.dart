@@ -1270,4 +1270,241 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get downloadOffline => 'Download to read offline';
+
+  @override
+  String get friendAdd => 'Add';
+
+  @override
+  String get friendAccept => 'Accept';
+
+  @override
+  String get friendRequested => 'Request sent';
+
+  @override
+  String get friendsWith => 'Friends ✓';
+
+  @override
+  String get friendDecline => 'Decline';
+
+  @override
+  String get follow => 'Follow';
+
+  @override
+  String get unfollow => 'Unfollow';
+
+  @override
+  String friendRemoveConfirm(String name) {
+    return 'Remove $name from your friends?';
+  }
+
+  @override
+  String get friendRemove => 'Remove';
+
+  @override
+  String get handleTitle => 'Your handle';
+
+  @override
+  String get handleHint =>
+      'Your friends find you by it. Without a handle, nobody can find you.';
+
+  @override
+  String get handleLabel => 'Handle';
+
+  @override
+  String get handleRules => '3 to 30 letters, digits, dots or underscores';
+
+  @override
+  String get handleTaken => 'This handle is taken.';
+
+  @override
+  String get handleInvalid =>
+      'Invalid handle: 3 to 30 letters, digits, dots or underscores.';
+
+  @override
+  String readerSince(int year) {
+    return 'Member since $year';
+  }
+
+  @override
+  String get statBooks => 'Books';
+
+  @override
+  String get statFriends => 'Friends';
+
+  @override
+  String get statFollowers => 'Followers';
+
+  @override
+  String get friendsTitle => 'Friends';
+
+  @override
+  String get seeAll => 'See all';
+
+  @override
+  String get searchReaders => 'A reader\'s handle…';
+
+  @override
+  String get noReaderFound => 'No reader with this handle.';
+
+  @override
+  String get friendInvitesYou => 'Invites you to be friends';
+
+  @override
+  String get noFriendsYet => 'No friends yet: search for a reader\'s handle.';
+
+  @override
+  String friendReading(String title, int percent) {
+    return 'Reading $title · $percent %';
+  }
+
+  @override
+  String seeMyFriends(int count) {
+    return 'See my $count friends';
+  }
+
+  @override
+  String get friendRequests => 'Requests received';
+
+  @override
+  String get followingTitle => 'Following';
+
+  @override
+  String get requestsSent => 'Requests sent';
+
+  @override
+  String get readerNotFoundSocial => 'This reader does not exist.';
+
+  @override
+  String get followsYou => 'Follows you';
+
+  @override
+  String get readingNow => 'Reading now';
+
+  @override
+  String get reviewsTitle => 'Reviews';
+
+  @override
+  String get sharedNotes => 'Shared notes';
+
+  @override
+  String comicPageNote(int page) {
+    return 'Note on page $page';
+  }
+
+  @override
+  String get libraryTitleShared => 'Library';
+
+  @override
+  String get nothingShared => 'This reader shares nothing with you yet.';
+
+  @override
+  String get recommendationsTitle => 'Recommended for you';
+
+  @override
+  String get feedTitle => 'Activity';
+
+  @override
+  String get feedEmpty => 'Nothing yet: add friends or follow readers.';
+
+  @override
+  String feedReading(String name, String title) {
+    return '$name is reading $title';
+  }
+
+  @override
+  String feedReview(String name, String title) {
+    return '$name reviewed $title';
+  }
+
+  @override
+  String feedNote(String name, String title) {
+    return '$name shared a note from $title';
+  }
+
+  @override
+  String recommendedBy(String name) {
+    return 'Recommended by $name';
+  }
+
+  @override
+  String get markRead => 'Seen';
+
+  @override
+  String get audiencePrivate => 'Me';
+
+  @override
+  String get audienceFriends => 'Friends';
+
+  @override
+  String get audiencePublic => 'Everyone';
+
+  @override
+  String get shareReading => 'Who sees what I read';
+
+  @override
+  String get shareLibrary => 'Who sees my library';
+
+  @override
+  String get publicProfile => 'Public profile';
+
+  @override
+  String get myReview => 'My review';
+
+  @override
+  String ratingStars(int count) {
+    return '$count stars';
+  }
+
+  @override
+  String get reviewHint => 'What you thought of it…';
+
+  @override
+  String get whoSees => 'Who sees it';
+
+  @override
+  String get reviewSaved => 'Review saved.';
+
+  @override
+  String get reviewDelete => 'Delete my review';
+
+  @override
+  String get recommendTitle => 'Recommend';
+
+  @override
+  String get recommendAction => 'Recommend';
+
+  @override
+  String get recommendNoFriends => 'Add friends first to recommend them books.';
+
+  @override
+  String get recommendMessage => 'A word for your friend (optional)';
+
+  @override
+  String get recommendSend => 'Send';
+
+  @override
+  String get recommendationSent => 'Recommendation sent.';
+
+  @override
+  String comicPage(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String get comicDirection => 'Reading direction';
+
+  @override
+  String get directionLtr => 'Left → right (comics)';
+
+  @override
+  String get directionRtl => 'Right → left (manga)';
+
+  @override
+  String get directionVertical => 'Vertical (webtoon)';
+
+  @override
+  String get comicAnnotate => 'Note a panel';
+
+  @override
+  String get comicAnnotateHint => 'Draw a frame around the panel to note.';
 }

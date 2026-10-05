@@ -1280,4 +1280,246 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get downloadOffline => 'Télécharger pour lire hors ligne';
+
+  @override
+  String get friendAdd => 'Ajouter';
+
+  @override
+  String get friendAccept => 'Accepter';
+
+  @override
+  String get friendRequested => 'Demande envoyée';
+
+  @override
+  String get friendsWith => 'Amis ✓';
+
+  @override
+  String get friendDecline => 'Refuser';
+
+  @override
+  String get follow => 'Suivre';
+
+  @override
+  String get unfollow => 'Ne plus suivre';
+
+  @override
+  String friendRemoveConfirm(String name) {
+    return 'Retirer $name de vos amis ?';
+  }
+
+  @override
+  String get friendRemove => 'Retirer';
+
+  @override
+  String get handleTitle => 'Votre pseudo';
+
+  @override
+  String get handleHint =>
+      'Vos amis vous trouvent grâce à lui. Sans pseudo, personne ne peut vous trouver.';
+
+  @override
+  String get handleLabel => 'Pseudo';
+
+  @override
+  String get handleRules => '3 à 30 lettres, chiffres, points ou tirets bas';
+
+  @override
+  String get handleTaken => 'Ce pseudo est déjà pris.';
+
+  @override
+  String get handleInvalid =>
+      'Pseudo invalide : 3 à 30 lettres, chiffres, points ou tirets bas.';
+
+  @override
+  String readerSince(int year) {
+    return 'Membre depuis $year';
+  }
+
+  @override
+  String get statBooks => 'Livres';
+
+  @override
+  String get statFriends => 'Amis';
+
+  @override
+  String get statFollowers => 'Abonnés';
+
+  @override
+  String get friendsTitle => 'Amis';
+
+  @override
+  String get seeAll => 'Tout voir';
+
+  @override
+  String get searchReaders => 'Pseudo d\'un lecteur…';
+
+  @override
+  String get noReaderFound => 'Aucun lecteur avec ce pseudo.';
+
+  @override
+  String get friendInvitesYou => 'Vous invite à devenir amis';
+
+  @override
+  String get noFriendsYet =>
+      'Pas encore d\'amis : cherchez le pseudo d\'un lecteur.';
+
+  @override
+  String friendReading(String title, int percent) {
+    return 'Lit $title · $percent %';
+  }
+
+  @override
+  String seeMyFriends(int count) {
+    return 'Voir mes $count amis';
+  }
+
+  @override
+  String get friendRequests => 'Demandes reçues';
+
+  @override
+  String get followingTitle => 'Abonnements';
+
+  @override
+  String get requestsSent => 'Demandes envoyées';
+
+  @override
+  String get readerNotFoundSocial => 'Ce lecteur n\'existe pas.';
+
+  @override
+  String get followsYou => 'Vous suit';
+
+  @override
+  String get readingNow => 'En cours de lecture';
+
+  @override
+  String get reviewsTitle => 'Avis';
+
+  @override
+  String get sharedNotes => 'Notes partagées';
+
+  @override
+  String comicPageNote(int page) {
+    return 'Note sur la page $page';
+  }
+
+  @override
+  String get libraryTitleShared => 'Bibliothèque';
+
+  @override
+  String get nothingShared =>
+      'Ce lecteur ne partage rien avec vous pour l\'instant.';
+
+  @override
+  String get recommendationsTitle => 'Recommandé pour vous';
+
+  @override
+  String get feedTitle => 'Activité';
+
+  @override
+  String get feedEmpty =>
+      'Rien pour l\'instant : ajoutez des amis ou suivez des lecteurs.';
+
+  @override
+  String feedReading(String name, String title) {
+    return '$name lit $title';
+  }
+
+  @override
+  String feedReview(String name, String title) {
+    return '$name a donné son avis sur $title';
+  }
+
+  @override
+  String feedNote(String name, String title) {
+    return '$name a partagé une note de $title';
+  }
+
+  @override
+  String recommendedBy(String name) {
+    return 'Recommandé par $name';
+  }
+
+  @override
+  String get markRead => 'Vu';
+
+  @override
+  String get audiencePrivate => 'Moi';
+
+  @override
+  String get audienceFriends => 'Amis';
+
+  @override
+  String get audiencePublic => 'Tous';
+
+  @override
+  String get shareReading => 'Qui voit ce que je lis';
+
+  @override
+  String get shareLibrary => 'Qui voit ma bibliothèque';
+
+  @override
+  String get publicProfile => 'Profil public';
+
+  @override
+  String get myReview => 'Mon avis';
+
+  @override
+  String ratingStars(int count) {
+    return '$count étoiles';
+  }
+
+  @override
+  String get reviewHint => 'Ce que vous en avez pensé…';
+
+  @override
+  String get whoSees => 'Qui le voit';
+
+  @override
+  String get reviewSaved => 'Avis enregistré.';
+
+  @override
+  String get reviewDelete => 'Supprimer mon avis';
+
+  @override
+  String get recommendTitle => 'Recommander';
+
+  @override
+  String get recommendAction => 'Recommander';
+
+  @override
+  String get recommendNoFriends =>
+      'Ajoutez d\'abord des amis pour leur recommander des livres.';
+
+  @override
+  String get recommendMessage => 'Un mot pour votre ami (facultatif)';
+
+  @override
+  String get recommendSend => 'Envoyer';
+
+  @override
+  String get recommendationSent => 'Recommandation envoyée.';
+
+  @override
+  String comicPage(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String get comicDirection => 'Sens de lecture';
+
+  @override
+  String get directionLtr => 'Gauche → droite (BD)';
+
+  @override
+  String get directionRtl => 'Droite → gauche (manga)';
+
+  @override
+  String get directionVertical => 'Vertical (webtoon)';
+
+  @override
+  String get comicAnnotate => 'Annoter une case';
+
+  @override
+  String get comicAnnotateHint =>
+      'Tracez un cadre autour de la case à annoter.';
 }

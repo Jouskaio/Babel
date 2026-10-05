@@ -81,3 +81,15 @@ class TooManySourcesError(DomainError):
 
 class SecretsUnavailableError(DomainError):
     """Credentials cannot be stored: the server has no encryption key configured."""
+
+
+class HandleTakenError(DomainError):
+    """Another reader already uses this handle."""
+
+
+class InvalidHandleError(DomainError):
+    """Handles are 3 to 30 letters, digits, dots or underscores."""
+
+
+class NotFriendsError(DomainError):
+    """Only friends can be sent a recommendation."""

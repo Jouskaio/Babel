@@ -16,7 +16,9 @@ import '../../../routing/router.dart';
 import '../../library/application/library_controller.dart';
 import '../application/reader_settings.dart';
 import '../application/reading_position.dart';
+import '../data/comic_book.dart';
 import '../data/epub_book.dart';
+import 'comic_view.dart';
 import 'epub_view.dart';
 import 'page_views.dart';
 
@@ -150,7 +152,9 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
           onBack: _back,
         ),
         BookFormat.cbz => ComicView(
-          pages: comicPages(opened.bytes),
+          book: ComicBook.open(opened.bytes),
+          itemId: item.id,
+          fileSha256: item.sha256,
           title: item.title,
           start: opened.start,
           onPosition: _savePosition,
