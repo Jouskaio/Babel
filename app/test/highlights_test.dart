@@ -40,8 +40,40 @@ void main() {
     expect(html, startsWith('<p title="moor">On the <a href='));
   });
 
-  test('quotes spanning several paragraphs are left alone', () {
-    const source = '<p>First.</p><p>Second.</p>';
-    expect(applyHighlights(source, [note('First. Second.')]), source);
+  test('quotes spanning several paragraphs get a mark in each', () {
+    final html = applyHighlights(
+      '<p>He said: First.</p>\n<p>Second. Then</p>',
+      [note('First.\nSecond.')],
+    );
+    expect(
+      html,
+      '<p>He said: <a href="babel-annotation:a1"><mark data-color="rose">First.'
+      '</mark></a></p>\n<p><a href="babel-annotation:a1"><mark data-color="rose">'
+      'Second.</mark></a> Then</p>',
+    );
+  });
+
+  test('quotes across inline tags are marked around them', () {
+    final html = applyHighlights('<p>Wuthering <em>Heights</em> is</p>', [
+      note('Wuthering Heights'),
+    ]);
+    expect(
+      html,
+      '<p><a href="babel-annotation:a1"><mark data-color="rose">Wuthering '
+      '</mark></a><em><a href="babel-annotation:a1"><mark data-color="rose">'
+      'Heights</mark></a></em> is</p>',
+    );
+  });
+
+  test('line breaks and repeated spaces match the selected text', () {
+    final html = applyHighlights('<p>On   the\n   moor.</p>', [
+      note('On the moor.'),
+    ]);
+    expect(html, contains('<mark data-color="rose">On   the\n   moor.</mark>'));
+  });
+
+  test('a quote that is not in the chapter changes nothing', () {
+    const source = '<p>First.</p>';
+    expect(applyHighlights(source, [note('Elsewhere')]), source);
   });
 }
