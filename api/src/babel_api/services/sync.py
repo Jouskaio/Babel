@@ -76,6 +76,12 @@ class SyncService:
     async def devices(self, user_id: UUID) -> list[Device]:
         return await self._sync.list_devices(user_id)
 
+    async def set_push_token(self, user_id: UUID, device_id: UUID, token: str | None) -> None:
+        """Where to send this device's notifications (None turns them off)."""
+        await self._own_device(user_id, device_id)
+        await self._sync.set_push_token(device_id, token)
+        await self._sync.commit()
+
     async def remove_device(self, user_id: UUID, device_id: UUID) -> None:
         await self._own_device(user_id, device_id)
         await self._sync.delete_device(device_id)

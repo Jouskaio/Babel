@@ -63,6 +63,9 @@ class Settings(BaseSettings):
     # How often unfinished AO3 works imported by link are checked for new chapters
     # (hours; 0 turns the follow-up off).
     follow_interval_hours: float = 24
+    # Firebase service account JSON (Project settings → Service accounts) used to send
+    # push notifications. Empty: notifications are only logged.
+    fcm_credentials_file: str = ""
 
     # Accounts with these emails are administrators (file withdrawal, blocking).
     admin_emails: list[str] = []

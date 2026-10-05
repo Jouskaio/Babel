@@ -20,6 +20,7 @@ from babel_api.domain.ports import FileRepository, SyncRepository
 from babel_api.domain.sources import RemoteEntry
 from babel_api.domain.sync import ChangeOp, EntityKind
 from babel_api.services.files import FileService
+from babel_api.services.notifications import Notifier
 
 logger = logging.getLogger(__name__)
 
@@ -48,12 +49,14 @@ class FollowService:
         library: FileService,
         sync: SyncRepository,
         ao3: Ao3Connector,
+        notifier: Notifier | None = None,
     ) -> None:
         self._follows = follows
         self._files = files
         self._library = library
         self._sync = sync
         self._ao3 = ao3
+        self._notifier = notifier
 
     async def follow_ao3(
         self, item: LibraryItem, work_id: str, url: str, entry: RemoteEntry
@@ -99,30 +102,39 @@ class FollowService:
         except SourceConnectionError as error:
             return await self._saved(follow, last_checked_at=now, last_error=str(error)[:200])
         chapters = ao3_chapters(entry)
+        updated: LibraryItem | None = None
         if entry.remote_id != follow.version:
             item = await self._files.get_item(follow.item_id)
             if item is None:  # removed from the library meanwhile
                 await self._follows.delete(follow.id)
                 await self._follows.commit()
                 return follow
-            await self._update_book(item, entry)
+            if await self._update_book(item, entry):
+                updated = item
             logger.info("New version of AO3 work %s (%s)", follow.ref, chapters)
-        return await self._saved(
+        saved = await self._saved(
             follow,
             version=entry.remote_id,
             chapters=chapters,
             complete=is_complete(chapters),
             last_checked_at=now,
             last_error=None,
+            updated_at=now if updated else None,
         )
+        if updated is not None and self._notifier is not None:
+            await self._notifier.new_chapters(
+                updated.user_id, updated.id, entry.title or updated.title, chapters
+            )
+        return saved
 
-    async def _update_book(self, item: LibraryItem, entry: RemoteEntry) -> None:
+    async def _update_book(self, item: LibraryItem, entry: RemoteEntry) -> bool:
+        """Brings the new version into the library; False when the file did not change."""
         chunks = self._ao3.fetch({"username": ""}, None, entry)
         name = f"{entry.title}.epub" if entry.title else "work.epub"
         stored, path, _ = await self._library.store(item.user_id, chunks, name)
         old_sha256 = item.file.sha256
         if stored.sha256 == old_sha256:
-            return
+            return False
         await self._library.replace_file(item, stored, path)
         # Annotations follow the book to its new file (devices learn it through sync).
         for annotation in await self._sync.move_annotations(
@@ -135,6 +147,7 @@ class FollowService:
                 ChangeOp.UPSERT,
                 annotation.as_data(),
             )
+        return True
 
     async def _saved(
         self,
@@ -145,6 +158,7 @@ class FollowService:
         version: str | None = None,
         chapters: str | None = None,
         complete: bool | None = None,
+        updated_at: datetime | None = None,
     ) -> Follow:
         saved = await self._follows.save(
             replace(
@@ -154,6 +168,7 @@ class FollowService:
                 complete=follow.complete if complete is None else complete,
                 last_checked_at=last_checked_at,
                 last_error=last_error,
+                updated_at=updated_at or follow.updated_at,
             )
         )
         await self._follows.commit()

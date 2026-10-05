@@ -21,6 +21,8 @@ class Follow:
     created_at: datetime
     last_checked_at: datetime | None = None
     last_error: str | None = None
+    # When the latest new chapters were brought into the library.
+    updated_at: datetime | None = None
 
 
 def is_complete(chapters: str | None) -> bool:

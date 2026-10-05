@@ -28,6 +28,7 @@ def _to_follow(row: FollowRow) -> Follow:
         created_at=_aware(row.created_at) or datetime.now(UTC),
         last_checked_at=_aware(row.last_checked_at),
         last_error=row.last_error,
+        updated_at=_aware(row.updated_at),
     )
 
 
@@ -46,6 +47,7 @@ class SqlFollowRepository:
         row.kind, row.ref, row.url = follow.kind, follow.ref, follow.url[:2000]
         row.version, row.chapters, row.complete = follow.version, follow.chapters, follow.complete
         row.last_checked_at, row.last_error = follow.last_checked_at, follow.last_error
+        row.updated_at = follow.updated_at
         await self._session.flush()
         return _to_follow(row)
 
