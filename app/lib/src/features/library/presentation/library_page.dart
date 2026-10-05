@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:babel_api_client/api.dart';
+import 'package:cross_file/cross_file.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/files/file_transfer.dart';
 import '../../../core/files/save_file.dart';
+import '../../../core/share/share_intake.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
@@ -31,13 +35,29 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   String? _importing;
   double _progress = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    // A file shared to Babel before the library was shown.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _importShared());
+  }
+
+  void _importShared() {
+    if (!mounted || _importing != null) return;
+    final shared = ref.read(pendingSharedFileProvider.notifier).take();
+    if (shared != null) unawaited(_importFile(XFile(shared.path)));
+  }
+
   Future<void> _import() async {
     final picked = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: _acceptedExtensions,
     );
     if (picked.isEmpty || !mounted) return;
-    final file = picked.first.xFile;
+    await _importFile(picked.first.xFile);
+  }
+
+  Future<void> _importFile(XFile file) async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
     setState(() {
@@ -80,6 +100,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(pendingSharedFileProvider, (_, file) {
+      if (file != null) _importShared();
+    });
     final l10n = context.l10n;
     final library = ref.watch(libraryControllerProvider);
     final items = library.value ?? const <LibraryItemResponse>[];

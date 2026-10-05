@@ -7,6 +7,7 @@ import '../../../core/api/api_providers.dart';
 import '../../../core/auth/auth_controller.dart';
 import '../../../core/auth/auth_failure.dart';
 import '../../../core/locale/language_picker.dart';
+import '../../../core/push/push_notifications.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/babel_text_field.dart';
@@ -102,6 +103,7 @@ class AccountPage extends ConsumerWidget {
                   kind: PillButtonKind.secondary,
                   expand: true,
                   onPressed: () async {
+                    await ref.read(pushRegistrationProvider)?.unregister();
                     await ref.read(authControllerProvider.notifier).logout();
                     // A deliberate sign-out ends on the landing page, not on the sign-in form.
                     ref.read(routerProvider).go(Routes.landing);
