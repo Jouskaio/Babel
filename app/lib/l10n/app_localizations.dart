@@ -2167,6 +2167,390 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Télécharger pour lire hors ligne'**
   String get downloadOffline;
+
+  /// No description provided for @friendAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get friendAdd;
+
+  /// No description provided for @friendAccept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter'**
+  String get friendAccept;
+
+  /// No description provided for @friendRequested.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande envoyée'**
+  String get friendRequested;
+
+  /// No description provided for @friendsWith.
+  ///
+  /// In fr, this message translates to:
+  /// **'Amis ✓'**
+  String get friendsWith;
+
+  /// No description provided for @friendDecline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser'**
+  String get friendDecline;
+
+  /// No description provided for @follow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivre'**
+  String get follow;
+
+  /// No description provided for @unfollow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne plus suivre'**
+  String get unfollow;
+
+  /// No description provided for @friendRemoveConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer {name} de vos amis ?'**
+  String friendRemoveConfirm(String name);
+
+  /// No description provided for @friendRemove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get friendRemove;
+
+  /// No description provided for @handleTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre pseudo'**
+  String get handleTitle;
+
+  /// No description provided for @handleHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos amis vous trouvent grâce à lui. Sans pseudo, personne ne peut vous trouver.'**
+  String get handleHint;
+
+  /// No description provided for @handleLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pseudo'**
+  String get handleLabel;
+
+  /// No description provided for @handleRules.
+  ///
+  /// In fr, this message translates to:
+  /// **'3 à 30 lettres, chiffres, points ou tirets bas'**
+  String get handleRules;
+
+  /// No description provided for @handleTaken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce pseudo est déjà pris.'**
+  String get handleTaken;
+
+  /// No description provided for @handleInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pseudo invalide : 3 à 30 lettres, chiffres, points ou tirets bas.'**
+  String get handleInvalid;
+
+  /// No description provided for @readerSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membre depuis {year}'**
+  String readerSince(int year);
+
+  /// No description provided for @statBooks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livres'**
+  String get statBooks;
+
+  /// No description provided for @statFriends.
+  ///
+  /// In fr, this message translates to:
+  /// **'Amis'**
+  String get statFriends;
+
+  /// No description provided for @statFollowers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnés'**
+  String get statFollowers;
+
+  /// No description provided for @friendsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Amis'**
+  String get friendsTitle;
+
+  /// No description provided for @seeAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout voir'**
+  String get seeAll;
+
+  /// No description provided for @searchReaders.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pseudo d\'un lecteur…'**
+  String get searchReaders;
+
+  /// No description provided for @noReaderFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun lecteur avec ce pseudo.'**
+  String get noReaderFound;
+
+  /// No description provided for @friendInvitesYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous invite à devenir amis'**
+  String get friendInvitesYou;
+
+  /// No description provided for @noFriendsYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore d\'amis : cherchez le pseudo d\'un lecteur.'**
+  String get noFriendsYet;
+
+  /// No description provided for @friendReading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lit {title} · {percent} %'**
+  String friendReading(String title, int percent);
+
+  /// No description provided for @seeMyFriends.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir mes {count} amis'**
+  String seeMyFriends(int count);
+
+  /// No description provided for @friendRequests.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandes reçues'**
+  String get friendRequests;
+
+  /// No description provided for @followingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnements'**
+  String get followingTitle;
+
+  /// No description provided for @requestsSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandes envoyées'**
+  String get requestsSent;
+
+  /// No description provided for @readerNotFoundSocial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce lecteur n\'existe pas.'**
+  String get readerNotFoundSocial;
+
+  /// No description provided for @followsYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous suit'**
+  String get followsYou;
+
+  /// No description provided for @readingNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours de lecture'**
+  String get readingNow;
+
+  /// No description provided for @reviewsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avis'**
+  String get reviewsTitle;
+
+  /// No description provided for @sharedNotes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notes partagées'**
+  String get sharedNotes;
+
+  /// No description provided for @comicPageNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note sur la page {page}'**
+  String comicPageNote(int page);
+
+  /// No description provided for @libraryTitleShared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bibliothèque'**
+  String get libraryTitleShared;
+
+  /// No description provided for @nothingShared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce lecteur ne partage rien avec vous pour l\'instant.'**
+  String get nothingShared;
+
+  /// No description provided for @recommendationsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recommandé pour vous'**
+  String get recommendationsTitle;
+
+  /// No description provided for @feedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activité'**
+  String get feedTitle;
+
+  /// No description provided for @feedEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien pour l\'instant : ajoutez des amis ou suivez des lecteurs.'**
+  String get feedEmpty;
+
+  /// No description provided for @feedReading.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} lit {title}'**
+  String feedReading(String name, String title);
+
+  /// No description provided for @feedReview.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} a donné son avis sur {title}'**
+  String feedReview(String name, String title);
+
+  /// No description provided for @feedNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} a partagé une note de {title}'**
+  String feedNote(String name, String title);
+
+  /// No description provided for @recommendedBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recommandé par {name}'**
+  String recommendedBy(String name);
+
+  /// No description provided for @markRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vu'**
+  String get markRead;
+
+  /// No description provided for @audiencePrivate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moi'**
+  String get audiencePrivate;
+
+  /// No description provided for @audienceFriends.
+  ///
+  /// In fr, this message translates to:
+  /// **'Amis'**
+  String get audienceFriends;
+
+  /// No description provided for @audiencePublic.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous'**
+  String get audiencePublic;
+
+  /// No description provided for @shareReading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui voit ce que je lis'**
+  String get shareReading;
+
+  /// No description provided for @shareLibrary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui voit ma bibliothèque'**
+  String get shareLibrary;
+
+  /// No description provided for @publicProfile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil public'**
+  String get publicProfile;
+
+  /// No description provided for @myReview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon avis'**
+  String get myReview;
+
+  /// No description provided for @ratingStars.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} étoiles'**
+  String ratingStars(int count);
+
+  /// No description provided for @reviewHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que vous en avez pensé…'**
+  String get reviewHint;
+
+  /// No description provided for @whoSees.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui le voit'**
+  String get whoSees;
+
+  /// No description provided for @reviewSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avis enregistré.'**
+  String get reviewSaved;
+
+  /// No description provided for @reviewDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer mon avis'**
+  String get reviewDelete;
+
+  /// No description provided for @recommendTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recommander'**
+  String get recommendTitle;
+
+  /// No description provided for @recommendAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recommander'**
+  String get recommendAction;
+
+  /// No description provided for @recommendNoFriends.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutez d\'abord des amis pour leur recommander des livres.'**
+  String get recommendNoFriends;
+
+  /// No description provided for @recommendMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un mot pour votre ami (facultatif)'**
+  String get recommendMessage;
+
+  /// No description provided for @recommendSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer'**
+  String get recommendSend;
+
+  /// No description provided for @recommendationSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recommandation envoyée.'**
+  String get recommendationSent;
 }
 
 class _AppLocalizationsDelegate

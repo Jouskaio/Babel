@@ -16,6 +16,7 @@ import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../auth/presentation/auth_layout.dart';
+import '../../social/presentation/sharing_settings.dart';
 
 /// Profile, password, sign-out and account deletion.
 class AccountPage extends ConsumerWidget {
@@ -33,7 +34,8 @@ class AccountPage extends ConsumerWidget {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: BabelColors.textPrimary),
-          onPressed: () => context.go(Routes.home),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(Routes.profile),
         ),
         title: Text(l10n.accountTitle, style: BabelText.heading(24)),
       ),
@@ -85,6 +87,11 @@ class AccountPage extends ConsumerWidget {
                 _Section(
                   title: l10n.accountSecurity,
                   child: _PasswordForm(user: user),
+                ),
+                const SizedBox(height: 24),
+                _Section(
+                  title: l10n.publicProfile,
+                  child: const SharingSettings(),
                 ),
                 const SizedBox(height: 24),
                 _Section(title: l10n.einkTitle, child: const EinkSetting()),

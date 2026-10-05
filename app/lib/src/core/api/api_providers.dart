@@ -72,6 +72,9 @@ final authedCatalogApiProvider = Provider<CatalogApi>(
 final sourcesApiProvider = Provider<SourcesApi>(
   (ref) => SourcesApi(ref.watch(apiClientProvider)),
 );
+final socialApiProvider = Provider<SocialApi>(
+  (ref) => SocialApi(ref.watch(apiClientProvider)),
+);
 final accountApiProvider = Provider<AccountApi>(
   (ref) => AccountApi(ref.watch(apiClientProvider)),
 );

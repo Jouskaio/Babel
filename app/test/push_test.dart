@@ -11,7 +11,7 @@ class FakeMessaging implements PushMessaging {
   bool allowed = true;
   String? current = 'token-1';
   final refreshes = StreamController<String>.broadcast();
-  final taps = StreamController<String>.broadcast();
+  final taps = StreamController<Map<String, String>>.broadcast();
 
   @override
   Future<bool> requestPermission() async => allowed;
@@ -23,10 +23,10 @@ class FakeMessaging implements PushMessaging {
   Stream<String> get tokenRefresh => refreshes.stream;
 
   @override
-  Future<String?> openedAtLaunch() async => null;
+  Future<Map<String, String>?> openedAtLaunch() async => null;
 
   @override
-  Stream<String> get opened => taps.stream;
+  Stream<Map<String, String>> get opened => taps.stream;
 }
 
 Future<ProviderContainer> start(

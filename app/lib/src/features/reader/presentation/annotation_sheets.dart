@@ -1,3 +1,4 @@
+import 'package:babel_api_client/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,6 +6,7 @@ import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
+import '../../social/presentation/sharing_settings.dart';
 import '../application/annotations.dart';
 
 /// The highlight colors offered when text is selected (design: the color dots).
@@ -72,6 +74,8 @@ class _AnnotationEditor extends ConsumerStatefulWidget {
 
 class _AnnotationEditorState extends ConsumerState<_AnnotationEditor> {
   late HighlightColor _color = widget.annotation.color;
+  late Audience _audience =
+      Audience.fromJson(widget.annotation.visibility) ?? Audience.private;
   late final _note = TextEditingController(text: widget.annotation.note ?? '');
 
   @override
@@ -89,6 +93,7 @@ class _AnnotationEditorState extends ConsumerState<_AnnotationEditor> {
           color: _color,
           note: note.isEmpty ? null : note,
           clearNote: note.isEmpty,
+          visibility: _audience.value,
         );
     if (mounted) Navigator.pop(context);
   }
@@ -120,7 +125,9 @@ class _AnnotationEditorState extends ConsumerState<_AnnotationEditor> {
                 border: Border(left: BorderSide(color: _color.color, width: 3)),
               ),
               child: Text(
-                widget.annotation.quote,
+                widget.annotation.onPage
+                    ? l10n.comicPageNote(widget.annotation.chapter + 1)
+                    : widget.annotation.quote,
                 maxLines: 6,
                 overflow: TextOverflow.ellipsis,
                 style: BabelText.reading(16, italic: true),
@@ -156,6 +163,13 @@ class _AnnotationEditorState extends ConsumerState<_AnnotationEditor> {
                   borderSide: BorderSide.none,
                 ),
               ),
+            ),
+            const SizedBox(height: 12),
+            Text(l10n.whoSees, style: BabelText.body(13)),
+            const SizedBox(height: 6),
+            AudiencePicker(
+              value: _audience,
+              onChanged: (a) => setState(() => _audience = a),
             ),
             const SizedBox(height: 16),
             Row(
