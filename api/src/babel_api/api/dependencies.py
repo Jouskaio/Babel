@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from babel_api.adapters.db.catalog_repository import SqlCatalogRepository
 from babel_api.adapters.db.file_repository import SqlFileRepository
+from babel_api.adapters.db.follow_repository import SqlFollowRepository
 from babel_api.adapters.db.repositories import SqlUserRepository
 from babel_api.adapters.db.source_repository import SqlSourceRepository
 from babel_api.adapters.db.sync_repository import SqlSyncRepository
@@ -35,6 +36,7 @@ from babel_api.domain.users import IdentityProvider
 from babel_api.services.auth import AuthService
 from babel_api.services.catalog import CatalogService
 from babel_api.services.files import FileService
+from babel_api.services.follows import FollowService
 from babel_api.services.links import LinkService
 from babel_api.services.sources import SourceService
 from babel_api.services.sync import SyncService
@@ -104,6 +106,11 @@ WorkServiceDep = Annotated[WorkService, Depends(get_work_service)]
 def get_file_service(
     container: ContainerDep, session: Annotated[AsyncSession, Depends(get_session)]
 ) -> FileService:
+    return make_file_service(container, session)
+
+
+def make_file_service(container: Container, session: AsyncSession) -> FileService:
+    """Also used outside requests (the daily follow-up of works)."""
     settings = container.settings
     return FileService(
         SqlFileRepository(session),
@@ -201,7 +208,31 @@ def get_link_service(
         SqlSourceRepository(session),
         container.ao3,
         container.link_fetcher,
+        make_follow_service(container, session, files),
     )
 
 
 LinkServiceDep = Annotated[LinkService, Depends(get_link_service)]
+
+
+def make_follow_service(
+    container: Container, session: AsyncSession, files: FileService | None = None
+) -> FollowService:
+    return FollowService(
+        SqlFollowRepository(session),
+        SqlFileRepository(session),
+        files or make_file_service(container, session),
+        SqlSyncRepository(session),
+        container.ao3,
+    )
+
+
+def get_follow_service(
+    container: ContainerDep,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    files: FileServiceDep,
+) -> FollowService:
+    return make_follow_service(container, session, files)
+
+
+FollowServiceDep = Annotated[FollowService, Depends(get_follow_service)]

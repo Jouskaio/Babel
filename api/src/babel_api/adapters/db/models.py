@@ -314,3 +314,24 @@ class AnnotationRow(Base):
     note: Mapped[str | None] = mapped_column(Text)
     visibility: Mapped[str] = mapped_column(String(16), default="private")
     client_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class FollowRow(Base):
+    """A library book whose source is checked daily for new chapters."""
+
+    __tablename__ = "follows"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    item_id: Mapped[UUID] = mapped_column(
+        ForeignKey("library_items.id", ondelete="CASCADE"), unique=True
+    )
+    kind: Mapped[str] = mapped_column(String(16))
+    ref: Mapped[str] = mapped_column(String(100))
+    url: Mapped[str] = mapped_column(String(2000))
+    version: Mapped[str] = mapped_column(String(100))
+    chapters: Mapped[str | None] = mapped_column(String(20))
+    complete: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    last_checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
+    last_error: Mapped[str | None] = mapped_column(String(200))

@@ -209,3 +209,18 @@ class SqlSyncRepository:
 
     async def delete_annotation(self, annotation_id: UUID) -> None:
         await self._session.execute(delete(AnnotationRow).where(AnnotationRow.id == annotation_id))
+
+    async def move_annotations(
+        self, user_id: UUID, old_sha256: str, new_sha256: str, item_id: UUID
+    ) -> list[Annotation]:
+        rows = (
+            await self._session.scalars(
+                select(AnnotationRow).where(
+                    AnnotationRow.user_id == user_id, AnnotationRow.file_sha256 == old_sha256
+                )
+            )
+        ).all()
+        for row in rows:
+            row.file_sha256, row.item_id = new_sha256, item_id
+        await self._session.flush()
+        return [a for row in rows if (a := await self.get_annotation(row.id))]

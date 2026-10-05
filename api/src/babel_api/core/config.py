@@ -60,6 +60,9 @@ class Settings(BaseSettings):
     # Hosts on private networks that OPDS and WebDAV sources may reach (e.g. a home
     # Calibre-Web or Nextcloud), as a JSON list: ["calibre.lan", "192.168.1.20"].
     source_allowed_hosts: list[str] = []
+    # How often unfinished AO3 works imported by link are checked for new chapters
+    # (hours; 0 turns the follow-up off).
+    follow_interval_hours: float = 24
 
     # Accounts with these emails are administrators (file withdrawal, blocking).
     admin_emails: list[str] = []
