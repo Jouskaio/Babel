@@ -422,7 +422,7 @@
   "linkHeading": "From a link",
   "linkSubtitle": "AO3, Gutenberg or a link to a file",
   "linkField": "Link",
-  "linkHelp": "Paste the link of an AO3 fanfiction, a Gutenberg book or an EPUB, PDF, CBZ file. A book already on Babel is added without downloading it again.",
+  "linkHelp": "A book already on Babel is added without downloading it again.",
   "linkShareTip": "Tip: in your browser, Share → Babel",
   "linkChecking": "Looking at the link…",
   "linkAo3": "AO3 fanfiction",
@@ -493,5 +493,11 @@
     }
   },
   "followNothingNew": "No new chapter for now",
-  "linkFollowed": "new chapters will arrive by themselves"
+  "linkFollowed": "new chapters will arrive by themselves",
+  "linkKindsTitle": "What Babel can import",
+  "linkKindAo3": "archiveofourown.org/works/…: the fanfiction as an EPUB. If it is not finished, Babel checks for new chapters every day and updates the book.",
+  "linkKindGutenberg": "gutenberg.org/ebooks/…: the public-domain book as an EPUB, with its illustrations.",
+  "linkKindFile": "A direct link to an EPUB, PDF or CBZ file, on any website.",
+  "linkKindsElse": "Other pages (online reading sites, shops) are not supported.",
+  "linkWillFollow": "ongoing: new chapters checked every day"
 }

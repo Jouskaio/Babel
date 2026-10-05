@@ -157,6 +157,7 @@ class _LinkImportPageState extends ConsumerState<LinkImportPage> {
           _describe(preview),
           if (preview.authors.isNotEmpty) preview.authors.join(', '),
           ?preview.detail,
+          if (_followed(preview)) l10n.linkWillFollow,
           if (preview.onBabel) l10n.linkOnBabel,
         ].join(' · '),
         true,
@@ -255,8 +256,42 @@ class _LinkImportPageState extends ConsumerState<LinkImportPage> {
               loading: _step == _Step.importing,
               onPressed: _step == _Step.recognized ? _import : null,
             ),
+          const SizedBox(height: 32),
+          Text(
+            l10n.linkKindsTitle.toUpperCase(),
+            style: BabelText.label(10, spacing: 1.2),
+          ),
+          const SizedBox(height: 12),
+          _Kind(label: l10n.linkAo3, text: l10n.linkKindAo3),
+          _Kind(label: l10n.linkGutenberg, text: l10n.linkKindGutenberg),
+          _Kind(label: l10n.linkFile, text: l10n.linkKindFile),
+          Text(
+            l10n.linkKindsElse,
+            style: BabelText.body(13, color: BabelColors.textSecondary),
+          ),
         ],
       ),
     );
   }
+}
+
+/// One kind of link Babel imports, with what it does.
+class _Kind extends StatelessWidget {
+  const _Kind({required this.label, required this.text});
+
+  final String label;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: BabelText.body(14, color: BabelColors.gold)),
+        const SizedBox(height: 2),
+        Text(text, style: BabelText.body(13)),
+      ],
+    ),
+  );
 }

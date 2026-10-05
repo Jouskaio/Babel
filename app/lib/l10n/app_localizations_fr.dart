@@ -1044,7 +1044,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get linkHelp =>
-      'Collez le lien d\'une fanfiction AO3, d\'un livre Gutenberg ou d\'un fichier EPUB, PDF, CBZ. Un livre déjà sur Babel est ajouté sans être retéléchargé.';
+      'Un livre déjà sur Babel est ajouté sans être retéléchargé.';
 
   @override
   String get linkShareTip => 'Astuce : depuis le navigateur, Partager → Babel';
@@ -1176,4 +1176,27 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get linkFollowed => 'les nouveaux chapitres arriveront tout seuls';
+
+  @override
+  String get linkKindsTitle => 'Ce que Babel sait importer';
+
+  @override
+  String get linkKindAo3 =>
+      'archiveofourown.org/works/… : la fanfiction en EPUB. Si elle n\'est pas terminée, Babel vérifie chaque jour les nouveaux chapitres et met le livre à jour.';
+
+  @override
+  String get linkKindGutenberg =>
+      'gutenberg.org/ebooks/… : le livre du domaine public en EPUB, avec ses illustrations.';
+
+  @override
+  String get linkKindFile =>
+      'Un lien direct vers un fichier EPUB, PDF ou CBZ, sur n\'importe quel site.';
+
+  @override
+  String get linkKindsElse =>
+      'Les autres pages (sites de lecture en ligne, boutiques) ne sont pas prises en charge.';
+
+  @override
+  String get linkWillFollow =>
+      'en cours : nouveaux chapitres vérifiés chaque jour';
 }
