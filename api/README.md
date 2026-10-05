@@ -28,3 +28,19 @@ uv run ruff format && uv run ruff check --fix         # format + lint
 uv run pyright                                        # strict type checking
 uv run python -m babel_api.scripts.export_openapi     # regenerate contracts/openapi.json
 ```
+
+## Developing on a copy of production
+
+Local development uses `api/babel.db` (SQLite) by default. To work on real data, copy
+the production database into a local PostgreSQL (Docker), never the other way round:
+
+```bash
+./scripts/copy-prod-db.sh
+```
+
+It exports the database over SSH (`deploy@babel-api` through Tailscale, or
+`BABEL_PROD_SSH`), restores it into the `babel-db-local` container on port 5433, deletes
+the export and prints the command that starts the API on the copy. Running it again
+replaces the copy. Migrations not yet released apply to the copy only. The copy holds real
+accounts, so it stays on this machine; sources' tokens cannot be read locally, and book
+files stay on the NAS.
