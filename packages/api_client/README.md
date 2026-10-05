@@ -87,14 +87,17 @@ Class | Method | HTTP request | Description
 *CatalogApi* | [**searchWorks**](doc//CatalogApi.md#searchworks) | **GET** /v1/catalog/search | Search Works
 *HealthApi* | [**getHealth**](doc//HealthApi.md#gethealth) | **GET** /v1/health | Get Health
 *LibraryApi* | [**addStoredFile**](doc//LibraryApi.md#addstoredfile) | **POST** /v1/library/files/{sha256} | Add Stored File
+*LibraryApi* | [**checkFollow**](doc//LibraryApi.md#checkfollow) | **POST** /v1/library/follows/{follow_id}/check | Check Follow
 *LibraryApi* | [**downloadFile**](doc//LibraryApi.md#downloadfile) | **GET** /v1/files/{sha256} | Download File
 *LibraryApi* | [**getFileCover**](doc//LibraryApi.md#getfilecover) | **GET** /v1/files/{sha256}/cover | Get File Cover
+*LibraryApi* | [**getFollows**](doc//LibraryApi.md#getfollows) | **GET** /v1/library/follows | Get Follows
 *LibraryApi* | [**getLibrary**](doc//LibraryApi.md#getlibrary) | **GET** /v1/library | Get Library
 *LibraryApi* | [**getReadingPositions**](doc//LibraryApi.md#getreadingpositions) | **GET** /v1/library/{item_id}/positions | Get Positions
 *LibraryApi* | [**importFile**](doc//LibraryApi.md#importfile) | **POST** /v1/library/files | Import File
 *LibraryApi* | [**importLink**](doc//LibraryApi.md#importlink) | **POST** /v1/library/links | Import Link
 *LibraryApi* | [**previewLink**](doc//LibraryApi.md#previewlink) | **POST** /v1/library/links/preview | Preview Link
 *LibraryApi* | [**removeFromLibrary**](doc//LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
+*LibraryApi* | [**stopFollow**](doc//LibraryApi.md#stopfollow) | **DELETE** /v1/library/follows/{follow_id} | Stop Follow
 *LibraryApi* | [**withdrawFile**](doc//LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
 *SourcesApi* | [**checkSource**](doc//SourcesApi.md#checksource) | **POST** /v1/sources/check | Check Source
 *SourcesApi* | [**createSource**](doc//SourcesApi.md#createsource) | **POST** /v1/sources | Create Source
@@ -126,6 +129,7 @@ Class | Method | HTTP request | Description
  - [EditionResponse](doc//EditionResponse.md)
  - [EntityKind](doc//EntityKind.md)
  - [EntryStatus](doc//EntryStatus.md)
+ - [FollowResponse](doc//FollowResponse.md)
  - [ForgotPasswordRequest](doc//ForgotPasswordRequest.md)
  - [GenericConfig](doc//GenericConfig.md)
  - [GitHubConfig](doc//GitHubConfig.md)

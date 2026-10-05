@@ -1,5 +1,6 @@
 """Entry point: assembles the FastAPI application."""
 
+import asyncio
 import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -25,13 +26,15 @@ from babel_api.adapters.sources.links import LinkFetcher
 from babel_api.adapters.sources.manifest import ManifestConnector
 from babel_api.adapters.sources.opds import OpdsConnector
 from babel_api.adapters.sources.webdav import WebDavConnector
-from babel_api.api.dependencies import Container
+from babel_api.api.dependencies import Container, make_follow_service
 from babel_api.api.errors import install_error_handlers
 from babel_api.api.v1.router import router as v1_router
 from babel_api.core.config import Settings, get_settings
 from babel_api.domain.sources import SourceKind
 from babel_api.domain.users import IdentityProvider
 from babel_api.services.catalog import CatalogService
+from babel_api.services.follow_loop import follow_forever
+from babel_api.services.follows import FollowService
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -67,8 +70,22 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
 
     @asynccontextmanager
-    async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
+    async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+        follow_task: asyncio.Task[None] | None = None
+        if settings.follow_interval_hours > 0:
+            container: Container = app.state.container
+
+            @asynccontextmanager
+            async def services() -> AsyncGenerator[FollowService]:
+                async with container.sessions() as session:
+                    yield make_follow_service(container, session)
+
+            follow_task = asyncio.create_task(
+                follow_forever(services, timedelta(hours=settings.follow_interval_hours))
+            )
         yield
+        if follow_task is not None:
+            follow_task.cancel()
         await mailer.drain()
         await open_library.aclose()
         for connector in connectors.values():

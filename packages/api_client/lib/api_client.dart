@@ -208,6 +208,8 @@ class ApiClient {
           return EntityKindTypeTransformer().decode(value);
         case 'EntryStatus':
           return EntryStatusTypeTransformer().decode(value);
+        case 'FollowResponse':
+          return FollowResponse.fromJson(value);
         case 'ForgotPasswordRequest':
           return ForgotPasswordRequest.fromJson(value);
         case 'GenericConfig':

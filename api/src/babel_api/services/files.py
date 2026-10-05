@@ -85,6 +85,16 @@ class FileService:
         filename: str,
         device_id: UUID | None = None,
     ) -> ImportResult:
+        stored, path, existed = await self.store(user_id, chunks, filename)
+        item = await self._files.find_item(user_id, stored.sha256)
+        if item is None:
+            item = await self._add_item(user_id, stored, path, filename, device_id)
+        return ImportResult(item, deduplicated=existed and stored.uploaded_by != user_id)
+
+    async def store(
+        self, user_id: UUID, chunks: AsyncIterator[bytes], filename: str
+    ) -> tuple[StoredFile, Path, bool]:
+        """Keeps a file in the shared store: (the stored file, its path, already there)."""
         sha256, size, path = await self._store.put(chunks, self._max_bytes)
         existing = await self._files.get_file(sha256)
         if await self._files.is_blocked(sha256):
@@ -97,10 +107,7 @@ class FileService:
                 # Withdrawn without being blocked: importing it again makes it available.
                 await self._files.reinstate_file(sha256, user_id)
                 existing = await self._files.get_file(sha256) or existing
-            item = await self._files.find_item(user_id, sha256)
-            if item is None:
-                item = await self._add_item(user_id, existing, path, filename, device_id)
-            return ImportResult(item, deduplicated=existing.uploaded_by != user_id)
+            return existing, path, True
 
         file_format = self._reader.detect(path)
         if file_format is None:
@@ -124,8 +131,25 @@ class FileService:
             authors=metadata.authors,
         )
         await self._files.add_file(stored)
-        item = await self._add_item(user_id, stored, path, filename, device_id)
-        return ImportResult(item, deduplicated=False)
+        return stored, path, False
+
+    async def replace_file(
+        self, item: LibraryItem, stored: StoredFile, path: Path, device_id: UUID | None = None
+    ) -> LibraryItem:
+        """A new version of a book (new chapters): same library item, new file."""
+        metadata = self._reader.metadata(path, stored.format)
+        updated = await self._files.replace_item_file(
+            item.id, stored.sha256, metadata.title or item.title, metadata.authors or item.authors
+        )
+        await self._changes.record(
+            item.user_id,
+            EntityKind.LIBRARY_ITEM,
+            str(item.id),
+            ChangeOp.UPSERT,
+            item_data(updated),
+            device_id,
+        )
+        return updated
 
     async def library(self, user_id: UUID) -> list[LibraryItem]:
         return await self._files.list_items(user_id)

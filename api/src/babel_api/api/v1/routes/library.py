@@ -13,10 +13,12 @@ from babel_api.api.dependencies import (
     CurrentUserId,
     DeviceHeader,
     FileServiceDep,
+    FollowServiceDep,
     LinkServiceDep,
     SyncServiceDep,
 )
 from babel_api.domain.files import BookFormat, LibraryItem
+from babel_api.domain.follows import Follow
 from babel_api.services.links import LinkKind
 
 router = APIRouter(tags=["library"])
@@ -182,6 +184,54 @@ async def import_link(
 ) -> LibraryItemResponse:
     """Import the book a link points to (AO3 works are fetched at AO3's pace)."""
     return LibraryItemResponse.of(await links.import_link(user_id, body.url, device_id))
+
+
+class FollowResponse(BaseModel):
+    """A book whose source is checked every day for new chapters."""
+
+    id: UUID
+    item_id: UUID
+    url: str
+    chapters: str | None = Field(description="Chapters posted / planned, e.g. 3/? or 12/12")
+    complete: bool = Field(description="Finished: no longer checked")
+    last_checked_at: datetime | None
+    last_error: str | None
+
+    @classmethod
+    def of(cls, follow: Follow) -> "FollowResponse":
+        return cls(
+            id=follow.id,
+            item_id=follow.item_id,
+            url=follow.url,
+            chapters=follow.chapters,
+            complete=follow.complete,
+            last_checked_at=follow.last_checked_at,
+            last_error=follow.last_error,
+        )
+
+
+@router.get("/library/follows", operation_id="getFollows")
+async def get_follows(user_id: CurrentUserId, follows: FollowServiceDep) -> list[FollowResponse]:
+    """Unfinished AO3 works imported by link, checked daily for new chapters."""
+    return [FollowResponse.of(f) for f in await follows.list_follows(user_id)]
+
+
+@router.post("/library/follows/{follow_id}/check", operation_id="checkFollow")
+async def check_follow(
+    user_id: CurrentUserId, follows: FollowServiceDep, follow_id: UUID
+) -> FollowResponse:
+    """Look for new chapters now; a new version replaces the book's file."""
+    return FollowResponse.of(await follows.check_now(user_id, follow_id))
+
+
+@router.delete(
+    "/library/follows/{follow_id}",
+    operation_id="stopFollow",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def stop_follow(user_id: CurrentUserId, follows: FollowServiceDep, follow_id: UUID) -> None:
+    """Stop checking this book for new chapters (the book stays)."""
+    await follows.stop(user_id, follow_id)
 
 
 @router.post(

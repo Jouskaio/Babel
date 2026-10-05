@@ -41,6 +41,10 @@ optional cover and identifiers) so anyone can expose a source without a dedicate
   content changes.
 - Fanfiction connectors only access works the user can access with their own account, at
   a polite rate, and identify Babel in their user agent.
+- Unfinished AO3 works imported by link are followed: their page is read once a day (one
+  request, at AO3's pace, for every reader of the server) and a new version replaces the
+  file of the same library item, keeping reading positions and annotations. Finished works
+  stop being followed (`BABEL_FOLLOW_INTERVAL_HOURS`, 0 turns it off).
 
 ### Secrets
 

@@ -81,6 +81,63 @@ class LibraryApi {
     return null;
   }
 
+  /// Check Follow
+  ///
+  /// Look for new chapters now; a new version replaces the book's file.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] followId (required):
+  Future<Response> checkFollowWithHttpInfo(String followId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/follows/{follow_id}/check'
+      .replaceAll('{follow_id}', followId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Check Follow
+  ///
+  /// Look for new chapters now; a new version replaces the book's file.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] followId (required):
+  Future<FollowResponse?> checkFollow(String followId,) async {
+    final response = await checkFollowWithHttpInfo(followId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'FollowResponse',) as FollowResponse;
+    
+    }
+    return null;
+  }
+
   /// Download File
   ///
   /// Download a stored file. Supports HTTP range requests to resume downloads.
@@ -177,6 +234,57 @@ class LibraryApi {
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
+  }
+
+  /// Get Follows
+  ///
+  /// Unfinished AO3 works imported by link, checked daily for new chapters.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> getFollowsWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/follows';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Follows
+  ///
+  /// Unfinished AO3 works imported by link, checked daily for new chapters.
+  Future<List<FollowResponse>?> getFollows() async {
+    final response = await getFollowsWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<FollowResponse>') as List)
+        .cast<FollowResponse>()
+        .toList(growable: false);
+
+    }
+    return null;
   }
 
   /// Get Library
@@ -536,6 +644,55 @@ class LibraryApi {
   /// * [String] xBabelDevice:
   Future<void> removeFromLibrary(String itemId, { String? xBabelDevice, }) async {
     final response = await removeFromLibraryWithHttpInfo(itemId,  xBabelDevice: xBabelDevice, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
+  /// Stop Follow
+  ///
+  /// Stop checking this book for new chapters (the book stays).
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] followId (required):
+  Future<Response> stopFollowWithHttpInfo(String followId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/follows/{follow_id}'
+      .replaceAll('{follow_id}', followId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'DELETE',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Stop Follow
+  ///
+  /// Stop checking this book for new chapters (the book stays).
+  ///
+  /// Parameters:
+  ///
+  /// * [String] followId (required):
+  Future<void> stopFollow(String followId,) async {
+    final response = await stopFollowWithHttpInfo(followId,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

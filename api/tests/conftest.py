@@ -21,6 +21,7 @@ def settings(tmp_path: Path) -> Settings:
         database_url=f"sqlite+aiosqlite:///{tmp_path / 'babel.db'}",
         files_dir=str(tmp_path / "files"),
         admin_emails=["admin@example.com"],
+        follow_interval_hours=0,  # no background follow-up during tests
     )
     command.upgrade(alembic_config(test_settings.database_url), "head")
     return test_settings
