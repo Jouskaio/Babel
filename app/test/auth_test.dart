@@ -16,6 +16,10 @@ class FakeApi {
   String? validAccess;
   final requests = <String>[];
 
+  /// Simulates a server out of reach: a status code (502 while restarting), or -1 for
+  /// no network at all.
+  int? down;
+
   Map<String, Object?> _tokens() {
     issued++;
     validAccess = 'access-$issued';
@@ -40,6 +44,8 @@ class FakeApi {
 
   Future<http.Response> handle(http.Request request) async {
     requests.add('${request.method} ${request.url.path}');
+    if (down == -1) throw http.ClientException('offline');
+    if (down case final status?) return http.Response('Bad gateway', status);
     final body = request.body.isEmpty
         ? <String, Object?>{}
         : jsonDecode(request.body) as Map<String, Object?>;
@@ -165,5 +171,59 @@ void main() {
 
     expect(c.read(authControllerProvider), isA<SignedOut>());
     expect(store.token, isNull);
+  });
+
+  group('the session survives the server being out of reach', () {
+    Future<(FakeApi, MemoryRefreshTokenStore)> signedInBefore() async {
+      final api = FakeApi();
+      final store = MemoryRefreshTokenStore();
+      final c = container(api, store);
+      await settled(c);
+      await c
+          .read(authControllerProvider.notifier)
+          .login('ada@example.com', 'correct horse battery');
+      c.dispose();
+      return (api, store);
+    }
+
+    for (final (name, status) in [('offline', -1), ('restarting', 502)]) {
+      test('$name at start-up: signed in with the last profile', () async {
+        final (api, store) = await signedInBefore();
+        final token = store.token;
+        api.down = status;
+
+        final state = await settled(container(api, store));
+
+        expect(state, isA<SignedIn>());
+        expect((state as SignedIn).user.displayName, 'Ada');
+        expect(store.token, token);
+      });
+    }
+
+    test('the session is renewed once the server answers again', () async {
+      final (api, store) = await signedInBefore();
+      api.down = 502;
+      final c = container(api, store);
+      await settled(c);
+      api.down = null;
+
+      final me = await c.read(accountApiProvider).getMe();
+
+      expect(me?.displayName, 'Ada');
+      expect(api.requests.reversed.take(3).toList().reversed, [
+        'GET /v1/me',
+        'POST /v1/auth/refresh',
+        'GET /v1/me',
+      ]);
+    });
+
+    test('a refused token still signs out', () async {
+      final (api, store) = await signedInBefore();
+      api.validRefresh = 'revoked-elsewhere';
+
+      expect(await settled(container(api, store)), isA<SignedOut>());
+      expect(store.token, isNull);
+      expect(store.user, isNull);
+    });
   });
 }
