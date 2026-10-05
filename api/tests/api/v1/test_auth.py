@@ -1,6 +1,10 @@
+from datetime import timedelta
 from typing import Any
 
+import pytest
 from fastapi.testclient import TestClient
+
+from babel_api.services import auth as auth_service
 
 PASSWORD = "correct horse battery"
 
@@ -66,7 +70,10 @@ def test_me_requires_a_valid_access_token(client: TestClient) -> None:
     assert client.get("/v1/me", headers=bearer("forged.token.value")).status_code == 401
 
 
-def test_refresh_rotates_tokens_and_detects_reuse(client: TestClient) -> None:
+def test_refresh_rotates_tokens_and_detects_reuse(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(auth_service, "REUSE_GRACE", timedelta(0))
     first = register(client)["refresh_token"]
 
     second = client.post("/v1/auth/refresh", json={"refresh_token": first})
@@ -77,6 +84,28 @@ def test_refresh_rotates_tokens_and_detects_reuse(client: TestClient) -> None:
     # Replaying the rotated token ends the whole sign-in, including the newer token.
     assert client.post("/v1/auth/refresh", json={"refresh_token": first}).status_code == 401
     assert client.post("/v1/auth/refresh", json={"refresh_token": second_token}).status_code == 401
+
+
+def test_a_lost_refresh_answer_does_not_sign_out(client: TestClient) -> None:
+    first = register(client)["refresh_token"]
+    lost = client.post("/v1/auth/refresh", json={"refresh_token": first}).json()["refresh_token"]
+
+    # The device never got `lost` and sends its old token again, right away.
+    again = client.post("/v1/auth/refresh", json={"refresh_token": first})
+
+    assert again.status_code == 200
+    renewed = again.json()["refresh_token"]
+    assert client.post("/v1/auth/refresh", json={"refresh_token": renewed}).status_code == 200
+    assert client.post("/v1/auth/refresh", json={"refresh_token": lost}).status_code == 200
+
+
+def test_a_signed_out_token_is_not_renewed_within_the_grace(client: TestClient) -> None:
+    token = register(client)["refresh_token"]
+    rotated = client.post("/v1/auth/refresh", json={"refresh_token": token}).json()
+
+    client.post("/v1/auth/logout", json={"refresh_token": rotated["refresh_token"]})
+
+    assert client.post("/v1/auth/refresh", json={"refresh_token": token}).status_code == 401
 
 
 def test_logout_revokes_the_refresh_token(client: TestClient) -> None:

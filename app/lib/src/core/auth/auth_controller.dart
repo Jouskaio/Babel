@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:babel_api_client/api.dart';
 import 'package:flutter/foundation.dart';
@@ -58,8 +59,23 @@ class AuthController extends Notifier<AuthState> {
     return const AuthRestoring();
   }
 
+  /// Renews the stored session. When the server cannot be reached (offline, or
+  /// restarting), the app opens with the last known profile; requests renew the session
+  /// once the server answers again.
   Future<void> _restore() async {
-    if (!await refresh()) state = const SignedOut();
+    if (await refresh() || state is! AuthRestoring) return;
+    final cached = await _cachedUser();
+    final hasToken = kIsWeb || await _store.read() != null;
+    state = cached != null && hasToken ? SignedIn(cached) : const SignedOut();
+  }
+
+  Future<UserResponse?> _cachedUser() async {
+    try {
+      final json = await _store.readUser();
+      return json == null ? null : UserResponse.fromJson(jsonDecode(json));
+    } on Object {
+      return null;
+    }
   }
 
   Future<void> login(String email, String password) async {
@@ -118,8 +134,9 @@ class AuthController extends Notifier<AuthState> {
       await _apply(tokens);
       return true;
     } on ApiException catch (error) {
-      // Offline: keep the stored token, the session may still be valid later.
-      if (error.innerException == null) await _clear();
+      // Only a refused token ends the session. Offline, or a server error (a restart
+      // during a deployment), keeps it: it will be renewed later.
+      if (error.code == 401) await _clear();
       return false;
     }
   }
@@ -141,7 +158,9 @@ class AuthController extends Notifier<AuthState> {
 
   /// Updates the cached user after a profile change.
   void updateUser(UserResponse user) {
-    if (state is SignedIn) state = SignedIn(user);
+    if (state is! SignedIn) return;
+    state = SignedIn(user);
+    unawaited(_store.writeUser(jsonEncode(user.toJson())));
   }
 
   /// Called after the account was deleted or the session revoked.
@@ -151,12 +170,14 @@ class AuthController extends Notifier<AuthState> {
     if (tokens == null) throw ApiException(500, 'Empty response');
     _accessToken = tokens.accessToken;
     await _store.write(tokens.refreshToken);
+    await _store.writeUser(jsonEncode(tokens.user.toJson()));
     state = SignedIn(tokens.user);
   }
 
   Future<void> _clear() async {
     _accessToken = null;
     await _store.write(null);
+    await _store.writeUser(null);
     state = const SignedOut();
   }
 }
