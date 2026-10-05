@@ -1484,4 +1484,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recommendationSent => 'Recommendation sent.';
+
+  @override
+  String comicPage(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String get comicDirection => 'Reading direction';
+
+  @override
+  String get directionLtr => 'Left → right (comics)';
+
+  @override
+  String get directionRtl => 'Right → left (manga)';
+
+  @override
+  String get directionVertical => 'Vertical (webtoon)';
+
+  @override
+  String get comicAnnotate => 'Note a panel';
+
+  @override
+  String get comicAnnotateHint => 'Draw a frame around the panel to note.';
 }

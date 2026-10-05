@@ -2551,6 +2551,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Recommandation envoyée.'**
   String get recommendationSent;
+
+  /// No description provided for @comicPage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Page {page}'**
+  String comicPage(int page);
+
+  /// No description provided for @comicDirection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sens de lecture'**
+  String get comicDirection;
+
+  /// No description provided for @directionLtr.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gauche → droite (BD)'**
+  String get directionLtr;
+
+  /// No description provided for @directionRtl.
+  ///
+  /// In fr, this message translates to:
+  /// **'Droite → gauche (manga)'**
+  String get directionRtl;
+
+  /// No description provided for @directionVertical.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vertical (webtoon)'**
+  String get directionVertical;
+
+  /// No description provided for @comicAnnotate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annoter une case'**
+  String get comicAnnotate;
+
+  /// No description provided for @comicAnnotateHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tracez un cadre autour de la case à annoter.'**
+  String get comicAnnotateHint;
 }
 
 class _AppLocalizationsDelegate

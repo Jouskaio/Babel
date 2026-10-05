@@ -589,5 +589,12 @@
   "recommendNoFriends": "Add friends first to recommend them books.",
   "recommendMessage": "A word for your friend (optional)",
   "recommendSend": "Send",
-  "recommendationSent": "Recommendation sent."
+  "recommendationSent": "Recommendation sent.",
+  "comicPage": "Page {page}",
+  "comicDirection": "Reading direction",
+  "directionLtr": "Left → right (comics)",
+  "directionRtl": "Right → left (manga)",
+  "directionVertical": "Vertical (webtoon)",
+  "comicAnnotate": "Note a panel",
+  "comicAnnotateHint": "Draw a frame around the panel to note."
 }

@@ -1498,4 +1498,28 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get recommendationSent => 'Recommandation envoyée.';
+
+  @override
+  String comicPage(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String get comicDirection => 'Sens de lecture';
+
+  @override
+  String get directionLtr => 'Gauche → droite (BD)';
+
+  @override
+  String get directionRtl => 'Droite → gauche (manga)';
+
+  @override
+  String get directionVertical => 'Vertical (webtoon)';
+
+  @override
+  String get comicAnnotate => 'Annoter une case';
+
+  @override
+  String get comicAnnotateHint =>
+      'Tracez un cadre autour de la case à annoter.';
 }

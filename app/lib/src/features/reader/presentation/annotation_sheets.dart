@@ -269,13 +269,15 @@ Future<void> showMarginPanel(
                             ),
                           ],
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          annotation.quote,
-                          maxLines: 4,
-                          overflow: TextOverflow.ellipsis,
-                          style: BabelText.reading(15, italic: true),
-                        ),
+                        if (!annotation.onPage) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            annotation.quote,
+                            maxLines: 4,
+                            overflow: TextOverflow.ellipsis,
+                            style: BabelText.reading(15, italic: true),
+                          ),
+                        ],
                         if (annotation.note case final note?) ...[
                           const SizedBox(height: 8),
                           Text(

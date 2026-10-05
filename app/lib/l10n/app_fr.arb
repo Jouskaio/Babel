@@ -783,5 +783,19 @@
   "recommendNoFriends": "Ajoutez d'abord des amis pour leur recommander des livres.",
   "recommendMessage": "Un mot pour votre ami (facultatif)",
   "recommendSend": "Envoyer",
-  "recommendationSent": "Recommandation envoyée."
+  "recommendationSent": "Recommandation envoyée.",
+  "comicPage": "Page {page}",
+  "@comicPage": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "comicDirection": "Sens de lecture",
+  "directionLtr": "Gauche → droite (BD)",
+  "directionRtl": "Droite → gauche (manga)",
+  "directionVertical": "Vertical (webtoon)",
+  "comicAnnotate": "Annoter une case",
+  "comicAnnotateHint": "Tracez un cadre autour de la case à annoter."
 }
