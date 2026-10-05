@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from uuid import UUID
 
-from sqlalchemy import delete, func, select, update
+from sqlalchemy import delete, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.models import (
@@ -13,12 +13,17 @@ from babel_api.adapters.db.models import (
     ChangeRow,
     DeviceRow,
     FollowRow,
+    FriendshipRow,
     IdentityRow,
     LibraryItemRow,
     ReadingPositionRow,
+    RecommendationRow,
     RefreshTokenRow,
+    ReviewRow,
+    SocialProfileRow,
     SourceEntryRow,
     SourceRow,
+    SubscriptionRow,
     UserRow,
 )
 from babel_api.domain.users import (
@@ -127,6 +132,26 @@ class SqlUserRepository:
         await self._session.execute(delete(SourceRow).where(SourceRow.user_id == user_id))
         await self._session.execute(delete(AnnotationRow).where(AnnotationRow.user_id == user_id))
         await self._session.execute(delete(FollowRow).where(FollowRow.user_id == user_id))
+        for social in (SocialProfileRow, ReviewRow):
+            await self._session.execute(delete(social).where(social.user_id == user_id))
+        await self._session.execute(
+            delete(FriendshipRow).where(
+                or_(FriendshipRow.requester_id == user_id, FriendshipRow.addressee_id == user_id)
+            )
+        )
+        await self._session.execute(
+            delete(SubscriptionRow).where(
+                or_(SubscriptionRow.follower_id == user_id, SubscriptionRow.followee_id == user_id)
+            )
+        )
+        await self._session.execute(
+            delete(RecommendationRow).where(
+                or_(
+                    RecommendationRow.sender_id == user_id,
+                    RecommendationRow.recipient_id == user_id,
+                )
+            )
+        )
         for table in (ReadingPositionRow, ChangeRow, AppliedOperationRow, DeviceRow):
             await self._session.execute(delete(table).where(table.user_id == user_id))
         await self._session.execute(delete(LibraryItemRow).where(LibraryItemRow.user_id == user_id))

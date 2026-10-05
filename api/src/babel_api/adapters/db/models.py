@@ -315,6 +315,7 @@ class AnnotationRow(Base):
     note: Mapped[str | None] = mapped_column(Text)
     visibility: Mapped[str] = mapped_column(String(16), default="private")
     client_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    region: Mapped[str | None] = mapped_column(String(64))
 
 
 class FollowRow(Base):
@@ -337,3 +338,85 @@ class FollowRow(Base):
     last_checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
     last_error: Mapped[str | None] = mapped_column(String(200))
     updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class SocialProfileRow(Base):
+    """A reader's public side: handle (to be found) and what they share."""
+
+    __tablename__ = "social_profiles"
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    handle: Mapped[str | None] = mapped_column(String(30), unique=True, index=True)
+    share_reading: Mapped[str] = mapped_column(String(16), default="friends")
+    share_library: Mapped[str] = mapped_column(String(16), default="friends")
+
+
+class FriendshipRow(Base):
+    """A friend request, mutual once accepted."""
+
+    __tablename__ = "friendships"
+    __table_args__ = (UniqueConstraint("requester_id", "addressee_id", name="uq_friendships"),)
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    requester_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    addressee_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class SubscriptionRow(Base):
+    """One reader following another (one way)."""
+
+    __tablename__ = "subscriptions"
+
+    follower_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    followee_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class ReviewRow(Base):
+    """A reader's review of a book of their library (one per book)."""
+
+    __tablename__ = "reviews"
+    __table_args__ = (UniqueConstraint("user_id", "item_id", name="uq_reviews_item"),)
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    item_id: Mapped[UUID] = mapped_column(
+        ForeignKey("library_items.id", ondelete="CASCADE"), index=True
+    )
+    title: Mapped[str] = mapped_column(String(500))
+    authors: Mapped[list[str]] = mapped_column(JSON, default=list)
+    rating: Mapped[int | None] = mapped_column(Integer)
+    text: Mapped[str | None] = mapped_column(Text)
+    audience: Mapped[str] = mapped_column(String(16), default="public")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, index=True)
+
+
+class RecommendationRow(Base):
+    """A book one reader suggests to a friend."""
+
+    __tablename__ = "recommendations"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    sender_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    recipient_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    title: Mapped[str] = mapped_column(String(500))
+    authors: Mapped[list[str]] = mapped_column(JSON, default=list)
+    url: Mapped[str | None] = mapped_column(String(2000))
+    message: Mapped[str | None] = mapped_column(String(1000))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

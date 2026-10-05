@@ -84,8 +84,11 @@ class HighlightColor(StrEnum):
 
 
 class Visibility(StrEnum):
+    """Who sees an annotation (same values as social audiences)."""
+
     PRIVATE = "private"
-    # Friends will come with the friends feature.
+    FRIENDS = "friends"
+    PUBLIC = "public"
 
 
 @dataclass(frozen=True, slots=True)
@@ -107,6 +110,9 @@ class Annotation:
     note: str | None
     visibility: Visibility
     client_time: datetime
+    # Comics and manga: the area of the page ("x,y,w,h", fractions of the page) a note is
+    # about, instead of a quote. ``chapter`` is then the page index.
+    region: str | None = None
 
     def as_data(self) -> dict[str, Any]:
         return {
@@ -119,4 +125,18 @@ class Annotation:
             "note": self.note,
             "visibility": self.visibility.value,
             "client_time": self.client_time.isoformat(),
+            "region": self.region,
         }
+
+
+def parse_region(value: object) -> str | None:
+    """A page area "x,y,w,h" in fractions of the page, normalized; ValueError if invalid."""
+    if value in (None, ""):
+        return None
+    parts = [float(p) for p in str(value).split(",")]
+    if len(parts) != 4:
+        raise ValueError("region")
+    x, y, w, h = parts
+    if not (0 <= x <= 1 and 0 <= y <= 1 and 0 < w <= 1 - x + 1e-9 and 0 < h <= 1 - y + 1e-9):
+        raise ValueError("region")
+    return ",".join(f"{p:.4f}" for p in parts)
