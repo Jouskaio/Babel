@@ -1,6 +1,7 @@
 """API configuration, read from the environment (``BABEL_`` prefix)."""
 
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal, Self
 
 from pydantic import SecretStr, model_validator
@@ -10,10 +11,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 _DEV_JWT_SECRET = "dev-only-insecure-secret-change-me-0123456789"  # noqa: S105
 
 
+# The api/ folder (this file is api/src/babel_api/core/config.py).
+API_DIR = Path(__file__).resolve().parents[3]
+
+
 class Settings(BaseSettings):
     """API settings. Secrets are never committed: see ``.env.example``."""
 
-    model_config = SettingsConfigDict(env_prefix="BABEL_", env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_prefix="BABEL_", env_file=API_DIR / ".env", extra="ignore"
+    )
 
     environment: Literal["development", "test", "production"] = "development"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
@@ -22,7 +29,8 @@ class Settings(BaseSettings):
     root_path: str = ""
 
     # SQLAlchemy async URL, e.g. postgresql+asyncpg://babel:secret@db:5432/babel
-    database_url: str = "sqlite+aiosqlite:///./babel.db"
+    # Local defaults live in api/, whatever folder the server is started from.
+    database_url: str = f"sqlite+aiosqlite:///{API_DIR / 'babel.db'}"
 
     # Authentication
     jwt_secret: SecretStr = SecretStr(_DEV_JWT_SECRET)
@@ -42,7 +50,7 @@ class Settings(BaseSettings):
     mail_from: str = "Babel <contact@jouskaio.me>"
 
     # Book files (ADR 0010): content-addressed store, who may download, upload size cap.
-    files_dir: str = "./data/files"
+    files_dir: str = str(API_DIR / "data" / "files")
     file_access: Literal["everyone", "entitled"] = "everyone"
     max_upload_mb: int = 300
     # Fernet key encrypting source credentials. Without it, sources work without tokens only.
