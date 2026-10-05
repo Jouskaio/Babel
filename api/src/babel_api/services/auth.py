@@ -35,6 +35,9 @@ RESET_TTL = timedelta(hours=1)
 VERIFICATION_TTL = timedelta(hours=48)
 # At most one email of each kind per account in this interval, to prevent mail bombing.
 EMAIL_THROTTLE = timedelta(minutes=1)
+# A device may lose the answer to a refresh (network drop, app killed) and send the
+# rotated token again: within this delay it gets a new session instead of being signed out.
+REUSE_GRACE = timedelta(minutes=2)
 
 
 @dataclass(frozen=True, slots=True)
@@ -136,6 +139,17 @@ class AuthService:
     async def refresh(self, refresh_token: str) -> AuthSession:
         token = await self._find_refresh_token(refresh_token)
         now = datetime.now(UTC)
+        if (
+            token.revoked_at is not None
+            and now - token.revoked_at <= REUSE_GRACE
+            and token.expires_at > now
+            and await self._users.family_is_active(token.family_id, now)
+        ):
+            # Just rotated, and the sign-in is still open: the answer was probably lost.
+            user = await self._users.get_by_id(token.user_id)
+            if user is None:
+                raise InvalidCredentialsError
+            return await self._open_session(user, family_id=token.family_id)
         if token.revoked_at is not None:
             # A rotated token was reused: it may have been stolen. End the whole sign-in.
             await self._users.revoke_refresh_family(token.family_id, now)

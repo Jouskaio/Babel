@@ -161,6 +161,19 @@ class SqlUserRepository:
     async def revoke_refresh_family(self, family_id: UUID, at: datetime) -> None:
         await self._revoke(RefreshTokenRow.family_id == family_id, at)
 
+    async def family_is_active(self, family_id: UUID, at: datetime) -> bool:
+        """Whether a sign-in still has a usable token (it was not signed out)."""
+        found = await self._session.scalar(
+            select(RefreshTokenRow.id)
+            .where(
+                RefreshTokenRow.family_id == family_id,
+                RefreshTokenRow.revoked_at.is_(None),
+                RefreshTokenRow.expires_at > at,
+            )
+            .limit(1)
+        )
+        return found is not None
+
     async def revoke_user_refresh_tokens(self, user_id: UUID, at: datetime) -> None:
         await self._revoke(RefreshTokenRow.user_id == user_id, at)
 
