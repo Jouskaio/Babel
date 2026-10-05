@@ -135,12 +135,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                     onPressed: () => context.push(Routes.importLink),
                     style: IconButton.styleFrom(
                       fixedSize: const Size(48, 48),
-                      side: const BorderSide(color: BabelColors.border),
+                      side: BorderSide(color: BabelColors.border),
                     ),
-                    icon: const Icon(
-                      Icons.link,
-                      color: BabelColors.textPrimary,
-                    ),
+                    icon: Icon(Icons.link, color: BabelColors.textPrimary),
                   ),
                   const SizedBox(width: 8),
                   IconButton.filled(
@@ -176,7 +173,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               ),
             ),
           if (library.isLoading && items.isEmpty)
-            const SliverFillRemaining(
+            SliverFillRemaining(
               hasScrollBody: false,
               child: Center(
                 child: CircularProgressIndicator(color: BabelColors.gold),

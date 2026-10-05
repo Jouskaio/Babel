@@ -195,9 +195,7 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
             ),
           ),
         ),
-        _ => const Center(
-          child: CircularProgressIndicator(color: BabelColors.gold),
-        ),
+        _ => Center(child: CircularProgressIndicator(color: BabelColors.gold)),
       },
     );
   }

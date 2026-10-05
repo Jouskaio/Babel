@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/auth/auth_controller.dart';
+import 'core/display/eink.dart';
 import 'core/locale/locale_controller.dart';
 import 'core/push/push_notifications.dart';
 import 'core/share/share_intake.dart';
+import 'core/theme/babel_colors.dart';
 import 'core/theme/babel_theme.dart';
+import 'core/theme/palette_scope.dart';
 import 'l10n.dart';
 import 'routing/router.dart';
 
@@ -88,10 +91,27 @@ class _BabelAppState extends ConsumerState<BabelApp> {
 
   @override
   Widget build(BuildContext context) {
+    final eink = ref.watch(einkDisplayProvider.select((d) => d.active));
+    final palette =
+        ref.watch(readingPaletteProvider) ??
+        (eink ? BabelPalette.paper : BabelPalette.midnight);
+    if (palette != BabelColors.palette) {
+      BabelColors.use(palette);
+      // Pages read their colors when built: rebuild them all, keeping their state.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) rebuildAll(context);
+      });
+    }
     return MaterialApp.router(
       title: 'Babel',
       debugShowCheckedModeBanner: false,
-      theme: BabelTheme.midnight(),
+      theme: BabelTheme.current(eink: eink),
+      builder: (context, child) => eink
+          ? MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: child!,
+            )
+          : child!,
       locale: ref.watch(localeControllerProvider),
       localeListResolutionCallback: LocaleController.resolve,
       localizationsDelegates: AppLocalizations.localizationsDelegates,

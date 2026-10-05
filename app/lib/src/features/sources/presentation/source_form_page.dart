@@ -228,11 +228,7 @@ class _SourceFormPageState extends ConsumerState<SourceFormPage> {
             style: TextButton.styleFrom(padding: EdgeInsets.zero),
             onPressed: () => launchUrl(_manifestDocs),
             iconAlignment: IconAlignment.end,
-            icon: const Icon(
-              Icons.north_east,
-              size: 14,
-              color: BabelColors.gold,
-            ),
+            icon: Icon(Icons.north_east, size: 14, color: BabelColors.gold),
             label: Text(
               l10n.genericDocs,
               style: BabelText.body(14, color: BabelColors.gold),
@@ -291,11 +287,7 @@ class _SourceFormPageState extends ConsumerState<SourceFormPage> {
             style: TextButton.styleFrom(padding: EdgeInsets.zero),
             onPressed: () => launchUrl(_newTokenUrl),
             iconAlignment: IconAlignment.end,
-            icon: const Icon(
-              Icons.north_east,
-              size: 14,
-              color: BabelColors.gold,
-            ),
+            icon: Icon(Icons.north_east, size: 14, color: BabelColors.gold),
             label: Text(
               l10n.githubCreateToken,
               style: BabelText.body(14, color: BabelColors.gold),

@@ -37,7 +37,7 @@ class LanguagePicker extends ConsumerWidget {
       ],
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: const ShapeDecoration(
+        decoration: ShapeDecoration(
           shape: StadiumBorder(side: BorderSide(color: BabelColors.border)),
         ),
         child: Row(
@@ -52,11 +52,7 @@ class LanguagePicker extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 4),
-            const Icon(
-              Icons.expand_more,
-              size: 16,
-              color: BabelColors.textSecondary,
-            ),
+            Icon(Icons.expand_more, size: 16, color: BabelColors.textSecondary),
           ],
         ),
       ),

@@ -5,13 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/display/eink.dart';
 import '../../../core/files/file_transfer.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/theme/palette_scope.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../library/application/library_controller.dart';
+import '../application/reader_settings.dart';
 import '../application/reading_position.dart';
 import '../data/epub_book.dart';
 import 'epub_view.dart';
@@ -46,11 +49,33 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
 
   // Kept from the start: the last position is saved while the page is closing.
   late final ReadingPositions _positions;
+  late final ReadingPalette _palette;
 
   @override
   void initState() {
     super.initState();
     _positions = ref.read(readingPositionsProvider);
+    _palette = ref.read(readingPaletteProvider.notifier);
+    // The reading theme (day, sepia, night; paper on e-ink) colors the whole screen.
+    ref.listenManual(readerSettingsProvider, (_, _) => _applyPalette());
+    ref.listenManual(einkDisplayProvider, (_, _) => _applyPalette());
+    Future.microtask(_applyPalette);
+  }
+
+  void _applyPalette() {
+    if (!mounted) return;
+    _palette.set(
+      ref
+          .read(readerSettingsProvider)
+          .palette(eink: ref.read(einkDisplayProvider).active),
+    );
+  }
+
+  @override
+  void dispose() {
+    // Back to the app's palette once the page is gone (not while the tree is locked).
+    Future.microtask(() => _palette.set(null));
+    super.dispose();
   }
 
   void _savePosition(ReadingLocator locator, double percent) =>
@@ -65,7 +90,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
       return _Message(
         onBack: _back,
         child: library.isLoading
-            ? const CircularProgressIndicator(color: BabelColors.gold)
+            ? CircularProgressIndicator(color: BabelColors.gold)
             : Text(l10n.readerNotFound, style: BabelText.body(15)),
       );
     }
@@ -190,7 +215,7 @@ class _Message extends StatelessWidget {
     appBar: AppBar(
       backgroundColor: BabelColors.canvas,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: BabelColors.textPrimary),
+        icon: Icon(Icons.arrow_back, color: BabelColors.textPrimary),
         onPressed: onBack,
       ),
     ),

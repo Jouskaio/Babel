@@ -1202,4 +1202,79 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get libraryNewChapters => 'Nouveau chapitre';
+
+  @override
+  String get readerSettings => 'Réglages de lecture';
+
+  @override
+  String get readerTheme => 'Thème';
+
+  @override
+  String get readerThemeEink =>
+      'Liseuse : noir sur blanc, pour l\'encre électronique.';
+
+  @override
+  String get themeNight => 'Nuit';
+
+  @override
+  String get themeDay => 'Jour';
+
+  @override
+  String get themeSepia => 'Sépia';
+
+  @override
+  String get readerFont => 'Police';
+
+  @override
+  String get fontSans => 'Sans empattement';
+
+  @override
+  String get fontLexend => 'Lexend · conçue pour la dyslexie';
+
+  @override
+  String get fontAtkinson => 'Atkinson Hyperlegible · malvoyance';
+
+  @override
+  String get readerSpacing => 'Interligne';
+
+  @override
+  String get spacingCompact => 'Serré';
+
+  @override
+  String get spacingNormal => 'Normal';
+
+  @override
+  String get spacingAiry => 'Aéré';
+
+  @override
+  String get readerLayout => 'Lecture';
+
+  @override
+  String get layoutScroll => 'Défilement';
+
+  @override
+  String get layoutPages => 'Pages';
+
+  @override
+  String get layoutPagesHint =>
+      'Touchez le bord droit ou gauche, ou balayez, pour tourner la page.';
+
+  @override
+  String get einkTitle => 'Liseuse (encre électronique)';
+
+  @override
+  String get einkHint =>
+      'Noir sur blanc, sans animations, lecture page par page et touches de page.';
+
+  @override
+  String get einkAuto => 'Automatique';
+
+  @override
+  String get einkOn => 'Activé';
+
+  @override
+  String get einkOff => 'Désactivé';
+
+  @override
+  String get einkDetected => 'Cet appareil est une liseuse.';
 }

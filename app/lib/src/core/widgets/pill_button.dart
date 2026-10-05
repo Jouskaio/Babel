@@ -84,7 +84,7 @@ class PillButton extends StatelessWidget {
           ),
           shape: StadiumBorder(
             side: kind == PillButtonKind.secondary
-                ? const BorderSide(color: BabelColors.border)
+                ? BorderSide(color: BabelColors.border)
                 : BorderSide.none,
           ),
         ),

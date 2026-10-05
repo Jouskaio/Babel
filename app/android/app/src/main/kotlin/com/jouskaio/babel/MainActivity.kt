@@ -32,6 +32,22 @@ class MainActivity : FlutterActivity() {
                 }
             }
         }
+        // Lets Flutter recognize e-readers (BOOX, PocketBook…) and adapt to e-ink.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "babel/device")
+            .setMethodCallHandler { call, result ->
+                if (call.method == "info") {
+                    result.success(
+                        mapOf(
+                            "manufacturer" to Build.MANUFACTURER,
+                            "brand" to Build.BRAND,
+                            "model" to Build.MODEL,
+                            "device" to Build.DEVICE,
+                        ),
+                    )
+                } else {
+                    result.notImplemented()
+                }
+            }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

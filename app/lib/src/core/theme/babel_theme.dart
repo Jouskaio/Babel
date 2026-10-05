@@ -3,15 +3,27 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'babel_colors.dart';
 
-/// App themes. Fonts: Cormorant Garamond (headings), Inter (UI), Literata (reading),
-/// DM Mono (labels).
+/// App themes, built from the current palette (midnight, or paper on e-ink screens).
+/// Fonts: Cormorant Garamond (headings), Inter (UI), Literata (reading), DM Mono (labels).
 abstract final class BabelTheme {
-  static ThemeData midnight() {
+  /// [eink]: no ink splashes or page transitions, which e-ink screens draw as ghosts.
+  static ThemeData current({bool eink = false}) {
+    final dark = BabelColors.palette.dark;
+    final scheme = dark ? ColorScheme.dark : ColorScheme.light;
     final base = ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
+      brightness: dark ? Brightness.dark : Brightness.light,
       scaffoldBackgroundColor: BabelColors.canvas,
-      colorScheme: const ColorScheme.dark(
+      splashFactory: eink ? NoSplash.splashFactory : null,
+      pageTransitionsTheme: eink
+          ? PageTransitionsTheme(
+              builders: {
+                for (final platform in TargetPlatform.values)
+                  platform: const _NoTransition(),
+              },
+            )
+          : null,
+      colorScheme: scheme(
         surface: BabelColors.surface,
         primary: BabelColors.textPrimary,
         onPrimary: BabelColors.canvas,
@@ -54,4 +66,18 @@ abstract final class BabelTheme {
     height: 1.75,
     color: BabelColors.textPrimary,
   );
+}
+
+/// Pages appear at once.
+class _NoTransition extends PageTransitionsBuilder {
+  const _NoTransition();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) => child;
 }

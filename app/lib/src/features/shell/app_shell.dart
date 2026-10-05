@@ -161,7 +161,7 @@ class _Sidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 248,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: BabelColors.surface,
         border: Border(right: BorderSide(color: BabelColors.border)),
       ),
@@ -252,7 +252,7 @@ class _OfflinePill extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.cloud_off, size: 14, color: BabelColors.gold),
+              Icon(Icons.cloud_off, size: 14, color: BabelColors.gold),
               const SizedBox(width: 8),
               Text(
                 text,

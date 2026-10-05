@@ -195,9 +195,9 @@ class _ResultSheet extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: BabelColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: SafeArea(
         top: false,

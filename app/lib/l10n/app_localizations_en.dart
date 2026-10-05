@@ -1193,4 +1193,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get libraryNewChapters => 'New chapter';
+
+  @override
+  String get readerSettings => 'Reading settings';
+
+  @override
+  String get readerTheme => 'Theme';
+
+  @override
+  String get readerThemeEink => 'E-reader: black on white, for electronic ink.';
+
+  @override
+  String get themeNight => 'Night';
+
+  @override
+  String get themeDay => 'Day';
+
+  @override
+  String get themeSepia => 'Sepia';
+
+  @override
+  String get readerFont => 'Font';
+
+  @override
+  String get fontSans => 'Sans serif';
+
+  @override
+  String get fontLexend => 'Lexend · designed for dyslexia';
+
+  @override
+  String get fontAtkinson => 'Atkinson Hyperlegible · low vision';
+
+  @override
+  String get readerSpacing => 'Line spacing';
+
+  @override
+  String get spacingCompact => 'Compact';
+
+  @override
+  String get spacingNormal => 'Normal';
+
+  @override
+  String get spacingAiry => 'Airy';
+
+  @override
+  String get readerLayout => 'Reading';
+
+  @override
+  String get layoutScroll => 'Scrolling';
+
+  @override
+  String get layoutPages => 'Pages';
+
+  @override
+  String get layoutPagesHint =>
+      'Tap the right or left edge, or swipe, to turn the page.';
+
+  @override
+  String get einkTitle => 'E-reader (electronic ink)';
+
+  @override
+  String get einkHint =>
+      'Black on white, no animations, page by page reading and page keys.';
+
+  @override
+  String get einkAuto => 'Automatic';
+
+  @override
+  String get einkOn => 'On';
+
+  @override
+  String get einkOff => 'Off';
+
+  @override
+  String get einkDetected => 'This device is an e-reader.';
 }

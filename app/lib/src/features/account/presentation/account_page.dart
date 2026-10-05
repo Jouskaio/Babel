@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/auth/auth_controller.dart';
 import '../../../core/auth/auth_failure.dart';
+import '../../../core/display/eink_setting.dart';
 import '../../../core/locale/language_picker.dart';
 import '../../../core/push/push_notifications.dart';
 import '../../../core/theme/babel_colors.dart';
@@ -31,7 +32,7 @@ class AccountPage extends ConsumerWidget {
         backgroundColor: BabelColors.canvas,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: BabelColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: BabelColors.textPrimary),
           onPressed: () => context.go(Routes.home),
         ),
         title: Text(l10n.accountTitle, style: BabelText.heading(24)),
@@ -60,7 +61,7 @@ class AccountPage extends ConsumerWidget {
                 const SizedBox(height: 24),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(
+                  leading: Icon(
                     Icons.cloud_sync_outlined,
                     color: BabelColors.gold,
                   ),
@@ -69,7 +70,7 @@ class AccountPage extends ConsumerWidget {
                     l10n.accountSourcesHint,
                     style: BabelText.body(13),
                   ),
-                  trailing: const Icon(
+                  trailing: Icon(
                     Icons.chevron_right,
                     color: BabelColors.textSecondary,
                   ),
@@ -85,6 +86,8 @@ class AccountPage extends ConsumerWidget {
                   title: l10n.accountSecurity,
                   child: _PasswordForm(user: user),
                 ),
+                const SizedBox(height: 24),
+                _Section(title: l10n.einkTitle, child: const EinkSetting()),
                 const SizedBox(height: 24),
                 Row(
                   children: [
