@@ -14,6 +14,7 @@ Method | HTTP request | Description
 [**pushOperations**](SyncApi.md#pushoperations) | **POST** /v1/sync/{device_id} | Push Operations
 [**registerDevice**](SyncApi.md#registerdevice) | **POST** /v1/devices | Register Device
 [**removeDevice**](SyncApi.md#removedevice) | **DELETE** /v1/devices/{device_id} | Remove Device
+[**setPushToken**](SyncApi.md#setpushtoken) | **PUT** /v1/devices/{device_id}/push-token | Set Push Token
 
 
 # **getDevices**
@@ -258,6 +259,56 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **setPushToken**
+> setPushToken(deviceId, pushTokenRequest)
+
+Set Push Token
+
+Where to send this device's notifications, such as new chapters of followed works.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SyncApi();
+final deviceId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final pushTokenRequest = PushTokenRequest(); // PushTokenRequest | 
+
+try {
+    api_instance.setPushToken(deviceId, pushTokenRequest);
+} catch (e) {
+    print('Exception when calling SyncApi->setPushToken: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **deviceId** | **String**|  | 
+ **pushTokenRequest** | [**PushTokenRequest**](PushTokenRequest.md)|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

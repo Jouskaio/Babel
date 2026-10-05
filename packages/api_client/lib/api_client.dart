@@ -252,6 +252,8 @@ class ApiClient {
           return PushRequest.fromJson(value);
         case 'PushResponse':
           return PushResponse.fromJson(value);
+        case 'PushTokenRequest':
+          return PushTokenRequest.fromJson(value);
         case 'ReadingPositionResponse':
           return ReadingPositionResponse.fromJson(value);
         case 'RefreshRequest':
