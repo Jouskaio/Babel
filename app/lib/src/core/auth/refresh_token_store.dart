@@ -21,7 +21,13 @@ abstract interface class RefreshTokenStore {
 /// Keychain (iOS, macOS) / Keystore-backed storage (Android).
 class SecureRefreshTokenStore implements RefreshTokenStore {
   SecureRefreshTokenStore([FlutterSecureStorage? storage])
-    : _storage = storage ?? const FlutterSecureStorage();
+    : _storage =
+          storage ??
+          const FlutterSecureStorage(
+            // The login keychain works without a signing team (local Mac builds);
+            // the data protection keychain needs a keychain-sharing entitlement.
+            mOptions: MacOsOptions(usesDataProtectionKeychain: false),
+          );
 
   static const _key = 'babel.refresh_token';
   static const _userKey = 'babel.user';
