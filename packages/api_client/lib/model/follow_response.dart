@@ -19,6 +19,7 @@ class FollowResponse {
     required this.itemId,
     this.lastCheckedAt,
     this.lastError,
+    this.updatedAt,
     required this.url,
   });
 
@@ -36,6 +37,9 @@ class FollowResponse {
 
   String? lastError;
 
+  /// When new chapters last arrived
+  DateTime? updatedAt;
+
   String url;
 
   @override
@@ -46,6 +50,7 @@ class FollowResponse {
     other.itemId == itemId &&
     other.lastCheckedAt == lastCheckedAt &&
     other.lastError == lastError &&
+    other.updatedAt == updatedAt &&
     other.url == url;
 
   @override
@@ -57,10 +62,11 @@ class FollowResponse {
     (itemId.hashCode) +
     (lastCheckedAt == null ? 0 : lastCheckedAt!.hashCode) +
     (lastError == null ? 0 : lastError!.hashCode) +
+    (updatedAt == null ? 0 : updatedAt!.hashCode) +
     (url.hashCode);
 
   @override
-  String toString() => 'FollowResponse[chapters=$chapters, complete=$complete, id=$id, itemId=$itemId, lastCheckedAt=$lastCheckedAt, lastError=$lastError, url=$url]';
+  String toString() => 'FollowResponse[chapters=$chapters, complete=$complete, id=$id, itemId=$itemId, lastCheckedAt=$lastCheckedAt, lastError=$lastError, updatedAt=$updatedAt, url=$url]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -81,6 +87,11 @@ class FollowResponse {
       json[r'last_error'] = this.lastError;
     } else {
       json[r'last_error'] = null;
+    }
+    if (this.updatedAt != null) {
+      json[r'updated_at'] = this.updatedAt!.toUtc().toIso8601String();
+    } else {
+      json[r'updated_at'] = null;
     }
       json[r'url'] = this.url;
     return json;
@@ -111,6 +122,7 @@ class FollowResponse {
         itemId: mapValueOfType<String>(json, r'item_id')!,
         lastCheckedAt: mapDateTime(json, r'last_checked_at', r''),
         lastError: mapValueOfType<String>(json, r'last_error'),
+        updatedAt: mapDateTime(json, r'updated_at', r''),
         url: mapValueOfType<String>(json, r'url')!,
       );
     }

@@ -29,6 +29,7 @@ from babel_api.domain.ports import (
     IdentityVerifier,
     Mailer,
     MetadataReader,
+    Pusher,
     SourceConnector,
 )
 from babel_api.domain.sources import SourceKind
@@ -38,6 +39,7 @@ from babel_api.services.catalog import CatalogService
 from babel_api.services.files import FileService
 from babel_api.services.follows import FollowService
 from babel_api.services.links import LinkService
+from babel_api.services.notifications import Notifier
 from babel_api.services.sources import SourceService
 from babel_api.services.sync import SyncService
 from babel_api.services.works import WorkService
@@ -62,6 +64,7 @@ class Container:
     link_fetcher: LinkFetcher
     secrets: SecretBox
     mailer: Mailer
+    pusher: Pusher
 
 
 def get_container(request: Request) -> Container:
@@ -224,6 +227,7 @@ def make_follow_service(
         files or make_file_service(container, session),
         SqlSyncRepository(session),
         container.ao3,
+        Notifier(SqlSyncRepository(session), SqlUserRepository(session), container.pusher),
     )
 
 

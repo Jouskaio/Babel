@@ -5,17 +5,20 @@ import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from datetime import timedelta
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from babel_api import __version__
 from babel_api.adapters.catalog.open_library import OpenLibrarySource
+from babel_api.adapters.db.migrations.config import upgrade_database
 from babel_api.adapters.db.session import create_engine, create_session_factory
 from babel_api.adapters.files.blob_store import LocalBlobStore
 from babel_api.adapters.files.covers import LocalCoverCache
 from babel_api.adapters.files.metadata import EbookMetadataReader
 from babel_api.adapters.mail.mailers import BackgroundMailer, LogMailer, SmtpMailer
+from babel_api.adapters.push.fcm import FcmPusher, LogPusher
 from babel_api.adapters.security.identity import apple_verifier, google_verifier
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
 from babel_api.adapters.security.secrets import SecretBox
@@ -69,8 +72,24 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         else LogMailer()
     )
 
+    pusher = LogPusher()
+    if settings.fcm_credentials_file:
+        if Path(settings.fcm_credentials_file).is_file():
+            pusher = FcmPusher.from_file(settings.fcm_credentials_file)
+        else:
+            logging.getLogger(__name__).warning(
+                "No Firebase service account at %s: notifications are only logged",
+                settings.fcm_credentials_file,
+            )
+
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+        migrate = settings.migrate_on_startup
+        if migrate is None:
+            migrate = settings.environment == "development"
+        if migrate:
+            # Alembic runs its own event loop: off this one.
+            await asyncio.to_thread(upgrade_database, settings.database_url)
         follow_task: asyncio.Task[None] | None = None
         if settings.follow_interval_hours > 0:
             container: Container = app.state.container
@@ -87,6 +106,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if follow_task is not None:
             follow_task.cancel()
         await mailer.drain()
+        await pusher.aclose()
         await open_library.aclose()
         for connector in connectors.values():
             await connector.aclose()
@@ -122,6 +142,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         link_fetcher=link_fetcher,
         secrets=SecretBox(settings.secrets_key.get_secret_value()),
         mailer=mailer,
+        pusher=pusher,
     )
     if settings.cors_origins:
         app.add_middleware(

@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 
 import '../api/api_providers.dart';
 import '../auth/auth_controller.dart';
+import '../display/eink.dart';
 import '../storage/local_database.dart';
 import 'lookups.dart';
 
@@ -174,7 +175,12 @@ class SyncEngine extends Notifier<SyncStatus> {
       final device = await ref
           .read(syncApiProvider)
           .registerDevice(
-            RegisterDeviceRequest(name: _deviceName, kind: _deviceKind),
+            RegisterDeviceRequest(
+              name: _deviceName,
+              kind: ref.read(einkDisplayProvider).detected
+                  ? DeviceKind.ereader
+                  : _deviceKind,
+            ),
           );
       id = device!.id;
       await LocalStores.meta.record(_deviceKey).put(db, id);

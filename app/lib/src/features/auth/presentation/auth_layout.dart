@@ -50,7 +50,7 @@ class AuthLayout extends StatelessWidget {
                         children: [
                           IconButton(
                             onPressed: () => context.go(Routes.landing),
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.arrow_back,
                               color: BabelColors.textPrimary,
                             ),

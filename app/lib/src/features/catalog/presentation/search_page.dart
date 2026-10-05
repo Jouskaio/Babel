@@ -76,19 +76,19 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     color: BabelColors.textSecondary,
                     italic: true,
                   ),
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     Icons.search,
                     color: BabelColors.textSecondary,
                   ),
                   filled: true,
                   fillColor: BabelColors.surface,
                   contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                  enabledBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(999)),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: const BorderRadius.all(Radius.circular(999)),
                     borderSide: BorderSide(color: BabelColors.border),
                   ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(999)),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: const BorderRadius.all(Radius.circular(999)),
                     borderSide: BorderSide(color: BabelColors.gold),
                   ),
                 ),
@@ -247,8 +247,8 @@ class _Results extends ConsumerWidget {
     });
     final results = ref.watch(searchResultsProvider(args));
     return results.when(
-      loading: () => const Padding(
-        padding: EdgeInsets.only(top: 40),
+      loading: () => Padding(
+        padding: const EdgeInsets.only(top: 40),
         child: Center(
           child: CircularProgressIndicator(color: BabelColors.gold),
         ),
@@ -366,7 +366,7 @@ class _Pending extends ConsumerWidget {
               }, style: BabelText.body(12)),
               trailing: IconButton(
                 tooltip: l10n.dismiss,
-                icon: const Icon(
+                icon: Icon(
                   Icons.close,
                   size: 18,
                   color: BabelColors.textSecondary,

@@ -63,7 +63,7 @@ class _RoundButton extends StatelessWidget {
     onPressed: onPressed,
     style: IconButton.styleFrom(
       fixedSize: const Size(44, 44),
-      side: const BorderSide(color: BabelColors.border),
+      side: BorderSide(color: BabelColors.border),
     ),
     icon: Icon(icon, color: BabelColors.textPrimary, size: 20),
   );

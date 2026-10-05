@@ -99,6 +99,24 @@ async def remove_device(user_id: CurrentUserId, sync: SyncServiceDep, device_id:
     await sync.remove_device(user_id, device_id)
 
 
+class PushTokenRequest(BaseModel):
+    token: Annotated[str | None, Field(max_length=512)] = Field(
+        description="Firebase Cloud Messaging token of the app; null turns notifications off"
+    )
+
+
+@router.put(
+    "/devices/{device_id}/push-token",
+    operation_id="setPushToken",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def set_push_token(
+    user_id: CurrentUserId, sync: SyncServiceDep, device_id: UUID, body: PushTokenRequest
+) -> None:
+    """Where to send this device's notifications, such as new chapters of followed works."""
+    await sync.set_push_token(user_id, device_id, body.token)
+
+
 @router.get("/sync", operation_id="pullChanges")
 async def pull_changes(
     user_id: CurrentUserId,

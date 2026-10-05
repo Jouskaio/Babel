@@ -72,6 +72,21 @@ echo "BABEL_SECRETS_KEY=$(openssl rand -base64 32 | tr '+/' '-_')" >> .env
 
 PostgreSQL (`db` service) has no published port and keeps its data in the `db-data` volume.
 
+### Push notifications (optional)
+
+New chapters of followed works are pushed through Firebase Cloud Messaging once the server
+has a Firebase service account (Firebase console → Project settings → Service accounts →
+Generate new private key). Copy the JSON to the server, readable by the API container only:
+
+```bash
+mkdir -p /opt/babel/secrets && chmod 700 /opt/babel/secrets
+# copy the downloaded key to /opt/babel/secrets/firebase.json (mode 600, uid 10001)
+echo "BABEL_FCM_CREDENTIALS_FILE=/run/babel-secrets/firebase.json" >> /opt/babel/.env
+docker compose up -d api
+```
+
+Without it, notifications are only logged.
+
 ### Book files (NAS)
 
 Book files live on the Synology shared folder `Babel` (`/volume1/Babel`, own quota and

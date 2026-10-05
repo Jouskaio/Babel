@@ -23,6 +23,8 @@ class Device:
     kind: DeviceKind
     created_at: datetime
     last_seen_at: datetime
+    # Firebase Cloud Messaging token of the app on this device, for notifications.
+    push_token: str | None = None
 
 
 class EntityKind(StrEnum):

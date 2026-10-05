@@ -196,6 +196,7 @@ class DeviceRow(Base):
     kind: Mapped[str] = mapped_column(String(16))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    push_token: Mapped[str | None] = mapped_column(String(512))
 
 
 class ChangeRow(Base):
@@ -335,3 +336,4 @@ class FollowRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     last_checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
     last_error: Mapped[str | None] = mapped_column(String(200))
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

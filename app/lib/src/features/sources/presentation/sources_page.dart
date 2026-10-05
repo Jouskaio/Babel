@@ -47,8 +47,8 @@ class SourcesPage extends ConsumerWidget {
                 ),
               ],
               _ => [
-                const Padding(
-                  padding: EdgeInsets.all(24),
+                Padding(
+                  padding: const EdgeInsets.all(24),
                   child: Center(
                     child: CircularProgressIndicator(color: BabelColors.gold),
                   ),
@@ -73,11 +73,7 @@ class SourcesPage extends ConsumerWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
-                  Icons.lock_outline,
-                  size: 16,
-                  color: BabelColors.gold,
-                ),
+                Icon(Icons.lock_outline, size: 16, color: BabelColors.gold),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(l10n.sourcesPrivacy, style: BabelText.body(12)),
@@ -145,7 +141,7 @@ class _SourceTile extends ConsumerWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: BabelColors.textSecondary),
+          Icon(Icons.chevron_right, color: BabelColors.textSecondary),
         ],
       ),
     );

@@ -932,12 +932,6 @@ abstract class AppLocalizations {
   /// **'Téléchargement lancé.'**
   String get downloadedWeb;
 
-  /// No description provided for @onDevice.
-  ///
-  /// In fr, this message translates to:
-  /// **'Sur cet appareil'**
-  String get onDevice;
-
   /// No description provided for @removeFromLibrary.
   ///
   /// In fr, this message translates to:
@@ -2011,6 +2005,168 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'en cours : nouveaux chapitres vérifiés chaque jour'**
   String get linkWillFollow;
+
+  /// No description provided for @libraryNewChapters.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau chapitre'**
+  String get libraryNewChapters;
+
+  /// No description provided for @readerSettings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réglages de lecture'**
+  String get readerSettings;
+
+  /// No description provided for @readerTheme.
+  ///
+  /// In fr, this message translates to:
+  /// **'Thème'**
+  String get readerTheme;
+
+  /// No description provided for @readerThemeEink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liseuse : noir sur blanc, pour l\'encre électronique.'**
+  String get readerThemeEink;
+
+  /// No description provided for @themeNight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nuit'**
+  String get themeNight;
+
+  /// No description provided for @themeDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jour'**
+  String get themeDay;
+
+  /// No description provided for @themeSepia.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sépia'**
+  String get themeSepia;
+
+  /// No description provided for @readerFont.
+  ///
+  /// In fr, this message translates to:
+  /// **'Police'**
+  String get readerFont;
+
+  /// No description provided for @fontSans.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans empattement'**
+  String get fontSans;
+
+  /// No description provided for @fontLexend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lexend · conçue pour la dyslexie'**
+  String get fontLexend;
+
+  /// No description provided for @fontAtkinson.
+  ///
+  /// In fr, this message translates to:
+  /// **'Atkinson Hyperlegible · malvoyance'**
+  String get fontAtkinson;
+
+  /// No description provided for @readerSpacing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Interligne'**
+  String get readerSpacing;
+
+  /// No description provided for @spacingCompact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Serré'**
+  String get spacingCompact;
+
+  /// No description provided for @spacingNormal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Normal'**
+  String get spacingNormal;
+
+  /// No description provided for @spacingAiry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aéré'**
+  String get spacingAiry;
+
+  /// No description provided for @readerLayout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture'**
+  String get readerLayout;
+
+  /// No description provided for @layoutScroll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Défilement'**
+  String get layoutScroll;
+
+  /// No description provided for @layoutPages.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pages'**
+  String get layoutPages;
+
+  /// No description provided for @layoutPagesHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Touchez le bord droit ou gauche, ou balayez, pour tourner la page.'**
+  String get layoutPagesHint;
+
+  /// No description provided for @einkTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liseuse (encre électronique)'**
+  String get einkTitle;
+
+  /// No description provided for @einkHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Noir sur blanc, sans animations, lecture page par page et touches de page.'**
+  String get einkHint;
+
+  /// No description provided for @einkAuto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Automatique'**
+  String get einkAuto;
+
+  /// No description provided for @einkOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activé'**
+  String get einkOn;
+
+  /// No description provided for @einkOff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactivé'**
+  String get einkOff;
+
+  /// No description provided for @einkDetected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cet appareil est une liseuse.'**
+  String get einkDetected;
+
+  /// No description provided for @offlineReady.
+  ///
+  /// In fr, this message translates to:
+  /// **'Disponible hors ligne sur cet appareil'**
+  String get offlineReady;
+
+  /// No description provided for @downloadOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger pour lire hors ligne'**
+  String get downloadOffline;
 }
 
 class _AppLocalizationsDelegate

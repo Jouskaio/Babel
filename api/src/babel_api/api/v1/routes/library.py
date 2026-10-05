@@ -196,6 +196,7 @@ class FollowResponse(BaseModel):
     complete: bool = Field(description="Finished: no longer checked")
     last_checked_at: datetime | None
     last_error: str | None
+    updated_at: datetime | None = Field(description="When new chapters last arrived")
 
     @classmethod
     def of(cls, follow: Follow) -> "FollowResponse":
@@ -207,6 +208,7 @@ class FollowResponse(BaseModel):
             complete=follow.complete,
             last_checked_at=follow.last_checked_at,
             last_error=follow.last_error,
+            updated_at=follow.updated_at,
         )
 
 

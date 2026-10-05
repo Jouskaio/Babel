@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:babel_api_client/api.dart';
+import 'package:cross_file/cross_file.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +11,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/files/file_transfer.dart';
 import '../../../core/files/save_file.dart';
+import '../../../core/locale/file_size.dart';
+import '../../../core/share/share_intake.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
@@ -31,13 +36,29 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   String? _importing;
   double _progress = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    // A file shared to Babel before the library was shown.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _importShared());
+  }
+
+  void _importShared() {
+    if (!mounted || _importing != null) return;
+    final shared = ref.read(pendingSharedFileProvider.notifier).take();
+    if (shared != null) unawaited(_importFile(XFile(shared.path)));
+  }
+
   Future<void> _import() async {
     final picked = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: _acceptedExtensions,
     );
     if (picked.isEmpty || !mounted) return;
-    final file = picked.first.xFile;
+    await _importFile(picked.first.xFile);
+  }
+
+  Future<void> _importFile(XFile file) async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
     setState(() {
@@ -80,6 +101,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(pendingSharedFileProvider, (_, file) {
+      if (file != null) _importShared();
+    });
     final l10n = context.l10n;
     final library = ref.watch(libraryControllerProvider);
     final items = library.value ?? const <LibraryItemResponse>[];
@@ -112,12 +136,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                     onPressed: () => context.push(Routes.importLink),
                     style: IconButton.styleFrom(
                       fixedSize: const Size(48, 48),
-                      side: const BorderSide(color: BabelColors.border),
+                      side: BorderSide(color: BabelColors.border),
                     ),
-                    icon: const Icon(
-                      Icons.link,
-                      color: BabelColors.textPrimary,
-                    ),
+                    icon: Icon(Icons.link, color: BabelColors.textPrimary),
                   ),
                   const SizedBox(width: 8),
                   IconButton.filled(
@@ -153,7 +174,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               ),
             ),
           if (library.isLoading && items.isEmpty)
-            const SliverFillRemaining(
+            SliverFillRemaining(
               hasScrollBody: false,
               child: Center(
                 child: CircularProgressIndicator(color: BabelColors.gold),
@@ -215,6 +236,8 @@ class _BookTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final fresh =
+        ref.watch(newChaptersProvider).value?.contains(item.id) ?? false;
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: () => showModalBottomSheet<void>(
@@ -225,12 +248,39 @@ class _BookTile extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          LayoutBuilder(
-            builder: (context, c) => BookCover(
-              width: c.maxWidth,
-              url: libraryCoverUrl(item),
-              title: item.title,
-            ),
+          Stack(
+            children: [
+              LayoutBuilder(
+                builder: (context, c) => BookCover(
+                  width: c.maxWidth,
+                  url: libraryCoverUrl(item),
+                  title: item.title,
+                ),
+              ),
+              if (fresh)
+                Positioned(
+                  left: 6,
+                  top: 6,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: BabelColors.gold,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    child: Text(
+                      context.l10n.libraryNewChapters.toUpperCase(),
+                      style: BabelText.label(
+                        8,
+                        color: BabelColors.canvas,
+                        spacing: 1,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 10),
           Text(
@@ -317,7 +367,7 @@ class _BookActionsState extends ConsumerState<_BookActions> {
               Text(item.authors.join(', '), style: BabelText.body(14)),
             const SizedBox(height: 6),
             Text(
-              '${item.format.value.toUpperCase()} · ${(item.size / 1024 / 1024).toStringAsFixed(1)} Mo',
+              '${item.format.value.toUpperCase()} · ${fileSize(context, item.size)}',
               style: BabelText.label(10, color: BabelColors.textSecondary),
             ),
             const SizedBox(height: 24),
@@ -343,12 +393,34 @@ class _BookActionsState extends ConsumerState<_BookActions> {
             else
               FutureBuilder<bool>(
                 future: _onDevice,
-                builder: (context, snapshot) => PillButton(
-                  label: snapshot.data == true ? l10n.onDevice : l10n.download,
-                  kind: PillButtonKind.secondary,
-                  expand: true,
-                  onPressed: snapshot.data == true ? null : _download,
-                ),
+                builder: (context, snapshot) => snapshot.data == true
+                    // Already kept here: a status, not a button.
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.offline_pin_outlined,
+                              size: 18,
+                              color: BabelColors.gold,
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                l10n.offlineReady,
+                                style: BabelText.body(14),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : PillButton(
+                        label: l10n.downloadOffline,
+                        kind: PillButtonKind.secondary,
+                        expand: true,
+                        onPressed: _download,
+                      ),
               ),
             const SizedBox(height: 12),
             TextButton(

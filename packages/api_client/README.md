@@ -112,6 +112,7 @@ Class | Method | HTTP request | Description
 *SyncApi* | [**pushOperations**](doc//SyncApi.md#pushoperations) | **POST** /v1/sync/{device_id} | Push Operations
 *SyncApi* | [**registerDevice**](doc//SyncApi.md#registerdevice) | **POST** /v1/devices | Register Device
 *SyncApi* | [**removeDevice**](doc//SyncApi.md#removedevice) | **DELETE** /v1/devices/{device_id} | Remove Device
+*SyncApi* | [**setPushToken**](doc//SyncApi.md#setpushtoken) | **PUT** /v1/devices/{device_id}/push-token | Set Push Token
 
 
 ## Documentation For Models
@@ -151,6 +152,7 @@ Class | Method | HTTP request | Description
  - [PullResponse](doc//PullResponse.md)
  - [PushRequest](doc//PushRequest.md)
  - [PushResponse](doc//PushResponse.md)
+ - [PushTokenRequest](doc//PushTokenRequest.md)
  - [ReadingPositionResponse](doc//ReadingPositionResponse.md)
  - [RefreshRequest](doc//RefreshRequest.md)
  - [RegisterDeviceRequest](doc//RegisterDeviceRequest.md)

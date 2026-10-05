@@ -27,9 +27,8 @@ class WorkPage extends ConsumerWidget {
         scrolledUnderElevation: 0,
       ),
       body: work.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: BabelColors.gold),
-        ),
+        loading: () =>
+            Center(child: CircularProgressIndicator(color: BabelColors.gold)),
         error: (_, _) => Center(
           child: TextButton(
             onPressed: () =>

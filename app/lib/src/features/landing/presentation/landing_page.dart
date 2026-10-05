@@ -445,7 +445,7 @@ class _Devices extends StatelessWidget {
                   horizontal: 16,
                   vertical: 8,
                 ),
-                decoration: const ShapeDecoration(
+                decoration: ShapeDecoration(
                   shape: StadiumBorder(
                     side: BorderSide(color: BabelColors.border),
                   ),
