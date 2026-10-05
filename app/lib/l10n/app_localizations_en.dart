@@ -1035,7 +1035,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get linkHelp =>
-      'Paste the link of an AO3 fanfiction, a Gutenberg book or an EPUB, PDF, CBZ file. A book already on Babel is added without downloading it again.';
+      'A book already on Babel is added without downloading it again.';
 
   @override
   String get linkShareTip => 'Tip: in your browser, Share → Babel';
@@ -1168,4 +1168,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get linkFollowed => 'new chapters will arrive by themselves';
+
+  @override
+  String get linkKindsTitle => 'What Babel can import';
+
+  @override
+  String get linkKindAo3 =>
+      'archiveofourown.org/works/…: the fanfiction as an EPUB. If it is not finished, Babel checks for new chapters every day and updates the book.';
+
+  @override
+  String get linkKindGutenberg =>
+      'gutenberg.org/ebooks/…: the public-domain book as an EPUB, with its illustrations.';
+
+  @override
+  String get linkKindFile =>
+      'A direct link to an EPUB, PDF or CBZ file, on any website.';
+
+  @override
+  String get linkKindsElse =>
+      'Other pages (online reading sites, shops) are not supported.';
+
+  @override
+  String get linkWillFollow => 'ongoing: new chapters checked every day';
 }
