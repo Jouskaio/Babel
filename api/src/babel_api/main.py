@@ -5,6 +5,7 @@ import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from datetime import timedelta
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -71,11 +72,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         else LogMailer()
     )
 
-    pusher = (
-        FcmPusher.from_file(settings.fcm_credentials_file)
-        if settings.fcm_credentials_file
-        else LogPusher()
-    )
+    pusher = LogPusher()
+    if settings.fcm_credentials_file:
+        if Path(settings.fcm_credentials_file).is_file():
+            pusher = FcmPusher.from_file(settings.fcm_credentials_file)
+        else:
+            logging.getLogger(__name__).warning(
+                "No Firebase service account at %s: notifications are only logged",
+                settings.fcm_credentials_file,
+            )
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
