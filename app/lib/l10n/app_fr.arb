@@ -856,5 +856,53 @@
   "adminKavitaReady": "Kavita prêt",
   "adminKavitaFailed": "Kavita en échec",
   "adminKavitaExists": "Kavita existant",
-  "adminKavitaCreating": "Kavita en cours"
+  "adminKavitaCreating": "Kavita en cours",
+  "moreActions": "Plus d'actions",
+  "blockReader": "Bloquer",
+  "reportReader": "Signaler",
+  "blockConfirm": "Bloquer {name} ? Vous ne serez plus amis ni abonnés, et aucun de vous deux ne verra l'autre.",
+  "@blockConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "blocked": "{name} est bloqué.",
+  "@blocked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTitle": "Signaler {name}",
+  "@reportTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportHint": "Les administrateurs de Babel examineront le signalement. Ce lecteur n'est pas prévenu.",
+  "reasonSpam": "Spam",
+  "reasonHarassment": "Harcèlement",
+  "reasonInappropriate": "Contenu inapproprié",
+  "reasonOther": "Autre",
+  "reportNote": "Ce qui s'est passé (facultatif)",
+  "reportSend": "Envoyer le signalement",
+  "reportSent": "Signalement envoyé.",
+  "blockedTitle": "Bloqués",
+  "unblock": "Débloquer",
+  "reportsTitle": "Signalements",
+  "reportsEmpty": "Aucun signalement.",
+  "reportedBy": "Signalé par @{handle}",
+  "@reportedBy": {
+    "placeholders": {
+      "handle": {
+        "type": "String"
+      }
+    }
+  },
+  "reportResolve": "Traité"
 }

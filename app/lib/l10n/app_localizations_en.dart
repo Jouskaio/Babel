@@ -1625,4 +1625,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminKavitaCreating => 'Kavita in progress';
+
+  @override
+  String get moreActions => 'More actions';
+
+  @override
+  String get blockReader => 'Block';
+
+  @override
+  String get reportReader => 'Report';
+
+  @override
+  String blockConfirm(String name) {
+    return 'Block $name? You will no longer be friends or follow each other, and neither of you will see the other.';
+  }
+
+  @override
+  String blocked(String name) {
+    return '$name is blocked.';
+  }
+
+  @override
+  String reportTitle(String name) {
+    return 'Report $name';
+  }
+
+  @override
+  String get reportHint =>
+      'Babel\'s administrators will look at the report. This reader is not told.';
+
+  @override
+  String get reasonSpam => 'Spam';
+
+  @override
+  String get reasonHarassment => 'Harassment';
+
+  @override
+  String get reasonInappropriate => 'Inappropriate content';
+
+  @override
+  String get reasonOther => 'Other';
+
+  @override
+  String get reportNote => 'What happened (optional)';
+
+  @override
+  String get reportSend => 'Send the report';
+
+  @override
+  String get reportSent => 'Report sent.';
+
+  @override
+  String get blockedTitle => 'Blocked';
+
+  @override
+  String get unblock => 'Unblock';
+
+  @override
+  String get reportsTitle => 'Reports';
+
+  @override
+  String get reportsEmpty => 'No reports.';
+
+  @override
+  String reportedBy(String handle) {
+    return 'Reported by @$handle';
+  }
+
+  @override
+  String get reportResolve => 'Handled';
 }

@@ -6,6 +6,7 @@ import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
+import '../../social/presentation/safety.dart';
 import '../../sources/presentation/source_badge.dart';
 import '../application/kavita_providers.dart';
 
@@ -26,6 +27,8 @@ class AdminPage extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 40),
             children: [
+              const ReportsSection(),
+              const SizedBox(height: 24),
               Text(l10n.adminPremiumHint, style: BabelText.body(13)),
               const SizedBox(height: 12),
               for (final member in value) _Member(member: member),
