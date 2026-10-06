@@ -1,9 +1,10 @@
 """Sources of book files: connecting, scanning and importing (ADR 0009)."""
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
 from babel_api.adapters.security.secrets import SecretBox
@@ -71,7 +72,7 @@ class SourceService:
     ) -> SourceDetail:
         if await self._sources.count(user_id) >= self._max_sources:
             raise TooManySourcesError
-        token = (token or "").strip() or None
+        config, token = self._split_secret(kind, config, token)
         encrypted = self._secrets.encrypt(token) if token else None
         checked = await self._connectors[kind].check(config, token)
         source = await self._sources.add(user_id, kind, name.strip()[:120], checked, encrypted)
@@ -80,9 +81,22 @@ class SourceService:
 
     async def check(self, kind: SourceKind, config: dict[str, Any], token: str | None) -> int:
         """Tries a source without saving it: the number of books it holds."""
-        token = (token or "").strip() or None
+        config, token = self._split_secret(kind, config, token)
         connector = self._connectors[kind]
         return len(await connector.list_entries(await connector.check(config, token), token))
+
+    def _split_secret(
+        self, kind: SourceKind, config: dict[str, Any], token: str | None
+    ) -> tuple[dict[str, Any], str | None]:
+        """A key pasted inside the address (Kavita OPDS) becomes the encrypted token."""
+        token = (token or "").strip() or None
+        extract = cast(
+            Callable[[dict[str, Any]], tuple[dict[str, Any], str | None]] | None,
+            getattr(self._connectors[kind], "extract_secret", None),
+        )
+        if token is None and extract is not None:
+            return extract(config)
+        return config, token
 
     async def list_sources(self, user_id: UUID) -> list[Source]:
         return await self._sources.list_sources(user_id)
