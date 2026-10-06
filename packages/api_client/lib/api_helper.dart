@@ -91,6 +91,9 @@ String parameterToString(dynamic value) {
   if (value is OpOutcome) {
     return OpOutcomeTypeTransformer().encode(value).toString();
   }
+  if (value is ReportReason) {
+    return ReportReasonTypeTransformer().encode(value).toString();
+  }
   if (value is SourceKind) {
     return SourceKindTypeTransformer().encode(value).toString();
   }

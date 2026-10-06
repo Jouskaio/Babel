@@ -72,6 +72,8 @@ Class | Method | HTTP request | Description
 *AccountApi* | [**updateMe**](doc//AccountApi.md#updateme) | **PATCH** /v1/me | Update Me
 *AccountApi* | [**updateSocialProfile**](doc//AccountApi.md#updatesocialprofile) | **PATCH** /v1/me/profile | Update Profile
 *AdminApi* | [**listMembers**](doc//AdminApi.md#listmembers) | **GET** /v1/admin/users | List Members
+*AdminApi* | [**listReports**](doc//AdminApi.md#listreports) | **GET** /v1/admin/reports | List Reports
+*AdminApi* | [**resolveReport**](doc//AdminApi.md#resolvereport) | **POST** /v1/admin/reports/{report_id}/resolve | Resolve Report
 *AdminApi* | [**setPremium**](doc//AdminApi.md#setpremium) | **PUT** /v1/admin/users/{member_id}/premium | Set Premium
 *AdminApi* | [**withdrawFile**](doc//AdminApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
 *AuthApi* | [**forgotPassword**](doc//AuthApi.md#forgotpassword) | **POST** /v1/auth/password/forgot | Forgot Password
@@ -114,19 +116,25 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**stopFollow**](doc//LibraryApi.md#stopfollow) | **DELETE** /v1/library/follows/{follow_id} | Stop Follow
 *LibraryApi* | [**withdrawFile**](doc//LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
 *SocialApi* | [**addFriend**](doc//SocialApi.md#addfriend) | **PUT** /v1/social/friends/{handle} | Add Friend
+*SocialApi* | [**blockReader**](doc//SocialApi.md#blockreader) | **PUT** /v1/social/blocks/{handle} | Block Reader
 *SocialApi* | [**deleteReview**](doc//SocialApi.md#deletereview) | **DELETE** /v1/library/{item_id}/review | Delete Review
 *SocialApi* | [**followReader**](doc//SocialApi.md#followreader) | **PUT** /v1/social/following/{handle} | Follow Reader
+*SocialApi* | [**getBlocked**](doc//SocialApi.md#getblocked) | **GET** /v1/social/blocks | Get Blocked
 *SocialApi* | [**getFeed**](doc//SocialApi.md#getfeed) | **GET** /v1/social/feed | Get Feed
 *SocialApi* | [**getFriends**](doc//SocialApi.md#getfriends) | **GET** /v1/social/friends | Get Friends
 *SocialApi* | [**getReader**](doc//SocialApi.md#getreader) | **GET** /v1/social/readers/{handle} | Get Reader
 *SocialApi* | [**getRecommendations**](doc//SocialApi.md#getrecommendations) | **GET** /v1/social/recommendations | Get Recommendations
 *SocialApi* | [**getReview**](doc//SocialApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
 *SocialApi* | [**getSocialProfile**](doc//SocialApi.md#getsocialprofile) | **GET** /v1/me/profile | Get Profile
+*SocialApi* | [**listReports**](doc//SocialApi.md#listreports) | **GET** /v1/admin/reports | List Reports
 *SocialApi* | [**markRecommendationRead**](doc//SocialApi.md#markrecommendationread) | **POST** /v1/social/recommendations/{recommendation_id}/read | Mark Read
 *SocialApi* | [**recommend**](doc//SocialApi.md#recommend) | **POST** /v1/social/recommendations | Recommend
 *SocialApi* | [**removeFriend**](doc//SocialApi.md#removefriend) | **DELETE** /v1/social/friends/{handle} | Remove Friend
+*SocialApi* | [**reportReader**](doc//SocialApi.md#reportreader) | **POST** /v1/social/reports | Report Reader
+*SocialApi* | [**resolveReport**](doc//SocialApi.md#resolvereport) | **POST** /v1/admin/reports/{report_id}/resolve | Resolve Report
 *SocialApi* | [**saveReview**](doc//SocialApi.md#savereview) | **PUT** /v1/library/{item_id}/review | Save Review
 *SocialApi* | [**searchReaders**](doc//SocialApi.md#searchreaders) | **GET** /v1/social/readers | Search Readers
+*SocialApi* | [**unblockReader**](doc//SocialApi.md#unblockreader) | **DELETE** /v1/social/blocks/{handle} | Unblock Reader
 *SocialApi* | [**unfollowReader**](doc//SocialApi.md#unfollowreader) | **DELETE** /v1/social/following/{handle} | Unfollow Reader
 *SocialApi* | [**updateSocialProfile**](doc//SocialApi.md#updatesocialprofile) | **PATCH** /v1/me/profile | Update Profile
 *SourcesApi* | [**checkSource**](doc//SourcesApi.md#checksource) | **POST** /v1/sources/check | Check Source
@@ -205,6 +213,9 @@ Class | Method | HTTP request | Description
  - [RegisterDeviceRequest](doc//RegisterDeviceRequest.md)
  - [RegisterRequest](doc//RegisterRequest.md)
  - [RelationResponse](doc//RelationResponse.md)
+ - [ReportReason](doc//ReportReason.md)
+ - [ReportRequest](doc//ReportRequest.md)
+ - [ReportResponse](doc//ReportResponse.md)
  - [ResetPasswordRequest](doc//ResetPasswordRequest.md)
  - [ReviewRequest](doc//ReviewRequest.md)
  - [ReviewResponse](doc//ReviewResponse.md)
