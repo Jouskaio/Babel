@@ -153,4 +153,67 @@ void main() {
     expect(find.text('Tout le roman tient là-dedans.'), findsOneWidget);
     expect(find.text('CHAPTER II'), findsWidgets);
   });
+
+  testWidgets(
+    'notes from other editions are placed in the text or the margin',
+    (tester) async {
+      tester.view.physicalSize = const Size(420, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      Map<String, Object?> other(String id, String quote, {double? percent}) =>
+          {
+            'id': id,
+            'reader': {'handle': 'camille', 'display_name': 'Camille'},
+            'quote': quote,
+            'note': 'Note $id',
+            'chapter': 7,
+            'region': null,
+            'percent': percent,
+            'prefix': null,
+            'suffix': null,
+            'same_file': false,
+            'language': 'fr',
+            'at': '2026-10-04T10:00:00Z',
+          };
+      final server = FakeServer()
+        ..addItem('i1', 'Wuthering Heights')
+        ..readerNotes.addAll([
+          // Same text, other typography: found in chapter II.
+          other('o1', 'nelly, i am heathcliff\u2009!'.replaceAll('\u2009', '')),
+          // A French edition: not in this text, placed near its percentage.
+          other('o2', 'Nelly, je suis Heathcliff !', percent: 62),
+        ]);
+      await tester.pumpWidget(
+        wrap(
+          Consumer(
+            builder: (context, ref, _) {
+              ref.watch(syncEngineProvider);
+              return const ReaderPage(itemId: 'i1');
+            },
+          ),
+          overrides: [
+            ...server.overrides,
+            fileTransferProvider.overrideWithValue(
+              _MemoryTransfer(epubFixture()),
+            ),
+          ],
+        ),
+      );
+      for (var i = 0; i < 5; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 100)),
+        );
+        await tester.pump(const Duration(milliseconds: 500));
+      }
+      await tester.tap(find.textContaining('En marge'));
+      await tester.pumpAndSettle();
+      expect(find.text('Les autres lecteurs'), findsOneWidget);
+      expect(
+        find.textContaining('@CAMILLE · ÉDITION FR · CHAPTER II'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('≈ 62 % DU LIVRE'), findsOneWidget);
+      expect(find.text('Note o2'), findsOneWidget);
+    },
+  );
 }

@@ -63,6 +63,9 @@ class _SignedIn extends AuthController {
 class FakeServer {
   final changes = <Map<String, Object?>>[];
   final pushed = <Map<String, Object?>>[];
+
+  /// Other readers' notes, answered for any book.
+  final readerNotes = <Map<String, Object?>>[];
   final connectivity = StreamController<List<ConnectivityResult>>.broadcast();
   int devicesRegistered = 0;
   bool emailVerified = true;
@@ -382,6 +385,7 @@ class FakeServer {
         'has_more': false,
       });
     }
+    if (path.endsWith('/reader-notes')) return json(readerNotes);
     if (path.startsWith('/v1/sync/') && request.method == 'POST') {
       final body = jsonDecode(request.body) as Map<String, dynamic>;
       final ops = (body['operations'] as List).cast<Map<String, Object?>>();

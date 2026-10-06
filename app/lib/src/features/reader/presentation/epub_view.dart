@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:babel_api_client/api.dart' show BookNoteResponse;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,7 @@ import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 import '../application/annotations.dart';
+import '../application/reader_notes.dart';
 import '../application/reader_settings.dart';
 import '../application/reading_position.dart';
 import '../data/epub_book.dart';
@@ -63,6 +65,48 @@ class _EpubViewState extends ConsumerState<EpubView>
     duration: const Duration(milliseconds: 220),
     value: 1,
   );
+
+  /// The book's text, to find other readers' passages in it.
+  late final BookText _text = BookText([
+    for (final chapter in widget.book.chapters) chapter.html,
+  ]);
+  List<BookNoteResponse>? _placedNotes;
+  Map<String, NotePlace> _places = const {};
+
+  /// Where each of other readers' notes goes in this copy, worked out once per list.
+  Map<String, NotePlace> _placesOf(List<BookNoteResponse> notes) {
+    if (identical(notes, _placedNotes)) return _places;
+    _placedNotes = notes;
+    return _places = {for (final note in notes) note.id: _place(note)};
+  }
+
+  NotePlace _place(BookNoteResponse note) {
+    if (note.region != null || note.quote.trim().isEmpty) {
+      // Comic panels only match on the same file, where pages are the same.
+      return note.percent != null
+          ? NotePlace.near(note.percent!.toDouble())
+          : const NotePlace.nowhere();
+    }
+    final chapter = _text.chapterOf(
+      note.quote,
+      hint: note.sameFile ? note.chapter : _chapterAt(note.percent?.toDouble()),
+      prefix: note.prefix,
+      suffix: note.suffix,
+    );
+    if (chapter != null) return NotePlace.exact(chapter);
+    return note.percent != null
+        ? NotePlace.near(note.percent!.toDouble())
+        : const NotePlace.nowhere();
+  }
+
+  int? _chapterAt(double? percent) {
+    if (percent == null) return null;
+    final target = percent / 100 * widget.book.totalLength;
+    for (var i = 0; i < widget.book.chapters.length; i++) {
+      if (_before[i] + widget.book.chapters[i].length >= target) return i;
+    }
+    return null;
+  }
 
   late final List<int> _before = [
     for (var i = 0, sum = 0; i < widget.book.chapters.length; i++)
@@ -206,6 +250,18 @@ class _EpubViewState extends ConsumerState<EpubView>
   }
 
   Future<bool> _onTapUrl(String url) async {
+    if (url.startsWith(readerNoteScheme)) {
+      final id = url.substring(readerNoteScheme.length);
+      final note = ref
+          .read(readerNotesProvider(widget.itemId))
+          .value
+          ?.where((n) => n.id == id)
+          .firstOrNull;
+      if (note != null && mounted) {
+        await showReaderNote(context, note, place: _places[id]);
+      }
+      return true;
+    }
     if (url.startsWith(annotationScheme)) {
       final id = url.substring(annotationScheme.length);
       final annotation = ref
@@ -240,6 +296,10 @@ class _EpubViewState extends ConsumerState<EpubView>
       ..hideToolbar()
       ..clearSelection();
     if (quote == null || quote.trim().isEmpty) return;
+    // Where it is and the words around it: they place it in other editions.
+    final chapter = widget.book.chapters[_chapter];
+    final around = quoteContext(chapter.html, quote);
+    final total = widget.book.totalLength;
     final annotation = await ref
         .read(annotationsControllerProvider)
         .create(
@@ -248,6 +308,14 @@ class _EpubViewState extends ConsumerState<EpubView>
           chapter: _chapter,
           quote: quote,
           color: color,
+          percent: total == 0
+              ? null
+              : (_before[_chapter] +
+                        (around?.fraction ?? _fraction) * chapter.length) /
+                    total *
+                    100,
+          prefix: around?.prefix,
+          suffix: around?.suffix,
         );
     if (withNote && annotation != null && mounted) {
       await showAnnotationEditor(context, annotation, focusNote: true);
@@ -371,6 +439,18 @@ class _EpubViewState extends ConsumerState<EpubView>
   }
 
   Map<String, String>? _styles(dom.Element element) {
+    if (element.localName == 'mark' &&
+        element.attributes['data-kind'] == 'reader') {
+      // Another reader's passage: a quiet dotted underline, never a highlight.
+      return {
+        'text-decoration': 'underline',
+        'text-decoration-style': 'dotted',
+        'text-decoration-color': ref.read(einkDisplayProvider).active
+            ? '#000000'
+            : BabelColors.css(BabelColors.gold),
+        'color': 'inherit',
+      };
+    }
     if (element.localName == 'mark') {
       if (ref.read(einkDisplayProvider).active) {
         // No colors on e-ink: italic and underlined (design: "eink / lecture").
@@ -391,7 +471,8 @@ class _EpubViewState extends ConsumerState<EpubView>
     }
     if (element.localName == 'a') {
       final href = element.attributes['href'] ?? '';
-      return href.startsWith(annotationScheme)
+      return href.startsWith(annotationScheme) ||
+              href.startsWith(readerNoteScheme)
           ? {'color': 'inherit', 'text-decoration': 'none'}
           : {'color': BabelColors.css(BabelColors.gold)};
     }
@@ -425,10 +506,21 @@ class _EpubViewState extends ConsumerState<EpubView>
     final chapterLabel = chapter.title ?? l10n.chapterNumber(_chapter + 1);
     final annotations =
         ref.watch(annotationsProvider(widget.fileSha256)).value ?? const [];
-    final html = applyHighlights(chapter.html, [
-      for (final a in annotations)
-        if (a.chapter == _chapter && a.color != HighlightColor.none) a,
-    ]);
+    final others = settings.readerNotes
+        ? ref.watch(readerNotesProvider(widget.itemId)).value ?? const []
+        : const <BookNoteResponse>[];
+    final places = _placesOf(others);
+    final html = applyHighlights(
+      applyReaderNotes(chapter.html, [
+        for (final n in others)
+          if (places[n.id]?.chapter == _chapter)
+            (id: n.id, quote: n.quote, prefix: n.prefix, suffix: n.suffix),
+      ]),
+      [
+        for (final a in annotations)
+          if (a.chapter == _chapter && a.color != HighlightColor.none) a,
+      ],
+    );
     return Scaffold(
       backgroundColor: BabelColors.canvas,
       body: Column(
@@ -484,6 +576,8 @@ class _EpubViewState extends ConsumerState<EpubView>
               onTap: () => showMarginPanel(
                 context,
                 fileSha256: widget.fileSha256,
+                others: [for (final n in others) (n, places[n.id])],
+                onSeek: _seek,
                 chapterName: (index) =>
                     chapters[index.clamp(0, chapters.length - 1)].title ??
                     l10n.chapterNumber(index + 1),

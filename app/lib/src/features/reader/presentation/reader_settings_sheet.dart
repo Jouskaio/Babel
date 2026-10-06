@@ -144,6 +144,21 @@ class ReaderSettingsSheet extends ConsumerWidget {
                       style: BabelText.body(13),
                     ),
                   ),
+                const SizedBox(height: 12),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: settings.readerNotes,
+                  activeThumbColor: BabelColors.gold,
+                  title: Text(
+                    l10n.readerNotesSetting,
+                    style: BabelText.body(15, color: BabelColors.textPrimary),
+                  ),
+                  subtitle: Text(
+                    l10n.readerNotesSettingHint,
+                    style: BabelText.body(12),
+                  ),
+                  onChanged: controller.setReaderNotes,
+                ),
               ],
             ],
           ),
