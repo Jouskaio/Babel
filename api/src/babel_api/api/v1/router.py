@@ -11,6 +11,7 @@ from babel_api.api.v1.routes import (
     me,
     social,
     sources,
+    stats,
     sync,
 )
 
@@ -25,3 +26,4 @@ router.include_router(sources.router)
 router.include_router(social.router)
 router.include_router(social.history_router)
 router.include_router(kavita.router)
+router.include_router(stats.router)
