@@ -14,6 +14,8 @@ import '../../../core/widgets/book_cover.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../landing/application/trending_provider.dart';
+import '../../library/application/history.dart';
+import '../../library/presentation/book_trace.dart';
 import '../application/catalog_providers.dart';
 
 /// Search (design: Penpot "screen / recherche").
@@ -246,6 +248,77 @@ class _Results extends ConsumerWidget {
       }
     });
     final results = ref.watch(searchResultsProvider(args));
+    final found = results.value ?? const <WorkSummaryResponse>[];
+    final mine = _yourBooks(
+      ref.watch(libraryHistoryProvider).value ?? const [],
+      query,
+      {for (final w in found) w.id},
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (mine.isNotEmpty) ...[
+          Text(l10n.yourBooks.toUpperCase(), style: BabelText.label(10)),
+          for (final trace in mine)
+            _TraceRow(
+              trace: trace,
+              onTap: () {
+                onOpen();
+                final work = trace.workId;
+                if (work != null) {
+                  context.push(Routes.work(work));
+                } else {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    useRootNavigator: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: BookTraceCard(trace: trace),
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+          const SizedBox(height: 20),
+        ],
+        _results(context, results, l10n),
+      ],
+    );
+  }
+
+  /// The reader's own books (kept, hidden or removed) whose title matches, unless the
+  /// catalog results already show their work.
+  static List<BookTraceResponse> _yourBooks(
+    List<BookTraceResponse> history,
+    String query,
+    Set<String> shown,
+  ) {
+    final words = query
+        .toLowerCase()
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty);
+    if (words.isEmpty) return const [];
+    return [
+      for (final trace in history)
+        if (!shown.contains(trace.workId) &&
+            words.every(
+              (w) => [
+                trace.item.title,
+                ...trace.item.authors,
+              ].join(' ').toLowerCase().contains(w),
+            ))
+          trace,
+    ].take(5).toList();
+  }
+
+  Widget _results(
+    BuildContext context,
+    AsyncValue<List<WorkSummaryResponse>> results,
+    AppLocalizations l10n,
+  ) {
     return results.when(
       loading: () => Padding(
         padding: const EdgeInsets.only(top: 40),
@@ -278,13 +351,64 @@ class _Results extends ConsumerWidget {
 }
 
 /// A work in a list: cover, title, authors and year.
-class WorkRow extends StatelessWidget {
+/// One of the reader's own books in the search results.
+class _TraceRow extends StatelessWidget {
+  const _TraceRow({required this.trace, required this.onTap});
+  final BookTraceResponse trace;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(16),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          BookCover(
+            width: 56,
+            url: trace.item.coverPath == null || !trace.available
+                ? null
+                : apiUrl(trace.item.coverPath!),
+            title: trace.item.title,
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(trace.item.title, style: BabelText.heading(19)),
+                if (trace.item.authors.isNotEmpty)
+                  Text(
+                    trace.item.authors.join(', '),
+                    style: BabelText.body(13),
+                  ),
+                if (traceLabel(context, trace) case final label?)
+                  Text(
+                    label,
+                    style: BabelText.label(9, color: BabelColors.gold),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class WorkRow extends ConsumerWidget {
   const WorkRow({required this.work, required this.onTap, super.key});
   final WorkSummaryResponse work;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final trace = traceFor(
+      ref.watch(libraryHistoryProvider).value ?? const [],
+      workId: work.id,
+    );
+    final label = trace == null ? null : traceLabel(context, trace);
     final subtitle = [
       if (work.authors.isNotEmpty) work.authors.join(', '),
       if (work.firstPublishYear case final year?) '$year',
@@ -309,6 +433,14 @@ class WorkRow extends StatelessWidget {
                   Text(work.title, style: BabelText.heading(19)),
                   if (subtitle.isNotEmpty)
                     Text(subtitle, style: BabelText.body(13)),
+                  if (label != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        label,
+                        style: BabelText.label(9, color: BabelColors.gold),
+                      ),
+                    ),
                 ],
               ),
             ),

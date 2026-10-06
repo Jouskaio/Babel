@@ -2,6 +2,7 @@ import 'package:babel_api_client/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/locale/relative_time.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
@@ -104,6 +105,24 @@ class _Page extends ConsumerWidget {
                     '${book.authors.join(', ')} · ${book.percent.round()} %',
               ),
           ],
+          if (page.finished.isNotEmpty) ...[
+            _Title(l10n.profileFinished),
+            for (final book in page.finished)
+              _Line(
+                title: book.title,
+                detail: [
+                  book.authors.join(', '),
+                  timeAgo(context, book.at),
+                ].where((t) => t.isNotEmpty).join(' · '),
+              ),
+          ],
+          for (final shelf in page.shelves) ...[
+            _Title(shelf.name),
+            if (shelf.books.isEmpty)
+              Text(l10n.shelfEmpty, style: BabelText.body(13)),
+            for (final book in shelf.books)
+              _Line(title: book.title, detail: book.authors.join(', ')),
+          ],
           if (page.reviews.isNotEmpty) ...[
             _Title(l10n.reviewsTitle),
             for (final review in page.reviews)
@@ -135,6 +154,8 @@ class _Page extends ConsumerWidget {
               _Line(title: book.title, detail: book.authors.join(', ')),
           ],
           if (page.reading.isEmpty &&
+              page.finished.isEmpty &&
+              page.shelves.isEmpty &&
               page.reviews.isEmpty &&
               page.notes.isEmpty &&
               (page.library_?.isEmpty ?? true))

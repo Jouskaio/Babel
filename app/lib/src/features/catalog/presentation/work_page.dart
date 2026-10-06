@@ -10,6 +10,8 @@ import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
+import '../../library/application/history.dart';
+import '../../library/presentation/book_trace.dart';
 import '../application/catalog_providers.dart';
 
 /// A work and its editions (design: Penpot "screen / fiche-livre").
@@ -43,21 +45,25 @@ class WorkPage extends ConsumerWidget {
   }
 }
 
-class _WorkBody extends StatefulWidget {
+class _WorkBody extends ConsumerStatefulWidget {
   const _WorkBody({required this.work});
   final WorkResponse work;
 
   @override
-  State<_WorkBody> createState() => _WorkBodyState();
+  ConsumerState<_WorkBody> createState() => _WorkBodyState();
 }
 
-class _WorkBodyState extends State<_WorkBody> {
+class _WorkBodyState extends ConsumerState<_WorkBody> {
   bool _expanded = false;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final work = widget.work;
+    final trace = traceFor(
+      ref.watch(libraryHistoryProvider).value ?? const [],
+      workId: work.id,
+    );
     final meta = [
       if (work.authors.isNotEmpty) work.authors.join(', '),
       if (work.firstPublishYear case final year?) '$year',
@@ -132,29 +138,36 @@ class _WorkBodyState extends State<_WorkBody> {
               for (final edition in work.editions.take(12))
                 _EditionRow(edition: edition),
             ],
-            const SizedBox(height: 32),
-            Text(l10n.getThisBook, style: BabelText.title(28)),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: BabelColors.surface,
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: BabelColors.border),
+            if (trace != null) ...[
+              const SizedBox(height: 28),
+              BookTraceCard(trace: trace),
+            ],
+            WorkReadersSection(workId: work.id),
+            if (trace == null || !trace.available) ...[
+              const SizedBox(height: 32),
+              Text(l10n.getThisBook, style: BabelText.title(28)),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: BabelColors.surface,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: BabelColors.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.importOwnCopy, style: BabelText.body(14)),
+                    const SizedBox(height: 14),
+                    PillButton(
+                      label: l10n.importFile,
+                      kind: PillButtonKind.secondary,
+                      onPressed: () => context.go(Routes.library),
+                    ),
+                  ],
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.importOwnCopy, style: BabelText.body(14)),
-                  const SizedBox(height: 14),
-                  PillButton(
-                    label: l10n.importFile,
-                    kind: PillButtonKind.secondary,
-                    onPressed: () => context.go(Routes.library),
-                  ),
-                ],
-              ),
-            ),
+            ],
           ],
         ),
       ),

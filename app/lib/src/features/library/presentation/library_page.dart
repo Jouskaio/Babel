@@ -21,7 +21,10 @@ import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../social/presentation/book_social_sheets.dart';
 import '../application/library_controller.dart';
+import '../application/shelves.dart';
+import 'book_state.dart';
 import 'follow_panel.dart';
+import 'link_work_sheet.dart';
 
 const _acceptedExtensions = ['epub', 'pdf', 'cbz', 'cbr'];
 
@@ -36,6 +39,41 @@ class LibraryPage extends ConsumerStatefulWidget {
 class _LibraryPageState extends ConsumerState<LibraryPage> {
   String? _importing;
   double _progress = 0;
+
+  /// A reading status or a shelf id; null shows every book.
+  Object? _filter;
+  bool _showHidden = false;
+
+  Future<void> _newShelf() async {
+    final name = await askShelfName(context);
+    if (name == null || name.isEmpty) return;
+    final shelf = await ref.read(shelvesControllerProvider).create(name);
+    if (mounted) setState(() => _filter = shelf.id);
+  }
+
+  List<LibraryItemResponse> _visible(
+    List<LibraryItemResponse> items,
+    List<Shelf> shelves,
+  ) {
+    final filter = _filter;
+    final shown = [
+      for (final item in items)
+        if (_showHidden || item.hidden != true) item,
+    ];
+    if (filter is ReadingStatus) {
+      return [
+        for (final item in shown)
+          if (item.status == filter) item,
+      ];
+    }
+    if (filter is String) {
+      final shelf = shelves.where((s) => s.id == filter).firstOrNull;
+      if (shelf == null) return shown;
+      final byId = {for (final item in shown) item.id: item};
+      return [for (final id in shelf.itemIds) ?byId[id]];
+    }
+    return shown;
+  }
 
   @override
   void initState() {
@@ -107,7 +145,10 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     });
     final l10n = context.l10n;
     final library = ref.watch(libraryControllerProvider);
-    final items = library.value ?? const <LibraryItemResponse>[];
+    final all = library.value ?? const <LibraryItemResponse>[];
+    final shelves = ref.watch(shelvesProvider).value ?? const <Shelf>[];
+    final hiddenCount = all.where((i) => i.hidden == true).length;
+    final items = _visible(all, shelves);
     return RefreshIndicator(
       onRefresh: ref.read(libraryControllerProvider.notifier).reload,
       color: BabelColors.gold,
@@ -156,6 +197,17 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               ),
             ),
           ),
+          SliverToBoxAdapter(
+            child: _Filters(
+              filter: _filter,
+              shelves: shelves,
+              hiddenCount: hiddenCount,
+              showHidden: _showHidden,
+              onFilter: (f) => setState(() => _filter = f),
+              onShowHidden: (v) => setState(() => _showHidden = v),
+              onNewShelf: _newShelf,
+            ),
+          ),
           if (_importing case final name?)
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
@@ -198,7 +250,10 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
                 sliver: SliverToBoxAdapter(
-                  child: Text(l10n.libraryEmpty, style: BabelText.body(15)),
+                  child: Text(
+                    _filter is String ? l10n.shelfEmpty : l10n.libraryEmpty,
+                    style: BabelText.body(15),
+                  ),
                 ),
               ),
             SliverPadding(
@@ -239,6 +294,10 @@ class _BookTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final fresh =
         ref.watch(newChaptersProvider).value?.contains(item.id) ?? false;
+    final progress = effectiveProgress(
+      item,
+      ref.watch(positionPercentsProvider).value ?? const {},
+    );
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: () => showModalBottomSheet<void>(
@@ -285,6 +344,20 @@ class _BookTile extends ConsumerWidget {
                 ),
             ],
           ),
+          if (progress != null &&
+              progress > 0 &&
+              item.status != ReadingStatus.finished) ...[
+            const SizedBox(height: 6),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(2),
+              child: LinearProgressIndicator(
+                value: progress / 100,
+                minHeight: 3,
+                color: BabelColors.gold,
+                backgroundColor: BabelColors.sunken,
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
           Text(
             item.title,
@@ -294,10 +367,17 @@ class _BookTile extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            item.format.value.toUpperCase(),
+            [
+              item.format.value.toUpperCase(),
+              if (item.status case final status?)
+                statusLabel(context.l10n, status).toUpperCase(),
+              if (item.hidden == true) context.l10n.hiddenBadge.toUpperCase(),
+            ].join(' · '),
             style: BabelText.label(
               9,
-              color: BabelColors.textSecondary,
+              color: item.status == ReadingStatus.finished
+                  ? BabelColors.gold
+                  : BabelColors.textSecondary,
               spacing: 1.2,
             ),
           ),
@@ -354,12 +434,26 @@ class _BookActionsState extends ConsumerState<_BookActions> {
     );
   }
 
+  Future<void> _hide() async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final item = widget.item;
+    final hide = item.hidden != true;
+    Navigator.of(context).pop();
+    await ref.read(readingStateProvider).setHidden(item, hide);
+    if (hide) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.bookHidden(item.title))),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final item = widget.item;
+    final item = liveItem(ref, widget.item);
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -425,10 +519,35 @@ class _BookActionsState extends ConsumerState<_BookActions> {
                         onPressed: _download,
                       ),
               ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 20),
+            StatusPicker(item: item),
+            const SizedBox(height: 14),
+            ProgressEditor(item: item),
+            const SizedBox(height: 8),
             Wrap(
               alignment: WrapAlignment.center,
               children: [
+                TextButton.icon(
+                  onPressed: () => showShelfPicker(context, item),
+                  icon: Icon(Icons.shelves, color: BabelColors.gold),
+                  label: Text(
+                    l10n.shelvesTitle,
+                    style: BabelText.body(14, color: BabelColors.textPrimary),
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () => item.workId == null
+                      ? showLinkWorkSheet(context, item)
+                      : context.push(Routes.work(item.workId!)),
+                  icon: Icon(
+                    item.workId == null ? Icons.link : Icons.menu_book_outlined,
+                    color: BabelColors.gold,
+                  ),
+                  label: Text(
+                    item.workId == null ? l10n.linkWork : l10n.seeWork,
+                    style: BabelText.body(14, color: BabelColors.textPrimary),
+                  ),
+                ),
                 TextButton.icon(
                   onPressed: () => showReviewSheet(context, item),
                   icon: Icon(Icons.star_border, color: BabelColors.gold),
@@ -447,15 +566,173 @@ class _BookActionsState extends ConsumerState<_BookActions> {
                 ),
               ],
             ),
-            TextButton(
-              onPressed: _progress == null ? _remove : null,
-              child: Text(
-                l10n.removeFromLibrary,
-                style: BabelText.body(14, color: BabelColors.dustyRose),
-              ),
+            Wrap(
+              alignment: WrapAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: _hide,
+                  child: Text(
+                    item.hidden == true ? l10n.unhideBook : l10n.hideBook,
+                    style: BabelText.body(14, color: BabelColors.textSecondary),
+                  ),
+                ),
+                TextButton(
+                  onPressed: _progress == null ? _remove : null,
+                  child: Text(
+                    l10n.removeFromLibrary,
+                    style: BabelText.body(14, color: BabelColors.dustyRose),
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              l10n.removeKeepsData,
+              textAlign: TextAlign.center,
+              style: BabelText.body(11),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Every book, a status, or a shelf; and the hidden books when asked.
+class _Filters extends StatelessWidget {
+  const _Filters({
+    required this.filter,
+    required this.shelves,
+    required this.hiddenCount,
+    required this.showHidden,
+    required this.onFilter,
+    required this.onShowHidden,
+    required this.onNewShelf,
+  });
+
+  final Object? filter;
+  final List<Shelf> shelves;
+  final int hiddenCount;
+  final bool showHidden;
+  final ValueChanged<Object?> onFilter;
+  final ValueChanged<bool> onShowHidden;
+  final VoidCallback onNewShelf;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    Widget chip(String label, Object? value, {VoidCallback? onLongPress}) {
+      final selected = filter == value;
+      return Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: GestureDetector(
+          onLongPress: onLongPress,
+          child: ChoiceChip(
+            label: Text(label),
+            selected: selected,
+            showCheckmark: false,
+            labelStyle: BabelText.body(
+              13,
+              color: selected ? BabelColors.canvas : BabelColors.textPrimary,
+            ),
+            selectedColor: BabelColors.textPrimary,
+            backgroundColor: BabelColors.canvas,
+            side: BorderSide(color: BabelColors.border),
+            onSelected: (_) => onFilter(selected ? null : value),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              children: [
+                chip(l10n.filterAll, null),
+                for (final status in [
+                  ReadingStatus.reading,
+                  ReadingStatus.toRead,
+                  ReadingStatus.finished,
+                  ReadingStatus.abandoned,
+                ])
+                  chip(statusLabel(l10n, status), status),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: Icon(
+                    Icons.shelves,
+                    size: 18,
+                    color: BabelColors.textSecondary,
+                  ),
+                ),
+                for (final shelf in shelves)
+                  chip(
+                    shelf.name,
+                    shelf.id,
+                    onLongPress: () => showShelfEditor(context, shelf),
+                  ),
+                ActionChip(
+                  avatar: Icon(Icons.add, size: 16, color: BabelColors.gold),
+                  label: Text(l10n.shelfNew),
+                  labelStyle: BabelText.body(13, color: BabelColors.gold),
+                  backgroundColor: BabelColors.canvas,
+                  side: BorderSide(
+                    color: BabelColors.gold.withValues(alpha: 0.6),
+                  ),
+                  onPressed: onNewShelf,
+                ),
+              ],
+            ),
+          ),
+          if (filter is String)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
+              child: TextButton.icon(
+                onPressed: () {
+                  final shelf = shelves
+                      .where((s) => s.id == filter)
+                      .firstOrNull;
+                  if (shelf != null) showShelfEditor(context, shelf);
+                },
+                icon: Icon(
+                  Icons.tune,
+                  size: 16,
+                  color: BabelColors.textSecondary,
+                ),
+                label: Text(
+                  l10n.shelfManage,
+                  style: BabelText.body(13, color: BabelColors.textSecondary),
+                ),
+              ),
+            ),
+          if (hiddenCount > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: SwitchListTile(
+                dense: true,
+                value: showHidden,
+                activeThumbColor: BabelColors.gold,
+                title: Text(
+                  '${l10n.showHidden} ($hiddenCount)',
+                  style: BabelText.body(13, color: BabelColors.textPrimary),
+                ),
+                onChanged: onShowHidden,
+              ),
+            ),
+        ],
       ),
     );
   }
