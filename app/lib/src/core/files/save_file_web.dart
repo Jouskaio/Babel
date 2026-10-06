@@ -34,3 +34,6 @@ Future<Uint8List?> readLocalBook(String sha256, String extension) async => null;
 
 /// Browsers do not keep the books they open.
 const keepsBooksOffline = false;
+
+/// Nothing is kept in the browser.
+Future<void> deleteLocalBook(String sha256, String extension) async {}

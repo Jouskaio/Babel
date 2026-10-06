@@ -30,11 +30,28 @@ class FileTransfer {
 
   Uri _uri(String path) => Uri.parse('${AppConfig.apiBaseUrl}$path');
 
+  /// Network failures become API errors without a status, like the generated client's,
+  /// so screens say "no connection" rather than "this file is broken".
+  static Future<T> _network<T>(Future<T> Function() call) async {
+    try {
+      return await call();
+    } on http.ClientException catch (error, stack) {
+      throw ApiException.withInner(0, error.message, error, stack);
+    } on TimeoutException catch (error, stack) {
+      throw ApiException.withInner(0, 'timeout', error, stack);
+    }
+  }
+
   /// Imports [file] into the library. [onProgress] receives a value between 0 and 1.
   Future<ImportResponse> upload(
     XFile file, {
     void Function(double)? onProgress,
-  }) async {
+  }) => _network(() => _upload(file, onProgress));
+
+  Future<ImportResponse> _upload(
+    XFile file,
+    void Function(double)? onProgress,
+  ) async {
     var response = await _sendUpload(file, onProgress);
     if (response.statusCode == 401 && await _refresh()) {
       response = await _sendUpload(file, onProgress);
@@ -68,7 +85,12 @@ class FileTransfer {
   Future<String> download(
     LibraryItemResponse item, {
     void Function(double)? onProgress,
-  }) async {
+  }) => _network(() => _download(item, onProgress));
+
+  Future<String> _download(
+    LibraryItemResponse item,
+    void Function(double)? onProgress,
+  ) async {
     final response = await _client.send(
       http.Request('GET', _uri('/v1/files/${item.sha256}')),
     );
@@ -99,14 +121,22 @@ class FileTransfer {
   Future<Uint8List> open(
     LibraryItemResponse item, {
     void Function(double)? onProgress,
-  }) async {
+  }) => _network(() => _open(item, onProgress));
+
+  Future<Uint8List> _open(
+    LibraryItemResponse item,
+    void Function(double)? onProgress,
+  ) async {
     // A CBR (RAR) is read as the CBZ the server converts it to.
     final comic = item.format == BookFormat.cbr;
     final extension = comic ? 'cbz' : item.format.value;
     final local = await readLocalBook(item.sha256, extension);
-    if (local != null) return local;
+    // A copy of another size is incomplete: it is fetched again (converted comics
+    // have their own size).
+    if (local != null && (comic || local.length == item.size)) return local;
+    if (local != null) await deleteLocalBook(item.sha256, extension);
     if (keepsBooksOffline && !comic) {
-      await download(item, onProgress: onProgress);
+      await _download(item, onProgress);
       return (await readLocalBook(item.sha256, extension))!;
     }
     final response = await _client.send(
