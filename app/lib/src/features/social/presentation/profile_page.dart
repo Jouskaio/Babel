@@ -11,6 +11,7 @@ import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../library/application/library_controller.dart';
+import '../../stats/application/stats_providers.dart';
 import '../application/social_providers.dart';
 import 'handle_card.dart';
 import 'social_widgets.dart';
@@ -99,7 +100,9 @@ class ProfilePage extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
+          const _YearCard(),
+          const SizedBox(height: 24),
           if (profile.hasValue && handle == null) ...[
             const HandleCard(),
             const SizedBox(height: 24),
@@ -119,7 +122,7 @@ class _Stat extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      Text('$value', style: BabelText.title(40)),
+      Text('$value', style: BabelText.figure(40)),
       Text(
         label.toUpperCase(),
         style: BabelText.label(9, color: BabelColors.textSecondary),
@@ -286,6 +289,57 @@ class _FriendsSectionState extends ConsumerState<_FriendsSection> {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// "Mon année de lecture": this year's books read, opening the statistics.
+class _YearCard extends ConsumerWidget {
+  const _YearCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final year = DateTime.now().year;
+    final stats = ref.watch(yearStatsProvider(year)).value;
+    return Material(
+      color: BabelColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: BorderSide(color: BabelColors.gold.withValues(alpha: 0.6)),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: () => context.push(Routes.stats),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${l10n.statsTitle} · $year'.toUpperCase(),
+                      style: BabelText.label(10),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      [
+                        l10n.statsFinished(stats?.finished.length ?? 0),
+                        if (stats != null && stats.readingDays > 0)
+                          l10n.statsDays(stats.readingDays),
+                      ].join(' · '),
+                      style: BabelText.heading(19),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: BabelColors.gold),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
