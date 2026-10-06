@@ -82,6 +82,9 @@ String parameterToString(dynamic value) {
   if (value is IdentityProvider) {
     return IdentityProviderTypeTransformer().encode(value).toString();
   }
+  if (value is KavitaStatus) {
+    return KavitaStatusTypeTransformer().encode(value).toString();
+  }
   if (value is LinkKind) {
     return LinkKindTypeTransformer().encode(value).toString();
   }

@@ -13,6 +13,7 @@ part of babel_api_client;
 class UserResponse {
   /// Returns a new [UserResponse] instance.
   UserResponse({
+    this.admin = false,
     required this.createdAt,
     required this.displayName,
     required this.email,
@@ -20,8 +21,12 @@ class UserResponse {
     required this.hasPassword,
     required this.id,
     required this.locale,
+    this.premium = false,
     this.providers = const [],
   });
+
+  /// Manages the server and premium accounts
+  bool admin;
 
   DateTime createdAt;
 
@@ -37,10 +42,14 @@ class UserResponse {
 
   UserResponseLocaleEnum locale;
 
+  /// Administrators are premium too
+  bool premium;
+
   List<IdentityProvider> providers;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserResponse &&
+    other.admin == admin &&
     other.createdAt == createdAt &&
     other.displayName == displayName &&
     other.email == email &&
@@ -48,11 +57,13 @@ class UserResponse {
     other.hasPassword == hasPassword &&
     other.id == id &&
     other.locale == locale &&
+    other.premium == premium &&
     _deepEquality.equals(other.providers, providers);
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (admin.hashCode) +
     (createdAt.hashCode) +
     (displayName.hashCode) +
     (email.hashCode) +
@@ -60,13 +71,15 @@ class UserResponse {
     (hasPassword.hashCode) +
     (id.hashCode) +
     (locale.hashCode) +
+    (premium.hashCode) +
     (providers.hashCode);
 
   @override
-  String toString() => 'UserResponse[createdAt=$createdAt, displayName=$displayName, email=$email, emailVerified=$emailVerified, hasPassword=$hasPassword, id=$id, locale=$locale, providers=$providers]';
+  String toString() => 'UserResponse[admin=$admin, createdAt=$createdAt, displayName=$displayName, email=$email, emailVerified=$emailVerified, hasPassword=$hasPassword, id=$id, locale=$locale, premium=$premium, providers=$providers]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'admin'] = this.admin;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'display_name'] = this.displayName;
       json[r'email'] = this.email;
@@ -74,6 +87,7 @@ class UserResponse {
       json[r'has_password'] = this.hasPassword;
       json[r'id'] = this.id;
       json[r'locale'] = this.locale;
+      json[r'premium'] = this.premium;
       json[r'providers'] = this.providers;
     return json;
   }
@@ -97,6 +111,7 @@ class UserResponse {
       }());
 
       return UserResponse(
+        admin: mapValueOfType<bool>(json, r'admin') ?? false,
         createdAt: mapDateTime(json, r'created_at', r'')!,
         displayName: mapValueOfType<String>(json, r'display_name')!,
         email: mapValueOfType<String>(json, r'email')!,
@@ -104,6 +119,7 @@ class UserResponse {
         hasPassword: mapValueOfType<bool>(json, r'has_password')!,
         id: mapValueOfType<String>(json, r'id')!,
         locale: UserResponseLocaleEnum.fromJson(json[r'locale'])!,
+        premium: mapValueOfType<bool>(json, r'premium') ?? false,
         providers: IdentityProvider.listFromJson(json[r'providers']),
       );
     }
