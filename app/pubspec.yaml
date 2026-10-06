@@ -47,7 +47,26 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   shared_preferences_platform_interface: ^2.4.2
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
   generate: true
+
+# App icons, from the Penpot design ("00 Foundations › app icon"):
+# dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: assets/icon/babel.png
+  android: true
+  adaptive_icon_background: "#0E1424"
+  adaptive_icon_foreground: assets/icon/babel_foreground.png
+  ios: true
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: assets/icon/babel.png
+    background_color: "#0E1424"
+    theme_color: "#0E1424"
+  macos:
+    generate: true
+    image_path: assets/icon/babel.png

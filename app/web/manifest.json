@@ -8,6 +8,15 @@
     "description": "Babel — your personal and social library.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "share_target": {
+        "action": "/import-link",
+        "method": "GET",
+        "params": {
+            "title": "title",
+            "text": "text",
+            "url": "url"
+        }
+    },
     "icons": [
         {
             "src": "icons/Icon-192.png",
@@ -31,14 +40,5 @@
             "type": "image/png",
             "purpose": "maskable"
         }
-    ],
-    "share_target": {
-        "action": "/import-link",
-        "method": "GET",
-        "params": {
-            "title": "title",
-            "text": "text",
-            "url": "url"
-        }
-    }
+    ]
 }
