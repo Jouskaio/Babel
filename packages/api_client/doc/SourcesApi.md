@@ -17,6 +17,7 @@ Method | HTTP request | Description
 [**importSource**](SourcesApi.md#importsource) | **POST** /v1/sources/{source_id}/import | Import All
 [**importSourceEntry**](SourcesApi.md#importsourceentry) | **POST** /v1/sources/{source_id}/entries/{entry_id}/import | Import Entry
 [**scanSource**](SourcesApi.md#scansource) | **POST** /v1/sources/{source_id}/scan | Scan Source
+[**searchSources**](SourcesApi.md#searchsources) | **GET** /v1/sources/search | Search Sources
 
 
 # **checkSource**
@@ -402,6 +403,55 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**SourceDetailResponse**](SourceDetailResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **searchSources**
+> List<SourceMatchResponse> searchSources(q)
+
+Search Sources
+
+Books of your sources matching a title or an author, to import the one you want.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SourcesApi();
+final q = q_example; // String | 
+
+try {
+    final result = api_instance.searchSources(q);
+    print(result);
+} catch (e) {
+    print('Exception when calling SourcesApi->searchSources: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **q** | **String**|  | 
+
+### Return type
+
+[**List<SourceMatchResponse>**](SourceMatchResponse.md)
 
 ### Authorization
 

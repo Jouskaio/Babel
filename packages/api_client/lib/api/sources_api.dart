@@ -488,4 +488,65 @@ class SourcesApi {
     }
     return null;
   }
+
+  /// Search Sources
+  ///
+  /// Books of your sources matching a title or an author, to import the one you want.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] q (required):
+  Future<Response> searchSourcesWithHttpInfo(String q,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/sources/search';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+      queryParams.addAll(_queryParams('', 'q', q));
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Search Sources
+  ///
+  /// Books of your sources matching a title or an author, to import the one you want.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] q (required):
+  Future<List<SourceMatchResponse>?> searchSources(String q,) async {
+    final response = await searchSourcesWithHttpInfo(q,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<SourceMatchResponse>') as List)
+        .cast<SourceMatchResponse>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
 }

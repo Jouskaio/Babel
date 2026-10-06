@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Query, status
 from pydantic import BaseModel, Field, model_validator
 
 from babel_api.api.dependencies import CurrentUserId, DeviceHeader, SourceServiceDep
@@ -176,6 +176,40 @@ async def check_source(
     """Try a source before adding it: nothing is saved."""
     books = await sources.check(body.kind, body.settings() or {}, body.token)
     return CheckSourceResponse(books=books)
+
+
+class SourceMatchResponse(BaseModel):
+    source_id: UUID
+    source_name: str
+    entry: SourceEntryResponse
+
+
+@router.get("/search", operation_id="searchSources")
+async def search_sources(
+    user_id: CurrentUserId,
+    sources: SourceServiceDep,
+    q: Annotated[str, Query(min_length=2, max_length=200)],
+) -> list[SourceMatchResponse]:
+    """Books of your sources matching a title or an author, to import the one you want."""
+    return [
+        SourceMatchResponse(
+            source_id=source.id,
+            source_name=source.name,
+            entry=SourceEntryResponse(
+                id=e.id,
+                name=e.name,
+                path=e.path,
+                size=e.size,
+                status=e.status,
+                item_id=e.item_id,
+                title=e.title,
+                authors=list(e.authors),
+                cover_path=e.cover_path,
+                format=e.format,
+            ),
+        )
+        for source, e in await sources.search(user_id, q)
+    ]
 
 
 @router.get("/{source_id}", operation_id="getSource")

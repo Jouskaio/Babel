@@ -54,6 +54,34 @@ _GOOGLE_BOOKS = "https://www.googleapis.com/books/v1/volumes"
 _TAGS = re.compile(r"<[^>]+>")
 
 
+_VOLUME_WORDS = {"vol", "volume", "tome", "band", "no", "n"}
+
+
+def _words(text: str) -> list[str]:
+    """Lower-case words and numbers; "03" and "3" are the same number."""
+    found = re.findall(r"\w+", text.lower())
+    return [str(int(w)) if w.isdigit() else w for w in found]
+
+
+def _best_blurb(
+    volumes: list[dict[str, Any]], wanted: set[str], language: str | None
+) -> str | None:
+    """The fullest description among [volumes], for the right volume and language."""
+    best: tuple[int, str] | None = None
+    for volume in volumes:
+        text = _clean_blurb(volume.get("description"))
+        if not text:
+            continue
+        numbers = {w for w in _words(str(volume.get("title", ""))) if w.isdigit()}
+        if wanted and numbers and wanted.isdisjoint(numbers):
+            continue  # another volume of the series: its story is not this one's
+        score = len(text) + (500 if wanted and wanted & numbers else 0)
+        score += 1000 if language and volume.get("language") == language else 0
+        if best is None or score > best[0]:
+            best = (score, text)
+    return best[1] if best else None
+
+
 def _clean_blurb(value: Any) -> str | None:
     """Google Books descriptions carry HTML: paragraphs and line breaks become blank lines."""
     if not isinstance(value, str):
@@ -231,33 +259,53 @@ class OpenLibrarySource:
     async def blurb(
         self, isbn13: str | None, title: str, authors: tuple[str, ...], language: str | None
     ) -> str | None:
-        """The description Google Books has for this book: by ISBN, else by title and author
-        (in [language] when known). Open Library often has a single line, or none."""
-        queries = [f"isbn:{isbn13}"] if isbn13 else []
+        """The description Google Books has for this book: by ISBN, else by title and author,
+        else (for a volume of a series) by the series. Open Library often has one line."""
+        words = _words(title)
+        volume = {w for w in words if w.isdigit()}
+        core = [w for w in words if not w.isdigit() and w not in _VOLUME_WORDS]
+        author = authors[0] if authors else ""
+        attempts: list[tuple[str, set[str]]] = []
+        if isbn13:
+            attempts.append((f"isbn:{isbn13}", set()))
         if title:
-            by = f'intitle:"{title}"' + (f' inauthor:"{authors[0]}"' if authors else "")
-            queries.append(by)
-        for query in queries:
-            params: dict[str, str | int] = {"q": query, "maxResults": 5, "printType": "books"}
-            if self._google_key:
-                params["key"] = self._google_key
-            if language and not query.startswith("isbn:"):
-                params["langRestrict"] = language
-            try:
-                response = await self._client.get(_GOOGLE_BOOKS, params=params)
-                response.raise_for_status()
-            except httpx.HTTPError:
-                continue
-            best = ""
-            payload: dict[str, Any] = response.json()
-            for item in _dicts(payload.get("items")):
-                info = _dicts([item.get("volumeInfo")])
-                text = _clean_blurb(info[0].get("description")) if info else None
-                if text and len(text) > len(best):
-                    best = text
-            if best:
-                return best
+            attempts.append((f"{title} {author}".strip(), volume))
+        if volume and core:
+            # "Homunculus 3": the series is described even when the volume is not.
+            attempts.append((f"{' '.join(core)} {author}".strip(), set()))
+        for query, wanted in attempts:
+            # An ISBN names one book: no need to try other languages.
+            langs = [None] if query.startswith("isbn:") or not language else [language, None]
+            for lang in langs:
+                found = await self._google(query, lang, None if query.startswith("isbn:") else core)
+                text = _best_blurb(found, wanted, lang)
+                if text:
+                    return text
         return None
+
+    async def _google(
+        self, query: str, language: str | None, core: list[str] | None
+    ) -> list[dict[str, Any]]:
+        params: dict[str, str | int] = {"q": query, "maxResults": 10, "printType": "books"}
+        if self._google_key:
+            params["key"] = self._google_key
+        if language and core is not None:
+            params["langRestrict"] = language
+        try:
+            response = await self._client.get(_GOOGLE_BOOKS, params=params)
+            response.raise_for_status()
+        except httpx.HTTPError:
+            return []
+        payload: dict[str, Any] = response.json()
+        volumes = [
+            dict(info[0])
+            for item in _dicts(payload.get("items"))
+            if (info := _dicts([item.get("volumeInfo")]))
+        ]
+        if core:
+            # A search finds neighbours too: the title must hold the title's words.
+            volumes = [v for v in volumes if set(core) <= set(_words(str(v.get("title", ""))))]
+        return volumes
 
     async def cover(self, cover_id: int, size: CoverSize) -> CoverImage | None:
         # default=false: a missing cover is a 404 instead of a blank placeholder image.
