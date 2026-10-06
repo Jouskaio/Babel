@@ -140,6 +140,24 @@ class SharedShelf:
     books: tuple[tuple[str, tuple[str, ...]], ...]
 
 
+@dataclass(frozen=True, slots=True)
+class BookNote:
+    """Another reader's note on a book, to place in the viewer's own edition."""
+
+    id: UUID
+    user_id: UUID
+    quote: str
+    note: str | None
+    chapter: int
+    region: str | None
+    percent: float | None
+    prefix: str | None
+    suffix: str | None
+    same_file: bool
+    language: str | None  # of the edition it was written in, when known
+    at: datetime
+
+
 class FeedKind(StrEnum):
     READING = "reading"
     FINISHED = "finished"

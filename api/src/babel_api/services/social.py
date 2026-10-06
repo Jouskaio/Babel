@@ -18,6 +18,7 @@ from babel_api.domain.files import LibraryItem
 from babel_api.domain.ports import FileRepository
 from babel_api.domain.social import (
     Audience,
+    BookNote,
     BookTrace,
     FeedEntry,
     FeedKind,
@@ -363,6 +364,19 @@ class SocialService:
         notes = await self._social.work_notes(work_id, viewer, friends, hidden, 100)
         people = list({r.user_id for r in reviews} | {n.user_id for n in notes})
         return WorkReaders(reviews, notes, await self._social.profiles(people))
+
+    async def book_notes(
+        self, viewer: UUID, item_id: UUID
+    ) -> tuple[list[BookNote], dict[UUID, Profile]]:
+        """Other readers' notes to show in the viewer's copy of a book, whatever edition
+        they were written in."""
+        item = await self._own_item(viewer, item_id)
+        hidden = list(await self._social.hidden(viewer))
+        friends = await self._social.friends(viewer)
+        notes = await self._social.book_notes(
+            item.work_id, item.file.sha256, viewer, friends, hidden, 500
+        )
+        return notes, await self._social.profiles(list({n.user_id for n in notes}))
 
     # ------------------------------------------------------------ history
     async def history(self, user_id: UUID) -> list[BookTrace]:

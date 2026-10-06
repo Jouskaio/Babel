@@ -81,6 +81,9 @@ def test_every_edition_of_a_work_shares_its_reviews_and_notes(
                 "note": "!",
                 "visibility": "friends",
                 "client_time": "2026-10-05T10:00:00+00:00",
+                "percent": 61.5,
+                "prefix": "  Reader,   she said:",
+                "suffix": "and no net ensnares me",
             },
         },
     )
@@ -100,6 +103,18 @@ def test_every_edition_of_a_work_shares_its_reviews_and_notes(
     assert [(n["reader"]["handle"], n["quote"]) for n in seen_by_ada["notes"]] == [
         ("bob", "I am no bird")
     ]
+
+    # In her own copy, Ada gets Bob's note with what places it in another edition.
+    [note] = client.get(f"/v1/library/{ada_book['id']}/reader-notes", headers=ada).json()
+    assert note["reader"]["handle"] == "bob"
+    assert (note["quote"], note["chapter"], note["percent"]) == ("I am no bird", 3, 61.5)
+    assert (note["prefix"], note["suffix"]) == ("Reader, she said:", "and no net ensnares me")
+    assert (note["same_file"], note["language"]) == (False, "fr")
+    # Bob does not get his own notes back, and the note is friends-only.
+    assert client.get(f"/v1/library/{bob_book['id']}/reader-notes", headers=bob).json() == []
+    dan_book = add(client, dan, title="Jane Eyre", author="Charlotte Brontë", isbn=None)
+    assert client.get(f"/v1/library/{dan_book['id']}/reader-notes", headers=dan).json() == []
+    assert client.get(f"/v1/library/{bob_book['id']}/reader-notes", headers=ada).status_code == 404
 
     # A stranger sees public content only; a blocked reader nothing of the blocker.
     seen_by_dan = client.get(f"/v1/catalog/works/{work}/readers", headers=dan).json()
