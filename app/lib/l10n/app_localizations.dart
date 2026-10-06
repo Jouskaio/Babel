@@ -2593,6 +2593,216 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Tracez un cadre autour de la case à annoter.'**
   String get comicAnnotateHint;
+
+  /// No description provided for @kavitaTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kavita'**
+  String get kavitaTitle;
+
+  /// No description provided for @kavitaCreating.
+  ///
+  /// In fr, this message translates to:
+  /// **'Création de votre accès Kavita…'**
+  String get kavitaCreating;
+
+  /// No description provided for @kavitaFollow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivre'**
+  String get kavitaFollow;
+
+  /// No description provided for @kavitaExists.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un compte Kavita existe déjà avec votre e-mail sur {host} : liez-le avec son identifiant et son mot de passe.'**
+  String kavitaExists(String host);
+
+  /// No description provided for @kavitaFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La création de votre accès Kavita n\'a pas abouti.'**
+  String get kavitaFailed;
+
+  /// No description provided for @kavitaLinked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lié à {host} · compte {username}'**
+  String kavitaLinked(String host, String username);
+
+  /// No description provided for @kavitaManaged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte créé pour vous par Babel, avec accès à toutes les bibliothèques.'**
+  String get kavitaManaged;
+
+  /// No description provided for @kavitaUnlink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délier'**
+  String get kavitaUnlink;
+
+  /// No description provided for @kavitaUnlinkConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délier votre Kavita ? Les livres déjà importés restent dans votre bibliothèque.'**
+  String get kavitaUnlinkConfirm;
+
+  /// No description provided for @kavitaUnlinkManaged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer l\'accès Kavita créé par Babel ? Les livres déjà importés restent dans votre bibliothèque.'**
+  String get kavitaUnlinkManaged;
+
+  /// No description provided for @kavitaHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos bibliothèques Kavita dans Babel. Le mot de passe sert une seule fois à créer une clé « Babel » sur votre compte, il n\'est pas conservé.'**
+  String get kavitaHint;
+
+  /// No description provided for @kavitaUrl.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse de votre Kavita'**
+  String get kavitaUrl;
+
+  /// No description provided for @kavitaUsername.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant Kavita'**
+  String get kavitaUsername;
+
+  /// No description provided for @kavitaPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe Kavita'**
+  String get kavitaPassword;
+
+  /// No description provided for @kavitaPasswordHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utilisé une seule fois, jamais enregistré.'**
+  String get kavitaPasswordHelp;
+
+  /// No description provided for @kavitaWrongCredentials.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant ou mot de passe Kavita incorrect.'**
+  String get kavitaWrongCredentials;
+
+  /// No description provided for @kavitaNotKavita.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette adresse ne répond pas comme un serveur Kavita.'**
+  String get kavitaNotKavita;
+
+  /// No description provided for @kavitaUnreachable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kavita n\'a pas pu être joint.'**
+  String get kavitaUnreachable;
+
+  /// No description provided for @kavitaLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lier mon Kavita'**
+  String get kavitaLink;
+
+  /// No description provided for @kavitaCreateMine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer mon accès sur le Kavita de Babel'**
+  String get kavitaCreateMine;
+
+  /// No description provided for @kavitaSetupTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre accès Kavita'**
+  String get kavitaSetupTitle;
+
+  /// No description provided for @kavitaSetupHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel crée votre compte sur {host} et y relie votre bibliothèque. Vous pouvez quitter cette page.'**
+  String kavitaSetupHint(String host);
+
+  /// No description provided for @kavitaStepCreating.
+  ///
+  /// In fr, this message translates to:
+  /// **'Création du compte'**
+  String get kavitaStepCreating;
+
+  /// No description provided for @kavitaStepLinking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Création de la clé Babel'**
+  String get kavitaStepLinking;
+
+  /// No description provided for @kavitaStepImporting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture du catalogue'**
+  String get kavitaStepImporting;
+
+  /// No description provided for @kavitaStepReady.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prêt'**
+  String get kavitaStepReady;
+
+  /// No description provided for @kavitaOpenLibrary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir mes sources'**
+  String get kavitaOpenLibrary;
+
+  /// No description provided for @kavitaWait.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quelques secondes suffisent en général.'**
+  String get kavitaWait;
+
+  /// No description provided for @adminTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Administration'**
+  String get adminTitle;
+
+  /// No description provided for @adminPremiumHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptes premium : accès au Kavita de Babel, créé automatiquement.'**
+  String get adminPremiumHint;
+
+  /// No description provided for @adminRole.
+  ///
+  /// In fr, this message translates to:
+  /// **'Admin'**
+  String get adminRole;
+
+  /// No description provided for @adminKavitaReady.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kavita prêt'**
+  String get adminKavitaReady;
+
+  /// No description provided for @adminKavitaFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kavita en échec'**
+  String get adminKavitaFailed;
+
+  /// No description provided for @adminKavitaExists.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kavita existant'**
+  String get adminKavitaExists;
+
+  /// No description provided for @adminKavitaCreating.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kavita en cours'**
+  String get adminKavitaCreating;
 }
 
 class _AppLocalizationsDelegate

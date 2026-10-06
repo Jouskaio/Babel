@@ -15,6 +15,8 @@ import '../features/catalog/presentation/scan_page.dart';
 import '../features/catalog/presentation/search_page.dart';
 import '../features/catalog/presentation/work_page.dart';
 import '../features/home/presentation/home_page.dart';
+import '../features/kavita/presentation/admin_page.dart';
+import '../features/kavita/presentation/kavita_setup_page.dart';
 import '../features/landing/presentation/landing_page.dart';
 import '../features/library/presentation/library_page.dart';
 import '../features/library/presentation/link_import_page.dart';
@@ -39,6 +41,8 @@ abstract final class Routes {
   static const profile = '/profile';
   static const friends = '/friends';
   static String reader(String handle) => '/readers/$handle';
+  static const kavita = '/kavita';
+  static const admin = '/admin';
   static const search = '/search';
   static const library = '/library';
   static const scan = '/scan';
@@ -126,6 +130,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: Routes.account, builder: (_, _) => const AccountPage()),
       GoRoute(path: Routes.friends, builder: (_, _) => const FriendsPage()),
+      GoRoute(path: Routes.kavita, builder: (_, _) => const KavitaSetupPage()),
+      GoRoute(path: Routes.admin, builder: (_, _) => const AdminPage()),
       GoRoute(
         path: '/readers/:handle',
         builder: (_, state) =>

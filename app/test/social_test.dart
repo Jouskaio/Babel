@@ -1,6 +1,8 @@
 import 'package:babel/src/features/home/presentation/home_page.dart';
+import 'package:babel/src/features/social/presentation/book_social_sheets.dart';
 import 'package:babel/src/features/social/presentation/profile_page.dart';
 import 'package:babel/src/features/social/presentation/reader_profile_page.dart';
+import 'package:babel_api_client/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
@@ -10,6 +12,7 @@ import 'fake_server.dart';
 import 'helpers.dart';
 
 void main() {
+  reviewTests();
   setUp(() {
     SharedPreferencesAsyncPlatform.instance =
         InMemorySharedPreferencesAsync.empty();
@@ -113,6 +116,33 @@ void main() {
       server.socialCalls,
       contains('POST /v1/social/recommendations/r1/read'),
     );
+  });
+}
+
+// Kept apart: a sheet opened from a button.
+void reviewTests() {
+  testWidgets('the review sheet opens on a book without a review', (
+    tester,
+  ) async {
+    SharedPreferencesAsyncPlatform.instance =
+        InMemorySharedPreferencesAsync.empty();
+    final server = FakeServer();
+    final item = LibraryItemResponse.fromJson(libraryItem('i1', 'Jane Eyre'))!;
+    await tester.pumpWidget(
+      wrap(
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showReviewSheet(context, item),
+            child: const Text('open'),
+          ),
+        ),
+        overrides: server.overrides,
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await settle(tester);
+    expect(find.text('Mon avis'), findsOneWidget);
+    expect(find.text('Supprimer mon avis'), findsNothing);
   });
 }
 
