@@ -1,3 +1,4 @@
+import 'package:babel_api_client/api.dart' show BookNoteResponse;
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/babel_colors.dart';
@@ -13,10 +14,16 @@ class PageNotesLayer extends StatefulWidget {
     required this.annotating,
     required this.onRegion,
     required this.onOpen,
+    this.others = const [],
+    this.onOpenOther,
     super.key,
   });
 
   final List<Annotation> notes;
+
+  /// Other readers' notes on this page (same file only: regions match there).
+  final List<BookNoteResponse> others;
+  final ValueChanged<BookNoteResponse>? onOpenOther;
   final bool annotating;
   final ValueChanged<PageRegion> onRegion;
   final ValueChanged<Annotation> onOpen;
@@ -29,6 +36,11 @@ class _PageNotesLayerState extends State<PageNotesLayer> {
   Offset? _start;
   Offset? _end;
 
+  static String _initial(BookNoteResponse note) {
+    final name = note.reader.handle ?? note.reader.displayName;
+    return name.isEmpty ? '?' : '@${name.characters.first.toUpperCase()}';
+  }
+
   static Color _color(Annotation note) =>
       note.color == HighlightColor.none ? BabelColors.gold : note.color.color;
 
@@ -39,6 +51,45 @@ class _PageNotesLayerState extends State<PageNotesLayer> {
       final stroke = (size.width / 200).clamp(1.0, 8.0);
       return Stack(
         children: [
+          for (final note in widget.others)
+            if (PageRegion.parse(note.region) case final region?)
+              Positioned(
+                left: region.x * size.width,
+                top: region.y * size.height,
+                width: region.width * size.width,
+                height: region.height * size.height,
+                child: GestureDetector(
+                  onTap: () => widget.onOpenOther?.call(note),
+                  // Another reader's frame: thin and quiet, with their initial.
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: BabelColors.textSecondary,
+                        width: stroke * 0.75,
+                      ),
+                    ),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      // Sized with the page, so it stays small once fitted on screen.
+                      child: Container(
+                        margin: EdgeInsets.all(size.width * 0.006),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: size.width * 0.008,
+                          vertical: size.width * 0.002,
+                        ),
+                        color: BabelColors.surface.withValues(alpha: 0.85),
+                        child: Text(
+                          _initial(note),
+                          style: TextStyle(
+                            fontSize: size.width * 0.03,
+                            color: BabelColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           for (final note in widget.notes)
             if (PageRegion.parse(note.region) case final region?)
               Positioned(

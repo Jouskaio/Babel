@@ -39,3 +39,11 @@ class NotePlace {
 
   bool get found => chapter != null;
 }
+
+/// Where another reader's note goes in a book of pages (comic, PDF): on its page when
+/// written in this very file, otherwise near the same place in the book.
+NotePlace pagePlace(BookNoteResponse note) {
+  if (note.sameFile) return NotePlace.exact(note.chapter);
+  final percent = note.percent?.toDouble();
+  return percent != null ? NotePlace.near(percent) : const NotePlace.nowhere();
+}
