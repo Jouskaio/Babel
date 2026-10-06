@@ -294,6 +294,24 @@ class AuthService:
         await self._users.commit()
         await self._mailer.send(emails.password_changed(user.email, user.display_name, user.locale))
 
+    async def list_users(self) -> list[User]:
+        return await self._users.list_users()
+
+    async def set_premium(self, user_id: UUID, premium: bool) -> User:
+        await self.get_user(user_id)
+        user = await self._users.set_premium(user_id, premium)
+        await self._users.commit()
+        return user
+
+    async def ensure_admin(self, user: User, admin_emails: set[str]) -> User:
+        """Marks the account as administrator when its email is listed; True when it just
+        became one."""
+        if (user.email in admin_emails) == user.admin:
+            return user
+        await self._users.sync_admins(admin_emails)
+        await self._users.commit()
+        return await self.get_user(user.id)
+
     async def delete_account(self, user_id: UUID) -> None:
         await self._users.delete(user_id)
         await self._users.commit()

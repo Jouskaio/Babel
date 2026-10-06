@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Response, status
 
-from babel_api.api.dependencies import AuthServiceDep, CurrentUserId
+from babel_api.api.dependencies import AuthServiceDep, CurrentUserId, KavitaServiceDep
 from babel_api.api.v1.schemas import ChangePasswordRequest, UpdateProfileRequest, UserResponse
 
 router = APIRouter(prefix="/me", tags=["account"])
@@ -31,8 +31,10 @@ async def change_password(
 
 
 @router.delete("", operation_id="deleteMe", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_me(user_id: CurrentUserId, auth: AuthServiceDep) -> None:
+async def delete_me(user_id: CurrentUserId, auth: AuthServiceDep, kavita: KavitaServiceDep) -> None:
     """Delete the account and all its data. This cannot be undone."""
+    # The account Babel made on its Kavita goes too.
+    await kavita.remove_managed(user_id)
     await auth.delete_account(user_id)
 
 

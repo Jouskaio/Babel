@@ -15,6 +15,7 @@ from babel_api.adapters.db.models import (
     FollowRow,
     FriendshipRow,
     IdentityRow,
+    KavitaLinkRow,
     LibraryItemRow,
     ReadingPositionRow,
     RecommendationRow,
@@ -50,6 +51,8 @@ def _to_user(row: UserRow) -> User:
         locale=row.locale,
         email_verified_at=_aware(row.email_verified_at) if row.email_verified_at else None,
         providers=frozenset(IdentityProvider(identity.provider) for identity in row.identities),
+        admin=row.is_admin,
+        premium=row.premium,
     )
 
 
@@ -123,6 +126,24 @@ class SqlUserRepository:
         await self._session.refresh(row, ["identities"])
         return _to_user(row)
 
+    async def set_premium(self, user_id: UUID, premium: bool) -> User:
+        row = await self._session.get_one(UserRow, user_id)
+        row.premium = premium
+        await self._session.flush()
+        await self._session.refresh(row, ["identities"])
+        return _to_user(row)
+
+    async def sync_admins(self, emails: set[str]) -> None:
+        """Marks the accounts listed in BABEL_ADMIN_EMAILS as administrators, only them."""
+        await self._session.execute(
+            update(UserRow).values(is_admin=UserRow.email.in_(sorted(emails)))
+        )
+        await self._session.flush()
+
+    async def list_users(self) -> list[User]:
+        rows = await self._session.scalars(select(UserRow).order_by(UserRow.created_at))
+        return [_to_user(row) for row in rows]
+
     async def delete(self, user_id: UUID) -> None:
         # Explicit deletes: SQLite does not enforce ON DELETE CASCADE by default.
         sources = select(SourceRow.id).where(SourceRow.user_id == user_id)
@@ -132,6 +153,7 @@ class SqlUserRepository:
         await self._session.execute(delete(SourceRow).where(SourceRow.user_id == user_id))
         await self._session.execute(delete(AnnotationRow).where(AnnotationRow.user_id == user_id))
         await self._session.execute(delete(FollowRow).where(FollowRow.user_id == user_id))
+        await self._session.execute(delete(KavitaLinkRow).where(KavitaLinkRow.user_id == user_id))
         for social in (SocialProfileRow, ReviewRow):
             await self._session.execute(delete(social).where(social.user_id == user_id))
         await self._session.execute(

@@ -25,6 +25,14 @@ class User:
     locale: str = "fr"
     email_verified_at: datetime | None = None
     providers: frozenset[IdentityProvider] = field(default_factory=frozenset[IdentityProvider])
+    # Administrators come from BABEL_ADMIN_EMAILS (copied here at startup); premium is
+    # granted by an administrator. Administrators are premium too.
+    admin: bool = False
+    premium: bool = False
+
+    @property
+    def has_premium(self) -> bool:
+        return self.admin or self.premium
 
     @property
     def email_verified(self) -> bool:

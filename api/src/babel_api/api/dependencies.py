@@ -1,6 +1,6 @@
 """Request-scoped dependencies: database session, services and the current user."""
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass
 from datetime import timedelta
 from typing import Annotated
@@ -13,10 +13,12 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from babel_api.adapters.db.catalog_repository import SqlCatalogRepository
 from babel_api.adapters.db.file_repository import SqlFileRepository
 from babel_api.adapters.db.follow_repository import SqlFollowRepository
+from babel_api.adapters.db.kavita_repository import SqlKavitaRepository
 from babel_api.adapters.db.repositories import SqlUserRepository
 from babel_api.adapters.db.social_repository import SqlSocialRepository
 from babel_api.adapters.db.source_repository import SqlSourceRepository
 from babel_api.adapters.db.sync_repository import SqlSyncRepository
+from babel_api.adapters.kavita import KavitaClient
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
 from babel_api.adapters.security.secrets import SecretBox
 from babel_api.adapters.security.tokens import AccessTokenError, AccessTokenIssuer
@@ -39,6 +41,7 @@ from babel_api.services.auth import AuthService
 from babel_api.services.catalog import CatalogService
 from babel_api.services.files import FileService
 from babel_api.services.follows import FollowService
+from babel_api.services.kavita import KavitaProvisioner, KavitaService
 from babel_api.services.links import LinkService
 from babel_api.services.notifications import Notifier
 from babel_api.services.social import SocialService
@@ -67,6 +70,8 @@ class Container:
     secrets: SecretBox
     mailer: Mailer
     pusher: Pusher
+    kavita_client: Callable[[str], KavitaClient]
+    kavita: KavitaProvisioner
 
 
 def get_container(request: Request) -> Container:
@@ -255,3 +260,38 @@ def get_social_service(
 
 
 SocialServiceDep = Annotated[SocialService, Depends(get_social_service)]
+
+
+def make_source_service(
+    container: Container, session: AsyncSession, files: FileService | None = None
+) -> SourceService:
+    return SourceService(
+        SqlSourceRepository(session),
+        SqlFileRepository(session),
+        files or make_file_service(container, session),
+        container.connectors,
+        container.secrets,
+        max_sources=container.settings.max_sources_per_user,
+    )
+
+
+def make_kavita_service(container: Container, session: AsyncSession) -> KavitaService:
+    """Also used in the background, to create accounts on Babel's Kavita."""
+    settings = container.settings
+    return KavitaService(
+        SqlKavitaRepository(session),
+        SqlUserRepository(session),
+        make_source_service(container, session),
+        container.kavita_client,
+        managed_url=settings.kavita_url,
+        admin_key=settings.kavita_admin_key.get_secret_value(),
+    )
+
+
+def get_kavita_service(
+    container: ContainerDep, session: Annotated[AsyncSession, Depends(get_session)]
+) -> KavitaService:
+    return make_kavita_service(container, session)
+
+
+KavitaServiceDep = Annotated[KavitaService, Depends(get_kavita_service)]
