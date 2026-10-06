@@ -450,11 +450,13 @@
         "type": "object"
       },
       "EntityKind": {
-        "description": "What a change is about. Shelves will join this list.",
+        "description": "What a change is about.",
         "enum": [
           "library_item",
           "reading_position",
-          "annotation"
+          "annotation",
+          "shelf",
+          "reading_state"
         ],
         "title": "EntityKind",
         "type": "string"
@@ -555,6 +557,7 @@
       "FeedKind": {
         "enum": [
           "reading",
+          "finished",
           "review",
           "note"
         ],
@@ -935,6 +938,18 @@
             ],
             "title": "Edition Id"
           },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
           "format": {
             "$ref": "#/components/schemas/BookFormat"
           },
@@ -942,6 +957,18 @@
             "format": "uuid",
             "title": "Id",
             "type": "string"
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Progress declared by hand, in percent (not a device position)",
+            "title": "Progress"
           },
           "sha256": {
             "description": "Identifies the file; download it from /v1/files/{sha256}",
@@ -951,6 +978,41 @@
           "size": {
             "title": "Size",
             "type": "integer"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "state_time": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When status or progress last changed (device clock)",
+            "title": "State Time"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReadingStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "title": {
             "title": "Title",
@@ -1431,6 +1493,14 @@
             "description": "Null when the library is not shared with you",
             "title": "Books"
           },
+          "finished": {
+            "description": "Books finished lately",
+            "items": {
+              "$ref": "#/components/schemas/ReadingResponse"
+            },
+            "title": "Finished",
+            "type": "array"
+          },
           "followers": {
             "title": "Followers",
             "type": "integer"
@@ -1476,6 +1546,13 @@
             },
             "title": "Reviews",
             "type": "array"
+          },
+          "shelves": {
+            "items": {
+              "$ref": "#/components/schemas/ShelfResponse"
+            },
+            "title": "Shelves",
+            "type": "array"
           }
         },
         "required": [
@@ -1486,7 +1563,9 @@
           "reading",
           "library",
           "reviews",
-          "notes"
+          "notes",
+          "finished",
+          "shelves"
         ],
         "title": "ReaderPageResponse",
         "type": "object"
@@ -1581,6 +1660,17 @@
         ],
         "title": "ReadingResponse",
         "type": "object"
+      },
+      "ReadingStatus": {
+        "description": "Where a reader is with a book, set by hand or followed from the reading position.",
+        "enum": [
+          "to_read",
+          "reading",
+          "finished",
+          "abandoned"
+        ],
+        "title": "ReadingStatus",
+        "type": "string"
       },
       "RecommendRequest": {
         "properties": {
@@ -2092,6 +2182,31 @@
           "region"
         ],
         "title": "SharedNoteResponse",
+        "type": "object"
+      },
+      "ShelfResponse": {
+        "properties": {
+          "audience": {
+            "$ref": "#/components/schemas/Audience"
+          },
+          "books": {
+            "items": {
+              "$ref": "#/components/schemas/BookTitleResponse"
+            },
+            "title": "Books",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "audience",
+          "books"
+        ],
+        "title": "ShelfResponse",
         "type": "object"
       },
       "SocialProfileResponse": {

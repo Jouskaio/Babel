@@ -286,6 +286,8 @@ class ApiClient {
           return ReadingPositionResponse.fromJson(value);
         case 'ReadingResponse':
           return ReadingResponse.fromJson(value);
+        case 'ReadingStatus':
+          return ReadingStatusTypeTransformer().decode(value);
         case 'RecommendRequest':
           return RecommendRequest.fromJson(value);
         case 'RecommendationResponse':
@@ -312,6 +314,8 @@ class ApiClient {
           return ReviewResponse.fromJson(value);
         case 'SharedNoteResponse':
           return SharedNoteResponse.fromJson(value);
+        case 'ShelfResponse':
+          return ShelfResponse.fromJson(value);
         case 'SocialProfileResponse':
           return SocialProfileResponse.fromJson(value);
         case 'SourceDetailResponse':

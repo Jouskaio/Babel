@@ -60,6 +60,7 @@ doc/ReaderPageResponse.md
 doc/ReaderResponse.md
 doc/ReadingPositionResponse.md
 doc/ReadingResponse.md
+doc/ReadingStatus.md
 doc/RecommendRequest.md
 doc/RecommendationResponse.md
 doc/RefreshRequest.md
@@ -73,6 +74,7 @@ doc/ResetPasswordRequest.md
 doc/ReviewRequest.md
 doc/ReviewResponse.md
 doc/SharedNoteResponse.md
+doc/ShelfResponse.md
 doc/SocialApi.md
 doc/SocialProfileResponse.md
 doc/SourceDetailResponse.md
@@ -162,6 +164,7 @@ lib/model/reader_page_response.dart
 lib/model/reader_response.dart
 lib/model/reading_position_response.dart
 lib/model/reading_response.dart
+lib/model/reading_status.dart
 lib/model/recommend_request.dart
 lib/model/recommendation_response.dart
 lib/model/refresh_request.dart
@@ -175,6 +178,7 @@ lib/model/reset_password_request.dart
 lib/model/review_request.dart
 lib/model/review_response.dart
 lib/model/shared_note_response.dart
+lib/model/shelf_response.dart
 lib/model/social_profile_response.dart
 lib/model/source_detail_response.dart
 lib/model/source_entry_response.dart
