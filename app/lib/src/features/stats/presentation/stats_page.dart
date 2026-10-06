@@ -12,6 +12,7 @@ import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../social/presentation/social_widgets.dart';
+import '../application/genres.dart';
 import '../application/stats_providers.dart';
 
 /// Month names in the reader's language ("mars").
@@ -153,6 +154,18 @@ class _Body extends StatelessWidget {
             Text(l10n.statsByMonth, style: BabelText.title(28)),
             const SizedBox(height: 14),
             MonthBars(byMonth: stats.byMonth, best: stats.bestMonth),
+            if (stats.genres.isNotEmpty) ...[
+              const SizedBox(height: 32),
+              Text(l10n.statsGenres, style: BabelText.title(28)),
+              const SizedBox(height: 12),
+              GenreBars(genres: stats.genres),
+              const SizedBox(height: 12),
+              for (final line in genreAnalysis(l10n, stats))
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Text(line, style: BabelText.reading(16, italic: true)),
+                ),
+            ],
             if (topAuthors.isNotEmpty) ...[
               const SizedBox(height: 32),
               Text(l10n.statsTopAuthors, style: BabelText.title(28)),
@@ -210,6 +223,58 @@ class _Figure extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// The year's genres as bars, the first one in gold.
+class GenreBars extends StatelessWidget {
+  const GenreBars({required this.genres, this.limit = 6, super.key});
+  final List<GenreCountResponse> genres;
+  final int limit;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final top = genres.isEmpty ? 1 : genres.first.books;
+    return Column(
+      children: [
+        for (final (i, g) in genres.take(limit).indexed)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 130,
+                  child: Text(
+                    genreTitle(l10n, g.genre),
+                    overflow: TextOverflow.ellipsis,
+                    style: BabelText.body(14, color: BabelColors.textPrimary),
+                  ),
+                ),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: FractionallySizedBox(
+                      widthFactor: (g.books / top).clamp(0.04, 1.0),
+                      child: Container(
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: i == 0
+                              ? BabelColors.gold
+                              : BabelColors.textSecondary,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text('${g.books}', style: BabelText.label(10)),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
 }
 
 /// Books finished each month, the best month in gold.

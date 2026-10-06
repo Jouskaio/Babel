@@ -2100,4 +2100,106 @@ class AppLocalizationsEn extends AppLocalizations {
   String attached(String title) {
     return 'File added: “$title” reads here too.';
   }
+
+  @override
+  String get genreFanfiction => 'fanfiction';
+
+  @override
+  String get genreComics => 'comics';
+
+  @override
+  String get genreManga => 'manga';
+
+  @override
+  String get genreScienceFiction => 'science fiction';
+
+  @override
+  String get genreFantasy => 'fantasy';
+
+  @override
+  String get genreHorror => 'horror';
+
+  @override
+  String get genreMystery => 'mystery';
+
+  @override
+  String get genreRomance => 'romance';
+
+  @override
+  String get genreHistorical => 'historical fiction';
+
+  @override
+  String get genreYoung => 'young readers';
+
+  @override
+  String get genrePoetry => 'poetry';
+
+  @override
+  String get genreTheatre => 'drama';
+
+  @override
+  String get genreBiography => 'biography';
+
+  @override
+  String get genrePhilosophy => 'philosophy';
+
+  @override
+  String get genreNonfiction => 'non-fiction';
+
+  @override
+  String get genreLiterary => 'literature';
+
+  @override
+  String get statsGenres => 'Your genres';
+
+  @override
+  String get wrapGenres => 'Your favourite genres';
+
+  @override
+  String genreDominant(String genre, int percent) {
+    return 'A decidedly $genre year: $percent% of your reading.';
+  }
+
+  @override
+  String genreTie(String first, String second) {
+    return 'Between $first and $second, your heart wavered.';
+  }
+
+  @override
+  String genreLead(String first, String second) {
+    return 'Your genre of the year: $first, ahead of $second.';
+  }
+
+  @override
+  String genreOnly(String genre) {
+    return 'Your genre of the year: $genre.';
+  }
+
+  @override
+  String genreEclectic(int count) {
+    return '$count genres explored: an eclectic year.';
+  }
+
+  @override
+  String get genreFaithful => 'A single genre: faithful to what you love.';
+
+  @override
+  String genreSome(int count) {
+    return '$count genres on the clock.';
+  }
+
+  @override
+  String genreNewLead(String genre, String previous) {
+    return 'A change of course: $genre takes the lead; last year it was $previous.';
+  }
+
+  @override
+  String genreSameLead(String genre) {
+    return 'Faithful to $genre, like last year.';
+  }
+
+  @override
+  String genreFirstTime(String genre) {
+    return 'A first this year: $genre.';
+  }
 }

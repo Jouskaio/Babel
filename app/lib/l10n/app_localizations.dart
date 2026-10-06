@@ -3499,6 +3499,174 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Fichier ajouté : « {title} » se lit aussi ici.'**
   String attached(String title);
+
+  /// No description provided for @genreFanfiction.
+  ///
+  /// In fr, this message translates to:
+  /// **'fanfiction'**
+  String get genreFanfiction;
+
+  /// No description provided for @genreComics.
+  ///
+  /// In fr, this message translates to:
+  /// **'BD'**
+  String get genreComics;
+
+  /// No description provided for @genreManga.
+  ///
+  /// In fr, this message translates to:
+  /// **'manga'**
+  String get genreManga;
+
+  /// No description provided for @genreScienceFiction.
+  ///
+  /// In fr, this message translates to:
+  /// **'science-fiction'**
+  String get genreScienceFiction;
+
+  /// No description provided for @genreFantasy.
+  ///
+  /// In fr, this message translates to:
+  /// **'fantasy'**
+  String get genreFantasy;
+
+  /// No description provided for @genreHorror.
+  ///
+  /// In fr, this message translates to:
+  /// **'horreur'**
+  String get genreHorror;
+
+  /// No description provided for @genreMystery.
+  ///
+  /// In fr, this message translates to:
+  /// **'polar'**
+  String get genreMystery;
+
+  /// No description provided for @genreRomance.
+  ///
+  /// In fr, this message translates to:
+  /// **'romance'**
+  String get genreRomance;
+
+  /// No description provided for @genreHistorical.
+  ///
+  /// In fr, this message translates to:
+  /// **'roman historique'**
+  String get genreHistorical;
+
+  /// No description provided for @genreYoung.
+  ///
+  /// In fr, this message translates to:
+  /// **'jeunesse'**
+  String get genreYoung;
+
+  /// No description provided for @genrePoetry.
+  ///
+  /// In fr, this message translates to:
+  /// **'poésie'**
+  String get genrePoetry;
+
+  /// No description provided for @genreTheatre.
+  ///
+  /// In fr, this message translates to:
+  /// **'théâtre'**
+  String get genreTheatre;
+
+  /// No description provided for @genreBiography.
+  ///
+  /// In fr, this message translates to:
+  /// **'biographie'**
+  String get genreBiography;
+
+  /// No description provided for @genrePhilosophy.
+  ///
+  /// In fr, this message translates to:
+  /// **'philosophie'**
+  String get genrePhilosophy;
+
+  /// No description provided for @genreNonfiction.
+  ///
+  /// In fr, this message translates to:
+  /// **'essais et documents'**
+  String get genreNonfiction;
+
+  /// No description provided for @genreLiterary.
+  ///
+  /// In fr, this message translates to:
+  /// **'littérature'**
+  String get genreLiterary;
+
+  /// No description provided for @statsGenres.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos genres'**
+  String get statsGenres;
+
+  /// No description provided for @wrapGenres.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos genres favoris'**
+  String get wrapGenres;
+
+  /// No description provided for @genreDominant.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une année résolument {genre} : {percent} % de vos lectures.'**
+  String genreDominant(String genre, int percent);
+
+  /// No description provided for @genreTie.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entre {first} et {second}, votre cœur a balancé.'**
+  String genreTie(String first, String second);
+
+  /// No description provided for @genreLead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre genre de l\'année : {first}, devant {second}.'**
+  String genreLead(String first, String second);
+
+  /// No description provided for @genreOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre genre de l\'année : {genre}.'**
+  String genreOnly(String genre);
+
+  /// No description provided for @genreEclectic.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} genres explorés : une année éclectique.'**
+  String genreEclectic(int count);
+
+  /// No description provided for @genreFaithful.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un seul genre : fidèle à vos amours.'**
+  String get genreFaithful;
+
+  /// No description provided for @genreSome.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} genres au compteur.'**
+  String genreSome(int count);
+
+  /// No description provided for @genreNewLead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changement de cap : {genre} prend la tête, l\'an dernier c\'était {previous}.'**
+  String genreNewLead(String genre, String previous);
+
+  /// No description provided for @genreSameLead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fidèle à {genre}, comme l\'an dernier.'**
+  String genreSameLead(String genre);
+
+  /// No description provided for @genreFirstTime.
+  ///
+  /// In fr, this message translates to:
+  /// **'Première incursion cette année : {genre}.'**
+  String genreFirstTime(String genre);
 }
 
 class _AppLocalizationsDelegate

@@ -417,6 +417,7 @@ class FakeServer {
             'rating': 5,
             'work_id': null,
             'cover_path': null,
+            'genres': ['romance'],
           },
           {
             'item_id': 'i2',
@@ -428,6 +429,7 @@ class FakeServer {
             'rating': null,
             'work_id': null,
             'cover_path': null,
+            'genres': ['romance', 'literary'],
           },
         ],
         'started': 3,
@@ -446,6 +448,13 @@ class FakeServer {
         ],
         'formats': {'epub': 2},
         'years': [2026, 2025],
+        'genres': [
+          {'genre': 'romance', 'books': 2},
+          {'genre': 'literary', 'books': 1},
+        ],
+        'previous_genres': [
+          {'genre': 'mystery', 'books': 3},
+        ],
       });
     }
     if (path.startsWith('/v1/sync/') && request.method == 'POST') {
