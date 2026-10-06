@@ -13,12 +13,13 @@ Name | Type | Description | Notes
 **coverPath** | **String** | Cover found in the file, relative to the API base URL (may answer 404) | [optional] 
 **editionId** | **String** |  | [optional] 
 **finishedAt** | [**DateTime**](DateTime.md) |  | [optional] 
-**format** | [**BookFormat**](BookFormat.md) |  | 
+**format** | [**BookFormat**](BookFormat.md) |  | [optional] 
 **hidden** | **bool** | Out of sight in the library, never shared | [optional] [default to false]
 **id** | **String** |  | 
+**paper** | **bool** | Owned on paper (it may have a file too) | [optional] [default to false]
 **progress** | **num** | Progress declared by hand, in percent (not a device position) | [optional] 
-**sha256** | **String** | Identifies the file; download it from /v1/files/{sha256} | 
-**size** | **int** |  | 
+**sha256** | **String** | Identifies the file; download it from /v1/files/{sha256}. Null for a paper book without a file | [optional] 
+**size** | **int** |  | [optional] 
 **startedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **stateTime** | [**DateTime**](DateTime.md) | When status or progress last changed (device clock) | [optional] 
 **status** | [**ReadingStatus**](ReadingStatus.md) |  | [optional] 

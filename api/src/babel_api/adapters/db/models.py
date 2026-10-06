@@ -103,6 +103,7 @@ class WorkRow(Base):
     cover_id: Mapped[int | None] = mapped_column(Integer)
     description: Mapped[str | None] = mapped_column(Text)
     edition_count: Mapped[int | None] = mapped_column(Integer)
+    subjects: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
     editions_synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
@@ -158,6 +159,8 @@ class StoredFileRow(Base):
     withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     title: Mapped[str | None] = mapped_column(String(500))
     authors: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
+    # From the file itself (EPUB dc:subject, ComicInfo genre); None until read.
+    subjects: Mapped[list[str] | None] = mapped_column(JSON)
 
 
 class BlockedFileRow(Base):
@@ -179,12 +182,14 @@ class LibraryItemRow(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    file_sha256: Mapped[str] = mapped_column(
+    # None for a paper book without a file.
+    file_sha256: Mapped[str | None] = mapped_column(
         ForeignKey("stored_files.sha256", ondelete="CASCADE"), index=True
     )
     title: Mapped[str] = mapped_column(String(500))
     authors: Mapped[list[str]] = mapped_column(JSON, default=list)
     added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    paper: Mapped[bool] = mapped_column(default=False, server_default=false())
     # The reader's status and declared progress (domain ReadingState).
     status: Mapped[str | None] = mapped_column(String(16), index=True)
     progress: Mapped[float | None] = mapped_column(Float)
@@ -197,7 +202,8 @@ class LibraryItemRow(Base):
         ForeignKey("works.id", ondelete="SET NULL"), index=True
     )
 
-    file: Mapped[StoredFileRow] = relationship(lazy="joined")
+    file: Mapped[StoredFileRow | None] = relationship(lazy="joined")
+    work: Mapped["WorkRow | None"] = relationship(lazy="joined")
 
 
 class DeviceRow(Base):

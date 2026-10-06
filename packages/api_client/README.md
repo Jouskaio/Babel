@@ -98,7 +98,9 @@ Class | Method | HTTP request | Description
 *KavitaApi* | [**retryKavita**](doc//KavitaApi.md#retrykavita) | **POST** /v1/me/kavita/retry | Retry Kavita
 *KavitaApi* | [**setPremium**](doc//KavitaApi.md#setpremium) | **PUT** /v1/admin/users/{member_id}/premium | Set Premium
 *KavitaApi* | [**unlinkKavita**](doc//KavitaApi.md#unlinkkavita) | **DELETE** /v1/me/kavita | Unlink Kavita
+*LibraryApi* | [**addPaperBook**](doc//LibraryApi.md#addpaperbook) | **POST** /v1/library/paper | Add Paper Book
 *LibraryApi* | [**addStoredFile**](doc//LibraryApi.md#addstoredfile) | **POST** /v1/library/files/{sha256} | Add Stored File
+*LibraryApi* | [**attachFile**](doc//LibraryApi.md#attachfile) | **POST** /v1/library/{item_id}/file | Attach File
 *LibraryApi* | [**checkFollow**](doc//LibraryApi.md#checkfollow) | **POST** /v1/library/follows/{follow_id}/check | Check Follow
 *LibraryApi* | [**deleteReview**](doc//LibraryApi.md#deletereview) | **DELETE** /v1/library/{item_id}/review | Delete Review
 *LibraryApi* | [**downloadFile**](doc//LibraryApi.md#downloadfile) | **GET** /v1/files/{sha256} | Download File
@@ -116,6 +118,7 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**previewLink**](doc//LibraryApi.md#previewlink) | **POST** /v1/library/links/preview | Preview Link
 *LibraryApi* | [**removeFromLibrary**](doc//LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
 *LibraryApi* | [**saveReview**](doc//LibraryApi.md#savereview) | **PUT** /v1/library/{item_id}/review | Save Review
+*LibraryApi* | [**setPaper**](doc//LibraryApi.md#setpaper) | **PUT** /v1/library/{item_id}/paper | Set Paper
 *LibraryApi* | [**stopFollow**](doc//LibraryApi.md#stopfollow) | **DELETE** /v1/library/follows/{follow_id} | Stop Follow
 *LibraryApi* | [**withdrawFile**](doc//LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
 *SocialApi* | [**addFriend**](doc//SocialApi.md#addfriend) | **PUT** /v1/social/friends/{handle} | Add Friend
@@ -187,6 +190,8 @@ Class | Method | HTTP request | Description
  - [FriendStatus](doc//FriendStatus.md)
  - [FriendsResponse](doc//FriendsResponse.md)
  - [GenericConfig](doc//GenericConfig.md)
+ - [Genre](doc//Genre.md)
+ - [GenreCountResponse](doc//GenreCountResponse.md)
  - [GitHubConfig](doc//GitHubConfig.md)
  - [HealthResponse](doc//HealthResponse.md)
  - [IdentityProvider](doc//IdentityProvider.md)
@@ -205,6 +210,8 @@ Class | Method | HTTP request | Description
  - [OpdsConfig](doc//OpdsConfig.md)
  - [OperationRequest](doc//OperationRequest.md)
  - [OperationResult](doc//OperationResult.md)
+ - [PaperBookRequest](doc//PaperBookRequest.md)
+ - [PaperRequest](doc//PaperRequest.md)
  - [PremiumRequest](doc//PremiumRequest.md)
  - [ProviderLoginRequest](doc//ProviderLoginRequest.md)
  - [ProvidersResponse](doc//ProvidersResponse.md)

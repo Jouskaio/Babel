@@ -1165,5 +1165,131 @@
   },
   "wrapOutro": "À l'année prochaine",
   "wrapOutroSub": "Merci d'avoir lu avec Babel.",
-  "wrapTapHint": "Touchez pour continuer"
+  "wrapTapHint": "Touchez pour continuer",
+  "paperBook": "Papier",
+  "paperOwned": "Je l'ai en papier",
+  "paperOwnedHint": "Suivez votre lecture sans fichier : statut, progression, notes et avis.",
+  "paperAdded": "« {title} » est dans votre bibliothèque, en papier.",
+  "@paperAdded": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "attachFile": "Ajouter le fichier",
+  "attachFileHint": "Pour lire aussi sur cet appareil : statut, progression, avis et notes restent ceux du livre.",
+  "paperNoFile": "Livre papier : ajoutez son fichier pour le lire aussi ici.",
+  "attachConflict": "Ce fichier est déjà un autre livre de votre bibliothèque.",
+  "attached": "Fichier ajouté : « {title} » se lit aussi ici.",
+  "@attached": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "genreFanfiction": "fanfiction",
+  "genreComics": "BD",
+  "genreManga": "manga",
+  "genreScienceFiction": "science-fiction",
+  "genreFantasy": "fantasy",
+  "genreHorror": "horreur",
+  "genreMystery": "polar",
+  "genreRomance": "romance",
+  "genreHistorical": "roman historique",
+  "genreYoung": "jeunesse",
+  "genrePoetry": "poésie",
+  "genreTheatre": "théâtre",
+  "genreBiography": "biographie",
+  "genrePhilosophy": "philosophie",
+  "genreNonfiction": "essais et documents",
+  "genreLiterary": "littérature",
+  "statsGenres": "Vos genres",
+  "wrapGenres": "Vos genres favoris",
+  "genreDominant": "Une année résolument {genre} : {percent} % de vos lectures.",
+  "@genreDominant": {
+    "placeholders": {
+      "genre": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "genreTie": "Entre {first} et {second}, votre cœur a balancé.",
+  "@genreTie": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
+  "genreLead": "Votre genre de l'année : {first}, devant {second}.",
+  "@genreLead": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
+  "genreOnly": "Votre genre de l'année : {genre}.",
+  "@genreOnly": {
+    "placeholders": {
+      "genre": {
+        "type": "String"
+      }
+    }
+  },
+  "genreEclectic": "{count} genres explorés : une année éclectique.",
+  "@genreEclectic": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genreFaithful": "Un seul genre : fidèle à vos amours.",
+  "genreSome": "{count} genres au compteur.",
+  "@genreSome": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genreNewLead": "Changement de cap : {genre} prend la tête, l'an dernier c'était {previous}.",
+  "@genreNewLead": {
+    "placeholders": {
+      "genre": {
+        "type": "String"
+      },
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "genreSameLead": "Fidèle à {genre}, comme l'an dernier.",
+  "@genreSameLead": {
+    "placeholders": {
+      "genre": {
+        "type": "String"
+      }
+    }
+  },
+  "genreFirstTime": "Première incursion cette année : {genre}.",
+  "@genreFirstTime": {
+    "placeholders": {
+      "genre": {
+        "type": "String"
+      }
+    }
+  }
 }

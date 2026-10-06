@@ -18,12 +18,13 @@ class LibraryItemResponse {
     this.coverPath,
     this.editionId,
     this.finishedAt,
-    required this.format,
+    this.format,
     this.hidden = false,
     required this.id,
+    this.paper = false,
     this.progress,
-    required this.sha256,
-    required this.size,
+    this.sha256,
+    this.size,
     this.startedAt,
     this.stateTime,
     this.status,
@@ -42,20 +43,29 @@ class LibraryItemResponse {
 
   DateTime? finishedAt;
 
-  BookFormat format;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  BookFormat? format;
 
   /// Out of sight in the library, never shared
   bool hidden;
 
   String id;
 
+  /// Owned on paper (it may have a file too)
+  bool paper;
+
   /// Progress declared by hand, in percent (not a device position)
   num? progress;
 
-  /// Identifies the file; download it from /v1/files/{sha256}
-  String sha256;
+  /// Identifies the file; download it from /v1/files/{sha256}. Null for a paper book without a file
+  String? sha256;
 
-  int size;
+  int? size;
 
   DateTime? startedAt;
 
@@ -85,6 +95,7 @@ class LibraryItemResponse {
     other.format == format &&
     other.hidden == hidden &&
     other.id == id &&
+    other.paper == paper &&
     other.progress == progress &&
     other.sha256 == sha256 &&
     other.size == size &&
@@ -102,12 +113,13 @@ class LibraryItemResponse {
     (coverPath == null ? 0 : coverPath!.hashCode) +
     (editionId == null ? 0 : editionId!.hashCode) +
     (finishedAt == null ? 0 : finishedAt!.hashCode) +
-    (format.hashCode) +
+    (format == null ? 0 : format!.hashCode) +
     (hidden.hashCode) +
     (id.hashCode) +
+    (paper.hashCode) +
     (progress == null ? 0 : progress!.hashCode) +
-    (sha256.hashCode) +
-    (size.hashCode) +
+    (sha256 == null ? 0 : sha256!.hashCode) +
+    (size == null ? 0 : size!.hashCode) +
     (startedAt == null ? 0 : startedAt!.hashCode) +
     (stateTime == null ? 0 : stateTime!.hashCode) +
     (status == null ? 0 : status!.hashCode) +
@@ -115,7 +127,7 @@ class LibraryItemResponse {
     (workId == null ? 0 : workId!.hashCode);
 
   @override
-  String toString() => 'LibraryItemResponse[addedAt=$addedAt, authors=$authors, coverPath=$coverPath, editionId=$editionId, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, progress=$progress, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title, workId=$workId]';
+  String toString() => 'LibraryItemResponse[addedAt=$addedAt, authors=$authors, coverPath=$coverPath, editionId=$editionId, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, paper=$paper, progress=$progress, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title, workId=$workId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -136,16 +148,29 @@ class LibraryItemResponse {
     } else {
       json[r'finished_at'] = null;
     }
+    if (this.format != null) {
       json[r'format'] = this.format;
+    } else {
+      json[r'format'] = null;
+    }
       json[r'hidden'] = this.hidden;
       json[r'id'] = this.id;
+      json[r'paper'] = this.paper;
     if (this.progress != null) {
       json[r'progress'] = this.progress;
     } else {
       json[r'progress'] = null;
     }
+    if (this.sha256 != null) {
       json[r'sha256'] = this.sha256;
+    } else {
+      json[r'sha256'] = null;
+    }
+    if (this.size != null) {
       json[r'size'] = this.size;
+    } else {
+      json[r'size'] = null;
+    }
     if (this.startedAt != null) {
       json[r'started_at'] = this.startedAt!.toUtc().toIso8601String();
     } else {
@@ -196,14 +221,15 @@ class LibraryItemResponse {
         coverPath: mapValueOfType<String>(json, r'cover_path'),
         editionId: mapValueOfType<String>(json, r'edition_id'),
         finishedAt: mapDateTime(json, r'finished_at', r''),
-        format: BookFormat.fromJson(json[r'format'])!,
+        format: BookFormat.fromJson(json[r'format']),
         hidden: mapValueOfType<bool>(json, r'hidden') ?? false,
         id: mapValueOfType<String>(json, r'id')!,
+        paper: mapValueOfType<bool>(json, r'paper') ?? false,
         progress: json[r'progress'] == null
             ? null
             : num.parse('${json[r'progress']}'),
-        sha256: mapValueOfType<String>(json, r'sha256')!,
-        size: mapValueOfType<int>(json, r'size')!,
+        sha256: mapValueOfType<String>(json, r'sha256'),
+        size: mapValueOfType<int>(json, r'size'),
         startedAt: mapDateTime(json, r'started_at', r''),
         stateTime: mapDateTime(json, r'state_time', r''),
         status: ReadingStatus.fromJson(json[r'status']),
@@ -258,10 +284,7 @@ class LibraryItemResponse {
   static const requiredKeys = <String>{
     'added_at',
     'authors',
-    'format',
     'id',
-    'sha256',
-    'size',
     'title',
   };
 }

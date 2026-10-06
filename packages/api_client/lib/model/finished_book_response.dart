@@ -17,6 +17,7 @@ class FinishedBookResponse {
     this.coverPath,
     required this.finishedAt,
     required this.format,
+    this.genres = const [],
     required this.itemId,
     this.rating,
     this.startedAt,
@@ -31,6 +32,8 @@ class FinishedBookResponse {
   DateTime finishedAt;
 
   String format;
+
+  List<Genre> genres;
 
   String itemId;
 
@@ -48,6 +51,7 @@ class FinishedBookResponse {
     other.coverPath == coverPath &&
     other.finishedAt == finishedAt &&
     other.format == format &&
+    _deepEquality.equals(other.genres, genres) &&
     other.itemId == itemId &&
     other.rating == rating &&
     other.startedAt == startedAt &&
@@ -61,6 +65,7 @@ class FinishedBookResponse {
     (coverPath == null ? 0 : coverPath!.hashCode) +
     (finishedAt.hashCode) +
     (format.hashCode) +
+    (genres.hashCode) +
     (itemId.hashCode) +
     (rating == null ? 0 : rating!.hashCode) +
     (startedAt == null ? 0 : startedAt!.hashCode) +
@@ -68,7 +73,7 @@ class FinishedBookResponse {
     (workId == null ? 0 : workId!.hashCode);
 
   @override
-  String toString() => 'FinishedBookResponse[authors=$authors, coverPath=$coverPath, finishedAt=$finishedAt, format=$format, itemId=$itemId, rating=$rating, startedAt=$startedAt, title=$title, workId=$workId]';
+  String toString() => 'FinishedBookResponse[authors=$authors, coverPath=$coverPath, finishedAt=$finishedAt, format=$format, genres=$genres, itemId=$itemId, rating=$rating, startedAt=$startedAt, title=$title, workId=$workId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -80,6 +85,7 @@ class FinishedBookResponse {
     }
       json[r'finished_at'] = this.finishedAt.toUtc().toIso8601String();
       json[r'format'] = this.format;
+      json[r'genres'] = this.genres;
       json[r'item_id'] = this.itemId;
     if (this.rating != null) {
       json[r'rating'] = this.rating;
@@ -125,6 +131,7 @@ class FinishedBookResponse {
         coverPath: mapValueOfType<String>(json, r'cover_path'),
         finishedAt: mapDateTime(json, r'finished_at', r'')!,
         format: mapValueOfType<String>(json, r'format')!,
+        genres: Genre.listFromJson(json[r'genres']),
         itemId: mapValueOfType<String>(json, r'item_id')!,
         rating: mapValueOfType<int>(json, r'rating'),
         startedAt: mapDateTime(json, r'started_at', r''),
@@ -180,6 +187,7 @@ class FinishedBookResponse {
     'authors',
     'finished_at',
     'format',
+    'genres',
     'item_id',
     'title',
   };

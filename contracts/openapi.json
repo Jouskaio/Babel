@@ -99,6 +99,20 @@
         "title": "BatchImportResponse",
         "type": "object"
       },
+      "Body_attachFile": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_attachFile",
+        "type": "object"
+      },
       "Body_importFile": {
         "properties": {
           "file": {
@@ -793,6 +807,13 @@
             "title": "Format",
             "type": "string"
           },
+          "genres": {
+            "items": {
+              "$ref": "#/components/schemas/Genre"
+            },
+            "title": "Genres",
+            "type": "array"
+          },
           "item_id": {
             "format": "uuid",
             "title": "Item Id",
@@ -847,7 +868,8 @@
           "started_at",
           "rating",
           "work_id",
-          "cover_path"
+          "cover_path",
+          "genres"
         ],
         "title": "FinishedBookResponse",
         "type": "object"
@@ -1017,6 +1039,45 @@
           "url"
         ],
         "title": "GenericConfig",
+        "type": "object"
+      },
+      "Genre": {
+        "enum": [
+          "fanfiction",
+          "comics",
+          "manga",
+          "science_fiction",
+          "fantasy",
+          "horror",
+          "mystery",
+          "romance",
+          "historical",
+          "young",
+          "poetry",
+          "theatre",
+          "biography",
+          "philosophy",
+          "nonfiction",
+          "literary"
+        ],
+        "title": "Genre",
+        "type": "string"
+      },
+      "GenreCountResponse": {
+        "properties": {
+          "books": {
+            "title": "Books",
+            "type": "integer"
+          },
+          "genre": {
+            "$ref": "#/components/schemas/Genre"
+          }
+        },
+        "required": [
+          "genre",
+          "books"
+        ],
+        "title": "GenreCountResponse",
         "type": "object"
       },
       "GitHubConfig": {
@@ -1239,7 +1300,15 @@
             "title": "Finished At"
           },
           "format": {
-            "$ref": "#/components/schemas/BookFormat"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BookFormat"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null for a paper book without a file"
           },
           "hidden": {
             "default": false,
@@ -1251,6 +1320,12 @@
             "format": "uuid",
             "title": "Id",
             "type": "string"
+          },
+          "paper": {
+            "default": false,
+            "description": "Owned on paper (it may have a file too)",
+            "title": "Paper",
+            "type": "boolean"
           },
           "progress": {
             "anyOf": [
@@ -1265,13 +1340,27 @@
             "title": "Progress"
           },
           "sha256": {
-            "description": "Identifies the file; download it from /v1/files/{sha256}",
-            "title": "Sha256",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Identifies the file; download it from /v1/files/{sha256}. Null for a paper book without a file",
+            "title": "Sha256"
           },
           "size": {
-            "title": "Size",
-            "type": "integer"
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size"
           },
           "started_at": {
             "anyOf": [
@@ -1622,6 +1711,34 @@
           "detail"
         ],
         "title": "OperationResult",
+        "type": "object"
+      },
+      "PaperBookRequest": {
+        "properties": {
+          "work_id": {
+            "description": "The catalog work of the paper book",
+            "format": "uuid",
+            "title": "Work Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "work_id"
+        ],
+        "title": "PaperBookRequest",
+        "type": "object"
+      },
+      "PaperRequest": {
+        "properties": {
+          "paper": {
+            "title": "Paper",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "paper"
+        ],
+        "title": "PaperRequest",
         "type": "object"
       },
       "PremiumRequest": {
@@ -3515,6 +3632,14 @@
             "title": "Formats",
             "type": "object"
           },
+          "genres": {
+            "description": "Genres of the books finished, most read first (a book counts in up to two)",
+            "items": {
+              "$ref": "#/components/schemas/GenreCountResponse"
+            },
+            "title": "Genres",
+            "type": "array"
+          },
           "longest_streak": {
             "description": "Longest run of consecutive reading days",
             "title": "Longest Streak",
@@ -3524,6 +3649,14 @@
             "description": "Highlights and notes made this year",
             "title": "Notes",
             "type": "integer"
+          },
+          "previous_genres": {
+            "description": "The same, the year before",
+            "items": {
+              "$ref": "#/components/schemas/GenreCountResponse"
+            },
+            "title": "Previous Genres",
+            "type": "array"
           },
           "reading_days": {
             "description": "Days with some reading",
@@ -3574,7 +3707,9 @@
           "average_rating",
           "top_authors",
           "formats",
-          "years"
+          "years",
+          "genres",
+          "previous_genres"
         ],
         "title": "YearStatsResponse",
         "type": "object"
@@ -5480,6 +5615,72 @@
         ]
       }
     },
+    "/v1/library/paper": {
+      "post": {
+        "description": "A book you own on paper, to follow your reading without a file. If the work is\nalready (or was) in your library, that book is marked as owned on paper instead.",
+        "operationId": "addPaperBook",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaperBookRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Add Paper Book",
+        "tags": [
+          "library"
+        ]
+      }
+    },
     "/v1/library/{item_id}": {
       "delete": {
         "description": "Take a book out of the library. Its status, review, notes and positions are kept and\ncome back if the same file is added again.",
@@ -5534,6 +5735,158 @@
           }
         ],
         "summary": "Remove From Library",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/v1/library/{item_id}/file": {
+      "post": {
+        "description": "Give a book (a paper one, say) a file, to read it on your devices too. Its status,\nprogress, review and notes stay with it.",
+        "operationId": "attachFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_attachFile"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Attach File",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/v1/library/{item_id}/paper": {
+      "put": {
+        "description": "Whether you own the book on paper. A paper book without a file that you no longer\nown leaves the library (its status, review and notes are kept).",
+        "operationId": "setPaper",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaperRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Set Paper",
         "tags": [
           "library"
         ]

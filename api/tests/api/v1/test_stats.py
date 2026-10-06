@@ -7,10 +7,11 @@ import pytest
 from fastapi.testclient import TestClient
 
 from babel_api.services.stats import _streaks  # pyright: ignore[reportPrivateUsage]
-from tests.api.v1.test_library import account
+from tests.api.v1.test_library import account, upload
 from tests.api.v1.test_shelves import state
 from tests.api.v1.test_social import book
 from tests.api.v1.test_sync import device, position, push
+from tests.books import epub
 
 
 @pytest.fixture
@@ -81,3 +82,32 @@ def test_a_year_of_reading(client: TestClient, ada: dict[str, str]) -> None:
 def test_an_empty_year(client: TestClient, ada: dict[str, str]) -> None:
     stats = client.get("/v1/me/stats", params={"year": 2020}, headers=ada).json()
     assert (stats["finished"], stats["reading_days"], stats["best_month"]) == ([], 0, None)
+
+
+def test_genres_of_the_year_and_the_year_before(client: TestClient, ada: dict[str, str]) -> None:
+    def add(title: str, *subjects: str) -> str:
+        response = upload(client, ada, epub(title=title, isbn=None, subjects=subjects))
+        return response.json()["item"]["id"]
+
+    dune = add("Dune", "Science fiction", "Desert -- Fiction")
+    hyperion = add("Hyperion", "Science-fiction")
+    emma = add("Emma", "Love stories", "England -- Fiction")
+    poems = add("Poèmes", "Poésie")
+    push(
+        client,
+        ada,
+        device(client, ada, "Pixel"),
+        state("op-g00001", dune, "2026-02-01T10:00:00+00:00", "finished"),
+        state("op-g00002", hyperion, "2026-03-01T10:00:00+00:00", "finished"),
+        state("op-g00003", emma, "2026-04-01T10:00:00+00:00", "finished"),
+        state("op-g00004", poems, "2025-06-01T10:00:00+00:00", "finished"),
+    )
+
+    stats = client.get("/v1/me/stats", params={"year": 2026}, headers=ada).json()
+
+    assert stats["genres"] == [
+        {"genre": "science_fiction", "books": 2},
+        {"genre": "romance", "books": 1},
+    ]
+    assert stats["previous_genres"] == [{"genre": "poetry", "books": 1}]
+    assert stats["finished"][0]["genres"] == ["science_fiction"]

@@ -10,6 +10,7 @@ import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
+import '../application/genres.dart';
 import '../application/stats_providers.dart';
 import 'stats_page.dart';
 
@@ -125,6 +126,31 @@ class _WrapPageState extends ConsumerState<WrapPage> {
               l10n.statsFinished(author.books).toUpperCase(),
               style: BabelText.label(12),
             ),
+          ],
+        ),
+      if (stats.genres.isNotEmpty)
+        _Slide(
+          kicker: l10n.wrapGenres.toUpperCase(),
+          children: [
+            for (final (i, g) in stats.genres.take(3).indexed)
+              Text(
+                genreTitle(l10n, g.genre),
+                textAlign: TextAlign.center,
+                style: BabelText.title(
+                  i == 0 ? 52 : 34,
+                  color: i == 0 ? BabelColors.gold : null,
+                ),
+              ),
+            const SizedBox(height: 24),
+            for (final line in genreAnalysis(l10n, stats))
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  line,
+                  textAlign: TextAlign.center,
+                  style: BabelText.reading(17, italic: true),
+                ),
+              ),
           ],
         ),
       _Slide(

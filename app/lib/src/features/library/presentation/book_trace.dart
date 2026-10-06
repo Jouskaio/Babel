@@ -52,9 +52,16 @@ class _BookTraceCardState extends ConsumerState<BookTraceCard> {
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _restoring = true);
     try {
-      final item = await ref
-          .read(libraryApiProvider)
-          .addStoredFile(widget.trace.item.sha256);
+      final api = ref.read(libraryApiProvider);
+      final book = widget.trace.item;
+      // A paper book without a file comes back from its work.
+      final item = switch ((book.sha256, book.workId)) {
+        (final sha256?, _) => await api.addStoredFile(sha256),
+        (null, final workId?) => await api.addPaperBook(
+          PaperBookRequest(workId: workId),
+        ),
+        _ => null,
+      };
       if (item != null) {
         await ref.read(libraryControllerProvider.notifier).keep(item);
         messenger.showSnackBar(

@@ -303,9 +303,10 @@ KavitaServiceDep = Annotated[KavitaService, Depends(get_kavita_service)]
 
 
 def get_stats_service(
-    session: Annotated[AsyncSession, Depends(get_session)],
+    container: ContainerDep, session: Annotated[AsyncSession, Depends(get_session)]
 ) -> StatsService:
-    return StatsService(SqlStatsRepository(session))
+    files = make_file_service(container, session)
+    return StatsService(SqlStatsRepository(session), files.file_subjects)
 
 
 StatsServiceDep = Annotated[StatsService, Depends(get_stats_service)]

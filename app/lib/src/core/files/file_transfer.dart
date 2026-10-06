@@ -12,6 +12,11 @@ import '../auth/auth_controller.dart';
 import '../config/app_config.dart';
 import 'save_file.dart';
 
+/// A paper book without a file: there is nothing to open.
+class NoFileException implements Exception {
+  const NoFileException();
+}
+
 final fileTransferProvider = Provider<FileTransfer>(
   (ref) => FileTransfer(
     client: ref.watch(apiClientProvider).client,
@@ -27,6 +32,48 @@ class FileTransfer {
 
   final http.Client _client;
   final Future<bool> Function() _refresh;
+
+  /// The file of a book; a paper book without one cannot be opened or downloaded.
+  static ({String sha256, BookFormat format, int size}) _fileOf(
+    LibraryItemResponse item,
+  ) {
+    final (sha256, format) = (item.sha256, item.format);
+    if (sha256 == null || format == null) throw const NoFileException();
+    return (sha256: sha256, format: format, size: item.size ?? 0);
+  }
+
+  /// Gives [item] a file (a paper book, say), to read it on this device too.
+  Future<LibraryItemResponse> attach(
+    LibraryItemResponse item,
+    XFile file, {
+    void Function(double)? onProgress,
+  }) => _network(() async {
+    Future<http.StreamedResponse> send() async {
+      final length = await file.length();
+      var sent = 0;
+      final stream = file.openRead().map((chunk) {
+        sent += chunk.length;
+        onProgress?.call(length == 0 ? 1 : sent / length);
+        return chunk;
+      });
+      final request =
+          http.MultipartRequest('POST', _uri('/v1/library/${item.id}/file'))
+            ..files.add(
+              http.MultipartFile('file', stream, length, filename: file.name),
+            );
+      return _client.send(request);
+    }
+
+    var response = await send();
+    if (response.statusCode == 401 && await _refresh()) {
+      response = await send();
+    }
+    final body = await response.stream.bytesToString();
+    if (response.statusCode >= 400) {
+      throw ApiException(response.statusCode, body);
+    }
+    return LibraryItemResponse.fromJson(jsonDecode(body))!;
+  });
 
   Uri _uri(String path) => Uri.parse('${AppConfig.apiBaseUrl}$path');
 
@@ -91,8 +138,9 @@ class FileTransfer {
     LibraryItemResponse item,
     void Function(double)? onProgress,
   ) async {
+    final file = _fileOf(item);
     final response = await _client.send(
-      http.Request('GET', _uri('/v1/files/${item.sha256}')),
+      http.Request('GET', _uri('/v1/files/${file.sha256}')),
     );
     if (response.statusCode >= 400) {
       throw ApiException(
@@ -100,17 +148,17 @@ class FileTransfer {
         await response.stream.bytesToString(),
       );
     }
-    final total = response.contentLength ?? item.size;
+    final total = response.contentLength ?? file.size;
     var received = 0;
     final bytes = response.stream.map((chunk) {
       received += chunk.length;
       onProgress?.call(total == 0 ? 1 : received / total);
       return chunk;
     });
-    final extension = item.format.value;
+    final extension = file.format.value;
     return saveBook(
       bytes,
-      sha256: item.sha256,
+      sha256: file.sha256,
       extension: extension,
       fileName: '${item.title}.$extension',
     );
@@ -127,22 +175,23 @@ class FileTransfer {
     LibraryItemResponse item,
     void Function(double)? onProgress,
   ) async {
+    final file = _fileOf(item);
     // A CBR (RAR) is read as the CBZ the server converts it to.
-    final comic = item.format == BookFormat.cbr;
-    final extension = comic ? 'cbz' : item.format.value;
-    final local = await readLocalBook(item.sha256, extension);
+    final comic = file.format == BookFormat.cbr;
+    final extension = comic ? 'cbz' : file.format.value;
+    final local = await readLocalBook(file.sha256, extension);
     // A copy of another size is incomplete: it is fetched again (converted comics
     // have their own size).
-    if (local != null && (comic || local.length == item.size)) return local;
-    if (local != null) await deleteLocalBook(item.sha256, extension);
+    if (local != null && (comic || local.length == file.size)) return local;
+    if (local != null) await deleteLocalBook(file.sha256, extension);
     if (keepsBooksOffline && !comic) {
       await _download(item, onProgress);
-      return (await readLocalBook(item.sha256, extension))!;
+      return (await readLocalBook(file.sha256, extension))!;
     }
     final response = await _client.send(
       http.Request(
         'GET',
-        _uri('/v1/files/${item.sha256}${comic ? '/cbz' : ''}'),
+        _uri('/v1/files/${file.sha256}${comic ? '/cbz' : ''}'),
       ),
     );
     if (response.statusCode >= 400) {
@@ -151,7 +200,7 @@ class FileTransfer {
         await response.stream.bytesToString(),
       );
     }
-    final total = response.contentLength ?? item.size;
+    final total = response.contentLength ?? file.size;
     final builder = BytesBuilder(copy: false);
     await for (final chunk in response.stream) {
       builder.add(chunk);
@@ -162,7 +211,7 @@ class FileTransfer {
       // Kept converted: next time the comic opens offline.
       await saveBook(
         Stream.value(bytes),
-        sha256: item.sha256,
+        sha256: file.sha256,
         extension: extension,
         fileName: '${item.title}.$extension',
       );

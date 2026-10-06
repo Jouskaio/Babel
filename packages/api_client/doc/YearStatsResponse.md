@@ -16,8 +16,10 @@ Name | Type | Description | Notes
 **currentStreak** | **int** | Run of reading days ending today or yesterday | 
 **finished** | [**List<FinishedBookResponse>**](FinishedBookResponse.md) | Books finished, in order | [default to const []]
 **formats** | **Map<String, int>** |  | [default to const {}]
+**genres** | [**List<GenreCountResponse>**](GenreCountResponse.md) | Genres of the books finished, most read first (a book counts in up to two) | [default to const []]
 **longestStreak** | **int** | Longest run of consecutive reading days | 
 **notes** | **int** | Highlights and notes made this year | 
+**previousGenres** | [**List<GenreCountResponse>**](GenreCountResponse.md) | The same, the year before | [default to const []]
 **readingDays** | **int** | Days with some reading | 
 **reviews** | **int** |  | 
 **started** | **int** |  | 

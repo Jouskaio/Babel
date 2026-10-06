@@ -32,6 +32,7 @@ class BookMetadata:
     authors: tuple[str, ...] = ()
     isbn13: str | None = None
     language: str | None = None
+    subjects: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,6 +50,8 @@ class StoredFile:
     # Read from the file itself when it was first imported.
     title: str | None = None
     authors: tuple[str, ...] = ()
+    # From the file itself; None until read (files stored before subjects were kept).
+    subjects: tuple[str, ...] | None = None
 
     @property
     def available(self) -> bool:
@@ -99,11 +102,11 @@ class ReadingState:
 
 @dataclass(frozen=True, slots=True)
 class LibraryItem:
-    """A book in a reader's library, backed by a stored file."""
+    """A book in a reader's library: a stored file, a paper copy, or both."""
 
     id: UUID
     user_id: UUID
-    file: StoredFile
+    file: StoredFile | None
     title: str
     authors: tuple[str, ...]
     added_at: datetime
@@ -115,3 +118,24 @@ class LibraryItem:
     # per work, whatever the edition or file. Found from the ISBN or the title, or chosen
     # by the reader.
     work_id: UUID | None = None
+    # The reader owns it on paper (with or without a file to read it on devices too).
+    paper: bool = False
+    # The work's cover, for paper books without a file.
+    work_cover_id: int | None = None
+
+    @property
+    def sha256(self) -> str | None:
+        return self.file.sha256 if self.file else None
+
+    @property
+    def format_name(self) -> str:
+        """The file's format, or "paper" for a paper book without one."""
+        return self.file.format.value if self.file else "paper"
+
+    @property
+    def cover_path(self) -> str | None:
+        if self.file and self.file.cover_path:
+            return self.file.cover_path
+        if self.work_cover_id:
+            return f"/v1/catalog/covers/{self.work_cover_id}/M"
+        return None

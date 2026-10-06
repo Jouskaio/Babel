@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **coverPath** | **String** |  | [optional] 
 **finishedAt** | [**DateTime**](DateTime.md) |  | 
 **format** | **String** |  | 
+**genres** | [**List<Genre>**](Genre.md) |  | [default to const []]
 **itemId** | **String** |  | 
 **rating** | **int** |  | [optional] 
 **startedAt** | [**DateTime**](DateTime.md) |  | [optional] 

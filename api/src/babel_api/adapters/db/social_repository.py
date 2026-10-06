@@ -596,7 +596,7 @@ class SqlSocialRepository:
     async def book_notes(
         self,
         work_id: UUID | None,
-        sha256: str,
+        sha256: str | None,
         viewer: UUID,
         friends: Sequence[UUID],
         hidden: Sequence[UUID],

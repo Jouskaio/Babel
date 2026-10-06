@@ -80,6 +80,34 @@ def _image(archive: zipfile.ZipFile, name: str) -> Cover | None:
     return Cover(content, media_type)
 
 
+def _comic_genres(path: Path) -> tuple[str, ...]:
+    """Genres from a comic's ComicInfo.xml ("Genre", "Manga"), if it has one."""
+    try:
+        with zipfile.ZipFile(path) as archive:
+            name = next(
+                (n for n in archive.namelist() if PurePosixPath(n).name.lower() == "comicinfo.xml"),
+                None,
+            )
+            if name is None:
+                return ()
+            root = ElementTree.fromstring(archive.read(name))
+    except (zipfile.BadZipFile, ElementTree.ParseError, ValueError, OSError):
+        return ()
+    genres = [
+        g.strip()
+        for e in root.iter()
+        if e.tag.rsplit("}", 1)[-1] == "Genre" and e.text
+        for g in e.text.split(",")
+        if g.strip()
+    ]
+    if any(
+        e.tag.rsplit("}", 1)[-1] == "Manga" and (e.text or "").lower().startswith("yes")
+        for e in root.iter()
+    ):
+        genres.append("Manga")
+    return tuple(dict.fromkeys(genres))[:20]
+
+
 class EbookMetadataReader:
     def detect(self, path: Path) -> BookFormat | None:
         with path.open("rb") as file:
@@ -102,6 +130,8 @@ class EbookMetadataReader:
         return None
 
     def metadata(self, path: Path, file_format: BookFormat) -> BookMetadata:
+        if file_format is BookFormat.CBZ:
+            return BookMetadata(subjects=_comic_genres(path))
         if file_format is not BookFormat.EPUB:
             return BookMetadata()
         try:
@@ -138,6 +168,7 @@ class EbookMetadataReader:
             authors=tuple(texts("creator")[:3]),
             isbn13=isbn,
             language=languages[0].split("-")[0].lower() if languages else None,
+            subjects=tuple(dict.fromkeys(texts("subject")))[:40],
         )
 
     def cover(self, path: Path, file_format: BookFormat) -> Cover | None:
