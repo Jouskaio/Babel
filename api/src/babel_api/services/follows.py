@@ -132,8 +132,8 @@ class FollowService:
         chunks = self._ao3.fetch({"username": ""}, None, entry)
         name = f"{entry.title}.epub" if entry.title else "work.epub"
         stored, path, _ = await self._library.store(item.user_id, chunks, name)
-        old_sha256 = item.file.sha256
-        if stored.sha256 == old_sha256:
+        old_sha256 = item.sha256
+        if stored.sha256 == old_sha256 or old_sha256 is None:
             return False
         await self._library.replace_file(item, stored, path)
         # Annotations follow the book to its new file (devices learn it through sync).

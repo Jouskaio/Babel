@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 
 from babel_api.domain.errors import (
     BlockedFileError,
+    BookAlreadyInLibraryError,
     DomainError,
     EmailAlreadyUsedError,
     FileTooLargeError,
@@ -46,6 +47,10 @@ _STATUS: dict[type[Exception], tuple[int, str]] = {
     ForbiddenError: (status.HTTP_403_FORBIDDEN, "Not allowed"),
     InvalidIsbnError: (status.HTTP_400_BAD_REQUEST, "Invalid ISBN"),
     NotFoundError: (status.HTTP_404_NOT_FOUND, "Not found"),
+    BookAlreadyInLibraryError: (
+        status.HTTP_409_CONFLICT,
+        "This file is already another book of your library",
+    ),
     SourceConnectionError: (
         status.HTTP_400_BAD_REQUEST,
         "The source could not be reached: check its address and access token",

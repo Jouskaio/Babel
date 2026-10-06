@@ -25,7 +25,7 @@ from babel_api.domain.sources import (
     SourceEntry,
     SourceKind,
 )
-from babel_api.services.files import FileService
+from babel_api.services.files import FileService, stored_sha
 
 logger = logging.getLogger(__name__)
 
@@ -172,7 +172,7 @@ class SourceService:
             await self._sources.mark_unreadable(entry.id)
             await self._sources.commit()
             raise
-        await self._sources.remember_file(source.kind, entry.remote_id, result.item.file.sha256)
+        await self._sources.remember_file(source.kind, entry.remote_id, stored_sha(result.item))
         await self._sources.commit()
         return result.item
 

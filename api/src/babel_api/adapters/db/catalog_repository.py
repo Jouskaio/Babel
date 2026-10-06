@@ -34,6 +34,7 @@ def _to_work(row: WorkRow) -> Work:
         open_library_id=row.open_library_id,
         edition_count=row.edition_count,
         editions_synced_at=_aware(row.editions_synced_at),
+        subjects=tuple(row.subjects or ()),
     )
 
 
@@ -78,6 +79,8 @@ class SqlCatalogRepository:
         row.cover_id = row.cover_id or work.cover_id
         row.description = work.description or row.description
         row.edition_count = work.edition_count or row.edition_count
+        if work.subjects:
+            row.subjects = list(work.subjects)
         row.updated_at = datetime.now(UTC)
         await self._session.flush()
         return _to_work(row)

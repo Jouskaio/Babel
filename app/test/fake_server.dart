@@ -165,6 +165,23 @@ class FakeServer {
     'device_id': null,
   });
 
+  /// A book owned on paper, without a file.
+  void addPaperItem(String id, String title) => changes.add({
+    'seq': changes.length + 1,
+    'entity': 'library_item',
+    'entity_id': id,
+    'op': 'upsert',
+    'data': {
+      ...libraryItem(id, title),
+      'format': null,
+      'size': null,
+      'sha256': null,
+      'cover_path': null,
+      'paper': true,
+    },
+    'device_id': null,
+  });
+
   void goOnline() {
     offline = false;
     connectivity.add([ConnectivityResult.wifi]);
@@ -400,6 +417,7 @@ class FakeServer {
             'rating': 5,
             'work_id': null,
             'cover_path': null,
+            'genres': ['romance'],
           },
           {
             'item_id': 'i2',
@@ -411,6 +429,7 @@ class FakeServer {
             'rating': null,
             'work_id': null,
             'cover_path': null,
+            'genres': ['romance', 'literary'],
           },
         ],
         'started': 3,
@@ -429,6 +448,13 @@ class FakeServer {
         ],
         'formats': {'epub': 2},
         'years': [2026, 2025],
+        'genres': [
+          {'genre': 'romance', 'books': 2},
+          {'genre': 'literary', 'books': 1},
+        ],
+        'previous_genres': [
+          {'genre': 'mystery', 'books': 3},
+        ],
       });
     }
     if (path.startsWith('/v1/sync/') && request.method == 'POST') {

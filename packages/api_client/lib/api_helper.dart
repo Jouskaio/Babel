@@ -79,6 +79,9 @@ String parameterToString(dynamic value) {
   if (value is FriendStatus) {
     return FriendStatusTypeTransformer().encode(value).toString();
   }
+  if (value is Genre) {
+    return GenreTypeTransformer().encode(value).toString();
+  }
   if (value is IdentityProvider) {
     return IdentityProviderTypeTransformer().encode(value).toString();
   }

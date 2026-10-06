@@ -2084,4 +2084,141 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get wrapTapHint => 'Touchez pour continuer';
+
+  @override
+  String get paperBook => 'Papier';
+
+  @override
+  String get paperOwned => 'Je l\'ai en papier';
+
+  @override
+  String get paperOwnedHint =>
+      'Suivez votre lecture sans fichier : statut, progression, notes et avis.';
+
+  @override
+  String paperAdded(String title) {
+    return '« $title » est dans votre bibliothèque, en papier.';
+  }
+
+  @override
+  String get attachFile => 'Ajouter le fichier';
+
+  @override
+  String get attachFileHint =>
+      'Pour lire aussi sur cet appareil : statut, progression, avis et notes restent ceux du livre.';
+
+  @override
+  String get paperNoFile =>
+      'Livre papier : ajoutez son fichier pour le lire aussi ici.';
+
+  @override
+  String get attachConflict =>
+      'Ce fichier est déjà un autre livre de votre bibliothèque.';
+
+  @override
+  String attached(String title) {
+    return 'Fichier ajouté : « $title » se lit aussi ici.';
+  }
+
+  @override
+  String get genreFanfiction => 'fanfiction';
+
+  @override
+  String get genreComics => 'BD';
+
+  @override
+  String get genreManga => 'manga';
+
+  @override
+  String get genreScienceFiction => 'science-fiction';
+
+  @override
+  String get genreFantasy => 'fantasy';
+
+  @override
+  String get genreHorror => 'horreur';
+
+  @override
+  String get genreMystery => 'polar';
+
+  @override
+  String get genreRomance => 'romance';
+
+  @override
+  String get genreHistorical => 'roman historique';
+
+  @override
+  String get genreYoung => 'jeunesse';
+
+  @override
+  String get genrePoetry => 'poésie';
+
+  @override
+  String get genreTheatre => 'théâtre';
+
+  @override
+  String get genreBiography => 'biographie';
+
+  @override
+  String get genrePhilosophy => 'philosophie';
+
+  @override
+  String get genreNonfiction => 'essais et documents';
+
+  @override
+  String get genreLiterary => 'littérature';
+
+  @override
+  String get statsGenres => 'Vos genres';
+
+  @override
+  String get wrapGenres => 'Vos genres favoris';
+
+  @override
+  String genreDominant(String genre, int percent) {
+    return 'Une année résolument $genre : $percent % de vos lectures.';
+  }
+
+  @override
+  String genreTie(String first, String second) {
+    return 'Entre $first et $second, votre cœur a balancé.';
+  }
+
+  @override
+  String genreLead(String first, String second) {
+    return 'Votre genre de l\'année : $first, devant $second.';
+  }
+
+  @override
+  String genreOnly(String genre) {
+    return 'Votre genre de l\'année : $genre.';
+  }
+
+  @override
+  String genreEclectic(int count) {
+    return '$count genres explorés : une année éclectique.';
+  }
+
+  @override
+  String get genreFaithful => 'Un seul genre : fidèle à vos amours.';
+
+  @override
+  String genreSome(int count) {
+    return '$count genres au compteur.';
+  }
+
+  @override
+  String genreNewLead(String genre, String previous) {
+    return 'Changement de cap : $genre prend la tête, l\'an dernier c\'était $previous.';
+  }
+
+  @override
+  String genreSameLead(String genre) {
+    return 'Fidèle à $genre, comme l\'an dernier.';
+  }
+
+  @override
+  String genreFirstTime(String genre) {
+    return 'Première incursion cette année : $genre.';
+  }
 }

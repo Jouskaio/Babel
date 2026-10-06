@@ -8,6 +8,7 @@ from fastapi import APIRouter, Query
 from pydantic import BaseModel, Field
 
 from babel_api.api.dependencies import CurrentUserId, StatsServiceDep
+from babel_api.domain.genres import Genre
 
 router = APIRouter(tags=["stats"])
 
@@ -22,6 +23,12 @@ class FinishedBookResponse(BaseModel):
     rating: int | None
     work_id: UUID | None
     cover_path: str | None
+    genres: list[Genre]
+
+
+class GenreCountResponse(BaseModel):
+    genre: Genre
+    books: int
 
 
 class AuthorCountResponse(BaseModel):
@@ -46,6 +53,10 @@ class YearStatsResponse(BaseModel):
     top_authors: list[AuthorCountResponse]
     formats: dict[str, int]
     years: list[int] = Field(description="Years with something to show, latest first")
+    genres: list[GenreCountResponse] = Field(
+        description="Genres of the books finished, most read first (a book counts in up to two)"
+    )
+    previous_genres: list[GenreCountResponse] = Field(description="The same, the year before")
 
 
 @router.get("/me/stats", operation_id="getYearStats")
@@ -72,6 +83,7 @@ async def get_year_stats(
                 rating=b.rating,
                 work_id=b.work_id,
                 cover_path=b.cover_path,
+                genres=list(b.genres),
             )
             for b in found.finished
         ],
@@ -89,4 +101,6 @@ async def get_year_stats(
         top_authors=[AuthorCountResponse(name=n, books=c) for n, c in found.top_authors],
         formats=found.formats,
         years=found.years,
+        genres=[GenreCountResponse(genre=g, books=n) for g, n in found.genres],
+        previous_genres=[GenreCountResponse(genre=g, books=n) for g, n in found.previous_genres],
     )

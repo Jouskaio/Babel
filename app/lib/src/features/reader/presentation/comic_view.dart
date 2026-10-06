@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:babel_api_client/api.dart' show BookNoteResponse;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +11,8 @@ import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 import '../application/annotations.dart';
+import '../application/reader_notes.dart';
+import '../application/reader_settings.dart';
 import '../application/reading_position.dart';
 import '../data/comic_book.dart';
 import 'annotation_sheets.dart';
@@ -307,6 +310,9 @@ class _ComicViewState extends ConsumerState<ComicView> {
               const <Annotation>[])
         if (a.onPage) a,
     ];
+    final others = ref.watch(readerSettingsProvider).readerNotes
+        ? ref.watch(readerNotesProvider(widget.itemId)).value ?? const []
+        : const <BookNoteResponse>[];
     Widget page(int index, {required bool strip}) => _ComicPage(
       key: ValueKey('page-$index-$_direction'),
       bytes: widget.book.page(index),
@@ -323,6 +329,12 @@ class _ComicViewState extends ConsumerState<ComicView> {
       },
       onRegion: (region) => _addNote(index, region),
       onOpen: (note) => showAnnotationEditor(context, note),
+      others: [
+        for (final n in others)
+          if (n.sameFile && n.region != null && n.chapter == index) n,
+      ],
+      onOpenOther: (note) =>
+          showReaderNote(context, note, place: pagePlace(note)),
     );
 
     final body = _vertical
@@ -385,6 +397,14 @@ class _ComicViewState extends ConsumerState<ComicView> {
           fileSha256: widget.fileSha256,
           chapterName: (index) => l10n.comicPage(index + 1),
           onOpenChapter: (index) => _go(index + 1),
+          others: [for (final n in others) (n, pagePlace(n))],
+          onSeek: (percent) => _go(
+            (percent / 100 * (widget.book.length - 1)).round().clamp(
+                  0,
+                  widget.book.length - 1,
+                ) +
+                1,
+          ),
         ),
         child: Text(
           '${l10n.marginTitle} · ${l10n.marginCount(notes.length)}',
@@ -418,6 +438,8 @@ class _ComicPage extends StatefulWidget {
     required this.onRegion,
     required this.onOpen,
     this.onHeight,
+    this.others = const [],
+    this.onOpenOther,
     super.key,
   });
 
@@ -430,6 +452,8 @@ class _ComicPage extends StatefulWidget {
   final ValueChanged<PageRegion> onRegion;
   final ValueChanged<Annotation> onOpen;
   final ValueChanged<double>? onHeight;
+  final List<BookNoteResponse> others;
+  final ValueChanged<BookNoteResponse>? onOpenOther;
 
   @override
   State<_ComicPage> createState() => _ComicPageState();
@@ -509,6 +533,8 @@ class _ComicPageState extends State<_ComicPage> {
               annotating: widget.annotating,
               onRegion: widget.onRegion,
               onOpen: widget.onOpen,
+              others: widget.others,
+              onOpenOther: widget.onOpenOther,
             ),
           ),
         ],

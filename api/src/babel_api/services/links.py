@@ -23,7 +23,7 @@ from babel_api.domain.errors import UnsupportedLinkError
 from babel_api.domain.files import LibraryItem
 from babel_api.domain.ports import FileRepository, SourceRepository
 from babel_api.domain.sources import RemoteEntry
-from babel_api.services.files import FileService
+from babel_api.services.files import FileService, stored_sha
 from babel_api.services.follows import FollowService
 
 
@@ -120,7 +120,7 @@ class LinkService:
         )
         name = f"{entry.title}.epub" if entry.title else file_name(entry.path)
         result = await self._library.import_file(user_id, chunks, name, device_id)
-        await self._sources.remember_file(kind.value, entry.remote_id, result.item.file.sha256)
+        await self._sources.remember_file(kind.value, entry.remote_id, stored_sha(result.item))
         await self._sources.commit()
         await self._follow(kind, result.item, url, entry)
         return result.item

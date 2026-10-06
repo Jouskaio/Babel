@@ -38,6 +38,18 @@ void main() {
     expect(find.text('Charlotte Brontë'), findsOneWidget);
     expect(find.text('Villette'), findsWidgets);
     expect(find.text('VOIR MON RÉCAP 2026'), findsOneWidget);
+    expect(find.text('Vos genres'), findsOneWidget);
+    expect(find.text('Romance'), findsOneWidget);
+    expect(
+      find.text('Votre genre de l\'année : romance, devant littérature.'),
+      findsOneWidget,
+    );
+    expect(
+      find.text(
+        'Changement de cap : romance prend la tête, l\'an dernier c\'était polar.',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('the wrap-up goes page by page', (tester) async {

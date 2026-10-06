@@ -11,6 +11,7 @@ from babel_api.adapters.files.comics import ComicConverter
 from babel_api.domain.catalog import IdentifierKind
 from babel_api.domain.errors import (
     BlockedFileError,
+    BookAlreadyInLibraryError,
     ForbiddenError,
     NotFoundError,
     UnsupportedFileError,
@@ -35,11 +36,12 @@ def item_data(item: LibraryItem) -> dict[str, Any]:
         "id": str(item.id),
         "title": item.title,
         "authors": list(item.authors),
-        "format": item.file.format.value,
-        "size": item.file.size,
-        "sha256": item.file.sha256,
-        "edition_id": str(item.file.edition_id) if item.file.edition_id else None,
-        "cover_path": item.file.cover_path,
+        "format": item.file.format.value if item.file else None,
+        "size": item.file.size if item.file else None,
+        "sha256": item.sha256,
+        "edition_id": str(item.file.edition_id) if item.file and item.file.edition_id else None,
+        "cover_path": item.cover_path,
+        "paper": item.paper,
         "added_at": item.added_at.isoformat(),
         "status": item.state.status.value if item.state.status else None,
         "progress": item.state.progress,
@@ -49,6 +51,13 @@ def item_data(item: LibraryItem) -> dict[str, Any]:
         "hidden": item.state.hidden,
         "work_id": str(item.work_id) if item.work_id else None,
     }
+
+
+def stored_sha(item: LibraryItem) -> str:
+    """The file of a book that was just imported (it has one)."""
+    if item.sha256 is None:
+        raise UnsupportedFileError
+    return item.sha256
 
 
 def _iso(value: datetime | None) -> str | None:
@@ -143,6 +152,7 @@ class FileService:
             uploaded_by=user_id,
             title=metadata.title,
             authors=metadata.authors,
+            subjects=metadata.subjects,
         )
         await self._files.add_file(stored)
         return stored, path, False
@@ -179,6 +189,94 @@ class FileService:
         await self._check_access(user_id, file)
         item = await self._files.find_item(user_id, sha256)
         return item or await self._add_item(user_id, file, path, file.original_name, device_id)
+
+    async def file_subjects(self, file: StoredFile) -> tuple[str, ...]:
+        """The subjects written in a stored file, read once and kept."""
+        if file.subjects is not None:
+            return file.subjects
+        path = self._store.path(file.sha256)
+        subjects = self._reader.metadata(path, file.format).subjects if path else ()
+        await self._files.set_subjects(file.sha256, subjects)
+        await self._files.commit()
+        return subjects
+
+    async def add_paper(
+        self, user_id: UUID, work_id: UUID, device_id: UUID | None = None
+    ) -> LibraryItem:
+        """A book the reader owns on paper, from its catalog work. The same book when they
+        already have (or had) it: it is marked as owned on paper and comes back."""
+        work = await self._catalog.get_work(work_id)
+        if work is None:
+            raise NotFoundError
+        item = await self._files.find_item_of_work(user_id, work_id)
+        if item is None:
+            item = await self._files.add_item(
+                user_id, None, work.title, tuple(work.authors), work_id, paper=True
+            )
+        else:
+            if item.removed_at is not None:
+                item = await self._files.restore_item(item.id, datetime.now(UTC))
+            item = await self._files.set_paper(item.id, True)
+        await self._record(item, device_id)
+        return item
+
+    async def set_paper(
+        self, user_id: UUID, item_id: UUID, paper: bool, device_id: UUID | None = None
+    ) -> LibraryItem:
+        """Whether the reader owns the book on paper. A paper book without a file that is
+        no longer owned on paper leaves the library (its data stays)."""
+        item = await self._own(user_id, item_id)
+        if not paper and item.file is None:
+            await self.remove_from_library(user_id, item_id, device_id)
+            return item
+        item = await self._files.set_paper(item_id, paper)
+        await self._record(item, device_id)
+        return item
+
+    async def attach_file(
+        self,
+        user_id: UUID,
+        item_id: UUID,
+        chunks: AsyncIterator[bytes],
+        filename: str,
+        device_id: UUID | None = None,
+    ) -> LibraryItem:
+        """Gives a book (a paper one, say) a file, to read it on devices too. Status,
+        progress, review and notes stay the book's."""
+        item = await self._own(user_id, item_id)
+        stored, _, _ = await self.store(user_id, chunks, filename)
+        if item.sha256 == stored.sha256:
+            return item
+        other = await self._files.find_item(user_id, stored.sha256, removed=True)
+        if other is not None and other.id != item_id:
+            if other.removed_at is None:
+                raise BookAlreadyInLibraryError
+            # A removed book had this file: it keeps its data, the file moves here.
+            await self._files.clear_file(other.id)
+        updated = await self._files.set_file(item_id, stored.sha256)
+        if updated.work_id is None and stored.edition_id is not None:
+            work = await self._files.guess_work(stored.edition_id, updated.title, ())
+            if work is not None:
+                updated = await self._files.set_work(item_id, work)
+        await self._record(updated, device_id)
+        return updated
+
+    async def _own(self, user_id: UUID, item_id: UUID) -> LibraryItem:
+        item = await self._files.get_item(item_id)
+        if item is None or item.user_id != user_id:
+            raise NotFoundError
+        return item
+
+    async def _record(self, item: LibraryItem, device_id: UUID | None) -> None:
+        await self._changes.record(
+            item.user_id,
+            EntityKind.LIBRARY_ITEM,
+            str(item.id),
+            ChangeOp.UPSERT,
+            item_data(item),
+            device_id,
+        )
+        await self._files.commit()
 
     async def link_work(
         self, user_id: UUID, item_id: UUID, work_id: UUID | None, device_id: UUID | None = None

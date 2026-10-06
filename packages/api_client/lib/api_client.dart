@@ -236,6 +236,10 @@ class ApiClient {
           return FriendsResponse.fromJson(value);
         case 'GenericConfig':
           return GenericConfig.fromJson(value);
+        case 'Genre':
+          return GenreTypeTransformer().decode(value);
+        case 'GenreCountResponse':
+          return GenreCountResponse.fromJson(value);
         case 'GitHubConfig':
           return GitHubConfig.fromJson(value);
         case 'HealthResponse':
@@ -272,6 +276,10 @@ class ApiClient {
           return OperationRequest.fromJson(value);
         case 'OperationResult':
           return OperationResult.fromJson(value);
+        case 'PaperBookRequest':
+          return PaperBookRequest.fromJson(value);
+        case 'PaperRequest':
+          return PaperRequest.fromJson(value);
         case 'PremiumRequest':
           return PremiumRequest.fromJson(value);
         case 'ProviderLoginRequest':

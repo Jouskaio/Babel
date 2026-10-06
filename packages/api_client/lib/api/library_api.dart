@@ -16,6 +16,70 @@ class LibraryApi {
 
   final ApiClient apiClient;
 
+  /// Add Paper Book
+  ///
+  /// A book you own on paper, to follow your reading without a file. If the work is already (or was) in your library, that book is marked as owned on paper instead.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [PaperBookRequest] paperBookRequest (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<Response> addPaperBookWithHttpInfo(PaperBookRequest paperBookRequest, { String? xBabelDevice, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/paper';
+
+    // ignore: prefer_final_locals
+    Object? postBody = paperBookRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (xBabelDevice != null) {
+      headerParams[r'X-Babel-Device'] = parameterToString(xBabelDevice);
+    }
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Add Paper Book
+  ///
+  /// A book you own on paper, to follow your reading without a file. If the work is already (or was) in your library, that book is marked as owned on paper instead.
+  ///
+  /// Parameters:
+  ///
+  /// * [PaperBookRequest] paperBookRequest (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<LibraryItemResponse?> addPaperBook(PaperBookRequest paperBookRequest, { String? xBabelDevice, }) async {
+    final response = await addPaperBookWithHttpInfo(paperBookRequest,  xBabelDevice: xBabelDevice, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'LibraryItemResponse',) as LibraryItemResponse;
+    
+    }
+    return null;
+  }
+
   /// Add Stored File
   ///
   /// Add a file already on Babel to the library, without uploading it again.
@@ -68,6 +132,85 @@ class LibraryApi {
   /// * [String] xBabelDevice:
   Future<LibraryItemResponse?> addStoredFile(String sha256, { String? xBabelDevice, }) async {
     final response = await addStoredFileWithHttpInfo(sha256,  xBabelDevice: xBabelDevice, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'LibraryItemResponse',) as LibraryItemResponse;
+    
+    }
+    return null;
+  }
+
+  /// Attach File
+  ///
+  /// Give a book (a paper one, say) a file, to read it on your devices too. Its status, progress, review and notes stay with it.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [MultipartFile] file (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<Response> attachFileWithHttpInfo(String itemId, MultipartFile file, { String? xBabelDevice, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/{item_id}/file'
+      .replaceAll('{item_id}', itemId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (xBabelDevice != null) {
+      headerParams[r'X-Babel-Device'] = parameterToString(xBabelDevice);
+    }
+
+    const contentTypes = <String>['multipart/form-data'];
+
+    bool hasFields = false;
+    final mp = MultipartRequest('POST', Uri.parse(path));
+    if (file != null) {
+      hasFields = true;
+      mp.fields[r'file'] = file.field;
+      mp.files.add(file);
+    }
+    if (hasFields) {
+      postBody = mp;
+    }
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Attach File
+  ///
+  /// Give a book (a paper one, say) a file, to read it on your devices too. Its status, progress, review and notes stay with it.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [MultipartFile] file (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<LibraryItemResponse?> attachFile(String itemId, MultipartFile file, { String? xBabelDevice, }) async {
+    final response = await attachFileWithHttpInfo(itemId, file,  xBabelDevice: xBabelDevice, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -1036,6 +1179,75 @@ class LibraryApi {
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ReviewResponse',) as ReviewResponse;
+    
+    }
+    return null;
+  }
+
+  /// Set Paper
+  ///
+  /// Whether you own the book on paper. A paper book without a file that you no longer own leaves the library (its status, review and notes are kept).
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [PaperRequest] paperRequest (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<Response> setPaperWithHttpInfo(String itemId, PaperRequest paperRequest, { String? xBabelDevice, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/{item_id}/paper'
+      .replaceAll('{item_id}', itemId);
+
+    // ignore: prefer_final_locals
+    Object? postBody = paperRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (xBabelDevice != null) {
+      headerParams[r'X-Babel-Device'] = parameterToString(xBabelDevice);
+    }
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'PUT',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Set Paper
+  ///
+  /// Whether you own the book on paper. A paper book without a file that you no longer own leaves the library (its status, review and notes are kept).
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [PaperRequest] paperRequest (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<LibraryItemResponse?> setPaper(String itemId, PaperRequest paperRequest, { String? xBabelDevice, }) async {
+    final response = await setPaperWithHttpInfo(itemId, paperRequest,  xBabelDevice: xBabelDevice, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'LibraryItemResponse',) as LibraryItemResponse;
     
     }
     return null;
