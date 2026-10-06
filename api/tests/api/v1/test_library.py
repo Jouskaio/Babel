@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 from babel_api.core.config import Settings
 from tests.api.v1.test_works import FakeBooks
-from tests.books import JPEG, NOT_A_BOOK, PDF, epub
+from tests.books import CBR, JPEG, NOT_A_BOOK, PDF, cbz, epub
 
 PASSWORD = "correct horse battery"
 
@@ -220,3 +220,35 @@ def test_files_without_cover_answer_404(client: TestClient, ada: dict[str, str])
     pdf_item = upload(client, ada, PDF, "book.pdf").json()["item"]
     assert pdf_item["cover_path"] is None
     assert client.get(f"/v1/files/{pdf_item['sha256']}/cover").status_code == 404
+
+
+class _Converter:
+    """Stands in for bsdtar: CBR files become a fixed CBZ."""
+
+    def __init__(self, root: Path) -> None:
+        self.calls = 0
+        self._target = root / "converted.cbz"
+
+    async def cbz(self, sha256: str, source: Path) -> Path:
+        self.calls += 1
+        self._target.write_bytes(cbz())
+        return self._target
+
+
+def test_comics_are_served_as_cbz(
+    app: FastAPI, client: TestClient, ada: dict[str, str], tmp_path: Path
+) -> None:
+    converter = _Converter(tmp_path)
+    app.state.container = replace(app.state.container, comics=converter)
+    rar = upload(client, ada, CBR, "Akira.cbr").json()["item"]
+    zipped = upload(client, ada, cbz(), "Akira.cbz").json()["item"]
+    book = upload(client, ada, epub(), "Jane Eyre.epub").json()["item"]
+
+    converted = client.get(f"/v1/files/{rar['sha256']}/cbz", headers=ada)
+    assert converted.status_code == 200
+    assert converted.headers["content-type"] == "application/vnd.comicbook+zip"
+    assert converted.content == cbz()
+    # A CBZ is served as it is; other books are not comics.
+    assert client.get(f"/v1/files/{zipped['sha256']}/cbz", headers=ada).content == cbz()
+    assert client.get(f"/v1/files/{book['sha256']}/cbz", headers=ada).status_code == 415
+    assert converter.calls == 1

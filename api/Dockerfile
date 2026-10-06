@@ -15,6 +15,10 @@ RUN uv sync --frozen --no-dev
 
 # ---------------------------------------------------------------- runtime
 FROM python:3.13-slim-bookworm AS runtime
+# bsdtar (libarchive) opens CBR comics, which are converted to CBZ for the readers.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends libarchive-tools \
+ && rm -rf /var/lib/apt/lists/*
 RUN useradd --system --uid 10001 --no-create-home babel
 WORKDIR /app
 COPY --from=build --chown=babel:babel /app /app

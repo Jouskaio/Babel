@@ -130,6 +130,28 @@ async def download_file(
 
 
 @router.get(
+    "/files/{sha256}/cbz",
+    operation_id="downloadFileAsCbz",
+    response_class=FileResponse,
+    responses={
+        200: {"content": {"application/vnd.comicbook+zip": {}}},
+        415: {"description": "Not a comic, or this one cannot be converted"},
+    },
+)
+async def download_as_cbz(
+    user_id: CurrentUserId, files: FileServiceDep, sha256: Sha256
+) -> FileResponse:
+    """A comic as CBZ: CBR (RAR) files are converted once, for readers that only open ZIP."""
+    download = await files.as_cbz(user_id, sha256)
+    return FileResponse(
+        download.path,
+        media_type="application/vnd.comicbook+zip",
+        filename=f"{download.path.stem}.cbz",
+        headers={"Cache-Control": "private, max-age=31536000, immutable"},
+    )
+
+
+@router.get(
     "/files/{sha256}/cover",
     operation_id="getFileCover",
     response_class=FileResponse,

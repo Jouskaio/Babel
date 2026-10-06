@@ -3998,6 +3998,54 @@
         ]
       }
     },
+    "/v1/files/{sha256}/cbz": {
+      "get": {
+        "description": "A comic as CBZ: CBR (RAR) files are converted once, for readers that only open ZIP.",
+        "operationId": "downloadFileAsCbz",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sha256",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Sha256",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.comicbook+zip": {}
+            },
+            "description": "Successful Response"
+          },
+          "415": {
+            "description": "Not a comic, or this one cannot be converted"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Download As Cbz",
+        "tags": [
+          "library"
+        ]
+      }
+    },
     "/v1/files/{sha256}/cover": {
       "get": {
         "description": "The cover found in a stored file (EPUB, CBZ). Public, like catalog covers.",

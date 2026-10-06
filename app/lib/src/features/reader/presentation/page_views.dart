@@ -1,11 +1,17 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
+import '../application/annotations.dart';
 import '../application/reading_position.dart';
+import '../data/comic_book.dart';
+import 'annotation_sheets.dart';
+import 'page_notes.dart';
 import 'reader_chrome.dart';
 import 'reader_settings_sheet.dart';
 
@@ -94,11 +100,12 @@ class PagedFrame extends StatelessWidget {
   }
 }
 
-/// Reads a PDF.
-class PdfView extends StatefulWidget {
+/// Reads a PDF, with notes drawn as frames on its pages.
+class PdfView extends ConsumerStatefulWidget {
   const PdfView({
     required this.bytes,
-    required this.name,
+    required this.itemId,
+    required this.fileSha256,
     required this.title,
     required this.start,
     required this.onPosition,
@@ -107,46 +114,118 @@ class PdfView extends StatefulWidget {
   });
 
   final Uint8List bytes;
-  final String name;
+  final String itemId;
+  final String fileSha256;
   final String title;
   final ReadingLocator? start;
   final void Function(ReadingLocator locator, double percent) onPosition;
   final VoidCallback onBack;
 
   @override
-  State<PdfView> createState() => _PdfViewState();
+  ConsumerState<PdfView> createState() => _PdfViewState();
 }
 
-class _PdfViewState extends State<PdfView> {
+class _PdfViewState extends ConsumerState<PdfView> {
   final _controller = PdfViewerController();
   late int _page = widget.start?.page ?? 1;
   int _total = 0;
+  bool _annotating = false;
+
+  Future<void> _addNote(int index, PageRegion region) async {
+    setState(() => _annotating = false);
+    final created = await ref
+        .read(annotationsControllerProvider)
+        .create(
+          itemId: widget.itemId,
+          fileSha256: widget.fileSha256,
+          chapter: index,
+          quote: '',
+          region: region.toString(),
+        );
+    if (created != null && mounted) {
+      await showAnnotationEditor(context, created, focusNote: true);
+    }
+  }
+
+  void _toggleAnnotating() {
+    setState(() => _annotating = !_annotating);
+    if (_annotating) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(context.l10n.comicAnnotateHint)));
+    }
+  }
 
   @override
-  Widget build(BuildContext context) => PagedFrame(
-    title: widget.title,
-    page: _page,
-    total: _total,
-    onBack: widget.onBack,
-    onGo: (page) => _controller.goToPage(pageNumber: page),
-    child: PdfViewer.data(
-      widget.bytes,
-      sourceName: widget.name,
-      controller: _controller,
-      initialPageNumber: _page,
-      params: PdfViewerParams(
-        backgroundColor: BabelColors.canvas,
-        onViewerReady: (document, _) =>
-            setState(() => _total = document.pages.length),
-        onPageChanged: (page) {
-          if (page == null) return;
-          setState(() => _page = page);
-          widget.onPosition(
-            ReadingLocator.page(page),
-            _total <= 1 ? 100 : (page - 1) / (_total - 1) * 100,
-          );
-        },
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final notes = [
+      for (final a
+          in ref.watch(annotationsProvider(widget.fileSha256)).value ??
+              const <Annotation>[])
+        if (a.onPage) a,
+    ];
+    return PagedFrame(
+      title: widget.title,
+      page: _page,
+      total: _total,
+      onBack: widget.onBack,
+      onGo: (page) => _controller.goToPage(pageNumber: page),
+      actions: [
+        ChromeButton(
+          tooltip: l10n.comicAnnotate,
+          icon: Icons.crop_free,
+          selected: _annotating,
+          onPressed: _toggleAnnotating,
+        ),
+      ],
+      footer: TextButton(
+        onPressed: () => showMarginPanel(
+          context,
+          fileSha256: widget.fileSha256,
+          chapterName: (index) => l10n.comicPage(index + 1),
+          onOpenChapter: (index) => _controller.goToPage(pageNumber: index + 1),
+        ),
+        child: Text(
+          '${l10n.marginTitle} · ${l10n.marginCount(notes.length)}',
+          style: BabelText.label(10),
+        ),
       ),
-    ),
-  );
+      child: PdfViewer.data(
+        widget.bytes,
+        sourceName: widget.fileSha256,
+        controller: _controller,
+        initialPageNumber: _page,
+        params: PdfViewerParams(
+          backgroundColor: BabelColors.canvas,
+          // Drawing a frame: the page stays still under the finger.
+          panEnabled: !_annotating,
+          scaleEnabled: !_annotating,
+          pageOverlaysBuilder: (context, rect, page) => [
+            Positioned.fill(
+              child: PageNotesLayer(
+                notes: [
+                  for (final n in notes)
+                    if (n.chapter == page.pageNumber - 1) n,
+                ],
+                annotating: _annotating,
+                onRegion: (region) => _addNote(page.pageNumber - 1, region),
+                onOpen: (note) => showAnnotationEditor(context, note),
+              ),
+            ),
+          ],
+          onViewerReady: (document, _) =>
+              setState(() => _total = document.pages.length),
+          onPageChanged: (page) {
+            if (page == null) return;
+            setState(() => _page = page);
+            widget.onPosition(
+              ReadingLocator.page(page),
+              _total <= 1 ? 100 : (page - 1) / (_total - 1) * 100,
+            );
+          },
+        ),
+      ),
+    );
+  }
 }

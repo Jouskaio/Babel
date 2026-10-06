@@ -17,6 +17,7 @@ from babel_api.adapters.db.migrations.config import upgrade_database
 from babel_api.adapters.db.repositories import SqlUserRepository
 from babel_api.adapters.db.session import create_engine, create_session_factory
 from babel_api.adapters.files.blob_store import LocalBlobStore
+from babel_api.adapters.files.comics import ComicConverter
 from babel_api.adapters.files.covers import LocalCoverCache
 from babel_api.adapters.files.metadata import EbookMetadataReader
 from babel_api.adapters.kavita import KavitaClient
@@ -171,6 +172,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         secrets=SecretBox(settings.secrets_key.get_secret_value()),
         mailer=mailer,
         pusher=pusher,
+        comics=ComicConverter(settings.files_dir),
         kavita_client=kavita_client,
         kavita=kavita,
     )
