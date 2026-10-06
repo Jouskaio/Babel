@@ -100,6 +100,7 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**checkFollow**](doc//LibraryApi.md#checkfollow) | **POST** /v1/library/follows/{follow_id}/check | Check Follow
 *LibraryApi* | [**deleteReview**](doc//LibraryApi.md#deletereview) | **DELETE** /v1/library/{item_id}/review | Delete Review
 *LibraryApi* | [**downloadFile**](doc//LibraryApi.md#downloadfile) | **GET** /v1/files/{sha256} | Download File
+*LibraryApi* | [**downloadFileAsCbz**](doc//LibraryApi.md#downloadfileascbz) | **GET** /v1/files/{sha256}/cbz | Download As Cbz
 *LibraryApi* | [**getFileCover**](doc//LibraryApi.md#getfilecover) | **GET** /v1/files/{sha256}/cover | Get File Cover
 *LibraryApi* | [**getFollows**](doc//LibraryApi.md#getfollows) | **GET** /v1/library/follows | Get Follows
 *LibraryApi* | [**getLibrary**](doc//LibraryApi.md#getlibrary) | **GET** /v1/library | Get Library

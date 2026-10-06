@@ -13,6 +13,7 @@ Method | HTTP request | Description
 [**checkFollow**](LibraryApi.md#checkfollow) | **POST** /v1/library/follows/{follow_id}/check | Check Follow
 [**deleteReview**](LibraryApi.md#deletereview) | **DELETE** /v1/library/{item_id}/review | Delete Review
 [**downloadFile**](LibraryApi.md#downloadfile) | **GET** /v1/files/{sha256} | Download File
+[**downloadFileAsCbz**](LibraryApi.md#downloadfileascbz) | **GET** /v1/files/{sha256}/cbz | Download As Cbz
 [**getFileCover**](LibraryApi.md#getfilecover) | **GET** /v1/files/{sha256}/cover | Get File Cover
 [**getFollows**](LibraryApi.md#getfollows) | **GET** /v1/library/follows | Get Follows
 [**getLibrary**](LibraryApi.md#getlibrary) | **GET** /v1/library | Get Library
@@ -218,6 +219,54 @@ void (empty response body)
 
  - **Content-Type**: Not defined
  - **Accept**: application/octet-stream
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **downloadFileAsCbz**
+> downloadFileAsCbz(sha256)
+
+Download As Cbz
+
+A comic as CBZ: CBR (RAR) files are converted once, for readers that only open ZIP.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = LibraryApi();
+final sha256 = sha256_example; // String | 
+
+try {
+    api_instance.downloadFileAsCbz(sha256);
+} catch (e) {
+    print('Exception when calling LibraryApi->downloadFileAsCbz: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **sha256** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/vnd.comicbook+zip
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
