@@ -13,6 +13,7 @@ import '../application/annotations.dart';
 import '../application/reading_position.dart';
 import '../data/comic_book.dart';
 import 'annotation_sheets.dart';
+import 'page_notes.dart';
 import 'page_views.dart';
 
 /// Reads a comic or manga (CBZ): pages left to right, right to left or as a vertical
@@ -57,6 +58,7 @@ class _ComicViewState extends ConsumerState<ComicView> {
   void initState() {
     super.initState();
     _strip.addListener(_onStripScroll);
+    _stripZoom.addListener(_onStripZoom);
     unawaited(_loadDirection());
   }
 
@@ -74,10 +76,31 @@ class _ComicViewState extends ConsumerState<ComicView> {
   void dispose() {
     _pages.dispose();
     _strip.dispose();
+    _stripZoom.dispose();
     super.dispose();
   }
 
   bool get _vertical => _direction == ComicDirection.vertical;
+
+  final _stripZoom = TransformationController();
+  Offset? _stripTapAt;
+
+  void _onStripZoom() {
+    final zoomed = _stripZoom.value.getMaxScaleOnAxis() > 1.01;
+    if (zoomed != _zoomed) setState(() => _zoomed = zoomed);
+  }
+
+  void _toggleStripZoom() {
+    if (_stripZoom.value.getMaxScaleOnAxis() > 1.01) {
+      _stripZoom.value = Matrix4.identity();
+      return;
+    }
+    final at = _stripTapAt ?? Offset.zero;
+    const scale = 2.0;
+    _stripZoom.value = Matrix4.identity()
+      ..translateByDouble(-at.dx * (scale - 1), -at.dy * (scale - 1), 0, 1)
+      ..scaleByDouble(scale, scale, 1, 1);
+  }
 
   void _setDirection(ComicDirection direction, {bool save = true}) {
     final page = _page;
@@ -303,10 +326,22 @@ class _ComicViewState extends ConsumerState<ComicView> {
     );
 
     final body = _vertical
-        ? ListView.builder(
-            controller: _strip,
-            itemCount: widget.book.length,
-            itemBuilder: (_, index) => page(index, strip: true),
+        // Pinch or double tap to zoom into the strip; scrolling resumes at full width.
+        ? GestureDetector(
+            onDoubleTapDown: (d) => _stripTapAt = d.localPosition,
+            onDoubleTap: _annotating ? null : _toggleStripZoom,
+            child: InteractiveViewer(
+              transformationController: _stripZoom,
+              maxScale: 4,
+              panEnabled: _zoomed && !_annotating,
+              scaleEnabled: !_annotating,
+              child: ListView.builder(
+                controller: _strip,
+                physics: _zoomed ? const NeverScrollableScrollPhysics() : null,
+                itemCount: widget.book.length,
+                itemBuilder: (_, index) => page(index, strip: true),
+              ),
+            ),
           )
         : PageView.builder(
             controller: _pages,
@@ -327,7 +362,7 @@ class _ComicViewState extends ConsumerState<ComicView> {
       onGo: _go,
       chrome: _chrome,
       actions: [
-        _ChromeButton(
+        ChromeButton(
           tooltip: l10n.comicDirection,
           // Not an arrow: next to the back button it would read as a second one.
           icon: switch (_direction) {
@@ -337,7 +372,7 @@ class _ComicViewState extends ConsumerState<ComicView> {
           },
           onPressed: _chooseDirection,
         ),
-        _ChromeButton(
+        ChromeButton(
           tooltip: l10n.comicAnnotate,
           icon: Icons.crop_free,
           selected: _annotating,
@@ -369,36 +404,6 @@ class _ComicViewState extends ConsumerState<ComicView> {
       ),
     );
   }
-}
-
-class _ChromeButton extends StatelessWidget {
-  const _ChromeButton({
-    required this.tooltip,
-    required this.icon,
-    required this.onPressed,
-    this.selected = false,
-  });
-
-  final String tooltip;
-  final IconData icon;
-  final VoidCallback onPressed;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) => IconButton(
-    tooltip: tooltip,
-    onPressed: onPressed,
-    style: IconButton.styleFrom(
-      fixedSize: const Size(44, 44),
-      backgroundColor: selected ? BabelColors.gold : Colors.transparent,
-      side: BorderSide(color: selected ? BabelColors.gold : BabelColors.border),
-    ),
-    icon: Icon(
-      icon,
-      size: 20,
-      color: selected ? BabelColors.canvas : BabelColors.textPrimary,
-    ),
-  );
 }
 
 /// One page: the image, its notes as frames, zoom, and drawing a new frame.
@@ -435,8 +440,6 @@ class _ComicPageState extends State<_ComicPage> {
   Size? _size;
   ImageStream? _stream;
   ImageStreamListener? _listener;
-  Offset? _start;
-  Offset? _end;
   Offset? _doubleTapAt;
 
   @override
@@ -500,61 +503,14 @@ class _ComicPageState extends State<_ComicPage> {
               gaplessPlayback: true,
             ),
           ),
-          for (final note in widget.notes)
-            if (PageRegion.parse(note.region) case final region?)
-              Positioned(
-                left: region.x * size.width,
-                top: region.y * size.height,
-                width: region.width * size.width,
-                height: region.height * size.height,
-                child: GestureDetector(
-                  onTap: () => widget.onOpen(note),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color:
-                          (note.color == HighlightColor.none
-                                  ? BabelColors.gold
-                                  : note.color.color)
-                              .withValues(alpha: 0.18),
-                      border: Border.all(
-                        color: note.color == HighlightColor.none
-                            ? BabelColors.gold
-                            : note.color.color,
-                        width: size.width / 200,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          if (widget.annotating)
-            Positioned.fill(
-              child: GestureDetector(
-                // The painter alone takes no touches.
-                behavior: HitTestBehavior.opaque,
-                // Where the finger went down, not where the drag was recognized.
-                onPanDown: (d) => setState(() {
-                  _start = d.localPosition;
-                  _end = d.localPosition;
-                }),
-                onPanUpdate: (d) => setState(() => _end = d.localPosition),
-                onPanEnd: (_) {
-                  final start = _start;
-                  final end = _end;
-                  setState(() => _start = _end = null);
-                  if (start == null || end == null) return;
-                  final region = PageRegion.between(
-                    start.dx / size.width,
-                    start.dy / size.height,
-                    end.dx / size.width,
-                    end.dy / size.height,
-                  );
-                  if (region != null) widget.onRegion(region);
-                },
-                child: CustomPaint(
-                  painter: _FramePainter(_start, _end, size.width / 200),
-                ),
-              ),
+          Positioned.fill(
+            child: PageNotesLayer(
+              notes: widget.notes,
+              annotating: widget.annotating,
+              onRegion: widget.onRegion,
+              onOpen: widget.onOpen,
             ),
+          ),
         ],
       ),
     );
@@ -586,30 +542,4 @@ class _ComicPageState extends State<_ComicPage> {
       ),
     );
   }
-}
-
-/// The frame being drawn around a panel.
-class _FramePainter extends CustomPainter {
-  _FramePainter(this.start, this.end, this.stroke);
-  final Offset? start;
-  final Offset? end;
-  final double stroke;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (start == null || end == null) return;
-    final rect = Rect.fromPoints(start!, end!);
-    canvas
-      ..drawRect(rect, Paint()..color = BabelColors.gold.withValues(alpha: 0.2))
-      ..drawRect(
-        rect,
-        Paint()
-          ..color = BabelColors.gold
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = stroke,
-      );
-  }
-
-  @override
-  bool shouldRepaint(_FramePainter old) => old.start != start || old.end != end;
 }

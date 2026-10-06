@@ -162,7 +162,8 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
         ),
         BookFormat.pdf => PdfView(
           bytes: opened.bytes,
-          name: item.sha256,
+          itemId: item.id,
+          fileSha256: item.sha256,
           title: item.title,
           start: opened.start,
           onPosition: _savePosition,

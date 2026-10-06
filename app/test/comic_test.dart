@@ -133,6 +133,21 @@ void main() {
         () => SharedPreferencesAsync().getString('babel.comic.direction.i1'),
       );
       expect(saved, 'vertical');
+
+      // A double tap zooms in (the strip stops scrolling), another one zooms out.
+      ScrollPhysics? physics() =>
+          tester.widget<ListView>(find.byType(ListView)).physics;
+      final strip = tester.getCenter(find.byType(ListView));
+      await tester.tapAt(strip);
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(strip);
+      await settle(tester);
+      expect(physics(), isA<NeverScrollableScrollPhysics>());
+      await tester.tapAt(strip);
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(strip);
+      await settle(tester);
+      expect(physics(), isNull);
     });
 
     testWidgets('a frame drawn on a page becomes a note', (tester) async {
