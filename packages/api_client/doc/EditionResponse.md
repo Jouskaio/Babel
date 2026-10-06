@@ -9,6 +9,8 @@ import 'package:babel_api_client/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **coverPath** | **String** |  | [optional] 
+**coverPaths** | **List<String>** | Every cover known for this edition, the first being cover_path | [default to const []]
+**description** | **String** |  | [optional] 
 **format** | **String** |  | [optional] 
 **id** | **String** |  | 
 **isbn13** | **List<String>** |  | [default to const []]

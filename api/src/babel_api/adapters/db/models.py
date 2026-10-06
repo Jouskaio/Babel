@@ -122,6 +122,8 @@ class EditionRow(Base):
     page_count: Mapped[int | None] = mapped_column(Integer)
     format: Mapped[str | None] = mapped_column(String(64))
     cover_id: Mapped[int | None] = mapped_column(Integer)
+    cover_ids: Mapped[list[int]] = mapped_column(JSON, default=list, server_default="[]")
+    description: Mapped[str | None] = mapped_column(Text)
 
     identifiers: Mapped[list["EditionIdentifierRow"]] = relationship(
         cascade="all, delete-orphan", lazy="selectin"

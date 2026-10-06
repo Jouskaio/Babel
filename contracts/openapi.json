@@ -827,6 +827,25 @@
             ],
             "title": "Cover Path"
           },
+          "cover_paths": {
+            "description": "Every cover known for this edition, the first being cover_path",
+            "items": {
+              "type": "string"
+            },
+            "title": "Cover Paths",
+            "type": "array"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
           "format": {
             "anyOf": [
               {
@@ -908,6 +927,8 @@
           "page_count",
           "format",
           "cover_path",
+          "cover_paths",
+          "description",
           "isbn13"
         ],
         "title": "EditionResponse",
