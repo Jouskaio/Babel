@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Response, status
 from pydantic import BaseModel, Field
 
 from babel_api.adapters.kavita import KavitaError
@@ -46,11 +46,20 @@ class LinkKavitaRequest(BaseModel):
     password: Annotated[str, Field(min_length=1, max_length=256)]
 
 
-@router.get("/me/kavita", operation_id="getKavita")
-async def get_kavita(user_id: CurrentUserId, kavita: KavitaServiceDep) -> KavitaLinkResponse | None:
+@router.get(
+    "/me/kavita",
+    operation_id="getKavita",
+    responses={204: {"description": "No Kavita linked"}},
+    response_model=KavitaLinkResponse,
+)
+async def get_kavita(
+    user_id: CurrentUserId, kavita: KavitaServiceDep
+) -> KavitaLinkResponse | Response:
     """Your linked Kavita, or the creation of your account on Babel's Kavita."""
     link = await kavita.status(user_id)
-    return KavitaLinkResponse.of(link) if link else None
+    if link is None:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return KavitaLinkResponse.of(link)
 
 
 @router.post("/me/kavita", operation_id="linkKavita")

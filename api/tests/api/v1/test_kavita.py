@@ -180,7 +180,7 @@ def me(client: TestClient, auth: dict[str, str]) -> dict[str, Any]:
 
 def test_any_reader_links_their_own_kavita(client: TestClient, kavita: Kavita) -> None:
     reader = account(client, "reader@example.com")
-    assert client.get("/v1/me/kavita", headers=reader).json() is None
+    assert client.get("/v1/me/kavita", headers=reader).status_code == 204
 
     wrong = client.post(
         "/v1/me/kavita",
@@ -212,7 +212,7 @@ def test_any_reader_links_their_own_kavita(client: TestClient, kavita: Kavita) -
     assert len(client.get("/v1/sources", headers=reader).json()) == 1
 
     assert client.delete("/v1/me/kavita", headers=reader).status_code == 204
-    assert client.get("/v1/me/kavita", headers=reader).json() is None
+    assert client.get("/v1/me/kavita", headers=reader).status_code == 204
     assert client.get("/v1/sources", headers=reader).json() == []
 
 
@@ -265,7 +265,7 @@ def test_admins_make_readers_premium_and_back(
 
     client.put(f"/v1/admin/users/{bob['id']}/premium", json={"premium": False}, headers=admin)
     assert "bob" in kavita.deleted
-    assert client.get("/v1/me/kavita", headers=reader).json() is None
+    assert client.get("/v1/me/kavita", headers=reader).status_code == 204
     assert client.get("/v1/sources", headers=reader).json() == []
 
 
@@ -306,4 +306,4 @@ def test_without_babels_kavita_nothing_is_created(app: FastAPI, client: TestClie
     admin = account(client, "admin@example.com")
     settle(app, client)
     assert me(client, admin)["admin"] is True
-    assert client.get("/v1/me/kavita", headers=admin).json() is None
+    assert client.get("/v1/me/kavita", headers=admin).status_code == 204
