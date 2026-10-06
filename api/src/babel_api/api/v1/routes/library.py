@@ -56,6 +56,10 @@ class LibraryItemResponse(BaseModel):
         default=None, description="The catalog work: reviews and notes are shared per work"
     )
     paper: bool = Field(default=False, description="Owned on paper (it may have a file too)")
+    audio_duration: float | None = Field(
+        default=None,
+        description="An audiobook from the reader's Audiobookshelf: its length in seconds",
+    )
 
     @classmethod
     def of(cls, item: LibraryItem) -> "LibraryItemResponse":
@@ -77,6 +81,7 @@ class LibraryItemResponse(BaseModel):
             hidden=item.state.hidden,
             work_id=item.work_id,
             paper=item.paper,
+            audio_duration=item.audio.duration if item.audio else None,
         )
 
 

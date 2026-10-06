@@ -3,6 +3,7 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
+from babel_api.adapters.audiobookshelf import AbsError
 from babel_api.domain.errors import (
     BlockedFileError,
     BookAlreadyInLibraryError,
@@ -77,6 +78,9 @@ _STATUS: dict[type[Exception], tuple[int, str]] = {
 
 
 async def _handle(_: Request, error: Exception) -> JSONResponse:
+    if isinstance(error, AbsError):
+        # "abs:expired" asks the reader to link Audiobookshelf again.
+        return JSONResponse({"detail": f"abs:{error.reason}"}, status_code=400)
     code, detail = _STATUS.get(type(error), (status.HTTP_400_BAD_REQUEST, "Request refused"))
     headers = {"Retry-After": "60"} if code == status.HTTP_503_SERVICE_UNAVAILABLE else None
     return JSONResponse({"detail": detail}, status_code=code, headers=headers)

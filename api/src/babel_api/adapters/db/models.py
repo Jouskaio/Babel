@@ -190,6 +190,10 @@ class LibraryItemRow(Base):
     authors: Mapped[list[str]] = mapped_column(JSON, default=list)
     added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     paper: Mapped[bool] = mapped_column(default=False, server_default=false())
+    # An audiobook of the reader's Audiobookshelf (domain AudioRef).
+    audio_id: Mapped[str | None] = mapped_column(String(64), index=True)
+    audio_duration: Mapped[float | None] = mapped_column(Float)
+    audio_cover: Mapped[str | None] = mapped_column(String(64))
     # The reader's status and declared progress (domain ReadingState).
     status: Mapped[str | None] = mapped_column(String(16), index=True)
     progress: Mapped[float | None] = mapped_column(Float)
@@ -469,6 +473,23 @@ class RecommendationRow(Base):
     message: Mapped[str | None] = mapped_column(String(1000))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class AbsLinkRow(Base):
+    """A reader's Audiobookshelf, linked to Babel for their audiobooks."""
+
+    __tablename__ = "abs_links"
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    base_url: Mapped[str] = mapped_column(String(500))
+    username: Mapped[str | None] = mapped_column(String(100))
+    # An API key, or the tokens of a session (access and refresh), encrypted.
+    api_key: Mapped[bool] = mapped_column(default=False)
+    secret: Mapped[str] = mapped_column(Text)
+    expired: Mapped[bool] = mapped_column(default=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
 class KavitaLinkRow(Base):

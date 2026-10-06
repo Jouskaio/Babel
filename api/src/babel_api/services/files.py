@@ -42,6 +42,7 @@ def item_data(item: LibraryItem) -> dict[str, Any]:
         "edition_id": str(item.file.edition_id) if item.file and item.file.edition_id else None,
         "cover_path": item.cover_path,
         "paper": item.paper,
+        "audio_duration": item.audio.duration if item.audio else None,
         "added_at": item.added_at.isoformat(),
         "status": item.state.status.value if item.state.status else None,
         "progress": item.state.progress,

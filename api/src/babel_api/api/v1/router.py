@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 
 from babel_api.api.v1.routes import (
+    audiobooks,
     auth,
     catalog,
     health,
@@ -27,3 +28,4 @@ router.include_router(social.router)
 router.include_router(social.history_router)
 router.include_router(kavita.router)
 router.include_router(stats.router)
+router.include_router(audiobooks.router)

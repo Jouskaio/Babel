@@ -182,10 +182,24 @@ class ApiClient {
           return valueString == 'true' || valueString == '1';
         case 'DateTime':
           return value is DateTime ? value : DateTime.tryParse(value);
+        case 'AbsBookResponse':
+          return AbsBookResponse.fromJson(value);
+        case 'AbsLibraryResponse':
+          return AbsLibraryResponse.fromJson(value);
+        case 'AbsLinkRequest':
+          return AbsLinkRequest.fromJson(value);
+        case 'AbsLinkResponse':
+          return AbsLinkResponse.fromJson(value);
         case 'Ao3Config':
           return Ao3Config.fromJson(value);
         case 'Audience':
           return AudienceTypeTransformer().decode(value);
+        case 'AudioChapterResponse':
+          return AudioChapterResponse.fromJson(value);
+        case 'AudioProgressRequest':
+          return AudioProgressRequest.fromJson(value);
+        case 'AudioTrackResponse':
+          return AudioTrackResponse.fromJson(value);
         case 'AuthorCountResponse':
           return AuthorCountResponse.fromJson(value);
         case 'AuthorResponse':
@@ -280,6 +294,8 @@ class ApiClient {
           return PaperBookRequest.fromJson(value);
         case 'PaperRequest':
           return PaperRequest.fromJson(value);
+        case 'PlaybackResponse':
+          return PlaybackResponse.fromJson(value);
         case 'PremiumRequest':
           return PremiumRequest.fromJson(value);
         case 'ProviderLoginRequest':
@@ -316,6 +332,8 @@ class ApiClient {
           return RegisterRequest.fromJson(value);
         case 'RelationResponse':
           return RelationResponse.fromJson(value);
+        case 'RemotePositionResponse':
+          return RemotePositionResponse.fromJson(value);
         case 'ReportReason':
           return ReportReasonTypeTransformer().decode(value);
         case 'ReportRequest':

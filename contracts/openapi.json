@@ -1,6 +1,179 @@
 {
   "components": {
     "schemas": {
+      "AbsBookResponse": {
+        "properties": {
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
+          "duration": {
+            "title": "Duration",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "item_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The book in your library, if added",
+            "title": "Item Id"
+          },
+          "narrators": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Narrators",
+            "type": "array"
+          },
+          "series": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Series"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "authors",
+          "narrators",
+          "series",
+          "duration",
+          "item_id"
+        ],
+        "title": "AbsBookResponse",
+        "type": "object"
+      },
+      "AbsLibraryResponse": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "AbsLibraryResponse",
+        "type": "object"
+      },
+      "AbsLinkRequest": {
+        "properties": {
+          "api_key": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "An API key made in Audiobookshelf (recommended)",
+            "title": "Api Key"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Used once to sign in; never stored",
+            "title": "Password"
+          },
+          "url": {
+            "maxLength": 500,
+            "minLength": 4,
+            "title": "Url",
+            "type": "string"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "AbsLinkRequest",
+        "type": "object"
+      },
+      "AbsLinkResponse": {
+        "properties": {
+          "api_key": {
+            "description": "Linked with an API key rather than a password",
+            "title": "Api Key",
+            "type": "boolean"
+          },
+          "base_url": {
+            "title": "Base Url",
+            "type": "string"
+          },
+          "expired": {
+            "description": "Audiobookshelf refused Babel's access: link it again",
+            "title": "Expired",
+            "type": "boolean"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          }
+        },
+        "required": [
+          "base_url",
+          "username",
+          "api_key",
+          "expired"
+        ],
+        "title": "AbsLinkResponse",
+        "type": "object"
+      },
       "Ao3Config": {
         "properties": {
           "username": {
@@ -24,6 +197,83 @@
         ],
         "title": "Audience",
         "type": "string"
+      },
+      "AudioChapterResponse": {
+        "properties": {
+          "end": {
+            "title": "End",
+            "type": "number"
+          },
+          "start": {
+            "title": "Start",
+            "type": "number"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "start",
+          "end"
+        ],
+        "title": "AudioChapterResponse",
+        "type": "object"
+      },
+      "AudioProgressRequest": {
+        "properties": {
+          "current_time": {
+            "minimum": 0.0,
+            "title": "Current Time",
+            "type": "number"
+          },
+          "finished": {
+            "default": false,
+            "title": "Finished",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "current_time"
+        ],
+        "title": "AudioProgressRequest",
+        "type": "object"
+      },
+      "AudioTrackResponse": {
+        "properties": {
+          "duration": {
+            "title": "Duration",
+            "type": "number"
+          },
+          "index": {
+            "title": "Index",
+            "type": "integer"
+          },
+          "mime_type": {
+            "title": "Mime Type",
+            "type": "string"
+          },
+          "path": {
+            "description": "Stream it from here (relative to the API base URL)",
+            "title": "Path",
+            "type": "string"
+          },
+          "start": {
+            "description": "Where the track starts in the book, in seconds",
+            "title": "Start",
+            "type": "number"
+          }
+        },
+        "required": [
+          "index",
+          "start",
+          "duration",
+          "mime_type",
+          "path"
+        ],
+        "title": "AudioTrackResponse",
+        "type": "object"
       },
       "AuthorCountResponse": {
         "properties": {
@@ -1256,6 +1506,18 @@
             "title": "Added At",
             "type": "string"
           },
+          "audio_duration": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "An audiobook from the reader's Audiobookshelf: its length in seconds",
+            "title": "Audio Duration"
+          },
           "authors": {
             "items": {
               "type": "string"
@@ -1739,6 +2001,55 @@
           "paper"
         ],
         "title": "PaperRequest",
+        "type": "object"
+      },
+      "PlaybackResponse": {
+        "properties": {
+          "chapters": {
+            "items": {
+              "$ref": "#/components/schemas/AudioChapterResponse"
+            },
+            "title": "Chapters",
+            "type": "array"
+          },
+          "duration": {
+            "title": "Duration",
+            "type": "number"
+          },
+          "narrators": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Narrators",
+            "type": "array"
+          },
+          "remote_position": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RemotePositionResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Where Audiobookshelf's own apps stopped"
+          },
+          "tracks": {
+            "items": {
+              "$ref": "#/components/schemas/AudioTrackResponse"
+            },
+            "title": "Tracks",
+            "type": "array"
+          }
+        },
+        "required": [
+          "duration",
+          "tracks",
+          "chapters",
+          "narrators",
+          "remote_position"
+        ],
+        "title": "PlaybackResponse",
         "type": "object"
       },
       "PremiumRequest": {
@@ -2335,6 +2646,30 @@
           "follows_you"
         ],
         "title": "RelationResponse",
+        "type": "object"
+      },
+      "RemotePositionResponse": {
+        "properties": {
+          "current_time": {
+            "title": "Current Time",
+            "type": "number"
+          },
+          "finished": {
+            "title": "Finished",
+            "type": "boolean"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "current_time",
+          "finished",
+          "updated_at"
+        ],
+        "title": "RemotePositionResponse",
         "type": "object"
       },
       "ReportReason": {
@@ -3945,6 +4280,221 @@
         "tags": [
           "kavita",
           "admin"
+        ]
+      }
+    },
+    "/v1/audio-covers/{key}": {
+      "get": {
+        "description": "An audiobook's cover, kept by Babel when it was added.",
+        "operationId": "getAudioCover",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cover",
+        "tags": [
+          "audiobooks"
+        ]
+      }
+    },
+    "/v1/audiobookshelf/books/{remote_id}": {
+      "post": {
+        "description": "Add an audiobook to your library (or bring it back, with its data).",
+        "operationId": "addAudiobook",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "remote_id",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "title": "Remote Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Add",
+        "tags": [
+          "audiobooks"
+        ]
+      }
+    },
+    "/v1/audiobookshelf/libraries": {
+      "get": {
+        "operationId": "getAudiobookLibraries",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AbsLibraryResponse"
+                  },
+                  "title": "Response Getaudiobooklibraries",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Libraries",
+        "tags": [
+          "audiobooks"
+        ]
+      }
+    },
+    "/v1/audiobookshelf/libraries/{library_id}/books": {
+      "get": {
+        "description": "Audiobooks of a library, by title, or matching [q].",
+        "operationId": "browseAudiobooks",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "library_id",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "title": "Library Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 1000,
+              "minimum": 0,
+              "title": "Page",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AbsBookResponse"
+                  },
+                  "title": "Response Browseaudiobooks",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Browse",
+        "tags": [
+          "audiobooks"
         ]
       }
     },
@@ -5740,6 +6290,176 @@
         ]
       }
     },
+    "/v1/library/{item_id}/audio": {
+      "get": {
+        "description": "What the player needs: tracks to stream, chapters, and Audiobookshelf's position.",
+        "operationId": "getPlayback",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybackResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Playback",
+        "tags": [
+          "audiobooks"
+        ]
+      }
+    },
+    "/v1/library/{item_id}/audio/progress": {
+      "put": {
+        "description": "Keep Audiobookshelf's own progress in step (its other apps resume there).",
+        "operationId": "saveAudioProgress",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AudioProgressRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Save Progress",
+        "tags": [
+          "audiobooks"
+        ]
+      }
+    },
+    "/v1/library/{item_id}/audio/tracks/{index}": {
+      "get": {
+        "description": "One audio track, streamed from Audiobookshelf (byte ranges supported).",
+        "operationId": "streamAudioTrack",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "index",
+            "required": true,
+            "schema": {
+              "maximum": 10000,
+              "minimum": 0,
+              "title": "Index",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Range",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Range"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Stream",
+        "tags": [
+          "audiobooks"
+        ]
+      }
+    },
     "/v1/library/{item_id}/file": {
       "post": {
         "description": "Give a book (a paper one, say) a file, to read it on your devices too. Its status,\nprogress, review and notes stay with it.",
@@ -6312,6 +7032,98 @@
         "summary": "Update Me",
         "tags": [
           "account"
+        ]
+      }
+    },
+    "/v1/me/audiobookshelf": {
+      "delete": {
+        "description": "Forget the linked Audiobookshelf; audiobooks already added keep their data.",
+        "operationId": "unlinkAudiobookshelf",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unlink",
+        "tags": [
+          "audiobooks"
+        ]
+      },
+      "get": {
+        "operationId": "getAudiobookshelf",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbsLinkResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "204": {
+            "description": "No Audiobookshelf linked"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Link",
+        "tags": [
+          "audiobooks"
+        ]
+      },
+      "post": {
+        "description": "Link your Audiobookshelf with an API key, or your password used once.",
+        "operationId": "linkAudiobookshelf",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbsLinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbsLinkResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Link",
+        "tags": [
+          "audiobooks"
         ]
       }
     },
