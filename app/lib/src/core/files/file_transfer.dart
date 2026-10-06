@@ -100,15 +100,20 @@ class FileTransfer {
     LibraryItemResponse item, {
     void Function(double)? onProgress,
   }) async {
-    final extension = item.format.value;
+    // A CBR (RAR) is read as the CBZ the server converts it to.
+    final comic = item.format == BookFormat.cbr;
+    final extension = comic ? 'cbz' : item.format.value;
     final local = await readLocalBook(item.sha256, extension);
     if (local != null) return local;
-    if (keepsBooksOffline) {
+    if (keepsBooksOffline && !comic) {
       await download(item, onProgress: onProgress);
       return (await readLocalBook(item.sha256, extension))!;
     }
     final response = await _client.send(
-      http.Request('GET', _uri('/v1/files/${item.sha256}')),
+      http.Request(
+        'GET',
+        _uri('/v1/files/${item.sha256}${comic ? '/cbz' : ''}'),
+      ),
     );
     if (response.statusCode >= 400) {
       throw ApiException(
@@ -122,6 +127,16 @@ class FileTransfer {
       builder.add(chunk);
       onProgress?.call(total == 0 ? 1 : builder.length / total);
     }
-    return builder.takeBytes();
+    final bytes = builder.takeBytes();
+    if (comic && keepsBooksOffline) {
+      // Kept converted: next time the comic opens offline.
+      await saveBook(
+        Stream.value(bytes),
+        sha256: item.sha256,
+        extension: extension,
+        fileName: '${item.title}.$extension',
+      );
+    }
+    return bytes;
   }
 }
