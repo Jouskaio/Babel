@@ -79,6 +79,11 @@ class Settings(BaseSettings):
     kavita_url: str = ""
     kavita_admin_key: SecretStr = SecretStr("")
 
+    # Google Books completes the one-line descriptions of Open Library. Without a key its
+    # shared anonymous quota is often used up: a free key (Google Cloud, Books API)
+    # makes it reliable. Empty: tried anyway, and given up on quietly when refused.
+    google_books_api_key: SecretStr = SecretStr("")
+
     # Social sign-in: accepted audiences (OAuth client IDs). Empty disables the provider.
     google_client_ids: list[str] = []
     apple_client_ids: list[str] = []
