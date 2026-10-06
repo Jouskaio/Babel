@@ -25,6 +25,8 @@ from babel_api.domain.social import (
     Reading,
     Recommendation,
     Relation,
+    Report,
+    ReportReason,
     Review,
     SharedNote,
     normalize_handle,
@@ -131,15 +133,19 @@ class SocialService:
             raise NotFoundError from error
         if profile is None or profile.user_id == viewer:
             raise NotFoundError
+        if profile.user_id in await self._social.hidden(viewer):
+            raise NotFoundError  # blocked, one way or the other: invisible
         return profile
 
     async def search(self, viewer: UUID, query: str, limit: int = 20) -> list[Reader]:
         prefix = query.strip().removeprefix("@").lower()
         if len(prefix) < 2:
             return []
+        hidden = await self._social.hidden(viewer)
         return [
             await self._reader(viewer, p)
             for p in await self._social.search(prefix, exclude=viewer, limit=limit)
+            if p.user_id not in hidden
         ]
 
     async def add_friend(self, viewer: UUID, handle: str) -> Reader:
@@ -184,6 +190,57 @@ class SocialService:
             following=await self._readers(viewer, await self._social.following(viewer)),
         )
 
+    # ------------------------------------------------------------ blocking and reporting
+    async def block(self, viewer: UUID, handle: str) -> None:
+        """Ends friendship and follows both ways; neither sees the other any more."""
+        other = await self._other(viewer, handle)
+        await self._social.block(viewer, other.user_id)
+        await self._social.commit()
+
+    async def unblock(self, viewer: UUID, handle: str) -> None:
+        try:
+            profile = await self._social.by_handle(normalize_handle(handle))
+        except ValueError as error:
+            raise NotFoundError from error
+        if profile is None:
+            raise NotFoundError
+        await self._social.unblock(viewer, profile.user_id)
+        await self._social.commit()
+
+    async def blocked(self, viewer: UUID) -> list[Profile]:
+        ids = await self._social.blocked(viewer)
+        profiles = await self._social.profiles(ids)
+        return [profiles[i] for i in ids if i in profiles]
+
+    async def report(
+        self, viewer: UUID, handle: str, reason: ReportReason, note: str | None
+    ) -> None:
+        """Tells the administrators; the reader reported is not told."""
+        other = await self._other(viewer, handle)
+        await self._social.add_report(
+            Report(
+                id=uuid4(),
+                reporter_id=viewer,
+                reported_id=other.user_id,
+                reason=reason,
+                note=(note or "").strip()[:MAX_MESSAGE] or None,
+                created_at=datetime.now(UTC),
+            )
+        )
+        await self._social.commit()
+        for admin in await self._social.admins():
+            await self._notify(admin, "report", other.user_id)
+
+    async def reports(self) -> tuple[list[Report], dict[UUID, Profile]]:
+        found = await self._social.reports(200)
+        ids = list({r.reporter_id for r in found} | {r.reported_id for r in found})
+        return found, await self._social.profiles(ids)
+
+    async def resolve_report(self, report_id: UUID) -> None:
+        if not await self._social.resolve_report(report_id, datetime.now(UTC)):
+            raise NotFoundError
+        await self._social.commit()
+
     # ------------------------------------------------------------ a reader's page
     def _audiences(self, relation: Relation) -> list[Audience]:
         if relation.friend is FriendStatus.FRIENDS:
@@ -214,8 +271,9 @@ class SocialService:
         self, viewer: UUID, limit: int = 50
     ) -> tuple[list[FeedEntry], dict[UUID, Profile]]:
         """What friends and followed readers shared lately, newest first."""
-        friends = set(await self._social.friends(viewer))
-        followed = set(await self._social.following(viewer)) - friends
+        hidden = await self._social.hidden(viewer)
+        friends = set(await self._social.friends(viewer)) - hidden
+        followed = set(await self._social.following(viewer)) - friends - hidden
         people = list(friends | followed)
         profiles = await self._social.profiles(people)
         entries: list[FeedEntry] = []

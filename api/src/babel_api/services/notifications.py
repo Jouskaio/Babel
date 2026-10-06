@@ -12,11 +12,13 @@ _SOCIAL = {
         "friend_request": ("Demande d'ami", "{name} veut devenir votre ami sur Babel"),
         "friend_accepted": ("Nouvel ami", "{name} a accepté votre demande"),
         "recommendation": ("Recommandation", "{name} vous recommande « {title} »"),
+        "report": ("Signalement", "Un lecteur a été signalé : {name}"),
     },
     "en": {
         "friend_request": ("Friend request", "{name} wants to be your friend on Babel"),
         "friend_accepted": ("New friend", "{name} accepted your request"),
         "recommendation": ("Recommendation", "{name} recommends “{title}”"),
+        "report": ("Report", "A reader was reported: {name}"),
     },
 }
 

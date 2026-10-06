@@ -10,6 +10,7 @@ from babel_api.adapters.db.models import (
     AccountTokenRow,
     AnnotationRow,
     AppliedOperationRow,
+    BlockRow,
     ChangeRow,
     DeviceRow,
     FollowRow,
@@ -20,6 +21,7 @@ from babel_api.adapters.db.models import (
     ReadingPositionRow,
     RecommendationRow,
     RefreshTokenRow,
+    ReportRow,
     ReviewRow,
     SocialProfileRow,
     SourceEntryRow,
@@ -154,6 +156,16 @@ class SqlUserRepository:
         await self._session.execute(delete(AnnotationRow).where(AnnotationRow.user_id == user_id))
         await self._session.execute(delete(FollowRow).where(FollowRow.user_id == user_id))
         await self._session.execute(delete(KavitaLinkRow).where(KavitaLinkRow.user_id == user_id))
+        await self._session.execute(
+            delete(BlockRow).where(
+                or_(BlockRow.blocker_id == user_id, BlockRow.blocked_id == user_id)
+            )
+        )
+        await self._session.execute(
+            delete(ReportRow).where(
+                or_(ReportRow.reporter_id == user_id, ReportRow.reported_id == user_id)
+            )
+        )
         for social in (SocialProfileRow, ReviewRow):
             await self._session.execute(delete(social).where(social.user_id == user_id))
         await self._session.execute(

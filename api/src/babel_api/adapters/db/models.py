@@ -440,3 +440,33 @@ class KavitaLinkRow(Base):
     error: Mapped[str | None] = mapped_column(String(300))
     source_id: Mapped[UUID | None] = mapped_column()
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class BlockRow(Base):
+    """A reader blocking another: neither sees the other any more."""
+
+    __tablename__ = "blocks"
+
+    blocker_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    blocked_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class ReportRow(Base):
+    """A reader reported to the administrators."""
+
+    __tablename__ = "reports"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    reporter_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    reported_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    reason: Mapped[str] = mapped_column(String(20))
+    note: Mapped[str | None] = mapped_column(String(1000))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

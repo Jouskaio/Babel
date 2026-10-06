@@ -7,6 +7,7 @@ import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 import '../../sources/presentation/source_badge.dart';
 import '../application/social_providers.dart';
+import 'safety.dart';
 import 'social_widgets.dart';
 
 /// Another reader's page: only what they share with you.
@@ -19,7 +20,13 @@ class ReaderProfilePage extends ConsumerWidget {
     final l10n = context.l10n;
     final page = ref.watch(readerPageProvider(handle));
     return Scaffold(
-      appBar: sourcesAppBar(atHandle(handle)),
+      appBar: sourcesAppBar(
+        atHandle(handle),
+        actions: [
+          if (page case AsyncData(:final value))
+            ReaderSafetyMenu(handle: handle, name: value.reader.displayName),
+        ],
+      ),
       body: switch (page) {
         AsyncData(:final value) => _Page(page: value, handle: handle),
         AsyncError(:final error) => Center(

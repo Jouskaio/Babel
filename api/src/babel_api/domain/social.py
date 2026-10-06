@@ -135,3 +135,21 @@ class FeedEntry:
     rating: int | None = None
     text: str | None = None
     quote: str | None = None
+
+
+class ReportReason(StrEnum):
+    SPAM = "spam"
+    HARASSMENT = "harassment"
+    INAPPROPRIATE = "inappropriate"
+    OTHER = "other"
+
+
+@dataclass(frozen=True, slots=True)
+class Report:
+    id: UUID
+    reporter_id: UUID
+    reported_id: UUID
+    reason: ReportReason
+    note: str | None
+    created_at: datetime
+    resolved_at: datetime | None = None

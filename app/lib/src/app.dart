@@ -61,6 +61,8 @@ class _BabelAppState extends ConsumerState<BabelApp> {
         router.go(Routes.reader(data['handle']!));
       case 'recommendation':
         router.go(Routes.home);
+      case 'report':
+        router.go(Routes.admin);
       case _ when data['item_id'] != null:
         router.go(Routes.read(data['item_id']!));
     }

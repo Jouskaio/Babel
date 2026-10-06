@@ -194,6 +194,7 @@ class FakeServer {
       final link = kavitaLink;
       return link == null ? http.Response('', 204) : json(link);
     }
+    if (path == '/v1/admin/reports') return json(<Object>[]);
     if (path == '/v1/admin/users') {
       return json([
         {
@@ -248,6 +249,11 @@ class FakeServer {
           'outgoing': <Object>[],
           'following': <Object>[],
         });
+      }
+      if (path == '/v1/social/blocks') return json(<Object>[]);
+      if (path == '/v1/social/reports') {
+        socialCalls.add('report ${request.body}');
+        return http.Response('', 204);
       }
       if (path == '/v1/social/feed') {
         return json([

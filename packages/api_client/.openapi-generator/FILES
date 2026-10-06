@@ -66,6 +66,9 @@ doc/RefreshRequest.md
 doc/RegisterDeviceRequest.md
 doc/RegisterRequest.md
 doc/RelationResponse.md
+doc/ReportReason.md
+doc/ReportRequest.md
+doc/ReportResponse.md
 doc/ResetPasswordRequest.md
 doc/ReviewRequest.md
 doc/ReviewResponse.md
@@ -165,6 +168,9 @@ lib/model/refresh_request.dart
 lib/model/register_device_request.dart
 lib/model/register_request.dart
 lib/model/relation_response.dart
+lib/model/report_reason.dart
+lib/model/report_request.dart
+lib/model/report_response.dart
 lib/model/reset_password_request.dart
 lib/model/review_request.dart
 lib/model/review_response.dart

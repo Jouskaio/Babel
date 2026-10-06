@@ -12,6 +12,7 @@ import 'fake_server.dart';
 import 'helpers.dart';
 
 void main() {
+  safetyTests();
   reviewTests();
   setUp(() {
     SharedPreferencesAsyncPlatform.instance =
@@ -143,6 +144,44 @@ void reviewTests() {
     await settle(tester);
     expect(find.text('Mon avis'), findsOneWidget);
     expect(find.text('Supprimer mon avis'), findsNothing);
+  });
+}
+
+void safetyTests() {
+  testWidgets("a reader's page lets you block or report them", (tester) async {
+    SharedPreferencesAsyncPlatform.instance =
+        InMemorySharedPreferencesAsync.empty();
+    tester.view.physicalSize = const Size(420, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final server = FakeServer()..handle = 'ada';
+    await tester.pumpWidget(
+      wrap(
+        const ReaderProfilePage(handle: 'camille'),
+        overrides: server.overrides,
+      ),
+    );
+    await settle(tester);
+
+    await tester.tap(find.byTooltip("Plus d'actions"));
+    await settle(tester);
+    await tester.tap(find.text('Signaler'));
+    await settle(tester);
+    await tester.tap(find.text('Spam'));
+    await tester.tap(find.text('ENVOYER LE SIGNALEMENT'));
+    await settle(tester);
+    expect(
+      server.socialCalls.where((c) => c.startsWith('report')).single,
+      contains('"reason":"spam"'),
+    );
+
+    await tester.tap(find.byTooltip("Plus d'actions"));
+    await settle(tester);
+    await tester.tap(find.text('Bloquer'));
+    await settle(tester);
+    await tester.tap(find.text('Bloquer').last);
+    await settle(tester);
+    expect(server.socialCalls, contains('PUT /v1/social/blocks/camille'));
   });
 }
 

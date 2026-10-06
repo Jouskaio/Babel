@@ -7,6 +7,7 @@ import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 import '../../sources/presentation/source_badge.dart';
 import '../application/social_providers.dart';
+import 'safety.dart';
 import 'social_widgets.dart';
 
 /// Every friend, requests both ways, and followed readers.
@@ -64,6 +65,7 @@ class FriendsPage extends ConsumerWidget {
                 (r) => null,
                 buttons: true,
               ),
+              const BlockedSection(),
               if (value.friends.isEmpty &&
                   value.incoming.isEmpty &&
                   value.following.isEmpty)

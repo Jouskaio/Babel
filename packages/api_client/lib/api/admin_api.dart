@@ -67,6 +67,102 @@ class AdminApi {
     return null;
   }
 
+  /// List Reports
+  ///
+  /// Reports, unresolved first.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> listReportsWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/admin/reports';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// List Reports
+  ///
+  /// Reports, unresolved first.
+  Future<List<ReportResponse>?> listReports() async {
+    final response = await listReportsWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<ReportResponse>') as List)
+        .cast<ReportResponse>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
+  /// Resolve Report
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] reportId (required):
+  Future<Response> resolveReportWithHttpInfo(String reportId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/admin/reports/{report_id}/resolve'
+      .replaceAll('{report_id}', reportId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Resolve Report
+  ///
+  /// Parameters:
+  ///
+  /// * [String] reportId (required):
+  Future<void> resolveReport(String reportId,) async {
+    final response = await resolveReportWithHttpInfo(reportId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Set Premium
   ///
   /// Make an account premium (it gets an account on Babel's Kavita), or not any more.
