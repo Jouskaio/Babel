@@ -93,6 +93,8 @@ class ReadingState:
     client_time: datetime | None = None
     started_at: datetime | None = None
     finished_at: datetime | None = None
+    # Kept but out of sight: the library hides it unless asked, other readers never see it.
+    hidden: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -106,3 +108,6 @@ class LibraryItem:
     authors: tuple[str, ...]
     added_at: datetime
     state: ReadingState = ReadingState()
+    # Taken out of the library by its reader. The book's data stays (status, review,
+    # notes, positions) and comes back if the same file is added again.
+    removed_at: datetime | None = None

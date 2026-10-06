@@ -19,6 +19,7 @@ class LibraryItemResponse {
     this.editionId,
     this.finishedAt,
     required this.format,
+    this.hidden = false,
     required this.id,
     this.progress,
     required this.sha256,
@@ -41,6 +42,9 @@ class LibraryItemResponse {
   DateTime? finishedAt;
 
   BookFormat format;
+
+  /// Out of sight in the library, never shared
+  bool hidden;
 
   String id;
 
@@ -75,6 +79,7 @@ class LibraryItemResponse {
     other.editionId == editionId &&
     other.finishedAt == finishedAt &&
     other.format == format &&
+    other.hidden == hidden &&
     other.id == id &&
     other.progress == progress &&
     other.sha256 == sha256 &&
@@ -93,6 +98,7 @@ class LibraryItemResponse {
     (editionId == null ? 0 : editionId!.hashCode) +
     (finishedAt == null ? 0 : finishedAt!.hashCode) +
     (format.hashCode) +
+    (hidden.hashCode) +
     (id.hashCode) +
     (progress == null ? 0 : progress!.hashCode) +
     (sha256.hashCode) +
@@ -103,7 +109,7 @@ class LibraryItemResponse {
     (title.hashCode);
 
   @override
-  String toString() => 'LibraryItemResponse[addedAt=$addedAt, authors=$authors, coverPath=$coverPath, editionId=$editionId, finishedAt=$finishedAt, format=$format, id=$id, progress=$progress, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title]';
+  String toString() => 'LibraryItemResponse[addedAt=$addedAt, authors=$authors, coverPath=$coverPath, editionId=$editionId, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, progress=$progress, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -125,6 +131,7 @@ class LibraryItemResponse {
       json[r'finished_at'] = null;
     }
       json[r'format'] = this.format;
+      json[r'hidden'] = this.hidden;
       json[r'id'] = this.id;
     if (this.progress != null) {
       json[r'progress'] = this.progress;
@@ -179,6 +186,7 @@ class LibraryItemResponse {
         editionId: mapValueOfType<String>(json, r'edition_id'),
         finishedAt: mapDateTime(json, r'finished_at', r''),
         format: BookFormat.fromJson(json[r'format'])!,
+        hidden: mapValueOfType<bool>(json, r'hidden') ?? false,
         id: mapValueOfType<String>(json, r'id')!,
         progress: json[r'progress'] == null
             ? null

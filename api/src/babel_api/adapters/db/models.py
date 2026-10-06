@@ -191,6 +191,8 @@ class LibraryItemRow(Base):
     state_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    hidden: Mapped[bool] = mapped_column(default=False, server_default=false())
+    removed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
 
     file: Mapped[StoredFileRow] = relationship(lazy="joined")
 

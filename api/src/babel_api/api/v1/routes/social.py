@@ -9,6 +9,7 @@ from fastapi import APIRouter, Query, Response, status
 from pydantic import BaseModel, Field
 
 from babel_api.api.dependencies import CurrentAdminId, CurrentUserId, SocialServiceDep
+from babel_api.api.v1.routes.library import LibraryItemResponse
 from babel_api.domain.social import (
     Audience,
     FeedEntry,
@@ -141,6 +142,17 @@ class ReaderPageResponse(BaseModel):
     notes: list[SharedNoteResponse]
     finished: list[ReadingResponse] = Field(description="Books finished lately")
     shelves: list[ShelfResponse]
+
+
+class BookTraceResponse(BaseModel):
+    """A book the reader has or once had, and what they left on it."""
+
+    item: LibraryItemResponse
+    removed_at: datetime | None = Field(description="Taken out of the library (data kept)")
+    work_id: UUID | None = Field(description="The catalog work, to show it on the work's page")
+    review: ReviewResponse | None
+    notes: int = Field(description="Highlights and notes kept for this book")
+    available: bool = Field(description="False when the file is gone: only the data remains")
 
 
 class FriendsResponse(BaseModel):
@@ -501,3 +513,24 @@ async def list_reports(_: CurrentAdminId, social: SocialServiceDep) -> list[Repo
 )
 async def resolve_report(_: CurrentAdminId, social: SocialServiceDep, report_id: UUID) -> None:
     await social.resolve_report(report_id)
+
+
+# ---------------------------------------------------------------- history
+@router.get("/library/history", operation_id="getLibraryHistory", tags=["library"])
+async def get_history(user_id: CurrentUserId, social: SocialServiceDep) -> list[BookTraceResponse]:
+    """Every book the reader has or once had, removed ones included, latest first.
+
+    Removing a book or losing its file never erases the reader's status, review, notes
+    and positions; adding the same file again brings the book back with them.
+    """
+    return [
+        BookTraceResponse(
+            item=LibraryItemResponse.of(t.item),
+            removed_at=t.item.removed_at,
+            work_id=t.work_id,
+            review=ReviewResponse.of(t.review) if t.review else None,
+            notes=t.notes,
+            available=t.available,
+        )
+        for t in await social.history(user_id)
+    ]

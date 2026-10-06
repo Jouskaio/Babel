@@ -18,6 +18,7 @@ from babel_api.domain.files import LibraryItem
 from babel_api.domain.ports import FileRepository
 from babel_api.domain.social import (
     Audience,
+    BookTrace,
     FeedEntry,
     FeedKind,
     FriendStatus,
@@ -337,6 +338,30 @@ class SocialService:
                 )
         entries.sort(key=lambda e: e.at, reverse=True)
         return entries[:limit], profiles
+
+    # ------------------------------------------------------------ history
+    async def history(self, user_id: UUID) -> list[BookTrace]:
+        """Every book the reader has or once had, with what they left on it.
+
+        Removing a book, or the file going away, never erases the reader's data: it is
+        shown again on the book's page and in searches, and comes back with the book.
+        """
+        items = await self._files.all_items(user_id)
+        reviews = await self._social.reviews_by_item(user_id)
+        notes = await self._social.note_counts(user_id)
+        works = await self._social.work_ids(
+            list({i.file.edition_id for i in items if i.file.edition_id})
+        )
+        return [
+            BookTrace(
+                item=item,
+                work_id=works.get(item.file.edition_id) if item.file.edition_id else None,
+                review=reviews.get(item.id),
+                notes=notes.get(item.file.sha256, 0),
+                available=item.file.available,
+            )
+            for item in items
+        ]
 
     # ------------------------------------------------------------ reviews
     async def _own_item(self, user_id: UUID, item_id: UUID) -> LibraryItem:

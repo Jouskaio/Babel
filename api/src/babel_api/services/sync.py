@@ -228,11 +228,17 @@ class SyncService:
             status = ReadingStatus.READING
         else:
             return
-        await self._store_state(item, self._advance(state, status, state.progress, when), device_id)
+        await self._store_state(
+            item, self._advance(state, status, state.progress, when, state.hidden), device_id
+        )
 
     @staticmethod
     def _advance(
-        state: ReadingState, status: ReadingStatus | None, progress: float | None, when: datetime
+        state: ReadingState,
+        status: ReadingStatus | None,
+        progress: float | None,
+        when: datetime,
+        hidden: bool,
     ) -> ReadingState:
         """The new state, keeping when the book was started and finished."""
         started = state.started_at
@@ -244,7 +250,7 @@ class SyncService:
                 finished = when
         else:
             finished = None
-        return ReadingState(status, progress, when, started, finished)
+        return ReadingState(status, progress, when, started, finished, hidden)
 
     async def _store_state(self, item: LibraryItem, state: ReadingState, device_id: UUID) -> None:
         updated = await self._files.save_state(item.id, state)
@@ -269,7 +275,10 @@ class SyncService:
         when = _client_time(data["client_time"])
         if item.state.client_time is not None and item.state.client_time >= when:
             return OpOutcome.STALE
-        await self._store_state(item, self._advance(item.state, status, progress, when), device_id)
+        hidden = bool(data.get("hidden", item.state.hidden))
+        await self._store_state(
+            item, self._advance(item.state, status, progress, when, hidden), device_id
+        )
         return OpOutcome.APPLIED
 
     async def _save_shelf(self, user_id: UUID, device_id: UUID, operation: Operation) -> OpOutcome:

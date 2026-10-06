@@ -194,6 +194,8 @@ class ApiClient {
           return BookFormatTypeTransformer().decode(value);
         case 'BookTitleResponse':
           return BookTitleResponse.fromJson(value);
+        case 'BookTraceResponse':
+          return BookTraceResponse.fromJson(value);
         case 'ChangeOp':
           return ChangeOpTypeTransformer().decode(value);
         case 'ChangePasswordRequest':

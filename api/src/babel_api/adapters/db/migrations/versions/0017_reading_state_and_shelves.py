@@ -1,4 +1,4 @@
-"""Reading status and declared progress of library books, and shelves.
+"""Reading status, declared progress, hiding and soft removal of library books, and shelves.
 
 Revision ID: 0017
 Revises: 0016
@@ -23,6 +23,13 @@ def upgrade() -> None:
         batch_op.add_column(sa.Column("state_time", sa.DateTime(timezone=True), nullable=True))
         batch_op.add_column(sa.Column("started_at", sa.DateTime(timezone=True), nullable=True))
         batch_op.add_column(sa.Column("finished_at", sa.DateTime(timezone=True), nullable=True))
+        batch_op.add_column(
+            sa.Column("hidden", sa.Boolean(), server_default=sa.false(), nullable=False)
+        )
+        batch_op.add_column(sa.Column("removed_at", sa.DateTime(timezone=True), nullable=True))
+        batch_op.create_index(
+            batch_op.f("ix_library_items_removed_at"), ["removed_at"], unique=False
+        )
         batch_op.create_index(batch_op.f("ix_library_items_status"), ["status"], unique=False)
 
     op.create_table(
@@ -61,6 +68,9 @@ def downgrade() -> None:
     op.drop_table("shelves")
     with op.batch_alter_table("library_items", schema=None) as batch_op:
         batch_op.drop_index(batch_op.f("ix_library_items_status"))
+        batch_op.drop_index(batch_op.f("ix_library_items_removed_at"))
+        batch_op.drop_column("removed_at")
+        batch_op.drop_column("hidden")
         batch_op.drop_column("finished_at")
         batch_op.drop_column("started_at")
         batch_op.drop_column("state_time")

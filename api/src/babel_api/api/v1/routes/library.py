@@ -48,6 +48,7 @@ class LibraryItemResponse(BaseModel):
     )
     started_at: datetime | None = None
     finished_at: datetime | None = None
+    hidden: bool = Field(default=False, description="Out of sight in the library, never shared")
 
     @classmethod
     def of(cls, item: LibraryItem) -> "LibraryItemResponse":
@@ -66,6 +67,7 @@ class LibraryItemResponse(BaseModel):
             state_time=item.state.client_time,
             started_at=item.state.started_at,
             finished_at=item.state.finished_at,
+            hidden=item.state.hidden,
         )
 
 

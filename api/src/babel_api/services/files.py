@@ -46,6 +46,7 @@ def item_data(item: LibraryItem) -> dict[str, Any]:
         "state_time": _iso(item.state.client_time),
         "started_at": _iso(item.state.started_at),
         "finished_at": _iso(item.state.finished_at),
+        "hidden": item.state.hidden,
     }
 
 
@@ -181,11 +182,13 @@ class FileService:
     async def remove_from_library(
         self, user_id: UUID, item_id: UUID, device_id: UUID | None = None
     ) -> None:
-        """The file itself stays stored: other readers may have it."""
+        """Takes a book out of the library. The file stays stored (other readers may have
+        it) and so does everything about the book: status, review, notes, positions. Adding
+        the same file again brings it all back."""
         item = await self._files.get_item(item_id)
         if item is None or item.user_id != user_id:
             raise NotFoundError
-        await self._files.delete_item(item_id)
+        await self._files.remove_item(item_id, datetime.now(UTC))
         await self._changes.record(
             user_id, EntityKind.LIBRARY_ITEM, str(item_id), ChangeOp.DELETE, device_id=device_id
         )
@@ -234,7 +237,7 @@ class FileService:
             await self._changes.record(
                 item.user_id, EntityKind.LIBRARY_ITEM, str(item.id), ChangeOp.DELETE
             )
-        await self._files.delete_items_of_file(sha256)
+        await self._files.remove_items_of_file(sha256, now)
         if block:
             await self._files.block(sha256, reason, admin_id, now)
         await self._files.commit()
@@ -255,9 +258,14 @@ class FileService:
         filename: str,
         device_id: UUID | None,
     ) -> LibraryItem:
-        metadata = self._reader.metadata(path, file.format)
-        title = metadata.title or PurePath(filename).stem or file.original_name
-        item = await self._files.add_item(user_id, file.sha256, title, metadata.authors)
+        removed = await self._files.find_item(user_id, file.sha256, removed=True)
+        if removed is not None:
+            # Back in the library with everything it had.
+            item = await self._files.restore_item(removed.id, datetime.now(UTC))
+        else:
+            metadata = self._reader.metadata(path, file.format)
+            title = metadata.title or PurePath(filename).stem or file.original_name
+            item = await self._files.add_item(user_id, file.sha256, title, metadata.authors)
         await self._changes.record(
             user_id,
             EntityKind.LIBRARY_ITEM,

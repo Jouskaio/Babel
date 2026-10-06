@@ -14,6 +14,8 @@ from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
+from babel_api.domain.files import LibraryItem
+
 HANDLE = re.compile(r"^[a-z0-9](?:[a-z0-9._]{1,28}[a-z0-9])$")
 
 
@@ -75,6 +77,17 @@ class Review:
     audience: Audience
     created_at: datetime
     updated_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
+class BookTrace:
+    """What a reader left on a book they have or once had: it outlives the file."""
+
+    item: LibraryItem
+    work_id: UUID | None
+    review: Review | None
+    notes: int
+    available: bool  # the file can still be read (or added back)
 
 
 @dataclass(frozen=True, slots=True)

@@ -10,6 +10,7 @@ doc/AuthorResponse.md
 doc/BatchImportResponse.md
 doc/BookFormat.md
 doc/BookTitleResponse.md
+doc/BookTraceResponse.md
 doc/CatalogApi.md
 doc/ChangeOp.md
 doc/ChangePasswordRequest.md
@@ -118,6 +119,7 @@ lib/model/author_response.dart
 lib/model/batch_import_response.dart
 lib/model/book_format.dart
 lib/model/book_title_response.dart
+lib/model/book_trace_response.dart
 lib/model/change_op.dart
 lib/model/change_password_request.dart
 lib/model/change_response.dart

@@ -106,6 +106,7 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**getFileCover**](doc//LibraryApi.md#getfilecover) | **GET** /v1/files/{sha256}/cover | Get File Cover
 *LibraryApi* | [**getFollows**](doc//LibraryApi.md#getfollows) | **GET** /v1/library/follows | Get Follows
 *LibraryApi* | [**getLibrary**](doc//LibraryApi.md#getlibrary) | **GET** /v1/library | Get Library
+*LibraryApi* | [**getLibraryHistory**](doc//LibraryApi.md#getlibraryhistory) | **GET** /v1/library/history | Get History
 *LibraryApi* | [**getReadingPositions**](doc//LibraryApi.md#getreadingpositions) | **GET** /v1/library/{item_id}/positions | Get Positions
 *LibraryApi* | [**getReview**](doc//LibraryApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
 *LibraryApi* | [**importFile**](doc//LibraryApi.md#importfile) | **POST** /v1/library/files | Import File
@@ -122,6 +123,7 @@ Class | Method | HTTP request | Description
 *SocialApi* | [**getBlocked**](doc//SocialApi.md#getblocked) | **GET** /v1/social/blocks | Get Blocked
 *SocialApi* | [**getFeed**](doc//SocialApi.md#getfeed) | **GET** /v1/social/feed | Get Feed
 *SocialApi* | [**getFriends**](doc//SocialApi.md#getfriends) | **GET** /v1/social/friends | Get Friends
+*SocialApi* | [**getLibraryHistory**](doc//SocialApi.md#getlibraryhistory) | **GET** /v1/library/history | Get History
 *SocialApi* | [**getReader**](doc//SocialApi.md#getreader) | **GET** /v1/social/readers/{handle} | Get Reader
 *SocialApi* | [**getRecommendations**](doc//SocialApi.md#getrecommendations) | **GET** /v1/social/recommendations | Get Recommendations
 *SocialApi* | [**getReview**](doc//SocialApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
@@ -161,6 +163,7 @@ Class | Method | HTTP request | Description
  - [BatchImportResponse](doc//BatchImportResponse.md)
  - [BookFormat](doc//BookFormat.md)
  - [BookTitleResponse](doc//BookTitleResponse.md)
+ - [BookTraceResponse](doc//BookTraceResponse.md)
  - [ChangeOp](doc//ChangeOp.md)
  - [ChangePasswordRequest](doc//ChangePasswordRequest.md)
  - [ChangeResponse](doc//ChangeResponse.md)

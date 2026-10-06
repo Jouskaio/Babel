@@ -17,6 +17,7 @@ Method | HTTP request | Description
 [**getFileCover**](LibraryApi.md#getfilecover) | **GET** /v1/files/{sha256}/cover | Get File Cover
 [**getFollows**](LibraryApi.md#getfollows) | **GET** /v1/library/follows | Get Follows
 [**getLibrary**](LibraryApi.md#getlibrary) | **GET** /v1/library | Get Library
+[**getLibraryHistory**](LibraryApi.md#getlibraryhistory) | **GET** /v1/library/history | Get History
 [**getReadingPositions**](LibraryApi.md#getreadingpositions) | **GET** /v1/library/{item_id}/positions | Get Positions
 [**getReview**](LibraryApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
 [**importFile**](LibraryApi.md#importfile) | **POST** /v1/library/files | Import File
@@ -390,6 +391,51 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**List<LibraryItemResponse>**](LibraryItemResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getLibraryHistory**
+> List<BookTraceResponse> getLibraryHistory()
+
+Get History
+
+Every book the reader has or once had, removed ones included, latest first.  Removing a book or losing its file never erases the reader's status, review, notes and positions; adding the same file again brings the book back with them.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = LibraryApi();
+
+try {
+    final result = api_instance.getLibraryHistory();
+    print(result);
+} catch (e) {
+    print('Exception when calling LibraryApi->getLibraryHistory: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**List<BookTraceResponse>**](BookTraceResponse.md)
 
 ### Authorization
 

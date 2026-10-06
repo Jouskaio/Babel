@@ -127,6 +127,70 @@
         "title": "BookTitleResponse",
         "type": "object"
       },
+      "BookTraceResponse": {
+        "description": "A book the reader has or once had, and what they left on it.",
+        "properties": {
+          "available": {
+            "description": "False when the file is gone: only the data remains",
+            "title": "Available",
+            "type": "boolean"
+          },
+          "item": {
+            "$ref": "#/components/schemas/LibraryItemResponse"
+          },
+          "notes": {
+            "description": "Highlights and notes kept for this book",
+            "title": "Notes",
+            "type": "integer"
+          },
+          "removed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Taken out of the library (data kept)",
+            "title": "Removed At"
+          },
+          "review": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReviewResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "work_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The catalog work, to show it on the work's page",
+            "title": "Work Id"
+          }
+        },
+        "required": [
+          "item",
+          "removed_at",
+          "work_id",
+          "review",
+          "notes",
+          "available"
+        ],
+        "title": "BookTraceResponse",
+        "type": "object"
+      },
       "ChangeOp": {
         "enum": [
           "upsert",
@@ -952,6 +1016,12 @@
           },
           "format": {
             "$ref": "#/components/schemas/BookFormat"
+          },
+          "hidden": {
+            "default": false,
+            "description": "Out of sight in the library, never shared",
+            "title": "Hidden",
+            "type": "boolean"
           },
           "id": {
             "format": "uuid",
@@ -4671,6 +4741,38 @@
         ],
         "summary": "Check Follow",
         "tags": [
+          "library"
+        ]
+      }
+    },
+    "/v1/library/history": {
+      "get": {
+        "description": "Every book the reader has or once had, removed ones included, latest first.\n\nRemoving a book or losing its file never erases the reader's status, review, notes\nand positions; adding the same file again brings the book back with them.",
+        "operationId": "getLibraryHistory",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BookTraceResponse"
+                  },
+                  "title": "Response Getlibraryhistory",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get History",
+        "tags": [
+          "social",
           "library"
         ]
       }

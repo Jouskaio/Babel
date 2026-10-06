@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **editionId** | **String** |  | [optional] 
 **finishedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **format** | [**BookFormat**](BookFormat.md) |  | 
+**hidden** | **bool** | Out of sight in the library, never shared | [optional] [default to false]
 **id** | **String** |  | 
 **progress** | **num** | Progress declared by hand, in percent (not a device position) | [optional] 
 **sha256** | **String** | Identifies the file; download it from /v1/files/{sha256} | 

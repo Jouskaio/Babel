@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from babel_api.adapters.db.models import (
     AnnotationRow,
     BlockRow,
+    EditionRow,
     FriendshipRow,
     LibraryItemRow,
     ReadingPositionRow,
@@ -47,6 +48,10 @@ def _aware(value: datetime) -> datetime:
 _READING = ReadingStatus.READING.value
 _FINISHED = ReadingStatus.FINISHED.value
 _DONE = (ReadingStatus.FINISHED.value, ReadingStatus.ABANDONED.value)
+
+
+# Books other readers may see: neither hidden nor taken out of the library.
+_SHOWN = and_(LibraryItemRow.hidden.is_(False), LibraryItemRow.removed_at.is_(None))
 
 
 def _reading(item: LibraryItemRow, percent: float, at: datetime) -> Reading:
@@ -371,6 +376,7 @@ class SqlSocialRepository:
                 ReadingPositionRow.percent > 0,
                 ReadingPositionRow.percent < 99.5,
                 or_(LibraryItemRow.status.is_(None), LibraryItemRow.status.not_in(_DONE)),
+                _SHOWN,
             )
             .order_by(ReadingPositionRow.client_time.desc())
             .limit(limit)
@@ -386,6 +392,7 @@ class SqlSocialRepository:
                 LibraryItemRow.user_id.in_(user_ids),
                 LibraryItemRow.status == _READING,
                 LibraryItemRow.state_time >= since,
+                _SHOWN,
             )
             .order_by(LibraryItemRow.state_time.desc())
             .limit(limit)
@@ -411,6 +418,7 @@ class SqlSocialRepository:
             LibraryItemRow.user_id.in_(user_ids),
             LibraryItemRow.status == _FINISHED,
             LibraryItemRow.finished_at.is_not(None),
+            _SHOWN,
         )
         if since is not None:
             query = query.where(LibraryItemRow.finished_at >= since)
@@ -436,7 +444,7 @@ class SqlSocialRepository:
             books = await self._session.execute(
                 select(LibraryItemRow.title, LibraryItemRow.authors)
                 .join(ShelfItemRow, ShelfItemRow.item_id == LibraryItemRow.id)
-                .where(ShelfItemRow.shelf_id == shelf.id)
+                .where(ShelfItemRow.shelf_id == shelf.id, _SHOWN)
                 .order_by(ShelfItemRow.position)
                 .limit(200)
             )
@@ -449,10 +457,31 @@ class SqlSocialRepository:
             )
         return found
 
+    async def reviews_by_item(self, user_id: UUID) -> dict[UUID, Review]:
+        rows = await self._session.scalars(select(ReviewRow).where(ReviewRow.user_id == user_id))
+        return {row.item_id: _review(row) for row in rows}
+
+    async def note_counts(self, user_id: UUID) -> dict[str, int]:
+        """Number of highlights and notes per file."""
+        rows = await self._session.execute(
+            select(AnnotationRow.file_sha256, func.count())
+            .where(AnnotationRow.user_id == user_id)
+            .group_by(AnnotationRow.file_sha256)
+        )
+        return {sha: int(count) for sha, count in rows.all()}
+
+    async def work_ids(self, edition_ids: Sequence[UUID]) -> dict[UUID, UUID]:
+        if not edition_ids:
+            return {}
+        rows = await self._session.execute(
+            select(EditionRow.id, EditionRow.work_id).where(EditionRow.id.in_(edition_ids))
+        )
+        return {edition: work for edition, work in rows.all()}
+
     async def library(self, user_id: UUID, limit: int) -> list[tuple[str, tuple[str, ...]]]:
         rows = await self._session.execute(
             select(LibraryItemRow.title, LibraryItemRow.authors)
-            .where(LibraryItemRow.user_id == user_id)
+            .where(LibraryItemRow.user_id == user_id, _SHOWN)
             .order_by(LibraryItemRow.added_at.desc())
             .limit(limit)
         )
@@ -462,7 +491,7 @@ class SqlSocialRepository:
         count = await self._session.scalar(
             select(func.count())
             .select_from(LibraryItemRow)
-            .where(LibraryItemRow.user_id == user_id)
+            .where(LibraryItemRow.user_id == user_id, _SHOWN)
         )
         return int(count or 0)
 
