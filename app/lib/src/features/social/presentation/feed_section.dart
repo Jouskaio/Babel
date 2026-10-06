@@ -75,6 +75,10 @@ class _FeedTile extends StatelessWidget {
         l10n.feedReading(who, entry.title),
         '${(entry.percent ?? 0).round()} %',
       ),
+      FeedKind.finished => (
+        l10n.feedFinished(who, entry.title),
+        entry.authors.join(', '),
+      ),
       FeedKind.review => (
         l10n.feedReview(who, entry.title),
         [

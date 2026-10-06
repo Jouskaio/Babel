@@ -481,7 +481,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String removed(String title) {
-    return '« $title » a été retiré de votre bibliothèque.';
+    return '« $title » a été retiré. Vos notes et votre avis sont gardés.';
   }
 
   @override
@@ -1711,4 +1711,174 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reportResolve => 'Traité';
+
+  @override
+  String get statusToRead => 'À lire';
+
+  @override
+  String get statusReading => 'En cours';
+
+  @override
+  String get statusFinished => 'Lu';
+
+  @override
+  String get statusAbandoned => 'Abandonné';
+
+  @override
+  String get filterAll => 'Tous';
+
+  @override
+  String get showHidden => 'Afficher les livres masqués';
+
+  @override
+  String get hiddenBadge => 'Masqué';
+
+  @override
+  String get hideBook => 'Masquer de la bibliothèque';
+
+  @override
+  String get unhideBook => 'Ne plus masquer';
+
+  @override
+  String bookHidden(String title) {
+    return '« $title » est masqué. Retrouvez-le avec « Afficher les livres masqués ».';
+  }
+
+  @override
+  String get removeKeepsData =>
+      'Vos notes, votre avis et votre progression sont gardés : en remettant ce livre, vous les retrouvez.';
+
+  @override
+  String get progressTitle => 'Progression';
+
+  @override
+  String get progressHint => 'Pour un livre lu ailleurs (papier, autre appli).';
+
+  @override
+  String progressPercent(int percent) {
+    return '$percent %';
+  }
+
+  @override
+  String get shelvesTitle => 'Étagères';
+
+  @override
+  String get shelfNew => 'Nouvelle étagère';
+
+  @override
+  String get shelfName => 'Nom de l\'étagère';
+
+  @override
+  String get shelfRename => 'Renommer';
+
+  @override
+  String get shelfDelete => 'Supprimer l\'étagère';
+
+  @override
+  String get shelfDeleteBody => 'Les livres restent dans votre bibliothèque.';
+
+  @override
+  String get shelfEmpty => 'Aucun livre sur cette étagère pour l\'instant.';
+
+  @override
+  String shelfBooks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count livres',
+      one: '1 livre',
+      zero: 'Vide',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get create => 'Créer';
+
+  @override
+  String get traceTitle => 'Vous et ce livre';
+
+  @override
+  String get traceInLibrary => 'Dans votre bibliothèque';
+
+  @override
+  String traceRemoved(String date) {
+    return 'Retiré de votre bibliothèque le $date';
+  }
+
+  @override
+  String get traceGone =>
+      'Le fichier n\'est plus disponible ; vos données sont gardées.';
+
+  @override
+  String traceNotes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notes et surlignages',
+      one: '1 note ou surlignage',
+      zero: 'Aucune note',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get traceRestore => 'Remettre dans ma bibliothèque';
+
+  @override
+  String traceRestored(String title) {
+    return '« $title » est de retour, avec vos notes.';
+  }
+
+  @override
+  String traceFinishedOn(String date) {
+    return 'Lu le $date';
+  }
+
+  @override
+  String get yourBooks => 'Dans vos livres';
+
+  @override
+  String get workReaders => 'Les lecteurs';
+
+  @override
+  String get workReadersEmpty => 'Pas encore d\'avis ni de note sur ce livre.';
+
+  @override
+  String workRating(String rating, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count avis',
+      one: '1 avis',
+    );
+    return '$rating sur 5 · $_temp0';
+  }
+
+  @override
+  String get workAllEditions => 'Toutes éditions confondues';
+
+  @override
+  String get you => 'Vous';
+
+  @override
+  String get linkWork => 'Associer à une fiche';
+
+  @override
+  String get linkWorkHint =>
+      'Avis et notes sont partagés entre toutes les éditions d\'un même livre : choisissez la fiche qui correspond.';
+
+  @override
+  String get linkWorkNone => 'Ce n\'est aucun de ces livres';
+
+  @override
+  String feedFinished(String name, String title) {
+    return '$name a terminé $title';
+  }
+
+  @override
+  String get profileFinished => 'Lus récemment';
+
+  @override
+  String get shelfManage => 'Gérer l\'étagère';
 }

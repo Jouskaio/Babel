@@ -4,11 +4,13 @@ import logging
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
 from babel_api.domain.errors import DomainError, NotFoundError
+from babel_api.domain.files import LibraryItem, ReadingState, ReadingStatus
 from babel_api.domain.ports import FileRepository, SyncRepository
+from babel_api.domain.shelves import MAX_SHELF_ITEMS, MAX_SHELF_NAME, MAX_SHELVES, Shelf
 from babel_api.domain.sync import (
     Annotation,
     Change,
@@ -21,13 +23,20 @@ from babel_api.domain.sync import (
     Visibility,
     parse_region,
 )
-from babel_api.services.files import FileService
+from babel_api.services.files import FileService, item_data
 
 logger = logging.getLogger(__name__)
 
 # Longest selection and note kept with an annotation.
 MAX_QUOTE = 2000
 MAX_NOTE = 5000
+# A position this far counts as the end of the book.
+END_PERCENT = 99.5
+
+
+def _client_time(value: object) -> datetime:
+    when = datetime.fromisoformat(str(value))
+    return when if when.tzinfo else when.replace(tzinfo=UTC)
 
 
 class OpOutcome(StrEnum):
@@ -146,6 +155,12 @@ class SyncService:
                 return await self._save_annotation(user_id, device_id, operation)
             case EntityKind.ANNOTATION, ChangeOp.DELETE:
                 return await self._delete_annotation(user_id, device_id, operation.entity_id)
+            case EntityKind.READING_STATE, ChangeOp.UPSERT:
+                return await self._save_state(user_id, device_id, operation)
+            case EntityKind.SHELF, ChangeOp.UPSERT:
+                return await self._save_shelf(user_id, device_id, operation)
+            case EntityKind.SHELF, ChangeOp.DELETE:
+                return await self._delete_shelf(user_id, device_id, operation.entity_id)
             case EntityKind.LIBRARY_ITEM, ChangeOp.UPSERT:
                 await self._library.add_existing(user_id, str(operation.data["sha256"]), device_id)
                 return OpOutcome.APPLIED
@@ -170,9 +185,7 @@ class SyncService:
         percent = float(data["percent"])
         if not 0 <= percent <= 100:
             raise ValueError("percent")
-        client_time = datetime.fromisoformat(str(data["client_time"]))
-        if client_time.tzinfo is None:
-            client_time = client_time.replace(tzinfo=UTC)
+        client_time = _client_time(data["client_time"])
         position = ReadingPosition(
             item_id=item_id,
             device_id=device_id,
@@ -191,6 +204,125 @@ class SyncService:
             ChangeOp.UPSERT,
             position.as_data(),
             device_id,
+        )
+        await self._follow_position(item, position, device_id)
+        return OpOutcome.APPLIED
+
+    async def _follow_position(
+        self, item: LibraryItem, position: ReadingPosition, device_id: UUID
+    ) -> None:
+        """Opening a book makes it "reading"; reaching its end makes it "finished".
+
+        A status set by hand later than this position is left alone, and so are finished
+        and abandoned books (re-reading one does not undo it).
+        """
+        state = item.state
+        if state.client_time is not None and state.client_time >= position.client_time:
+            return
+        if state.status in (ReadingStatus.FINISHED, ReadingStatus.ABANDONED):
+            return
+        when = position.client_time
+        if position.percent >= END_PERCENT:
+            status = ReadingStatus.FINISHED
+        elif position.percent > 0 and state.status != ReadingStatus.READING:
+            status = ReadingStatus.READING
+        else:
+            return
+        await self._store_state(
+            item, self._advance(state, status, state.progress, when, state.hidden), device_id
+        )
+
+    @staticmethod
+    def _advance(
+        state: ReadingState,
+        status: ReadingStatus | None,
+        progress: float | None,
+        when: datetime,
+        hidden: bool,
+    ) -> ReadingState:
+        """The new state, keeping when the book was started and finished."""
+        started = state.started_at
+        if status in (ReadingStatus.READING, ReadingStatus.FINISHED) and started is None:
+            started = when
+        finished = state.finished_at
+        if status == ReadingStatus.FINISHED:
+            if state.status != ReadingStatus.FINISHED or finished is None:
+                finished = when
+        else:
+            finished = None
+        return ReadingState(status, progress, when, started, finished, hidden)
+
+    async def _store_state(self, item: LibraryItem, state: ReadingState, device_id: UUID) -> None:
+        updated = await self._files.save_state(item.id, state)
+        await self._sync.record(
+            item.user_id,
+            EntityKind.LIBRARY_ITEM,
+            str(item.id),
+            ChangeOp.UPSERT,
+            item_data(updated),
+            device_id,
+        )
+
+    async def _save_state(self, user_id: UUID, device_id: UUID, operation: Operation) -> OpOutcome:
+        data = operation.data
+        item = await self._files.get_item(UUID(operation.entity_id))
+        if item is None or item.user_id != user_id:
+            raise NotFoundError
+        status = ReadingStatus(str(data["status"])) if data.get("status") else None
+        progress = float(data["progress"]) if data.get("progress") is not None else None
+        if progress is not None and not 0 <= progress <= 100:
+            raise ValueError("progress")
+        when = _client_time(data["client_time"])
+        if item.state.client_time is not None and item.state.client_time >= when:
+            return OpOutcome.STALE
+        hidden = bool(data.get("hidden", item.state.hidden))
+        await self._store_state(
+            item, self._advance(item.state, status, progress, when, hidden), device_id
+        )
+        return OpOutcome.APPLIED
+
+    async def _save_shelf(self, user_id: UUID, device_id: UUID, operation: Operation) -> OpOutcome:
+        data = operation.data
+        shelf_id = UUID(operation.entity_id)
+        name = " ".join(str(data["name"]).split())
+        raw_items: object = data.get("item_ids") or []
+        if not name or len(name) > MAX_SHELF_NAME or not isinstance(raw_items, list):
+            raise ValueError("shelf")
+        entries = cast(list[object], raw_items)
+        requested = list(dict.fromkeys(UUID(str(i)) for i in entries))
+        if len(requested) > MAX_SHELF_ITEMS:
+            raise ValueError("shelf")
+        when = _client_time(data["client_time"])
+        stored = await self._sync.get_shelf(shelf_id)
+        if stored is not None and stored.user_id != user_id:
+            raise NotFoundError  # another reader's id: never overwritten
+        if stored is not None and stored.client_time >= when:
+            return OpOutcome.STALE
+        if stored is None and await self._sync.count_shelves(user_id) >= MAX_SHELVES:
+            raise ValueError("shelves")
+        # Books removed meanwhile (maybe on another device) are dropped, not an error.
+        owned = {item.id for item in await self._files.list_items(user_id)}
+        shelf = Shelf(
+            id=shelf_id,
+            user_id=user_id,
+            name=name,
+            item_ids=tuple(i for i in requested if i in owned),
+            visibility=Visibility(str(data.get("visibility") or Visibility.PRIVATE.value)),
+            client_time=when,
+        )
+        await self._sync.save_shelf(shelf)
+        await self._sync.record(
+            user_id, EntityKind.SHELF, str(shelf_id), ChangeOp.UPSERT, shelf.as_data(), device_id
+        )
+        return OpOutcome.APPLIED
+
+    async def _delete_shelf(self, user_id: UUID, device_id: UUID, entity_id: str) -> OpOutcome:
+        stored = await self._sync.get_shelf(UUID(entity_id))
+        if stored is None or stored.user_id != user_id:
+            return OpOutcome.STALE
+        await self._sync.delete_shelf(stored.id)
+        await self._sync.record(
+            user_id, EntityKind.SHELF, entity_id, ChangeOp.DELETE, device_id=device_id
         )
         return OpOutcome.APPLIED
 
@@ -214,9 +346,7 @@ class SyncService:
             or chapter < 0
         ):
             raise ValueError("annotation")
-        client_time = datetime.fromisoformat(str(data["client_time"]))
-        if client_time.tzinfo is None:
-            client_time = client_time.replace(tzinfo=UTC)
+        client_time = _client_time(data["client_time"])
         stored = await self._sync.get_annotation(annotation_id)
         if stored is not None and stored.user_id != user_id:
             raise NotFoundError  # another reader's id: never overwritten

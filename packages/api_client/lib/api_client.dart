@@ -194,6 +194,8 @@ class ApiClient {
           return BookFormatTypeTransformer().decode(value);
         case 'BookTitleResponse':
           return BookTitleResponse.fromJson(value);
+        case 'BookTraceResponse':
+          return BookTraceResponse.fromJson(value);
         case 'ChangeOp':
           return ChangeOpTypeTransformer().decode(value);
         case 'ChangePasswordRequest':
@@ -286,6 +288,8 @@ class ApiClient {
           return ReadingPositionResponse.fromJson(value);
         case 'ReadingResponse':
           return ReadingResponse.fromJson(value);
+        case 'ReadingStatus':
+          return ReadingStatusTypeTransformer().decode(value);
         case 'RecommendRequest':
           return RecommendRequest.fromJson(value);
         case 'RecommendationResponse':
@@ -312,6 +316,8 @@ class ApiClient {
           return ReviewResponse.fromJson(value);
         case 'SharedNoteResponse':
           return SharedNoteResponse.fromJson(value);
+        case 'ShelfResponse':
+          return ShelfResponse.fromJson(value);
         case 'SocialProfileResponse':
           return SocialProfileResponse.fromJson(value);
         case 'SourceDetailResponse':
@@ -338,8 +344,16 @@ class ApiClient {
           return WebDavConfig.fromJson(value);
         case 'WithdrawRequest':
           return WithdrawRequest.fromJson(value);
+        case 'WorkLinkRequest':
+          return WorkLinkRequest.fromJson(value);
+        case 'WorkNoteResponse':
+          return WorkNoteResponse.fromJson(value);
+        case 'WorkReadersResponse':
+          return WorkReadersResponse.fromJson(value);
         case 'WorkResponse':
           return WorkResponse.fromJson(value);
+        case 'WorkReviewResponse':
+          return WorkReviewResponse.fromJson(value);
         case 'WorkSummaryResponse':
           return WorkSummaryResponse.fromJson(value);
         default:

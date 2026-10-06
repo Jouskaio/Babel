@@ -9,6 +9,7 @@ from fastapi import APIRouter, Query, Response, status
 from pydantic import BaseModel, Field
 
 from babel_api.api.dependencies import CurrentAdminId, CurrentUserId, SocialServiceDep
+from babel_api.api.v1.routes.library import LibraryItemResponse
 from babel_api.domain.social import (
     Audience,
     FeedEntry,
@@ -93,6 +94,12 @@ class BookTitleResponse(BaseModel):
     authors: list[str]
 
 
+class ShelfResponse(BaseModel):
+    name: str
+    audience: Audience
+    books: list[BookTitleResponse]
+
+
 class ReviewResponse(BaseModel):
     item_id: UUID
     title: str
@@ -133,6 +140,19 @@ class ReaderPageResponse(BaseModel):
     library: list[BookTitleResponse] | None
     reviews: list[ReviewResponse]
     notes: list[SharedNoteResponse]
+    finished: list[ReadingResponse] = Field(description="Books finished lately")
+    shelves: list[ShelfResponse]
+
+
+class BookTraceResponse(BaseModel):
+    """A book the reader has or once had, and what they left on it."""
+
+    item: LibraryItemResponse
+    removed_at: datetime | None = Field(description="Taken out of the library (data kept)")
+    work_id: UUID | None = Field(description="The catalog work, to show it on the work's page")
+    review: ReviewResponse | None
+    notes: int = Field(description="Highlights and notes kept for this book")
+    available: bool = Field(description="False when the file is gone: only the data remains")
 
 
 class FriendsResponse(BaseModel):
@@ -244,6 +264,18 @@ async def get_reader(
                 title=n.title, quote=n.quote, note=n.note, at=n.at, page=n.page, region=n.region
             )
             for n in page.notes
+        ],
+        finished=[
+            ReadingResponse(title=r.title, authors=list(r.authors), percent=r.percent, at=r.at)
+            for r in page.finished
+        ],
+        shelves=[
+            ShelfResponse(
+                name=s.name,
+                audience=s.audience,
+                books=[BookTitleResponse(title=t, authors=list(a)) for t, a in s.books],
+            )
+            for s in page.shelves
         ],
     )
 
@@ -481,3 +513,93 @@ async def list_reports(_: CurrentAdminId, social: SocialServiceDep) -> list[Repo
 )
 async def resolve_report(_: CurrentAdminId, social: SocialServiceDep, report_id: UUID) -> None:
     await social.resolve_report(report_id)
+
+
+# ---------------------------------------------------------------- a work
+class WorkReviewResponse(BaseModel):
+    reader: AuthorResponse
+    rating: int | None
+    text: str | None
+    audience: Audience
+    updated_at: datetime
+    mine: bool
+
+
+class WorkNoteResponse(BaseModel):
+    reader: AuthorResponse
+    quote: str
+    note: str | None
+    page: int | None
+    audience: Audience
+    at: datetime
+    mine: bool
+
+
+class WorkReadersResponse(BaseModel):
+    """Every reader's reviews and notes on a work, whatever edition or file they read."""
+
+    rating: float | None = Field(description="Average of the ratings shown")
+    ratings: int
+    reviews: list[WorkReviewResponse]
+    notes: list[WorkNoteResponse]
+
+
+@router.get("/catalog/works/{work_id}/readers", operation_id="getWorkReaders")
+async def get_work_readers(
+    user_id: CurrentUserId, social: SocialServiceDep, work_id: UUID
+) -> WorkReadersResponse:
+    """Reviews and notes on all editions of a work that you may see."""
+    found = await social.work_readers(user_id, work_id)
+    rating, ratings = found.rating
+    return WorkReadersResponse(
+        rating=round(rating, 2) if rating is not None else None,
+        ratings=ratings,
+        reviews=[
+            WorkReviewResponse(
+                reader=_author(found.profiles.get(r.user_id)),
+                rating=r.rating,
+                text=r.text,
+                audience=r.audience,
+                updated_at=r.updated_at,
+                mine=r.user_id == user_id,
+            )
+            for r in found.reviews
+        ],
+        notes=[
+            WorkNoteResponse(
+                reader=_author(found.profiles.get(n.user_id)),
+                quote=n.quote,
+                note=n.note,
+                page=n.page,
+                audience=n.audience,
+                at=n.at,
+                mine=n.user_id == user_id,
+            )
+            for n in found.notes
+        ],
+    )
+
+
+# ---------------------------------------------------------------- history
+# Listed with the library in the contract (it is mostly library data).
+history_router = APIRouter(tags=["library"])
+
+
+@history_router.get("/library/history", operation_id="getLibraryHistory")
+async def get_history(user_id: CurrentUserId, social: SocialServiceDep) -> list[BookTraceResponse]:
+    """Every book the reader has or once had, removed ones included, latest first.
+
+    Removing a book or losing its file never erases the reader's status, review, notes
+    and positions; adding the same file again brings the book back with them.
+    """
+    return [
+        BookTraceResponse(
+            item=LibraryItemResponse.of(t.item),
+            removed_at=t.item.removed_at,
+            work_id=t.work_id,
+            review=ReviewResponse.of(t.review) if t.review else None,
+            notes=t.notes,
+            available=t.available,
+        )
+        for t in await social.history(user_id)
+    ]

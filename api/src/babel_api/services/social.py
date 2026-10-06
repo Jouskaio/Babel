@@ -18,6 +18,7 @@ from babel_api.domain.files import LibraryItem
 from babel_api.domain.ports import FileRepository
 from babel_api.domain.social import (
     Audience,
+    BookTrace,
     FeedEntry,
     FeedKind,
     FriendStatus,
@@ -29,6 +30,7 @@ from babel_api.domain.social import (
     ReportReason,
     Review,
     SharedNote,
+    SharedShelf,
     normalize_handle,
 )
 from babel_api.services.notifications import Notifier
@@ -56,6 +58,23 @@ class ReaderPage:
     library: list[tuple[str, tuple[str, ...]]] | None
     reviews: list[Review]
     notes: list[SharedNote]
+    finished: list[Reading]
+    shelves: list[SharedShelf]
+
+
+@dataclass(frozen=True, slots=True)
+class WorkReaders:
+    """What readers left on a work, across all its editions and files."""
+
+    reviews: list[Review]
+    notes: list[SharedNote]
+    profiles: dict[UUID, Profile]
+
+    @property
+    def rating(self) -> tuple[float | None, int]:
+        """Average rating of the reviews shown, and how many have one."""
+        ratings = [r.rating for r in self.reviews if r.rating]
+        return (sum(ratings) / len(ratings) if ratings else None, len(ratings))
 
 
 @dataclass(frozen=True, slots=True)
@@ -264,6 +283,8 @@ class SocialService:
             library=await self._social.library(user, 200) if sees_library else None,
             reviews=await self._social.reviews([user], audiences, 50),
             notes=await self._social.notes([user], audiences, 50),
+            finished=await self._social.finished([user], None, 10) if sees_reading else [],
+            shelves=await self._social.shelves(user, audiences),
         )
 
     # ------------------------------------------------------------ feed
@@ -294,6 +315,15 @@ class SocialService:
                         percent=reading.percent,
                     )
                 )
+        for done in await self._social.finished(people, since, limit):
+            profile = profiles.get(done.user_id)
+            relation = Relation(
+                friend=FriendStatus.FRIENDS if done.user_id in friends else FriendStatus.NONE
+            )
+            if profile and relation.sees(profile.share_reading):
+                entries.append(
+                    FeedEntry(FeedKind.FINISHED, done.user_id, done.at, done.title, done.authors)
+                )
         for group, audiences in (
             (list(friends), [Audience.FRIENDS, Audience.PUBLIC]),
             (list(followed), [Audience.PUBLIC]),
@@ -323,6 +353,41 @@ class SocialService:
                 )
         entries.sort(key=lambda e: e.at, reverse=True)
         return entries[:limit], profiles
+
+    # ------------------------------------------------------------ a work
+    async def work_readers(self, viewer: UUID, work_id: UUID) -> WorkReaders:
+        """Reviews and notes of every reader on a work, whatever the edition they read."""
+        hidden = list(await self._social.hidden(viewer))
+        friends = await self._social.friends(viewer)
+        reviews = await self._social.work_reviews(work_id, viewer, friends, hidden, 100)
+        notes = await self._social.work_notes(work_id, viewer, friends, hidden, 100)
+        people = list({r.user_id for r in reviews} | {n.user_id for n in notes})
+        return WorkReaders(reviews, notes, await self._social.profiles(people))
+
+    # ------------------------------------------------------------ history
+    async def history(self, user_id: UUID) -> list[BookTrace]:
+        """Every book the reader has or once had, with what they left on it.
+
+        Removing a book, or the file going away, never erases the reader's data: it is
+        shown again on the book's page and in searches, and comes back with the book.
+        """
+        items = await self._files.all_items(user_id)
+        reviews = await self._social.reviews_by_item(user_id)
+        notes = await self._social.note_counts(user_id)
+        works = await self._social.work_ids(
+            list({i.file.edition_id for i in items if i.file.edition_id and not i.work_id})
+        )
+        return [
+            BookTrace(
+                item=item,
+                work_id=item.work_id
+                or (works.get(item.file.edition_id) if item.file.edition_id else None),
+                review=reviews.get(item.id),
+                notes=notes.get(item.file.sha256, 0),
+                available=item.file.available,
+            )
+            for item in items
+        ]
 
     # ------------------------------------------------------------ reviews
     async def _own_item(self, user_id: UUID, item_id: UUID) -> LibraryItem:

@@ -24,12 +24,14 @@ class FeedKind {
   String toJson() => value;
 
   static const reading = FeedKind._(r'reading');
+  static const finished = FeedKind._(r'finished');
   static const review = FeedKind._(r'review');
   static const note = FeedKind._(r'note');
 
   /// List of all possible values in this [enum][FeedKind].
   static const values = <FeedKind>[
     reading,
+    finished,
     review,
     note,
   ];
@@ -71,6 +73,7 @@ class FeedKindTypeTransformer {
     if (data != null) {
       switch (data) {
         case r'reading': return FeedKind.reading;
+        case r'finished': return FeedKind.finished;
         case r'review': return FeedKind.review;
         case r'note': return FeedKind.note;
         default:

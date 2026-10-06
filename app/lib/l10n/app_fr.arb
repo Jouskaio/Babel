@@ -210,7 +210,7 @@
   "downloaded": "Téléchargé sur cet appareil.",
   "downloadedWeb": "Téléchargement lancé.",
   "removeFromLibrary": "Retirer de la bibliothèque",
-  "removed": "« {title} » a été retiré de votre bibliothèque.",
+  "removed": "« {title} » a été retiré. Vos notes et votre avis sont gardés.",
   "@removed": {
     "placeholders": {
       "title": {
@@ -904,5 +904,117 @@
       }
     }
   },
-  "reportResolve": "Traité"
+  "reportResolve": "Traité",
+  "statusToRead": "À lire",
+  "statusReading": "En cours",
+  "statusFinished": "Lu",
+  "statusAbandoned": "Abandonné",
+  "filterAll": "Tous",
+  "showHidden": "Afficher les livres masqués",
+  "hiddenBadge": "Masqué",
+  "hideBook": "Masquer de la bibliothèque",
+  "unhideBook": "Ne plus masquer",
+  "bookHidden": "« {title} » est masqué. Retrouvez-le avec « Afficher les livres masqués ».",
+  "@bookHidden": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "removeKeepsData": "Vos notes, votre avis et votre progression sont gardés : en remettant ce livre, vous les retrouvez.",
+  "progressTitle": "Progression",
+  "progressHint": "Pour un livre lu ailleurs (papier, autre appli).",
+  "progressPercent": "{percent} %",
+  "@progressPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "shelvesTitle": "Étagères",
+  "shelfNew": "Nouvelle étagère",
+  "shelfName": "Nom de l'étagère",
+  "shelfRename": "Renommer",
+  "shelfDelete": "Supprimer l'étagère",
+  "shelfDeleteBody": "Les livres restent dans votre bibliothèque.",
+  "shelfEmpty": "Aucun livre sur cette étagère pour l'instant.",
+  "shelfBooks": "{count, plural, =0{Vide} =1{1 livre} other{{count} livres}}",
+  "@shelfBooks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "create": "Créer",
+  "traceTitle": "Vous et ce livre",
+  "traceInLibrary": "Dans votre bibliothèque",
+  "traceRemoved": "Retiré de votre bibliothèque le {date}",
+  "@traceRemoved": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "traceGone": "Le fichier n'est plus disponible ; vos données sont gardées.",
+  "traceNotes": "{count, plural, =0{Aucune note} =1{1 note ou surlignage} other{{count} notes et surlignages}}",
+  "@traceNotes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "traceRestore": "Remettre dans ma bibliothèque",
+  "traceRestored": "« {title} » est de retour, avec vos notes.",
+  "@traceRestored": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "traceFinishedOn": "Lu le {date}",
+  "@traceFinishedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "yourBooks": "Dans vos livres",
+  "workReaders": "Les lecteurs",
+  "workReadersEmpty": "Pas encore d'avis ni de note sur ce livre.",
+  "workRating": "{rating} sur 5 · {count, plural, =1{1 avis} other{{count} avis}}",
+  "@workRating": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "workAllEditions": "Toutes éditions confondues",
+  "you": "Vous",
+  "linkWork": "Associer à une fiche",
+  "linkWorkHint": "Avis et notes sont partagés entre toutes les éditions d'un même livre : choisissez la fiche qui correspond.",
+  "linkWorkNone": "Ce n'est aucun de ces livres",
+  "feedFinished": "{name} a terminé {title}",
+  "@feedFinished": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "profileFinished": "Lus récemment",
+  "shelfManage": "Gérer l'étagère"
 }

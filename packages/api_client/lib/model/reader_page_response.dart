@@ -14,6 +14,7 @@ class ReaderPageResponse {
   /// Returns a new [ReaderPageResponse] instance.
   ReaderPageResponse({
     this.books,
+    this.finished = const [],
     required this.followers,
     required this.friends,
     this.library_ = const [],
@@ -21,10 +22,14 @@ class ReaderPageResponse {
     required this.reader,
     this.reading = const [],
     this.reviews = const [],
+    this.shelves = const [],
   });
 
   /// Null when the library is not shared with you
   int? books;
+
+  /// Books finished lately
+  List<ReadingResponse> finished;
 
   int followers;
 
@@ -40,31 +45,37 @@ class ReaderPageResponse {
 
   List<ReviewResponse> reviews;
 
+  List<ShelfResponse> shelves;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is ReaderPageResponse &&
     other.books == books &&
+    _deepEquality.equals(other.finished, finished) &&
     other.followers == followers &&
     other.friends == friends &&
     _deepEquality.equals(other.library_, library_) &&
     _deepEquality.equals(other.notes, notes) &&
     other.reader == reader &&
     _deepEquality.equals(other.reading, reading) &&
-    _deepEquality.equals(other.reviews, reviews);
+    _deepEquality.equals(other.reviews, reviews) &&
+    _deepEquality.equals(other.shelves, shelves);
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (books == null ? 0 : books!.hashCode) +
+    (finished.hashCode) +
     (followers.hashCode) +
     (friends.hashCode) +
     (library_ == null ? 0 : library_!.hashCode) +
     (notes.hashCode) +
     (reader.hashCode) +
     (reading.hashCode) +
-    (reviews.hashCode);
+    (reviews.hashCode) +
+    (shelves.hashCode);
 
   @override
-  String toString() => 'ReaderPageResponse[books=$books, followers=$followers, friends=$friends, library_=$library_, notes=$notes, reader=$reader, reading=$reading, reviews=$reviews]';
+  String toString() => 'ReaderPageResponse[books=$books, finished=$finished, followers=$followers, friends=$friends, library_=$library_, notes=$notes, reader=$reader, reading=$reading, reviews=$reviews, shelves=$shelves]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -73,6 +84,7 @@ class ReaderPageResponse {
     } else {
       json[r'books'] = null;
     }
+      json[r'finished'] = this.finished;
       json[r'followers'] = this.followers;
       json[r'friends'] = this.friends;
     if (this.library_ != null) {
@@ -84,6 +96,7 @@ class ReaderPageResponse {
       json[r'reader'] = this.reader;
       json[r'reading'] = this.reading;
       json[r'reviews'] = this.reviews;
+      json[r'shelves'] = this.shelves;
     return json;
   }
 
@@ -107,6 +120,7 @@ class ReaderPageResponse {
 
       return ReaderPageResponse(
         books: mapValueOfType<int>(json, r'books'),
+        finished: ReadingResponse.listFromJson(json[r'finished']),
         followers: mapValueOfType<int>(json, r'followers')!,
         friends: mapValueOfType<int>(json, r'friends')!,
         library_: BookTitleResponse.listFromJson(json[r'library']),
@@ -114,6 +128,7 @@ class ReaderPageResponse {
         reader: ReaderResponse.fromJson(json[r'reader'])!,
         reading: ReadingResponse.listFromJson(json[r'reading']),
         reviews: ReviewResponse.listFromJson(json[r'reviews']),
+        shelves: ShelfResponse.listFromJson(json[r'shelves']),
       );
     }
     return null;
@@ -161,12 +176,14 @@ class ReaderPageResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'finished',
     'followers',
     'friends',
     'notes',
     'reader',
     'reading',
     'reviews',
+    'shelves',
   };
 }
 

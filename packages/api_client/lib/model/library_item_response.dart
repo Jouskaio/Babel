@@ -17,11 +17,18 @@ class LibraryItemResponse {
     this.authors = const [],
     this.coverPath,
     this.editionId,
+    this.finishedAt,
     required this.format,
+    this.hidden = false,
     required this.id,
+    this.progress,
     required this.sha256,
     required this.size,
+    this.startedAt,
+    this.stateTime,
+    this.status,
     required this.title,
+    this.workId,
   });
 
   DateTime addedAt;
@@ -33,16 +40,40 @@ class LibraryItemResponse {
 
   String? editionId;
 
+  DateTime? finishedAt;
+
   BookFormat format;
 
+  /// Out of sight in the library, never shared
+  bool hidden;
+
   String id;
+
+  /// Progress declared by hand, in percent (not a device position)
+  num? progress;
 
   /// Identifies the file; download it from /v1/files/{sha256}
   String sha256;
 
   int size;
 
+  DateTime? startedAt;
+
+  /// When status or progress last changed (device clock)
+  DateTime? stateTime;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  ReadingStatus? status;
+
   String title;
+
+  /// The catalog work: reviews and notes are shared per work
+  String? workId;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is LibraryItemResponse &&
@@ -50,11 +81,18 @@ class LibraryItemResponse {
     _deepEquality.equals(other.authors, authors) &&
     other.coverPath == coverPath &&
     other.editionId == editionId &&
+    other.finishedAt == finishedAt &&
     other.format == format &&
+    other.hidden == hidden &&
     other.id == id &&
+    other.progress == progress &&
     other.sha256 == sha256 &&
     other.size == size &&
-    other.title == title;
+    other.startedAt == startedAt &&
+    other.stateTime == stateTime &&
+    other.status == status &&
+    other.title == title &&
+    other.workId == workId;
 
   @override
   int get hashCode =>
@@ -63,14 +101,21 @@ class LibraryItemResponse {
     (authors.hashCode) +
     (coverPath == null ? 0 : coverPath!.hashCode) +
     (editionId == null ? 0 : editionId!.hashCode) +
+    (finishedAt == null ? 0 : finishedAt!.hashCode) +
     (format.hashCode) +
+    (hidden.hashCode) +
     (id.hashCode) +
+    (progress == null ? 0 : progress!.hashCode) +
     (sha256.hashCode) +
     (size.hashCode) +
-    (title.hashCode);
+    (startedAt == null ? 0 : startedAt!.hashCode) +
+    (stateTime == null ? 0 : stateTime!.hashCode) +
+    (status == null ? 0 : status!.hashCode) +
+    (title.hashCode) +
+    (workId == null ? 0 : workId!.hashCode);
 
   @override
-  String toString() => 'LibraryItemResponse[addedAt=$addedAt, authors=$authors, coverPath=$coverPath, editionId=$editionId, format=$format, id=$id, sha256=$sha256, size=$size, title=$title]';
+  String toString() => 'LibraryItemResponse[addedAt=$addedAt, authors=$authors, coverPath=$coverPath, editionId=$editionId, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, progress=$progress, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title, workId=$workId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -86,11 +131,42 @@ class LibraryItemResponse {
     } else {
       json[r'edition_id'] = null;
     }
+    if (this.finishedAt != null) {
+      json[r'finished_at'] = this.finishedAt!.toUtc().toIso8601String();
+    } else {
+      json[r'finished_at'] = null;
+    }
       json[r'format'] = this.format;
+      json[r'hidden'] = this.hidden;
       json[r'id'] = this.id;
+    if (this.progress != null) {
+      json[r'progress'] = this.progress;
+    } else {
+      json[r'progress'] = null;
+    }
       json[r'sha256'] = this.sha256;
       json[r'size'] = this.size;
+    if (this.startedAt != null) {
+      json[r'started_at'] = this.startedAt!.toUtc().toIso8601String();
+    } else {
+      json[r'started_at'] = null;
+    }
+    if (this.stateTime != null) {
+      json[r'state_time'] = this.stateTime!.toUtc().toIso8601String();
+    } else {
+      json[r'state_time'] = null;
+    }
+    if (this.status != null) {
+      json[r'status'] = this.status;
+    } else {
+      json[r'status'] = null;
+    }
       json[r'title'] = this.title;
+    if (this.workId != null) {
+      json[r'work_id'] = this.workId;
+    } else {
+      json[r'work_id'] = null;
+    }
     return json;
   }
 
@@ -119,11 +195,20 @@ class LibraryItemResponse {
             : const [],
         coverPath: mapValueOfType<String>(json, r'cover_path'),
         editionId: mapValueOfType<String>(json, r'edition_id'),
+        finishedAt: mapDateTime(json, r'finished_at', r''),
         format: BookFormat.fromJson(json[r'format'])!,
+        hidden: mapValueOfType<bool>(json, r'hidden') ?? false,
         id: mapValueOfType<String>(json, r'id')!,
+        progress: json[r'progress'] == null
+            ? null
+            : num.parse('${json[r'progress']}'),
         sha256: mapValueOfType<String>(json, r'sha256')!,
         size: mapValueOfType<int>(json, r'size')!,
+        startedAt: mapDateTime(json, r'started_at', r''),
+        stateTime: mapDateTime(json, r'state_time', r''),
+        status: ReadingStatus.fromJson(json[r'status']),
         title: mapValueOfType<String>(json, r'title')!,
+        workId: mapValueOfType<String>(json, r'work_id'),
       );
     }
     return null;
