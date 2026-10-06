@@ -185,6 +185,17 @@ class LibraryItemRow(Base):
     title: Mapped[str] = mapped_column(String(500))
     authors: Mapped[list[str]] = mapped_column(JSON, default=list)
     added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    # The reader's status and declared progress (domain ReadingState).
+    status: Mapped[str | None] = mapped_column(String(16), index=True)
+    progress: Mapped[float | None] = mapped_column(Float)
+    state_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    hidden: Mapped[bool] = mapped_column(default=False, server_default=false())
+    removed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
+    work_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("works.id", ondelete="SET NULL"), index=True
+    )
 
     file: Mapped[StoredFileRow] = relationship(lazy="joined")
 
@@ -318,6 +329,33 @@ class AnnotationRow(Base):
     visibility: Mapped[str] = mapped_column(String(16), default="private")
     client_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     region: Mapped[str | None] = mapped_column(String(64))
+
+
+class ShelfRow(Base):
+    """A list of books a reader made in their library."""
+
+    __tablename__ = "shelves"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True)  # chosen by the client (offline)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    name: Mapped[str] = mapped_column(String(80))
+    visibility: Mapped[str] = mapped_column(String(16), default="private")
+    client_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class ShelfItemRow(Base):
+    """A book on a shelf, in the shelf's order."""
+
+    __tablename__ = "shelf_items"
+
+    shelf_id: Mapped[UUID] = mapped_column(
+        ForeignKey("shelves.id", ondelete="CASCADE"), primary_key=True
+    )
+    item_id: Mapped[UUID] = mapped_column(
+        ForeignKey("library_items.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
+    position: Mapped[int] = mapped_column(Integer)
 
 
 class FollowRow(Base):

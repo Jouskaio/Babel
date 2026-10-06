@@ -12,17 +12,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from babel_api.adapters.db.models import (
     AnnotationRow,
     BlockRow,
+    EditionRow,
     FriendshipRow,
     LibraryItemRow,
     ReadingPositionRow,
     RecommendationRow,
     ReportRow,
     ReviewRow,
+    ShelfItemRow,
+    ShelfRow,
     SocialProfileRow,
     SubscriptionRow,
     UserRow,
 )
 from babel_api.domain.errors import HandleTakenError
+from babel_api.domain.files import ReadingStatus
 from babel_api.domain.social import (
     Audience,
     Profile,
@@ -32,11 +36,33 @@ from babel_api.domain.social import (
     ReportReason,
     Review,
     SharedNote,
+    SharedShelf,
 )
 
 
 def _aware(value: datetime) -> datetime:
     return value if value.tzinfo else value.replace(tzinfo=UTC)
+
+
+# Reading statuses as stored (domain ReadingStatus).
+_READING = ReadingStatus.READING.value
+_FINISHED = ReadingStatus.FINISHED.value
+_DONE = (ReadingStatus.FINISHED.value, ReadingStatus.ABANDONED.value)
+
+
+# Books other readers may see: neither hidden nor taken out of the library.
+_SHOWN = and_(LibraryItemRow.hidden.is_(False), LibraryItemRow.removed_at.is_(None))
+
+
+def _reading(item: LibraryItemRow, percent: float, at: datetime) -> Reading:
+    return Reading(
+        user_id=item.user_id,
+        item_id=item.id,
+        title=item.title,
+        authors=tuple(item.authors or ()),
+        percent=percent,
+        at=_aware(at),
+    )
 
 
 def _profile(user: UserRow, row: SocialProfileRow | None) -> Profile:
@@ -349,32 +375,113 @@ class SqlSocialRepository:
                 ReadingPositionRow.client_time >= since,
                 ReadingPositionRow.percent > 0,
                 ReadingPositionRow.percent < 99.5,
+                or_(LibraryItemRow.status.is_(None), LibraryItemRow.status.not_in(_DONE)),
+                _SHOWN,
             )
             .order_by(ReadingPositionRow.client_time.desc())
             .limit(limit)
         )
-        seen: set[UUID] = set()
-        found: list[Reading] = []
+        found: dict[UUID, Reading] = {}
         for position, item in rows:
-            if item.id in seen:
+            if item.id not in found:
+                found[item.id] = _reading(item, position.percent, position.client_time)
+        # Progress declared by hand (a book read elsewhere) counts when it is newer.
+        declared = await self._session.scalars(
+            select(LibraryItemRow)
+            .where(
+                LibraryItemRow.user_id.in_(user_ids),
+                LibraryItemRow.status == _READING,
+                LibraryItemRow.state_time >= since,
+                _SHOWN,
+            )
+            .order_by(LibraryItemRow.state_time.desc())
+            .limit(limit)
+        )
+        for item in declared:
+            known = found.get(item.id)
+            when = item.state_time
+            if when is None or (known is not None and known.at >= _aware(when)):
                 continue
-            seen.add(item.id)
+            percent = item.progress
+            if percent is None:
+                percent = known.percent if known else 0
+            found[item.id] = _reading(item, percent, when)
+        return sorted(found.values(), key=lambda r: r.at, reverse=True)[:limit]
+
+    async def finished(
+        self, user_ids: Sequence[UUID], since: datetime | None, limit: int
+    ) -> list[Reading]:
+        """Books finished (since [since]), latest first."""
+        if not user_ids:
+            return []
+        query = select(LibraryItemRow).where(
+            LibraryItemRow.user_id.in_(user_ids),
+            LibraryItemRow.status == _FINISHED,
+            LibraryItemRow.finished_at.is_not(None),
+            _SHOWN,
+        )
+        if since is not None:
+            query = query.where(LibraryItemRow.finished_at >= since)
+        items = await self._session.scalars(
+            query.order_by(LibraryItemRow.finished_at.desc()).limit(limit)
+        )
+        return [_reading(item, 100, item.finished_at) for item in items if item.finished_at]
+
+    async def shelves(self, user_id: UUID, audiences: Sequence[Audience]) -> list[SharedShelf]:
+        """The reader's shelves shown to [audiences], with their books in order."""
+        shelves = (
+            await self._session.scalars(
+                select(ShelfRow)
+                .where(
+                    ShelfRow.user_id == user_id,
+                    ShelfRow.visibility.in_([a.value for a in audiences]),
+                )
+                .order_by(ShelfRow.created_at)
+            )
+        ).all()
+        found: list[SharedShelf] = []
+        for shelf in shelves:
+            books = await self._session.execute(
+                select(LibraryItemRow.title, LibraryItemRow.authors)
+                .join(ShelfItemRow, ShelfItemRow.item_id == LibraryItemRow.id)
+                .where(ShelfItemRow.shelf_id == shelf.id, _SHOWN)
+                .order_by(ShelfItemRow.position)
+                .limit(200)
+            )
             found.append(
-                Reading(
-                    user_id=item.user_id,
-                    item_id=item.id,
-                    title=item.title,
-                    authors=tuple(item.authors or ()),
-                    percent=position.percent,
-                    at=_aware(position.client_time),
+                SharedShelf(
+                    name=shelf.name,
+                    audience=Audience(shelf.visibility),
+                    books=tuple((title, tuple(authors or ())) for title, authors in books),
                 )
             )
         return found
 
+    async def reviews_by_item(self, user_id: UUID) -> dict[UUID, Review]:
+        rows = await self._session.scalars(select(ReviewRow).where(ReviewRow.user_id == user_id))
+        return {row.item_id: _review(row) for row in rows}
+
+    async def note_counts(self, user_id: UUID) -> dict[str, int]:
+        """Number of highlights and notes per file."""
+        rows = await self._session.execute(
+            select(AnnotationRow.file_sha256, func.count())
+            .where(AnnotationRow.user_id == user_id)
+            .group_by(AnnotationRow.file_sha256)
+        )
+        return {sha: int(count) for sha, count in rows.all()}
+
+    async def work_ids(self, edition_ids: Sequence[UUID]) -> dict[UUID, UUID]:
+        if not edition_ids:
+            return {}
+        rows = await self._session.execute(
+            select(EditionRow.id, EditionRow.work_id).where(EditionRow.id.in_(edition_ids))
+        )
+        return {edition: work for edition, work in rows.all()}
+
     async def library(self, user_id: UUID, limit: int) -> list[tuple[str, tuple[str, ...]]]:
         rows = await self._session.execute(
             select(LibraryItemRow.title, LibraryItemRow.authors)
-            .where(LibraryItemRow.user_id == user_id)
+            .where(LibraryItemRow.user_id == user_id, _SHOWN)
             .order_by(LibraryItemRow.added_at.desc())
             .limit(limit)
         )
@@ -384,7 +491,7 @@ class SqlSocialRepository:
         count = await self._session.scalar(
             select(func.count())
             .select_from(LibraryItemRow)
-            .where(LibraryItemRow.user_id == user_id)
+            .where(LibraryItemRow.user_id == user_id, _SHOWN)
         )
         return int(count or 0)
 
@@ -399,6 +506,72 @@ class SqlSocialRepository:
             .where(
                 AnnotationRow.user_id.in_(user_ids),
                 AnnotationRow.visibility.in_([a.value for a in audiences]),
+            )
+            .order_by(AnnotationRow.client_time.desc())
+            .limit(limit)
+        )
+        return [
+            SharedNote(
+                id=row.id,
+                user_id=row.user_id,
+                title=title or "",
+                quote=row.quote,
+                note=row.note,
+                audience=Audience(row.visibility),
+                at=_aware(row.client_time),
+                page=row.chapter if row.region else None,
+                region=row.region,
+            )
+            for row, title in rows
+        ]
+
+    # ------------------------------------------------------------ a work, all editions
+    def _seen_by(self, column: Any, owner: Any, viewer: UUID, friends: Sequence[UUID]) -> Any:
+        """Content the viewer may read: their own, public, or friends-only from a friend."""
+        return or_(
+            owner == viewer,
+            column == Audience.PUBLIC.value,
+            and_(column == Audience.FRIENDS.value, owner.in_(list(friends))),
+        )
+
+    async def work_reviews(
+        self,
+        work_id: UUID,
+        viewer: UUID,
+        friends: Sequence[UUID],
+        hidden: Sequence[UUID],
+        limit: int,
+    ) -> list[Review]:
+        """Reviews of any edition or file of a work, as the viewer may see them."""
+        rows = await self._session.scalars(
+            select(ReviewRow)
+            .join(LibraryItemRow, LibraryItemRow.id == ReviewRow.item_id)
+            .where(
+                LibraryItemRow.work_id == work_id,
+                ReviewRow.user_id.not_in(list(hidden)),
+                self._seen_by(ReviewRow.audience, ReviewRow.user_id, viewer, friends),
+            )
+            .order_by(ReviewRow.updated_at.desc())
+            .limit(limit)
+        )
+        return [_review(row) for row in rows]
+
+    async def work_notes(
+        self,
+        work_id: UUID,
+        viewer: UUID,
+        friends: Sequence[UUID],
+        hidden: Sequence[UUID],
+        limit: int,
+    ) -> list[SharedNote]:
+        """Highlights and notes on any edition or file of a work, as the viewer may see them."""
+        rows = await self._session.execute(
+            select(AnnotationRow, LibraryItemRow.title)
+            .join(LibraryItemRow, LibraryItemRow.id == AnnotationRow.item_id)
+            .where(
+                LibraryItemRow.work_id == work_id,
+                AnnotationRow.user_id.not_in(list(hidden)),
+                self._seen_by(AnnotationRow.visibility, AnnotationRow.user_id, viewer, friends),
             )
             .order_by(AnnotationRow.client_time.desc())
             .limit(limit)

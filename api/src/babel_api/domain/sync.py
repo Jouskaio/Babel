@@ -28,11 +28,15 @@ class Device:
 
 
 class EntityKind(StrEnum):
-    """What a change is about. Shelves will join this list."""
+    """What a change is about."""
 
     LIBRARY_ITEM = "library_item"
     READING_POSITION = "reading_position"
     ANNOTATION = "annotation"
+    SHELF = "shelf"
+    # Pushed only: a book's status and declared progress. The change log carries the
+    # updated library item instead.
+    READING_STATE = "reading_state"
 
 
 class ChangeOp(StrEnum):

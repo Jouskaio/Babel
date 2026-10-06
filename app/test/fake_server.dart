@@ -307,6 +307,26 @@ class FakeServer {
               'updated_at': '2026-10-05T10:00:00Z',
             },
           ],
+          'finished': [
+            {
+              'title': 'Emma',
+              'authors': ['Jane Austen'],
+              'percent': 100.0,
+              'at': '2026-10-04T10:00:00Z',
+            },
+          ],
+          'shelves': [
+            {
+              'name': 'Favoris',
+              'audience': 'friends',
+              'books': [
+                {
+                  'title': 'Jane Eyre',
+                  'authors': ['Charlotte Brontë'],
+                },
+              ],
+            },
+          ],
           'notes': [
             {
               'title': 'Akira',

@@ -941,7 +941,7 @@ abstract class AppLocalizations {
   /// No description provided for @removed.
   ///
   /// In fr, this message translates to:
-  /// **'« {title} » a été retiré de votre bibliothèque.'**
+  /// **'« {title} » a été retiré. Vos notes et votre avis sont gardés.'**
   String removed(String title);
 
   /// No description provided for @workSummary.
@@ -2923,6 +2923,264 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Traité'**
   String get reportResolve;
+
+  /// No description provided for @statusToRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'À lire'**
+  String get statusToRead;
+
+  /// No description provided for @statusReading.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours'**
+  String get statusReading;
+
+  /// No description provided for @statusFinished.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu'**
+  String get statusFinished;
+
+  /// No description provided for @statusAbandoned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abandonné'**
+  String get statusAbandoned;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous'**
+  String get filterAll;
+
+  /// No description provided for @showHidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher les livres masqués'**
+  String get showHidden;
+
+  /// No description provided for @hiddenBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masqué'**
+  String get hiddenBadge;
+
+  /// No description provided for @hideBook.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer de la bibliothèque'**
+  String get hideBook;
+
+  /// No description provided for @unhideBook.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne plus masquer'**
+  String get unhideBook;
+
+  /// No description provided for @bookHidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {title} » est masqué. Retrouvez-le avec « Afficher les livres masqués ».'**
+  String bookHidden(String title);
+
+  /// No description provided for @removeKeepsData.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos notes, votre avis et votre progression sont gardés : en remettant ce livre, vous les retrouvez.'**
+  String get removeKeepsData;
+
+  /// No description provided for @progressTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Progression'**
+  String get progressTitle;
+
+  /// No description provided for @progressHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour un livre lu ailleurs (papier, autre appli).'**
+  String get progressHint;
+
+  /// No description provided for @progressPercent.
+  ///
+  /// In fr, this message translates to:
+  /// **'{percent} %'**
+  String progressPercent(int percent);
+
+  /// No description provided for @shelvesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étagères'**
+  String get shelvesTitle;
+
+  /// No description provided for @shelfNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle étagère'**
+  String get shelfNew;
+
+  /// No description provided for @shelfName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom de l\'étagère'**
+  String get shelfName;
+
+  /// No description provided for @shelfRename.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renommer'**
+  String get shelfRename;
+
+  /// No description provided for @shelfDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer l\'étagère'**
+  String get shelfDelete;
+
+  /// No description provided for @shelfDeleteBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les livres restent dans votre bibliothèque.'**
+  String get shelfDeleteBody;
+
+  /// No description provided for @shelfEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun livre sur cette étagère pour l\'instant.'**
+  String get shelfEmpty;
+
+  /// No description provided for @shelfBooks.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Vide} =1{1 livre} other{{count} livres}}'**
+  String shelfBooks(int count);
+
+  /// No description provided for @create.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer'**
+  String get create;
+
+  /// No description provided for @traceTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous et ce livre'**
+  String get traceTitle;
+
+  /// No description provided for @traceInLibrary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans votre bibliothèque'**
+  String get traceInLibrary;
+
+  /// No description provided for @traceRemoved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retiré de votre bibliothèque le {date}'**
+  String traceRemoved(String date);
+
+  /// No description provided for @traceGone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le fichier n\'est plus disponible ; vos données sont gardées.'**
+  String get traceGone;
+
+  /// No description provided for @traceNotes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune note} =1{1 note ou surlignage} other{{count} notes et surlignages}}'**
+  String traceNotes(int count);
+
+  /// No description provided for @traceRestore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remettre dans ma bibliothèque'**
+  String get traceRestore;
+
+  /// No description provided for @traceRestored.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {title} » est de retour, avec vos notes.'**
+  String traceRestored(String title);
+
+  /// No description provided for @traceFinishedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu le {date}'**
+  String traceFinishedOn(String date);
+
+  /// No description provided for @yourBooks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans vos livres'**
+  String get yourBooks;
+
+  /// No description provided for @workReaders.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les lecteurs'**
+  String get workReaders;
+
+  /// No description provided for @workReadersEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore d\'avis ni de note sur ce livre.'**
+  String get workReadersEmpty;
+
+  /// No description provided for @workRating.
+  ///
+  /// In fr, this message translates to:
+  /// **'{rating} sur 5 · {count, plural, =1{1 avis} other{{count} avis}}'**
+  String workRating(String rating, int count);
+
+  /// No description provided for @workAllEditions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes éditions confondues'**
+  String get workAllEditions;
+
+  /// No description provided for @you.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous'**
+  String get you;
+
+  /// No description provided for @linkWork.
+  ///
+  /// In fr, this message translates to:
+  /// **'Associer à une fiche'**
+  String get linkWork;
+
+  /// No description provided for @linkWorkHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avis et notes sont partagés entre toutes les éditions d\'un même livre : choisissez la fiche qui correspond.'**
+  String get linkWorkHint;
+
+  /// No description provided for @linkWorkNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce n\'est aucun de ces livres'**
+  String get linkWorkNone;
+
+  /// No description provided for @feedFinished.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} a terminé {title}'**
+  String feedFinished(String name, String title);
+
+  /// No description provided for @profileFinished.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lus récemment'**
+  String get profileFinished;
+
+  /// No description provided for @shelfManage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gérer l\'étagère'**
+  String get shelfManage;
 }
 
 class _AppLocalizationsDelegate

@@ -127,6 +127,70 @@
         "title": "BookTitleResponse",
         "type": "object"
       },
+      "BookTraceResponse": {
+        "description": "A book the reader has or once had, and what they left on it.",
+        "properties": {
+          "available": {
+            "description": "False when the file is gone: only the data remains",
+            "title": "Available",
+            "type": "boolean"
+          },
+          "item": {
+            "$ref": "#/components/schemas/LibraryItemResponse"
+          },
+          "notes": {
+            "description": "Highlights and notes kept for this book",
+            "title": "Notes",
+            "type": "integer"
+          },
+          "removed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Taken out of the library (data kept)",
+            "title": "Removed At"
+          },
+          "review": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReviewResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "work_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The catalog work, to show it on the work's page",
+            "title": "Work Id"
+          }
+        },
+        "required": [
+          "item",
+          "removed_at",
+          "work_id",
+          "review",
+          "notes",
+          "available"
+        ],
+        "title": "BookTraceResponse",
+        "type": "object"
+      },
       "ChangeOp": {
         "enum": [
           "upsert",
@@ -450,11 +514,13 @@
         "type": "object"
       },
       "EntityKind": {
-        "description": "What a change is about. Shelves will join this list.",
+        "description": "What a change is about.",
         "enum": [
           "library_item",
           "reading_position",
-          "annotation"
+          "annotation",
+          "shelf",
+          "reading_state"
         ],
         "title": "EntityKind",
         "type": "string"
@@ -555,6 +621,7 @@
       "FeedKind": {
         "enum": [
           "reading",
+          "finished",
           "review",
           "note"
         ],
@@ -935,13 +1002,43 @@
             ],
             "title": "Edition Id"
           },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
           "format": {
             "$ref": "#/components/schemas/BookFormat"
+          },
+          "hidden": {
+            "default": false,
+            "description": "Out of sight in the library, never shared",
+            "title": "Hidden",
+            "type": "boolean"
           },
           "id": {
             "format": "uuid",
             "title": "Id",
             "type": "string"
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Progress declared by hand, in percent (not a device position)",
+            "title": "Progress"
           },
           "sha256": {
             "description": "Identifies the file; download it from /v1/files/{sha256}",
@@ -952,9 +1049,57 @@
             "title": "Size",
             "type": "integer"
           },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "state_time": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When status or progress last changed (device clock)",
+            "title": "State Time"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReadingStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "title": {
             "title": "Title",
             "type": "string"
+          },
+          "work_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The catalog work: reviews and notes are shared per work",
+            "title": "Work Id"
           }
         },
         "required": [
@@ -1431,6 +1576,14 @@
             "description": "Null when the library is not shared with you",
             "title": "Books"
           },
+          "finished": {
+            "description": "Books finished lately",
+            "items": {
+              "$ref": "#/components/schemas/ReadingResponse"
+            },
+            "title": "Finished",
+            "type": "array"
+          },
           "followers": {
             "title": "Followers",
             "type": "integer"
@@ -1476,6 +1629,13 @@
             },
             "title": "Reviews",
             "type": "array"
+          },
+          "shelves": {
+            "items": {
+              "$ref": "#/components/schemas/ShelfResponse"
+            },
+            "title": "Shelves",
+            "type": "array"
           }
         },
         "required": [
@@ -1486,7 +1646,9 @@
           "reading",
           "library",
           "reviews",
-          "notes"
+          "notes",
+          "finished",
+          "shelves"
         ],
         "title": "ReaderPageResponse",
         "type": "object"
@@ -1581,6 +1743,17 @@
         ],
         "title": "ReadingResponse",
         "type": "object"
+      },
+      "ReadingStatus": {
+        "description": "Where a reader is with a book, set by hand or followed from the reading position.",
+        "enum": [
+          "to_read",
+          "reading",
+          "finished",
+          "abandoned"
+        ],
+        "title": "ReadingStatus",
+        "type": "string"
       },
       "RecommendRequest": {
         "properties": {
@@ -2092,6 +2265,31 @@
           "region"
         ],
         "title": "SharedNoteResponse",
+        "type": "object"
+      },
+      "ShelfResponse": {
+        "properties": {
+          "audience": {
+            "$ref": "#/components/schemas/Audience"
+          },
+          "books": {
+            "items": {
+              "$ref": "#/components/schemas/BookTitleResponse"
+            },
+            "title": "Books",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "audience",
+          "books"
+        ],
+        "title": "ShelfResponse",
         "type": "object"
       },
       "SocialProfileResponse": {
@@ -2694,6 +2892,127 @@
         "title": "WithdrawRequest",
         "type": "object"
       },
+      "WorkLinkRequest": {
+        "properties": {
+          "work_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The catalog work, or null for none",
+            "title": "Work Id"
+          }
+        },
+        "required": [
+          "work_id"
+        ],
+        "title": "WorkLinkRequest",
+        "type": "object"
+      },
+      "WorkNoteResponse": {
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "audience": {
+            "$ref": "#/components/schemas/Audience"
+          },
+          "mine": {
+            "title": "Mine",
+            "type": "boolean"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "quote": {
+            "title": "Quote",
+            "type": "string"
+          },
+          "reader": {
+            "$ref": "#/components/schemas/AuthorResponse"
+          }
+        },
+        "required": [
+          "reader",
+          "quote",
+          "note",
+          "page",
+          "audience",
+          "at",
+          "mine"
+        ],
+        "title": "WorkNoteResponse",
+        "type": "object"
+      },
+      "WorkReadersResponse": {
+        "description": "Every reader's reviews and notes on a work, whatever edition or file they read.",
+        "properties": {
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/WorkNoteResponse"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Average of the ratings shown",
+            "title": "Rating"
+          },
+          "ratings": {
+            "title": "Ratings",
+            "type": "integer"
+          },
+          "reviews": {
+            "items": {
+              "$ref": "#/components/schemas/WorkReviewResponse"
+            },
+            "title": "Reviews",
+            "type": "array"
+          }
+        },
+        "required": [
+          "rating",
+          "ratings",
+          "reviews",
+          "notes"
+        ],
+        "title": "WorkReadersResponse",
+        "type": "object"
+      },
       "WorkResponse": {
         "description": "A work with its description and known editions.",
         "properties": {
@@ -2783,6 +3102,57 @@
         "title": "WorkResponse",
         "type": "object"
       },
+      "WorkReviewResponse": {
+        "properties": {
+          "audience": {
+            "$ref": "#/components/schemas/Audience"
+          },
+          "mine": {
+            "title": "Mine",
+            "type": "boolean"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "reader": {
+            "$ref": "#/components/schemas/AuthorResponse"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reader",
+          "rating",
+          "text",
+          "audience",
+          "updated_at",
+          "mine"
+        ],
+        "title": "WorkReviewResponse",
+        "type": "object"
+      },
       "WorkSummaryResponse": {
         "description": "A work. ``title`` and ``cover_path`` follow the requested language when possible.",
         "properties": {
@@ -2863,7 +3233,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.21.0"
+    "version": "0.22.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -3947,6 +4317,55 @@
         ]
       }
     },
+    "/v1/catalog/works/{work_id}/readers": {
+      "get": {
+        "description": "Reviews and notes on all editions of a work that you may see.",
+        "operationId": "getWorkReaders",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "work_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Work Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkReadersResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Work Readers",
+        "tags": [
+          "social"
+        ]
+      }
+    },
     "/v1/devices": {
       "get": {
         "description": "The account's devices, most recently seen first.",
@@ -4560,6 +4979,37 @@
         ]
       }
     },
+    "/v1/library/history": {
+      "get": {
+        "description": "Every book the reader has or once had, removed ones included, latest first.\n\nRemoving a book or losing its file never erases the reader's status, review, notes\nand positions; adding the same file again brings the book back with them.",
+        "operationId": "getLibraryHistory",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BookTraceResponse"
+                  },
+                  "title": "Response Getlibraryhistory",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get History",
+        "tags": [
+          "library"
+        ]
+      }
+    },
     "/v1/library/links": {
       "post": {
         "description": "Import the book a link points to (AO3 works are fetched at AO3's pace).",
@@ -4675,7 +5125,7 @@
     },
     "/v1/library/{item_id}": {
       "delete": {
-        "description": "Remove a book from the library.",
+        "description": "Take a book out of the library. Its status, review, notes and positions are kept and\ncome back if the same file is added again.",
         "operationId": "removeFromLibrary",
         "parameters": [
           {
@@ -4932,6 +5382,82 @@
         "summary": "Save Review",
         "tags": [
           "social",
+          "library"
+        ]
+      }
+    },
+    "/v1/library/{item_id}/work": {
+      "put": {
+        "description": "Say which catalog work a book is, so its reviews and notes join the work's page.",
+        "operationId": "linkWork",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkLinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Link Work",
+        "tags": [
           "library"
         ]
       }

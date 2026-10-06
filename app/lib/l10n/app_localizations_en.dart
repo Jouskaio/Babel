@@ -476,7 +476,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String removed(String title) {
-    return '“$title” was removed from your library.';
+    return '“$title” was taken out. Your notes and review are kept.';
   }
 
   @override
@@ -1694,4 +1694,173 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportResolve => 'Handled';
+
+  @override
+  String get statusToRead => 'To read';
+
+  @override
+  String get statusReading => 'Reading';
+
+  @override
+  String get statusFinished => 'Read';
+
+  @override
+  String get statusAbandoned => 'Abandoned';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get showHidden => 'Show hidden books';
+
+  @override
+  String get hiddenBadge => 'Hidden';
+
+  @override
+  String get hideBook => 'Hide from the library';
+
+  @override
+  String get unhideBook => 'Stop hiding';
+
+  @override
+  String bookHidden(String title) {
+    return '“$title” is hidden. Find it with “Show hidden books”.';
+  }
+
+  @override
+  String get removeKeepsData =>
+      'Your notes, review and progress are kept: add this book again to find them.';
+
+  @override
+  String get progressTitle => 'Progress';
+
+  @override
+  String get progressHint => 'For a book read elsewhere (paper, another app).';
+
+  @override
+  String progressPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String get shelvesTitle => 'Shelves';
+
+  @override
+  String get shelfNew => 'New shelf';
+
+  @override
+  String get shelfName => 'Shelf name';
+
+  @override
+  String get shelfRename => 'Rename';
+
+  @override
+  String get shelfDelete => 'Delete the shelf';
+
+  @override
+  String get shelfDeleteBody => 'The books stay in your library.';
+
+  @override
+  String get shelfEmpty => 'No book on this shelf yet.';
+
+  @override
+  String shelfBooks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count books',
+      one: '1 book',
+      zero: 'Empty',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get traceTitle => 'You and this book';
+
+  @override
+  String get traceInLibrary => 'In your library';
+
+  @override
+  String traceRemoved(String date) {
+    return 'Taken out of your library on $date';
+  }
+
+  @override
+  String get traceGone => 'The file is no longer available; your data is kept.';
+
+  @override
+  String traceNotes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notes and highlights',
+      one: '1 note or highlight',
+      zero: 'No notes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get traceRestore => 'Put it back in my library';
+
+  @override
+  String traceRestored(String title) {
+    return '“$title” is back, with your notes.';
+  }
+
+  @override
+  String traceFinishedOn(String date) {
+    return 'Read on $date';
+  }
+
+  @override
+  String get yourBooks => 'In your books';
+
+  @override
+  String get workReaders => 'Readers';
+
+  @override
+  String get workReadersEmpty => 'No reviews or notes on this book yet.';
+
+  @override
+  String workRating(String rating, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reviews',
+      one: '1 review',
+    );
+    return '$rating out of 5 · $_temp0';
+  }
+
+  @override
+  String get workAllEditions => 'All editions together';
+
+  @override
+  String get you => 'You';
+
+  @override
+  String get linkWork => 'Link to a book page';
+
+  @override
+  String get linkWorkHint =>
+      'Reviews and notes are shared by all editions of a book: pick the matching page.';
+
+  @override
+  String get linkWorkNone => 'None of these';
+
+  @override
+  String feedFinished(String name, String title) {
+    return '$name finished $title';
+  }
+
+  @override
+  String get profileFinished => 'Recently read';
+
+  @override
+  String get shelfManage => 'Manage the shelf';
 }

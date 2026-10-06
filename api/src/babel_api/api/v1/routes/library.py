@@ -17,7 +17,7 @@ from babel_api.api.dependencies import (
     LinkServiceDep,
     SyncServiceDep,
 )
-from babel_api.domain.files import BookFormat, LibraryItem
+from babel_api.domain.files import BookFormat, LibraryItem, ReadingStatus
 from babel_api.domain.follows import Follow
 from babel_api.services.links import LinkKind
 
@@ -39,6 +39,19 @@ class LibraryItemResponse(BaseModel):
     cover_path: str | None = Field(
         description="Cover found in the file, relative to the API base URL (may answer 404)"
     )
+    status: ReadingStatus | None = None
+    progress: float | None = Field(
+        default=None, description="Progress declared by hand, in percent (not a device position)"
+    )
+    state_time: datetime | None = Field(
+        default=None, description="When status or progress last changed (device clock)"
+    )
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+    hidden: bool = Field(default=False, description="Out of sight in the library, never shared")
+    work_id: UUID | None = Field(
+        default=None, description="The catalog work: reviews and notes are shared per work"
+    )
 
     @classmethod
     def of(cls, item: LibraryItem) -> "LibraryItemResponse":
@@ -52,6 +65,13 @@ class LibraryItemResponse(BaseModel):
             edition_id=item.file.edition_id,
             added_at=item.added_at,
             cover_path=item.file.cover_path,
+            status=item.state.status,
+            progress=item.state.progress,
+            state_time=item.state.client_time,
+            started_at=item.state.started_at,
+            finished_at=item.state.finished_at,
+            hidden=item.state.hidden,
+            work_id=item.work_id,
         )
 
 
@@ -106,8 +126,25 @@ async def add_stored_file(
 async def remove_from_library(
     user_id: CurrentUserId, files: FileServiceDep, item_id: UUID, device_id: DeviceHeader = None
 ) -> None:
-    """Remove a book from the library."""
+    """Take a book out of the library. Its status, review, notes and positions are kept and
+    come back if the same file is added again."""
     await files.remove_from_library(user_id, item_id, device_id)
+
+
+class WorkLinkRequest(BaseModel):
+    work_id: UUID | None = Field(description="The catalog work, or null for none")
+
+
+@router.put("/library/{item_id}/work", operation_id="linkWork")
+async def link_work(
+    user_id: CurrentUserId,
+    files: FileServiceDep,
+    item_id: UUID,
+    body: WorkLinkRequest,
+    device_id: DeviceHeader = None,
+) -> LibraryItemResponse:
+    """Say which catalog work a book is, so its reviews and notes join the work's page."""
+    return LibraryItemResponse.of(await files.link_work(user_id, item_id, body.work_id, device_id))
 
 
 @router.get(

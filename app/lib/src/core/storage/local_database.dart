@@ -46,6 +46,10 @@ abstract final class LocalStores {
   /// Highlights and margin notes by id (from this device and from sync).
   static final annotations = stringMapStoreFactory.store('annotations');
 
+  /// Shelves by id, in the shape of the change log's shelf data, plus a local
+  /// `created` order.
+  static final shelves = stringMapStoreFactory.store('shelves');
+
   /// Sync cursor, device id…
   static final meta = StoreRef<String, Object?>('meta');
 }

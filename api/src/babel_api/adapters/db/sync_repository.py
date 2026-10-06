@@ -13,7 +13,10 @@ from babel_api.adapters.db.models import (
     ChangeRow,
     DeviceRow,
     ReadingPositionRow,
+    ShelfItemRow,
+    ShelfRow,
 )
+from babel_api.domain.shelves import Shelf
 from babel_api.domain.sync import (
     Annotation,
     Change,
@@ -239,3 +242,55 @@ class SqlSyncRepository:
             row.file_sha256, row.item_id = new_sha256, item_id
         await self._session.flush()
         return [a for row in rows if (a := await self.get_annotation(row.id))]
+
+    # ------------------------------------------------------------ shelves
+    async def _shelf(self, row: ShelfRow) -> Shelf:
+        items = await self._session.scalars(
+            select(ShelfItemRow.item_id)
+            .where(ShelfItemRow.shelf_id == row.id)
+            .order_by(ShelfItemRow.position)
+        )
+        return Shelf(
+            id=row.id,
+            user_id=row.user_id,
+            name=row.name,
+            item_ids=tuple(items),
+            visibility=Visibility(row.visibility),
+            client_time=_aware(row.client_time),
+        )
+
+    async def get_shelf(self, shelf_id: UUID) -> Shelf | None:
+        row = await self._session.get(ShelfRow, shelf_id)
+        return await self._shelf(row) if row else None
+
+    async def list_shelves(self, user_id: UUID) -> list[Shelf]:
+        rows = await self._session.scalars(
+            select(ShelfRow).where(ShelfRow.user_id == user_id).order_by(ShelfRow.created_at)
+        )
+        return [await self._shelf(row) for row in rows.all()]
+
+    async def count_shelves(self, user_id: UUID) -> int:
+        count = await self._session.scalar(
+            select(func.count()).select_from(ShelfRow).where(ShelfRow.user_id == user_id)
+        )
+        return int(count or 0)
+
+    async def save_shelf(self, shelf: Shelf) -> None:
+        row = await self._session.get(ShelfRow, shelf.id)
+        if row is None:
+            row = ShelfRow(id=shelf.id, user_id=shelf.user_id)
+            self._session.add(row)
+        row.name = shelf.name
+        row.visibility = shelf.visibility.value
+        row.client_time = shelf.client_time
+        await self._session.execute(delete(ShelfItemRow).where(ShelfItemRow.shelf_id == shelf.id))
+        await self._session.flush()
+        self._session.add_all(
+            ShelfItemRow(shelf_id=shelf.id, item_id=item_id, position=i)
+            for i, item_id in enumerate(shelf.item_ids)
+        )
+        await self._session.flush()
+
+    async def delete_shelf(self, shelf_id: UUID) -> None:
+        await self._session.execute(delete(ShelfItemRow).where(ShelfItemRow.shelf_id == shelf_id))
+        await self._session.execute(delete(ShelfRow).where(ShelfRow.id == shelf_id))
