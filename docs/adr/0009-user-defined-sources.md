@@ -18,7 +18,7 @@ A **source** belongs to one user and is one of:
 | Kind | Connects to | Authentication |
 | --- | --- | --- |
 | `github` | a repository (and optional folder) containing book files | fine-grained personal access token, read-only, optional for public repositories |
-| `opds` | an OPDS 1.2 / 2.0 catalog (Calibre-Web, Kavita, Komga, COPS…) | none, HTTP Basic or API key |
+| `opds` | an OPDS 1.2 / 2.0 catalog (Calibre-Web, Kavita, Komga, COPS…) | none, HTTP Basic, or a key inside the address (Kavita: kept encrypted, stored addresses use a `{key}` placeholder) |
 | `webdav` | a WebDAV folder (Nextcloud, ownCloud, NAS) | username + app password |
 | `ao3` | the user's Archive of Our Own bookmarks (and subscriptions when signed in) | none for public bookmarks, or the user's own password |
 | `generic` | any HTTP endpoint returning a Babel source manifest (JSON) | optional bearer token or header |

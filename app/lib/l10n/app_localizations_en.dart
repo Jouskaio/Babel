@@ -893,7 +893,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get opdsUrl => 'Catalog address';
 
   @override
-  String get opdsUrlHelp => 'For example https://calibre.example.com/opds';
+  String get opdsUrlHelp =>
+      'For example https://calibre.example.com/opds. Kavita: paste your account\'s OPDS address (Settings › OPDS) as it is; the key in it is encrypted.';
 
   @override
   String get webdavTitle => 'WebDAV folder';

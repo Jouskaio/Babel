@@ -188,3 +188,61 @@ def test_formats_listed_as_separate_entries_count_once() -> None:
     }
     entries = asyncio.run(catalog(pages).list_entries({"url": ROOT}, None))
     assert [(e.title, e.format) for e in entries] == [("Emma", "epub")]
+
+
+KAVITA_KEY = "8f1c2a3b-4d5e-6f70-8192-a3b4c5d6e7f8"
+KAVITA = f"https://books.example.com/api/opds/{KAVITA_KEY}"
+
+
+def kavita(request: httpx.Request) -> httpx.Response:
+    path = request.url.path
+    if KAVITA_KEY not in path:
+        return httpx.Response(401)
+    if path.endswith(f"/opds/{KAVITA_KEY}"):
+        return httpx.Response(
+            200,
+            text=atom(
+                "<entry><title>Libraries</title><id>l</id>"
+                '<link type="application/atom+xml;profile=opds-catalog;kind=navigation" '
+                f'href="/api/opds/{KAVITA_KEY}/libraries"/></entry>'
+            ),
+        )
+    if path.endswith("/libraries"):
+        return httpx.Response(
+            200,
+            text=atom(
+                "<entry><title>Akira</title><author><name>Otomo</name></author>"
+                f'<link rel="{ACQ}" type="application/vnd.comicbook+zip" '
+                f'href="/api/opds/{KAVITA_KEY}/series/1/volume/1/chapter/1/download/akira.cbz"/>'
+                "</entry>"
+            ),
+        )
+    if path.endswith("akira.cbz"):
+        return httpx.Response(200, content=b"PK-akira")
+    return httpx.Response(404)
+
+
+def test_a_kavita_key_never_stays_in_stored_addresses() -> None:
+    connector = OpdsConnector(
+        httpx.AsyncClient(transport=httpx.MockTransport(kavita)),
+        allowed_hosts=("books.example.com",),
+    )
+    config, key = connector.extract_secret({"url": KAVITA})
+    assert key == KAVITA_KEY
+    assert config["url"] == "https://books.example.com/api/opds/{key}"
+
+    async def run() -> tuple[list[RemoteEntry], bytes]:
+        checked = await connector.check(config, key)
+        entries = await connector.list_entries(checked, key)
+        data = b"".join([c async for c in connector.fetch(checked, key, entries[0])])
+        return entries, data
+
+    entries, data = asyncio.run(run())
+    assert [(e.title, e.format) for e in entries] == [("Akira", "cbz")]
+    assert KAVITA_KEY not in entries[0].path + (entries[0].locator or "")
+    assert "{key}" in entries[0].path
+    assert data == b"PK-akira"
+
+
+def test_addresses_without_a_key_are_left_alone() -> None:
+    assert OpdsConnector.extract_secret({"url": ROOT}) == ({"url": ROOT}, None)

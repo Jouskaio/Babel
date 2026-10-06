@@ -54,17 +54,18 @@ unsigned `Babel-macOS.zip` in CI (first launch: right-click → Open).
 
 ### Notifications on iOS and macOS (one-time)
 
-1. Firebase console → Project settings → add the Apple apps `com.jouskaio.babel` (iOS and
-   macOS) and download `GoogleService-Info.plist` into `ios/Runner/` and
-   `macos/Runner/` (add it to the Runner target in Xcode).
-2. Apple Developer → Keys → create an APNs key, then upload it in Firebase → Cloud
-   Messaging → Apple app configuration.
-3. Xcode → Runner target → Signing & Capabilities: pick your team, add **Push
-   Notifications** (and **Background Modes → Remote notifications** on iOS).
+The Apple app (`com.jouskaio.babel`) is registered in the Firebase project and its
+`GoogleService-Info.plist` is bundled in both Runner targets. What remains needs an Apple
+Developer account:
 
-The server sends notifications once `BABEL_FCM_CREDENTIALS_FILE` points to a Firebase
-service account JSON (Project settings → Service accounts → Generate new private key),
-mounted into the API container.
+1. Apple Developer → Keys → create an APNs key, then upload it in Firebase → Project
+   settings → Cloud Messaging → Apple app configuration.
+2. Xcode → Runner target → Signing & Capabilities: pick your team, add **Push
+   Notifications** (and **Background Modes → Remote notifications** on iOS). Signed builds
+   also give the macOS app access to the keychain.
+
+The server sends notifications with the Firebase service account mounted at
+`/run/babel-secrets/firebase.json` (see `infra/README.md`).
 
 ### Regenerating platform folders
 

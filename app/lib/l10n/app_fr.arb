@@ -446,7 +446,7 @@
   "opdsTitle": "Catalogue OPDS",
   "opdsSubtitle": "Lecture seule · Calibre-Web, Kavita, Komga, COPS…",
   "opdsUrl": "Adresse du catalogue",
-  "opdsUrlHelp": "Par exemple https://calibre.example.com/opds",
+  "opdsUrlHelp": "Par exemple https://calibre.example.com/opds. Kavita : collez l'adresse OPDS de votre compte (Paramètres › OPDS) telle quelle, la clé qu'elle contient est chiffrée.",
   "webdavTitle": "Dossier WebDAV",
   "webdavSubtitle": "Lecture seule · Nextcloud, ownCloud, NAS",
   "webdavUrl": "Adresse du dossier",
