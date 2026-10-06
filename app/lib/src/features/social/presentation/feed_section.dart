@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_providers.dart';
+import '../../../core/locale/relative_time.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
@@ -93,6 +94,8 @@ class _FeedTile extends StatelessWidget {
       name: headline,
       handle: entry.reader.handle,
       subtitle: body.isEmpty ? null : body,
+      lines: 3,
+      detail: timeAgo(context, entry.at),
     );
   }
 }

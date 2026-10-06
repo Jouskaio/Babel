@@ -57,6 +57,8 @@ Future<void> showAnnotationEditor(
   bool focusNote = false,
 }) => showModalBottomSheet<void>(
   context: context,
+  // Above the floating navigation bar of the tabs.
+  useRootNavigator: true,
   isScrollControlled: true,
   backgroundColor: BabelColors.surface,
   builder: (context) =>
@@ -200,6 +202,8 @@ Future<void> showMarginPanel(
   required ValueChanged<int> onOpenChapter,
 }) => showModalBottomSheet<void>(
   context: context,
+  // Above the floating navigation bar of the tabs.
+  useRootNavigator: true,
   isScrollControlled: true,
   backgroundColor: BabelColors.surface,
   builder: (context) => DraggableScrollableSheet(

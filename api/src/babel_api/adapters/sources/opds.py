@@ -23,7 +23,8 @@ _ATOM = "{http://www.w3.org/2005/Atom}"
 _ACQUISITION = "http://opds-spec.org/acquisition"
 # Preferred format when an entry offers several.
 _PREFERENCE = {"epub": 0, "cbz": 1, "pdf": 2, "cbr": 3}
-MAX_FEEDS = 60
+# Kavita and Komga give each series its own feed: room for a few hundred series.
+MAX_FEEDS = 300
 MAX_ENTRIES = 5000
 MAX_FEED_BYTES = 10 * 1024 * 1024
 # Kavita puts the reader's key in every OPDS address (/api/opds/<key>/...). The key is kept

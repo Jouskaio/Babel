@@ -226,6 +226,8 @@ class _ComicViewState extends ConsumerState<ComicView> {
     final l10n = context.l10n;
     final chosen = await showModalBottomSheet<ComicDirection>(
       context: context,
+      // Above the floating navigation bar of the tabs.
+      useRootNavigator: true,
       backgroundColor: BabelColors.surface,
       builder: (context) => SafeArea(
         child: Padding(
@@ -327,10 +329,11 @@ class _ComicViewState extends ConsumerState<ComicView> {
       actions: [
         _ChromeButton(
           tooltip: l10n.comicDirection,
+          // Not an arrow: next to the back button it would read as a second one.
           icon: switch (_direction) {
-            ComicDirection.leftToRight => Icons.arrow_forward,
-            ComicDirection.rightToLeft => Icons.arrow_back,
-            ComicDirection.vertical => Icons.arrow_downward,
+            ComicDirection.leftToRight => Icons.format_textdirection_l_to_r,
+            ComicDirection.rightToLeft => Icons.format_textdirection_r_to_l,
+            ComicDirection.vertical => Icons.swap_vert,
           },
           onPressed: _chooseDirection,
         ),
@@ -528,7 +531,8 @@ class _ComicPageState extends State<_ComicPage> {
               child: GestureDetector(
                 // The painter alone takes no touches.
                 behavior: HitTestBehavior.opaque,
-                onPanStart: (d) => setState(() {
+                // Where the finger went down, not where the drag was recognized.
+                onPanDown: (d) => setState(() {
                   _start = d.localPosition;
                   _end = d.localPosition;
                 }),

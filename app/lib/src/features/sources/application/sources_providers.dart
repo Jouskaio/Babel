@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_providers.dart';
+import '../../../core/locale/relative_time.dart';
 import '../../../l10n.dart';
 
 /// The account's sources (this needs the network: scans run on the server).
@@ -65,15 +66,7 @@ String sourceSubtitle(BuildContext context, SourceResponse source) {
 
 /// "scanned 2 h ago".
 String scannedAgo(BuildContext context, DateTime at, {DateTime? now}) {
-  final l10n = context.l10n;
-  final elapsed = (now ?? DateTime.now()).difference(at.toLocal());
-  final when = switch (elapsed) {
-    Duration(inMinutes: < 1) => l10n.justNow,
-    Duration(inHours: < 1) => l10n.minutesAgo(elapsed.inMinutes),
-    Duration(inDays: < 1) => l10n.hoursAgo(elapsed.inHours),
-    _ => l10n.daysAgo(elapsed.inDays),
-  };
-  return l10n.scannedAgo(when);
+  return context.l10n.scannedAgo(timeAgo(context, at, now: now));
 }
 
 /// "Jane Eyre.epub" → ("Jane Eyre", "EPUB").
