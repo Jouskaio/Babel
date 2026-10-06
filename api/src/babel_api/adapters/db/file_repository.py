@@ -1,17 +1,20 @@
 """SQLAlchemy implementation of the file repository."""
 
+import re
 from datetime import UTC, datetime
 from uuid import UUID
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.models import (
     BlockedFileRow,
+    EditionRow,
     FollowRow,
     LibraryItemRow,
     ShelfItemRow,
     StoredFileRow,
+    WorkRow,
 )
 from babel_api.domain.files import (
     BookFormat,
@@ -41,6 +44,11 @@ def _to_file(row: StoredFileRow) -> StoredFile:
     )
 
 
+def _plain(text: str) -> str:
+    """Lowercase words only, accents kept: "Jane  Eyre!" and "jane eyre" compare equal."""
+    return " ".join(re.findall(r"\w+", text.lower()))
+
+
 def _maybe(value: datetime | None) -> datetime | None:
     return _aware(value) if value else None
 
@@ -62,6 +70,7 @@ def _to_item(row: LibraryItemRow) -> LibraryItem:
             hidden=row.hidden,
         ),
         removed_at=_maybe(row.removed_at),
+        work_id=row.work_id,
     )
 
 
@@ -112,10 +121,19 @@ class SqlFileRepository:
             await self._session.flush()
 
     async def add_item(
-        self, user_id: UUID, sha256: str, title: str, authors: tuple[str, ...]
+        self,
+        user_id: UUID,
+        sha256: str,
+        title: str,
+        authors: tuple[str, ...],
+        work_id: UUID | None = None,
     ) -> LibraryItem:
         row = LibraryItemRow(
-            user_id=user_id, file_sha256=sha256, title=title[:500], authors=list(authors)
+            user_id=user_id,
+            file_sha256=sha256,
+            title=title[:500],
+            authors=list(authors),
+            work_id=work_id,
         )
         self._session.add(row)
         await self._session.flush()
@@ -171,6 +189,35 @@ class SqlFileRepository:
         row.hidden = state.hidden
         await self._session.flush()
         return _to_item(row)
+
+    async def set_work(self, item_id: UUID, work_id: UUID | None) -> LibraryItem:
+        row = await self._session.get_one(LibraryItemRow, item_id)
+        row.work_id = work_id
+        await self._session.flush()
+        return _to_item(row)
+
+    async def guess_work(
+        self, edition_id: UUID | None, title: str, authors: tuple[str, ...]
+    ) -> UUID | None:
+        """The work of the file's edition, else a known work with the same title and author."""
+        if edition_id is not None:
+            edition = await self._session.get(EditionRow, edition_id)
+            if edition is not None:
+                return edition.work_id
+        wanted = _plain(title)
+        if not wanted:
+            return None
+        candidates = await self._session.scalars(
+            select(WorkRow).where(func.lower(WorkRow.title) == title.strip().lower()).limit(20)
+        )
+        names = {_plain(a) for a in authors}
+        for work in candidates:
+            if _plain(work.title) != wanted:
+                continue
+            # Same title is not enough when both sides name authors: one must match.
+            if not names or not work.authors or names & {_plain(a) for a in work.authors}:
+                return work.id
+        return None
 
     async def remove_item(self, item_id: UUID, at: datetime) -> None:
         """Out of the library, off its shelves, no longer followed; its data is kept."""

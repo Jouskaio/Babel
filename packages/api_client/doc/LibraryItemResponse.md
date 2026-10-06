@@ -23,6 +23,7 @@ Name | Type | Description | Notes
 **stateTime** | [**DateTime**](DateTime.md) | When status or progress last changed (device clock) | [optional] 
 **status** | [**ReadingStatus**](ReadingStatus.md) |  | [optional] 
 **title** | **String** |  | 
+**workId** | **String** | The catalog work: reviews and notes are shared per work | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

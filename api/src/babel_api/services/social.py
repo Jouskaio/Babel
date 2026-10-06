@@ -63,6 +63,21 @@ class ReaderPage:
 
 
 @dataclass(frozen=True, slots=True)
+class WorkReaders:
+    """What readers left on a work, across all its editions and files."""
+
+    reviews: list[Review]
+    notes: list[SharedNote]
+    profiles: dict[UUID, Profile]
+
+    @property
+    def rating(self) -> tuple[float | None, int]:
+        """Average rating of the reviews shown, and how many have one."""
+        ratings = [r.rating for r in self.reviews if r.rating]
+        return (sum(ratings) / len(ratings) if ratings else None, len(ratings))
+
+
+@dataclass(frozen=True, slots=True)
 class Friends:
     friends: list[Reader]
     incoming: list[Reader]
@@ -339,6 +354,16 @@ class SocialService:
         entries.sort(key=lambda e: e.at, reverse=True)
         return entries[:limit], profiles
 
+    # ------------------------------------------------------------ a work
+    async def work_readers(self, viewer: UUID, work_id: UUID) -> WorkReaders:
+        """Reviews and notes of every reader on a work, whatever the edition they read."""
+        hidden = list(await self._social.hidden(viewer))
+        friends = await self._social.friends(viewer)
+        reviews = await self._social.work_reviews(work_id, viewer, friends, hidden, 100)
+        notes = await self._social.work_notes(work_id, viewer, friends, hidden, 100)
+        people = list({r.user_id for r in reviews} | {n.user_id for n in notes})
+        return WorkReaders(reviews, notes, await self._social.profiles(people))
+
     # ------------------------------------------------------------ history
     async def history(self, user_id: UUID) -> list[BookTrace]:
         """Every book the reader has or once had, with what they left on it.
@@ -350,12 +375,13 @@ class SocialService:
         reviews = await self._social.reviews_by_item(user_id)
         notes = await self._social.note_counts(user_id)
         works = await self._social.work_ids(
-            list({i.file.edition_id for i in items if i.file.edition_id})
+            list({i.file.edition_id for i in items if i.file.edition_id and not i.work_id})
         )
         return [
             BookTrace(
                 item=item,
-                work_id=works.get(item.file.edition_id) if item.file.edition_id else None,
+                work_id=item.work_id
+                or (works.get(item.file.edition_id) if item.file.edition_id else None),
                 review=reviews.get(item.id),
                 notes=notes.get(item.file.sha256, 0),
                 available=item.file.available,

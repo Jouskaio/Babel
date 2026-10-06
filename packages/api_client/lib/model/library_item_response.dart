@@ -28,6 +28,7 @@ class LibraryItemResponse {
     this.stateTime,
     this.status,
     required this.title,
+    this.workId,
   });
 
   DateTime addedAt;
@@ -71,6 +72,9 @@ class LibraryItemResponse {
 
   String title;
 
+  /// The catalog work: reviews and notes are shared per work
+  String? workId;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is LibraryItemResponse &&
     other.addedAt == addedAt &&
@@ -87,7 +91,8 @@ class LibraryItemResponse {
     other.startedAt == startedAt &&
     other.stateTime == stateTime &&
     other.status == status &&
-    other.title == title;
+    other.title == title &&
+    other.workId == workId;
 
   @override
   int get hashCode =>
@@ -106,10 +111,11 @@ class LibraryItemResponse {
     (startedAt == null ? 0 : startedAt!.hashCode) +
     (stateTime == null ? 0 : stateTime!.hashCode) +
     (status == null ? 0 : status!.hashCode) +
-    (title.hashCode);
+    (title.hashCode) +
+    (workId == null ? 0 : workId!.hashCode);
 
   @override
-  String toString() => 'LibraryItemResponse[addedAt=$addedAt, authors=$authors, coverPath=$coverPath, editionId=$editionId, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, progress=$progress, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title]';
+  String toString() => 'LibraryItemResponse[addedAt=$addedAt, authors=$authors, coverPath=$coverPath, editionId=$editionId, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, progress=$progress, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title, workId=$workId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -156,6 +162,11 @@ class LibraryItemResponse {
       json[r'status'] = null;
     }
       json[r'title'] = this.title;
+    if (this.workId != null) {
+      json[r'work_id'] = this.workId;
+    } else {
+      json[r'work_id'] = null;
+    }
     return json;
   }
 
@@ -197,6 +208,7 @@ class LibraryItemResponse {
         stateTime: mapDateTime(json, r'state_time', r''),
         status: ReadingStatus.fromJson(json[r'status']),
         title: mapValueOfType<String>(json, r'title')!,
+        workId: mapValueOfType<String>(json, r'work_id'),
       );
     }
     return null;

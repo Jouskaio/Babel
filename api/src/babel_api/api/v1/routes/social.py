@@ -515,6 +515,71 @@ async def resolve_report(_: CurrentAdminId, social: SocialServiceDep, report_id:
     await social.resolve_report(report_id)
 
 
+# ---------------------------------------------------------------- a work
+class WorkReviewResponse(BaseModel):
+    reader: AuthorResponse
+    rating: int | None
+    text: str | None
+    audience: Audience
+    updated_at: datetime
+    mine: bool
+
+
+class WorkNoteResponse(BaseModel):
+    reader: AuthorResponse
+    quote: str
+    note: str | None
+    page: int | None
+    audience: Audience
+    at: datetime
+    mine: bool
+
+
+class WorkReadersResponse(BaseModel):
+    """Every reader's reviews and notes on a work, whatever edition or file they read."""
+
+    rating: float | None = Field(description="Average of the ratings shown")
+    ratings: int
+    reviews: list[WorkReviewResponse]
+    notes: list[WorkNoteResponse]
+
+
+@router.get("/catalog/works/{work_id}/readers", operation_id="getWorkReaders")
+async def get_work_readers(
+    user_id: CurrentUserId, social: SocialServiceDep, work_id: UUID
+) -> WorkReadersResponse:
+    """Reviews and notes on all editions of a work that you may see."""
+    found = await social.work_readers(user_id, work_id)
+    rating, ratings = found.rating
+    return WorkReadersResponse(
+        rating=round(rating, 2) if rating is not None else None,
+        ratings=ratings,
+        reviews=[
+            WorkReviewResponse(
+                reader=_author(found.profiles.get(r.user_id)),
+                rating=r.rating,
+                text=r.text,
+                audience=r.audience,
+                updated_at=r.updated_at,
+                mine=r.user_id == user_id,
+            )
+            for r in found.reviews
+        ],
+        notes=[
+            WorkNoteResponse(
+                reader=_author(found.profiles.get(n.user_id)),
+                quote=n.quote,
+                note=n.note,
+                page=n.page,
+                audience=n.audience,
+                at=n.at,
+                mine=n.user_id == user_id,
+            )
+            for n in found.notes
+        ],
+    )
+
+
 # ---------------------------------------------------------------- history
 # Listed with the library in the contract (it is mostly library data).
 history_router = APIRouter(tags=["library"])

@@ -47,6 +47,7 @@ def item_data(item: LibraryItem) -> dict[str, Any]:
         "started_at": _iso(item.state.started_at),
         "finished_at": _iso(item.state.finished_at),
         "hidden": item.state.hidden,
+        "work_id": str(item.work_id) if item.work_id else None,
     }
 
 
@@ -179,6 +180,27 @@ class FileService:
         item = await self._files.find_item(user_id, sha256)
         return item or await self._add_item(user_id, file, path, file.original_name, device_id)
 
+    async def link_work(
+        self, user_id: UUID, item_id: UUID, work_id: UUID | None, device_id: UUID | None = None
+    ) -> LibraryItem:
+        """The reader says which catalog work a book is (or that it is none)."""
+        item = await self._files.get_item(item_id)
+        if item is None or item.user_id != user_id:
+            raise NotFoundError
+        if work_id is not None and await self._catalog.get_work(work_id) is None:
+            raise NotFoundError
+        updated = await self._files.set_work(item_id, work_id)
+        await self._changes.record(
+            user_id,
+            EntityKind.LIBRARY_ITEM,
+            str(item_id),
+            ChangeOp.UPSERT,
+            item_data(updated),
+            device_id,
+        )
+        await self._files.commit()
+        return updated
+
     async def remove_from_library(
         self, user_id: UUID, item_id: UUID, device_id: UUID | None = None
     ) -> None:
@@ -265,7 +287,8 @@ class FileService:
         else:
             metadata = self._reader.metadata(path, file.format)
             title = metadata.title or PurePath(filename).stem or file.original_name
-            item = await self._files.add_item(user_id, file.sha256, title, metadata.authors)
+            work = await self._files.guess_work(file.edition_id, title, metadata.authors)
+            item = await self._files.add_item(user_id, file.sha256, title, metadata.authors, work)
         await self._changes.record(
             user_id,
             EntityKind.LIBRARY_ITEM,

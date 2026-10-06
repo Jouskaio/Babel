@@ -525,6 +525,72 @@ class SqlSocialRepository:
             for row, title in rows
         ]
 
+    # ------------------------------------------------------------ a work, all editions
+    def _seen_by(self, column: Any, owner: Any, viewer: UUID, friends: Sequence[UUID]) -> Any:
+        """Content the viewer may read: their own, public, or friends-only from a friend."""
+        return or_(
+            owner == viewer,
+            column == Audience.PUBLIC.value,
+            and_(column == Audience.FRIENDS.value, owner.in_(list(friends))),
+        )
+
+    async def work_reviews(
+        self,
+        work_id: UUID,
+        viewer: UUID,
+        friends: Sequence[UUID],
+        hidden: Sequence[UUID],
+        limit: int,
+    ) -> list[Review]:
+        """Reviews of any edition or file of a work, as the viewer may see them."""
+        rows = await self._session.scalars(
+            select(ReviewRow)
+            .join(LibraryItemRow, LibraryItemRow.id == ReviewRow.item_id)
+            .where(
+                LibraryItemRow.work_id == work_id,
+                ReviewRow.user_id.not_in(list(hidden)),
+                self._seen_by(ReviewRow.audience, ReviewRow.user_id, viewer, friends),
+            )
+            .order_by(ReviewRow.updated_at.desc())
+            .limit(limit)
+        )
+        return [_review(row) for row in rows]
+
+    async def work_notes(
+        self,
+        work_id: UUID,
+        viewer: UUID,
+        friends: Sequence[UUID],
+        hidden: Sequence[UUID],
+        limit: int,
+    ) -> list[SharedNote]:
+        """Highlights and notes on any edition or file of a work, as the viewer may see them."""
+        rows = await self._session.execute(
+            select(AnnotationRow, LibraryItemRow.title)
+            .join(LibraryItemRow, LibraryItemRow.id == AnnotationRow.item_id)
+            .where(
+                LibraryItemRow.work_id == work_id,
+                AnnotationRow.user_id.not_in(list(hidden)),
+                self._seen_by(AnnotationRow.visibility, AnnotationRow.user_id, viewer, friends),
+            )
+            .order_by(AnnotationRow.client_time.desc())
+            .limit(limit)
+        )
+        return [
+            SharedNote(
+                id=row.id,
+                user_id=row.user_id,
+                title=title or "",
+                quote=row.quote,
+                note=row.note,
+                audience=Audience(row.visibility),
+                at=_aware(row.client_time),
+                page=row.chapter if row.region else None,
+                region=row.region,
+            )
+            for row, title in rows
+        ]
+
     # ------------------------------------------------------------ blocks and reports
     async def block(self, blocker: UUID, blocked: UUID) -> None:
         await self.remove_friendship(blocker, blocked)

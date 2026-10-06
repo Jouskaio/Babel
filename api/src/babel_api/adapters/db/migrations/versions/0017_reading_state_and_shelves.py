@@ -1,4 +1,4 @@
-"""Reading status, declared progress, hiding and soft removal of library books, and shelves.
+"""Library books: status, progress, hiding, soft removal and their work; shelves.
 
 Revision ID: 0017
 Revises: 0016
@@ -31,6 +31,22 @@ def upgrade() -> None:
             batch_op.f("ix_library_items_removed_at"), ["removed_at"], unique=False
         )
         batch_op.create_index(batch_op.f("ix_library_items_status"), ["status"], unique=False)
+        batch_op.add_column(sa.Column("work_id", sa.Uuid(), nullable=True))
+        batch_op.create_index(batch_op.f("ix_library_items_work_id"), ["work_id"], unique=False)
+        batch_op.create_foreign_key(
+            batch_op.f("fk_library_items_work_id_works"),
+            "works",
+            ["work_id"],
+            ["id"],
+            ondelete="SET NULL",
+        )
+    # Books whose file matched an edition (ISBN) belong to that edition's work.
+    op.execute(
+        "UPDATE library_items SET work_id = ("
+        " SELECT editions.work_id FROM editions JOIN stored_files"
+        " ON stored_files.edition_id = editions.id"
+        " WHERE stored_files.sha256 = library_items.file_sha256)"
+    )
 
     op.create_table(
         "shelves",
@@ -68,6 +84,9 @@ def downgrade() -> None:
     op.drop_table("shelves")
     with op.batch_alter_table("library_items", schema=None) as batch_op:
         batch_op.drop_index(batch_op.f("ix_library_items_status"))
+        batch_op.drop_constraint(batch_op.f("fk_library_items_work_id_works"), type_="foreignkey")
+        batch_op.drop_index(batch_op.f("ix_library_items_work_id"))
+        batch_op.drop_column("work_id")
         batch_op.drop_index(batch_op.f("ix_library_items_removed_at"))
         batch_op.drop_column("removed_at")
         batch_op.drop_column("hidden")

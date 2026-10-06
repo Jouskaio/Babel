@@ -20,6 +20,7 @@ Method | HTTP request | Description
 [**getRecommendations**](SocialApi.md#getrecommendations) | **GET** /v1/social/recommendations | Get Recommendations
 [**getReview**](SocialApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
 [**getSocialProfile**](SocialApi.md#getsocialprofile) | **GET** /v1/me/profile | Get Profile
+[**getWorkReaders**](SocialApi.md#getworkreaders) | **GET** /v1/catalog/works/{work_id}/readers | Get Work Readers
 [**listReports**](SocialApi.md#listreports) | **GET** /v1/admin/reports | List Reports
 [**markRecommendationRead**](SocialApi.md#markrecommendationread) | **POST** /v1/social/recommendations/{recommendation_id}/read | Mark Read
 [**recommend**](SocialApi.md#recommend) | **POST** /v1/social/recommendations | Recommend
@@ -534,6 +535,55 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**SocialProfileResponse**](SocialProfileResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getWorkReaders**
+> WorkReadersResponse getWorkReaders(workId)
+
+Get Work Readers
+
+Reviews and notes on all editions of a work that you may see.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SocialApi();
+final workId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.getWorkReaders(workId);
+    print(result);
+} catch (e) {
+    print('Exception when calling SocialApi->getWorkReaders: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **workId** | **String**|  | 
+
+### Return type
+
+[**WorkReadersResponse**](WorkReadersResponse.md)
 
 ### Authorization
 

@@ -1087,6 +1087,19 @@
           "title": {
             "title": "Title",
             "type": "string"
+          },
+          "work_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The catalog work: reviews and notes are shared per work",
+            "title": "Work Id"
           }
         },
         "required": [
@@ -2879,6 +2892,127 @@
         "title": "WithdrawRequest",
         "type": "object"
       },
+      "WorkLinkRequest": {
+        "properties": {
+          "work_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The catalog work, or null for none",
+            "title": "Work Id"
+          }
+        },
+        "required": [
+          "work_id"
+        ],
+        "title": "WorkLinkRequest",
+        "type": "object"
+      },
+      "WorkNoteResponse": {
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "audience": {
+            "$ref": "#/components/schemas/Audience"
+          },
+          "mine": {
+            "title": "Mine",
+            "type": "boolean"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "quote": {
+            "title": "Quote",
+            "type": "string"
+          },
+          "reader": {
+            "$ref": "#/components/schemas/AuthorResponse"
+          }
+        },
+        "required": [
+          "reader",
+          "quote",
+          "note",
+          "page",
+          "audience",
+          "at",
+          "mine"
+        ],
+        "title": "WorkNoteResponse",
+        "type": "object"
+      },
+      "WorkReadersResponse": {
+        "description": "Every reader's reviews and notes on a work, whatever edition or file they read.",
+        "properties": {
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/WorkNoteResponse"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Average of the ratings shown",
+            "title": "Rating"
+          },
+          "ratings": {
+            "title": "Ratings",
+            "type": "integer"
+          },
+          "reviews": {
+            "items": {
+              "$ref": "#/components/schemas/WorkReviewResponse"
+            },
+            "title": "Reviews",
+            "type": "array"
+          }
+        },
+        "required": [
+          "rating",
+          "ratings",
+          "reviews",
+          "notes"
+        ],
+        "title": "WorkReadersResponse",
+        "type": "object"
+      },
       "WorkResponse": {
         "description": "A work with its description and known editions.",
         "properties": {
@@ -2966,6 +3100,57 @@
           "editions"
         ],
         "title": "WorkResponse",
+        "type": "object"
+      },
+      "WorkReviewResponse": {
+        "properties": {
+          "audience": {
+            "$ref": "#/components/schemas/Audience"
+          },
+          "mine": {
+            "title": "Mine",
+            "type": "boolean"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "reader": {
+            "$ref": "#/components/schemas/AuthorResponse"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reader",
+          "rating",
+          "text",
+          "audience",
+          "updated_at",
+          "mine"
+        ],
+        "title": "WorkReviewResponse",
         "type": "object"
       },
       "WorkSummaryResponse": {
@@ -4132,6 +4317,55 @@
         ]
       }
     },
+    "/v1/catalog/works/{work_id}/readers": {
+      "get": {
+        "description": "Reviews and notes on all editions of a work that you may see.",
+        "operationId": "getWorkReaders",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "work_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Work Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkReadersResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Work Readers",
+        "tags": [
+          "social"
+        ]
+      }
+    },
     "/v1/devices": {
       "get": {
         "description": "The account's devices, most recently seen first.",
@@ -4891,7 +5125,7 @@
     },
     "/v1/library/{item_id}": {
       "delete": {
-        "description": "Remove a book from the library.",
+        "description": "Take a book out of the library. Its status, review, notes and positions are kept and\ncome back if the same file is added again.",
         "operationId": "removeFromLibrary",
         "parameters": [
           {
@@ -5148,6 +5382,82 @@
         "summary": "Save Review",
         "tags": [
           "social",
+          "library"
+        ]
+      }
+    },
+    "/v1/library/{item_id}/work": {
+      "put": {
+        "description": "Say which catalog work a book is, so its reviews and notes join the work's page.",
+        "operationId": "linkWork",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkLinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Link Work",
+        "tags": [
           "library"
         ]
       }

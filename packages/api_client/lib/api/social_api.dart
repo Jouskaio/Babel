@@ -583,6 +583,63 @@ class SocialApi {
     return null;
   }
 
+  /// Get Work Readers
+  ///
+  /// Reviews and notes on all editions of a work that you may see.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] workId (required):
+  Future<Response> getWorkReadersWithHttpInfo(String workId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/catalog/works/{work_id}/readers'
+      .replaceAll('{work_id}', workId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Work Readers
+  ///
+  /// Reviews and notes on all editions of a work that you may see.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] workId (required):
+  Future<WorkReadersResponse?> getWorkReaders(String workId,) async {
+    final response = await getWorkReadersWithHttpInfo(workId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'WorkReadersResponse',) as WorkReadersResponse;
+    
+    }
+    return null;
+  }
+
   /// List Reports
   ///
   /// Reports, unresolved first.

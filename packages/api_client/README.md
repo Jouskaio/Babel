@@ -111,6 +111,7 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**getReview**](doc//LibraryApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
 *LibraryApi* | [**importFile**](doc//LibraryApi.md#importfile) | **POST** /v1/library/files | Import File
 *LibraryApi* | [**importLink**](doc//LibraryApi.md#importlink) | **POST** /v1/library/links | Import Link
+*LibraryApi* | [**linkWork**](doc//LibraryApi.md#linkwork) | **PUT** /v1/library/{item_id}/work | Link Work
 *LibraryApi* | [**previewLink**](doc//LibraryApi.md#previewlink) | **POST** /v1/library/links/preview | Preview Link
 *LibraryApi* | [**removeFromLibrary**](doc//LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
 *LibraryApi* | [**saveReview**](doc//LibraryApi.md#savereview) | **PUT** /v1/library/{item_id}/review | Save Review
@@ -127,6 +128,7 @@ Class | Method | HTTP request | Description
 *SocialApi* | [**getRecommendations**](doc//SocialApi.md#getrecommendations) | **GET** /v1/social/recommendations | Get Recommendations
 *SocialApi* | [**getReview**](doc//SocialApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
 *SocialApi* | [**getSocialProfile**](doc//SocialApi.md#getsocialprofile) | **GET** /v1/me/profile | Get Profile
+*SocialApi* | [**getWorkReaders**](doc//SocialApi.md#getworkreaders) | **GET** /v1/catalog/works/{work_id}/readers | Get Work Readers
 *SocialApi* | [**listReports**](doc//SocialApi.md#listreports) | **GET** /v1/admin/reports | List Reports
 *SocialApi* | [**markRecommendationRead**](doc//SocialApi.md#markrecommendationread) | **POST** /v1/social/recommendations/{recommendation_id}/read | Mark Read
 *SocialApi* | [**recommend**](doc//SocialApi.md#recommend) | **POST** /v1/social/recommendations | Recommend
@@ -237,7 +239,11 @@ Class | Method | HTTP request | Description
  - [VerifyEmailRequest](doc//VerifyEmailRequest.md)
  - [WebDavConfig](doc//WebDavConfig.md)
  - [WithdrawRequest](doc//WithdrawRequest.md)
+ - [WorkLinkRequest](doc//WorkLinkRequest.md)
+ - [WorkNoteResponse](doc//WorkNoteResponse.md)
+ - [WorkReadersResponse](doc//WorkReadersResponse.md)
  - [WorkResponse](doc//WorkResponse.md)
+ - [WorkReviewResponse](doc//WorkReviewResponse.md)
  - [WorkSummaryResponse](doc//WorkSummaryResponse.md)
 
 

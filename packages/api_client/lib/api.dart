@@ -120,7 +120,11 @@ part 'model/user_response.dart';
 part 'model/verify_email_request.dart';
 part 'model/web_dav_config.dart';
 part 'model/withdraw_request.dart';
+part 'model/work_link_request.dart';
+part 'model/work_note_response.dart';
+part 'model/work_readers_response.dart';
 part 'model/work_response.dart';
+part 'model/work_review_response.dart';
 part 'model/work_summary_response.dart';
 
 

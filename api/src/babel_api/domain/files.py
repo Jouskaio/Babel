@@ -111,3 +111,7 @@ class LibraryItem:
     # Taken out of the library by its reader. The book's data stays (status, review,
     # notes, positions) and comes back if the same file is added again.
     removed_at: datetime | None = None
+    # The catalog work this book is an edition of: reviews and shared notes are gathered
+    # per work, whatever the edition or file. Found from the ISBN or the title, or chosen
+    # by the reader.
+    work_id: UUID | None = None

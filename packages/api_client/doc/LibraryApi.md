@@ -22,6 +22,7 @@ Method | HTTP request | Description
 [**getReview**](LibraryApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
 [**importFile**](LibraryApi.md#importfile) | **POST** /v1/library/files | Import File
 [**importLink**](LibraryApi.md#importlink) | **POST** /v1/library/links | Import Link
+[**linkWork**](LibraryApi.md#linkwork) | **PUT** /v1/library/{item_id}/work | Link Work
 [**previewLink**](LibraryApi.md#previewlink) | **POST** /v1/library/links/preview | Preview Link
 [**removeFromLibrary**](LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
 [**saveReview**](LibraryApi.md#savereview) | **PUT** /v1/library/{item_id}/review | Save Review
@@ -648,6 +649,59 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **linkWork**
+> LibraryItemResponse linkWork(itemId, workLinkRequest, xBabelDevice)
+
+Link Work
+
+Say which catalog work a book is, so its reviews and notes join the work's page.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = LibraryApi();
+final itemId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final workLinkRequest = WorkLinkRequest(); // WorkLinkRequest | 
+final xBabelDevice = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.linkWork(itemId, workLinkRequest, xBabelDevice);
+    print(result);
+} catch (e) {
+    print('Exception when calling LibraryApi->linkWork: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **itemId** | **String**|  | 
+ **workLinkRequest** | [**WorkLinkRequest**](WorkLinkRequest.md)|  | 
+ **xBabelDevice** | **String**|  | [optional] 
+
+### Return type
+
+[**LibraryItemResponse**](LibraryItemResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **previewLink**
 > LinkPreviewResponse previewLink(linkRequest)
 
@@ -702,7 +756,7 @@ Name | Type | Description  | Notes
 
 Remove From Library
 
-Remove a book from the library.
+Take a book out of the library. Its status, review, notes and positions are kept and come back if the same file is added again.
 
 ### Example
 ```dart

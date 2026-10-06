@@ -344,8 +344,16 @@ class ApiClient {
           return WebDavConfig.fromJson(value);
         case 'WithdrawRequest':
           return WithdrawRequest.fromJson(value);
+        case 'WorkLinkRequest':
+          return WorkLinkRequest.fromJson(value);
+        case 'WorkNoteResponse':
+          return WorkNoteResponse.fromJson(value);
+        case 'WorkReadersResponse':
+          return WorkReadersResponse.fromJson(value);
         case 'WorkResponse':
           return WorkResponse.fromJson(value);
+        case 'WorkReviewResponse':
+          return WorkReviewResponse.fromJson(value);
         case 'WorkSummaryResponse':
           return WorkSummaryResponse.fromJson(value);
         default:

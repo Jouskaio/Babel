@@ -92,7 +92,11 @@ doc/UserResponse.md
 doc/VerifyEmailRequest.md
 doc/WebDavConfig.md
 doc/WithdrawRequest.md
+doc/WorkLinkRequest.md
+doc/WorkNoteResponse.md
+doc/WorkReadersResponse.md
 doc/WorkResponse.md
+doc/WorkReviewResponse.md
 doc/WorkSummaryResponse.md
 lib/api.dart
 lib/api/account_api.dart
@@ -194,6 +198,10 @@ lib/model/user_response.dart
 lib/model/verify_email_request.dart
 lib/model/web_dav_config.dart
 lib/model/withdraw_request.dart
+lib/model/work_link_request.dart
+lib/model/work_note_response.dart
+lib/model/work_readers_response.dart
 lib/model/work_response.dart
+lib/model/work_review_response.dart
 lib/model/work_summary_response.dart
 pubspec.yaml
