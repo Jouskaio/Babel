@@ -43,5 +43,11 @@ Future<Uint8List?> readLocalBook(String sha256, String extension) async {
   return await file.exists() ? file.readAsBytes() : null;
 }
 
+/// Forgets the local copy of a stored file (it was incomplete or damaged).
+Future<void> deleteLocalBook(String sha256, String extension) async {
+  final file = File(await localBookPath(sha256, extension));
+  if (await file.exists()) await file.delete();
+}
+
 /// Devices keep the books they open, to read them offline.
 const keepsBooksOffline = true;

@@ -1,7 +1,7 @@
 name: babel
 description: "Babel — personal and social library (Flutter client, no server logic)."
 publish_to: "none"
-version: 0.21.0+33
+version: 0.21.1+34
 
 environment:
   sdk: ^3.13.0
@@ -48,6 +48,8 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   shared_preferences_platform_interface: ^2.4.2
   flutter_launcher_icons: ^0.14.4
+  path_provider_platform_interface: ^2.1.3
+  plugin_platform_interface: ^2.1.8
 
 flutter:
   uses-material-design: true
