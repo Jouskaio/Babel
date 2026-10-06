@@ -483,6 +483,66 @@ class LibraryApi {
     return null;
   }
 
+  /// Get Reader Notes
+  ///
+  /// Other readers' notes you may see on this book, from any edition of its work.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  Future<Response> getReaderNotesWithHttpInfo(String itemId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/{item_id}/reader-notes'
+      .replaceAll('{item_id}', itemId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Reader Notes
+  ///
+  /// Other readers' notes you may see on this book, from any edition of its work.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  Future<List<BookNoteResponse>?> getReaderNotes(String itemId,) async {
+    final response = await getReaderNotesWithHttpInfo(itemId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<BookNoteResponse>') as List)
+        .cast<BookNoteResponse>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
   /// Get Positions
   ///
   /// Where each device stopped in this book, most recent first.

@@ -1032,5 +1032,35 @@
   "showAll": "Tout afficher",
   "progressElsewhere": "Lu ailleurs ? Indiquer ma progression",
   "progressAsk": "Où en êtes-vous ?",
-  "progressAskHint": "Pourcentage du livre (0 à 100)"
+  "progressAskHint": "Pourcentage du livre (0 à 100)",
+  "readerNotesSetting": "Notes des autres lecteurs",
+  "readerNotesSettingHint": "Les passages qu'ils ont annotés, retrouvés dans votre édition.",
+  "marginOthers": "Les autres lecteurs",
+  "notePlaceNear": "≈ {percent} % du livre",
+  "@notePlaceNear": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "noteNotFound": "Passage introuvable dans votre édition",
+  "noteOtherEdition": "Autre édition",
+  "noteEditionLanguage": "Édition {language}",
+  "@noteEditionLanguage": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "noteBy": "Note de {name}",
+  "@noteBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goThere": "Y aller"
 }

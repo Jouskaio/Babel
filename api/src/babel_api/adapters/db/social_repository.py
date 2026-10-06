@@ -22,6 +22,7 @@ from babel_api.adapters.db.models import (
     ShelfItemRow,
     ShelfRow,
     SocialProfileRow,
+    StoredFileRow,
     SubscriptionRow,
     UserRow,
 )
@@ -29,6 +30,7 @@ from babel_api.domain.errors import HandleTakenError
 from babel_api.domain.files import ReadingStatus
 from babel_api.domain.social import (
     Audience,
+    BookNote,
     Profile,
     Reading,
     Recommendation,
@@ -589,6 +591,51 @@ class SqlSocialRepository:
                 region=row.region,
             )
             for row, title in rows
+        ]
+
+    async def book_notes(
+        self,
+        work_id: UUID | None,
+        sha256: str,
+        viewer: UUID,
+        friends: Sequence[UUID],
+        hidden: Sequence[UUID],
+        limit: int,
+    ) -> list[BookNote]:
+        """Other readers' notes on this file or on any edition of its work."""
+        same_book = AnnotationRow.file_sha256 == sha256
+        if work_id is not None:
+            same_book = or_(same_book, LibraryItemRow.work_id == work_id)
+        rows = await self._session.execute(
+            select(AnnotationRow, EditionRow.language)
+            .join(LibraryItemRow, LibraryItemRow.id == AnnotationRow.item_id)
+            .join(StoredFileRow, StoredFileRow.sha256 == AnnotationRow.file_sha256)
+            .outerjoin(EditionRow, EditionRow.id == StoredFileRow.edition_id)
+            .where(
+                same_book,
+                AnnotationRow.user_id != viewer,
+                AnnotationRow.user_id.not_in(list(hidden)),
+                self._seen_by(AnnotationRow.visibility, AnnotationRow.user_id, viewer, friends),
+            )
+            .order_by(AnnotationRow.client_time.desc())
+            .limit(limit)
+        )
+        return [
+            BookNote(
+                id=row.id,
+                user_id=row.user_id,
+                quote=row.quote,
+                note=row.note,
+                chapter=row.chapter,
+                region=row.region,
+                percent=row.percent,
+                prefix=row.prefix,
+                suffix=row.suffix,
+                same_file=row.file_sha256 == sha256,
+                language=language,
+                at=_aware(row.client_time),
+            )
+            for row, language in rows
         ]
 
     # ------------------------------------------------------------ blocks and reports

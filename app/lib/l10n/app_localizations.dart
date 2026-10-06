@@ -3235,6 +3235,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Pourcentage du livre (0 à 100)'**
   String get progressAskHint;
+
+  /// No description provided for @readerNotesSetting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notes des autres lecteurs'**
+  String get readerNotesSetting;
+
+  /// No description provided for @readerNotesSettingHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les passages qu\'ils ont annotés, retrouvés dans votre édition.'**
+  String get readerNotesSettingHint;
+
+  /// No description provided for @marginOthers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les autres lecteurs'**
+  String get marginOthers;
+
+  /// No description provided for @notePlaceNear.
+  ///
+  /// In fr, this message translates to:
+  /// **'≈ {percent} % du livre'**
+  String notePlaceNear(int percent);
+
+  /// No description provided for @noteNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passage introuvable dans votre édition'**
+  String get noteNotFound;
+
+  /// No description provided for @noteOtherEdition.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre édition'**
+  String get noteOtherEdition;
+
+  /// No description provided for @noteEditionLanguage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Édition {language}'**
+  String noteEditionLanguage(String language);
+
+  /// No description provided for @noteBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note de {name}'**
+  String noteBy(String name);
+
+  /// No description provided for @goThere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Y aller'**
+  String get goThere;
 }
 
 class _AppLocalizationsDelegate

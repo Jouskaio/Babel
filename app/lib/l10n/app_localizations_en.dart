@@ -1892,4 +1892,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get progressAskHint => 'Percent of the book (0 to 100)';
+
+  @override
+  String get readerNotesSetting => 'Other readers\' notes';
+
+  @override
+  String get readerNotesSettingHint =>
+      'The passages they noted, found in your edition.';
+
+  @override
+  String get marginOthers => 'Other readers';
+
+  @override
+  String notePlaceNear(int percent) {
+    return '≈ $percent% into the book';
+  }
+
+  @override
+  String get noteNotFound => 'Passage not found in your edition';
+
+  @override
+  String get noteOtherEdition => 'Another edition';
+
+  @override
+  String noteEditionLanguage(String language) {
+    return '$language edition';
+  }
+
+  @override
+  String noteBy(String name) {
+    return 'Note by $name';
+  }
+
+  @override
+  String get goThere => 'Go there';
 }

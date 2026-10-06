@@ -192,6 +192,8 @@ class ApiClient {
           return BatchImportResponse.fromJson(value);
         case 'BookFormat':
           return BookFormatTypeTransformer().decode(value);
+        case 'BookNoteResponse':
+          return BookNoteResponse.fromJson(value);
         case 'BookTitleResponse':
           return BookTitleResponse.fromJson(value);
         case 'BookTraceResponse':

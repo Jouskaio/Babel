@@ -8,6 +8,7 @@ import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../social/presentation/sharing_settings.dart';
 import '../application/annotations.dart';
+import '../application/reader_notes.dart';
 
 /// The highlight colors offered when text is selected (design: the color dots).
 const highlightChoices = [
@@ -200,6 +201,8 @@ Future<void> showMarginPanel(
   required String fileSha256,
   required String Function(int chapter) chapterName,
   required ValueChanged<int> onOpenChapter,
+  List<(BookNoteResponse, NotePlace?)> others = const [],
+  ValueChanged<double>? onSeek,
 }) => showModalBottomSheet<void>(
   context: context,
   // Above the floating navigation bar of the tabs.
@@ -297,9 +300,164 @@ Future<void> showMarginPanel(
                   ),
                 ),
               ),
+            if (others.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              Text(l10n.marginOthers, style: BabelText.title(26)),
+              const SizedBox(height: 10),
+              for (final (note, place) in others)
+                _OtherNoteTile(
+                  note: note,
+                  place: place,
+                  chapterName: chapterName,
+                  onTap: () {
+                    Navigator.pop(context);
+                    if (place?.chapter case final chapter?) {
+                      onOpenChapter(chapter);
+                    } else if (place?.percent case final percent?) {
+                      onSeek?.call(percent);
+                    }
+                  },
+                ),
+            ],
           ],
         );
       },
     ),
   ),
+);
+
+/// Who wrote another reader's note, and where it comes from.
+String _noteSource(
+  BuildContext context,
+  BookNoteResponse note,
+  NotePlace? place,
+) {
+  final l10n = context.l10n;
+  final who = note.reader.handle != null
+      ? '@${note.reader.handle}'
+      : note.reader.displayName;
+  final edition = note.sameFile
+      ? null
+      : (note.language != null
+            ? l10n.noteEditionLanguage(note.language!.toUpperCase())
+            : l10n.noteOtherEdition);
+  return [who, ?edition].join(' · ');
+}
+
+class _OtherNoteTile extends StatelessWidget {
+  const _OtherNoteTile({
+    required this.note,
+    required this.place,
+    required this.chapterName,
+    required this.onTap,
+  });
+
+  final BookNoteResponse note;
+  final NotePlace? place;
+  final String Function(int chapter) chapterName;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final where = switch (place) {
+      NotePlace(chapter: final chapter?) => chapterName(chapter),
+      NotePlace(percent: final percent?) => l10n.notePlaceNear(percent.round()),
+      _ => l10n.noteNotFound,
+    };
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: place?.chapter != null || place?.percent != null ? onTap : null,
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: BabelColors.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 6,
+            children: [
+              Text(
+                '${_noteSource(context, note, place)} · $where'.toUpperCase(),
+                style: BabelText.label(9, spacing: 1.2),
+              ),
+              if (note.quote.isNotEmpty)
+                Text(
+                  '« ${note.quote} »',
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                  style: BabelText.reading(15, italic: true),
+                ),
+              if (note.note case final text? when text.isNotEmpty)
+                Text(
+                  text,
+                  style: BabelText.body(14, color: BabelColors.textPrimary),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Another reader's note, opened from its passage in the text.
+Future<void> showReaderNote(
+  BuildContext context,
+  BookNoteResponse note, {
+  NotePlace? place,
+}) => showModalBottomSheet<void>(
+  context: context,
+  useRootNavigator: true,
+  backgroundColor: BabelColors.surface,
+  builder: (context) {
+    final l10n = context.l10n;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 10,
+          children: [
+            Text(
+              l10n.noteBy(
+                note.reader.handle != null
+                    ? '@${note.reader.handle}'
+                    : note.reader.displayName,
+              ),
+              style: BabelText.title(26),
+            ),
+            Text(
+              _noteSource(context, note, place).toUpperCase(),
+              style: BabelText.label(9, spacing: 1.2),
+            ),
+            if (note.quote.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.only(left: 12),
+                decoration: BoxDecoration(
+                  border: Border(
+                    left: BorderSide(color: BabelColors.gold, width: 3),
+                  ),
+                ),
+                child: Text(
+                  note.quote,
+                  maxLines: 8,
+                  overflow: TextOverflow.ellipsis,
+                  style: BabelText.reading(16, italic: true),
+                ),
+              ),
+            if (note.note case final text? when text.isNotEmpty)
+              Text(
+                text,
+                style: BabelText.body(15, color: BabelColors.textPrimary),
+              ),
+          ],
+        ),
+      ),
+    );
+  },
 );

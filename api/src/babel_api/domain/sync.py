@@ -117,6 +117,11 @@ class Annotation:
     # Comics and manga: the area of the page ("x,y,w,h", fractions of the page) a note is
     # about, instead of a quote. ``chapter`` is then the page index.
     region: str | None = None
+    # Where the note is in its book (percent), and a few words around the quote: they
+    # place it in other editions of the work (ADR 0012).
+    percent: float | None = None
+    prefix: str | None = None
+    suffix: str | None = None
 
     def as_data(self) -> dict[str, Any]:
         return {
@@ -130,6 +135,9 @@ class Annotation:
             "visibility": self.visibility.value,
             "client_time": self.client_time.isoformat(),
             "region": self.region,
+            "percent": self.percent,
+            "prefix": self.prefix,
+            "suffix": self.suffix,
         }
 
 

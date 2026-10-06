@@ -9,6 +9,7 @@ doc/AuthApi.md
 doc/AuthorResponse.md
 doc/BatchImportResponse.md
 doc/BookFormat.md
+doc/BookNoteResponse.md
 doc/BookTitleResponse.md
 doc/BookTraceResponse.md
 doc/CatalogApi.md
@@ -122,6 +123,7 @@ lib/model/audience.dart
 lib/model/author_response.dart
 lib/model/batch_import_response.dart
 lib/model/book_format.dart
+lib/model/book_note_response.dart
 lib/model/book_title_response.dart
 lib/model/book_trace_response.dart
 lib/model/change_op.dart

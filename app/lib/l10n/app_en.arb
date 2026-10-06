@@ -703,5 +703,14 @@
   "showAll": "Show all",
   "progressElsewhere": "Read elsewhere? Set my progress",
   "progressAsk": "Where are you?",
-  "progressAskHint": "Percent of the book (0 to 100)"
+  "progressAskHint": "Percent of the book (0 to 100)",
+  "readerNotesSetting": "Other readers' notes",
+  "readerNotesSettingHint": "The passages they noted, found in your edition.",
+  "marginOthers": "Other readers",
+  "notePlaceNear": "≈ {percent}% into the book",
+  "noteNotFound": "Passage not found in your edition",
+  "noteOtherEdition": "Another edition",
+  "noteEditionLanguage": "{language} edition",
+  "noteBy": "Note by {name}",
+  "goThere": "Go there"
 }
