@@ -4634,19 +4634,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/ReviewResponse"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Response Getreview"
+                  "$ref": "#/components/schemas/ReviewResponse"
                 }
               }
             },
             "description": "Successful Response"
+          },
+          "204": {
+            "description": "No review yet"
           },
           "422": {
             "content": {
@@ -4866,19 +4861,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/KavitaLinkResponse"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Response Getkavita"
+                  "$ref": "#/components/schemas/KavitaLinkResponse"
                 }
               }
             },
             "description": "Successful Response"
+          },
+          "204": {
+            "description": "No Kavita linked"
           }
         },
         "security": [
