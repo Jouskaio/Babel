@@ -98,6 +98,7 @@ doc/SocialProfileResponse.md
 doc/SourceDetailResponse.md
 doc/SourceEntryResponse.md
 doc/SourceKind.md
+doc/SourceMatchResponse.md
 doc/SourceResponse.md
 doc/SourcesApi.md
 doc/StatsApi.md
@@ -226,6 +227,7 @@ lib/model/social_profile_response.dart
 lib/model/source_detail_response.dart
 lib/model/source_entry_response.dart
 lib/model/source_kind.dart
+lib/model/source_match_response.dart
 lib/model/source_response.dart
 lib/model/token_response.dart
 lib/model/trending_work_response.dart

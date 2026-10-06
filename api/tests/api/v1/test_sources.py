@@ -398,3 +398,39 @@ def test_deleting_an_account_removes_its_sources(
     assert client.request(
         "DELETE", "/v1/me", headers=ada, json={"password": "correct horse battery"}
     ).status_code in (200, 204)
+
+
+def test_books_are_found_across_the_sources_and_imported(
+    client: TestClient, github: FakeGitHub, ada: dict[str, str], bob: dict[str, str]
+) -> None:
+    source = connect(client, ada).json()["source"]
+    opds = client.post(
+        "/v1/sources",
+        json={"kind": "opds", "name": "Kavita", "opds": {"url": "https://books.example.com/opds"}},
+        headers=ada,
+    ).json()["source"]
+    assert opds["id"] != source["id"]
+
+    # Words in any order, accents and case ignored, titles and authors.
+    found = client.get("/v1/sources/search", params={"q": "EYRE jane"}, headers=ada).json()
+    assert sorted((m["source_name"], m["entry"]["name"]) for m in found) == [
+        ("Kavita", "1"),
+        ("My books", "Jane Eyre.epub"),
+    ]
+    by_author = client.get("/v1/sources/search", params={"q": "brontë"}, headers=ada).json()
+    assert [m["source_name"] for m in by_author] == ["Kavita"]
+    austen = client.get("/v1/sources/search", params={"q": "emma"}, headers=ada).json()
+    assert [m["entry"]["name"] for m in austen] == ["Emma.epub"]
+    assert client.get("/v1/sources/search", params={"q": "zzzz"}, headers=ada).json() == []
+
+    # A match is imported like any entry of the source.
+    match = austen[0]
+    imported = client.post(
+        f"/v1/sources/{match['source_id']}/entries/{match['entry']['id']}/import", headers=ada
+    )
+    assert imported.status_code == 201
+    again = client.get("/v1/sources/search", params={"q": "emma"}, headers=ada).json()
+    assert again[0]["entry"]["status"] == "in_library"
+
+    # Another reader's sources are theirs alone.
+    assert client.get("/v1/sources/search", params={"q": "emma"}, headers=bob).json() == []

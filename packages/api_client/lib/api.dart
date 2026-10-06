@@ -129,6 +129,7 @@ part 'model/social_profile_response.dart';
 part 'model/source_detail_response.dart';
 part 'model/source_entry_response.dart';
 part 'model/source_kind.dart';
+part 'model/source_match_response.dart';
 part 'model/source_response.dart';
 part 'model/token_response.dart';
 part 'model/trending_work_response.dart';

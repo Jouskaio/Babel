@@ -3150,6 +3150,29 @@
         "title": "SourceKind",
         "type": "string"
       },
+      "SourceMatchResponse": {
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/SourceEntryResponse"
+          },
+          "source_id": {
+            "format": "uuid",
+            "title": "Source Id",
+            "type": "string"
+          },
+          "source_name": {
+            "title": "Source Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_id",
+          "source_name",
+          "entry"
+        ],
+        "title": "SourceMatchResponse",
+        "type": "object"
+      },
       "SourceResponse": {
         "properties": {
           "book_count": {
@@ -4081,7 +4104,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.26.1"
+    "version": "0.26.2"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -8208,6 +8231,60 @@
           }
         ],
         "summary": "Check Source",
+        "tags": [
+          "sources"
+        ]
+      }
+    },
+    "/v1/sources/search": {
+      "get": {
+        "description": "Books of your sources matching a title or an author, to import the one you want.",
+        "operationId": "searchSources",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 2,
+              "title": "Q",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SourceMatchResponse"
+                  },
+                  "title": "Response Searchsources",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Search Sources",
         "tags": [
           "sources"
         ]

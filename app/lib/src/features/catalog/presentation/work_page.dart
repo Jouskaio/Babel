@@ -270,6 +270,8 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
             WorkReadersSection(workId: work.id),
             if (trace == null || !trace.available) ...[
               const SizedBox(height: 32),
+              _SourceMatches(title: work.title),
+              const SizedBox(height: 32),
               Text(l10n.getThisBook, style: BabelText.title(28)),
               const SizedBox(height: 12),
               Container(
@@ -537,4 +539,140 @@ class _Thumb extends StatelessWidget {
             ),
     ),
   );
+}
+
+/// Books of the reader's own sources (Kavita, WebDAV, GitHub…) that match this work, to
+/// add the right one to the library. Babel offers no download from the catalog itself.
+class _SourceMatches extends ConsumerStatefulWidget {
+  const _SourceMatches({required this.title});
+  final String title;
+
+  @override
+  ConsumerState<_SourceMatches> createState() => _SourceMatchesState();
+}
+
+class _SourceMatchesState extends ConsumerState<_SourceMatches> {
+  final _adding = <String>{};
+
+  Future<void> _add(SourceMatchResponse match) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _adding.add(match.entry.id));
+    try {
+      final item = await ref
+          .read(sourcesApiProvider)
+          .importSourceEntry(match.sourceId, match.entry.id);
+      if (item != null) {
+        await ref.read(libraryControllerProvider.notifier).keep(item);
+        ref.invalidate(libraryHistoryProvider);
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.sourceMatchImported(item.title))),
+        );
+      }
+      ref.invalidate(sourceMatchesProvider(widget.title));
+    } on ApiException catch (error) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            error.innerException != null
+                ? l10n.errorNetwork
+                : l10n.errorGeneric,
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _adding.remove(match.entry.id));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final found = ref.watch(sourceMatchesProvider(widget.title));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.inMySources, style: BabelText.title(28)),
+        const SizedBox(height: 8),
+        ...switch (found) {
+          AsyncData(:final value) when value.isNotEmpty => [
+            Text(l10n.inMySourcesHint, style: BabelText.body(13)),
+            const SizedBox(height: 12),
+            for (final match in value)
+              Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: BabelColors.surface,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: BabelColors.border),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            match.entry.title ?? match.entry.name,
+                            style: BabelText.body(
+                              15,
+                              color: BabelColors.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            [
+                              match.sourceName,
+                              if (match.entry.authors.isNotEmpty)
+                                match.entry.authors.join(', '),
+                              ?match.entry.format?.toUpperCase(),
+                            ].join(' · '),
+                            style: BabelText.body(12),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    if (match.entry.itemId != null)
+                      Text(
+                        l10n.audiobookInLibrary.toUpperCase(),
+                        style: BabelText.label(9, color: BabelColors.gold),
+                      )
+                    else
+                      OutlinedButton(
+                        onPressed: _adding.contains(match.entry.id)
+                            ? null
+                            : () => _add(match),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: BabelColors.gold),
+                          shape: const StadiumBorder(),
+                        ),
+                        child: Text(
+                          l10n.addToLibrary,
+                          style: BabelText.body(13, color: BabelColors.gold),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+          ],
+          AsyncLoading() => [const LinearProgressIndicator(minHeight: 2)],
+          _ => [
+            Text(l10n.noSourceMatch, style: BabelText.body(13)),
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () => context.push(Routes.sources),
+                child: Text(
+                  l10n.manageSources.toUpperCase(),
+                  style: BabelText.label(10, color: BabelColors.gold),
+                ),
+              ),
+            ),
+          ],
+        },
+      ],
+    );
+  }
 }

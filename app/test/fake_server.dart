@@ -64,6 +64,9 @@ class FakeServer {
   final changes = <Map<String, Object?>>[];
   final pushed = <Map<String, Object?>>[];
 
+  /// Books of the reader's sources matching the work page's title.
+  final sourceMatches = <Map<String, Object?>>[];
+
   /// The work page's answer.
   Map<String, Object?> work = {
     'id': 'w1',
@@ -434,6 +437,26 @@ class FakeServer {
       });
     }
     if (path.endsWith('/reader-notes')) return json(readerNotes);
+    if (path == '/v1/catalog/trending') {
+      return json([
+        {
+          'work_id': 'w1',
+          'title': 'Jane Eyre',
+          'authors': ['Charlotte Brontë'],
+          'cover_path': '/v1/catalog/covers/1/M',
+          'first_publish_year': 1847,
+        },
+      ]);
+    }
+    if (path == '/v1/sources/search') {
+      return json(sourceMatches);
+    }
+    if (sourceMatches.isNotEmpty &&
+        path.startsWith('/v1/sources/s1/entries/') &&
+        path.endsWith('/import')) {
+      sourceMatches.clear();
+      return json(libraryItem('i9', 'Jane Eyre'), 201);
+    }
     if (path.startsWith('/v1/catalog/works/') && !path.endsWith('/readers')) {
       return json(work);
     }

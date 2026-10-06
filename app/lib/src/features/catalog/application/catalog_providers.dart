@@ -15,6 +15,13 @@ final searchResultsProvider = FutureProvider.autoDispose
           const [];
     });
 
+/// Books of the reader's sources that match [query] (a title), to import the right one.
+final sourceMatchesProvider = FutureProvider.autoDispose
+    .family<List<SourceMatchResponse>, String>(
+      (ref, query) async =>
+          await ref.watch(sourcesApiProvider).searchSources(query) ?? const [],
+    );
+
 /// A work with its editions, titled in the given language.
 final workProvider = FutureProvider.autoDispose
     .family<WorkResponse?, ({String id, String lang})>(
@@ -48,6 +55,14 @@ class RecentSearches extends Notifier<List<String>> {
       q,
       ...state.where((s) => s.toLowerCase() != q.toLowerCase()),
     ].take(_max).toList();
+    await SharedPreferencesAsync().setStringList(_key, state);
+  }
+
+  Future<void> remove(String query) async {
+    state = [
+      for (final s in state)
+        if (s != query) s,
+    ];
     await SharedPreferencesAsync().setStringList(_key, state);
   }
 

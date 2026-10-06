@@ -45,6 +45,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     });
   }
 
+  void _clear() {
+    _debounce?.cancel();
+    _controller.clear();
+    setState(() => _query = '');
+  }
+
   void _search(String value) {
     _debounce?.cancel();
     _controller.text = value;
@@ -81,6 +87,20 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   prefixIcon: Icon(
                     Icons.search,
                     color: BabelColors.textSecondary,
+                  ),
+                  // A cross to start over, as soon as there is something to erase.
+                  suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _controller,
+                    builder: (context, value, _) => value.text.isEmpty
+                        ? const SizedBox.shrink()
+                        : IconButton(
+                            tooltip: l10n.searchClear,
+                            onPressed: _clear,
+                            icon: Icon(
+                              Icons.close,
+                              color: BabelColors.textSecondary,
+                            ),
+                          ),
                   ),
                   filled: true,
                   fillColor: BabelColors.surface,
@@ -160,7 +180,7 @@ class _Recent extends ConsumerWidget {
             runSpacing: 10,
             children: [
               for (final q in recent)
-                ActionChip(
+                InputChip(
                   label: Text(
                     q,
                     style: BabelText.body(13, color: BabelColors.textPrimary),
@@ -168,6 +188,14 @@ class _Recent extends ConsumerWidget {
                   backgroundColor: BabelColors.surface,
                   side: BorderSide.none,
                   shape: const StadiumBorder(),
+                  deleteIcon: Icon(
+                    Icons.close,
+                    size: 16,
+                    color: BabelColors.textSecondary,
+                  ),
+                  deleteButtonTooltipMessage: l10n.recentRemove,
+                  onDeleted: () =>
+                      ref.read(recentSearchesProvider.notifier).remove(q),
                   onPressed: () => onSelect(q),
                 ),
             ],
@@ -193,33 +221,40 @@ class _Trending extends ConsumerWidget {
         Text(context.l10n.trendingTitle, style: BabelText.title(30)),
         const SizedBox(height: 16),
         for (final (i, work) in works.indexed)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 32,
-                  child: Text(
-                    '${i + 1}',
-                    style: BabelText.title(34, color: BabelColors.gold),
+          InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () => context.push(Routes.work(work.workId)),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 32,
+                    child: Text(
+                      '${i + 1}',
+                      style: BabelText.title(34, color: BabelColors.gold),
+                    ),
                   ),
-                ),
-                BookCover(
-                  width: 56,
-                  url: apiUrl(work.coverPath),
-                  title: work.title,
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(work.title, style: BabelText.heading(20)),
-                      Text(work.authors.join(', '), style: BabelText.body(13)),
-                    ],
+                  BookCover(
+                    width: 56,
+                    url: apiUrl(work.coverPath),
+                    title: work.title,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(work.title, style: BabelText.heading(20)),
+                        Text(
+                          work.authors.join(', '),
+                          style: BabelText.body(13),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
       ],

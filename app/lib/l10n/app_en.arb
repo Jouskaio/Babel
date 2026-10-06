@@ -818,5 +818,13 @@
   "playerError": "Cannot play: check your connection or your Audiobookshelf.",
   "workCovers": "Covers",
   "coversCount": "{count, plural, =1{1 cover} other{{count} covers}}",
-  "coverUse": "Show this cover"
+  "coverUse": "Show this cover",
+  "searchClear": "Clear the search",
+  "recentRemove": "Remove from history",
+  "inMySources": "In my sources",
+  "inMySourcesHint": "Books from your sources (Kavita, WebDAV, GitHub…) match this work.",
+  "noSourceMatch": "None of your sources has this book. Babel does not download catalog books: add a source, or import your file.",
+  "manageSources": "Manage my sources",
+  "addToLibrary": "Add to the library",
+  "sourceMatchImported": "“{title}” is in your library."
 }

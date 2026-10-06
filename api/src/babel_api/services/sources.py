@@ -1,6 +1,7 @@
 """Sources of book files: connecting, scanning and importing (ADR 0009)."""
 
 import logging
+import unicodedata
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
@@ -31,6 +32,12 @@ logger = logging.getLogger(__name__)
 
 # At most this many books per "import all" call, to keep requests short.
 IMPORT_BATCH = 50
+
+
+def _plain(text: str) -> str:
+    """Lower case without accents, for matching."""
+    decomposed = unicodedata.normalize("NFKD", text.lower())
+    return "".join(c for c in decomposed if not unicodedata.combining(c))
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,6 +107,24 @@ class SourceService:
 
     async def list_sources(self, user_id: UUID) -> list[Source]:
         return await self._sources.list_sources(user_id)
+
+    async def search(
+        self, user_id: UUID, query: str, limit: int = 30
+    ) -> list[tuple[Source, SourceEntry]]:
+        """Books of the reader's sources whose title or authors hold every word of [query]
+        (accents and case ignored): to find a book the reader already has access to."""
+        words = _plain(query).split()
+        if not words:
+            return []
+        found: list[tuple[Source, SourceEntry]] = []
+        for source in await self._sources.list_sources(user_id):
+            for entry in await self._sources.entries(source.id):
+                haystack = _plain(" ".join([entry.title or entry.name, *entry.authors]))
+                if all(w in haystack for w in words):
+                    found.append((source, await self._with_status(user_id, source.kind, entry)))
+                    if len(found) >= limit:
+                        return found
+        return found
 
     async def detail(self, user_id: UUID, source_id: UUID) -> SourceDetail:
         source = await self._own(user_id, source_id)

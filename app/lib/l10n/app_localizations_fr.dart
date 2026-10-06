@@ -2375,4 +2375,32 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get coverUse => 'Voir cette couverture';
+
+  @override
+  String get searchClear => 'Effacer la recherche';
+
+  @override
+  String get recentRemove => 'Retirer de l\'historique';
+
+  @override
+  String get inMySources => 'Dans mes sources';
+
+  @override
+  String get inMySourcesHint =>
+      'Des livres de vos sources (Kavita, WebDAV, GitHub…) correspondent à cette œuvre.';
+
+  @override
+  String get noSourceMatch =>
+      'Aucun livre de vos sources ne correspond. Babel ne télécharge pas de livres du catalogue : ajoutez une source, ou importez votre fichier.';
+
+  @override
+  String get manageSources => 'Gérer mes sources';
+
+  @override
+  String get addToLibrary => 'Ajouter à la bibliothèque';
+
+  @override
+  String sourceMatchImported(String title) {
+    return '« $title » est dans votre bibliothèque.';
+  }
 }
