@@ -18,11 +18,14 @@ from babel_api.adapters.db.models import (
     RecommendationRow,
     ReportRow,
     ReviewRow,
+    ShelfItemRow,
+    ShelfRow,
     SocialProfileRow,
     SubscriptionRow,
     UserRow,
 )
 from babel_api.domain.errors import HandleTakenError
+from babel_api.domain.files import ReadingStatus
 from babel_api.domain.social import (
     Audience,
     Profile,
@@ -32,11 +35,29 @@ from babel_api.domain.social import (
     ReportReason,
     Review,
     SharedNote,
+    SharedShelf,
 )
 
 
 def _aware(value: datetime) -> datetime:
     return value if value.tzinfo else value.replace(tzinfo=UTC)
+
+
+# Reading statuses as stored (domain ReadingStatus).
+_READING = ReadingStatus.READING.value
+_FINISHED = ReadingStatus.FINISHED.value
+_DONE = (ReadingStatus.FINISHED.value, ReadingStatus.ABANDONED.value)
+
+
+def _reading(item: LibraryItemRow, percent: float, at: datetime) -> Reading:
+    return Reading(
+        user_id=item.user_id,
+        item_id=item.id,
+        title=item.title,
+        authors=tuple(item.authors or ()),
+        percent=percent,
+        at=_aware(at),
+    )
 
 
 def _profile(user: UserRow, row: SocialProfileRow | None) -> Profile:
@@ -349,24 +370,81 @@ class SqlSocialRepository:
                 ReadingPositionRow.client_time >= since,
                 ReadingPositionRow.percent > 0,
                 ReadingPositionRow.percent < 99.5,
+                or_(LibraryItemRow.status.is_(None), LibraryItemRow.status.not_in(_DONE)),
             )
             .order_by(ReadingPositionRow.client_time.desc())
             .limit(limit)
         )
-        seen: set[UUID] = set()
-        found: list[Reading] = []
+        found: dict[UUID, Reading] = {}
         for position, item in rows:
-            if item.id in seen:
+            if item.id not in found:
+                found[item.id] = _reading(item, position.percent, position.client_time)
+        # Progress declared by hand (a book read elsewhere) counts when it is newer.
+        declared = await self._session.scalars(
+            select(LibraryItemRow)
+            .where(
+                LibraryItemRow.user_id.in_(user_ids),
+                LibraryItemRow.status == _READING,
+                LibraryItemRow.state_time >= since,
+            )
+            .order_by(LibraryItemRow.state_time.desc())
+            .limit(limit)
+        )
+        for item in declared:
+            known = found.get(item.id)
+            when = item.state_time
+            if when is None or (known is not None and known.at >= _aware(when)):
                 continue
-            seen.add(item.id)
+            percent = item.progress
+            if percent is None:
+                percent = known.percent if known else 0
+            found[item.id] = _reading(item, percent, when)
+        return sorted(found.values(), key=lambda r: r.at, reverse=True)[:limit]
+
+    async def finished(
+        self, user_ids: Sequence[UUID], since: datetime | None, limit: int
+    ) -> list[Reading]:
+        """Books finished (since [since]), latest first."""
+        if not user_ids:
+            return []
+        query = select(LibraryItemRow).where(
+            LibraryItemRow.user_id.in_(user_ids),
+            LibraryItemRow.status == _FINISHED,
+            LibraryItemRow.finished_at.is_not(None),
+        )
+        if since is not None:
+            query = query.where(LibraryItemRow.finished_at >= since)
+        items = await self._session.scalars(
+            query.order_by(LibraryItemRow.finished_at.desc()).limit(limit)
+        )
+        return [_reading(item, 100, item.finished_at) for item in items if item.finished_at]
+
+    async def shelves(self, user_id: UUID, audiences: Sequence[Audience]) -> list[SharedShelf]:
+        """The reader's shelves shown to [audiences], with their books in order."""
+        shelves = (
+            await self._session.scalars(
+                select(ShelfRow)
+                .where(
+                    ShelfRow.user_id == user_id,
+                    ShelfRow.visibility.in_([a.value for a in audiences]),
+                )
+                .order_by(ShelfRow.created_at)
+            )
+        ).all()
+        found: list[SharedShelf] = []
+        for shelf in shelves:
+            books = await self._session.execute(
+                select(LibraryItemRow.title, LibraryItemRow.authors)
+                .join(ShelfItemRow, ShelfItemRow.item_id == LibraryItemRow.id)
+                .where(ShelfItemRow.shelf_id == shelf.id)
+                .order_by(ShelfItemRow.position)
+                .limit(200)
+            )
             found.append(
-                Reading(
-                    user_id=item.user_id,
-                    item_id=item.id,
-                    title=item.title,
-                    authors=tuple(item.authors or ()),
-                    percent=position.percent,
-                    at=_aware(position.client_time),
+                SharedShelf(
+                    name=shelf.name,
+                    audience=Audience(shelf.visibility),
+                    books=tuple((title, tuple(authors or ())) for title, authors in books),
                 )
             )
         return found

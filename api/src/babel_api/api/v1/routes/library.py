@@ -17,7 +17,7 @@ from babel_api.api.dependencies import (
     LinkServiceDep,
     SyncServiceDep,
 )
-from babel_api.domain.files import BookFormat, LibraryItem
+from babel_api.domain.files import BookFormat, LibraryItem, ReadingStatus
 from babel_api.domain.follows import Follow
 from babel_api.services.links import LinkKind
 
@@ -39,6 +39,15 @@ class LibraryItemResponse(BaseModel):
     cover_path: str | None = Field(
         description="Cover found in the file, relative to the API base URL (may answer 404)"
     )
+    status: ReadingStatus | None = None
+    progress: float | None = Field(
+        default=None, description="Progress declared by hand, in percent (not a device position)"
+    )
+    state_time: datetime | None = Field(
+        default=None, description="When status or progress last changed (device clock)"
+    )
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
 
     @classmethod
     def of(cls, item: LibraryItem) -> "LibraryItemResponse":
@@ -52,6 +61,11 @@ class LibraryItemResponse(BaseModel):
             edition_id=item.file.edition_id,
             added_at=item.added_at,
             cover_path=item.file.cover_path,
+            status=item.state.status,
+            progress=item.state.progress,
+            state_time=item.state.client_time,
+            started_at=item.state.started_at,
+            finished_at=item.state.finished_at,
         )
 
 

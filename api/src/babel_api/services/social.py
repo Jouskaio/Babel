@@ -29,6 +29,7 @@ from babel_api.domain.social import (
     ReportReason,
     Review,
     SharedNote,
+    SharedShelf,
     normalize_handle,
 )
 from babel_api.services.notifications import Notifier
@@ -56,6 +57,8 @@ class ReaderPage:
     library: list[tuple[str, tuple[str, ...]]] | None
     reviews: list[Review]
     notes: list[SharedNote]
+    finished: list[Reading]
+    shelves: list[SharedShelf]
 
 
 @dataclass(frozen=True, slots=True)
@@ -264,6 +267,8 @@ class SocialService:
             library=await self._social.library(user, 200) if sees_library else None,
             reviews=await self._social.reviews([user], audiences, 50),
             notes=await self._social.notes([user], audiences, 50),
+            finished=await self._social.finished([user], None, 10) if sees_reading else [],
+            shelves=await self._social.shelves(user, audiences),
         )
 
     # ------------------------------------------------------------ feed
@@ -293,6 +298,15 @@ class SocialService:
                         reading.authors,
                         percent=reading.percent,
                     )
+                )
+        for done in await self._social.finished(people, since, limit):
+            profile = profiles.get(done.user_id)
+            relation = Relation(
+                friend=FriendStatus.FRIENDS if done.user_id in friends else FriendStatus.NONE
+            )
+            if profile and relation.sees(profile.share_reading):
+                entries.append(
+                    FeedEntry(FeedKind.FINISHED, done.user_id, done.at, done.title, done.authors)
                 )
         for group, audiences in (
             (list(friends), [Audience.FRIENDS, Audience.PUBLIC]),

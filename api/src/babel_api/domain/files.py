@@ -70,6 +70,31 @@ class Cover:
     media_type: str
 
 
+class ReadingStatus(StrEnum):
+    """Where a reader is with a book, set by hand or followed from the reading position."""
+
+    TO_READ = "to_read"
+    READING = "reading"
+    FINISHED = "finished"
+    ABANDONED = "abandoned"
+
+
+@dataclass(frozen=True, slots=True)
+class ReadingState:
+    """A reader's status and declared progress for a book.
+
+    ``progress`` is a percentage given by hand (a book read elsewhere, on paper…); the
+    reading positions of the devices stay separate. ``client_time`` orders concurrent
+    edits: the latest one wins.
+    """
+
+    status: ReadingStatus | None = None
+    progress: float | None = None
+    client_time: datetime | None = None
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+
+
 @dataclass(frozen=True, slots=True)
 class LibraryItem:
     """A book in a reader's library, backed by a stored file."""
@@ -80,3 +105,4 @@ class LibraryItem:
     title: str
     authors: tuple[str, ...]
     added_at: datetime
+    state: ReadingState = ReadingState()

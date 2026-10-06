@@ -11,9 +11,16 @@ from babel_api.adapters.db.models import (
     FollowRow,
     LibraryItemRow,
     ReadingPositionRow,
+    ShelfItemRow,
     StoredFileRow,
 )
-from babel_api.domain.files import BookFormat, LibraryItem, StoredFile
+from babel_api.domain.files import (
+    BookFormat,
+    LibraryItem,
+    ReadingState,
+    ReadingStatus,
+    StoredFile,
+)
 
 
 def _aware(value: datetime) -> datetime:
@@ -35,6 +42,10 @@ def _to_file(row: StoredFileRow) -> StoredFile:
     )
 
 
+def _maybe(value: datetime | None) -> datetime | None:
+    return _aware(value) if value else None
+
+
 def _to_item(row: LibraryItemRow) -> LibraryItem:
     return LibraryItem(
         id=row.id,
@@ -43,6 +54,13 @@ def _to_item(row: LibraryItemRow) -> LibraryItem:
         title=row.title,
         authors=tuple(row.authors or ()),
         added_at=_aware(row.added_at),
+        state=ReadingState(
+            status=ReadingStatus(row.status) if row.status else None,
+            progress=row.progress,
+            client_time=_maybe(row.state_time),
+            started_at=_maybe(row.started_at),
+            finished_at=_maybe(row.finished_at),
+        ),
     )
 
 
@@ -124,10 +142,21 @@ class SqlFileRepository:
         )
         return [_to_item(row) for row in rows]
 
+    async def save_state(self, item_id: UUID, state: ReadingState) -> LibraryItem:
+        row = await self._session.get_one(LibraryItemRow, item_id)
+        row.status = state.status.value if state.status else None
+        row.progress = state.progress
+        row.state_time = state.client_time
+        row.started_at = state.started_at
+        row.finished_at = state.finished_at
+        await self._session.flush()
+        return _to_item(row)
+
     async def delete_item(self, item_id: UUID) -> None:
         await self._session.execute(
             delete(ReadingPositionRow).where(ReadingPositionRow.item_id == item_id)
         )
+        await self._session.execute(delete(ShelfItemRow).where(ShelfItemRow.item_id == item_id))
         await self._session.execute(delete(FollowRow).where(FollowRow.item_id == item_id))
         await self._session.execute(delete(LibraryItemRow).where(LibraryItemRow.id == item_id))
 
@@ -153,6 +182,7 @@ class SqlFileRepository:
         await self._session.execute(
             delete(ReadingPositionRow).where(ReadingPositionRow.item_id.in_(items))
         )
+        await self._session.execute(delete(ShelfItemRow).where(ShelfItemRow.item_id.in_(items)))
         await self._session.execute(
             delete(LibraryItemRow).where(LibraryItemRow.file_sha256 == sha256)
         )

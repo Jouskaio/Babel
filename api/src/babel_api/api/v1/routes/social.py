@@ -93,6 +93,12 @@ class BookTitleResponse(BaseModel):
     authors: list[str]
 
 
+class ShelfResponse(BaseModel):
+    name: str
+    audience: Audience
+    books: list[BookTitleResponse]
+
+
 class ReviewResponse(BaseModel):
     item_id: UUID
     title: str
@@ -133,6 +139,8 @@ class ReaderPageResponse(BaseModel):
     library: list[BookTitleResponse] | None
     reviews: list[ReviewResponse]
     notes: list[SharedNoteResponse]
+    finished: list[ReadingResponse] = Field(description="Books finished lately")
+    shelves: list[ShelfResponse]
 
 
 class FriendsResponse(BaseModel):
@@ -244,6 +252,18 @@ async def get_reader(
                 title=n.title, quote=n.quote, note=n.note, at=n.at, page=n.page, region=n.region
             )
             for n in page.notes
+        ],
+        finished=[
+            ReadingResponse(title=r.title, authors=list(r.authors), percent=r.percent, at=r.at)
+            for r in page.finished
+        ],
+        shelves=[
+            ShelfResponse(
+                name=s.name,
+                audience=s.audience,
+                books=[BookTitleResponse(title=t, authors=list(a)) for t, a in s.books],
+            )
+            for s in page.shelves
         ],
     )
 

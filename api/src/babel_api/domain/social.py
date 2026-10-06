@@ -118,8 +118,18 @@ class SharedNote:
     region: str | None = None
 
 
+@dataclass(frozen=True, slots=True)
+class SharedShelf:
+    """A shelf as other readers see it."""
+
+    name: str
+    audience: Audience
+    books: tuple[tuple[str, tuple[str, ...]], ...]
+
+
 class FeedKind(StrEnum):
     READING = "reading"
+    FINISHED = "finished"
     REVIEW = "review"
     NOTE = "note"
 
