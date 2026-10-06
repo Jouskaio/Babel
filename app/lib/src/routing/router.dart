@@ -29,6 +29,8 @@ import '../features/sources/presentation/new_source_page.dart';
 import '../features/sources/presentation/source_detail_page.dart';
 import '../features/sources/presentation/source_form_page.dart';
 import '../features/sources/presentation/sources_page.dart';
+import '../features/stats/presentation/stats_page.dart';
+import '../features/stats/presentation/wrap_page.dart';
 import 'splash_page.dart';
 
 abstract final class Routes {
@@ -49,6 +51,8 @@ abstract final class Routes {
   static String work(String id) => '/works/$id';
   static String read(String itemId) => '/read/$itemId';
   static const importLink = '/import-link';
+  static const stats = '/stats';
+  static String wrap(int year) => '/stats/wrap/$year';
   static const sources = '/sources';
   static const newSource = '/sources/new';
   static String newSourceOf(String kind) => '/sources/new/$kind';
@@ -130,6 +134,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: Routes.account, builder: (_, _) => const AccountPage()),
       GoRoute(path: Routes.friends, builder: (_, _) => const FriendsPage()),
+      GoRoute(path: Routes.stats, builder: (_, _) => const StatsPage()),
+      GoRoute(
+        path: '/stats/wrap/:year',
+        builder: (_, state) => WrapPage(
+          year:
+              int.tryParse(state.pathParameters['year']!) ??
+              DateTime.now().year,
+        ),
+      ),
       GoRoute(path: Routes.kavita, builder: (_, _) => const KavitaSetupPage()),
       GoRoute(path: Routes.admin, builder: (_, _) => const AdminPage()),
       GoRoute(

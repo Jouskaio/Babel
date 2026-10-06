@@ -3289,6 +3289,162 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Y aller'**
   String get goThere;
+
+  /// No description provided for @statsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon année de lecture'**
+  String get statsTitle;
+
+  /// No description provided for @statsBooksRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livres lus'**
+  String get statsBooksRead;
+
+  /// No description provided for @statsReadingDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jours de lecture'**
+  String get statsReadingDays;
+
+  /// No description provided for @statsLongestStreak.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus longue série'**
+  String get statsLongestStreak;
+
+  /// No description provided for @statsNotes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notes'**
+  String get statsNotes;
+
+  /// No description provided for @statsByMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois par mois'**
+  String get statsByMonth;
+
+  /// No description provided for @statsTopAuthors.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos auteurs'**
+  String get statsTopAuthors;
+
+  /// No description provided for @statsBooksList.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos lectures'**
+  String get statsBooksList;
+
+  /// No description provided for @statsCurrentStreak.
+  ///
+  /// In fr, this message translates to:
+  /// **'Série en cours : {days}'**
+  String statsCurrentStreak(String days);
+
+  /// No description provided for @statsDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 jour} other{{count} jours}}'**
+  String statsDays(int count);
+
+  /// No description provided for @statsFinished.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun livre lu} =1{1 livre lu} other{{count} livres lus}}'**
+  String statsFinished(int count);
+
+  /// No description provided for @statsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien encore cette année : vos livres terminés apparaîtront ici.'**
+  String get statsEmpty;
+
+  /// No description provided for @statsOpenWrap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir mon récap {year}'**
+  String statsOpenWrap(String year);
+
+  /// No description provided for @statsAverage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note moyenne {rating} / 5'**
+  String statsAverage(String rating);
+
+  /// No description provided for @statsAbandoned.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{} =1{1 abandonné} other{{count} abandonnés}}'**
+  String statsAbandoned(int count);
+
+  /// No description provided for @wrapIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'{year} en livres'**
+  String wrapIntro(String year);
+
+  /// No description provided for @wrapIntroSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre année de lecture, en quelques pages.'**
+  String get wrapIntroSub;
+
+  /// No description provided for @wrapFinished.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{livre terminé} other{livres terminés}}'**
+  String wrapFinished(int count);
+
+  /// No description provided for @wrapDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{jour passé à lire} other{jours passés à lire}}'**
+  String wrapDays(int count);
+
+  /// No description provided for @wrapStreak.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre plus longue série : {days} d\'affilée.'**
+  String wrapStreak(String days);
+
+  /// No description provided for @wrapBestMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre mois le plus lu'**
+  String get wrapBestMonth;
+
+  /// No description provided for @wrapAuthor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre auteur·rice de l\'année'**
+  String get wrapAuthor;
+
+  /// No description provided for @wrapNotes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Pas de note cette année} =1{note ou surlignage} other{notes et surlignages}}'**
+  String wrapNotes(int count);
+
+  /// No description provided for @wrapOutro.
+  ///
+  /// In fr, this message translates to:
+  /// **'À l\'année prochaine'**
+  String get wrapOutro;
+
+  /// No description provided for @wrapOutroSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci d\'avoir lu avec Babel.'**
+  String get wrapOutroSub;
+
+  /// No description provided for @wrapTapHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Touchez pour continuer'**
+  String get wrapTapHint;
 }
 
 class _AppLocalizationsDelegate

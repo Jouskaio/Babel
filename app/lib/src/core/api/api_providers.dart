@@ -84,3 +84,7 @@ final accountApiProvider = Provider<AccountApi>(
 
 /// Absolute URL of a path returned by the API (e.g. a cover).
 String apiUrl(String path) => '${AppConfig.apiBaseUrl}$path';
+
+final statsApiProvider = Provider<StatsApi>(
+  (ref) => StatsApi(ref.watch(apiClientProvider)),
+);

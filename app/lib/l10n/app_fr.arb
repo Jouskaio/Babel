@@ -1062,5 +1062,108 @@
       }
     }
   },
-  "goThere": "Y aller"
+  "goThere": "Y aller",
+  "statsTitle": "Mon année de lecture",
+  "statsBooksRead": "Livres lus",
+  "statsReadingDays": "Jours de lecture",
+  "statsLongestStreak": "Plus longue série",
+  "statsNotes": "Notes",
+  "statsByMonth": "Mois par mois",
+  "statsTopAuthors": "Vos auteurs",
+  "statsBooksList": "Vos lectures",
+  "statsCurrentStreak": "Série en cours : {days}",
+  "@statsCurrentStreak": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "statsDays": "{count, plural, =1{1 jour} other{{count} jours}}",
+  "@statsDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsFinished": "{count, plural, =0{Aucun livre lu} =1{1 livre lu} other{{count} livres lus}}",
+  "@statsFinished": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsEmpty": "Rien encore cette année : vos livres terminés apparaîtront ici.",
+  "statsOpenWrap": "Voir mon récap {year}",
+  "@statsOpenWrap": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "statsAverage": "Note moyenne {rating} / 5",
+  "@statsAverage": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      }
+    }
+  },
+  "statsAbandoned": "{count, plural, =0{} =1{1 abandonné} other{{count} abandonnés}}",
+  "@statsAbandoned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrapIntro": "{year} en livres",
+  "@wrapIntro": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "wrapIntroSub": "Votre année de lecture, en quelques pages.",
+  "wrapFinished": "{count, plural, =1{livre terminé} other{livres terminés}}",
+  "@wrapFinished": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrapDays": "{count, plural, =1{jour passé à lire} other{jours passés à lire}}",
+  "@wrapDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrapStreak": "Votre plus longue série : {days} d'affilée.",
+  "@wrapStreak": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "wrapBestMonth": "Votre mois le plus lu",
+  "wrapAuthor": "Votre auteur·rice de l'année",
+  "wrapNotes": "{count, plural, =0{Pas de note cette année} =1{note ou surlignage} other{notes et surlignages}}",
+  "@wrapNotes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrapOutro": "À l'année prochaine",
+  "wrapOutroSub": "Merci d'avoir lu avec Babel.",
+  "wrapTapHint": "Touchez pour continuer"
 }

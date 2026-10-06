@@ -6,6 +6,7 @@ doc/AdminApi.md
 doc/Ao3Config.md
 doc/Audience.md
 doc/AuthApi.md
+doc/AuthorCountResponse.md
 doc/AuthorResponse.md
 doc/BatchImportResponse.md
 doc/BookFormat.md
@@ -25,6 +26,7 @@ doc/EntityKind.md
 doc/EntryStatus.md
 doc/FeedEntryResponse.md
 doc/FeedKind.md
+doc/FinishedBookResponse.md
 doc/FollowResponse.md
 doc/ForgotPasswordRequest.md
 doc/FriendStatus.md
@@ -84,6 +86,7 @@ doc/SourceEntryResponse.md
 doc/SourceKind.md
 doc/SourceResponse.md
 doc/SourcesApi.md
+doc/StatsApi.md
 doc/SyncApi.md
 doc/TokenResponse.md
 doc/TrendingWorkResponse.md
@@ -99,6 +102,7 @@ doc/WorkReadersResponse.md
 doc/WorkResponse.md
 doc/WorkReviewResponse.md
 doc/WorkSummaryResponse.md
+doc/YearStatsResponse.md
 lib/api.dart
 lib/api/account_api.dart
 lib/api/admin_api.dart
@@ -109,6 +113,7 @@ lib/api/kavita_api.dart
 lib/api/library_api.dart
 lib/api/social_api.dart
 lib/api/sources_api.dart
+lib/api/stats_api.dart
 lib/api/sync_api.dart
 lib/api_client.dart
 lib/api_exception.dart
@@ -120,6 +125,7 @@ lib/auth/http_bearer_auth.dart
 lib/auth/oauth.dart
 lib/model/ao3_config.dart
 lib/model/audience.dart
+lib/model/author_count_response.dart
 lib/model/author_response.dart
 lib/model/batch_import_response.dart
 lib/model/book_format.dart
@@ -138,6 +144,7 @@ lib/model/entity_kind.dart
 lib/model/entry_status.dart
 lib/model/feed_entry_response.dart
 lib/model/feed_kind.dart
+lib/model/finished_book_response.dart
 lib/model/follow_response.dart
 lib/model/forgot_password_request.dart
 lib/model/friend_status.dart
@@ -206,4 +213,5 @@ lib/model/work_readers_response.dart
 lib/model/work_response.dart
 lib/model/work_review_response.dart
 lib/model/work_summary_response.dart
+lib/model/year_stats_response.dart
 pubspec.yaml

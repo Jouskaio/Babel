@@ -25,6 +25,24 @@
         "title": "Audience",
         "type": "string"
       },
+      "AuthorCountResponse": {
+        "properties": {
+          "books": {
+            "title": "Books",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "books"
+        ],
+        "title": "AuthorCountResponse",
+        "type": "object"
+      },
       "AuthorResponse": {
         "description": "Who wrote a feed entry or sent a recommendation.",
         "properties": {
@@ -745,6 +763,94 @@
         ],
         "title": "FeedKind",
         "type": "string"
+      },
+      "FinishedBookResponse": {
+        "properties": {
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
+          "cover_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover Path"
+          },
+          "finished_at": {
+            "format": "date-time",
+            "title": "Finished At",
+            "type": "string"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "item_id": {
+            "format": "uuid",
+            "title": "Item Id",
+            "type": "string"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "work_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Work Id"
+          }
+        },
+        "required": [
+          "item_id",
+          "title",
+          "authors",
+          "format",
+          "finished_at",
+          "started_at",
+          "rating",
+          "work_id",
+          "cover_path"
+        ],
+        "title": "FinishedBookResponse",
+        "type": "object"
       },
       "FollowResponse": {
         "description": "A book whose source is checked every day for new chapters.",
@@ -3339,6 +3445,139 @@
         ],
         "title": "WorkSummaryResponse",
         "type": "object"
+      },
+      "YearStatsResponse": {
+        "properties": {
+          "abandoned": {
+            "title": "Abandoned",
+            "type": "integer"
+          },
+          "average_rating": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Rating"
+          },
+          "best_month": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "1 to 12, the month with most books finished",
+            "title": "Best Month"
+          },
+          "busiest_day": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Busiest Day"
+          },
+          "by_month": {
+            "description": "Books finished each month, January first",
+            "items": {
+              "type": "integer"
+            },
+            "title": "By Month",
+            "type": "array"
+          },
+          "current_streak": {
+            "description": "Run of reading days ending today or yesterday",
+            "title": "Current Streak",
+            "type": "integer"
+          },
+          "finished": {
+            "description": "Books finished, in order",
+            "items": {
+              "$ref": "#/components/schemas/FinishedBookResponse"
+            },
+            "title": "Finished",
+            "type": "array"
+          },
+          "formats": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Formats",
+            "type": "object"
+          },
+          "longest_streak": {
+            "description": "Longest run of consecutive reading days",
+            "title": "Longest Streak",
+            "type": "integer"
+          },
+          "notes": {
+            "description": "Highlights and notes made this year",
+            "title": "Notes",
+            "type": "integer"
+          },
+          "reading_days": {
+            "description": "Days with some reading",
+            "title": "Reading Days",
+            "type": "integer"
+          },
+          "reviews": {
+            "title": "Reviews",
+            "type": "integer"
+          },
+          "started": {
+            "title": "Started",
+            "type": "integer"
+          },
+          "top_authors": {
+            "items": {
+              "$ref": "#/components/schemas/AuthorCountResponse"
+            },
+            "title": "Top Authors",
+            "type": "array"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          },
+          "years": {
+            "description": "Years with something to show, latest first",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Years",
+            "type": "array"
+          }
+        },
+        "required": [
+          "year",
+          "finished",
+          "started",
+          "abandoned",
+          "by_month",
+          "best_month",
+          "reading_days",
+          "longest_streak",
+          "current_streak",
+          "busiest_day",
+          "notes",
+          "reviews",
+          "average_rating",
+          "top_authors",
+          "formats",
+          "years"
+        ],
+        "title": "YearStatsResponse",
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -3351,7 +3590,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.23.0"
+    "version": "0.24.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -5972,6 +6211,77 @@
         "tags": [
           "social",
           "account"
+        ]
+      }
+    },
+    "/v1/me/stats": {
+      "get": {
+        "description": "What you read in a year: books finished, reading days, streaks, notes, authors.",
+        "operationId": "getYearStats",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "year",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 2200,
+                  "minimum": 1970,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Year"
+            }
+          },
+          {
+            "description": "Minutes east of UTC, so days are yours",
+            "in": "query",
+            "name": "tz_offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "description": "Minutes east of UTC, so days are yours",
+              "maximum": 840,
+              "minimum": -840,
+              "title": "Tz Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YearStatsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Year Stats",
+        "tags": [
+          "stats"
         ]
       }
     },

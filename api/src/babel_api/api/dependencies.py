@@ -17,6 +17,7 @@ from babel_api.adapters.db.kavita_repository import SqlKavitaRepository
 from babel_api.adapters.db.repositories import SqlUserRepository
 from babel_api.adapters.db.social_repository import SqlSocialRepository
 from babel_api.adapters.db.source_repository import SqlSourceRepository
+from babel_api.adapters.db.stats_repository import SqlStatsRepository
 from babel_api.adapters.db.sync_repository import SqlSyncRepository
 from babel_api.adapters.files.comics import ComicConverter
 from babel_api.adapters.kavita import KavitaClient
@@ -47,6 +48,7 @@ from babel_api.services.links import LinkService
 from babel_api.services.notifications import Notifier
 from babel_api.services.social import SocialService
 from babel_api.services.sources import SourceService
+from babel_api.services.stats import StatsService
 from babel_api.services.sync import SyncService
 from babel_api.services.works import WorkService
 
@@ -298,3 +300,12 @@ def get_kavita_service(
 
 
 KavitaServiceDep = Annotated[KavitaService, Depends(get_kavita_service)]
+
+
+def get_stats_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> StatsService:
+    return StatsService(SqlStatsRepository(session))
+
+
+StatsServiceDep = Annotated[StatsService, Depends(get_stats_service)]
