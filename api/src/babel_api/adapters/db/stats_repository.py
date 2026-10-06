@@ -13,6 +13,7 @@ from babel_api.adapters.db.models import (
     ChangeRow,
     LibraryItemRow,
     ReviewRow,
+    WorkRow,
 )
 from babel_api.domain.files import LibraryItem
 from babel_api.domain.sync import EntityKind
@@ -32,6 +33,14 @@ class SqlStatsRepository:
             select(LibraryItemRow).where(LibraryItemRow.user_id == user_id)
         )
         return [_to_item(row) for row in rows]
+
+    async def work_subjects(self, work_ids: Sequence[UUID]) -> dict[UUID, tuple[str, ...]]:
+        if not work_ids:
+            return {}
+        rows = await self._session.execute(
+            select(WorkRow.id, WorkRow.subjects).where(WorkRow.id.in_(list(work_ids)))
+        )
+        return {work: tuple(subjects or ()) for work, subjects in rows.all()}
 
     async def ratings(self, user_id: UUID) -> dict[UUID, int]:
         rows = await self._session.execute(

@@ -41,6 +41,7 @@ def _to_file(row: StoredFileRow) -> StoredFile:
         withdrawn_at=_aware(row.withdrawn_at) if row.withdrawn_at else None,
         title=row.title,
         authors=tuple(row.authors or ()),
+        subjects=tuple(row.subjects) if row.subjects is not None else None,
     )
 
 
@@ -96,6 +97,7 @@ class SqlFileRepository:
                 created_at=file.created_at,
                 title=file.title,
                 authors=list(file.authors),
+                subjects=list(file.subjects) if file.subjects is not None else None,
             )
         )
         await self._session.flush()
@@ -111,6 +113,12 @@ class SqlFileRepository:
         row.withdrawn_at = None
         row.uploaded_by = uploaded_by
         await self._session.flush()
+
+    async def set_subjects(self, sha256: str, subjects: tuple[str, ...]) -> None:
+        row = await self._session.get(StoredFileRow, sha256)
+        if row is not None:
+            row.subjects = list(subjects)
+            await self._session.flush()
 
     async def is_blocked(self, sha256: str) -> bool:
         return await self._session.get(BlockedFileRow, sha256) is not None

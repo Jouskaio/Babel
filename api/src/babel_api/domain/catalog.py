@@ -73,6 +73,8 @@ class Work:
     open_library_id: str | None = None
     edition_count: int | None = None
     editions_synced_at: datetime | None = None
+    # Free subjects from the catalog ("Science fiction", "Governesses -- Fiction"…).
+    subjects: tuple[str, ...] = ()
 
 
 # ------------------------------------------------------------------ external records
@@ -90,6 +92,7 @@ class SourceWork:
     # Best edition in the requested language, when the search asked for one.
     localized_title: str | None = None
     localized_cover_id: int | None = None
+    subjects: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

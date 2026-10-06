@@ -1,8 +1,10 @@
 """A reader's year in books (statistics and the yearly wrap-up)."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime
 from uuid import UUID
+
+from babel_api.domain.genres import Genre
 
 
 @dataclass(frozen=True, slots=True)
@@ -16,6 +18,7 @@ class FinishedBook:
     rating: int | None
     work_id: UUID | None
     cover_path: str | None
+    genres: tuple[Genre, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -35,6 +38,9 @@ class YearStats:
     formats: dict[str, int]
     busiest_day: date | None
     years: list[int]  # every year with something to show, latest first
+    genres: list[tuple[Genre, int]] = field(default_factory=list[tuple[Genre, int]])
+    # The year before, to tell what changed.
+    previous_genres: list[tuple[Genre, int]] = field(default_factory=list[tuple[Genre, int]])
 
     @property
     def best_month(self) -> int | None:

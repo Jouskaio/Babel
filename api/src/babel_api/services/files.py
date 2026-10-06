@@ -152,6 +152,7 @@ class FileService:
             uploaded_by=user_id,
             title=metadata.title,
             authors=metadata.authors,
+            subjects=metadata.subjects,
         )
         await self._files.add_file(stored)
         return stored, path, False
@@ -188,6 +189,16 @@ class FileService:
         await self._check_access(user_id, file)
         item = await self._files.find_item(user_id, sha256)
         return item or await self._add_item(user_id, file, path, file.original_name, device_id)
+
+    async def file_subjects(self, file: StoredFile) -> tuple[str, ...]:
+        """The subjects written in a stored file, read once and kept."""
+        if file.subjects is not None:
+            return file.subjects
+        path = self._store.path(file.sha256)
+        subjects = self._reader.metadata(path, file.format).subjects if path else ()
+        await self._files.set_subjects(file.sha256, subjects)
+        await self._files.commit()
+        return subjects
 
     async def add_paper(
         self, user_id: UUID, work_id: UUID, device_id: UUID | None = None

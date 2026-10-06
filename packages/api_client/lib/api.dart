@@ -67,6 +67,8 @@ part 'model/forgot_password_request.dart';
 part 'model/friend_status.dart';
 part 'model/friends_response.dart';
 part 'model/generic_config.dart';
+part 'model/genre.dart';
+part 'model/genre_count_response.dart';
 part 'model/git_hub_config.dart';
 part 'model/health_response.dart';
 part 'model/identity_provider.dart';

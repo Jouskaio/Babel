@@ -103,6 +103,7 @@ class WorkRow(Base):
     cover_id: Mapped[int | None] = mapped_column(Integer)
     description: Mapped[str | None] = mapped_column(Text)
     edition_count: Mapped[int | None] = mapped_column(Integer)
+    subjects: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
     editions_synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
@@ -158,6 +159,8 @@ class StoredFileRow(Base):
     withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     title: Mapped[str | None] = mapped_column(String(500))
     authors: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
+    # From the file itself (EPUB dc:subject, ComicInfo genre); None until read.
+    subjects: Mapped[list[str] | None] = mapped_column(JSON)
 
 
 class BlockedFileRow(Base):

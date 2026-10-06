@@ -21,8 +21,10 @@ class YearStatsResponse {
     required this.currentStreak,
     this.finished = const [],
     this.formats = const {},
+    this.genres = const [],
     required this.longestStreak,
     required this.notes,
+    this.previousGenres = const [],
     required this.readingDays,
     required this.reviews,
     required this.started,
@@ -51,11 +53,17 @@ class YearStatsResponse {
 
   Map<String, int> formats;
 
+  /// Genres of the books finished, most read first (a book counts in up to two)
+  List<GenreCountResponse> genres;
+
   /// Longest run of consecutive reading days
   int longestStreak;
 
   /// Highlights and notes made this year
   int notes;
+
+  /// The same, the year before
+  List<GenreCountResponse> previousGenres;
 
   /// Days with some reading
   int readingDays;
@@ -81,8 +89,10 @@ class YearStatsResponse {
     other.currentStreak == currentStreak &&
     _deepEquality.equals(other.finished, finished) &&
     _deepEquality.equals(other.formats, formats) &&
+    _deepEquality.equals(other.genres, genres) &&
     other.longestStreak == longestStreak &&
     other.notes == notes &&
+    _deepEquality.equals(other.previousGenres, previousGenres) &&
     other.readingDays == readingDays &&
     other.reviews == reviews &&
     other.started == started &&
@@ -101,8 +111,10 @@ class YearStatsResponse {
     (currentStreak.hashCode) +
     (finished.hashCode) +
     (formats.hashCode) +
+    (genres.hashCode) +
     (longestStreak.hashCode) +
     (notes.hashCode) +
+    (previousGenres.hashCode) +
     (readingDays.hashCode) +
     (reviews.hashCode) +
     (started.hashCode) +
@@ -111,7 +123,7 @@ class YearStatsResponse {
     (years.hashCode);
 
   @override
-  String toString() => 'YearStatsResponse[abandoned=$abandoned, averageRating=$averageRating, bestMonth=$bestMonth, busiestDay=$busiestDay, byMonth=$byMonth, currentStreak=$currentStreak, finished=$finished, formats=$formats, longestStreak=$longestStreak, notes=$notes, readingDays=$readingDays, reviews=$reviews, started=$started, topAuthors=$topAuthors, year=$year, years=$years]';
+  String toString() => 'YearStatsResponse[abandoned=$abandoned, averageRating=$averageRating, bestMonth=$bestMonth, busiestDay=$busiestDay, byMonth=$byMonth, currentStreak=$currentStreak, finished=$finished, formats=$formats, genres=$genres, longestStreak=$longestStreak, notes=$notes, previousGenres=$previousGenres, readingDays=$readingDays, reviews=$reviews, started=$started, topAuthors=$topAuthors, year=$year, years=$years]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -135,8 +147,10 @@ class YearStatsResponse {
       json[r'current_streak'] = this.currentStreak;
       json[r'finished'] = this.finished;
       json[r'formats'] = this.formats;
+      json[r'genres'] = this.genres;
       json[r'longest_streak'] = this.longestStreak;
       json[r'notes'] = this.notes;
+      json[r'previous_genres'] = this.previousGenres;
       json[r'reading_days'] = this.readingDays;
       json[r'reviews'] = this.reviews;
       json[r'started'] = this.started;
@@ -177,8 +191,10 @@ class YearStatsResponse {
         currentStreak: mapValueOfType<int>(json, r'current_streak')!,
         finished: FinishedBookResponse.listFromJson(json[r'finished']),
         formats: mapCastOfType<String, int>(json, r'formats')!,
+        genres: GenreCountResponse.listFromJson(json[r'genres']),
         longestStreak: mapValueOfType<int>(json, r'longest_streak')!,
         notes: mapValueOfType<int>(json, r'notes')!,
+        previousGenres: GenreCountResponse.listFromJson(json[r'previous_genres']),
         readingDays: mapValueOfType<int>(json, r'reading_days')!,
         reviews: mapValueOfType<int>(json, r'reviews')!,
         started: mapValueOfType<int>(json, r'started')!,
@@ -239,8 +255,10 @@ class YearStatsResponse {
     'current_streak',
     'finished',
     'formats',
+    'genres',
     'longest_streak',
     'notes',
+    'previous_genres',
     'reading_days',
     'reviews',
     'started',

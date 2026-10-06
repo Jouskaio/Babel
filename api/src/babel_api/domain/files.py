@@ -32,6 +32,7 @@ class BookMetadata:
     authors: tuple[str, ...] = ()
     isbn13: str | None = None
     language: str | None = None
+    subjects: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,6 +50,8 @@ class StoredFile:
     # Read from the file itself when it was first imported.
     title: str | None = None
     authors: tuple[str, ...] = ()
+    # From the file itself; None until read (files stored before subjects were kept).
+    subjects: tuple[str, ...] | None = None
 
     @property
     def available(self) -> bool:

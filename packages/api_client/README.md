@@ -190,6 +190,8 @@ Class | Method | HTTP request | Description
  - [FriendStatus](doc//FriendStatus.md)
  - [FriendsResponse](doc//FriendsResponse.md)
  - [GenericConfig](doc//GenericConfig.md)
+ - [Genre](doc//Genre.md)
+ - [GenreCountResponse](doc//GenreCountResponse.md)
  - [GitHubConfig](doc//GitHubConfig.md)
  - [HealthResponse](doc//HealthResponse.md)
  - [IdentityProvider](doc//IdentityProvider.md)

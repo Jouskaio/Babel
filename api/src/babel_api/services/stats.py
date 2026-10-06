@@ -1,12 +1,17 @@
 """A reader's year in books: what they finished, when they read, what they wrote."""
 
 from collections import Counter
+from collections.abc import Awaitable, Callable
 from datetime import UTC, date, datetime, timedelta, timezone
 from uuid import UUID
 
 from babel_api.adapters.db.stats_repository import SqlStatsRepository
-from babel_api.domain.files import ReadingStatus
+from babel_api.domain.files import LibraryItem, ReadingStatus, StoredFile
+from babel_api.domain.genres import Genre, genres_of
 from babel_api.domain.stats import FinishedBook, YearStats
+
+# Reads (once) the subjects written in a stored file.
+SubjectReader = Callable[[StoredFile], Awaitable[tuple[str, ...]]]
 
 
 def _streaks(days: set[date], today: date) -> tuple[int, int]:
@@ -27,8 +32,26 @@ def _streaks(days: set[date], today: date) -> tuple[int, int]:
 
 
 class StatsService:
-    def __init__(self, stats: SqlStatsRepository) -> None:
+    def __init__(
+        self, stats: SqlStatsRepository, file_subjects: SubjectReader | None = None
+    ) -> None:
         self._stats = stats
+        self._file_subjects = file_subjects
+
+    async def _genres(
+        self, items: list[LibraryItem], works: dict[UUID, tuple[str, ...]]
+    ) -> dict[UUID, tuple[Genre, ...]]:
+        """Each book's genres, from its work's subjects and its file's."""
+        found: dict[UUID, tuple[Genre, ...]] = {}
+        for item in items:
+            subjects = list(works.get(item.work_id, ()) if item.work_id else ())
+            if item.file is not None:
+                file_subjects = item.file.subjects
+                if file_subjects is None and self._file_subjects is not None:
+                    file_subjects = await self._file_subjects(item.file)
+                subjects.extend(file_subjects or ())
+            found[item.id] = tuple(genres_of(subjects, item.format_name))
+        return found
 
     async def year(
         self, user_id: UUID, year: int, offset_minutes: int = 0, now: datetime | None = None
@@ -46,6 +69,22 @@ class StatsService:
         notes = [local(t) for t in await self._stats.note_times(user_id)]
         reviews = [local(t) for t in await self._stats.review_times(user_id)]
 
+        def finished_in(y: int) -> list[LibraryItem]:
+            return [
+                i
+                for i in items
+                if i.state.status is ReadingStatus.FINISHED
+                and i.state.finished_at is not None
+                and local(i.state.finished_at).year == y
+            ]
+
+        counted = finished_in(year) + finished_in(year - 1)
+        works = await self._stats.work_subjects(list({i.work_id for i in counted if i.work_id}))
+        genres = await self._genres(counted, works)
+
+        def tally(y: int) -> list[tuple[Genre, int]]:
+            return Counter(g for i in finished_in(y) for g in genres[i.id]).most_common()
+
         finished = sorted(
             (
                 FinishedBook(
@@ -58,6 +97,7 @@ class StatsService:
                     rating=ratings.get(item.id),
                     work_id=item.work_id,
                     cover_path=item.cover_path,
+                    genres=genres.get(item.id, ()),
                 )
                 for item in items
                 if item.state.status is ReadingStatus.FINISHED
@@ -103,4 +143,6 @@ class StatsService:
             formats=dict(Counter(b.format for b in finished)),
             busiest_day=per_day.most_common(1)[0][0] if per_day else None,
             years=sorted(years | {now.year}, reverse=True),
+            genres=tally(year),
+            previous_genres=tally(year - 1),
         )

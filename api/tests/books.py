@@ -11,6 +11,7 @@ def epub(
     opf_extra: str = "",
     cover: bytes | None = None,
     cover_style: str = "epub3",
+    subjects: tuple[str, ...] = (),
 ) -> bytes:
     """A minimal EPUB; ``cover`` adds a JPEG cover declared the EPUB 3 or EPUB 2 way."""
     identifier = f"<dc:identifier>urn:isbn:{isbn}</dc:identifier>" if isbn else ""
@@ -30,7 +31,8 @@ def epub(
             'version="3.0"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">'
             f"<dc:title>{title}</dc:title><dc:creator>{author}</dc:creator>"
             f"{identifier}<dc:language>fr-FR</dc:language>{_cover_meta(cover, cover_style)}"
-            f"</metadata>{_manifest(cover, cover_style)}</package>",
+            + "".join(f"<dc:subject>{s}</dc:subject>" for s in subjects)
+            + f"</metadata>{_manifest(cover, cover_style)}</package>",
         )
         if cover is not None:
             archive.writestr("OEBPS/images/cover art.jpg", cover)

@@ -56,6 +56,11 @@ def _year(value: Any) -> int | None:
 _USER_AGENT = "Babel/1.0 (https://babel.jouskaio.me)"
 
 
+def _subjects(value: object) -> tuple[str, ...]:
+    """The first subjects of a work (Open Library lists up to hundreds)."""
+    return tuple(str(s)[:120] for s in _items(value)[:40] if str(s).strip())
+
+
 class OpenLibrarySource:
     """Reads Open Library over HTTP. Failures surface as ``httpx.HTTPError``."""
 
@@ -91,7 +96,7 @@ class OpenLibrarySource:
         return works
 
     async def search(self, query: str, limit: int, language: str | None = None) -> list[SourceWork]:
-        fields = "key,title,author_name,first_publish_year,cover_i,edition_count"
+        fields = "key,title,author_name,first_publish_year,cover_i,edition_count,subject"
         params: dict[str, str | int] = {"q": query, "limit": limit, "fields": fields}
         if language:
             # Open Library then returns, per work, its best edition in that language.
@@ -117,6 +122,7 @@ class OpenLibrarySource:
                     if best and best[0].get("title")
                     else None,
                     localized_cover_id=best[0].get("cover_i") if best else None,
+                    subjects=_subjects(doc.get("subject")),
                 )
             )
         return works
@@ -140,6 +146,7 @@ class OpenLibrarySource:
             first_publish_year=_year(doc.get("first_publish_date")),
             cover_id=_first_int(doc.get("covers")),
             description=_text(doc.get("description")),
+            subjects=_subjects(doc.get("subjects")),
         )
 
     async def editions(self, work_open_library_id: str, limit: int) -> list[SourceEdition]:

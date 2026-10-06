@@ -236,6 +236,10 @@ class ApiClient {
           return FriendsResponse.fromJson(value);
         case 'GenericConfig':
           return GenericConfig.fromJson(value);
+        case 'Genre':
+          return GenreTypeTransformer().decode(value);
+        case 'GenreCountResponse':
+          return GenreCountResponse.fromJson(value);
         case 'GitHubConfig':
           return GitHubConfig.fromJson(value);
         case 'HealthResponse':
