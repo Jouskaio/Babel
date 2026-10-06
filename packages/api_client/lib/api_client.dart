@@ -272,6 +272,10 @@ class ApiClient {
           return OperationRequest.fromJson(value);
         case 'OperationResult':
           return OperationResult.fromJson(value);
+        case 'PaperBookRequest':
+          return PaperBookRequest.fromJson(value);
+        case 'PaperRequest':
+          return PaperRequest.fromJson(value);
         case 'PremiumRequest':
           return PremiumRequest.fromJson(value);
         case 'ProviderLoginRequest':

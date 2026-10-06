@@ -53,6 +53,8 @@ doc/OpOutcome.md
 doc/OpdsConfig.md
 doc/OperationRequest.md
 doc/OperationResult.md
+doc/PaperBookRequest.md
+doc/PaperRequest.md
 doc/PremiumRequest.md
 doc/ProviderLoginRequest.md
 doc/ProvidersResponse.md
@@ -168,6 +170,8 @@ lib/model/op_outcome.dart
 lib/model/opds_config.dart
 lib/model/operation_request.dart
 lib/model/operation_result.dart
+lib/model/paper_book_request.dart
+lib/model/paper_request.dart
 lib/model/premium_request.dart
 lib/model/provider_login_request.dart
 lib/model/providers_response.dart

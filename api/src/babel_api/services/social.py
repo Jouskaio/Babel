@@ -374,7 +374,7 @@ class SocialService:
         hidden = list(await self._social.hidden(viewer))
         friends = await self._social.friends(viewer)
         notes = await self._social.book_notes(
-            item.work_id, item.file.sha256, viewer, friends, hidden, 500
+            item.work_id, item.sha256, viewer, friends, hidden, 500
         )
         return notes, await self._social.profiles(list({n.user_id for n in notes}))
 
@@ -389,16 +389,21 @@ class SocialService:
         reviews = await self._social.reviews_by_item(user_id)
         notes = await self._social.note_counts(user_id)
         works = await self._social.work_ids(
-            list({i.file.edition_id for i in items if i.file.edition_id and not i.work_id})
+            list(
+                {i.file.edition_id for i in items if i.file and i.file.edition_id and not i.work_id}
+            )
         )
         return [
             BookTrace(
                 item=item,
                 work_id=item.work_id
-                or (works.get(item.file.edition_id) if item.file.edition_id else None),
+                or (
+                    works.get(item.file.edition_id) if item.file and item.file.edition_id else None
+                ),
                 review=reviews.get(item.id),
-                notes=notes.get(item.file.sha256, 0),
-                available=item.file.available,
+                notes=notes.get(item.sha256 or "", 0),
+                # A paper book without a file can always come back.
+                available=item.file.available if item.file else True,
             )
             for item in items
         ]

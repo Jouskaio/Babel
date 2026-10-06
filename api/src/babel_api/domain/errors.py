@@ -91,5 +91,9 @@ class InvalidHandleError(DomainError):
     """Handles are 3 to 30 letters, digits, dots or underscores."""
 
 
+class BookAlreadyInLibraryError(DomainError):
+    """The file is already another book of the library."""
+
+
 class NotFriendsError(DomainError):
     """Only friends can be sent a recommendation."""

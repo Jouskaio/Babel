@@ -49,6 +49,13 @@ def _context(value: object) -> str | None:
     return text[:80] or None
 
 
+def _file_of(item: LibraryItem) -> str:
+    """Notes are made in a file: a paper book without one has none."""
+    if item.sha256 is None:
+        raise ValueError("annotation")
+    return item.sha256
+
+
 def _client_time(value: object) -> datetime:
     when = datetime.fromisoformat(str(value))
     return when if when.tzinfo else when.replace(tzinfo=UTC)
@@ -370,7 +377,7 @@ class SyncService:
         annotation = Annotation(
             id=annotation_id,
             user_id=user_id,
-            file_sha256=item.file.sha256,
+            file_sha256=_file_of(item),
             item_id=item.id,
             chapter=chapter,
             quote=quote,

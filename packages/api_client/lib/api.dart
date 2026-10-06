@@ -85,6 +85,8 @@ part 'model/op_outcome.dart';
 part 'model/opds_config.dart';
 part 'model/operation_request.dart';
 part 'model/operation_result.dart';
+part 'model/paper_book_request.dart';
+part 'model/paper_request.dart';
 part 'model/premium_request.dart';
 part 'model/provider_login_request.dart';
 part 'model/providers_response.dart';

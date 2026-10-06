@@ -57,7 +57,7 @@ def _to_item(row: LibraryItemRow) -> LibraryItem:
     return LibraryItem(
         id=row.id,
         user_id=row.user_id,
-        file=_to_file(row.file),
+        file=_to_file(row.file) if row.file else None,
         title=row.title,
         authors=tuple(row.authors or ()),
         added_at=_aware(row.added_at),
@@ -71,6 +71,8 @@ def _to_item(row: LibraryItemRow) -> LibraryItem:
         ),
         removed_at=_maybe(row.removed_at),
         work_id=row.work_id,
+        paper=row.paper,
+        work_cover_id=row.work.cover_id if row.work else None,
     )
 
 
@@ -123,10 +125,11 @@ class SqlFileRepository:
     async def add_item(
         self,
         user_id: UUID,
-        sha256: str,
+        sha256: str | None,
         title: str,
         authors: tuple[str, ...],
         work_id: UUID | None = None,
+        paper: bool = False,
     ) -> LibraryItem:
         row = LibraryItemRow(
             user_id=user_id,
@@ -134,10 +137,39 @@ class SqlFileRepository:
             title=title[:500],
             authors=list(authors),
             work_id=work_id,
+            paper=paper,
         )
         self._session.add(row)
         await self._session.flush()
-        await self._session.refresh(row, ["file"])
+        await self._session.refresh(row, ["file", "work"])
+        return _to_item(row)
+
+    async def find_item_of_work(self, user_id: UUID, work_id: UUID) -> LibraryItem | None:
+        """The reader's book of this work, removed ones included (the latest)."""
+        row = await self._session.scalar(
+            select(LibraryItemRow)
+            .where(LibraryItemRow.user_id == user_id, LibraryItemRow.work_id == work_id)
+            .order_by(LibraryItemRow.removed_at.is_not(None), LibraryItemRow.added_at.desc())
+            .limit(1)
+        )
+        return _to_item(row) if row else None
+
+    async def set_file(self, item_id: UUID, sha256: str) -> LibraryItem:
+        row = await self._session.get_one(LibraryItemRow, item_id)
+        row.file_sha256 = sha256
+        await self._session.flush()
+        await self._session.refresh(row, ["file", "work"])
+        return _to_item(row)
+
+    async def clear_file(self, item_id: UUID) -> None:
+        row = await self._session.get_one(LibraryItemRow, item_id)
+        row.file_sha256 = None
+        await self._session.flush()
+
+    async def set_paper(self, item_id: UUID, paper: bool) -> LibraryItem:
+        row = await self._session.get_one(LibraryItemRow, item_id)
+        row.paper = paper
+        await self._session.flush()
         return _to_item(row)
 
     async def find_item(
@@ -194,6 +226,7 @@ class SqlFileRepository:
         row = await self._session.get_one(LibraryItemRow, item_id)
         row.work_id = work_id
         await self._session.flush()
+        await self._session.refresh(row, ["work"])
         return _to_item(row)
 
     async def guess_work(
@@ -242,7 +275,7 @@ class SqlFileRepository:
         row.title = title[:500]
         row.authors = list(authors)
         await self._session.flush()
-        await self._session.refresh(row, ["file"])
+        await self._session.refresh(row, ["file", "work"])
         return _to_item(row)
 
     async def items_of_file(self, sha256: str) -> list[LibraryItem]:

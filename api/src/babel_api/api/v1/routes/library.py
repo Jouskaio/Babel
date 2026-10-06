@@ -31,9 +31,12 @@ class LibraryItemResponse(BaseModel):
     id: UUID
     title: str
     authors: list[str]
-    format: BookFormat
-    size: int
-    sha256: str = Field(description="Identifies the file; download it from /v1/files/{sha256}")
+    format: BookFormat | None = Field(description="Null for a paper book without a file")
+    size: int | None
+    sha256: str | None = Field(
+        description="Identifies the file; download it from /v1/files/{sha256}. Null for a "
+        "paper book without a file"
+    )
     edition_id: UUID | None
     added_at: datetime
     cover_path: str | None = Field(
@@ -52,6 +55,7 @@ class LibraryItemResponse(BaseModel):
     work_id: UUID | None = Field(
         default=None, description="The catalog work: reviews and notes are shared per work"
     )
+    paper: bool = Field(default=False, description="Owned on paper (it may have a file too)")
 
     @classmethod
     def of(cls, item: LibraryItem) -> "LibraryItemResponse":
@@ -59,12 +63,12 @@ class LibraryItemResponse(BaseModel):
             id=item.id,
             title=item.title,
             authors=list(item.authors),
-            format=item.file.format,
-            size=item.file.size,
-            sha256=item.file.sha256,
-            edition_id=item.file.edition_id,
+            format=item.file.format if item.file else None,
+            size=item.file.size if item.file else None,
+            sha256=item.sha256,
+            edition_id=item.file.edition_id if item.file else None,
             added_at=item.added_at,
-            cover_path=item.file.cover_path,
+            cover_path=item.cover_path,
             status=item.state.status,
             progress=item.state.progress,
             state_time=item.state.client_time,
@@ -72,6 +76,7 @@ class LibraryItemResponse(BaseModel):
             finished_at=item.state.finished_at,
             hidden=item.state.hidden,
             work_id=item.work_id,
+            paper=item.paper,
         )
 
 
@@ -129,6 +134,59 @@ async def remove_from_library(
     """Take a book out of the library. Its status, review, notes and positions are kept and
     come back if the same file is added again."""
     await files.remove_from_library(user_id, item_id, device_id)
+
+
+class PaperBookRequest(BaseModel):
+    work_id: UUID = Field(description="The catalog work of the paper book")
+
+
+@router.post("/library/paper", operation_id="addPaperBook", status_code=status.HTTP_201_CREATED)
+async def add_paper_book(
+    user_id: CurrentUserId,
+    files: FileServiceDep,
+    body: PaperBookRequest,
+    device_id: DeviceHeader = None,
+) -> LibraryItemResponse:
+    """A book you own on paper, to follow your reading without a file. If the work is
+    already (or was) in your library, that book is marked as owned on paper instead."""
+    return LibraryItemResponse.of(await files.add_paper(user_id, body.work_id, device_id))
+
+
+class PaperRequest(BaseModel):
+    paper: bool
+
+
+@router.put("/library/{item_id}/paper", operation_id="setPaper")
+async def set_paper(
+    user_id: CurrentUserId,
+    files: FileServiceDep,
+    item_id: UUID,
+    body: PaperRequest,
+    device_id: DeviceHeader = None,
+) -> LibraryItemResponse:
+    """Whether you own the book on paper. A paper book without a file that you no longer
+    own leaves the library (its status, review and notes are kept)."""
+    return LibraryItemResponse.of(await files.set_paper(user_id, item_id, body.paper, device_id))
+
+
+@router.post("/library/{item_id}/file", operation_id="attachFile")
+async def attach_file(
+    user_id: CurrentUserId,
+    files: FileServiceDep,
+    item_id: UUID,
+    file: Annotated[UploadFile, File()],
+    device_id: DeviceHeader = None,
+) -> LibraryItemResponse:
+    """Give a book (a paper one, say) a file, to read it on your devices too. Its status,
+    progress, review and notes stay with it."""
+
+    async def chunks():
+        while chunk := await file.read(_CHUNK):
+            yield chunk
+
+    return LibraryItemResponse.of(
+        await files.attach_file(user_id, item_id, chunks(), file.filename or "book", device_id)
+    )
 
 
 class WorkLinkRequest(BaseModel):

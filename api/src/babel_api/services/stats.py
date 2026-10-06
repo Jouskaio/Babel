@@ -52,12 +52,12 @@ class StatsService:
                     item_id=item.id,
                     title=item.title,
                     authors=item.authors,
-                    format=item.file.format.value,
+                    format=item.format_name,
                     finished_at=local(item.state.finished_at),
                     started_at=local(item.state.started_at) if item.state.started_at else None,
                     rating=ratings.get(item.id),
                     work_id=item.work_id,
-                    cover_path=item.file.cover_path,
+                    cover_path=item.cover_path,
                 )
                 for item in items
                 if item.state.status is ReadingStatus.FINISHED
