@@ -18,6 +18,7 @@ from babel_api.adapters.db.repositories import SqlUserRepository
 from babel_api.adapters.db.social_repository import SqlSocialRepository
 from babel_api.adapters.db.source_repository import SqlSourceRepository
 from babel_api.adapters.db.sync_repository import SqlSyncRepository
+from babel_api.adapters.files.comics import ComicConverter
 from babel_api.adapters.kavita import KavitaClient
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
 from babel_api.adapters.security.secrets import SecretBox
@@ -70,6 +71,7 @@ class Container:
     secrets: SecretBox
     mailer: Mailer
     pusher: Pusher
+    comics: ComicConverter
     kavita_client: Callable[[str], KavitaClient]
     kavita: KavitaProvisioner
 
@@ -131,6 +133,7 @@ def make_file_service(container: Container, session: AsyncSession) -> FileServic
         container.covers,
         access=settings.file_access,
         max_bytes=settings.max_upload_mb * 1024 * 1024,
+        comics=container.comics,
     )
 
 

@@ -7,6 +7,7 @@ from pathlib import Path, PurePath
 from typing import Any, Literal
 from uuid import UUID
 
+from babel_api.adapters.files.comics import ComicConverter
 from babel_api.domain.catalog import IdentifierKind
 from babel_api.domain.errors import (
     BlockedFileError,
@@ -14,7 +15,7 @@ from babel_api.domain.errors import (
     NotFoundError,
     UnsupportedFileError,
 )
-from babel_api.domain.files import LibraryItem, StoredFile
+from babel_api.domain.files import BookFormat, LibraryItem, StoredFile
 from babel_api.domain.ports import (
     BlobStore,
     CatalogRepository,
@@ -68,6 +69,7 @@ class FileService:
         *,
         access: FileAccess,
         max_bytes: int,
+        comics: ComicConverter | None = None,
     ) -> None:
         self._files = files
         self._catalog = catalog
@@ -77,6 +79,7 @@ class FileService:
         self._covers = covers
         self._access = access
         self._max_bytes = max_bytes
+        self._comics = comics
 
     async def import_file(
         self,
@@ -201,6 +204,15 @@ class FileService:
             raise NotFoundError
         await self._check_access(user_id, file)
         return Download(file, path)
+
+    async def as_cbz(self, user_id: UUID, sha256: str) -> Download:
+        """A comic as CBZ, so every device can read it: CBR files are converted once."""
+        download = await self.download(user_id, sha256)
+        if download.file.format is BookFormat.CBZ:
+            return download
+        if download.file.format is not BookFormat.CBR or self._comics is None:
+            raise UnsupportedFileError
+        return Download(download.file, await self._comics.cbz(sha256, download.path))
 
     async def withdraw(self, admin_id: UUID, sha256: str, reason: str, *, block: bool) -> None:
         """Remove a file from every library and delete its bytes; optionally block its hash."""
