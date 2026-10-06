@@ -32,17 +32,18 @@ class ReaderAvatar extends StatelessWidget {
     ];
     final seed = (handle ?? name).codeUnits.fold(0, (a, b) => a + b);
     final initial = name.trim().isEmpty ? '?' : name.trim()[0].toUpperCase();
+    final background = colors[seed % colors.length];
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: colors[seed % colors.length],
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: background, shape: BoxShape.circle),
       child: Text(
         initial,
-        style: BabelText.heading(size * 0.45, color: BabelColors.canvas),
+        style: BabelText.heading(
+          size * 0.45,
+          color: BabelColors.on(background),
+        ),
       ),
     );
   }
@@ -58,6 +59,8 @@ class ReaderTile extends StatelessWidget {
     required this.handle,
     this.subtitle,
     this.trailing,
+    this.lines = 1,
+    this.detail,
     super.key,
   });
 
@@ -65,6 +68,12 @@ class ReaderTile extends StatelessWidget {
   final String? handle;
   final String? subtitle;
   final Widget? trailing;
+
+  /// How many lines the subtitle may take.
+  final int lines;
+
+  /// A small line under the subtitle (when it happened).
+  final String? detail;
 
   @override
   Widget build(BuildContext context) => InkWell(
@@ -89,10 +98,19 @@ class ReaderTile extends StatelessWidget {
                 ),
                 Text(
                   subtitle ?? atHandle(handle),
-                  maxLines: 1,
+                  maxLines: lines,
                   overflow: TextOverflow.ellipsis,
                   style: BabelText.body(13),
                 ),
+                if (detail case final detail?)
+                  Text(
+                    detail.toUpperCase(),
+                    style: BabelText.label(
+                      8,
+                      color: BabelColors.textSecondary,
+                      spacing: 1,
+                    ),
+                  ),
               ],
             ),
           ),

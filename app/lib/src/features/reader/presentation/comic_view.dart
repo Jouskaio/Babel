@@ -226,6 +226,8 @@ class _ComicViewState extends ConsumerState<ComicView> {
     final l10n = context.l10n;
     final chosen = await showModalBottomSheet<ComicDirection>(
       context: context,
+      // Above the floating navigation bar of the tabs.
+      useRootNavigator: true,
       backgroundColor: BabelColors.surface,
       builder: (context) => SafeArea(
         child: Padding(
