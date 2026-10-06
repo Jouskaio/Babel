@@ -694,5 +694,14 @@
   "linkWorkNone": "None of these",
   "feedFinished": "{name} finished {title}",
   "profileFinished": "Recently read",
-  "shelfManage": "Manage the shelf"
+  "shelfManage": "Manage the shelf",
+  "tabReading": "Reading",
+  "tabToRead": "To read",
+  "tabFinished": "Read",
+  "tabAbandoned": "Abandoned",
+  "shelfFilter": "Shelf · {name}",
+  "showAll": "Show all",
+  "progressElsewhere": "Read elsewhere? Set my progress",
+  "progressAsk": "Where are you?",
+  "progressAskHint": "Percent of the book (0 to 100)"
 }

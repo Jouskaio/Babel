@@ -1016,5 +1016,21 @@
     }
   },
   "profileFinished": "Lus récemment",
-  "shelfManage": "Gérer l'étagère"
+  "shelfManage": "Gérer l'étagère",
+  "tabReading": "En cours",
+  "tabToRead": "À lire",
+  "tabFinished": "Lus",
+  "tabAbandoned": "Abandonnés",
+  "shelfFilter": "Étagère · {name}",
+  "@shelfFilter": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "showAll": "Tout afficher",
+  "progressElsewhere": "Lu ailleurs ? Indiquer ma progression",
+  "progressAsk": "Où en êtes-vous ?",
+  "progressAskHint": "Pourcentage du livre (0 à 100)"
 }

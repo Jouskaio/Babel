@@ -1863,4 +1863,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shelfManage => 'Manage the shelf';
+
+  @override
+  String get tabReading => 'Reading';
+
+  @override
+  String get tabToRead => 'To read';
+
+  @override
+  String get tabFinished => 'Read';
+
+  @override
+  String get tabAbandoned => 'Abandoned';
+
+  @override
+  String shelfFilter(String name) {
+    return 'Shelf · $name';
+  }
+
+  @override
+  String get showAll => 'Show all';
+
+  @override
+  String get progressElsewhere => 'Read elsewhere? Set my progress';
+
+  @override
+  String get progressAsk => 'Where are you?';
+
+  @override
+  String get progressAskHint => 'Percent of the book (0 to 100)';
 }
