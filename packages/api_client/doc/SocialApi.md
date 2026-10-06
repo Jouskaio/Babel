@@ -16,7 +16,6 @@ Method | HTTP request | Description
 [**getBlocked**](SocialApi.md#getblocked) | **GET** /v1/social/blocks | Get Blocked
 [**getFeed**](SocialApi.md#getfeed) | **GET** /v1/social/feed | Get Feed
 [**getFriends**](SocialApi.md#getfriends) | **GET** /v1/social/friends | Get Friends
-[**getLibraryHistory**](SocialApi.md#getlibraryhistory) | **GET** /v1/library/history | Get History
 [**getReader**](SocialApi.md#getreader) | **GET** /v1/social/readers/{handle} | Get Reader
 [**getRecommendations**](SocialApi.md#getrecommendations) | **GET** /v1/social/recommendations | Get Recommendations
 [**getReview**](SocialApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
@@ -347,51 +346,6 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**FriendsResponse**](FriendsResponse.md)
-
-### Authorization
-
-[HTTPBearer](../README.md#HTTPBearer)
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **getLibraryHistory**
-> List<BookTraceResponse> getLibraryHistory()
-
-Get History
-
-Every book the reader has or once had, removed ones included, latest first.  Removing a book or losing its file never erases the reader's status, review, notes and positions; adding the same file again brings the book back with them.
-
-### Example
-```dart
-import 'package:babel_api_client/api.dart';
-// TODO Configure HTTP Bearer authorization: HTTPBearer
-// Case 1. Use String Token
-//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
-// Case 2. Use Function which generate token.
-// String yourTokenGeneratorFunction() { ... }
-//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
-
-final api_instance = SocialApi();
-
-try {
-    final result = api_instance.getLibraryHistory();
-    print(result);
-} catch (e) {
-    print('Exception when calling SocialApi->getLibraryHistory: $e\n');
-}
-```
-
-### Parameters
-This endpoint does not need any parameter.
-
-### Return type
-
-[**List<BookTraceResponse>**](BookTraceResponse.md)
 
 ### Authorization
 

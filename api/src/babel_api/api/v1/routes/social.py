@@ -516,7 +516,11 @@ async def resolve_report(_: CurrentAdminId, social: SocialServiceDep, report_id:
 
 
 # ---------------------------------------------------------------- history
-@router.get("/library/history", operation_id="getLibraryHistory", tags=["library"])
+# Listed with the library in the contract (it is mostly library data).
+history_router = APIRouter(tags=["library"])
+
+
+@history_router.get("/library/history", operation_id="getLibraryHistory")
 async def get_history(user_id: CurrentUserId, social: SocialServiceDep) -> list[BookTraceResponse]:
     """Every book the reader has or once had, removed ones included, latest first.
 

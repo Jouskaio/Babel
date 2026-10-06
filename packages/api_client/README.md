@@ -123,7 +123,6 @@ Class | Method | HTTP request | Description
 *SocialApi* | [**getBlocked**](doc//SocialApi.md#getblocked) | **GET** /v1/social/blocks | Get Blocked
 *SocialApi* | [**getFeed**](doc//SocialApi.md#getfeed) | **GET** /v1/social/feed | Get Feed
 *SocialApi* | [**getFriends**](doc//SocialApi.md#getfriends) | **GET** /v1/social/friends | Get Friends
-*SocialApi* | [**getLibraryHistory**](doc//SocialApi.md#getlibraryhistory) | **GET** /v1/library/history | Get History
 *SocialApi* | [**getReader**](doc//SocialApi.md#getreader) | **GET** /v1/social/readers/{handle} | Get Reader
 *SocialApi* | [**getRecommendations**](doc//SocialApi.md#getrecommendations) | **GET** /v1/social/recommendations | Get Recommendations
 *SocialApi* | [**getReview**](doc//SocialApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
