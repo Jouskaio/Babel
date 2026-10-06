@@ -7,6 +7,7 @@ file becomes an entry (the same file reached from several feeds counts once).
 
 import hashlib
 import json
+import re
 from collections.abc import AsyncIterator, Iterator
 from typing import Any, cast
 from urllib.parse import urljoin, urlsplit
@@ -25,6 +26,19 @@ _PREFERENCE = {"epub": 0, "cbz": 1, "pdf": 2, "cbr": 3}
 MAX_FEEDS = 60
 MAX_ENTRIES = 5000
 MAX_FEED_BYTES = 10 * 1024 * 1024
+# Kavita puts the reader's key in every OPDS address (/api/opds/<key>/...). The key is kept
+# encrypted as the source token, and addresses are stored with this placeholder instead.
+KEY = "{key}"
+_PATH_KEY = re.compile(r"/api/opds/([A-Za-z0-9-]{16,})")
+
+
+def extract_secret(config: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
+    """Takes a key out of the catalog address (Kavita): (config to store, the key)."""
+    url = str(config.get("url", "")).strip()
+    match = _PATH_KEY.search(url)
+    if match is None:
+        return config, None
+    return {**config, "url": url.replace(match.group(1), KEY)}, match.group(1)
 
 
 def _remote_id(url: str, version: str | None) -> str:
@@ -188,16 +202,28 @@ class OpdsConnector:
         self._allowed = allowed_hosts
         self._client = client or guarded_client(allowed_hosts)
 
+    @staticmethod
+    def extract_secret(config: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
+        return extract_secret(config)
+
+    @staticmethod
+    def _real(url: str, token: str | None) -> str:
+        """The address to request: the key put back in place of its placeholder."""
+        return url.replace(KEY, token) if token and KEY in url else url
+
     def _auth(self, config: dict[str, Any], token: str | None, url: str) -> httpx.Auth | None:
         # Credentials only go to the catalog's own host, never to a linked site.
         username = config.get("username")
+        if KEY in str(config["url"]):
+            return None  # the key travels in the address
         same_host = urlsplit(url).hostname == urlsplit(str(config["url"])).hostname
         return httpx.BasicAuth(username, token) if username and token and same_host else None
 
     async def _feed(self, config: dict[str, Any], token: str | None, url: str) -> _Feed:
+        keyed = KEY in str(config["url"]) and token is not None
         try:
             response = await self._client.get(
-                url,
+                self._real(url, token if keyed else None),
                 auth=self._auth(config, token, url),
                 headers={"Accept": "application/atom+xml, application/opds+json;q=0.9, */*;q=0.5"},
             )
@@ -208,11 +234,13 @@ class OpdsConnector:
         if response.status_code >= 400 or len(response.content) > MAX_FEED_BYTES:
             raise SourceConnectionError("unreachable")
         content_type = response.headers.get("content-type", "")
-        is_json = "json" in content_type or response.content.lstrip().startswith(b"{")
-        base = str(response.url)
-        return (
-            _parse_json(response.content, base) if is_json else _parse_atom(response.content, base)
-        )
+        content, base = response.content, str(response.url)
+        if keyed and token:
+            # Every link of the feed carries the key: store them with the placeholder.
+            content = content.replace(token.encode(), KEY.encode())
+            base = base.replace(token, KEY)
+        is_json = "json" in content_type or content.lstrip().startswith(b"{")
+        return _parse_json(content, base) if is_json else _parse_atom(content, base)
 
     async def check(self, config: dict[str, Any], token: str | None) -> dict[str, Any]:
         url = str(config.get("url", "")).strip()
@@ -247,7 +275,7 @@ class OpdsConnector:
         url = entry.locator or entry.path
         try:
             async with self._client.stream(
-                "GET", url, auth=self._auth(config, token, url)
+                "GET", self._real(url, token), auth=self._auth(config, token, url)
             ) as response:
                 if response.status_code >= 400:
                     raise SourceConnectionError(str(response.status_code))
