@@ -74,12 +74,16 @@ void main() {
     late List<int> pages;
     late ProviderContainer container;
 
-    Future<void> open(WidgetTester tester, {String? manga}) async {
+    Future<void> open(
+      WidgetTester tester, {
+      String? manga,
+      List<Map<String, Object?>> others = const [],
+    }) async {
       tester.view.physicalSize = const Size(400, 800);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       pages = [];
-      final server = FakeServer();
+      final server = FakeServer()..readerNotes.addAll(others);
       await tester.pumpWidget(
         wrap(
           Consumer(
@@ -148,6 +152,35 @@ void main() {
       await tester.tapAt(strip);
       await settle(tester);
       expect(physics(), isNull);
+    });
+
+    testWidgets('other readers\' panel notes show on the page or near it', (
+      tester,
+    ) async {
+      Map<String, Object?> other(String id, {required bool sameFile}) => {
+        'id': id,
+        'reader': {'handle': 'camille', 'display_name': 'Camille'},
+        'quote': '',
+        'note': 'Cette case $id',
+        'chapter': 0,
+        'region': '0.1000,0.1000,0.5000,0.3000',
+        'percent': 50.0,
+        'prefix': null,
+        'suffix': null,
+        'same_file': sameFile,
+        'language': sameFile ? null : 'ja',
+        'at': '2026-10-04T10:00:00Z',
+      };
+      await open(
+        tester,
+        others: [other('o1', sameFile: true), other('o2', sameFile: false)],
+      );
+      // Only the note made on this very file is drawn on the page.
+      expect(find.text('@C'), findsOneWidget);
+      await tester.tap(find.text('@C'));
+      await settle(tester);
+      expect(find.text('Note de @camille'), findsOneWidget);
+      expect(find.text('Cette case o1'), findsOneWidget);
     });
 
     testWidgets('a frame drawn on a page becomes a note', (tester) async {

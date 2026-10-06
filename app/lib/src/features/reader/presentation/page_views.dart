@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:babel_api_client/api.dart' show BookNoteResponse;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdfrx/pdfrx.dart';
@@ -8,6 +9,8 @@ import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 import '../application/annotations.dart';
+import '../application/reader_notes.dart';
+import '../application/reader_settings.dart';
 import '../application/reading_position.dart';
 import '../data/comic_book.dart';
 import 'annotation_sheets.dart';
@@ -165,6 +168,9 @@ class _PdfViewState extends ConsumerState<PdfView> {
               const <Annotation>[])
         if (a.onPage) a,
     ];
+    final others = ref.watch(readerSettingsProvider).readerNotes
+        ? ref.watch(readerNotesProvider(widget.itemId)).value ?? const []
+        : const <BookNoteResponse>[];
     return PagedFrame(
       title: widget.title,
       page: _page,
@@ -185,6 +191,13 @@ class _PdfViewState extends ConsumerState<PdfView> {
           fileSha256: widget.fileSha256,
           chapterName: (index) => l10n.comicPage(index + 1),
           onOpenChapter: (index) => _controller.goToPage(pageNumber: index + 1),
+          others: [for (final n in others) (n, pagePlace(n))],
+          onSeek: (percent) => _controller.goToPage(
+            pageNumber: _total <= 1
+                ? 1
+                : (percent / 100 * (_total - 1)).round().clamp(0, _total - 1) +
+                      1,
+          ),
         ),
         child: Text(
           '${l10n.marginTitle} · ${l10n.marginCount(notes.length)}',
@@ -211,6 +224,15 @@ class _PdfViewState extends ConsumerState<PdfView> {
                 annotating: _annotating,
                 onRegion: (region) => _addNote(page.pageNumber - 1, region),
                 onOpen: (note) => showAnnotationEditor(context, note),
+                others: [
+                  for (final n in others)
+                    if (n.sameFile &&
+                        n.region != null &&
+                        n.chapter == page.pageNumber - 1)
+                      n,
+                ],
+                onOpenOther: (note) =>
+                    showReaderNote(context, note, place: pagePlace(note)),
               ),
             ),
           ],
