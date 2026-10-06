@@ -8,7 +8,7 @@ from uuid import UUID
 from fastapi import APIRouter, Query, Response, status
 from pydantic import BaseModel, Field
 
-from babel_api.api.dependencies import CurrentUserId, SocialServiceDep
+from babel_api.api.dependencies import CurrentAdminId, CurrentUserId, SocialServiceDep
 from babel_api.domain.social import (
     Audience,
     FeedEntry,
@@ -16,6 +16,7 @@ from babel_api.domain.social import (
     FriendStatus,
     Profile,
     Recommendation,
+    ReportReason,
     Review,
 )
 from babel_api.services.social import Reader
@@ -404,3 +405,79 @@ async def mark_read(
     user_id: CurrentUserId, social: SocialServiceDep, recommendation_id: UUID
 ) -> None:
     await social.mark_read(user_id, recommendation_id)
+
+
+# ---------------------------------------------------------------- blocks and reports
+class ReportRequest(BaseModel):
+    handle: Handle
+    reason: ReportReason
+    note: Annotated[str, Field(max_length=1000)] | None = None
+
+
+class ReportResponse(BaseModel):
+    id: UUID
+    reporter: AuthorResponse
+    reported: AuthorResponse
+    reason: ReportReason
+    note: str | None
+    created_at: datetime
+    resolved: bool
+
+
+@router.put(
+    "/social/blocks/{handle}", operation_id="blockReader", status_code=status.HTTP_204_NO_CONTENT
+)
+async def block_reader(user_id: CurrentUserId, social: SocialServiceDep, handle: str) -> None:
+    """Block a reader: friendship and follows end both ways; neither sees the other."""
+    await social.block(user_id, handle)
+
+
+@router.delete(
+    "/social/blocks/{handle}",
+    operation_id="unblockReader",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def unblock_reader(user_id: CurrentUserId, social: SocialServiceDep, handle: str) -> None:
+    await social.unblock(user_id, handle)
+
+
+@router.get("/social/blocks", operation_id="getBlocked")
+async def get_blocked(user_id: CurrentUserId, social: SocialServiceDep) -> list[AuthorResponse]:
+    """Readers you blocked."""
+    return [_author(p) for p in await social.blocked(user_id)]
+
+
+@router.post("/social/reports", operation_id="reportReader", status_code=status.HTTP_204_NO_CONTENT)
+async def report_reader(
+    user_id: CurrentUserId, social: SocialServiceDep, body: ReportRequest
+) -> None:
+    """Report a reader to the administrators (the reader is not told)."""
+    await social.report(user_id, body.handle, body.reason, body.note)
+
+
+@router.get("/admin/reports", operation_id="listReports", tags=["admin"])
+async def list_reports(_: CurrentAdminId, social: SocialServiceDep) -> list[ReportResponse]:
+    """Reports, unresolved first."""
+    found, profiles = await social.reports()
+    return [
+        ReportResponse(
+            id=r.id,
+            reporter=_author(profiles.get(r.reporter_id)),
+            reported=_author(profiles.get(r.reported_id)),
+            reason=r.reason,
+            note=r.note,
+            created_at=r.created_at,
+            resolved=r.resolved_at is not None,
+        )
+        for r in found
+    ]
+
+
+@router.post(
+    "/admin/reports/{report_id}/resolve",
+    operation_id="resolveReport",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["admin"],
+)
+async def resolve_report(_: CurrentAdminId, social: SocialServiceDep, report_id: UUID) -> None:
+    await social.resolve_report(report_id)

@@ -11,10 +11,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.models import (
     AnnotationRow,
+    BlockRow,
     FriendshipRow,
     LibraryItemRow,
     ReadingPositionRow,
     RecommendationRow,
+    ReportRow,
     ReviewRow,
     SocialProfileRow,
     SubscriptionRow,
@@ -26,6 +28,8 @@ from babel_api.domain.social import (
     Profile,
     Reading,
     Recommendation,
+    Report,
+    ReportReason,
     Review,
     SharedNote,
 )
@@ -413,6 +417,81 @@ class SqlSocialRepository:
             )
             for row, title in rows
         ]
+
+    # ------------------------------------------------------------ blocks and reports
+    async def block(self, blocker: UUID, blocked: UUID) -> None:
+        await self.remove_friendship(blocker, blocked)
+        await self.unfollow(blocker, blocked)
+        await self.unfollow(blocked, blocker)
+        if await self._session.get(BlockRow, (blocker, blocked)) is None:
+            self._session.add(BlockRow(blocker_id=blocker, blocked_id=blocked))
+        await self._session.flush()
+
+    async def unblock(self, blocker: UUID, blocked: UUID) -> None:
+        await self._session.execute(
+            delete(BlockRow).where(BlockRow.blocker_id == blocker, BlockRow.blocked_id == blocked)
+        )
+
+    async def blocked(self, blocker: UUID) -> list[UUID]:
+        return list(
+            await self._session.scalars(
+                select(BlockRow.blocked_id)
+                .where(BlockRow.blocker_id == blocker)
+                .order_by(BlockRow.created_at.desc())
+            )
+        )
+
+    async def hidden(self, user_id: UUID) -> set[UUID]:
+        """Readers this one blocked, or who blocked this one: invisible to each other."""
+        rows = await self._session.execute(
+            select(BlockRow.blocker_id, BlockRow.blocked_id).where(
+                or_(BlockRow.blocker_id == user_id, BlockRow.blocked_id == user_id)
+            )
+        )
+        return {b if a == user_id else a for a, b in rows}
+
+    async def add_report(self, report: Report) -> None:
+        self._session.add(
+            ReportRow(
+                id=report.id,
+                reporter_id=report.reporter_id,
+                reported_id=report.reported_id,
+                reason=report.reason.value,
+                note=report.note,
+                created_at=report.created_at,
+            )
+        )
+        await self._session.flush()
+
+    async def reports(self, limit: int) -> list[Report]:
+        rows = await self._session.scalars(
+            select(ReportRow)
+            .order_by(ReportRow.resolved_at.is_not(None), ReportRow.created_at.desc())
+            .limit(limit)
+        )
+        return [
+            Report(
+                id=row.id,
+                reporter_id=row.reporter_id,
+                reported_id=row.reported_id,
+                reason=ReportReason(row.reason),
+                note=row.note,
+                created_at=_aware(row.created_at),
+                resolved_at=_aware(row.resolved_at) if row.resolved_at else None,
+            )
+            for row in rows
+        ]
+
+    async def resolve_report(self, report_id: UUID, at: datetime) -> bool:
+        row = await self._session.get(ReportRow, report_id)
+        if row is None:
+            return False
+        row.resolved_at = at
+        await self._session.flush()
+        return True
+
+    async def admins(self) -> list[UUID]:
+        return list(await self._session.scalars(select(UserRow.id).where(UserRow.is_admin)))
 
     async def commit(self) -> None:
         await self._session.commit()
