@@ -1291,5 +1291,93 @@
         "type": "String"
       }
     }
-  }
+  },
+  "absTitle": "Audiobookshelf",
+  "absIntro": "Liez votre Audiobookshelf pour écouter vos livres audio dans Babel, avec statut, étagères et statistiques comme vos livres.",
+  "absUrl": "Adresse d'Audiobookshelf",
+  "absApiKey": "Clé d'API",
+  "absApiKeyHelp": "Créée dans Audiobookshelf : Paramètres › Clés d'API. Recommandé : elle n'expire pas.",
+  "absUsePassword": "Utiliser mon identifiant à la place",
+  "absUseKey": "Utiliser une clé d'API",
+  "absUsername": "Identifiant",
+  "absPassword": "Mot de passe",
+  "absPasswordHelp": "Utilisé une seule fois : Babel ne le garde pas.",
+  "absLink": "Lier",
+  "absLinked": "Lié à {host} · {user}",
+  "@absLinked": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      },
+      "user": {
+        "type": "String"
+      }
+    }
+  },
+  "absExpired": "Audiobookshelf refuse désormais l'accès de Babel : liez-le à nouveau.",
+  "absUnlink": "Délier",
+  "absBrowse": "Parcourir mes livres audio",
+  "absErrorUnauthorized": "Identifiants refusés par Audiobookshelf.",
+  "absErrorUnreachable": "Audiobookshelf ne répond pas à cette adresse.",
+  "absErrorGeneric": "Audiobookshelf n'a pas pu être lié.",
+  "audiobooksTitle": "Livres audio",
+  "audiobooksSearch": "Chercher un livre audio",
+  "audiobookAdd": "Ajouter",
+  "audiobookInLibrary": "Dans votre bibliothèque",
+  "audiobookAdded": "« {title} » est dans votre bibliothèque.",
+  "@audiobookAdded": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "audiobooksEmpty": "Aucun livre audio ici.",
+  "audiobooksNotLinked": "Liez d'abord votre Audiobookshelf, dans Compte.",
+  "narratedBy": "Lu par {names}",
+  "@narratedBy": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "listen": "Écouter",
+  "audioBadge": "Audio",
+  "playerChapters": "Chapitres",
+  "playerSpeed": "Vitesse",
+  "playerSleep": "Minuterie",
+  "sleepOff": "Désactivée",
+  "sleepMinutes": "{minutes} min",
+  "@sleepMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "sleepEndOfChapter": "Fin du chapitre",
+  "sleepLeft": "Arrêt dans {time}",
+  "@sleepLeft": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "playerBack30": "Reculer de 30 s",
+  "playerForward30": "Avancer de 30 s",
+  "playerPlay": "Lecture",
+  "playerPause": "Pause",
+  "playerError": "Lecture impossible : vérifiez votre connexion ou votre Audiobookshelf.",
+  "workCovers": "Couvertures",
+  "coversCount": "{count, plural, =1{1 couverture} other{{count} couvertures}}",
+  "@coversCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "coverUse": "Voir cette couverture"
 }

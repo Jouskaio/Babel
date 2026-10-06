@@ -10,6 +10,9 @@ JANE = SourceWork("OL1W", "Jane Eyre", ("Charlotte Brontë",), 1847, 8235363, No
 FRENCH = SourceEdition(
     "OL10M", "OL1W", "Jane Eyre", "fr", "Gallimard", "2008", 640, "Paperback", 123,
     isbn13=("9782070360246",), isbn10=("2070360245",),
+    cover_ids=(123, 124, 125),
+    description="Orpheline, Jane devient gouvernante à Thornfield Hall, où le maître des lieux "
+    "cache un secret que la nuit trahit : rires dans le couloir, flammes, cris.",
 )  # fmt: skip
 ENGLISH = SourceEdition("OL11M", "OL1W", "Jane Eyre", "en", isbn13=("9780141441146",))
 
@@ -72,7 +75,8 @@ def test_search_then_open_a_work_with_its_editions(
 
     work = client.get(f"/v1/catalog/works/{hit['id']}", headers=auth).json()
 
-    assert work["description"] == "A governess."
+    # The work's own line is short: the fullest edition blurb replaces it.
+    assert work["description"].startswith("Orpheline")
     assert {e["language"] for e in work["editions"]} == {"fr", "en"}
     french = next(e for e in work["editions"] if e["language"] == "fr")
     assert french["isbn13"] == ["9782070360246"]
@@ -151,3 +155,25 @@ def test_details_do_not_override_the_year_and_cover_from_search(
 
     assert work["first_publish_year"] == 1847
     assert work["cover_path"] == "/v1/catalog/covers/8235363/M"
+
+
+def test_editions_show_all_their_covers_and_their_description(
+    client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=auth).json()
+
+    work = client.get(f"/v1/catalog/works/{hit['id']}", params={"lang": "fr"}, headers=auth).json()
+
+    french = next(e for e in work["editions"] if e["language"] == "fr")
+    assert french["cover_paths"] == [
+        "/v1/catalog/covers/123/M",
+        "/v1/catalog/covers/124/M",
+        "/v1/catalog/covers/125/M",
+    ]
+    english = next(e for e in work["editions"] if e["language"] == "en")
+    assert english["cover_paths"] == []
+    # The French blurb is the fullest, and the reader reads French.
+    assert work["description"].startswith("Orpheline")
+    # In English the work's own (shorter) description is not replaced by a French one.
+    other = client.get(f"/v1/catalog/works/{hit['id']}", params={"lang": "en"}, headers=auth).json()
+    assert other["description"].startswith("Orpheline")  # still the longest on offer

@@ -13,6 +13,7 @@ import '../../../core/theme/palette_scope.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
+import '../../audiobooks/presentation/audio_player_view.dart';
 import '../../library/application/library_controller.dart';
 import '../../library/presentation/attach_file.dart';
 import '../application/reader_settings.dart';
@@ -96,6 +97,9 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
             ? CircularProgressIndicator(color: BabelColors.gold)
             : Text(l10n.readerNotFound, style: BabelText.body(15)),
       );
+    }
+    if (item.audioDuration != null) {
+      return AudioPlayerView(item: item, onBack: _back);
     }
     if (item.sha256 == null) {
       // A paper book: its file can be added to read it here too.

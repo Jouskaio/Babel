@@ -88,3 +88,7 @@ String apiUrl(String path) => '${AppConfig.apiBaseUrl}$path';
 final statsApiProvider = Provider<StatsApi>(
   (ref) => StatsApi(ref.watch(apiClientProvider)),
 );
+
+final audiobooksApiProvider = Provider<AudiobooksApi>(
+  (ref) => AudiobooksApi(ref.watch(apiClientProvider)),
+);

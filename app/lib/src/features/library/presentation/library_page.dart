@@ -19,6 +19,7 @@ import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
+import '../../audiobooks/application/audiobooks_providers.dart';
 import '../../social/presentation/book_social_sheets.dart';
 import '../application/library_controller.dart';
 import '../application/shelves.dart';
@@ -172,6 +173,19 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                       ],
                     ),
                   ),
+                  IconButton(
+                    tooltip: l10n.audiobooksTitle,
+                    onPressed: () => context.push(Routes.audiobooks),
+                    style: IconButton.styleFrom(
+                      fixedSize: const Size(48, 48),
+                      side: BorderSide(color: BabelColors.border),
+                    ),
+                    icon: Icon(
+                      Icons.headphones,
+                      color: BabelColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   IconButton(
                     tooltip: l10n.linkTitle,
                     onPressed: () => context.push(Routes.importLink),
@@ -367,8 +381,12 @@ class _BookTile extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             [
-              item.format?.value.toUpperCase() ??
-                  context.l10n.paperBook.toUpperCase(),
+              if (item.audioDuration case final seconds?)
+                '${context.l10n.audioBadge} · ${duration(seconds.toDouble())}'
+                    .toUpperCase()
+              else
+                item.format?.value.toUpperCase() ??
+                    context.l10n.paperBook.toUpperCase(),
               if (item.paper && item.format != null)
                 context.l10n.paperBook.toUpperCase(),
               if (item.status case final status?)
@@ -512,7 +530,17 @@ class _BookActionsState extends ConsumerState<_BookActions> {
             ),
             const SizedBox(height: 24),
             FollowPanel(itemId: item.id),
-            if (item.sha256 == null) ...[
+            if (item.audioDuration != null)
+              PillButton(
+                label: l10n.listen,
+                large: true,
+                expand: true,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  context.push(Routes.read(item.id));
+                },
+              )
+            else if (item.sha256 == null) ...[
               // A paper book: its file can always be added, to read here too.
               PillButton(
                 label: l10n.attachFile,

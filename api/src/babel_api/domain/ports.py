@@ -16,6 +16,7 @@ from babel_api.domain.catalog import (
     Work,
 )
 from babel_api.domain.files import (
+    AudioRef,
     BookFormat,
     BookMetadata,
     Cover,
@@ -184,6 +185,15 @@ class FileRepository(Protocol):
         paper: bool = False,
     ) -> LibraryItem: ...
     async def find_item_of_work(self, user_id: UUID, work_id: UUID) -> LibraryItem | None: ...
+    async def find_audio_item(self, user_id: UUID, remote_id: str) -> LibraryItem | None: ...
+    async def add_audio_item(
+        self,
+        user_id: UUID,
+        title: str,
+        authors: tuple[str, ...],
+        audio: AudioRef,
+        work_id: UUID | None,
+    ) -> LibraryItem: ...
     async def set_file(self, item_id: UUID, sha256: str) -> LibraryItem: ...
     async def set_paper(self, item_id: UUID, paper: bool) -> LibraryItem: ...
     async def clear_file(self, item_id: UUID) -> None: ...

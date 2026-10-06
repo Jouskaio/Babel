@@ -9,6 +9,7 @@ import 'package:babel_api_client/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **addedAt** | [**DateTime**](DateTime.md) |  | 
+**audioDuration** | **num** | An audiobook from the reader's Audiobookshelf: its length in seconds | [optional] 
 **authors** | **List<String>** |  | [default to const []]
 **coverPath** | **String** | Cover found in the file, relative to the API base URL (may answer 404) | [optional] 
 **editionId** | **String** |  | [optional] 

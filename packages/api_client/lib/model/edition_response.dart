@@ -14,6 +14,8 @@ class EditionResponse {
   /// Returns a new [EditionResponse] instance.
   EditionResponse({
     this.coverPath,
+    this.coverPaths = const [],
+    this.description,
     this.format,
     required this.id,
     this.isbn13 = const [],
@@ -25,6 +27,11 @@ class EditionResponse {
   });
 
   String? coverPath;
+
+  /// Every cover known for this edition, the first being cover_path
+  List<String> coverPaths;
+
+  String? description;
 
   String? format;
 
@@ -45,6 +52,8 @@ class EditionResponse {
   @override
   bool operator ==(Object other) => identical(this, other) || other is EditionResponse &&
     other.coverPath == coverPath &&
+    _deepEquality.equals(other.coverPaths, coverPaths) &&
+    other.description == description &&
     other.format == format &&
     other.id == id &&
     _deepEquality.equals(other.isbn13, isbn13) &&
@@ -58,6 +67,8 @@ class EditionResponse {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (coverPath == null ? 0 : coverPath!.hashCode) +
+    (coverPaths.hashCode) +
+    (description == null ? 0 : description!.hashCode) +
     (format == null ? 0 : format!.hashCode) +
     (id.hashCode) +
     (isbn13.hashCode) +
@@ -68,7 +79,7 @@ class EditionResponse {
     (title.hashCode);
 
   @override
-  String toString() => 'EditionResponse[coverPath=$coverPath, format=$format, id=$id, isbn13=$isbn13, language=$language, pageCount=$pageCount, published=$published, publisher=$publisher, title=$title]';
+  String toString() => 'EditionResponse[coverPath=$coverPath, coverPaths=$coverPaths, description=$description, format=$format, id=$id, isbn13=$isbn13, language=$language, pageCount=$pageCount, published=$published, publisher=$publisher, title=$title]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -76,6 +87,12 @@ class EditionResponse {
       json[r'cover_path'] = this.coverPath;
     } else {
       json[r'cover_path'] = null;
+    }
+      json[r'cover_paths'] = this.coverPaths;
+    if (this.description != null) {
+      json[r'description'] = this.description;
+    } else {
+      json[r'description'] = null;
     }
     if (this.format != null) {
       json[r'format'] = this.format;
@@ -128,6 +145,10 @@ class EditionResponse {
 
       return EditionResponse(
         coverPath: mapValueOfType<String>(json, r'cover_path'),
+        coverPaths: json[r'cover_paths'] is Iterable
+            ? (json[r'cover_paths'] as Iterable).cast<String>().toList(growable: false)
+            : const [],
+        description: mapValueOfType<String>(json, r'description'),
         format: mapValueOfType<String>(json, r'format'),
         id: mapValueOfType<String>(json, r'id')!,
         isbn13: json[r'isbn13'] is Iterable
@@ -185,6 +206,7 @@ class EditionResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'cover_paths',
     'id',
     'isbn13',
     'title',

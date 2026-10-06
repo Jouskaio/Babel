@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Path, Query, Response, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from babel_api.api.dependencies import ContainerDep, CurrentUserId, WorkServiceDep
 from babel_api.domain.catalog import Edition, IdentifierKind, Work
@@ -110,6 +110,10 @@ class EditionResponse(BaseModel):
     page_count: int | None
     format: str | None
     cover_path: str | None
+    cover_paths: list[str] = Field(
+        description="Every cover known for this edition, the first being cover_path"
+    )
+    description: str | None
     isbn13: list[str]
 
     @classmethod
@@ -123,6 +127,14 @@ class EditionResponse(BaseModel):
             page_count=edition.page_count,
             format=edition.format,
             cover_path=_cover_path(edition.cover_id),
+            cover_paths=[
+                p
+                for p in (
+                    _cover_path(c) for c in dict.fromkeys((edition.cover_id, *edition.cover_ids))
+                )
+                if p
+            ],
+            description=edition.description,
             isbn13=edition.identifier(IdentifierKind.ISBN13),
         )
 
@@ -138,7 +150,7 @@ class WorkResponse(WorkSummaryResponse):
         summary = WorkSummaryResponse.of(detail.work, *detail.localized(language))
         return cls(
             **summary.model_dump(),
-            description=detail.work.description,
+            description=detail.described(language),
             editions=[EditionResponse.of(e) for e in detail.editions],
         )
 

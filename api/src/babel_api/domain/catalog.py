@@ -55,6 +55,9 @@ class Edition:
     format: str | None = None
     cover_id: int | None = None
     identifiers: tuple[Identifier, ...] = ()
+    # Every cover the catalog has for this edition (the first is ``cover_id``).
+    cover_ids: tuple[int, ...] = ()
+    description: str | None = None
 
     def identifier(self, kind: IdentifierKind) -> list[str]:
         return [i.value for i in self.identifiers if i.kind is kind]
@@ -110,3 +113,5 @@ class SourceEdition:
     cover_id: int | None = None
     isbn13: tuple[str, ...] = ()
     isbn10: tuple[str, ...] = ()
+    cover_ids: tuple[int, ...] = ()
+    description: str | None = None

@@ -10,6 +10,8 @@ from fastapi import Depends, Header, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from babel_api.adapters.audiobookshelf import AbsClient
+from babel_api.adapters.db.abs_repository import SqlAbsRepository
 from babel_api.adapters.db.catalog_repository import SqlCatalogRepository
 from babel_api.adapters.db.file_repository import SqlFileRepository
 from babel_api.adapters.db.follow_repository import SqlFollowRepository
@@ -39,6 +41,7 @@ from babel_api.domain.ports import (
 )
 from babel_api.domain.sources import SourceKind
 from babel_api.domain.users import IdentityProvider
+from babel_api.services.audiobooks import AbsService
 from babel_api.services.auth import AuthService
 from babel_api.services.catalog import CatalogService
 from babel_api.services.files import FileService
@@ -76,6 +79,7 @@ class Container:
     comics: ComicConverter
     kavita_client: Callable[[str], KavitaClient]
     kavita: KavitaProvisioner
+    abs_client: Callable[[str], AbsClient]
 
 
 def get_container(request: Request) -> Container:
@@ -310,3 +314,19 @@ def get_stats_service(
 
 
 StatsServiceDep = Annotated[StatsService, Depends(get_stats_service)]
+
+
+def get_abs_service(
+    container: ContainerDep, session: Annotated[AsyncSession, Depends(get_session)]
+) -> AbsService:
+    return AbsService(
+        SqlAbsRepository(session),
+        SqlFileRepository(session),
+        SqlSyncRepository(session),
+        container.secrets,
+        container.covers,
+        container.abs_client,
+    )
+
+
+AbsServiceDep = Annotated[AbsService, Depends(get_abs_service)]

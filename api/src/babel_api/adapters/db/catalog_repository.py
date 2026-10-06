@@ -49,6 +49,8 @@ def _to_edition(row: EditionRow) -> Edition:
         page_count=row.page_count,
         format=row.format,
         cover_id=row.cover_id,
+        cover_ids=tuple(row.cover_ids or ()),
+        description=row.description,
         identifiers=tuple(
             Identifier(IdentifierKind(i.kind), i.value)
             for i in sorted(row.identifiers, key=lambda i: (i.kind, i.value))
@@ -117,6 +119,8 @@ class SqlCatalogRepository:
             row.page_count = source.page_count
             row.format = source.format
             row.cover_id = source.cover_id
+            row.cover_ids = list(source.cover_ids)
+            row.description = source.description or row.description
             await self._session.flush()
             wanted = {(IdentifierKind.OPEN_LIBRARY.value, source.open_library_id)}
             wanted |= {(IdentifierKind.ISBN13.value, i) for i in source.isbn13}

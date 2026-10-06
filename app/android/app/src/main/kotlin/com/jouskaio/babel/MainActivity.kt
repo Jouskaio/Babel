@@ -5,7 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.OpenableColumns
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
@@ -14,7 +14,7 @@ import java.io.File
  * Receives "Share → Babel" (links and book files) and "Open with Babel" (book files), and
  * hands them to Flutter on the `babel/share` channel as `{text: …}` or `{file: path}`.
  */
-class MainActivity : FlutterActivity() {
+class MainActivity : AudioServiceActivity() {
     private var channel: MethodChannel? = null
     private var pending: Map<String, String>? = null
     private var flutterReady = false

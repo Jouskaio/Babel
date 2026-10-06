@@ -76,6 +76,16 @@ Class | Method | HTTP request | Description
 *AdminApi* | [**resolveReport**](doc//AdminApi.md#resolvereport) | **POST** /v1/admin/reports/{report_id}/resolve | Resolve Report
 *AdminApi* | [**setPremium**](doc//AdminApi.md#setpremium) | **PUT** /v1/admin/users/{member_id}/premium | Set Premium
 *AdminApi* | [**withdrawFile**](doc//AdminApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
+*AudiobooksApi* | [**addAudiobook**](doc//AudiobooksApi.md#addaudiobook) | **POST** /v1/audiobookshelf/books/{remote_id} | Add
+*AudiobooksApi* | [**browseAudiobooks**](doc//AudiobooksApi.md#browseaudiobooks) | **GET** /v1/audiobookshelf/libraries/{library_id}/books | Browse
+*AudiobooksApi* | [**getAudioCover**](doc//AudiobooksApi.md#getaudiocover) | **GET** /v1/audio-covers/{key} | Cover
+*AudiobooksApi* | [**getAudiobookLibraries**](doc//AudiobooksApi.md#getaudiobooklibraries) | **GET** /v1/audiobookshelf/libraries | Libraries
+*AudiobooksApi* | [**getAudiobookshelf**](doc//AudiobooksApi.md#getaudiobookshelf) | **GET** /v1/me/audiobookshelf | Get Link
+*AudiobooksApi* | [**getPlayback**](doc//AudiobooksApi.md#getplayback) | **GET** /v1/library/{item_id}/audio | Playback
+*AudiobooksApi* | [**linkAudiobookshelf**](doc//AudiobooksApi.md#linkaudiobookshelf) | **POST** /v1/me/audiobookshelf | Link
+*AudiobooksApi* | [**saveAudioProgress**](doc//AudiobooksApi.md#saveaudioprogress) | **PUT** /v1/library/{item_id}/audio/progress | Save Progress
+*AudiobooksApi* | [**streamAudioTrack**](doc//AudiobooksApi.md#streamaudiotrack) | **GET** /v1/library/{item_id}/audio/tracks/{index} | Stream
+*AudiobooksApi* | [**unlinkAudiobookshelf**](doc//AudiobooksApi.md#unlinkaudiobookshelf) | **DELETE** /v1/me/audiobookshelf | Unlink
 *AuthApi* | [**forgotPassword**](doc//AuthApi.md#forgotpassword) | **POST** /v1/auth/password/forgot | Forgot Password
 *AuthApi* | [**getAuthProviders**](doc//AuthApi.md#getauthproviders) | **GET** /v1/auth/providers | Get Providers
 *AuthApi* | [**login**](doc//AuthApi.md#login) | **POST** /v1/auth/login | Login
@@ -163,8 +173,15 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AbsBookResponse](doc//AbsBookResponse.md)
+ - [AbsLibraryResponse](doc//AbsLibraryResponse.md)
+ - [AbsLinkRequest](doc//AbsLinkRequest.md)
+ - [AbsLinkResponse](doc//AbsLinkResponse.md)
  - [Ao3Config](doc//Ao3Config.md)
  - [Audience](doc//Audience.md)
+ - [AudioChapterResponse](doc//AudioChapterResponse.md)
+ - [AudioProgressRequest](doc//AudioProgressRequest.md)
+ - [AudioTrackResponse](doc//AudioTrackResponse.md)
  - [AuthorCountResponse](doc//AuthorCountResponse.md)
  - [AuthorResponse](doc//AuthorResponse.md)
  - [BatchImportResponse](doc//BatchImportResponse.md)
@@ -212,6 +229,7 @@ Class | Method | HTTP request | Description
  - [OperationResult](doc//OperationResult.md)
  - [PaperBookRequest](doc//PaperBookRequest.md)
  - [PaperRequest](doc//PaperRequest.md)
+ - [PlaybackResponse](doc//PlaybackResponse.md)
  - [PremiumRequest](doc//PremiumRequest.md)
  - [ProviderLoginRequest](doc//ProviderLoginRequest.md)
  - [ProvidersResponse](doc//ProvidersResponse.md)
@@ -230,6 +248,7 @@ Class | Method | HTTP request | Description
  - [RegisterDeviceRequest](doc//RegisterDeviceRequest.md)
  - [RegisterRequest](doc//RegisterRequest.md)
  - [RelationResponse](doc//RelationResponse.md)
+ - [RemotePositionResponse](doc//RemotePositionResponse.md)
  - [ReportReason](doc//ReportReason.md)
  - [ReportRequest](doc//ReportRequest.md)
  - [ReportResponse](doc//ReportResponse.md)
