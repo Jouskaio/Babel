@@ -186,6 +186,8 @@ class ApiClient {
           return Ao3Config.fromJson(value);
         case 'Audience':
           return AudienceTypeTransformer().decode(value);
+        case 'AuthorCountResponse':
+          return AuthorCountResponse.fromJson(value);
         case 'AuthorResponse':
           return AuthorResponse.fromJson(value);
         case 'BatchImportResponse':
@@ -222,6 +224,8 @@ class ApiClient {
           return FeedEntryResponse.fromJson(value);
         case 'FeedKind':
           return FeedKindTypeTransformer().decode(value);
+        case 'FinishedBookResponse':
+          return FinishedBookResponse.fromJson(value);
         case 'FollowResponse':
           return FollowResponse.fromJson(value);
         case 'ForgotPasswordRequest':
@@ -358,6 +362,8 @@ class ApiClient {
           return WorkReviewResponse.fromJson(value);
         case 'WorkSummaryResponse':
           return WorkSummaryResponse.fromJson(value);
+        case 'YearStatsResponse':
+          return YearStatsResponse.fromJson(value);
         default:
           dynamic match;
           if (value is List && (match = _regList.firstMatch(targetType)?.group(1)) != null) {

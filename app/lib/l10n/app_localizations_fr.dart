@@ -1944,4 +1944,144 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get goThere => 'Y aller';
+
+  @override
+  String get statsTitle => 'Mon année de lecture';
+
+  @override
+  String get statsBooksRead => 'Livres lus';
+
+  @override
+  String get statsReadingDays => 'Jours de lecture';
+
+  @override
+  String get statsLongestStreak => 'Plus longue série';
+
+  @override
+  String get statsNotes => 'Notes';
+
+  @override
+  String get statsByMonth => 'Mois par mois';
+
+  @override
+  String get statsTopAuthors => 'Vos auteurs';
+
+  @override
+  String get statsBooksList => 'Vos lectures';
+
+  @override
+  String statsCurrentStreak(String days) {
+    return 'Série en cours : $days';
+  }
+
+  @override
+  String statsDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours',
+      one: '1 jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statsFinished(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count livres lus',
+      one: '1 livre lu',
+      zero: 'Aucun livre lu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get statsEmpty =>
+      'Rien encore cette année : vos livres terminés apparaîtront ici.';
+
+  @override
+  String statsOpenWrap(String year) {
+    return 'Voir mon récap $year';
+  }
+
+  @override
+  String statsAverage(String rating) {
+    return 'Note moyenne $rating / 5';
+  }
+
+  @override
+  String statsAbandoned(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count abandonnés',
+      one: '1 abandonné',
+      zero: '',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wrapIntro(String year) {
+    return '$year en livres';
+  }
+
+  @override
+  String get wrapIntroSub => 'Votre année de lecture, en quelques pages.';
+
+  @override
+  String wrapFinished(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'livres terminés',
+      one: 'livre terminé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wrapDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'jours passés à lire',
+      one: 'jour passé à lire',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wrapStreak(String days) {
+    return 'Votre plus longue série : $days d\'affilée.';
+  }
+
+  @override
+  String get wrapBestMonth => 'Votre mois le plus lu';
+
+  @override
+  String get wrapAuthor => 'Votre auteur·rice de l\'année';
+
+  @override
+  String wrapNotes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'notes et surlignages',
+      one: 'note ou surlignage',
+      zero: 'Pas de note cette année',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wrapOutro => 'À l\'année prochaine';
+
+  @override
+  String get wrapOutroSub => 'Merci d\'avoir lu avec Babel.';
+
+  @override
+  String get wrapTapHint => 'Touchez pour continuer';
 }

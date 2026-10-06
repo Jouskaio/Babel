@@ -8,6 +8,13 @@ import 'babel_colors.dart';
 /// Cormorant Garamond for titles, Inter Tight for the interface, DM Mono for small
 /// uppercase labels and Literata for book content.
 abstract final class BabelText {
+  /// Figures in the title face, as modern numbers: Cormorant's old-style "1" reads
+  /// as a roman "I".
+  static TextStyle figure(double size, {Color? color}) => title(
+    size,
+    color: color,
+  ).copyWith(fontFeatures: const [FontFeature.liningFigures()]);
+
   static TextStyle title(double size, {Color? color, bool italic = false}) =>
       GoogleFonts.cormorantGaramond(
         fontSize: size,

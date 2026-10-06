@@ -386,6 +386,51 @@ class FakeServer {
       });
     }
     if (path.endsWith('/reader-notes')) return json(readerNotes);
+    if (path == '/v1/me/stats') {
+      return json({
+        'year': 2026,
+        'finished': [
+          {
+            'item_id': 'i1',
+            'title': 'Jane Eyre',
+            'authors': ['Charlotte Brontë'],
+            'format': 'epub',
+            'finished_at': '2026-03-03T20:00:00Z',
+            'started_at': '2026-03-01T20:00:00Z',
+            'rating': 5,
+            'work_id': null,
+            'cover_path': null,
+          },
+          {
+            'item_id': 'i2',
+            'title': 'Villette',
+            'authors': ['Charlotte Brontë'],
+            'format': 'epub',
+            'finished_at': '2026-03-20T20:00:00Z',
+            'started_at': null,
+            'rating': null,
+            'work_id': null,
+            'cover_path': null,
+          },
+        ],
+        'started': 3,
+        'abandoned': 1,
+        'by_month': [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'best_month': 3,
+        'reading_days': 41,
+        'longest_streak': 9,
+        'current_streak': 2,
+        'busiest_day': '2026-03-02',
+        'notes': 12,
+        'reviews': 1,
+        'average_rating': 5.0,
+        'top_authors': [
+          {'name': 'Charlotte Brontë', 'books': 2},
+        ],
+        'formats': {'epub': 2},
+        'years': [2026, 2025],
+      });
+    }
     if (path.startsWith('/v1/sync/') && request.method == 'POST') {
       final body = jsonDecode(request.body) as Map<String, dynamic>;
       final ops = (body['operations'] as List).cast<Map<String, Object?>>();

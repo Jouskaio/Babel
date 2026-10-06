@@ -149,6 +149,7 @@ Class | Method | HTTP request | Description
 *SourcesApi* | [**importSource**](doc//SourcesApi.md#importsource) | **POST** /v1/sources/{source_id}/import | Import All
 *SourcesApi* | [**importSourceEntry**](doc//SourcesApi.md#importsourceentry) | **POST** /v1/sources/{source_id}/entries/{entry_id}/import | Import Entry
 *SourcesApi* | [**scanSource**](doc//SourcesApi.md#scansource) | **POST** /v1/sources/{source_id}/scan | Scan Source
+*StatsApi* | [**getYearStats**](doc//StatsApi.md#getyearstats) | **GET** /v1/me/stats | Get Year Stats
 *SyncApi* | [**getDevices**](doc//SyncApi.md#getdevices) | **GET** /v1/devices | Get Devices
 *SyncApi* | [**pullChanges**](doc//SyncApi.md#pullchanges) | **GET** /v1/sync | Pull Changes
 *SyncApi* | [**pushOperations**](doc//SyncApi.md#pushoperations) | **POST** /v1/sync/{device_id} | Push Operations
@@ -161,6 +162,7 @@ Class | Method | HTTP request | Description
 
  - [Ao3Config](doc//Ao3Config.md)
  - [Audience](doc//Audience.md)
+ - [AuthorCountResponse](doc//AuthorCountResponse.md)
  - [AuthorResponse](doc//AuthorResponse.md)
  - [BatchImportResponse](doc//BatchImportResponse.md)
  - [BookFormat](doc//BookFormat.md)
@@ -179,6 +181,7 @@ Class | Method | HTTP request | Description
  - [EntryStatus](doc//EntryStatus.md)
  - [FeedEntryResponse](doc//FeedEntryResponse.md)
  - [FeedKind](doc//FeedKind.md)
+ - [FinishedBookResponse](doc//FinishedBookResponse.md)
  - [FollowResponse](doc//FollowResponse.md)
  - [ForgotPasswordRequest](doc//ForgotPasswordRequest.md)
  - [FriendStatus](doc//FriendStatus.md)
@@ -247,6 +250,7 @@ Class | Method | HTTP request | Description
  - [WorkResponse](doc//WorkResponse.md)
  - [WorkReviewResponse](doc//WorkReviewResponse.md)
  - [WorkSummaryResponse](doc//WorkSummaryResponse.md)
+ - [YearStatsResponse](doc//YearStatsResponse.md)
 
 
 ## Documentation For Authorization

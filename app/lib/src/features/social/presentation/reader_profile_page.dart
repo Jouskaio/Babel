@@ -181,7 +181,7 @@ class _Count extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      Text('$value', style: BabelText.title(32)),
+      Text('$value', style: BabelText.figure(32)),
       Text(
         label.toUpperCase(),
         style: BabelText.label(9, color: BabelColors.textSecondary),

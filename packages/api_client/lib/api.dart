@@ -37,10 +37,12 @@ part 'api/kavita_api.dart';
 part 'api/library_api.dart';
 part 'api/social_api.dart';
 part 'api/sources_api.dart';
+part 'api/stats_api.dart';
 part 'api/sync_api.dart';
 
 part 'model/ao3_config.dart';
 part 'model/audience.dart';
+part 'model/author_count_response.dart';
 part 'model/author_response.dart';
 part 'model/batch_import_response.dart';
 part 'model/book_format.dart';
@@ -59,6 +61,7 @@ part 'model/entity_kind.dart';
 part 'model/entry_status.dart';
 part 'model/feed_entry_response.dart';
 part 'model/feed_kind.dart';
+part 'model/finished_book_response.dart';
 part 'model/follow_response.dart';
 part 'model/forgot_password_request.dart';
 part 'model/friend_status.dart';
@@ -127,6 +130,7 @@ part 'model/work_readers_response.dart';
 part 'model/work_response.dart';
 part 'model/work_review_response.dart';
 part 'model/work_summary_response.dart';
+part 'model/year_stats_response.dart';
 
 
 /// An [ApiClient] instance that uses the default values obtained from
