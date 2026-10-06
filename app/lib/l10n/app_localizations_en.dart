@@ -2339,4 +2339,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get playerError =>
       'Cannot play: check your connection or your Audiobookshelf.';
+
+  @override
+  String get workCovers => 'Covers';
+
+  @override
+  String coversCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count covers',
+      one: '1 cover',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get coverUse => 'Show this cover';
 }

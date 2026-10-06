@@ -815,5 +815,8 @@
   "playerForward30": "Forward 30 s",
   "playerPlay": "Play",
   "playerPause": "Pause",
-  "playerError": "Cannot play: check your connection or your Audiobookshelf."
+  "playerError": "Cannot play: check your connection or your Audiobookshelf.",
+  "workCovers": "Covers",
+  "coversCount": "{count, plural, =1{1 cover} other{{count} covers}}",
+  "coverUse": "Show this cover"
 }

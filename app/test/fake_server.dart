@@ -64,6 +64,33 @@ class FakeServer {
   final changes = <Map<String, Object?>>[];
   final pushed = <Map<String, Object?>>[];
 
+  /// The work page's answer.
+  Map<String, Object?> work = {
+    'id': 'w1',
+    'title': 'Jane Eyre',
+    'original_title': 'Jane Eyre',
+    'authors': ['Charlotte Brontë'],
+    'first_publish_year': 1847,
+    'cover_path': '/v1/catalog/covers/1/M',
+    'edition_count': 2,
+    'description': 'Une orpheline devient gouvernante.',
+    'editions': [
+      {
+        'id': 'e1',
+        'title': 'Jane Eyre',
+        'language': 'fr',
+        'publisher': 'Gallimard',
+        'published': '2008',
+        'page_count': 640,
+        'format': 'Paperback',
+        'cover_path': '/v1/catalog/covers/10/M',
+        'cover_paths': ['/v1/catalog/covers/10/M', '/v1/catalog/covers/11/M'],
+        'description': 'Le résumé complet de cette édition.',
+        'isbn13': <String>[],
+      },
+    ],
+  };
+
   /// Audiobookshelf: linked or not, and the audiobooks added.
   bool absLinked = false;
   final absAdded = <String>[];
@@ -407,6 +434,17 @@ class FakeServer {
       });
     }
     if (path.endsWith('/reader-notes')) return json(readerNotes);
+    if (path.startsWith('/v1/catalog/works/') && !path.endsWith('/readers')) {
+      return json(work);
+    }
+    if (path.endsWith('/readers')) {
+      return json({
+        'rating': null,
+        'ratings': 0,
+        'reviews': <Object?>[],
+        'notes': <Object?>[],
+      });
+    }
     if (path == '/v1/me/audiobookshelf') {
       if (request.method == 'POST') {
         final body = jsonDecode(request.body) as Map<String, Object?>;

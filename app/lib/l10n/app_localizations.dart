@@ -3907,6 +3907,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Lecture impossible : vérifiez votre connexion ou votre Audiobookshelf.'**
   String get playerError;
+
+  /// No description provided for @workCovers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couvertures'**
+  String get workCovers;
+
+  /// No description provided for @coversCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 couverture} other{{count} couvertures}}'**
+  String coversCount(int count);
+
+  /// No description provided for @coverUse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir cette couverture'**
+  String get coverUse;
 }
 
 class _AppLocalizationsDelegate

@@ -1369,5 +1369,15 @@
   "playerForward30": "Avancer de 30 s",
   "playerPlay": "Lecture",
   "playerPause": "Pause",
-  "playerError": "Lecture impossible : vérifiez votre connexion ou votre Audiobookshelf."
+  "playerError": "Lecture impossible : vérifiez votre connexion ou votre Audiobookshelf.",
+  "workCovers": "Couvertures",
+  "coversCount": "{count, plural, =1{1 couverture} other{{count} couvertures}}",
+  "@coversCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "coverUse": "Voir cette couverture"
 }
