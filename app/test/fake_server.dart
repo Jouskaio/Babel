@@ -165,6 +165,23 @@ class FakeServer {
     'device_id': null,
   });
 
+  /// A book owned on paper, without a file.
+  void addPaperItem(String id, String title) => changes.add({
+    'seq': changes.length + 1,
+    'entity': 'library_item',
+    'entity_id': id,
+    'op': 'upsert',
+    'data': {
+      ...libraryItem(id, title),
+      'format': null,
+      'size': null,
+      'sha256': null,
+      'cover_path': null,
+      'paper': true,
+    },
+    'device_id': null,
+  });
+
   void goOnline() {
     offline = false;
     connectivity.add([ConnectivityResult.wifi]);

@@ -2066,4 +2066,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wrapTapHint => 'Tap to continue';
+
+  @override
+  String get paperBook => 'Paper';
+
+  @override
+  String get paperOwned => 'I own it on paper';
+
+  @override
+  String get paperOwnedHint =>
+      'Follow your reading without a file: status, progress, notes and review.';
+
+  @override
+  String paperAdded(String title) {
+    return '“$title” is in your library, on paper.';
+  }
+
+  @override
+  String get attachFile => 'Add the file';
+
+  @override
+  String get attachFileHint =>
+      'To read on this device too: status, progress, review and notes stay the book\'s.';
+
+  @override
+  String get paperNoFile => 'Paper book: add its file to read it here too.';
+
+  @override
+  String get attachConflict =>
+      'This file is already another book of your library.';
+
+  @override
+  String attached(String title) {
+    return 'File added: “$title” reads here too.';
+  }
 }

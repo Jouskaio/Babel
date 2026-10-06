@@ -738,5 +738,14 @@
   "wrapNotes": "{count, plural, =0{No notes this year} =1{note or highlight} other{notes and highlights}}",
   "wrapOutro": "See you next year",
   "wrapOutroSub": "Thank you for reading with Babel.",
-  "wrapTapHint": "Tap to continue"
+  "wrapTapHint": "Tap to continue",
+  "paperBook": "Paper",
+  "paperOwned": "I own it on paper",
+  "paperOwnedHint": "Follow your reading without a file: status, progress, notes and review.",
+  "paperAdded": "“{title}” is in your library, on paper.",
+  "attachFile": "Add the file",
+  "attachFileHint": "To read on this device too: status, progress, review and notes stay the book's.",
+  "paperNoFile": "Paper book: add its file to read it here too.",
+  "attachConflict": "This file is already another book of your library.",
+  "attached": "File added: “{title}” reads here too."
 }

@@ -14,6 +14,7 @@ import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../library/application/library_controller.dart';
+import '../../library/presentation/attach_file.dart';
 import '../application/reader_settings.dart';
 import '../application/reading_position.dart';
 import '../data/comic_book.dart';
@@ -96,6 +97,27 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
             : Text(l10n.readerNotFound, style: BabelText.body(15)),
       );
     }
+    if (item.sha256 == null) {
+      // A paper book: its file can be added to read it here too.
+      return _Message(
+        onBack: _back,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              l10n.paperNoFile,
+              textAlign: TextAlign.center,
+              style: BabelText.body(15),
+            ),
+            const SizedBox(height: 20),
+            PillButton(
+              label: l10n.attachFile,
+              onPressed: () => attachFileTo(context, ref, item),
+            ),
+          ],
+        ),
+      );
+    }
     _opening ??= _open(item);
     return FutureBuilder<_Opened>(
       future: _opening,
@@ -145,7 +167,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
         BookFormat.epub => EpubView(
           book: EpubBook.open(opened.bytes),
           itemId: item.id,
-          fileSha256: item.sha256,
+          fileSha256: item.sha256!,
           title: item.title,
           start: opened.start,
           onPosition: _savePosition,
@@ -154,7 +176,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
         BookFormat.cbz || BookFormat.cbr => ComicView(
           book: ComicBook.open(opened.bytes),
           itemId: item.id,
-          fileSha256: item.sha256,
+          fileSha256: item.sha256!,
           title: item.title,
           start: opened.start,
           onPosition: _savePosition,
@@ -163,7 +185,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
         BookFormat.pdf => PdfView(
           bytes: opened.bytes,
           itemId: item.id,
-          fileSha256: item.sha256,
+          fileSha256: item.sha256!,
           title: item.title,
           start: opened.start,
           onPosition: _savePosition,

@@ -22,11 +22,10 @@ import '../../../routing/router.dart';
 import '../../social/presentation/book_social_sheets.dart';
 import '../application/library_controller.dart';
 import '../application/shelves.dart';
+import 'attach_file.dart';
 import 'book_state.dart';
 import 'follow_panel.dart';
 import 'link_work_sheet.dart';
-
-const _acceptedExtensions = ['epub', 'pdf', 'cbz', 'cbr'];
 
 /// The reader's library (design: Penpot "screen / bibliotheque").
 class LibraryPage extends ConsumerStatefulWidget {
@@ -91,7 +90,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   Future<void> _import() async {
     final picked = await FilePicker.pickFiles(
       type: FileType.custom,
-      allowedExtensions: _acceptedExtensions,
+      allowedExtensions: bookExtensions,
     );
     if (picked.isEmpty || !mounted) return;
     await _importFile(picked.first.xFile);
@@ -368,7 +367,10 @@ class _BookTile extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             [
-              item.format.value.toUpperCase(),
+              item.format?.value.toUpperCase() ??
+                  context.l10n.paperBook.toUpperCase(),
+              if (item.paper && item.format != null)
+                context.l10n.paperBook.toUpperCase(),
               if (item.status case final status?)
                 statusLabel(context.l10n, status).toUpperCase(),
               if (item.hidden == true) context.l10n.hiddenBadge.toUpperCase(),
@@ -397,10 +399,47 @@ class _BookActions extends ConsumerStatefulWidget {
 
 class _BookActionsState extends ConsumerState<_BookActions> {
   double? _progress;
-  late final Future<bool> _onDevice = isOnDevice(
+  late final Future<bool> _onDevice = switch ((
     widget.item.sha256,
-    widget.item.format.value,
-  );
+    widget.item.format,
+  )) {
+    (final sha256?, final format?) => isOnDevice(sha256, format.value),
+    _ => Future.value(false),
+  };
+
+  Future<void> _attach() async {
+    setState(() => _progress = 0);
+    await attachFileTo(
+      context,
+      ref,
+      liveItem(ref, widget.item),
+      onProgress: (p) => mounted ? setState(() => _progress = p) : null,
+    );
+    if (mounted) setState(() => _progress = null);
+  }
+
+  Future<void> _setPaper(LibraryItemResponse item, bool paper) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    final navigator = Navigator.of(context);
+    try {
+      final updated = await ref
+          .read(libraryApiProvider)
+          .setPaper(item.id, PaperRequest(paper: paper));
+      if (!paper && item.sha256 == null) {
+        // A paper book no longer owned leaves the library (its data stays).
+        await ref.read(libraryControllerProvider.notifier).reload();
+        navigator.pop();
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.removed(item.title))),
+        );
+      } else if (updated != null) {
+        await ref.read(libraryControllerProvider.notifier).keep(updated);
+      }
+    } on ApiException {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.errorNetwork)));
+    }
+  }
 
   Future<void> _download() async {
     final l10n = context.l10n;
@@ -464,62 +503,99 @@ class _BookActionsState extends ConsumerState<_BookActions> {
               Text(item.authors.join(', '), style: BabelText.body(14)),
             const SizedBox(height: 6),
             Text(
-              '${item.format.value.toUpperCase()} · ${fileSize(context, item.size)}',
+              [
+                if ((item.format, item.size) case (final format?, final size?))
+                  '${format.value.toUpperCase()} · ${fileSize(context, size)}',
+                if (item.paper) l10n.paperBook.toUpperCase(),
+              ].join(' · '),
               style: BabelText.label(10, color: BabelColors.textSecondary),
             ),
             const SizedBox(height: 24),
             FollowPanel(itemId: item.id),
-            PillButton(
-              label: l10n.readBook,
-              large: true,
-              expand: true,
-              onPressed: _progress == null
-                  ? () {
-                      Navigator.of(context).pop();
-                      context.push(Routes.read(item.id));
-                    }
-                  : null,
-            ),
-            const SizedBox(height: 12),
-            if (_progress case final progress?)
-              LinearProgressIndicator(
-                value: progress,
-                color: BabelColors.gold,
-                backgroundColor: BabelColors.sunken,
-              )
-            else
-              FutureBuilder<bool>(
-                future: _onDevice,
-                builder: (context, snapshot) => snapshot.data == true
-                    // Already kept here: a status, not a button.
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.offline_pin_outlined,
-                              size: 18,
-                              color: BabelColors.gold,
-                            ),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              child: Text(
-                                l10n.offlineReady,
-                                style: BabelText.body(14),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : PillButton(
-                        label: l10n.downloadOffline,
-                        kind: PillButtonKind.secondary,
-                        expand: true,
-                        onPressed: _download,
-                      ),
+            if (item.sha256 == null) ...[
+              // A paper book: its file can always be added, to read here too.
+              PillButton(
+                label: l10n.attachFile,
+                large: true,
+                expand: true,
+                onPressed: _progress == null ? _attach : null,
               ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 8),
+              if (_progress case final progress?)
+                LinearProgressIndicator(
+                  value: progress,
+                  color: BabelColors.gold,
+                  backgroundColor: BabelColors.sunken,
+                )
+              else
+                Text(
+                  l10n.attachFileHint,
+                  textAlign: TextAlign.center,
+                  style: BabelText.body(12),
+                ),
+            ] else ...[
+              PillButton(
+                label: l10n.readBook,
+                large: true,
+                expand: true,
+                onPressed: _progress == null
+                    ? () {
+                        Navigator.of(context).pop();
+                        context.push(Routes.read(item.id));
+                      }
+                    : null,
+              ),
+              const SizedBox(height: 12),
+              if (_progress case final progress?)
+                LinearProgressIndicator(
+                  value: progress,
+                  color: BabelColors.gold,
+                  backgroundColor: BabelColors.sunken,
+                )
+              else
+                FutureBuilder<bool>(
+                  future: _onDevice,
+                  builder: (context, snapshot) => snapshot.data == true
+                      // Already kept here: a status, not a button.
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.offline_pin_outlined,
+                                size: 18,
+                                color: BabelColors.gold,
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  l10n.offlineReady,
+                                  style: BabelText.body(14),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : PillButton(
+                          label: l10n.downloadOffline,
+                          kind: PillButtonKind.secondary,
+                          expand: true,
+                          onPressed: _download,
+                        ),
+                ),
+            ],
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: item.paper,
+              activeThumbColor: BabelColors.gold,
+              title: Text(
+                l10n.paperOwned,
+                style: BabelText.body(15, color: BabelColors.textPrimary),
+              ),
+              onChanged: (paper) => _setPaper(item, paper),
+            ),
+            const SizedBox(height: 8),
             StatusPicker(item: item),
             const SizedBox(height: 14),
             ProgressEditor(item: item),
@@ -869,7 +945,8 @@ class _AddOwnBooks extends StatelessWidget {
 String? libraryCoverUrl(LibraryItemResponse item) {
   final path =
       item.coverPath ??
-      (item.format == BookFormat.epub || item.format == BookFormat.cbz
+      (item.sha256 != null &&
+              (item.format == BookFormat.epub || item.format == BookFormat.cbz)
           ? '/v1/files/${item.sha256}/cover'
           : null);
   return path == null ? null : apiUrl(path);

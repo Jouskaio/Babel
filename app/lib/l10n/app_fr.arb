@@ -1165,5 +1165,28 @@
   },
   "wrapOutro": "À l'année prochaine",
   "wrapOutroSub": "Merci d'avoir lu avec Babel.",
-  "wrapTapHint": "Touchez pour continuer"
+  "wrapTapHint": "Touchez pour continuer",
+  "paperBook": "Papier",
+  "paperOwned": "Je l'ai en papier",
+  "paperOwnedHint": "Suivez votre lecture sans fichier : statut, progression, notes et avis.",
+  "paperAdded": "« {title} » est dans votre bibliothèque, en papier.",
+  "@paperAdded": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "attachFile": "Ajouter le fichier",
+  "attachFileHint": "Pour lire aussi sur cet appareil : statut, progression, avis et notes restent ceux du livre.",
+  "paperNoFile": "Livre papier : ajoutez son fichier pour le lire aussi ici.",
+  "attachConflict": "Ce fichier est déjà un autre livre de votre bibliothèque.",
+  "attached": "Fichier ajouté : « {title} » se lit aussi ici.",
+  "@attached": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  }
 }

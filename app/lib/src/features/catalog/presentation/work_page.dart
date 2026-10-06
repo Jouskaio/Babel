@@ -11,6 +11,7 @@ import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../library/application/history.dart';
+import '../../library/application/library_controller.dart';
 import '../../library/presentation/book_trace.dart';
 import '../application/catalog_providers.dart';
 
@@ -55,6 +56,38 @@ class _WorkBody extends ConsumerStatefulWidget {
 
 class _WorkBodyState extends ConsumerState<_WorkBody> {
   bool _expanded = false;
+  bool _adding = false;
+
+  /// A book owned on paper, followed without a file (one can be added later).
+  Future<void> _addPaper(WorkResponse work) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _adding = true);
+    try {
+      final item = await ref
+          .read(libraryApiProvider)
+          .addPaperBook(PaperBookRequest(workId: work.id));
+      if (item != null) {
+        await ref.read(libraryControllerProvider.notifier).keep(item);
+        ref.invalidate(libraryHistoryProvider);
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.paperAdded(item.title))),
+        );
+      }
+    } on ApiException catch (error) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            error.innerException != null
+                ? l10n.errorNetwork
+                : l10n.errorGeneric,
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _adding = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -159,11 +192,23 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
                   children: [
                     Text(l10n.importOwnCopy, style: BabelText.body(14)),
                     const SizedBox(height: 14),
-                    PillButton(
-                      label: l10n.importFile,
-                      kind: PillButtonKind.secondary,
-                      onPressed: () => context.go(Routes.library),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: [
+                        PillButton(
+                          label: l10n.paperOwned,
+                          onPressed: _adding ? null : () => _addPaper(work),
+                        ),
+                        PillButton(
+                          label: l10n.importFile,
+                          kind: PillButtonKind.secondary,
+                          onPressed: () => context.go(Routes.library),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 10),
+                    Text(l10n.paperOwnedHint, style: BabelText.body(12)),
                   ],
                 ),
               ),

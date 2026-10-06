@@ -3445,6 +3445,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Touchez pour continuer'**
   String get wrapTapHint;
+
+  /// No description provided for @paperBook.
+  ///
+  /// In fr, this message translates to:
+  /// **'Papier'**
+  String get paperBook;
+
+  /// No description provided for @paperOwned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je l\'ai en papier'**
+  String get paperOwned;
+
+  /// No description provided for @paperOwnedHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivez votre lecture sans fichier : statut, progression, notes et avis.'**
+  String get paperOwnedHint;
+
+  /// No description provided for @paperAdded.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {title} » est dans votre bibliothèque, en papier.'**
+  String paperAdded(String title);
+
+  /// No description provided for @attachFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter le fichier'**
+  String get attachFile;
+
+  /// No description provided for @attachFileHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour lire aussi sur cet appareil : statut, progression, avis et notes restent ceux du livre.'**
+  String get attachFileHint;
+
+  /// No description provided for @paperNoFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livre papier : ajoutez son fichier pour le lire aussi ici.'**
+  String get paperNoFile;
+
+  /// No description provided for @attachConflict.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier est déjà un autre livre de votre bibliothèque.'**
+  String get attachConflict;
+
+  /// No description provided for @attached.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier ajouté : « {title} » se lit aussi ici.'**
+  String attached(String title);
 }
 
 class _AppLocalizationsDelegate
