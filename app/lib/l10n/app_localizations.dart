@@ -1517,7 +1517,7 @@ abstract class AppLocalizations {
   /// No description provided for @opdsUrlHelp.
   ///
   /// In fr, this message translates to:
-  /// **'Par exemple https://calibre.example.com/opds'**
+  /// **'Par exemple https://calibre.example.com/opds. Kavita : collez l\'adresse OPDS de votre compte (Paramètres › OPDS) telle quelle, la clé qu\'elle contient est chiffrée.'**
   String get opdsUrlHelp;
 
   /// No description provided for @webdavTitle.
