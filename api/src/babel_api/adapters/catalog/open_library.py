@@ -48,6 +48,12 @@ def _first_int(values: Any) -> int | None:
     return None
 
 
+def _ints(values: Any) -> tuple[int, ...]:
+    """The positive integers of a JSON list, in order, without repeats (Open Library marks
+    removed covers with negative numbers)."""
+    return tuple(dict.fromkeys(i for i in _items(values) if isinstance(i, int) and i > 0))[:12]
+
+
 def _year(value: Any) -> int | None:
     digits = "".join(c for c in str(value or "") if c.isdigit())
     return int(digits[-4:]) if len(digits) >= 4 else None
@@ -200,6 +206,8 @@ class OpenLibrarySource:
             cover_id=_first_int(doc.get("covers")),
             isbn13=tuple(sorted(i for i in isbn13 if i)),
             isbn10=tuple(str(i) for i in _items(doc.get("isbn_10"))),
+            cover_ids=_ints(doc.get("covers")),
+            description=_text(doc.get("description")) or _text(doc.get("first_sentence")),
         )
 
     async def cover(self, cover_id: int, size: CoverSize) -> CoverImage | None:

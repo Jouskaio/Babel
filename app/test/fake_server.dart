@@ -64,6 +64,37 @@ class FakeServer {
   final changes = <Map<String, Object?>>[];
   final pushed = <Map<String, Object?>>[];
 
+  /// The work page's answer.
+  Map<String, Object?> work = {
+    'id': 'w1',
+    'title': 'Jane Eyre',
+    'original_title': 'Jane Eyre',
+    'authors': ['Charlotte Brontë'],
+    'first_publish_year': 1847,
+    'cover_path': '/v1/catalog/covers/1/M',
+    'edition_count': 2,
+    'description': 'Une orpheline devient gouvernante.',
+    'editions': [
+      {
+        'id': 'e1',
+        'title': 'Jane Eyre',
+        'language': 'fr',
+        'publisher': 'Gallimard',
+        'published': '2008',
+        'page_count': 640,
+        'format': 'Paperback',
+        'cover_path': '/v1/catalog/covers/10/M',
+        'cover_paths': ['/v1/catalog/covers/10/M', '/v1/catalog/covers/11/M'],
+        'description': 'Le résumé complet de cette édition.',
+        'isbn13': <String>[],
+      },
+    ],
+  };
+
+  /// Audiobookshelf: linked or not, and the audiobooks added.
+  bool absLinked = false;
+  final absAdded = <String>[];
+
   /// Other readers' notes, answered for any book.
   final readerNotes = <Map<String, Object?>>[];
   final connectivity = StreamController<List<ConnectivityResult>>.broadcast();
@@ -403,6 +434,63 @@ class FakeServer {
       });
     }
     if (path.endsWith('/reader-notes')) return json(readerNotes);
+    if (path.startsWith('/v1/catalog/works/') && !path.endsWith('/readers')) {
+      return json(work);
+    }
+    if (path.endsWith('/readers')) {
+      return json({
+        'rating': null,
+        'ratings': 0,
+        'reviews': <Object?>[],
+        'notes': <Object?>[],
+      });
+    }
+    if (path == '/v1/me/audiobookshelf') {
+      if (request.method == 'POST') {
+        final body = jsonDecode(request.body) as Map<String, Object?>;
+        if (body['api_key'] != 'key-1') {
+          return json({'detail': 'abs:unauthorized'}, 400);
+        }
+        absLinked = true;
+      }
+      if (request.method == 'DELETE') absLinked = false;
+      if (!absLinked) return http.Response('', 204);
+      return json({
+        'base_url': 'http://abs.example.com',
+        'username': 'ada',
+        'api_key': true,
+        'expired': false,
+      });
+    }
+    if (path == '/v1/audiobookshelf/libraries') {
+      return json([
+        {'id': 'lib1', 'name': 'Livres audio'},
+      ]);
+    }
+    if (path == '/v1/audiobookshelf/libraries/lib1/books') {
+      return json([
+        {
+          'id': 'li1',
+          'title': 'Dune',
+          'authors': ['Frank Herbert'],
+          'narrators': ['Simon Vance'],
+          'series': null,
+          'duration': 7200.0,
+          'item_id': absAdded.contains('li1') ? 'a1' : null,
+        },
+      ]);
+    }
+    if (path == '/v1/audiobookshelf/books/li1') {
+      absAdded.add('li1');
+      return json({
+        ...libraryItem('a1', 'Dune'),
+        'format': null,
+        'size': null,
+        'sha256': null,
+        'cover_path': null,
+        'audio_duration': 7200.0,
+      }, 201);
+    }
     if (path == '/v1/me/stats') {
       return json({
         'year': 2026,

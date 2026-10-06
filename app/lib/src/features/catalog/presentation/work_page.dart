@@ -55,8 +55,44 @@ class _WorkBody extends ConsumerStatefulWidget {
 }
 
 class _WorkBodyState extends ConsumerState<_WorkBody> {
-  bool _expanded = false;
+  final _scroll = ScrollController();
+  String? _cover; // the cover shown large, when the reader picked one
   bool _adding = false;
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  /// Every distinct cover of the work and its editions, with where it comes from.
+  List<({String path, String label})> _covers(WorkResponse work) {
+    final found = <String, String>{};
+    if (work.coverPath case final path?) found[path] = '';
+    for (final edition in work.editions) {
+      final label = [
+        ?edition.language?.toUpperCase(),
+        ?edition.publisher,
+        ?edition.published,
+      ].join(' · ');
+      for (final path in edition.coverPaths) {
+        found.putIfAbsent(path, () => label);
+      }
+    }
+    return [
+      for (final e in found.entries.take(30)) (path: e.key, label: e.value),
+    ];
+  }
+
+  void _pickCover(String path) {
+    setState(() => _cover = path);
+    // Back to the top, where the cover is shown large.
+    _scroll.animateTo(
+      0,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+    );
+  }
 
   /// A book owned on paper, followed without a file (one can be added later).
   Future<void> _addPaper(WorkResponse work) async {
@@ -97,6 +133,7 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
       ref.watch(libraryHistoryProvider).value ?? const [],
       workId: work.id,
     );
+    final covers = _covers(work);
     final meta = [
       if (work.authors.isNotEmpty) work.authors.join(', '),
       if (work.firstPublishYear case final year?) '$year',
@@ -105,15 +142,82 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 720),
         child: ListView(
+          controller: _scroll,
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 48),
           children: [
             Center(
-              child: BookCover(
-                width: 180,
-                url: work.coverPath == null ? null : apiUrl(work.coverPath!),
-                title: work.title,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                child: BookCover(
+                  key: ValueKey(_cover ?? work.coverPath),
+                  width: 220,
+                  url: switch (_cover ?? work.coverPath) {
+                    final path? => apiUrl(path),
+                    _ => null,
+                  },
+                  title: work.title,
+                ),
               ),
             ),
+            if (covers.length > 1) ...[
+              const SizedBox(height: 22),
+              Text(
+                '${l10n.workCovers} · ${l10n.coversCount(covers.length)}'
+                    .toUpperCase(),
+                textAlign: TextAlign.center,
+                style: BabelText.label(9),
+              ),
+              const SizedBox(height: 10),
+              LayoutBuilder(
+                builder: (context, box) => SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: box.maxWidth),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 10,
+                      children: [
+                        for (final cover in covers)
+                          Tooltip(
+                            message: cover.label,
+                            child: InkWell(
+                              onTap: () => setState(() => _cover = cover.path),
+                              borderRadius: BorderRadius.circular(6),
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color:
+                                        (_cover ?? work.coverPath) == cover.path
+                                        ? BabelColors.gold
+                                        : Colors.transparent,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(5),
+                                  child: Image.network(
+                                    apiUrl(cover.path),
+                                    width: 56,
+                                    height: 84,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => Container(
+                                      width: 56,
+                                      height: 84,
+                                      color: BabelColors.velvet,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 28),
             Text(
               work.title,
@@ -140,19 +244,7 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
               const SizedBox(height: 32),
               Text(l10n.workSummary.toUpperCase(), style: BabelText.label(11)),
               const SizedBox(height: 12),
-              Text(
-                description,
-                maxLines: _expanded ? null : 6,
-                overflow: _expanded ? null : TextOverflow.fade,
-                style: BabelText.reading(16),
-              ),
-              TextButton(
-                onPressed: () => setState(() => _expanded = !_expanded),
-                child: Text(
-                  (_expanded ? l10n.readLess : l10n.readMore).toUpperCase(),
-                  style: BabelText.label(10),
-                ),
-              ),
+              _Description(text: description),
             ],
             if (work.editions.isNotEmpty) ...[
               const SizedBox(height: 24),
@@ -168,8 +260,8 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
                 ],
               ),
               const SizedBox(height: 12),
-              for (final edition in work.editions.take(12))
-                _EditionRow(edition: edition),
+              for (final edition in work.editions.take(20))
+                _EditionRow(edition: edition, onPickCover: _pickCover),
             ],
             if (trace != null) ...[
               const SizedBox(height: 28),
@@ -220,52 +312,229 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
   }
 }
 
-class _EditionRow extends StatelessWidget {
-  const _EditionRow({required this.edition});
-  final EditionResponse edition;
+/// The description at a readable size, in full up to ten lines; only a longer one gets
+/// "read more" (and it is the only case where the button shows).
+class _Description extends StatefulWidget {
+  const _Description({required this.text});
+  final String text;
+
+  @override
+  State<_Description> createState() => _DescriptionState();
+}
+
+class _DescriptionState extends State<_Description> {
+  static const _lines = 10;
+  bool _expanded = false;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final style = BabelText.reading(18);
+    return LayoutBuilder(
+      builder: (context, box) {
+        final painter = TextPainter(
+          text: TextSpan(text: widget.text, style: style),
+          maxLines: _lines,
+          textDirection: Directionality.of(context),
+        )..layout(maxWidth: box.maxWidth);
+        final overflows = painter.didExceedMaxLines;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AnimatedSize(
+              duration: const Duration(milliseconds: 250),
+              alignment: Alignment.topCenter,
+              child: Text(
+                widget.text,
+                maxLines: _expanded || !overflows ? null : _lines,
+                overflow: _expanded || !overflows
+                    ? TextOverflow.clip
+                    : TextOverflow.fade,
+                style: style,
+              ),
+            ),
+            if (overflows)
+              TextButton(
+                onPressed: () => setState(() => _expanded = !_expanded),
+                child: Text(
+                  (_expanded ? l10n.readLess : l10n.readMore).toUpperCase(),
+                  style: BabelText.label(11, color: BabelColors.gold),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _EditionRow extends StatefulWidget {
+  const _EditionRow({required this.edition, required this.onPickCover});
+  final EditionResponse edition;
+  final ValueChanged<String> onPickCover;
+
+  @override
+  State<_EditionRow> createState() => _EditionRowState();
+}
+
+class _EditionRowState extends State<_EditionRow> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final edition = widget.edition;
     final details = [
       ?edition.publisher,
       ?edition.published,
-      if (edition.pageCount case final pages?) context.l10n.pages(pages),
+      if (edition.pageCount case final pages?) l10n.pages(pages),
       ?edition.format,
     ].join(' · ');
+    final covers = edition.coverPaths;
+    final hasMore = covers.length > 1 || edition.description != null;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: BabelColors.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: BabelColors.border),
       ),
-      child: Row(
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 36,
-            alignment: Alignment.center,
-            child: Text(
-              (edition.language ?? '—').toUpperCase(),
-              style: BabelText.label(11, color: BabelColors.gold),
+          InkWell(
+            onTap: hasMore ? () => setState(() => _open = !_open) : null,
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                children: [
+                  _Thumb(
+                    path: covers.firstOrNull,
+                    title: edition.title,
+                    onTap: covers.isEmpty
+                        ? null
+                        : () => widget.onPickCover(covers.first),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          [
+                            if (edition.language case final language?)
+                              language.toUpperCase(),
+                          ].join(),
+                          style: BabelText.label(10, color: BabelColors.gold),
+                        ),
+                        Text(
+                          edition.title,
+                          style: BabelText.body(
+                            15,
+                            color: BabelColors.textPrimary,
+                          ),
+                        ),
+                        if (details.isNotEmpty)
+                          Text(details, style: BabelText.body(12)),
+                        if (covers.length > 1)
+                          Text(
+                            l10n.coversCount(covers.length).toUpperCase(),
+                            style: BabelText.label(9),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (hasMore)
+                    Icon(
+                      _open ? Icons.expand_less : Icons.expand_more,
+                      color: BabelColors.textSecondary,
+                    ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  edition.title,
-                  style: BabelText.body(14, color: BabelColors.textPrimary),
-                ),
-                if (details.isNotEmpty)
-                  Text(details, style: BabelText.body(12)),
-              ],
+          if (_open)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (covers.length > 1)
+                    SizedBox(
+                      height: 100,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: covers.length,
+                        separatorBuilder: (_, _) => const SizedBox(width: 10),
+                        itemBuilder: (context, i) => Tooltip(
+                          message: l10n.coverUse,
+                          child: _Thumb(
+                            path: covers[i],
+                            title: edition.title,
+                            width: 66,
+                            onTap: () => widget.onPickCover(covers[i]),
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (edition.description case final text?) ...[
+                    const SizedBox(height: 12),
+                    Text(text, style: BabelText.reading(15)),
+                  ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
   }
+}
+
+/// A small cover; tapping it shows it large.
+class _Thumb extends StatelessWidget {
+  const _Thumb({
+    required this.path,
+    required this.title,
+    required this.onTap,
+    this.width = 48,
+  });
+
+  final String? path;
+  final String title;
+  final VoidCallback? onTap;
+  final double width;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(5),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(5),
+      child: path == null
+          ? Container(
+              width: width,
+              height: width * 1.5,
+              color: BabelColors.sunken,
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.menu_book_outlined,
+                size: width * 0.4,
+                color: BabelColors.textSecondary,
+              ),
+            )
+          : Image.network(
+              apiUrl(path!),
+              width: width,
+              height: width * 1.5,
+              fit: BoxFit.cover,
+              semanticLabel: title,
+              errorBuilder: (_, _, _) => Container(
+                width: width,
+                height: width * 1.5,
+                color: BabelColors.velvet,
+              ),
+            ),
+    ),
+  );
 }

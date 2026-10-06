@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../core/auth/auth_controller.dart';
 import '../core/telemetry/telemetry.dart';
 import '../features/account/presentation/account_page.dart';
+import '../features/audiobooks/presentation/audiobooks_page.dart';
 import '../features/auth/presentation/forgot_password_page.dart';
 import '../features/auth/presentation/login_page.dart';
 import '../features/auth/presentation/reset_password_page.dart';
@@ -52,6 +53,7 @@ abstract final class Routes {
   static String read(String itemId) => '/read/$itemId';
   static const importLink = '/import-link';
   static const stats = '/stats';
+  static const audiobooks = '/audiobooks';
   static String wrap(int year) => '/stats/wrap/$year';
   static const sources = '/sources';
   static const newSource = '/sources/new';
@@ -135,6 +137,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.account, builder: (_, _) => const AccountPage()),
       GoRoute(path: Routes.friends, builder: (_, _) => const FriendsPage()),
       GoRoute(path: Routes.stats, builder: (_, _) => const StatsPage()),
+      GoRoute(
+        path: Routes.audiobooks,
+        builder: (_, _) => const AudiobooksPage(),
+      ),
       GoRoute(
         path: '/stats/wrap/:year',
         builder: (_, state) => WrapPage(

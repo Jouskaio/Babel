@@ -14,6 +14,7 @@ class LibraryItemResponse {
   /// Returns a new [LibraryItemResponse] instance.
   LibraryItemResponse({
     required this.addedAt,
+    this.audioDuration,
     this.authors = const [],
     this.coverPath,
     this.editionId,
@@ -33,6 +34,9 @@ class LibraryItemResponse {
   });
 
   DateTime addedAt;
+
+  /// An audiobook from the reader's Audiobookshelf: its length in seconds
+  num? audioDuration;
 
   List<String> authors;
 
@@ -88,6 +92,7 @@ class LibraryItemResponse {
   @override
   bool operator ==(Object other) => identical(this, other) || other is LibraryItemResponse &&
     other.addedAt == addedAt &&
+    other.audioDuration == audioDuration &&
     _deepEquality.equals(other.authors, authors) &&
     other.coverPath == coverPath &&
     other.editionId == editionId &&
@@ -109,6 +114,7 @@ class LibraryItemResponse {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (addedAt.hashCode) +
+    (audioDuration == null ? 0 : audioDuration!.hashCode) +
     (authors.hashCode) +
     (coverPath == null ? 0 : coverPath!.hashCode) +
     (editionId == null ? 0 : editionId!.hashCode) +
@@ -127,11 +133,16 @@ class LibraryItemResponse {
     (workId == null ? 0 : workId!.hashCode);
 
   @override
-  String toString() => 'LibraryItemResponse[addedAt=$addedAt, authors=$authors, coverPath=$coverPath, editionId=$editionId, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, paper=$paper, progress=$progress, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title, workId=$workId]';
+  String toString() => 'LibraryItemResponse[addedAt=$addedAt, audioDuration=$audioDuration, authors=$authors, coverPath=$coverPath, editionId=$editionId, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, paper=$paper, progress=$progress, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title, workId=$workId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'added_at'] = this.addedAt.toUtc().toIso8601String();
+    if (this.audioDuration != null) {
+      json[r'audio_duration'] = this.audioDuration;
+    } else {
+      json[r'audio_duration'] = null;
+    }
       json[r'authors'] = this.authors;
     if (this.coverPath != null) {
       json[r'cover_path'] = this.coverPath;
@@ -215,6 +226,9 @@ class LibraryItemResponse {
 
       return LibraryItemResponse(
         addedAt: mapDateTime(json, r'added_at', r'')!,
+        audioDuration: json[r'audio_duration'] == null
+            ? null
+            : num.parse('${json[r'audio_duration']}'),
         authors: json[r'authors'] is Iterable
             ? (json[r'authors'] as Iterable).cast<String>().toList(growable: false)
             : const [],

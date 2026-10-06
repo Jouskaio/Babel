@@ -101,6 +101,15 @@ class ReadingState:
 
 
 @dataclass(frozen=True, slots=True)
+class AudioRef:
+    """Where an audiobook lives: an item of the reader's Audiobookshelf."""
+
+    remote_id: str
+    duration: float
+    cover: str | None = None  # key of the cover kept by Babel
+
+
+@dataclass(frozen=True, slots=True)
 class LibraryItem:
     """A book in a reader's library: a stored file, a paper copy, or both."""
 
@@ -122,6 +131,8 @@ class LibraryItem:
     paper: bool = False
     # The work's cover, for paper books without a file.
     work_cover_id: int | None = None
+    # An audiobook of the reader's Audiobookshelf, streamed through Babel.
+    audio: "AudioRef | None" = None
 
     @property
     def sha256(self) -> str | None:
@@ -129,13 +140,17 @@ class LibraryItem:
 
     @property
     def format_name(self) -> str:
-        """The file's format, or "paper" for a paper book without one."""
-        return self.file.format.value if self.file else "paper"
+        """The file's format, "audio" for an audiobook, or "paper" for a paper book."""
+        if self.file:
+            return self.file.format.value
+        return "audio" if self.audio else "paper"
 
     @property
     def cover_path(self) -> str | None:
         if self.file and self.file.cover_path:
             return self.file.cover_path
+        if self.audio and self.audio.cover:
+            return f"/v1/audio-covers/{self.audio.cover}"
         if self.work_cover_id:
             return f"/v1/catalog/covers/{self.work_cover_id}/M"
         return None

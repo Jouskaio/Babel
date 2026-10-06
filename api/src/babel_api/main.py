@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import SQLAlchemyError
 
 from babel_api import __version__
+from babel_api.adapters.audiobookshelf import AbsClient
 from babel_api.adapters.catalog.open_library import OpenLibrarySource
 from babel_api.adapters.db.migrations.config import upgrade_database
 from babel_api.adapters.db.repositories import SqlUserRepository
@@ -89,6 +90,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     def kavita_client(url: str) -> KavitaClient:
         return KavitaClient(url, allowed_hosts=allowed_hosts)
+
+    def abs_client(url: str) -> AbsClient:
+        return AbsClient(url, allowed_hosts=allowed_hosts)
 
     @asynccontextmanager
     async def kavita_services() -> AsyncGenerator[KavitaService]:
@@ -175,6 +179,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         comics=ComicConverter(settings.files_dir),
         kavita_client=kavita_client,
         kavita=kavita,
+        abs_client=abs_client,
     )
     if settings.cors_origins:
         app.add_middleware(

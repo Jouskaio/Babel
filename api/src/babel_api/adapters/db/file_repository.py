@@ -17,6 +17,7 @@ from babel_api.adapters.db.models import (
     WorkRow,
 )
 from babel_api.domain.files import (
+    AudioRef,
     BookFormat,
     LibraryItem,
     ReadingState,
@@ -74,6 +75,9 @@ def _to_item(row: LibraryItemRow) -> LibraryItem:
         work_id=row.work_id,
         paper=row.paper,
         work_cover_id=row.work.cover_id if row.work else None,
+        audio=AudioRef(row.audio_id, row.audio_duration or 0, row.audio_cover)
+        if row.audio_id
+        else None,
     )
 
 
@@ -146,6 +150,38 @@ class SqlFileRepository:
             authors=list(authors),
             work_id=work_id,
             paper=paper,
+        )
+        self._session.add(row)
+        await self._session.flush()
+        await self._session.refresh(row, ["file", "work"])
+        return _to_item(row)
+
+    async def find_audio_item(self, user_id: UUID, remote_id: str) -> LibraryItem | None:
+        """The reader's audiobook of this Audiobookshelf item, removed ones included."""
+        row = await self._session.scalar(
+            select(LibraryItemRow)
+            .where(LibraryItemRow.user_id == user_id, LibraryItemRow.audio_id == remote_id)
+            .limit(1)
+        )
+        return _to_item(row) if row else None
+
+    async def add_audio_item(
+        self,
+        user_id: UUID,
+        title: str,
+        authors: tuple[str, ...],
+        audio: AudioRef,
+        work_id: UUID | None,
+    ) -> LibraryItem:
+        row = LibraryItemRow(
+            user_id=user_id,
+            file_sha256=None,
+            title=title[:500],
+            authors=list(authors),
+            work_id=work_id,
+            audio_id=audio.remote_id,
+            audio_duration=audio.duration,
+            audio_cover=audio.cover,
         )
         self._session.add(row)
         await self._session.flush()

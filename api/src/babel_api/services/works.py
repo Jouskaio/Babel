@@ -31,6 +31,21 @@ class WorkDetail:
     work: Work
     editions: list[Edition]
 
+    def described(self, language: str | None) -> str | None:
+        """The fullest description: an edition's in the reader's language when it has one
+        (a translated blurb), else the longest of the work's and its editions'."""
+        if language:
+            local = [
+                e.description for e in self.editions if e.language == language and e.description
+            ]
+            if local:
+                best = max(local, key=len)
+                # A translated blurb is only worth it if it is not just a line.
+                if len(best) >= 120:
+                    return best
+        candidates = [self.work.description, *(e.description for e in self.editions)]
+        return max((c for c in candidates if c), key=len, default=None)
+
     def localized(self, language: str | None) -> tuple[str, int | None]:
         """Title and cover of the first edition in ``language``, else the work's own."""
         for edition in self.editions:

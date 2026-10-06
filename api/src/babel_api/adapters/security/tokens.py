@@ -42,6 +42,41 @@ class AccessTokenIssuer:
             raise AccessTokenError from error
 
 
+_TICKET_ISSUER = "babel-audio"
+TICKET_TTL = timedelta(hours=12)
+
+
+def issue_ticket(secret: str, user_id: UUID, item_id: UUID, now: datetime | None = None) -> str:
+    """A signed pass to stream one audiobook's tracks, for players that cannot send
+    headers (the web) or that outlive an access token. Never valid as an access token."""
+    now = now or datetime.now(UTC)
+    claims = {
+        "sub": str(user_id),
+        "item": str(item_id),
+        "iss": _TICKET_ISSUER,
+        "iat": now,
+        "exp": now + TICKET_TTL,
+    }
+    return jwt.encode(claims, secret, algorithm=_ALGORITHM)
+
+
+def verify_ticket(secret: str, ticket: str, item_id: UUID) -> UUID:
+    """The reader a ticket was issued to, if it is valid for this audiobook."""
+    try:
+        claims = jwt.decode(
+            ticket,
+            secret,
+            algorithms=[_ALGORITHM],
+            issuer=_TICKET_ISSUER,
+            options={"require": ["sub", "item", "exp", "iss"]},
+        )
+        if claims["item"] != str(item_id):
+            raise AccessTokenError
+        return UUID(claims["sub"])
+    except (jwt.PyJWTError, ValueError) as error:
+        raise AccessTokenError from error
+
+
 def new_refresh_secret() -> str:
     """Random, URL-safe secret of 256 bits."""
     return secrets.token_urlsafe(32)

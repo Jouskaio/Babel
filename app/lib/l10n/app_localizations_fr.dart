@@ -2221,4 +2221,158 @@ class AppLocalizationsFr extends AppLocalizations {
   String genreFirstTime(String genre) {
     return 'Première incursion cette année : $genre.';
   }
+
+  @override
+  String get absTitle => 'Audiobookshelf';
+
+  @override
+  String get absIntro =>
+      'Liez votre Audiobookshelf pour écouter vos livres audio dans Babel, avec statut, étagères et statistiques comme vos livres.';
+
+  @override
+  String get absUrl => 'Adresse d\'Audiobookshelf';
+
+  @override
+  String get absApiKey => 'Clé d\'API';
+
+  @override
+  String get absApiKeyHelp =>
+      'Créée dans Audiobookshelf : Paramètres › Clés d\'API. Recommandé : elle n\'expire pas.';
+
+  @override
+  String get absUsePassword => 'Utiliser mon identifiant à la place';
+
+  @override
+  String get absUseKey => 'Utiliser une clé d\'API';
+
+  @override
+  String get absUsername => 'Identifiant';
+
+  @override
+  String get absPassword => 'Mot de passe';
+
+  @override
+  String get absPasswordHelp =>
+      'Utilisé une seule fois : Babel ne le garde pas.';
+
+  @override
+  String get absLink => 'Lier';
+
+  @override
+  String absLinked(String host, String user) {
+    return 'Lié à $host · $user';
+  }
+
+  @override
+  String get absExpired =>
+      'Audiobookshelf refuse désormais l\'accès de Babel : liez-le à nouveau.';
+
+  @override
+  String get absUnlink => 'Délier';
+
+  @override
+  String get absBrowse => 'Parcourir mes livres audio';
+
+  @override
+  String get absErrorUnauthorized => 'Identifiants refusés par Audiobookshelf.';
+
+  @override
+  String get absErrorUnreachable =>
+      'Audiobookshelf ne répond pas à cette adresse.';
+
+  @override
+  String get absErrorGeneric => 'Audiobookshelf n\'a pas pu être lié.';
+
+  @override
+  String get audiobooksTitle => 'Livres audio';
+
+  @override
+  String get audiobooksSearch => 'Chercher un livre audio';
+
+  @override
+  String get audiobookAdd => 'Ajouter';
+
+  @override
+  String get audiobookInLibrary => 'Dans votre bibliothèque';
+
+  @override
+  String audiobookAdded(String title) {
+    return '« $title » est dans votre bibliothèque.';
+  }
+
+  @override
+  String get audiobooksEmpty => 'Aucun livre audio ici.';
+
+  @override
+  String get audiobooksNotLinked =>
+      'Liez d\'abord votre Audiobookshelf, dans Compte.';
+
+  @override
+  String narratedBy(String names) {
+    return 'Lu par $names';
+  }
+
+  @override
+  String get listen => 'Écouter';
+
+  @override
+  String get audioBadge => 'Audio';
+
+  @override
+  String get playerChapters => 'Chapitres';
+
+  @override
+  String get playerSpeed => 'Vitesse';
+
+  @override
+  String get playerSleep => 'Minuterie';
+
+  @override
+  String get sleepOff => 'Désactivée';
+
+  @override
+  String sleepMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String get sleepEndOfChapter => 'Fin du chapitre';
+
+  @override
+  String sleepLeft(String time) {
+    return 'Arrêt dans $time';
+  }
+
+  @override
+  String get playerBack30 => 'Reculer de 30 s';
+
+  @override
+  String get playerForward30 => 'Avancer de 30 s';
+
+  @override
+  String get playerPlay => 'Lecture';
+
+  @override
+  String get playerPause => 'Pause';
+
+  @override
+  String get playerError =>
+      'Lecture impossible : vérifiez votre connexion ou votre Audiobookshelf.';
+
+  @override
+  String get workCovers => 'Couvertures';
+
+  @override
+  String coversCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count couvertures',
+      one: '1 couverture',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get coverUse => 'Voir cette couverture';
 }
