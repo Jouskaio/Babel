@@ -1,6 +1,8 @@
 """Open Library: trending works and cover images (https://openlibrary.org/developers/api)."""
 
 import asyncio
+import html
+import re
 from typing import Any
 
 import httpx
@@ -48,6 +50,21 @@ def _first_int(values: Any) -> int | None:
     return None
 
 
+_GOOGLE_BOOKS = "https://www.googleapis.com/books/v1/volumes"
+_TAGS = re.compile(r"<[^>]+>")
+
+
+def _clean_blurb(value: Any) -> str | None:
+    """Google Books descriptions carry HTML: paragraphs and line breaks become blank lines."""
+    if not isinstance(value, str):
+        return None
+    text = re.sub(r"(?i)</p>|<br\s*/?>", "\n\n", value)
+    text = html.unescape(_TAGS.sub("", text))
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
+    return text or None
+
+
 def _ints(values: Any) -> tuple[int, ...]:
     """The positive integers of a JSON list, in order, without repeats (Open Library marks
     removed covers with negative numbers)."""
@@ -70,7 +87,8 @@ def _subjects(value: object) -> tuple[str, ...]:
 class OpenLibrarySource:
     """Reads Open Library over HTTP. Failures surface as ``httpx.HTTPError``."""
 
-    def __init__(self, client: httpx.AsyncClient | None = None) -> None:
+    def __init__(self, client: httpx.AsyncClient | None = None, google_books_key: str = "") -> None:
+        self._google_key = google_books_key
         self._client = client or httpx.AsyncClient(
             timeout=httpx.Timeout(10.0),
             headers={"User-Agent": _USER_AGENT},
@@ -209,6 +227,37 @@ class OpenLibrarySource:
             cover_ids=_ints(doc.get("covers")),
             description=_text(doc.get("description")) or _text(doc.get("first_sentence")),
         )
+
+    async def blurb(
+        self, isbn13: str | None, title: str, authors: tuple[str, ...], language: str | None
+    ) -> str | None:
+        """The description Google Books has for this book: by ISBN, else by title and author
+        (in [language] when known). Open Library often has a single line, or none."""
+        queries = [f"isbn:{isbn13}"] if isbn13 else []
+        if title:
+            by = f'intitle:"{title}"' + (f' inauthor:"{authors[0]}"' if authors else "")
+            queries.append(by)
+        for query in queries:
+            params: dict[str, str | int] = {"q": query, "maxResults": 5, "printType": "books"}
+            if self._google_key:
+                params["key"] = self._google_key
+            if language and not query.startswith("isbn:"):
+                params["langRestrict"] = language
+            try:
+                response = await self._client.get(_GOOGLE_BOOKS, params=params)
+                response.raise_for_status()
+            except httpx.HTTPError:
+                continue
+            best = ""
+            payload: dict[str, Any] = response.json()
+            for item in _dicts(payload.get("items")):
+                info = _dicts([item.get("volumeInfo")])
+                text = _clean_blurb(info[0].get("description")) if info else None
+                if text and len(text) > len(best):
+                    best = text
+            if best:
+                return best
+        return None
 
     async def cover(self, cover_id: int, size: CoverSize) -> CoverImage | None:
         # default=false: a missing cover is a 404 instead of a blank placeholder image.

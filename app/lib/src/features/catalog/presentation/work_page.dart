@@ -329,7 +329,7 @@ class _DescriptionState extends State<_Description> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final style = BabelText.reading(18);
+    final style = BabelText.reading(16);
     return LayoutBuilder(
       builder: (context, box) {
         final painter = TextPainter(
