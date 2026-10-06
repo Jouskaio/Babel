@@ -70,4 +70,46 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('RÉDUIRE'), findsOneWidget);
   });
+
+  testWidgets('books of the reader\'s sources can be added from the page', (
+    tester,
+  ) async {
+    final server = FakeServer()
+      ..sourceMatches.add({
+        'source_id': 's1',
+        'source_name': 'Kavita',
+        'entry': {
+          'id': 'e1',
+          'name': 'Jane Eyre.epub',
+          'path': 'Jane Eyre.epub',
+          'size': 1200,
+          'status': 'new',
+          'item_id': null,
+          'title': 'Jane Eyre',
+          'authors': ['Charlotte Brontë'],
+          'cover_path': null,
+          'format': 'epub',
+        },
+      });
+    await open(tester, server);
+
+    expect(find.text('Dans mes sources'), findsOneWidget);
+    expect(find.text('Kavita · Charlotte Brontë · EPUB'), findsOneWidget);
+    await tester.ensureVisible(find.text('Ajouter à la bibliothèque'));
+    await tester.tap(find.text('Ajouter à la bibliothèque'));
+    await settle(tester);
+    expect(
+      find.text('« Jane Eyre » est dans votre bibliothèque.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('without a match, the page says Babel downloads nothing', (
+    tester,
+  ) async {
+    await open(tester, FakeServer());
+
+    expect(find.textContaining('Babel ne télécharge pas'), findsOneWidget);
+    expect(find.text('GÉRER MES SOURCES'), findsOneWidget);
+  });
 }

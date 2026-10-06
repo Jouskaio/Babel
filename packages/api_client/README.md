@@ -162,6 +162,7 @@ Class | Method | HTTP request | Description
 *SourcesApi* | [**importSource**](doc//SourcesApi.md#importsource) | **POST** /v1/sources/{source_id}/import | Import All
 *SourcesApi* | [**importSourceEntry**](doc//SourcesApi.md#importsourceentry) | **POST** /v1/sources/{source_id}/entries/{entry_id}/import | Import Entry
 *SourcesApi* | [**scanSource**](doc//SourcesApi.md#scansource) | **POST** /v1/sources/{source_id}/scan | Scan Source
+*SourcesApi* | [**searchSources**](doc//SourcesApi.md#searchsources) | **GET** /v1/sources/search | Search Sources
 *StatsApi* | [**getYearStats**](doc//StatsApi.md#getyearstats) | **GET** /v1/me/stats | Get Year Stats
 *SyncApi* | [**getDevices**](doc//SyncApi.md#getdevices) | **GET** /v1/devices | Get Devices
 *SyncApi* | [**pullChanges**](doc//SyncApi.md#pullchanges) | **GET** /v1/sync | Pull Changes
@@ -261,6 +262,7 @@ Class | Method | HTTP request | Description
  - [SourceDetailResponse](doc//SourceDetailResponse.md)
  - [SourceEntryResponse](doc//SourceEntryResponse.md)
  - [SourceKind](doc//SourceKind.md)
+ - [SourceMatchResponse](doc//SourceMatchResponse.md)
  - [SourceResponse](doc//SourceResponse.md)
  - [TokenResponse](doc//TokenResponse.md)
  - [TrendingWorkResponse](doc//TrendingWorkResponse.md)

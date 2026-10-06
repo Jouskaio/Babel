@@ -3925,6 +3925,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Voir cette couverture'**
   String get coverUse;
+
+  /// No description provided for @searchClear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Effacer la recherche'**
+  String get searchClear;
+
+  /// No description provided for @recentRemove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer de l\'historique'**
+  String get recentRemove;
+
+  /// No description provided for @inMySources.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans mes sources'**
+  String get inMySources;
+
+  /// No description provided for @inMySourcesHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Des livres de vos sources (Kavita, WebDAV, GitHub…) correspondent à cette œuvre.'**
+  String get inMySourcesHint;
+
+  /// No description provided for @noSourceMatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun livre de vos sources ne correspond. Babel ne télécharge pas de livres du catalogue : ajoutez une source, ou importez votre fichier.'**
+  String get noSourceMatch;
+
+  /// No description provided for @manageSources.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gérer mes sources'**
+  String get manageSources;
+
+  /// No description provided for @addToLibrary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter à la bibliothèque'**
+  String get addToLibrary;
+
+  /// No description provided for @sourceMatchImported.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {title} » est dans votre bibliothèque.'**
+  String sourceMatchImported(String title);
 }
 
 class _AppLocalizationsDelegate

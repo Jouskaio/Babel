@@ -358,6 +358,8 @@ class ApiClient {
           return SourceEntryResponse.fromJson(value);
         case 'SourceKind':
           return SourceKindTypeTransformer().decode(value);
+        case 'SourceMatchResponse':
+          return SourceMatchResponse.fromJson(value);
         case 'SourceResponse':
           return SourceResponse.fromJson(value);
         case 'TokenResponse':

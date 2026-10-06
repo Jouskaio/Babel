@@ -1379,5 +1379,20 @@
       }
     }
   },
-  "coverUse": "Voir cette couverture"
+  "coverUse": "Voir cette couverture",
+  "searchClear": "Effacer la recherche",
+  "recentRemove": "Retirer de l'historique",
+  "inMySources": "Dans mes sources",
+  "inMySourcesHint": "Des livres de vos sources (Kavita, WebDAV, GitHub…) correspondent à cette œuvre.",
+  "noSourceMatch": "Aucun livre de vos sources ne correspond. Babel ne télécharge pas de livres du catalogue : ajoutez une source, ou importez votre fichier.",
+  "manageSources": "Gérer mes sources",
+  "addToLibrary": "Ajouter à la bibliothèque",
+  "sourceMatchImported": "« {title} » est dans votre bibliothèque.",
+  "@sourceMatchImported": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  }
 }

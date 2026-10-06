@@ -6,9 +6,11 @@ import 'package:babel/src/core/auth/refresh_token_store.dart';
 import 'package:babel/src/core/sync/sync_engine.dart';
 import 'package:babel/src/features/catalog/presentation/search_page.dart';
 import 'package:babel/src/features/library/presentation/library_page.dart';
+import 'package:babel/src/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
@@ -118,5 +120,76 @@ void main() {
 
     expect(find.text('1 TITRE'), findsOneWidget);
     expect(server.pushed.single['entity_id'], 'i2');
+  });
+
+  testWidgets(
+    'search starts over with a cross, and forgets one recent search',
+    (tester) async {
+      tester.view.physicalSize = const Size(400, 1600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final client = MockClient((request) async => json([]));
+      await tester.pumpWidget(app(const SearchPage(), client));
+
+      expect(find.byTooltip('Effacer la recherche'), findsNothing);
+      await tester.enterText(find.byType(TextField), 'dune');
+      await tester.pump();
+      expect(find.byTooltip('Effacer la recherche'), findsOneWidget);
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+      expect(find.text('Aucun résultat pour « dune ».'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Effacer la recherche'));
+      await tester.pumpAndSettle();
+      expect(find.byType(EditableText), findsOneWidget);
+      expect(find.text('Aucun résultat pour « dune ».'), findsNothing);
+      // Back on the start page, the search is kept as a recent one: one tap on its cross.
+      expect(find.text('dune'), findsOneWidget);
+      await tester.tap(find.byTooltip('Retirer de l\'historique'));
+      await tester.pumpAndSettle();
+      expect(find.text('dune'), findsNothing);
+    },
+  );
+
+  testWidgets('the popular books on the start page open their page', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final server = FakeServer();
+    String? opened;
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (_, _) => const Scaffold(body: SearchPage()),
+        ),
+        GoRoute(
+          path: '/works/:id',
+          builder: (_, state) {
+            opened = state.pathParameters['id'];
+            return const Scaffold(body: Text('work page'));
+          },
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        retry: (_, _) => null,
+        overrides: server.overrides,
+        child: MaterialApp.router(
+          routerConfig: router,
+          locale: const Locale('fr'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Jane Eyre').last);
+    await tester.pumpAndSettle();
+    expect(opened, 'w1');
   });
 }

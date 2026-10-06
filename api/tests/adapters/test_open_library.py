@@ -64,11 +64,12 @@ def test_blurb_comes_from_google_books_by_isbn_then_by_title() -> None:
             200,
             json={
                 "items": [
-                    {"volumeInfo": {"description": "Court."}},
+                    {"volumeInfo": {"title": "Jane Eyre", "description": "Court."}},
                     {
                         "volumeInfo": {
+                            "title": "Jane Eyre",
                             "description": "<p>Orpheline, <b>Jane</b> devient gouvernante.</p>"
-                            "<p>Un secret l&#39;attend &amp; la d&eacute;chire.<br>Fin.</p>"
+                            "<p>Un secret l&#39;attend &amp; la d&eacute;chire.<br>Fin.</p>",
                         }
                     },
                 ]
@@ -86,8 +87,44 @@ def test_blurb_comes_from_google_books_by_isbn_then_by_title() -> None:
     )
     assert "key" not in seen[0]
     assert seen[0]["q"] == "isbn:9782070360246"
-    assert seen[1]["q"] == 'intitle:"Jane Eyre" inauthor:"Charlotte Brontë"'
+    # A plain search, without operators: they find nothing for many books.
+    assert seen[1]["q"] == "Jane Eyre Charlotte Brontë"
     assert seen[1]["langRestrict"] == "fr"
+
+
+def test_a_volume_gets_its_own_blurb_or_the_series() -> None:
+    def handle(request: httpx.Request) -> httpx.Response:
+        query = request.url.params["q"]
+        volumes = [
+            {"title": "Homunculus (Omnibus) Vol. 3-4", "language": "en", "description": "A" * 700},
+            {"title": "Homunculus - new edition 09", "language": "de", "description": "B" * 1100},
+            {"title": "Terre di confine magazine", "language": "it", "description": "C" * 900},
+        ]
+        if query.startswith("Homunculus 3"):
+            return httpx.Response(200, json={"items": [{"volumeInfo": v} for v in volumes]})
+        return httpx.Response(200, json={"items": [{"volumeInfo": volumes[1]}]})
+
+    text = asyncio.run(
+        source(httpx.MockTransport(handle)).blurb(None, "Homunculus 3", ("Hideo Yamamoto",), None)
+    )
+
+    # Volume 9's blurb and the unrelated magazine are left out: it is this volume's.
+    assert text == "A" * 700
+
+
+def test_a_series_blurb_is_the_fallback_for_a_volume() -> None:
+    def handle(request: httpx.Request) -> httpx.Response:
+        if request.url.params["q"].startswith("Homunculus 7"):
+            return httpx.Response(200, json={"totalItems": 0})
+        item = {"title": "Homunculus", "language": "en", "description": "The series. " * 20}
+        return httpx.Response(200, json={"items": [{"volumeInfo": item}]})
+
+    text = asyncio.run(
+        source(httpx.MockTransport(handle)).blurb(None, "Homunculus 7", ("Hideo Yamamoto",), "en")
+    )
+
+    assert text
+    assert text.startswith("The series.")
 
 
 def test_blurb_is_none_when_google_books_has_nothing_or_fails() -> None:
