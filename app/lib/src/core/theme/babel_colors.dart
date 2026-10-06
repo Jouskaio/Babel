@@ -90,6 +90,11 @@ abstract final class BabelColors {
     forest = next.forest;
   }
 
+  /// Text on a colored background (an avatar): dark ink on light colors, light on dark.
+  static Color on(Color background) => background.computeLuminance() > 0.3
+      ? const Color(0xFF14110D)
+      : const Color(0xFFF7F1E6);
+
   /// CSS hex of a color (book content is styled with CSS).
   static String css(Color color) =>
       '#${(color.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';

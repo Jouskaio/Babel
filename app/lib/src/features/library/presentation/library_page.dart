@@ -243,6 +243,8 @@ class _BookTile extends ConsumerWidget {
       borderRadius: BorderRadius.circular(8),
       onTap: () => showModalBottomSheet<void>(
         context: context,
+        // Above the floating navigation bar of the tabs.
+        useRootNavigator: true,
         backgroundColor: BabelColors.surface,
         builder: (_) => _BookActions(item: item),
       ),

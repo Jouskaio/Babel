@@ -14,6 +14,8 @@ import 'social_widgets.dart';
 Future<void> showReviewSheet(BuildContext context, LibraryItemResponse item) =>
     showModalBottomSheet<void>(
       context: context,
+      // Above the floating navigation bar of the tabs.
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: BabelColors.surface,
       builder: (_) => _ReviewSheet(item: item),
@@ -24,6 +26,8 @@ Future<void> showRecommendSheet(
   LibraryItemResponse item,
 ) => showModalBottomSheet<void>(
   context: context,
+  // Above the floating navigation bar of the tabs.
+  useRootNavigator: true,
   isScrollControlled: true,
   backgroundColor: BabelColors.surface,
   builder: (_) => _RecommendSheet(item: item),

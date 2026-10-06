@@ -77,6 +77,27 @@ class FakeServer {
   int importCalls = 0;
   int linkImports = 0;
 
+  /// Kavita: statuses answered one after the other (the last one stays), and calls.
+  final kavitaStatuses = <String?>[null];
+  bool kavitaManaged = false;
+  final kavitaCalls = <String>[];
+  bool premiumMember = false;
+
+  Map<String, Object?>? get kavitaLink {
+    final status = kavitaStatuses.length > 1
+        ? kavitaStatuses.removeAt(0)
+        : kavitaStatuses.first;
+    if (status == null) return null;
+    return {
+      'status': status,
+      'base_url': 'https://kavita.jouskaio.me',
+      'username': 'ada',
+      'managed': kavitaManaged,
+      'error': null,
+      'updated_at': '2026-10-06T10:00:00Z',
+    };
+  }
+
   /// Social: the reader's handle, requests made, and what other readers share.
   String? handle;
   final socialCalls = <String>[];
@@ -149,6 +170,58 @@ class FakeServer {
   late final client = MockClient((request) async {
     if (offline) throw http.ClientException('offline');
     final path = request.url.path;
+    if (path.endsWith('/review') && request.method == 'GET') {
+      return http.Response('', 204); // no review yet
+    }
+    if (path == '/v1/me/kavita' || path.startsWith('/v1/me/kavita/')) {
+      kavitaCalls.add('${request.method} $path');
+      if (request.method == 'POST' && path == '/v1/me/kavita') {
+        final body = jsonDecode(request.body) as Map<String, Object?>;
+        if (body['password'] != 'right') {
+          return json({'detail': 'kavita:unauthorized'}, 400);
+        }
+        kavitaStatuses
+          ..clear()
+          ..add('ready');
+      }
+      if (request.method == 'DELETE') {
+        kavitaStatuses
+          ..clear()
+          ..add(null);
+        return http.Response('', 204);
+      }
+      if (path.endsWith('/retry')) return http.Response('', 202);
+      final link = kavitaLink;
+      return link == null ? http.Response('', 204) : json(link);
+    }
+    if (path == '/v1/admin/users') {
+      return json([
+        {
+          'id': 'u2',
+          'email': 'bob@example.com',
+          'display_name': 'Bob',
+          'admin': false,
+          'premium': premiumMember,
+          'created_at': '2026-10-01T10:00:00Z',
+          'kavita': premiumMember ? 'ready' : null,
+        },
+      ]);
+    }
+    if (path == '/v1/admin/users/u2/premium') {
+      premiumMember =
+          (jsonDecode(request.body) as Map<String, Object?>)['premium']!
+              as bool;
+      kavitaCalls.add('PUT premium $premiumMember');
+      return json({
+        'id': 'u2',
+        'email': 'bob@example.com',
+        'display_name': 'Bob',
+        'admin': false,
+        'premium': premiumMember,
+        'created_at': '2026-10-01T10:00:00Z',
+        'kavita': null,
+      });
+    }
     if (path == '/v1/me/profile') {
       if (request.method == 'PATCH') {
         final wanted =

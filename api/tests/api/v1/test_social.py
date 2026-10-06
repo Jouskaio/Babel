@@ -180,7 +180,7 @@ def test_reviews_reach_who_they_are_meant_for(
         client.put(f"/v1/library/{item}/review", json={"rating": 6}, headers=ada).status_code == 422
     )
     assert client.delete(f"/v1/library/{item}/review", headers=ada).status_code == 204
-    assert client.get(f"/v1/library/{item}/review", headers=ada).json() is None
+    assert client.get(f"/v1/library/{item}/review", headers=ada).status_code == 204
 
 
 def test_notes_are_shared_only_when_chosen(

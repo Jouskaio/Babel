@@ -797,5 +797,64 @@
   "directionRtl": "Droite → gauche (manga)",
   "directionVertical": "Vertical (webtoon)",
   "comicAnnotate": "Annoter une case",
-  "comicAnnotateHint": "Tracez un cadre autour de la case à annoter."
+  "comicAnnotateHint": "Tracez un cadre autour de la case à annoter.",
+  "kavitaTitle": "Kavita",
+  "kavitaCreating": "Création de votre accès Kavita…",
+  "kavitaFollow": "Suivre",
+  "kavitaExists": "Un compte Kavita existe déjà avec votre e-mail sur {host} : liez-le avec son identifiant et son mot de passe.",
+  "@kavitaExists": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "kavitaFailed": "La création de votre accès Kavita n'a pas abouti.",
+  "kavitaLinked": "Lié à {host} · compte {username}",
+  "@kavitaLinked": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      },
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "kavitaManaged": "Compte créé pour vous par Babel, avec accès à toutes les bibliothèques.",
+  "kavitaUnlink": "Délier",
+  "kavitaUnlinkConfirm": "Délier votre Kavita ? Les livres déjà importés restent dans votre bibliothèque.",
+  "kavitaUnlinkManaged": "Supprimer l'accès Kavita créé par Babel ? Les livres déjà importés restent dans votre bibliothèque.",
+  "kavitaHint": "Vos bibliothèques Kavita dans Babel. Le mot de passe sert une seule fois à créer une clé « Babel » sur votre compte, il n'est pas conservé.",
+  "kavitaUrl": "Adresse de votre Kavita",
+  "kavitaUsername": "Identifiant Kavita",
+  "kavitaPassword": "Mot de passe Kavita",
+  "kavitaPasswordHelp": "Utilisé une seule fois, jamais enregistré.",
+  "kavitaWrongCredentials": "Identifiant ou mot de passe Kavita incorrect.",
+  "kavitaNotKavita": "Cette adresse ne répond pas comme un serveur Kavita.",
+  "kavitaUnreachable": "Kavita n'a pas pu être joint.",
+  "kavitaLink": "Lier mon Kavita",
+  "kavitaCreateMine": "Créer mon accès sur le Kavita de Babel",
+  "kavitaSetupTitle": "Votre accès Kavita",
+  "kavitaSetupHint": "Babel crée votre compte sur {host} et y relie votre bibliothèque. Vous pouvez quitter cette page.",
+  "@kavitaSetupHint": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "kavitaStepCreating": "Création du compte",
+  "kavitaStepLinking": "Création de la clé Babel",
+  "kavitaStepImporting": "Lecture du catalogue",
+  "kavitaStepReady": "Prêt",
+  "kavitaOpenLibrary": "Voir mes sources",
+  "kavitaWait": "Quelques secondes suffisent en général.",
+  "adminTitle": "Administration",
+  "adminPremiumHint": "Comptes premium : accès au Kavita de Babel, créé automatiquement.",
+  "adminRole": "Admin",
+  "adminKavitaReady": "Kavita prêt",
+  "adminKavitaFailed": "Kavita en échec",
+  "adminKavitaExists": "Kavita existant",
+  "adminKavitaCreating": "Kavita en cours"
 }

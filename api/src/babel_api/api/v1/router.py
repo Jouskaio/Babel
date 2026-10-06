@@ -2,7 +2,17 @@
 
 from fastapi import APIRouter
 
-from babel_api.api.v1.routes import auth, catalog, health, library, me, social, sources, sync
+from babel_api.api.v1.routes import (
+    auth,
+    catalog,
+    health,
+    kavita,
+    library,
+    me,
+    social,
+    sources,
+    sync,
+)
 
 router = APIRouter()
 router.include_router(health.router)
@@ -13,3 +23,4 @@ router.include_router(library.router)
 router.include_router(sync.router)
 router.include_router(sources.router)
 router.include_router(social.router)
+router.include_router(kavita.router)

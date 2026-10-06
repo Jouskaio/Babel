@@ -75,6 +75,9 @@ final sourcesApiProvider = Provider<SourcesApi>(
 final socialApiProvider = Provider<SocialApi>(
   (ref) => SocialApi(ref.watch(apiClientProvider)),
 );
+final kavitaApiProvider = Provider<KavitaApi>(
+  (ref) => KavitaApi(ref.watch(apiClientProvider)),
+);
 final accountApiProvider = Provider<AccountApi>(
   (ref) => AccountApi(ref.watch(apiClientProvider)),
 );

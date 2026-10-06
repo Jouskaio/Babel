@@ -39,6 +39,8 @@ class UserRow(Base):
     locale: Mapped[str] = mapped_column(String(8), default="fr", server_default="fr")
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    is_admin: Mapped[bool] = mapped_column(default=False, server_default=false())
+    premium: Mapped[bool] = mapped_column(default=False, server_default=false())
 
     identities: Mapped[list["IdentityRow"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", lazy="selectin"
@@ -420,3 +422,21 @@ class RecommendationRow(Base):
     message: Mapped[str | None] = mapped_column(String(1000))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class KavitaLinkRow(Base):
+    """A reader's Kavita account, linked to Babel as a source."""
+
+    __tablename__ = "kavita_links"
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    base_url: Mapped[str] = mapped_column(String(500))
+    username: Mapped[str | None] = mapped_column(String(100))
+    # Created by Babel on the server's own Kavita (administrators and premium readers).
+    managed: Mapped[bool] = mapped_column(default=False)
+    status: Mapped[str] = mapped_column(String(20))
+    error: Mapped[str | None] = mapped_column(String(300))
+    source_id: Mapped[UUID | None] = mapped_column()
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)

@@ -6,6 +6,7 @@ import '../../../core/locale/greeting.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
+import '../../kavita/presentation/kavita_progress_card.dart';
 import '../../social/presentation/feed_section.dart';
 import '../application/server_status_provider.dart';
 import 'verify_email_banner.dart';
@@ -46,6 +47,7 @@ class HomePage extends ConsumerWidget {
                 spacing: 0.8,
               ),
             ),
+            const KavitaProgressCard(),
             const SizedBox(height: 32),
             const FeedSection(),
           ],

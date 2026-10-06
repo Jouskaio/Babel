@@ -16,6 +16,7 @@ import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../auth/presentation/auth_layout.dart';
+import '../../kavita/presentation/kavita_section.dart';
 import '../../social/presentation/sharing_settings.dart';
 
 /// Profile, password, sign-out and account deletion.
@@ -88,6 +89,28 @@ class AccountPage extends ConsumerWidget {
                   title: l10n.accountSecurity,
                   child: _PasswordForm(user: user),
                 ),
+                const SizedBox(height: 24),
+                _Section(title: l10n.kavitaTitle, child: const KavitaSection()),
+                if (user.admin) ...[
+                  const SizedBox(height: 24),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      Icons.admin_panel_settings_outlined,
+                      color: BabelColors.gold,
+                    ),
+                    title: Text(l10n.adminTitle, style: BabelText.heading(20)),
+                    subtitle: Text(
+                      l10n.adminPremiumHint,
+                      style: BabelText.body(13),
+                    ),
+                    trailing: Icon(
+                      Icons.chevron_right,
+                      color: BabelColors.textSecondary,
+                    ),
+                    onTap: () => context.push(Routes.admin),
+                  ),
+                ],
                 const SizedBox(height: 24),
                 _Section(
                   title: l10n.publicProfile,

@@ -1,10 +1,11 @@
 """Sign-up, sign-in (password, Google, Apple), token refresh and sign-out."""
 
+from dataclasses import replace
 from typing import Annotated
 
 from fastapi import APIRouter, Cookie, Header, HTTPException, Response, status
 
-from babel_api.api.dependencies import AuthServiceDep, ContainerDep
+from babel_api.api.dependencies import AuthServiceDep, Container, ContainerDep
 from babel_api.api.v1.schemas import (
     ForgotPasswordRequest,
     LoginRequest,
@@ -19,7 +20,7 @@ from babel_api.api.v1.schemas import (
 )
 from babel_api.core.config import Settings
 from babel_api.domain.users import IdentityProvider
-from babel_api.services.auth import AuthSession
+from babel_api.services.auth import AuthService, AuthSession
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -65,6 +66,16 @@ def _clear_cookie(response: Response, settings: Settings) -> None:
     )
 
 
+async def _roles(session: AuthSession, auth: AuthService, container: Container) -> AuthSession:
+    """An account listed in BABEL_ADMIN_EMAILS becomes administrator, which brings it an
+    account on Babel's Kavita."""
+    admins = {email.strip().lower() for email in container.settings.admin_emails}
+    user = await auth.ensure_admin(session.user, admins)
+    if user.admin and not session.user.admin:
+        container.kavita.schedule(user.id)
+    return replace(session, user=user)
+
+
 @router.get("/providers", operation_id="getAuthProviders")
 def get_providers(auth: AuthServiceDep) -> ProvidersResponse:
     """List the sign-in methods enabled on this server."""
@@ -84,6 +95,7 @@ async def register(
 ) -> TokenResponse:
     """Create an account with email and password, and sign in."""
     session = await auth.register(body.email, body.password, body.display_name, body.locale or "fr")
+    session = await _roles(session, auth, container)
     return _respond(session, response, container.settings, client)
 
 
@@ -97,6 +109,7 @@ async def login(
 ) -> TokenResponse:
     """Sign in with email and password."""
     session = await auth.login(body.email, body.password)
+    session = await _roles(session, auth, container)
     return _respond(session, response, container.settings, client)
 
 
@@ -112,6 +125,7 @@ async def login_with_google(
     session = await auth.login_with_provider(
         IdentityProvider.GOOGLE, body.id_token, body.nonce, body.display_name
     )
+    session = await _roles(session, auth, container)
     return _respond(session, response, container.settings, client)
 
 
@@ -127,6 +141,7 @@ async def login_with_apple(
     session = await auth.login_with_provider(
         IdentityProvider.APPLE, body.id_token, body.nonce, body.display_name
     )
+    session = await _roles(session, auth, container)
     return _respond(session, response, container.settings, client)
 
 
