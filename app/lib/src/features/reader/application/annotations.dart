@@ -35,6 +35,9 @@ class Annotation {
     required this.time,
     this.visibility = 'private',
     this.region,
+    this.percent,
+    this.prefix,
+    this.suffix,
   });
 
   factory Annotation.fromJson(Map<String, Object?> data) => Annotation(
@@ -48,6 +51,9 @@ class Annotation {
     time: DateTime.parse(data['client_time']! as String),
     visibility: data['visibility'] as String? ?? 'private',
     region: data['region'] as String?,
+    percent: (data['percent'] as num?)?.toDouble(),
+    prefix: data['prefix'] as String?,
+    suffix: data['suffix'] as String?,
   );
 
   final String id;
@@ -66,6 +72,12 @@ class Annotation {
   /// [chapter] is then the page index.
   final String? region;
 
+  /// Where it is in the book (percent) and the words around the quote: they place the
+  /// note in other editions (ADR 0012).
+  final double? percent;
+  final String? prefix;
+  final String? suffix;
+
   /// A note on an area of a comic page rather than on a passage of text.
   bool get onPage => region != null;
 
@@ -80,6 +92,9 @@ class Annotation {
     'client_time': time.toUtc().toIso8601String(),
     'visibility': visibility,
     'region': ?region,
+    'percent': ?percent,
+    'prefix': ?prefix,
+    'suffix': ?suffix,
   };
 }
 
@@ -121,6 +136,9 @@ class AnnotationsController {
     HighlightColor color = HighlightColor.gold,
     String? note,
     String? region,
+    double? percent,
+    String? prefix,
+    String? suffix,
   }) async {
     final text = quote.trim();
     if (text.isEmpty && region == null) return null;
@@ -134,6 +152,11 @@ class AnnotationsController {
       note: note,
       time: DateTime.now(),
       region: region,
+      percent: percent == null
+          ? null
+          : double.parse(percent.clamp(0, 100).toStringAsFixed(2)),
+      prefix: prefix,
+      suffix: suffix,
     );
     await _save(annotation);
     return annotation;
@@ -157,6 +180,9 @@ class AnnotationsController {
       time: DateTime.now(),
       visibility: visibility ?? annotation.visibility,
       region: annotation.region,
+      percent: annotation.percent,
+      prefix: annotation.prefix,
+      suffix: annotation.suffix,
     ),
   );
 

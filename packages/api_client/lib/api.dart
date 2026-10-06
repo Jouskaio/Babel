@@ -44,6 +44,7 @@ part 'model/audience.dart';
 part 'model/author_response.dart';
 part 'model/batch_import_response.dart';
 part 'model/book_format.dart';
+part 'model/book_note_response.dart';
 part 'model/book_title_response.dart';
 part 'model/book_trace_response.dart';
 part 'model/change_op.dart';

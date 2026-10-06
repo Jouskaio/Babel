@@ -329,6 +329,9 @@ class AnnotationRow(Base):
     visibility: Mapped[str] = mapped_column(String(16), default="private")
     client_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     region: Mapped[str | None] = mapped_column(String(64))
+    percent: Mapped[float | None] = mapped_column(Float)
+    prefix: Mapped[str | None] = mapped_column(String(80))
+    suffix: Mapped[str | None] = mapped_column(String(80))
 
 
 class ShelfRow(Base):

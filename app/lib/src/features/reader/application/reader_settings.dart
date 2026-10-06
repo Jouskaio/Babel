@@ -81,6 +81,7 @@ class ReaderSettings {
     this.font = ReaderFont.literata,
     this.spacing = ReaderSpacing.normal,
     this.layout = ReaderLayout.scroll,
+    this.readerNotes = true,
   });
 
   static const minSize = 14.0;
@@ -93,18 +94,23 @@ class ReaderSettings {
   final ReaderSpacing spacing;
   final ReaderLayout layout;
 
+  /// Show the notes other readers shared, in the text and in the margin.
+  final bool readerNotes;
+
   ReaderSettings copyWith({
     double? textSize,
     ReaderTheme? theme,
     ReaderFont? font,
     ReaderSpacing? spacing,
     ReaderLayout? layout,
+    bool? readerNotes,
   }) => ReaderSettings(
     textSize: textSize ?? this.textSize,
     theme: theme ?? this.theme,
     font: font ?? this.font,
     spacing: spacing ?? this.spacing,
     layout: layout ?? this.layout,
+    readerNotes: readerNotes ?? this.readerNotes,
   );
 
   /// The palette while reading: on e-ink always black on white.
@@ -123,10 +129,12 @@ class ReaderSettings {
       other.theme == theme &&
       other.font == font &&
       other.spacing == spacing &&
-      other.layout == layout;
+      other.layout == layout &&
+      other.readerNotes == readerNotes;
 
   @override
-  int get hashCode => Object.hash(textSize, theme, font, spacing, layout);
+  int get hashCode =>
+      Object.hash(textSize, theme, font, spacing, layout, readerNotes);
 }
 
 final readerSettingsProvider =
@@ -159,6 +167,7 @@ class ReaderSettingsController extends Notifier<ReaderSettings> {
       final font = await prefs.getString('${_prefix}font');
       final spacing = await prefs.getString('${_prefix}spacing');
       final layout = await prefs.getString('${_prefix}layout');
+      final readerNotes = await prefs.getBool('${_prefix}reader_notes');
       if (!ref.mounted) return;
       final loaded = state.copyWith(
         textSize: textSize?.clamp(
@@ -169,6 +178,7 @@ class ReaderSettingsController extends Notifier<ReaderSettings> {
         font: pick(ReaderFont.values, font),
         spacing: pick(ReaderSpacing.values, spacing),
         layout: pick(ReaderLayout.values, layout),
+        readerNotes: readerNotes,
       );
       state = loaded;
     } on Object catch (error) {
@@ -199,6 +209,11 @@ class ReaderSettingsController extends Notifier<ReaderSettings> {
 
   Future<void> setLayout(ReaderLayout layout) =>
       _save('layout', layout, () => state = state.copyWith(layout: layout));
+
+  Future<void> setReaderNotes(bool show) async {
+    state = state.copyWith(readerNotes: show);
+    await SharedPreferencesAsync().setBool('${_prefix}reader_notes', show);
+  }
 
   Future<void> _save(String key, Enum value, void Function() apply) async {
     apply();

@@ -34,6 +34,21 @@ MAX_NOTE = 5000
 END_PERCENT = 99.5
 
 
+def _percent(value: object) -> float | None:
+    if value is None:
+        return None
+    percent = float(str(value))
+    if not 0 <= percent <= 100:
+        raise ValueError("percent")
+    return percent
+
+
+def _context(value: object) -> str | None:
+    """A few words around a quote, kept short."""
+    text = " ".join(str(value or "").split())
+    return text[:80] or None
+
+
 def _client_time(value: object) -> datetime:
     when = datetime.fromisoformat(str(value))
     return when if when.tzinfo else when.replace(tzinfo=UTC)
@@ -364,6 +379,9 @@ class SyncService:
             visibility=Visibility(str(data.get("visibility") or Visibility.PRIVATE.value)),
             client_time=client_time,
             region=region,
+            percent=_percent(data.get("percent")),
+            prefix=_context(data.get("prefix")),
+            suffix=_context(data.get("suffix")),
         )
         await self._sync.save_annotation(annotation)
         await self._sync.record(

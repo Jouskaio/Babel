@@ -76,4 +76,58 @@ void main() {
     const source = '<p>First.</p>';
     expect(applyHighlights(source, [note('Elsewhere')]), source);
   });
+
+  group('other editions', () {
+    ReaderMark mark(String quote, {String? prefix, String? suffix}) =>
+        (id: 'n1', quote: quote, prefix: prefix, suffix: suffix);
+
+    test('typography and case do not stop a quote from being found', () {
+      final html = applyReaderNotes(
+        '<p>« Je ne suis pas un oiseau », dit-elle — '
+        'et aucun filet ne m’arrête.</p>',
+        [
+          mark(
+            "« je ne suis pas un oiseau », dit-elle - et aucun filet ne m'arrête.",
+          ),
+        ],
+      );
+      expect(html, contains('<mark data-kind="reader">«'));
+      expect(html, contains('arrête.</mark>'));
+    });
+
+    test('the words around a quote choose between repeated passages', () {
+      const html =
+          '<p>Il pleuvait. Elle partit.</p><p>Le soleil revint. Elle partit.</p>';
+      final marked = applyReaderNotes(html, [
+        mark('Elle partit.', prefix: 'Le soleil revint.'),
+      ]);
+      expect(
+        marked,
+        '<p>Il pleuvait. Elle partit.</p><p>Le soleil revint. '
+        '<a href="babel-reader-note:n1"><mark data-kind="reader">Elle partit.'
+        '</mark></a></p>',
+      );
+    });
+
+    test('a quote is looked for in every chapter of the book', () {
+      final book = BookText([
+        '<p>Chapitre un.</p>',
+        '<p>Rien ici.</p>',
+        '<p>“Reader, I married him.”</p>',
+      ]);
+      expect(book.chapterOf('"reader, i married him."', hint: 0), 2);
+      expect(book.chapterOf('Lecteur, je l’ai épousé.'), isNull);
+    });
+
+    test('a new note keeps the words around it and where it starts', () {
+      final context = quoteContext(
+        '<p>It was a dark night. Reader, I married him. The end came.</p>',
+        'Reader, I married him.',
+        length: 12,
+      );
+      expect(context?.prefix, 'dark night.');
+      expect(context?.suffix, 'The end cam');
+      expect(context!.fraction, closeTo(21 / 58, 0.001));
+    });
+  });
 }

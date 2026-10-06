@@ -585,6 +585,48 @@ async def get_work_readers(
 history_router = APIRouter(tags=["library"])
 
 
+class BookNoteResponse(BaseModel):
+    """Another reader's note, with what places it in another edition."""
+
+    id: UUID
+    reader: AuthorResponse
+    quote: str
+    note: str | None
+    chapter: int = Field(description="Chapter (or page) in the edition it was written in")
+    region: str | None
+    percent: float | None = Field(description="Where it is in its book, in percent")
+    prefix: str | None = Field(description="Words just before the quote")
+    suffix: str | None = Field(description="Words just after the quote")
+    same_file: bool = Field(description="Written in this very file: chapter and quote match")
+    language: str | None = Field(description="Language of the edition it was written in")
+    at: datetime
+
+
+@history_router.get("/library/{item_id}/reader-notes", operation_id="getReaderNotes")
+async def get_reader_notes(
+    user_id: CurrentUserId, social: SocialServiceDep, item_id: UUID
+) -> list[BookNoteResponse]:
+    """Other readers' notes you may see on this book, from any edition of its work."""
+    notes, profiles = await social.book_notes(user_id, item_id)
+    return [
+        BookNoteResponse(
+            id=n.id,
+            reader=_author(profiles.get(n.user_id)),
+            quote=n.quote,
+            note=n.note,
+            chapter=n.chapter,
+            region=n.region,
+            percent=n.percent,
+            prefix=n.prefix,
+            suffix=n.suffix,
+            same_file=n.same_file,
+            language=n.language,
+            at=n.at,
+        )
+        for n in notes
+    ]
+
+
 @history_router.get("/library/history", operation_id="getLibraryHistory")
 async def get_history(user_id: CurrentUserId, social: SocialServiceDep) -> list[BookTraceResponse]:
     """Every book the reader has or once had, removed ones included, latest first.

@@ -34,9 +34,13 @@ whatever the edition.
   notes are gathered per work through their item (`GET /v1/catalog/works/{id}/readers`),
   whatever the edition or file, with each reader's audiences and blocks applied.
 
-## Placing notes from other editions (next step)
+## Placing notes from other editions
 
-Notes keep the quoted text; that, not a position, is the anchor between editions.
+Notes keep the quoted text, where they are in their book (percent) and about 40 characters
+before and after the quote; the text, not a position, is the anchor between editions.
+`GET /v1/library/{id}/reader-notes` gives the notes the reader may see on that file or any
+edition of its work, and the EPUB reader places them ("Other readers' notes", on by default
+in the reader settings): dotted underline on the passage, the rest in the margin.
 
 - Same file: exact place (chapter and quote).
 - Other edition, same language: the quote is searched in the whole book (chapters differ
