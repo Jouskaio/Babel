@@ -597,7 +597,7 @@ class _BookActionsState extends ConsumerState<_BookActions> {
   }
 }
 
-/// Every book, a status, or a shelf; and the hidden books when asked.
+/// Text tabs for the statuses, and "Shelves ▾" opening the shelves and hidden books.
 class _Filters extends StatelessWidget {
   const _Filters({
     required this.filter,
@@ -620,122 +620,210 @@ class _Filters extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    Widget chip(String label, Object? value, {VoidCallback? onLongPress}) {
-      final selected = filter == value;
-      return Padding(
-        padding: const EdgeInsets.only(right: 8),
-        child: GestureDetector(
-          onLongPress: onLongPress,
-          child: ChoiceChip(
-            label: Text(label),
-            selected: selected,
-            showCheckmark: false,
-            labelStyle: BabelText.body(
-              13,
-              color: selected ? BabelColors.canvas : BabelColors.textPrimary,
-            ),
-            selectedColor: BabelColors.textPrimary,
-            backgroundColor: BabelColors.canvas,
-            side: BorderSide(color: BabelColors.border),
-            onSelected: (_) => onFilter(selected ? null : value),
-          ),
-        ),
-      );
-    }
-
+    final shelf = filter is String
+        ? shelves.where((s) => s.id == filter).firstOrNull
+        : null;
     return Padding(
-      padding: const EdgeInsets.only(top: 18),
+      padding: const EdgeInsets.only(top: 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              children: [
-                chip(l10n.filterAll, null),
-                for (final status in [
-                  ReadingStatus.reading,
-                  ReadingStatus.toRead,
-                  ReadingStatus.finished,
-                  ReadingStatus.abandoned,
-                ])
-                  chip(statusLabel(l10n, status), status),
-              ],
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: BabelColors.border)),
             ),
-          ),
-          const SizedBox(height: 8),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Row(
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: Icon(
-                    Icons.shelves,
-                    size: 18,
-                    color: BabelColors.textSecondary,
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (final (label, value) in [
+                          (l10n.filterAll, null),
+                          (l10n.tabReading, ReadingStatus.reading),
+                          (l10n.tabToRead, ReadingStatus.toRead),
+                          (l10n.tabFinished, ReadingStatus.finished),
+                          (l10n.tabAbandoned, ReadingStatus.abandoned),
+                        ])
+                          _Tab(
+                            label: label,
+                            selected: filter == value,
+                            onTap: () => onFilter(value),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-                for (final shelf in shelves)
-                  chip(
-                    shelf.name,
-                    shelf.id,
-                    onLongPress: () => showShelfEditor(context, shelf),
-                  ),
-                ActionChip(
-                  avatar: Icon(Icons.add, size: 16, color: BabelColors.gold),
-                  label: Text(l10n.shelfNew),
-                  labelStyle: BabelText.body(13, color: BabelColors.gold),
-                  backgroundColor: BabelColors.canvas,
-                  side: BorderSide(
-                    color: BabelColors.gold.withValues(alpha: 0.6),
-                  ),
-                  onPressed: onNewShelf,
+                _Tab(
+                  label: '${l10n.shelvesTitle} ▾',
+                  selected: shelf != null,
+                  onTap: () => _showShelves(context),
                 ),
               ],
             ),
           ),
-          if (filter is String)
+          if (shelf != null)
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
-              child: TextButton.icon(
-                onPressed: () {
-                  final shelf = shelves
-                      .where((s) => s.id == filter)
-                      .firstOrNull;
-                  if (shelf != null) showShelfEditor(context, shelf);
-                },
-                icon: Icon(
-                  Icons.tune,
-                  size: 16,
-                  color: BabelColors.textSecondary,
-                ),
-                label: Text(
-                  l10n.shelfManage,
-                  style: BabelText.body(13, color: BabelColors.textSecondary),
-                ),
-              ),
-            ),
-          if (hiddenCount > 0)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: SwitchListTile(
-                dense: true,
-                value: showHidden,
-                activeThumbColor: BabelColors.gold,
-                title: Text(
-                  '${l10n.showHidden} ($hiddenCount)',
-                  style: BabelText.body(13, color: BabelColors.textPrimary),
-                ),
-                onChanged: onShowHidden,
+              padding: const EdgeInsets.fromLTRB(24, 10, 12, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.shelfFilter(shelf.name),
+                      overflow: TextOverflow.ellipsis,
+                      style: BabelText.heading(18),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => showShelfEditor(context, shelf),
+                    child: Text(
+                      l10n.shelfManage,
+                      style: BabelText.body(13, color: BabelColors.gold),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => onFilter(null),
+                    child: Text(
+                      l10n.showAll,
+                      style: BabelText.body(
+                        13,
+                        color: BabelColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
         ],
       ),
     );
   }
+
+  void _showShelves(BuildContext context) => showModalBottomSheet<void>(
+    context: context,
+    useRootNavigator: true,
+    isScrollControlled: true,
+    backgroundColor: BabelColors.surface,
+    builder: (context) {
+      final l10n = context.l10n;
+      var hidden = showHidden;
+      return SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * 0.8,
+          ),
+          child: StatefulBuilder(
+            builder: (context, setSheet) => ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+              children: [
+                Text(l10n.shelvesTitle, style: BabelText.title(32)),
+                const SizedBox(height: 8),
+                for (final s in shelves)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    selected: filter == s.id,
+                    selectedColor: BabelColors.gold,
+                    title: Text(
+                      s.name,
+                      style: BabelText.heading(
+                        18,
+                        color: filter == s.id ? BabelColors.gold : null,
+                      ),
+                    ),
+                    subtitle: Text(
+                      l10n.shelfBooks(s.itemIds.length).toUpperCase(),
+                      style: BabelText.label(
+                        9,
+                        color: BabelColors.textSecondary,
+                      ),
+                    ),
+                    trailing: IconButton(
+                      tooltip: l10n.shelfManage,
+                      onPressed: () => showShelfEditor(context, s),
+                      icon: Icon(
+                        Icons.more_horiz,
+                        color: BabelColors.textSecondary,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      onFilter(s.id);
+                    },
+                  ),
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: PillButton(
+                    label: l10n.shelfNew,
+                    kind: PillButtonKind.secondary,
+                    onPressed: () {
+                      Navigator.pop(context);
+                      onNewShelf();
+                    },
+                  ),
+                ),
+                if (hiddenCount > 0) ...[
+                  const SizedBox(height: 12),
+                  Divider(color: BabelColors.border),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: hidden,
+                    activeThumbColor: BabelColors.gold,
+                    title: Text(
+                      '${l10n.showHidden} ($hiddenCount)',
+                      style: BabelText.body(14, color: BabelColors.textPrimary),
+                    ),
+                    onChanged: (v) {
+                      setSheet(() => hidden = v);
+                      onShowHidden(v);
+                    },
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class _Tab extends StatelessWidget {
+  const _Tab({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+      margin: const EdgeInsets.only(right: 20),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: selected ? BabelColors.gold : Colors.transparent,
+            width: 2,
+          ),
+        ),
+      ),
+      child: Text(
+        label,
+        style: BabelText.body(
+          14,
+          color: selected ? BabelColors.textPrimary : BabelColors.textSecondary,
+        ),
+      ),
+    ),
+  );
 }
 
 class _AddOwnBooks extends StatelessWidget {
