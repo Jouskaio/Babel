@@ -2202,4 +2202,141 @@ class AppLocalizationsEn extends AppLocalizations {
   String genreFirstTime(String genre) {
     return 'A first this year: $genre.';
   }
+
+  @override
+  String get absTitle => 'Audiobookshelf';
+
+  @override
+  String get absIntro =>
+      'Link your Audiobookshelf to listen to your audiobooks in Babel, with status, shelves and statistics like your books.';
+
+  @override
+  String get absUrl => 'Audiobookshelf address';
+
+  @override
+  String get absApiKey => 'API key';
+
+  @override
+  String get absApiKeyHelp =>
+      'Made in Audiobookshelf: Settings › API Keys. Recommended: it does not expire.';
+
+  @override
+  String get absUsePassword => 'Use my user name instead';
+
+  @override
+  String get absUseKey => 'Use an API key';
+
+  @override
+  String get absUsername => 'User name';
+
+  @override
+  String get absPassword => 'Password';
+
+  @override
+  String get absPasswordHelp => 'Used once: Babel does not keep it.';
+
+  @override
+  String get absLink => 'Link';
+
+  @override
+  String absLinked(String host, String user) {
+    return 'Linked to $host · $user';
+  }
+
+  @override
+  String get absExpired =>
+      'Audiobookshelf now refuses Babel\'s access: link it again.';
+
+  @override
+  String get absUnlink => 'Unlink';
+
+  @override
+  String get absBrowse => 'Browse my audiobooks';
+
+  @override
+  String get absErrorUnauthorized =>
+      'Audiobookshelf refused these credentials.';
+
+  @override
+  String get absErrorUnreachable =>
+      'Audiobookshelf does not answer at this address.';
+
+  @override
+  String get absErrorGeneric => 'Audiobookshelf could not be linked.';
+
+  @override
+  String get audiobooksTitle => 'Audiobooks';
+
+  @override
+  String get audiobooksSearch => 'Search an audiobook';
+
+  @override
+  String get audiobookAdd => 'Add';
+
+  @override
+  String get audiobookInLibrary => 'In your library';
+
+  @override
+  String audiobookAdded(String title) {
+    return '“$title” is in your library.';
+  }
+
+  @override
+  String get audiobooksEmpty => 'No audiobook here.';
+
+  @override
+  String get audiobooksNotLinked =>
+      'Link your Audiobookshelf first, in Account.';
+
+  @override
+  String narratedBy(String names) {
+    return 'Read by $names';
+  }
+
+  @override
+  String get listen => 'Listen';
+
+  @override
+  String get audioBadge => 'Audio';
+
+  @override
+  String get playerChapters => 'Chapters';
+
+  @override
+  String get playerSpeed => 'Speed';
+
+  @override
+  String get playerSleep => 'Sleep timer';
+
+  @override
+  String get sleepOff => 'Off';
+
+  @override
+  String sleepMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String get sleepEndOfChapter => 'End of chapter';
+
+  @override
+  String sleepLeft(String time) {
+    return 'Stops in $time';
+  }
+
+  @override
+  String get playerBack30 => 'Back 30 s';
+
+  @override
+  String get playerForward30 => 'Forward 30 s';
+
+  @override
+  String get playerPlay => 'Play';
+
+  @override
+  String get playerPause => 'Pause';
+
+  @override
+  String get playerError =>
+      'Cannot play: check your connection or your Audiobookshelf.';
 }

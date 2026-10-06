@@ -3667,6 +3667,246 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Première incursion cette année : {genre}.'**
   String genreFirstTime(String genre);
+
+  /// No description provided for @absTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Audiobookshelf'**
+  String get absTitle;
+
+  /// No description provided for @absIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liez votre Audiobookshelf pour écouter vos livres audio dans Babel, avec statut, étagères et statistiques comme vos livres.'**
+  String get absIntro;
+
+  /// No description provided for @absUrl.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse d\'Audiobookshelf'**
+  String get absUrl;
+
+  /// No description provided for @absApiKey.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clé d\'API'**
+  String get absApiKey;
+
+  /// No description provided for @absApiKeyHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créée dans Audiobookshelf : Paramètres › Clés d\'API. Recommandé : elle n\'expire pas.'**
+  String get absApiKeyHelp;
+
+  /// No description provided for @absUsePassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser mon identifiant à la place'**
+  String get absUsePassword;
+
+  /// No description provided for @absUseKey.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser une clé d\'API'**
+  String get absUseKey;
+
+  /// No description provided for @absUsername.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant'**
+  String get absUsername;
+
+  /// No description provided for @absPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get absPassword;
+
+  /// No description provided for @absPasswordHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utilisé une seule fois : Babel ne le garde pas.'**
+  String get absPasswordHelp;
+
+  /// No description provided for @absLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lier'**
+  String get absLink;
+
+  /// No description provided for @absLinked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lié à {host} · {user}'**
+  String absLinked(String host, String user);
+
+  /// No description provided for @absExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Audiobookshelf refuse désormais l\'accès de Babel : liez-le à nouveau.'**
+  String get absExpired;
+
+  /// No description provided for @absUnlink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délier'**
+  String get absUnlink;
+
+  /// No description provided for @absBrowse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parcourir mes livres audio'**
+  String get absBrowse;
+
+  /// No description provided for @absErrorUnauthorized.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiants refusés par Audiobookshelf.'**
+  String get absErrorUnauthorized;
+
+  /// No description provided for @absErrorUnreachable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Audiobookshelf ne répond pas à cette adresse.'**
+  String get absErrorUnreachable;
+
+  /// No description provided for @absErrorGeneric.
+  ///
+  /// In fr, this message translates to:
+  /// **'Audiobookshelf n\'a pas pu être lié.'**
+  String get absErrorGeneric;
+
+  /// No description provided for @audiobooksTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livres audio'**
+  String get audiobooksTitle;
+
+  /// No description provided for @audiobooksSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chercher un livre audio'**
+  String get audiobooksSearch;
+
+  /// No description provided for @audiobookAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get audiobookAdd;
+
+  /// No description provided for @audiobookInLibrary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans votre bibliothèque'**
+  String get audiobookInLibrary;
+
+  /// No description provided for @audiobookAdded.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {title} » est dans votre bibliothèque.'**
+  String audiobookAdded(String title);
+
+  /// No description provided for @audiobooksEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun livre audio ici.'**
+  String get audiobooksEmpty;
+
+  /// No description provided for @audiobooksNotLinked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liez d\'abord votre Audiobookshelf, dans Compte.'**
+  String get audiobooksNotLinked;
+
+  /// No description provided for @narratedBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu par {names}'**
+  String narratedBy(String names);
+
+  /// No description provided for @listen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écouter'**
+  String get listen;
+
+  /// No description provided for @audioBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Audio'**
+  String get audioBadge;
+
+  /// No description provided for @playerChapters.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chapitres'**
+  String get playerChapters;
+
+  /// No description provided for @playerSpeed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vitesse'**
+  String get playerSpeed;
+
+  /// No description provided for @playerSleep.
+  ///
+  /// In fr, this message translates to:
+  /// **'Minuterie'**
+  String get playerSleep;
+
+  /// No description provided for @sleepOff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactivée'**
+  String get sleepOff;
+
+  /// No description provided for @sleepMinutes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minutes} min'**
+  String sleepMinutes(int minutes);
+
+  /// No description provided for @sleepEndOfChapter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fin du chapitre'**
+  String get sleepEndOfChapter;
+
+  /// No description provided for @sleepLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrêt dans {time}'**
+  String sleepLeft(String time);
+
+  /// No description provided for @playerBack30.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reculer de 30 s'**
+  String get playerBack30;
+
+  /// No description provided for @playerForward30.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avancer de 30 s'**
+  String get playerForward30;
+
+  /// No description provided for @playerPlay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture'**
+  String get playerPlay;
+
+  /// No description provided for @playerPause.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pause'**
+  String get playerPause;
+
+  /// No description provided for @playerError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture impossible : vérifiez votre connexion ou votre Audiobookshelf.'**
+  String get playerError;
 }
 
 class _AppLocalizationsDelegate

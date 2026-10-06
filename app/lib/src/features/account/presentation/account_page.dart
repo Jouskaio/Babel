@@ -15,6 +15,7 @@ import '../../../core/widgets/babel_text_field.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
+import '../../audiobooks/presentation/audiobookshelf_section.dart';
 import '../../auth/presentation/auth_layout.dart';
 import '../../kavita/presentation/kavita_section.dart';
 import '../../social/presentation/sharing_settings.dart';
@@ -91,6 +92,11 @@ class AccountPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 _Section(title: l10n.kavitaTitle, child: const KavitaSection()),
+                const SizedBox(height: 24),
+                _Section(
+                  title: l10n.absTitle,
+                  child: const AudiobookshelfSection(),
+                ),
                 if (user.admin) ...[
                   const SizedBox(height: 24),
                   ListTile(

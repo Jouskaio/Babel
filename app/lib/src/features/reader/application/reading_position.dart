@@ -7,14 +7,26 @@ import '../../../core/storage/local_database.dart';
 import '../../../core/sync/sync_engine.dart';
 
 /// Where a reader stopped, in a form each viewer understands:
-/// `epub:<chapter>:<fraction>`, `pages:<page>` (comics, PDF).
+/// `epub:<chapter>:<fraction>`, `pages:<page>` (comics, PDF), `audio:<seconds>`.
 class ReadingLocator {
-  const ReadingLocator.epub(this.chapter, this.fraction) : page = null;
-  const ReadingLocator.page(int this.page) : chapter = 0, fraction = 0;
+  const ReadingLocator.epub(this.chapter, this.fraction)
+    : page = null,
+      seconds = null;
+  const ReadingLocator.page(int this.page)
+    : chapter = 0,
+      fraction = 0,
+      seconds = null;
+  const ReadingLocator.audio(double this.seconds)
+    : chapter = 0,
+      fraction = 0,
+      page = null;
 
   final int chapter;
   final double fraction;
   final int? page;
+
+  /// Where an audiobook was left, in seconds from its start.
+  final double? seconds;
 
   static ReadingLocator? parse(String value) {
     final parts = value.split(':');
@@ -33,14 +45,20 @@ class ReadingLocator {
         final page? => ReadingLocator.page(page),
         _ => null,
       },
+      ['audio', final s] => switch (double.tryParse(s)) {
+        final seconds? => ReadingLocator.audio(seconds < 0 ? 0 : seconds),
+        _ => null,
+      },
       _ => null,
     };
   }
 
   @override
-  String toString() => page != null
-      ? 'pages:$page'
-      : 'epub:$chapter:${fraction.toStringAsFixed(4)}';
+  String toString() => switch ((page, seconds)) {
+    (final page?, _) => 'pages:$page',
+    (_, final seconds?) => 'audio:${seconds.toStringAsFixed(1)}',
+    _ => 'epub:$chapter:${fraction.toStringAsFixed(4)}',
+  };
 }
 
 /// A saved position: this device's own, or one synced from another device.

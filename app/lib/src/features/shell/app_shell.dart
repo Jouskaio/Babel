@@ -7,6 +7,7 @@ import '../../core/theme/babel_colors.dart';
 import '../../core/theme/babel_text.dart';
 import '../../l10n.dart';
 import '../../routing/router.dart';
+import '../audiobooks/presentation/audio_player_view.dart';
 
 class _Destination {
   const _Destination(this.icon, this.label, {this.branch, this.route});
@@ -62,6 +63,10 @@ class AppShell extends ConsumerWidget {
                       children: [
                         if (!sync.online) _OfflinePill(pending: sync.pending),
                         Expanded(child: shell),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          child: MiniPlayer(),
+                        ),
                       ],
                     ),
                   ),
@@ -79,6 +84,7 @@ class AppShell extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (!sync.online) _OfflinePill(pending: sync.pending),
+                const MiniPlayer(),
                 _BottomBar(
                   destinations: destinations,
                   current: shell.currentIndex,
