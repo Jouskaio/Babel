@@ -238,8 +238,14 @@ class ApiClient {
           return ImportResponse.fromJson(value);
         case 'IsbnLookupResponse':
           return IsbnLookupResponse.fromJson(value);
+        case 'KavitaLinkResponse':
+          return KavitaLinkResponse.fromJson(value);
+        case 'KavitaStatus':
+          return KavitaStatusTypeTransformer().decode(value);
         case 'LibraryItemResponse':
           return LibraryItemResponse.fromJson(value);
+        case 'LinkKavitaRequest':
+          return LinkKavitaRequest.fromJson(value);
         case 'LinkKind':
           return LinkKindTypeTransformer().decode(value);
         case 'LinkPreviewResponse':
@@ -248,6 +254,8 @@ class ApiClient {
           return LinkRequest.fromJson(value);
         case 'LoginRequest':
           return LoginRequest.fromJson(value);
+        case 'MemberResponse':
+          return MemberResponse.fromJson(value);
         case 'OpOutcome':
           return OpOutcomeTypeTransformer().decode(value);
         case 'OpdsConfig':
@@ -256,6 +264,8 @@ class ApiClient {
           return OperationRequest.fromJson(value);
         case 'OperationResult':
           return OperationResult.fromJson(value);
+        case 'PremiumRequest':
+          return PremiumRequest.fromJson(value);
         case 'ProviderLoginRequest':
           return ProviderLoginRequest.fromJson(value);
         case 'ProvidersResponse':

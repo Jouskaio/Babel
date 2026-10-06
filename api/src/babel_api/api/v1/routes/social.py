@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, Query, Response, status
 from pydantic import BaseModel, Field
 
 from babel_api.api.dependencies import CurrentUserId, SocialServiceDep
@@ -312,13 +312,21 @@ async def get_feed(user_id: CurrentUserId, social: SocialServiceDep) -> list[Fee
 
 
 # ---------------------------------------------------------------- reviews
-@router.get("/library/{item_id}/review", operation_id="getReview", tags=["library"])
+@router.get(
+    "/library/{item_id}/review",
+    operation_id="getReview",
+    tags=["library"],
+    responses={204: {"description": "No review yet"}},
+    response_model=ReviewResponse,
+)
 async def get_review(
     user_id: CurrentUserId, social: SocialServiceDep, item_id: UUID
-) -> ReviewResponse | None:
+) -> ReviewResponse | Response:
     """Your review of this book, if any."""
     review = await social.review(user_id, item_id)
-    return ReviewResponse.of(review) if review else None
+    if review is None:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return ReviewResponse.of(review)
 
 
 @router.put("/library/{item_id}/review", operation_id="saveReview", tags=["library"])

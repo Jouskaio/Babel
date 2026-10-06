@@ -70,8 +70,14 @@ class Settings(BaseSettings):
     # push notifications. Empty: notifications are only logged.
     fcm_credentials_file: str = ""
 
-    # Accounts with these emails are administrators (file withdrawal, blocking).
+    # Accounts with these emails are administrators (file withdrawal, blocking); they are
+    # premium too, and only they can make other accounts premium.
     admin_emails: list[str] = []
+
+    # Babel's own Kavita: administrators and premium readers get an account there, created
+    # and linked by Babel. The key is an auth key of a Kavita administrator account.
+    kavita_url: str = ""
+    kavita_admin_key: SecretStr = SecretStr("")
 
     # Social sign-in: accepted audiences (OAuth client IDs). Empty disables the provider.
     google_client_ids: list[str] = []

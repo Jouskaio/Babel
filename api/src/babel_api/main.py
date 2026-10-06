@@ -9,14 +9,17 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import SQLAlchemyError
 
 from babel_api import __version__
 from babel_api.adapters.catalog.open_library import OpenLibrarySource
 from babel_api.adapters.db.migrations.config import upgrade_database
+from babel_api.adapters.db.repositories import SqlUserRepository
 from babel_api.adapters.db.session import create_engine, create_session_factory
 from babel_api.adapters.files.blob_store import LocalBlobStore
 from babel_api.adapters.files.covers import LocalCoverCache
 from babel_api.adapters.files.metadata import EbookMetadataReader
+from babel_api.adapters.kavita import KavitaClient
 from babel_api.adapters.mail.mailers import BackgroundMailer, LogMailer, SmtpMailer
 from babel_api.adapters.push.fcm import FcmPusher, LogPusher
 from babel_api.adapters.security.identity import apple_verifier, google_verifier
@@ -29,7 +32,7 @@ from babel_api.adapters.sources.links import LinkFetcher
 from babel_api.adapters.sources.manifest import ManifestConnector
 from babel_api.adapters.sources.opds import OpdsConnector
 from babel_api.adapters.sources.webdav import WebDavConnector
-from babel_api.api.dependencies import Container, make_follow_service
+from babel_api.api.dependencies import Container, make_follow_service, make_kavita_service
 from babel_api.api.errors import install_error_handlers
 from babel_api.api.v1.router import router as v1_router
 from babel_api.core.config import Settings, get_settings
@@ -38,6 +41,7 @@ from babel_api.domain.users import IdentityProvider
 from babel_api.services.catalog import CatalogService
 from babel_api.services.follow_loop import follow_forever
 from babel_api.services.follows import FollowService
+from babel_api.services.kavita import KavitaProvisioner, KavitaService
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -82,6 +86,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 settings.fcm_credentials_file,
             )
 
+    def kavita_client(url: str) -> KavitaClient:
+        return KavitaClient(url, allowed_hosts=allowed_hosts)
+
+    @asynccontextmanager
+    async def kavita_services() -> AsyncGenerator[KavitaService]:
+        container: Container = app.state.container
+        async with container.sessions() as session:
+            yield make_kavita_service(container, session)
+
+    kavita = KavitaProvisioner(kavita_services)
+
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         migrate = settings.migrate_on_startup
@@ -90,6 +105,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if migrate:
             # Alembic runs its own event loop: off this one.
             await asyncio.to_thread(upgrade_database, settings.database_url)
+        container_: Container = app.state.container
+        try:
+            async with container_.sessions() as session:
+                # Administrators come from the settings; they may have changed since.
+                users = SqlUserRepository(session)
+                await users.sync_admins({e.strip().lower() for e in settings.admin_emails})
+                await session.commit()
+            # Administrators and premium readers still without a Kavita account get one.
+            await kavita.schedule_awaiting()
+        except SQLAlchemyError:
+            # A database not migrated yet (or down) must not stop the server from starting.
+            logging.getLogger(__name__).warning("Roles not synchronized", exc_info=True)
         follow_task: asyncio.Task[None] | None = None
         if settings.follow_interval_hours > 0:
             container: Container = app.state.container
@@ -103,6 +130,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 follow_forever(services, timedelta(hours=settings.follow_interval_hours))
             )
         yield
+        kavita.cancel()
         if follow_task is not None:
             follow_task.cancel()
         await mailer.drain()
@@ -143,6 +171,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         secrets=SecretBox(settings.secrets_key.get_secret_value()),
         mailer=mailer,
         pusher=pusher,
+        kavita_client=kavita_client,
+        kavita=kavita,
     )
     if settings.cors_origins:
         app.add_middleware(

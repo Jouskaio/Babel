@@ -1523,4 +1523,123 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get comicAnnotateHint =>
       'Tracez un cadre autour de la case à annoter.';
+
+  @override
+  String get kavitaTitle => 'Kavita';
+
+  @override
+  String get kavitaCreating => 'Création de votre accès Kavita…';
+
+  @override
+  String get kavitaFollow => 'Suivre';
+
+  @override
+  String kavitaExists(String host) {
+    return 'Un compte Kavita existe déjà avec votre e-mail sur $host : liez-le avec son identifiant et son mot de passe.';
+  }
+
+  @override
+  String get kavitaFailed =>
+      'La création de votre accès Kavita n\'a pas abouti.';
+
+  @override
+  String kavitaLinked(String host, String username) {
+    return 'Lié à $host · compte $username';
+  }
+
+  @override
+  String get kavitaManaged =>
+      'Compte créé pour vous par Babel, avec accès à toutes les bibliothèques.';
+
+  @override
+  String get kavitaUnlink => 'Délier';
+
+  @override
+  String get kavitaUnlinkConfirm =>
+      'Délier votre Kavita ? Les livres déjà importés restent dans votre bibliothèque.';
+
+  @override
+  String get kavitaUnlinkManaged =>
+      'Supprimer l\'accès Kavita créé par Babel ? Les livres déjà importés restent dans votre bibliothèque.';
+
+  @override
+  String get kavitaHint =>
+      'Vos bibliothèques Kavita dans Babel. Le mot de passe sert une seule fois à créer une clé « Babel » sur votre compte, il n\'est pas conservé.';
+
+  @override
+  String get kavitaUrl => 'Adresse de votre Kavita';
+
+  @override
+  String get kavitaUsername => 'Identifiant Kavita';
+
+  @override
+  String get kavitaPassword => 'Mot de passe Kavita';
+
+  @override
+  String get kavitaPasswordHelp => 'Utilisé une seule fois, jamais enregistré.';
+
+  @override
+  String get kavitaWrongCredentials =>
+      'Identifiant ou mot de passe Kavita incorrect.';
+
+  @override
+  String get kavitaNotKavita =>
+      'Cette adresse ne répond pas comme un serveur Kavita.';
+
+  @override
+  String get kavitaUnreachable => 'Kavita n\'a pas pu être joint.';
+
+  @override
+  String get kavitaLink => 'Lier mon Kavita';
+
+  @override
+  String get kavitaCreateMine => 'Créer mon accès sur le Kavita de Babel';
+
+  @override
+  String get kavitaSetupTitle => 'Votre accès Kavita';
+
+  @override
+  String kavitaSetupHint(String host) {
+    return 'Babel crée votre compte sur $host et y relie votre bibliothèque. Vous pouvez quitter cette page.';
+  }
+
+  @override
+  String get kavitaStepCreating => 'Création du compte';
+
+  @override
+  String get kavitaStepLinking => 'Création de la clé Babel';
+
+  @override
+  String get kavitaStepImporting => 'Lecture du catalogue';
+
+  @override
+  String get kavitaStepReady => 'Prêt';
+
+  @override
+  String get kavitaOpenLibrary => 'Voir mes sources';
+
+  @override
+  String get kavitaWait => 'Quelques secondes suffisent en général.';
+
+  @override
+  String get adminTitle => 'Administration';
+
+  @override
+  String get adminPremiumHint =>
+      'Comptes premium : accès au Kavita de Babel, créé automatiquement.';
+
+  @override
+  String get adminRole => 'Admin';
+
+  @override
+  String get adminKavitaReady => 'Kavita prêt';
+
+  @override
+  String get adminKavitaFailed => 'Kavita en échec';
+
+  @override
+  String get adminKavitaExists => 'Kavita existant';
+
+  @override
+  String get adminKavitaCreating => 'Kavita en cours';
 }

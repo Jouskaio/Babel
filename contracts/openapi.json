@@ -829,6 +829,74 @@
         "title": "IsbnLookupResponse",
         "type": "object"
       },
+      "KavitaLinkResponse": {
+        "properties": {
+          "base_url": {
+            "title": "Base Url",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "managed": {
+            "description": "An account on Babel's own Kavita",
+            "title": "Managed",
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/KavitaStatus",
+            "description": "Steps of a managed account, then ready"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          }
+        },
+        "required": [
+          "status",
+          "base_url",
+          "username",
+          "managed",
+          "error",
+          "updated_at"
+        ],
+        "title": "KavitaLinkResponse",
+        "type": "object"
+      },
+      "KavitaStatus": {
+        "description": "Where linking stands. Managed accounts go through every step; manual ones jump to\n``ready`` or ``failed``.",
+        "enum": [
+          "pending",
+          "creating",
+          "linking",
+          "importing",
+          "ready",
+          "failed",
+          "exists"
+        ],
+        "title": "KavitaStatus",
+        "type": "string"
+      },
       "LibraryItemResponse": {
         "properties": {
           "added_at": {
@@ -901,6 +969,35 @@
           "cover_path"
         ],
         "title": "LibraryItemResponse",
+        "type": "object"
+      },
+      "LinkKavitaRequest": {
+        "properties": {
+          "password": {
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Password",
+            "type": "string"
+          },
+          "url": {
+            "maxLength": 500,
+            "minLength": 8,
+            "title": "Url",
+            "type": "string"
+          },
+          "username": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "username",
+          "password"
+        ],
+        "title": "LinkKavitaRequest",
         "type": "object"
       },
       "LinkKind": {
@@ -996,6 +1093,57 @@
           "password"
         ],
         "title": "LoginRequest",
+        "type": "object"
+      },
+      "MemberResponse": {
+        "properties": {
+          "admin": {
+            "title": "Admin",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kavita": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/KavitaStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "premium": {
+            "title": "Premium",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "display_name",
+          "admin",
+          "premium",
+          "created_at",
+          "kavita"
+        ],
+        "title": "MemberResponse",
         "type": "object"
       },
       "OpOutcome": {
@@ -1105,6 +1253,19 @@
           "detail"
         ],
         "title": "OperationResult",
+        "type": "object"
+      },
+      "PremiumRequest": {
+        "properties": {
+          "premium": {
+            "title": "Premium",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "premium"
+        ],
+        "title": "PremiumRequest",
         "type": "object"
       },
       "ProviderLoginRequest": {
@@ -2273,6 +2434,12 @@
       "UserResponse": {
         "description": "The signed-in account.",
         "properties": {
+          "admin": {
+            "default": false,
+            "description": "Manages the server and premium accounts",
+            "title": "Admin",
+            "type": "boolean"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -2306,6 +2473,12 @@
             ],
             "title": "Locale",
             "type": "string"
+          },
+          "premium": {
+            "default": false,
+            "description": "Administrators are premium too",
+            "title": "Premium",
+            "type": "boolean"
           },
           "providers": {
             "items": {
@@ -2653,6 +2826,98 @@
         "summary": "Withdraw File",
         "tags": [
           "library",
+          "admin"
+        ]
+      }
+    },
+    "/v1/admin/users": {
+      "get": {
+        "description": "Every account, with its roles and Kavita account.",
+        "operationId": "listMembers",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MemberResponse"
+                  },
+                  "title": "Response Listmembers",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Members",
+        "tags": [
+          "kavita",
+          "admin"
+        ]
+      }
+    },
+    "/v1/admin/users/{member_id}/premium": {
+      "put": {
+        "description": "Make an account premium (it gets an account on Babel's Kavita), or not any more.",
+        "operationId": "setPremium",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "member_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Member Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PremiumRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Set Premium",
+        "tags": [
+          "kavita",
           "admin"
         ]
       }
@@ -4369,19 +4634,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/ReviewResponse"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Response Getreview"
+                  "$ref": "#/components/schemas/ReviewResponse"
                 }
               }
             },
             "description": "Successful Response"
+          },
+          "204": {
+            "description": "No review yet"
           },
           "422": {
             "content": {
@@ -4571,6 +4831,124 @@
         "summary": "Resend Verification",
         "tags": [
           "account"
+        ]
+      }
+    },
+    "/v1/me/kavita": {
+      "delete": {
+        "description": "Forget the linked Kavita; books already imported stay.",
+        "operationId": "unlinkKavita",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unlink Kavita",
+        "tags": [
+          "kavita"
+        ]
+      },
+      "get": {
+        "description": "Your linked Kavita, or the creation of your account on Babel's Kavita.",
+        "operationId": "getKavita",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaLinkResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "204": {
+            "description": "No Kavita linked"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Kavita",
+        "tags": [
+          "kavita"
+        ]
+      },
+      "post": {
+        "description": "Link your own Kavita: the password is used once to make a \"Babel\" key, never kept.",
+        "operationId": "linkKavita",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkKavitaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaLinkResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Link Kavita",
+        "tags": [
+          "kavita"
+        ]
+      }
+    },
+    "/v1/me/kavita/retry": {
+      "post": {
+        "description": "Try again to create your account on Babel's Kavita (premium readers).",
+        "operationId": "retryKavita",
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Retry Kavita",
+        "tags": [
+          "kavita"
         ]
       }
     },

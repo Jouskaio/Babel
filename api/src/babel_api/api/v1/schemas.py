@@ -24,6 +24,8 @@ class UserResponse(BaseModel):
     locale: Locale
     providers: list[IdentityProvider]
     created_at: datetime
+    admin: bool = Field(default=False, description="Manages the server and premium accounts")
+    premium: bool = Field(default=False, description="Administrators are premium too")
 
     @classmethod
     def of(cls, user: User) -> "UserResponse":
@@ -36,6 +38,8 @@ class UserResponse(BaseModel):
             locale="en" if user.locale == "en" else "fr",
             providers=sorted(user.providers),
             created_at=user.created_at,
+            admin=user.admin,
+            premium=user.has_premium,
         )
 
 
