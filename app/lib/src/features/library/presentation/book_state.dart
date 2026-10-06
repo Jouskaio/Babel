@@ -70,24 +70,18 @@ class StatusPicker extends ConsumerWidget {
   }
 }
 
-/// Progress declared by hand, for a book read elsewhere.
-class ProgressEditor extends ConsumerStatefulWidget {
+/// Where the reader is in a book, shown, not edited: the position follows reading. A
+/// discreet link lets them declare progress made elsewhere (paper, another app).
+class ProgressEditor extends ConsumerWidget {
   const ProgressEditor({required this.item, super.key});
   final LibraryItemResponse item;
 
   @override
-  ConsumerState<ProgressEditor> createState() => _ProgressEditorState();
-}
-
-class _ProgressEditorState extends ConsumerState<ProgressEditor> {
-  double? _dragging;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final item = liveItem(ref, widget.item);
+    final current = liveItem(ref, item);
     final positions = ref.watch(positionPercentsProvider).value ?? const {};
-    final shown = _dragging ?? effectiveProgress(item, positions) ?? 0;
+    final shown = effectiveProgress(current, positions) ?? 0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -105,20 +99,98 @@ class _ProgressEditorState extends ConsumerState<ProgressEditor> {
             ),
           ],
         ),
-        Slider(
-          value: shown.clamp(0, 100).toDouble(),
-          max: 100,
-          divisions: 100,
-          activeColor: BabelColors.gold,
-          inactiveColor: BabelColors.sunken,
-          label: l10n.progressPercent(shown.round()),
-          onChanged: (v) => setState(() => _dragging = v),
-          onChangeEnd: (v) async {
-            await ref.read(readingStateProvider).setProgress(item, v);
-            if (mounted) setState(() => _dragging = null);
-          },
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(2),
+          child: LinearProgressIndicator(
+            value: (shown / 100).clamp(0, 1).toDouble(),
+            minHeight: 4,
+            color: BabelColors.gold,
+            backgroundColor: BabelColors.sunken,
+          ),
         ),
-        Text(l10n.progressHint, style: BabelText.body(12)),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            style: TextButton.styleFrom(padding: EdgeInsets.zero),
+            onPressed: () async {
+              final percent = await _askProgress(context, shown.round());
+              if (percent != null) {
+                await ref
+                    .read(readingStateProvider)
+                    .setProgress(current, percent.toDouble());
+              }
+            },
+            child: Text(
+              l10n.progressElsewhere,
+              style: BabelText.body(12, color: BabelColors.textSecondary),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+Future<int?> _askProgress(BuildContext context, int initial) => showDialog<int>(
+  context: context,
+  builder: (_) => _ProgressDialog(initial: initial),
+);
+
+class _ProgressDialog extends StatefulWidget {
+  const _ProgressDialog({required this.initial});
+  final int initial;
+
+  @override
+  State<_ProgressDialog> createState() => _ProgressDialogState();
+}
+
+class _ProgressDialogState extends State<_ProgressDialog> {
+  late final _value = TextEditingController(text: '${widget.initial}');
+
+  @override
+  void dispose() {
+    _value.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final percent = int.tryParse(_value.text.trim());
+    if (percent == null || percent < 0 || percent > 100) return;
+    Navigator.pop(context, percent);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return AlertDialog(
+      backgroundColor: BabelColors.surface,
+      title: Text(l10n.progressAsk, style: BabelText.title(26)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _value,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            style: BabelText.body(15, color: BabelColors.textPrimary),
+            decoration: InputDecoration(
+              hintText: l10n.progressAskHint,
+              suffixText: '%',
+            ),
+            onSubmitted: (_) => _submit(),
+          ),
+          const SizedBox(height: 8),
+          Text(l10n.progressHint, style: BabelText.body(12)),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.cancel),
+        ),
+        TextButton(onPressed: _submit, child: Text(l10n.save)),
       ],
     );
   }

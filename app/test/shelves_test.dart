@@ -57,6 +57,22 @@ void main() {
     expect(state['entity_id'], 'i2');
     expect((state['data']! as Map)['status'], 'reading');
 
+    // Progress read elsewhere is typed, not dragged.
+    expect(find.byType(Slider), findsNothing);
+    await tester.ensureVisible(
+      find.text('Lu ailleurs ? Indiquer ma progression'),
+    );
+    await tester.tap(find.text('Lu ailleurs ? Indiquer ma progression'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, '40');
+    await tester.tap(find.text('Enregistrer'));
+    await settle(tester);
+    final declared = server.pushed.lastWhere(
+      (op) => op['entity'] == 'reading_state',
+    );
+    expect((declared['data']! as Map)['progress'], 40);
+    expect(find.text('40 %'), findsOneWidget);
+
     // A new shelf with this book on it.
     await tester.ensureVisible(find.text('Étagères').last);
     await tester.pumpAndSettle();
@@ -76,11 +92,14 @@ void main() {
     await tester.pumpAndSettle();
 
     // The shelf filters the library.
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Gothique'));
+    await tester.tap(find.text('Étagères ▾'));
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Gothique'));
+    await tester.pumpAndSettle();
+    expect(find.text('Étagère · Gothique'), findsOneWidget);
     expect(find.text('Jane Eyre'), findsNothing);
     expect(find.text('Rebecca'), findsWidgets);
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Tous'));
+    await tester.tap(find.text('Tout afficher'));
     await tester.pumpAndSettle();
 
     // Hiding keeps the book, out of sight until asked.
@@ -96,7 +115,12 @@ void main() {
     );
     expect((hidden['data']! as Map)['hidden'], true);
 
+    await tester.tap(find.text('Étagères ▾'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Afficher les livres masqués (1)'));
+    await tester.pumpAndSettle();
+    Navigator.of(tester.element(find.text('Afficher les livres masqués (1)')))
+        .pop();
     await tester.pumpAndSettle();
     expect(find.text('Jane Eyre'), findsWidgets);
     expect(find.textContaining('MASQUÉ'), findsOneWidget);

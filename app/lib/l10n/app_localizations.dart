@@ -3181,6 +3181,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Gérer l\'étagère'**
   String get shelfManage;
+
+  /// No description provided for @tabReading.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours'**
+  String get tabReading;
+
+  /// No description provided for @tabToRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'À lire'**
+  String get tabToRead;
+
+  /// No description provided for @tabFinished.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lus'**
+  String get tabFinished;
+
+  /// No description provided for @tabAbandoned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abandonnés'**
+  String get tabAbandoned;
+
+  /// No description provided for @shelfFilter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étagère · {name}'**
+  String shelfFilter(String name);
+
+  /// No description provided for @showAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout afficher'**
+  String get showAll;
+
+  /// No description provided for @progressElsewhere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu ailleurs ? Indiquer ma progression'**
+  String get progressElsewhere;
+
+  /// No description provided for @progressAsk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Où en êtes-vous ?'**
+  String get progressAsk;
+
+  /// No description provided for @progressAskHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pourcentage du livre (0 à 100)'**
+  String get progressAskHint;
 }
 
 class _AppLocalizationsDelegate

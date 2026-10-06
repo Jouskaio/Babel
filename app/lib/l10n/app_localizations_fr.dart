@@ -1881,4 +1881,33 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get shelfManage => 'Gérer l\'étagère';
+
+  @override
+  String get tabReading => 'En cours';
+
+  @override
+  String get tabToRead => 'À lire';
+
+  @override
+  String get tabFinished => 'Lus';
+
+  @override
+  String get tabAbandoned => 'Abandonnés';
+
+  @override
+  String shelfFilter(String name) {
+    return 'Étagère · $name';
+  }
+
+  @override
+  String get showAll => 'Tout afficher';
+
+  @override
+  String get progressElsewhere => 'Lu ailleurs ? Indiquer ma progression';
+
+  @override
+  String get progressAsk => 'Où en êtes-vous ?';
+
+  @override
+  String get progressAskHint => 'Pourcentage du livre (0 à 100)';
 }
