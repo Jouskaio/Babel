@@ -1,6 +1,7 @@
 """Audiobooks from a linked Audiobookshelf (a fake one here)."""
 
 import json
+import uuid
 from dataclasses import replace
 from typing import Any
 
@@ -187,10 +188,14 @@ def test_link_browse_add_and_listen(
     assert [c["title"] for c in playback["chapters"]] == ["Livre un", "Livre deux"]
     assert (playback["narrators"], playback["remote_position"]) == (["Simon Vance"], None)
 
-    part = client.get(playback["tracks"][1]["path"], headers={**ada, "Range": "bytes=100-199"})
+    # Tracks are signed: a player needs no header, and only this book is opened.
+    path = playback["tracks"][1]["path"]
+    part = client.get(path, headers={"Range": "bytes=100-199"})
     assert part.status_code == 206
     assert part.content == AUDIO[100:200]
     assert part.headers["content-range"] == f"bytes 100-199/{len(AUDIO)}"
+    assert client.get(path.replace("ticket=", "ticket=x")).status_code == 401
+    assert client.get(path.replace(item["id"], str(uuid.uuid4()))).status_code == 401
 
     saved = client.put(
         f"/v1/library/{item['id']}/audio/progress", json={"current_time": 4000}, headers=ada

@@ -4,10 +4,11 @@ from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Header, Path, Query, Response, status
+from fastapi import APIRouter, Header, HTTPException, Path, Query, Response, status
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
+from babel_api.adapters.security.tokens import AccessTokenError, issue_ticket, verify_ticket
 from babel_api.api.dependencies import AbsServiceDep, ContainerDep, CurrentUserId, DeviceHeader
 from babel_api.api.v1.routes.library import LibraryItemResponse
 from babel_api.domain.audiobooks import AbsLink
@@ -191,9 +192,12 @@ async def cover(
 
 # ---------------------------------------------------------------- listening
 @router.get("/library/{item_id}/audio", operation_id="getPlayback")
-async def playback(user_id: CurrentUserId, audio: AbsServiceDep, item_id: UUID) -> PlaybackResponse:
+async def playback(
+    user_id: CurrentUserId, audio: AbsServiceDep, container: ContainerDep, item_id: UUID
+) -> PlaybackResponse:
     """What the player needs: tracks to stream, chapters, and Audiobookshelf's position."""
     found = await audio.playback(user_id, item_id)
+    ticket = issue_ticket(container.settings.jwt_secret.get_secret_value(), user_id, item_id)
     tracks: list[AudioTrackResponse] = []
     start = 0.0
     for track in found.detail.tracks:
@@ -203,7 +207,7 @@ async def playback(user_id: CurrentUserId, audio: AbsServiceDep, item_id: UUID) 
                 start=start,
                 duration=track.duration,
                 mime_type=track.mime_type,
-                path=f"/v1/library/{item_id}/audio/tracks/{track.index}",
+                path=f"/v1/library/{item_id}/audio/tracks/{track.index}?ticket={ticket}",
             )
         )
         start += track.duration
@@ -232,13 +236,19 @@ async def playback(user_id: CurrentUserId, audio: AbsServiceDep, item_id: UUID) 
     response_class=StreamingResponse,
 )
 async def stream(
-    user_id: CurrentUserId,
     audio: AbsServiceDep,
+    container: ContainerDep,
     item_id: UUID,
     index: Annotated[int, Path(ge=0, le=10_000)],
+    ticket: Annotated[str, Query(max_length=1000, description="From the playback's paths")],
     range_header: Annotated[str | None, Header(alias="Range")] = None,
 ) -> StreamingResponse:
-    """One audio track, streamed from Audiobookshelf (byte ranges supported)."""
+    """One audio track, streamed from Audiobookshelf (byte ranges supported). Signed by the
+    ticket in the path the playback gave, so players need no header."""
+    try:
+        user_id = verify_ticket(container.settings.jwt_secret.get_secret_value(), ticket, item_id)
+    except AccessTokenError as error:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid ticket") from error
     code, headers, body = await audio.stream(user_id, item_id, index, range_header)
     return StreamingResponse(body, status_code=code, headers=headers)
 

@@ -6393,7 +6393,7 @@
     },
     "/v1/library/{item_id}/audio/tracks/{index}": {
       "get": {
-        "description": "One audio track, streamed from Audiobookshelf (byte ranges supported).",
+        "description": "One audio track, streamed from Audiobookshelf (byte ranges supported). Signed by the\nticket in the path the playback gave, so players need no header.",
         "operationId": "streamAudioTrack",
         "parameters": [
           {
@@ -6415,6 +6415,18 @@
               "minimum": 0,
               "title": "Index",
               "type": "integer"
+            }
+          },
+          {
+            "description": "From the playback's paths",
+            "in": "query",
+            "name": "ticket",
+            "required": true,
+            "schema": {
+              "description": "From the playback's paths",
+              "maxLength": 1000,
+              "title": "Ticket",
+              "type": "string"
             }
           },
           {
@@ -6449,11 +6461,6 @@
             "description": "Validation Error"
           }
         },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
         "summary": "Stream",
         "tags": [
           "audiobooks"

@@ -464,7 +464,7 @@ class AudiobooksApi {
 
   /// Stream
   ///
-  /// One audio track, streamed from Audiobookshelf (byte ranges supported).
+  /// One audio track, streamed from Audiobookshelf (byte ranges supported). Signed by the ticket in the path the playback gave, so players need no header.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -474,8 +474,11 @@ class AudiobooksApi {
   ///
   /// * [int] index (required):
   ///
+  /// * [String] ticket (required):
+  ///   From the playback's paths
+  ///
   /// * [String] range:
-  Future<Response> streamAudioTrackWithHttpInfo(String itemId, int index, { String? range, }) async {
+  Future<Response> streamAudioTrackWithHttpInfo(String itemId, int index, String ticket, { String? range, }) async {
     // ignore: prefer_const_declarations
     final path = r'/v1/library/{item_id}/audio/tracks/{index}'
       .replaceAll('{item_id}', itemId)
@@ -487,6 +490,8 @@ class AudiobooksApi {
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
+
+      queryParams.addAll(_queryParams('', 'ticket', ticket));
 
     if (range != null) {
       headerParams[r'Range'] = parameterToString(range);
@@ -508,7 +513,7 @@ class AudiobooksApi {
 
   /// Stream
   ///
-  /// One audio track, streamed from Audiobookshelf (byte ranges supported).
+  /// One audio track, streamed from Audiobookshelf (byte ranges supported). Signed by the ticket in the path the playback gave, so players need no header.
   ///
   /// Parameters:
   ///
@@ -516,9 +521,12 @@ class AudiobooksApi {
   ///
   /// * [int] index (required):
   ///
+  /// * [String] ticket (required):
+  ///   From the playback's paths
+  ///
   /// * [String] range:
-  Future<void> streamAudioTrack(String itemId, int index, { String? range, }) async {
-    final response = await streamAudioTrackWithHttpInfo(itemId, index,  range: range, );
+  Future<void> streamAudioTrack(String itemId, int index, String ticket, { String? range, }) async {
+    final response = await streamAudioTrackWithHttpInfo(itemId, index, ticket,  range: range, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

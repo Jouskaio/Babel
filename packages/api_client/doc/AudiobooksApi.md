@@ -402,29 +402,24 @@ void (empty response body)
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **streamAudioTrack**
-> streamAudioTrack(itemId, index, range)
+> streamAudioTrack(itemId, index, ticket, range)
 
 Stream
 
-One audio track, streamed from Audiobookshelf (byte ranges supported).
+One audio track, streamed from Audiobookshelf (byte ranges supported). Signed by the ticket in the path the playback gave, so players need no header.
 
 ### Example
 ```dart
 import 'package:babel_api_client/api.dart';
-// TODO Configure HTTP Bearer authorization: HTTPBearer
-// Case 1. Use String Token
-//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
-// Case 2. Use Function which generate token.
-// String yourTokenGeneratorFunction() { ... }
-//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
 
 final api_instance = AudiobooksApi();
 final itemId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
 final index = 56; // int | 
+final ticket = ticket_example; // String | From the playback's paths
 final range = range_example; // String | 
 
 try {
-    api_instance.streamAudioTrack(itemId, index, range);
+    api_instance.streamAudioTrack(itemId, index, ticket, range);
 } catch (e) {
     print('Exception when calling AudiobooksApi->streamAudioTrack: $e\n');
 }
@@ -436,6 +431,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **itemId** | **String**|  | 
  **index** | **int**|  | 
+ **ticket** | **String**| From the playback's paths | 
  **range** | **String**|  | [optional] 
 
 ### Return type
@@ -444,7 +440,7 @@ void (empty response body)
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+No authorization required
 
 ### HTTP request headers
 
