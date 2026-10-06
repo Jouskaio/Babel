@@ -298,6 +298,12 @@ class ApiClient {
           return RegisterRequest.fromJson(value);
         case 'RelationResponse':
           return RelationResponse.fromJson(value);
+        case 'ReportReason':
+          return ReportReasonTypeTransformer().decode(value);
+        case 'ReportRequest':
+          return ReportRequest.fromJson(value);
+        case 'ReportResponse':
+          return ReportResponse.fromJson(value);
         case 'ResetPasswordRequest':
           return ResetPasswordRequest.fromJson(value);
         case 'ReviewRequest':

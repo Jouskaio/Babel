@@ -76,10 +76,12 @@ class StatusDot extends StatelessWidget {
 }
 
 /// App bar of the sources screens: back arrow and centered title.
-PreferredSizeWidget sourcesAppBar(String title) => AppBar(
-  backgroundColor: BabelColors.canvas,
-  scrolledUnderElevation: 0,
-  centerTitle: true,
-  iconTheme: IconThemeData(color: BabelColors.textPrimary),
-  title: Text(title, style: BabelText.heading(22)),
-);
+PreferredSizeWidget sourcesAppBar(String title, {List<Widget>? actions}) =>
+    AppBar(
+      backgroundColor: BabelColors.canvas,
+      scrolledUnderElevation: 0,
+      centerTitle: true,
+      iconTheme: IconThemeData(color: BabelColors.textPrimary),
+      title: Text(title, style: BabelText.heading(22)),
+      actions: actions,
+    );

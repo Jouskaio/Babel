@@ -10,19 +10,25 @@ All URIs are relative to *http://localhost*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**addFriend**](SocialApi.md#addfriend) | **PUT** /v1/social/friends/{handle} | Add Friend
+[**blockReader**](SocialApi.md#blockreader) | **PUT** /v1/social/blocks/{handle} | Block Reader
 [**deleteReview**](SocialApi.md#deletereview) | **DELETE** /v1/library/{item_id}/review | Delete Review
 [**followReader**](SocialApi.md#followreader) | **PUT** /v1/social/following/{handle} | Follow Reader
+[**getBlocked**](SocialApi.md#getblocked) | **GET** /v1/social/blocks | Get Blocked
 [**getFeed**](SocialApi.md#getfeed) | **GET** /v1/social/feed | Get Feed
 [**getFriends**](SocialApi.md#getfriends) | **GET** /v1/social/friends | Get Friends
 [**getReader**](SocialApi.md#getreader) | **GET** /v1/social/readers/{handle} | Get Reader
 [**getRecommendations**](SocialApi.md#getrecommendations) | **GET** /v1/social/recommendations | Get Recommendations
 [**getReview**](SocialApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
 [**getSocialProfile**](SocialApi.md#getsocialprofile) | **GET** /v1/me/profile | Get Profile
+[**listReports**](SocialApi.md#listreports) | **GET** /v1/admin/reports | List Reports
 [**markRecommendationRead**](SocialApi.md#markrecommendationread) | **POST** /v1/social/recommendations/{recommendation_id}/read | Mark Read
 [**recommend**](SocialApi.md#recommend) | **POST** /v1/social/recommendations | Recommend
 [**removeFriend**](SocialApi.md#removefriend) | **DELETE** /v1/social/friends/{handle} | Remove Friend
+[**reportReader**](SocialApi.md#reportreader) | **POST** /v1/social/reports | Report Reader
+[**resolveReport**](SocialApi.md#resolvereport) | **POST** /v1/admin/reports/{report_id}/resolve | Resolve Report
 [**saveReview**](SocialApi.md#savereview) | **PUT** /v1/library/{item_id}/review | Save Review
 [**searchReaders**](SocialApi.md#searchreaders) | **GET** /v1/social/readers | Search Readers
+[**unblockReader**](SocialApi.md#unblockreader) | **DELETE** /v1/social/blocks/{handle} | Unblock Reader
 [**unfollowReader**](SocialApi.md#unfollowreader) | **DELETE** /v1/social/following/{handle} | Unfollow Reader
 [**updateSocialProfile**](SocialApi.md#updatesocialprofile) | **PATCH** /v1/me/profile | Update Profile
 
@@ -73,6 +79,54 @@ Name | Type | Description  | Notes
 
  - **Content-Type**: Not defined
  - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **blockReader**
+> blockReader(handle)
+
+Block Reader
+
+Block a reader: friendship and follows end both ways; neither sees the other.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SocialApi();
+final handle = handle_example; // String | 
+
+try {
+    api_instance.blockReader(handle);
+} catch (e) {
+    print('Exception when calling SocialApi->blockReader: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **handle** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -159,6 +213,51 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**ReaderResponse**](ReaderResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getBlocked**
+> List<AuthorResponse> getBlocked()
+
+Get Blocked
+
+Readers you blocked.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SocialApi();
+
+try {
+    final result = api_instance.getBlocked();
+    print(result);
+} catch (e) {
+    print('Exception when calling SocialApi->getBlocked: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**List<AuthorResponse>**](AuthorResponse.md)
 
 ### Authorization
 
@@ -447,6 +546,51 @@ This endpoint does not need any parameter.
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **listReports**
+> List<ReportResponse> listReports()
+
+List Reports
+
+Reports, unresolved first.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SocialApi();
+
+try {
+    final result = api_instance.listReports();
+    print(result);
+} catch (e) {
+    print('Exception when calling SocialApi->listReports: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**List<ReportResponse>**](ReportResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **markRecommendationRead**
 > markRecommendationRead(recommendationId)
 
@@ -591,6 +735,100 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **reportReader**
+> reportReader(reportRequest)
+
+Report Reader
+
+Report a reader to the administrators (the reader is not told).
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SocialApi();
+final reportRequest = ReportRequest(); // ReportRequest | 
+
+try {
+    api_instance.reportReader(reportRequest);
+} catch (e) {
+    print('Exception when calling SocialApi->reportReader: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **reportRequest** | [**ReportRequest**](ReportRequest.md)|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **resolveReport**
+> resolveReport(reportId)
+
+Resolve Report
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SocialApi();
+final reportId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    api_instance.resolveReport(reportId);
+} catch (e) {
+    print('Exception when calling SocialApi->resolveReport: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **reportId** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **saveReview**
 > ReviewResponse saveReview(itemId, reviewRequest)
 
@@ -688,6 +926,52 @@ Name | Type | Description  | Notes
 
  - **Content-Type**: Not defined
  - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **unblockReader**
+> unblockReader(handle)
+
+Unblock Reader
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SocialApi();
+final handle = handle_example; // String | 
+
+try {
+    api_instance.unblockReader(handle);
+} catch (e) {
+    print('Exception when calling SocialApi->unblockReader: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **handle** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

@@ -353,3 +353,66 @@ def test_comic_pages_take_notes_on_an_area(
         "0.1000,0.2000,0.5000,0.3000",
         "Cette case !",
     )
+
+
+def test_blocked_readers_disappear_for_each_other(
+    client: TestClient, people: dict[str, dict[str, str]]
+) -> None:
+    ada, bob, cleo = people["ada"], people["bob"], people["cleo"]
+    client.put("/v1/social/following/ada", headers=bob)
+
+    assert client.put("/v1/social/blocks/bob", headers=ada).status_code == 204
+
+    # Friendship and follows are gone, both ways.
+    assert client.get("/v1/social/friends", headers=ada).json()["friends"] == []
+    assert client.get("/v1/social/friends", headers=bob).json()["following"] == []
+    # Neither finds nor sees the other.
+    for viewer, other in ((ada, "bob"), (bob, "ada")):
+        assert client.get(f"/v1/social/readers/{other}", headers=viewer).status_code == 404
+        found = client.get("/v1/social/readers", params={"q": other}, headers=viewer).json()
+        assert found == []
+    assert client.put("/v1/social/friends/ada", headers=bob).status_code == 404
+    assert (
+        client.post(
+            "/v1/social/recommendations", json={"to": "ada", "title": "Dune"}, headers=bob
+        ).status_code
+        == 404
+    )
+    # Others are not affected.
+    assert client.get("/v1/social/readers/ada", headers=cleo).status_code == 200
+
+    assert [r["handle"] for r in client.get("/v1/social/blocks", headers=ada).json()] == ["bob"]
+    assert client.delete("/v1/social/blocks/bob", headers=ada).status_code == 204
+    assert client.get("/v1/social/readers/ada", headers=bob).status_code == 200
+    assert client.get("/v1/social/blocks", headers=ada).json() == []
+
+
+def test_reports_reach_the_administrators(
+    app: FastAPI, client: TestClient, people: dict[str, dict[str, str]]
+) -> None:
+    pushes = Pushes()
+    app.state.container = replace(app.state.container, pusher=pushes)
+    admin = account(client, "admin@example.com")
+    phone = device(client, admin, "Phone")
+    client.put(f"/v1/devices/{phone}/push-token", json={"token": "admin"}, headers=admin)
+
+    reported = client.post(
+        "/v1/social/reports",
+        json={"handle": "dan", "reason": "harassment", "note": "Messages insistants."},
+        headers=people["ada"],
+    )
+    assert reported.status_code == 204
+    assert [(t, d["kind"]) for _, t, _, d in pushes.sent] == [("Signalement", "report")]
+
+    assert client.get("/v1/admin/reports", headers=people["ada"]).status_code == 403
+    [report] = client.get("/v1/admin/reports", headers=admin).json()
+    assert (report["reporter"]["handle"], report["reported"]["handle"]) == ("ada", "dan")
+    assert (report["reason"], report["note"], report["resolved"]) == (
+        "harassment",
+        "Messages insistants.",
+        False,
+    )
+    assert (
+        client.post(f"/v1/admin/reports/{report['id']}/resolve", headers=admin).status_code == 204
+    )
+    assert client.get("/v1/admin/reports", headers=admin).json()[0]["resolved"] is True

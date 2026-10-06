@@ -2803,6 +2803,126 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Kavita en cours'**
   String get adminKavitaCreating;
+
+  /// No description provided for @moreActions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus d\'actions'**
+  String get moreActions;
+
+  /// No description provided for @blockReader.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloquer'**
+  String get blockReader;
+
+  /// No description provided for @reportReader.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler'**
+  String get reportReader;
+
+  /// No description provided for @blockConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloquer {name} ? Vous ne serez plus amis ni abonnés, et aucun de vous deux ne verra l\'autre.'**
+  String blockConfirm(String name);
+
+  /// No description provided for @blocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} est bloqué.'**
+  String blocked(String name);
+
+  /// No description provided for @reportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler {name}'**
+  String reportTitle(String name);
+
+  /// No description provided for @reportHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les administrateurs de Babel examineront le signalement. Ce lecteur n\'est pas prévenu.'**
+  String get reportHint;
+
+  /// No description provided for @reasonSpam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Spam'**
+  String get reasonSpam;
+
+  /// No description provided for @reasonHarassment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Harcèlement'**
+  String get reasonHarassment;
+
+  /// No description provided for @reasonInappropriate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contenu inapproprié'**
+  String get reasonInappropriate;
+
+  /// No description provided for @reasonOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get reasonOther;
+
+  /// No description provided for @reportNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui s\'est passé (facultatif)'**
+  String get reportNote;
+
+  /// No description provided for @reportSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le signalement'**
+  String get reportSend;
+
+  /// No description provided for @reportSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalement envoyé.'**
+  String get reportSent;
+
+  /// No description provided for @blockedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloqués'**
+  String get blockedTitle;
+
+  /// No description provided for @unblock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Débloquer'**
+  String get unblock;
+
+  /// No description provided for @reportsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalements'**
+  String get reportsTitle;
+
+  /// No description provided for @reportsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun signalement.'**
+  String get reportsEmpty;
+
+  /// No description provided for @reportedBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalé par @{handle}'**
+  String reportedBy(String handle);
+
+  /// No description provided for @reportResolve.
+  ///
+  /// In fr, this message translates to:
+  /// **'Traité'**
+  String get reportResolve;
 }
 
 class _AppLocalizationsDelegate

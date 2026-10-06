@@ -151,7 +151,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
           onPosition: _savePosition,
           onBack: _back,
         ),
-        BookFormat.cbz => ComicView(
+        BookFormat.cbz || BookFormat.cbr => ComicView(
           book: ComicBook.open(opened.bytes),
           itemId: item.id,
           fileSha256: item.sha256,
@@ -162,7 +162,8 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
         ),
         BookFormat.pdf => PdfView(
           bytes: opened.bytes,
-          name: item.sha256,
+          itemId: item.id,
+          fileSha256: item.sha256,
           title: item.title,
           start: opened.start,
           onPosition: _savePosition,

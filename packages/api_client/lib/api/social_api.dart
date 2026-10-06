@@ -73,6 +73,55 @@ class SocialApi {
     return null;
   }
 
+  /// Block Reader
+  ///
+  /// Block a reader: friendship and follows end both ways; neither sees the other.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] handle (required):
+  Future<Response> blockReaderWithHttpInfo(String handle,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/social/blocks/{handle}'
+      .replaceAll('{handle}', handle);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'PUT',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Block Reader
+  ///
+  /// Block a reader: friendship and follows end both ways; neither sees the other.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] handle (required):
+  Future<void> blockReader(String handle,) async {
+    final response = await blockReaderWithHttpInfo(handle,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Delete Review
   ///
   /// Note: This method returns the HTTP [Response].
@@ -171,6 +220,57 @@ class SocialApi {
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ReaderResponse',) as ReaderResponse;
     
+    }
+    return null;
+  }
+
+  /// Get Blocked
+  ///
+  /// Readers you blocked.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> getBlockedWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/social/blocks';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Blocked
+  ///
+  /// Readers you blocked.
+  Future<List<AuthorResponse>?> getBlocked() async {
+    final response = await getBlockedWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<AuthorResponse>') as List)
+        .cast<AuthorResponse>()
+        .toList(growable: false);
+
     }
     return null;
   }
@@ -483,6 +583,57 @@ class SocialApi {
     return null;
   }
 
+  /// List Reports
+  ///
+  /// Reports, unresolved first.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> listReportsWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/admin/reports';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// List Reports
+  ///
+  /// Reports, unresolved first.
+  Future<List<ReportResponse>?> listReports() async {
+    final response = await listReportsWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<ReportResponse>') as List)
+        .cast<ReportResponse>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
   /// Mark Read
   ///
   /// Note: This method returns the HTTP [Response].
@@ -641,6 +792,99 @@ class SocialApi {
     return null;
   }
 
+  /// Report Reader
+  ///
+  /// Report a reader to the administrators (the reader is not told).
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [ReportRequest] reportRequest (required):
+  Future<Response> reportReaderWithHttpInfo(ReportRequest reportRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/social/reports';
+
+    // ignore: prefer_final_locals
+    Object? postBody = reportRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Report Reader
+  ///
+  /// Report a reader to the administrators (the reader is not told).
+  ///
+  /// Parameters:
+  ///
+  /// * [ReportRequest] reportRequest (required):
+  Future<void> reportReader(ReportRequest reportRequest,) async {
+    final response = await reportReaderWithHttpInfo(reportRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
+  /// Resolve Report
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] reportId (required):
+  Future<Response> resolveReportWithHttpInfo(String reportId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/admin/reports/{report_id}/resolve'
+      .replaceAll('{report_id}', reportId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Resolve Report
+  ///
+  /// Parameters:
+  ///
+  /// * [String] reportId (required):
+  Future<void> resolveReport(String reportId,) async {
+    final response = await resolveReportWithHttpInfo(reportId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Save Review
   ///
   /// Rate and review a book of your library, and choose who sees it.
@@ -761,6 +1005,51 @@ class SocialApi {
 
     }
     return null;
+  }
+
+  /// Unblock Reader
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] handle (required):
+  Future<Response> unblockReaderWithHttpInfo(String handle,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/social/blocks/{handle}'
+      .replaceAll('{handle}', handle);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'DELETE',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Unblock Reader
+  ///
+  /// Parameters:
+  ///
+  /// * [String] handle (required):
+  Future<void> unblockReader(String handle,) async {
+    final response = await unblockReaderWithHttpInfo(handle,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
   }
 
   /// Unfollow Reader

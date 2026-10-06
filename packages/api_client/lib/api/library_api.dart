@@ -232,6 +232,55 @@ class LibraryApi {
     }
   }
 
+  /// Download As Cbz
+  ///
+  /// A comic as CBZ: CBR (RAR) files are converted once, for readers that only open ZIP.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] sha256 (required):
+  Future<Response> downloadFileAsCbzWithHttpInfo(String sha256,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/files/{sha256}/cbz'
+      .replaceAll('{sha256}', sha256);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Download As Cbz
+  ///
+  /// A comic as CBZ: CBR (RAR) files are converted once, for readers that only open ZIP.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] sha256 (required):
+  Future<void> downloadFileAsCbz(String sha256,) async {
+    final response = await downloadFileAsCbzWithHttpInfo(sha256,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Get File Cover
   ///
   /// The cover found in a stored file (EPUB, CBZ). Public, like catalog covers.

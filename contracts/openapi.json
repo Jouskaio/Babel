@@ -1823,6 +1823,96 @@
         "title": "RelationResponse",
         "type": "object"
       },
+      "ReportReason": {
+        "enum": [
+          "spam",
+          "harassment",
+          "inappropriate",
+          "other"
+        ],
+        "title": "ReportReason",
+        "type": "string"
+      },
+      "ReportRequest": {
+        "properties": {
+          "handle": {
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Handle",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/ReportReason"
+          }
+        },
+        "required": [
+          "handle",
+          "reason"
+        ],
+        "title": "ReportRequest",
+        "type": "object"
+      },
+      "ReportResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/ReportReason"
+          },
+          "reported": {
+            "$ref": "#/components/schemas/AuthorResponse"
+          },
+          "reporter": {
+            "$ref": "#/components/schemas/AuthorResponse"
+          },
+          "resolved": {
+            "title": "Resolved",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "reporter",
+          "reported",
+          "reason",
+          "note",
+          "created_at",
+          "resolved"
+        ],
+        "title": "ReportResponse",
+        "type": "object"
+      },
       "ResetPasswordRequest": {
         "description": "``token`` comes from the link sent by email.",
         "properties": {
@@ -2773,7 +2863,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.20.0"
+    "version": "0.21.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -2826,6 +2916,80 @@
         "summary": "Withdraw File",
         "tags": [
           "library",
+          "admin"
+        ]
+      }
+    },
+    "/v1/admin/reports": {
+      "get": {
+        "description": "Reports, unresolved first.",
+        "operationId": "listReports",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReportResponse"
+                  },
+                  "title": "Response Listreports",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Reports",
+        "tags": [
+          "social",
+          "admin"
+        ]
+      }
+    },
+    "/v1/admin/reports/{report_id}/resolve": {
+      "post": {
+        "operationId": "resolveReport",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Report Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Resolve Report",
+        "tags": [
+          "social",
           "admin"
         ]
       }
@@ -3998,6 +4162,54 @@
         ]
       }
     },
+    "/v1/files/{sha256}/cbz": {
+      "get": {
+        "description": "A comic as CBZ: CBR (RAR) files are converted once, for readers that only open ZIP.",
+        "operationId": "downloadFileAsCbz",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sha256",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Sha256",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.comicbook+zip": {}
+            },
+            "description": "Successful Response"
+          },
+          "415": {
+            "description": "Not a comic, or this one cannot be converted"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Download As Cbz",
+        "tags": [
+          "library"
+        ]
+      }
+    },
     "/v1/files/{sha256}/cover": {
       "get": {
         "description": "The cover found in a stored file (EPUB, CBZ). Public, like catalog covers.",
@@ -5066,6 +5278,116 @@
         ]
       }
     },
+    "/v1/social/blocks": {
+      "get": {
+        "description": "Readers you blocked.",
+        "operationId": "getBlocked",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AuthorResponse"
+                  },
+                  "title": "Response Getblocked",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Blocked",
+        "tags": [
+          "social"
+        ]
+      }
+    },
+    "/v1/social/blocks/{handle}": {
+      "delete": {
+        "operationId": "unblockReader",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "handle",
+            "required": true,
+            "schema": {
+              "title": "Handle",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unblock Reader",
+        "tags": [
+          "social"
+        ]
+      },
+      "put": {
+        "description": "Block a reader: friendship and follows end both ways; neither sees the other.",
+        "operationId": "blockReader",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "handle",
+            "required": true,
+            "schema": {
+              "title": "Handle",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Block Reader",
+        "tags": [
+          "social"
+        ]
+      }
+    },
     "/v1/social/feed": {
       "get": {
         "description": "What friends and followed readers shared lately, newest first.",
@@ -5524,6 +5846,46 @@
           }
         ],
         "summary": "Mark Read",
+        "tags": [
+          "social"
+        ]
+      }
+    },
+    "/v1/social/reports": {
+      "post": {
+        "description": "Report a reader to the administrators (the reader is not told).",
+        "operationId": "reportReader",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Report Reader",
         "tags": [
           "social"
         ]

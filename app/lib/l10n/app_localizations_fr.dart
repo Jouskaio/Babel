@@ -1642,4 +1642,73 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get adminKavitaCreating => 'Kavita en cours';
+
+  @override
+  String get moreActions => 'Plus d\'actions';
+
+  @override
+  String get blockReader => 'Bloquer';
+
+  @override
+  String get reportReader => 'Signaler';
+
+  @override
+  String blockConfirm(String name) {
+    return 'Bloquer $name ? Vous ne serez plus amis ni abonnés, et aucun de vous deux ne verra l\'autre.';
+  }
+
+  @override
+  String blocked(String name) {
+    return '$name est bloqué.';
+  }
+
+  @override
+  String reportTitle(String name) {
+    return 'Signaler $name';
+  }
+
+  @override
+  String get reportHint =>
+      'Les administrateurs de Babel examineront le signalement. Ce lecteur n\'est pas prévenu.';
+
+  @override
+  String get reasonSpam => 'Spam';
+
+  @override
+  String get reasonHarassment => 'Harcèlement';
+
+  @override
+  String get reasonInappropriate => 'Contenu inapproprié';
+
+  @override
+  String get reasonOther => 'Autre';
+
+  @override
+  String get reportNote => 'Ce qui s\'est passé (facultatif)';
+
+  @override
+  String get reportSend => 'Envoyer le signalement';
+
+  @override
+  String get reportSent => 'Signalement envoyé.';
+
+  @override
+  String get blockedTitle => 'Bloqués';
+
+  @override
+  String get unblock => 'Débloquer';
+
+  @override
+  String get reportsTitle => 'Signalements';
+
+  @override
+  String get reportsEmpty => 'Aucun signalement.';
+
+  @override
+  String reportedBy(String handle) {
+    return 'Signalé par @$handle';
+  }
+
+  @override
+  String get reportResolve => 'Traité';
 }
