@@ -6,8 +6,8 @@ from dataclasses import replace
 from typing import Any
 
 import httpx
-from cryptography.fernet import Fernet
 import pytest
+from cryptography.fernet import Fernet
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 

@@ -151,6 +151,18 @@ class SqlCatalogRepository:
         )
         return _to_edition(row) if row else None
 
+    async def set_edition_description(self, edition_id: UUID, description: str) -> None:
+        row = await self._session.get(EditionRow, edition_id)
+        if row is not None:
+            row.description = description
+            await self._session.flush()
+
+    async def set_work_description(self, work_id: UUID, description: str) -> None:
+        row = await self._session.get(WorkRow, work_id)
+        if row is not None:
+            row.description = description
+            await self._session.flush()
+
     async def mark_editions_synced(self, work_id: UUID, at: datetime) -> None:
         row = await self._session.get_one(WorkRow, work_id)
         row.editions_synced_at = at

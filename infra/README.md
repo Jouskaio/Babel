@@ -126,3 +126,18 @@ and logs out again, so the package can stay private and no credential is kept on
 | --- | --- |
 | `TS_OAUTH_CLIENT_ID` | OAuth client ID |
 | `TS_OAUTH_SECRET` | OAuth client secret |
+
+## Fuller book descriptions (Google Books)
+
+Open Library often has one line, or nothing, for a book. Babel completes it from Google Books,
+by ISBN and per language. Without a key the shared anonymous quota is usually used up; a free
+key makes it reliable:
+
+1. Google Cloud console, create a project, enable the **Books API**, then Credentials, create an
+   **API key** (restrict it to the Books API).
+2. On the server:
+
+```bash
+echo "BABEL_GOOGLE_BOOKS_API_KEY=<the key>" >> /opt/babel/.env
+cd /opt/babel && docker compose up -d api
+```

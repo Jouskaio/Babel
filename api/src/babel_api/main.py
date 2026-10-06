@@ -55,7 +55,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     # The engine connects lazily: building the app (e.g. to export the contract) needs no DB.
     engine = create_engine(settings.database_url)
-    open_library = OpenLibrarySource()
+    open_library = OpenLibrarySource(
+        google_books_key=settings.google_books_api_key.get_secret_value()
+    )
     allowed_hosts = tuple(settings.source_allowed_hosts)
     ao3 = Ao3Connector()
     link_fetcher = LinkFetcher(allowed_hosts=allowed_hosts)

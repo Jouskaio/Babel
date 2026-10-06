@@ -15,6 +15,10 @@ logger = logging.getLogger(__name__)
 # Editions of a work are fetched again at most this often.
 EDITIONS_TTL = timedelta(days=7)
 MAX_EDITIONS = 50
+# A description this long is a real blurb; shorter ones are completed from Google Books.
+FULL_DESCRIPTION = 400
+# Editions (one per language) asked about at most, per refresh of a work.
+MAX_BLURBS = 4
 
 
 @dataclass(frozen=True, slots=True)
@@ -118,9 +122,47 @@ class WorkService:
         if details is not None:
             work = await self._repo.upsert_work(details)
         await self._repo.upsert_editions(work.id, editions)
+        await self._complete_descriptions(work)
         await self._repo.mark_editions_synced(work.id, datetime.now(UTC))
         await self._repo.commit()
         return await self._repo.get_work(work.id) or work
+
+    async def _complete_descriptions(self, work: Work) -> None:
+        """Open Library often gives one line, or none: Google Books fills the gap, per
+        language (a few editions at most, one per language), and for the work itself."""
+        editions = await self._repo.list_editions(work.id)
+        have = [e.description for e in editions if e.description]
+        if work.description:
+            have.append(work.description)
+        if max(map(len, have), default=0) >= FULL_DESCRIPTION:
+            return
+        seen: set[str | None] = set()
+        for edition in sorted(editions, key=lambda e: not e.identifier(IdentifierKind.ISBN13)):
+            if len(seen) >= MAX_BLURBS or edition.language in seen:
+                continue
+            if edition.description and len(edition.description) >= FULL_DESCRIPTION:
+                seen.add(edition.language)
+                continue
+            seen.add(edition.language)
+            isbns = edition.identifier(IdentifierKind.ISBN13)
+            text = await self._blurb(
+                isbns[0] if isbns else None, edition.title or work.title, work, edition.language
+            )
+            if text:
+                await self._repo.set_edition_description(edition.id, text)
+        if not work.description or len(work.description) < FULL_DESCRIPTION:
+            text = await self._blurb(None, work.title, work, None)
+            if text and len(text) > len(work.description or ""):
+                await self._repo.set_work_description(work.id, text)
+
+    async def _blurb(
+        self, isbn13: str | None, title: str, work: Work, language: str | None
+    ) -> str | None:
+        try:
+            return await self._source.blurb(isbn13, title, work.authors, language)
+        except Exception:
+            logger.warning("Could not get a description for %s", title, exc_info=True)
+            return None
 
     async def _import_isbn(self, isbn: str) -> Edition:
         try:

@@ -21,6 +21,9 @@ class FakeBooks:
     def __init__(self) -> None:
         self.calls: list[str] = []
         self.down = False
+        # What Google Books would answer, and what it was asked.
+        self.blurb_text: str | None = None
+        self.blurbs: list[tuple[str | None, str, str | None]] = []
 
     def _call(self, name: str) -> None:
         self.calls.append(name)
@@ -44,6 +47,12 @@ class FakeBooks:
     async def edition_by_isbn(self, isbn13: str) -> SourceEdition | None:
         self._call("isbn")
         return FRENCH if isbn13 == "9782070360246" else None
+
+    async def blurb(
+        self, isbn13: str | None, title: str, authors: tuple[str, ...], language: str | None
+    ) -> str | None:
+        self.blurbs.append((isbn13, title, language))
+        return self.blurb_text
 
 
 @pytest.fixture
@@ -177,3 +186,47 @@ def test_editions_show_all_their_covers_and_their_description(
     # In English the work's own (shorter) description is not replaced by a French one.
     other = client.get(f"/v1/catalog/works/{hit['id']}", params={"lang": "en"}, headers=auth).json()
     assert other["description"].startswith("Orpheline")  # still the longest on offer
+
+
+LONG_BLURB = "Jane Eyre, orpheline recueillie puis rejetée, devient gouvernante. " * 12
+
+
+def test_short_descriptions_are_completed_with_a_fuller_blurb(
+    client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    books.blurb_text = LONG_BLURB
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=auth).json()
+
+    work = client.get(f"/v1/catalog/works/{hit['id']}", params={"lang": "fr"}, headers=auth).json()
+
+    # Asked by ISBN for the edition that has one, once per language.
+    assert ("9782070360246", "Jane Eyre", "fr") in books.blurbs
+    assert {language for _, _, language in books.blurbs} >= {"fr", "en", None}
+    assert work["description"] == LONG_BLURB.strip() or work["description"].startswith("Jane Eyre,")
+    assert len(work["description"]) > 400
+    french = next(e for e in work["editions"] if e["language"] == "fr")
+    assert french["description"] == LONG_BLURB
+
+
+def test_full_descriptions_are_not_replaced(
+    client: TestClient, books: FakeBooks, auth: dict[str, str], app: FastAPI
+) -> None:
+    books.blurb_text = LONG_BLURB
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=auth).json()
+    client.get(f"/v1/catalog/works/{hit['id']}", headers=auth)
+    asked = len(books.blurbs)
+
+    # A second visit is answered from the database: Google Books is not asked again.
+    client.get(f"/v1/catalog/works/{hit['id']}", headers=auth)
+
+    assert len(books.blurbs) == asked
+
+
+def test_a_missing_blurb_source_changes_nothing(
+    client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=auth).json()
+
+    work = client.get(f"/v1/catalog/works/{hit['id']}", headers=auth).json()
+
+    assert work["description"].startswith("Orpheline")
