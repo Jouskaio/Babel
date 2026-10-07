@@ -3973,6 +3973,96 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'« {title} » est dans votre bibliothèque.'**
   String sourceMatchImported(String title);
+
+  /// No description provided for @editDetails.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier les informations'**
+  String get editDetails;
+
+  /// No description provided for @detailsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Informations du livre'**
+  String get detailsTitle;
+
+  /// No description provided for @detailsBookTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Titre'**
+  String get detailsBookTitle;
+
+  /// No description provided for @detailsAuthors.
+  ///
+  /// In fr, this message translates to:
+  /// **'Auteurs, séparés par des virgules'**
+  String get detailsAuthors;
+
+  /// No description provided for @detailsSeries.
+  ///
+  /// In fr, this message translates to:
+  /// **'Série'**
+  String get detailsSeries;
+
+  /// No description provided for @detailsSeriesHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Laissez vide si ce livre n\'est pas dans une série.'**
+  String get detailsSeriesHint;
+
+  /// No description provided for @detailsVolume.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tome'**
+  String get detailsVolume;
+
+  /// No description provided for @detailsCover.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couverture'**
+  String get detailsCover;
+
+  /// No description provided for @coverDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par défaut'**
+  String get coverDefault;
+
+  /// No description provided for @coverLinkFirst.
+  ///
+  /// In fr, this message translates to:
+  /// **'Associez d\'abord ce livre à une fiche pour choisir parmi les couvertures de ses éditions.'**
+  String get coverLinkFirst;
+
+  /// No description provided for @volumeNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tome {number}'**
+  String volumeNumber(String number);
+
+  /// No description provided for @seriesVolumes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 tome} other{{count} tomes}}'**
+  String seriesVolumes(int count);
+
+  /// No description provided for @seriesRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} lus'**
+  String seriesRead(int count);
+
+  /// No description provided for @detailsSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Informations enregistrées.'**
+  String get detailsSaved;
+
+  /// No description provided for @seriesOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{series} · tome {number}'**
+  String seriesOf(String series, String number);
 }
 
 class _AppLocalizationsDelegate

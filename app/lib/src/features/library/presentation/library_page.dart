@@ -22,11 +22,14 @@ import '../../../routing/router.dart';
 import '../../audiobooks/application/audiobooks_providers.dart';
 import '../../social/presentation/book_social_sheets.dart';
 import '../application/library_controller.dart';
+import '../application/series.dart';
 import '../application/shelves.dart';
 import 'attach_file.dart';
+import 'book_details_sheet.dart';
 import 'book_state.dart';
 import 'follow_panel.dart';
 import 'link_work_sheet.dart';
+import 'series_sheet.dart';
 
 /// The reader's library (design: Penpot "screen / bibliotheque").
 class LibraryPage extends ConsumerStatefulWidget {
@@ -149,6 +152,8 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     final shelves = ref.watch(shelvesProvider).value ?? const <Shelf>[];
     final hiddenCount = all.where((i) => i.hidden == true).length;
     final items = _visible(all, shelves);
+    // The volumes of a series sit together in one tile.
+    final entries = groupSeries(items);
     return RefreshIndicator(
       onRefresh: ref.read(libraryControllerProvider.notifier).reload,
       color: BabelColors.gold,
@@ -279,8 +284,13 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                   childAspectRatio: 0.48,
                 ),
                 delegate: SliverChildBuilderDelegate(
-                  (context, i) => _BookTile(item: items[i]),
-                  childCount: items.length,
+                  (context, i) => switch (entries[i]) {
+                    SingleBook(:final item) => _BookTile(item: item),
+                    SeriesGroup() => _SeriesTile(
+                      group: entries[i] as SeriesGroup,
+                    ),
+                  },
+                  childCount: entries.length,
                 ),
               ),
             ),
@@ -293,6 +303,107 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Opens a book's sheet (above the floating navigation bar of the tabs).
+Future<void> showBookActions(BuildContext context, LibraryItemResponse item) =>
+    showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      backgroundColor: BabelColors.surface,
+      builder: (_) => _BookActions(item: item),
+    );
+
+/// Several volumes of a series, as one tile: the first volume's cover, how many there
+/// are and how many were read.
+class _SeriesTile extends ConsumerWidget {
+  const _SeriesTile({required this.group});
+  final SeriesGroup group;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final read = group.items
+        .where((i) => i.status == ReadingStatus.finished)
+        .length;
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: () => showSeriesSheet(context, group),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              // Volumes behind the first one, so it looks like a pile.
+              for (final offset in [if (group.items.length > 2) 8.0, 4.0])
+                Positioned(
+                  left: offset,
+                  top: offset,
+                  right: -offset,
+                  bottom: -offset,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: BabelColors.surface,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: BabelColors.border),
+                    ),
+                  ),
+                ),
+              LayoutBuilder(
+                builder: (context, c) => BookCover(
+                  width: c.maxWidth - 8,
+                  url: libraryCoverUrl(group.first),
+                  title: group.name,
+                ),
+              ),
+              Positioned(
+                right: 6,
+                top: 6,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: BabelColors.canvas.withValues(alpha: 0.85),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: Text(
+                    '×${group.items.length}',
+                    style: BabelText.label(
+                      9,
+                      color: BabelColors.textPrimary,
+                      spacing: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            group.name,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: BabelText.heading(16),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            [
+              l10n.seriesVolumes(group.items.length),
+              if (read > 0) l10n.seriesRead(read),
+            ].join(' · ').toUpperCase(),
+            style: BabelText.label(
+              9,
+              color: BabelColors.textSecondary,
+              spacing: 1.2,
+            ),
+          ),
         ],
       ),
     );
@@ -519,6 +630,13 @@ class _BookActionsState extends ConsumerState<_BookActions> {
             Text(item.title, style: BabelText.title(28)),
             if (item.authors.isNotEmpty)
               Text(item.authors.join(', '), style: BabelText.body(14)),
+            if (item.series case final series?)
+              Text(
+                item.seriesIndex == null
+                    ? series
+                    : l10n.seriesOf(series, volumeText(item.seriesIndex!)),
+                style: BabelText.body(13, color: BabelColors.gold),
+              ),
             const SizedBox(height: 6),
             Text(
               [
@@ -631,6 +749,14 @@ class _BookActionsState extends ConsumerState<_BookActions> {
             Wrap(
               alignment: WrapAlignment.center,
               children: [
+                TextButton.icon(
+                  onPressed: () => showBookDetailsSheet(context, item),
+                  icon: Icon(Icons.edit_outlined, color: BabelColors.gold),
+                  label: Text(
+                    l10n.editDetails,
+                    style: BabelText.body(14, color: BabelColors.textPrimary),
+                  ),
+                ),
                 TextButton.icon(
                   onPressed: () => showShelfPicker(context, item),
                   icon: Icon(Icons.shelves, color: BabelColors.gold),
