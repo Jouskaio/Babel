@@ -2371,8 +2371,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Books from your sources (Kavita, WebDAV, GitHub…) match this work.';
 
   @override
-  String get noSourceMatch =>
-      'None of your sources has this book. Babel does not download catalog books: add a source, or import your file.';
+  String get noSourceMatch => 'None of your sources has this book.';
 
   @override
   String get manageSources => 'Manage my sources';

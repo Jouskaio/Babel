@@ -71,11 +71,16 @@ class ChaptarrClient:
         return response.json()
 
     async def lookup(self, title: str, authors: tuple[str, ...]) -> dict[str, Any] | None:
-        term = f"{title} {authors[0]}" if authors else title
-        found = cast(
-            list[dict[str, Any]], await self._call("GET", "book/lookup", params={"term": term})
-        )
-        return best_match(found, title, authors)
+        """Searches the title alone first (adding the author buries the novel under books about
+        it), then with the author."""
+        terms = [title] + ([f"{title} {authors[0]}"] if authors else [])
+        for term in terms:
+            found = cast(
+                list[dict[str, Any]], await self._call("GET", "book/lookup", params={"term": term})
+            )
+            if match := best_match(found, title, authors):
+                return match
+        return None
 
     async def _first_id(self, path: str, profile_type: str | int) -> int:
         profiles = cast(list[dict[str, Any]], await self._call("GET", path))

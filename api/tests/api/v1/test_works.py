@@ -403,3 +403,33 @@ def test_a_request_becomes_available_when_the_files_arrive(
     chaptarr.arrived = True
     assert client.get("/v1/requests", headers=admin).json()["items"][0]["status"] == "available"
     assert chaptarr.scans == 1
+
+
+def test_the_title_alone_is_searched_before_the_title_with_its_author() -> None:
+    import asyncio
+
+    from babel_api.adapters.chaptarr import ChaptarrClient
+
+    asked: list[str] = []
+    novel: dict[str, object] = {"title": "Jane Eyre", "author": {"authorName": "Charlotte Brontë"}}
+    about: dict[str, object] = {
+        "title": "The Secret History of Jane Eyre",
+        "author": {"authorName": "J. P."},
+    }
+
+    class Fake(ChaptarrClient):
+        async def _call(  # type: ignore[override]
+            self,
+            method: str,
+            path: str,
+            json: object | None = None,
+            params: dict[str, str] | None = None,
+        ) -> list[dict[str, object]]:
+            term = (params or {})["term"]
+            asked.append(term)
+            return [novel] if term == "Jane Eyre" else [about]
+
+    client = Fake("http://x", "k")
+    found = asyncio.run(client.lookup("Jane Eyre", ("Charlotte Brontë",)))
+    assert found == novel
+    assert asked == ["Jane Eyre"]  # found at once, no second search
