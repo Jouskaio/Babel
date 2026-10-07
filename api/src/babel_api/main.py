@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Callable
 from contextlib import asynccontextmanager
 from datetime import timedelta
 from pathlib import Path
@@ -14,6 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from babel_api import __version__
 from babel_api.adapters.audiobookshelf import AbsClient
 from babel_api.adapters.catalog.open_library import OpenLibrarySource
+from babel_api.adapters.chaptarr import ChaptarrClient
 from babel_api.adapters.db.migrations.config import upgrade_database
 from babel_api.adapters.db.repositories import SqlUserRepository
 from babel_api.adapters.db.session import create_engine, create_session_factory
@@ -95,6 +96,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     def abs_client(url: str) -> AbsClient:
         return AbsClient(url, allowed_hosts=allowed_hosts)
+
+    chaptarr: Callable[[], ChaptarrClient] | None = None
+    if settings.chaptarr_url and settings.chaptarr_api_key.get_secret_value():
+
+        def chaptarr_client() -> ChaptarrClient:
+            return ChaptarrClient(
+                settings.chaptarr_url, settings.chaptarr_api_key.get_secret_value()
+            )
+
+        chaptarr = chaptarr_client
 
     @asynccontextmanager
     async def kavita_services() -> AsyncGenerator[KavitaService]:
@@ -182,6 +193,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         kavita_client=kavita_client,
         kavita=kavita,
         abs_client=abs_client,
+        chaptarr=chaptarr,
     )
     if settings.cors_origins:
         app.add_middleware(

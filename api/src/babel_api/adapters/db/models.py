@@ -592,3 +592,17 @@ class DisabledConnectorRow(Base):
     __tablename__ = "disabled_connectors"
 
     kind: Mapped[str] = mapped_column(String(20), primary_key=True)
+
+
+class BookRequestRow(Base):
+    """A book a premium reader asked for (one per reader and work)."""
+
+    __tablename__ = "book_requests"
+    __table_args__ = (UniqueConstraint("user_id", "work_id", name="uq_book_requests_user_work"),)
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    work_id: Mapped[UUID] = mapped_column(ForeignKey("works.id", ondelete="CASCADE"))
+    status: Mapped[str] = mapped_column(String(20))
+    chaptarr_id: Mapped[int | None] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)

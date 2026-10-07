@@ -892,5 +892,12 @@
   "adminQuota": "Sources: {value}",
   "adminQuotaDefault": "default ({count})",
   "adminQuotaAsk": "How many sources?",
-  "adminQuotaHint": "Empty: back to the server default"
+  "adminQuotaHint": "Empty: back to the server default",
+  "requestBook": "Request this book",
+  "requestHint": "Babel looks for it and downloads it for you. It shows up here once it has arrived.",
+  "requestPending": "Requested: being searched. Come back in a while.",
+  "requestAvailable": "Downloaded: it shows up here after the next scan.",
+  "requestNotFound": "Not found for now.",
+  "requestFailed": "The request could not be sent. Try again later.",
+  "addSourceHint": "This book is in none of your sources. Add one (Kavita, WebDAV, GitHub…) to find it here."
 }

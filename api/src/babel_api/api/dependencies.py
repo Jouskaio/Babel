@@ -11,12 +11,14 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from babel_api.adapters.audiobookshelf import AbsClient
+from babel_api.adapters.chaptarr import ChaptarrClient
 from babel_api.adapters.db.abs_repository import SqlAbsRepository
 from babel_api.adapters.db.catalog_repository import SqlCatalogRepository
 from babel_api.adapters.db.file_repository import SqlFileRepository
 from babel_api.adapters.db.follow_repository import SqlFollowRepository
 from babel_api.adapters.db.kavita_repository import SqlKavitaRepository
 from babel_api.adapters.db.repositories import SqlUserRepository
+from babel_api.adapters.db.request_repository import SqlRequestRepository
 from babel_api.adapters.db.social_repository import SqlSocialRepository
 from babel_api.adapters.db.source_repository import SqlSourceRepository
 from babel_api.adapters.db.stats_repository import SqlStatsRepository
@@ -49,6 +51,7 @@ from babel_api.services.follows import FollowService
 from babel_api.services.kavita import KavitaProvisioner, KavitaService
 from babel_api.services.links import LinkService
 from babel_api.services.notifications import Notifier
+from babel_api.services.requests import RequestService
 from babel_api.services.social import SocialService
 from babel_api.services.sources import SourceService
 from babel_api.services.stats import StatsService
@@ -80,6 +83,7 @@ class Container:
     kavita_client: Callable[[str], KavitaClient]
     kavita: KavitaProvisioner
     abs_client: Callable[[str], AbsClient]
+    chaptarr: Callable[[], ChaptarrClient] | None = None
 
 
 def get_container(request: Request) -> Container:
@@ -330,3 +334,32 @@ def get_abs_service(
 
 
 AbsServiceDep = Annotated[AbsService, Depends(get_abs_service)]
+
+
+def make_request_service(container: Container, session: AsyncSession) -> RequestService:
+    settings = container.settings
+
+    async def scan_library() -> None:
+        client = container.kavita_client(settings.kavita_url)
+        try:
+            admin = await client.login_with_key(settings.kavita_admin_key.get_secret_value())
+            await client.scan_all(admin.token)
+        finally:
+            await client.aclose()
+
+    return RequestService(
+        SqlRequestRepository(session),
+        SqlUserRepository(session),
+        WorkService(SqlCatalogRepository(session), container.books),
+        container.chaptarr,
+        scan_library,
+    )
+
+
+def get_request_service(
+    container: ContainerDep, session: Annotated[AsyncSession, Depends(get_session)]
+) -> RequestService:
+    return make_request_service(container, session)
+
+
+RequestServiceDep = Annotated[RequestService, Depends(get_request_service)]

@@ -11,6 +11,7 @@ from babel_api.api.v1.routes import (
     kavita,
     library,
     me,
+    requests,
     social,
     sources,
     stats,
@@ -31,3 +32,4 @@ router.include_router(kavita.router)
 router.include_router(stats.router)
 router.include_router(audiobooks.router)
 router.include_router(admin.router)
+router.include_router(requests.router)

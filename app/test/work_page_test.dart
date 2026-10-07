@@ -104,13 +104,13 @@ void main() {
     );
   });
 
-  testWidgets('without a match, the page says Babel downloads nothing', (
+  testWidgets('without a match, a reader without premium can add a source', (
     tester,
   ) async {
     await open(tester, FakeServer());
 
-    expect(find.textContaining('Babel ne télécharge pas'), findsOneWidget);
-    expect(find.text('GÉRER MES SOURCES'), findsOneWidget);
+    expect(find.textContaining('dans aucune de vos sources'), findsOneWidget);
+    expect(find.text('AJOUTER UNE SOURCE'), findsOneWidget);
   });
 
   testWidgets('reviews can be liked and commented', (tester) async {

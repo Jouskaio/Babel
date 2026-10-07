@@ -79,6 +79,12 @@ class Settings(BaseSettings):
     kavita_url: str = ""
     kavita_admin_key: SecretStr = SecretStr("")
 
+    # Chaptarr (a book manager of the Readarr family): premium readers can ask for a book
+    # that is in none of their sources, and it downloads it into the library Kavita reads.
+    # Address and API key (Settings > General). Empty: requests are off.
+    chaptarr_url: str = ""
+    chaptarr_api_key: SecretStr = SecretStr("")
+
     # Google Books completes the one-line descriptions of Open Library. Without a key its
     # shared anonymous quota is often used up: a free key (Google Cloud, Books API)
     # makes it reliable. Empty: tried anyway, and given up on quietly when refused.
