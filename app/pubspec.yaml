@@ -1,7 +1,7 @@
 name: babel
 description: "Babel — personal and social library (Flutter client, no server logic)."
 publish_to: "none"
-version: 0.24.2+39
+version: 0.25.0+40
 
 environment:
   sdk: ^3.13.0
