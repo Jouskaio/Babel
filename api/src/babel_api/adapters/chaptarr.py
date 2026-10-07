@@ -11,6 +11,7 @@ from typing import Any, cast
 import httpx
 
 from babel_api.domain.errors import DomainError
+from babel_api.domain.series import guess_series, series_key
 
 EBOOK_QUALITY = "ebook"  # profile type names in Chaptarr
 
@@ -27,18 +28,38 @@ def _plain(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", kept).strip()
 
 
+_RANGE = re.compile(r"\d\s*[-–—/&]\s*\d")  # "Vol. 3-4": an omnibus, never one volume
+
+
+def _same_volume(wanted: str, found: str) -> bool:
+    """ "Homunculus 3" and "Homunculus, Band 3" are the same volume of the same series;
+    "Homunculus 3-4" (an omnibus) and "Homunculus 2" are not."""
+    mine, theirs = guess_series(wanted), guess_series(found)
+    return (
+        mine is not None
+        and theirs is not None
+        and series_key(mine.series) == series_key(theirs.series)
+        and mine.number == theirs.number
+        and not _RANGE.search(found)
+    )
+
+
 def best_match(
     candidates: list[dict[str, Any]], title: str, authors: tuple[str, ...]
 ) -> dict[str, Any] | None:
-    """The candidate with the same title (a subtitle after ":" or "(" is ignored) and an
-    author that shares the work's author surname. Study guides and anthologies never match."""
+    """The candidate with the same title (a subtitle after ":" or "(" is ignored) or the same
+    volume of the same series, and an author that shares the work's author surname. Study
+    guides and anthologies never match."""
     wanted = _plain(title)
     surnames = {_plain(a).split(" ")[-1] for a in authors if _plain(a)}
     for found in candidates:
         author = cast(dict[str, Any], found.get("author") or {})
-        name = _plain(re.split(r"[:(]", str(found.get("title", "")))[0])
+        text = str(found.get("title", ""))
+        name = _plain(re.split(r"[:(]", text)[0])
         who = _plain(str(author.get("authorName", "")))
-        if name == wanted and (not surnames or any(s in who for s in surnames)):
+        if (name == wanted or _same_volume(title, text)) and (
+            not surnames or any(s in who for s in surnames)
+        ):
             return found
     return None
 
@@ -73,7 +94,11 @@ class ChaptarrClient:
     async def lookup(self, title: str, authors: tuple[str, ...]) -> dict[str, Any] | None:
         """Searches the title alone first (adding the author buries the novel under books about
         it), then with the author."""
-        terms = [title] + ([f"{title} {authors[0]}"] if authors else [])
+        terms = [title]
+        if guess := guess_series(title):  # "Homunculus 3": Chaptarr may say "Homunculus, Band 3"
+            terms.append(f"{guess.series} {guess.number:g}")
+        if authors:
+            terms.append(f"{title} {authors[0]}")
         for term in terms:
             found = cast(
                 list[dict[str, Any]], await self._call("GET", "book/lookup", params={"term": term})
