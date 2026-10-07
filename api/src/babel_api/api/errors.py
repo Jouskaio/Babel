@@ -12,6 +12,7 @@ from babel_api.domain.errors import (
     FileTooLargeError,
     ForbiddenError,
     HandleTakenError,
+    InvalidBookDetailsError,
     InvalidCredentialsError,
     InvalidHandleError,
     InvalidIsbnError,
@@ -48,6 +49,7 @@ _STATUS: dict[type[Exception], tuple[int, str]] = {
     ForbiddenError: (status.HTTP_403_FORBIDDEN, "Not allowed"),
     InvalidIsbnError: (status.HTTP_400_BAD_REQUEST, "Invalid ISBN"),
     NotFoundError: (status.HTTP_404_NOT_FOUND, "Not found"),
+    InvalidBookDetailsError: (status.HTTP_400_BAD_REQUEST, "Invalid book details"),
     BookAlreadyInLibraryError: (
         status.HTTP_409_CONFLICT,
         "This file is already another book of your library",

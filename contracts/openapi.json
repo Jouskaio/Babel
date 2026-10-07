@@ -377,6 +377,80 @@
         "title": "Body_importFile",
         "type": "object"
       },
+      "BookDetailsRequest": {
+        "description": "Only the fields sent change. An empty series clears it (and its volume); a null\ncover goes back to the file's.",
+        "properties": {
+          "authors": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                "maxItems": 8,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authors"
+          },
+          "cover_id": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A cover of the catalog, from the book's work",
+            "title": "Cover Id"
+          },
+          "series": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Series"
+          },
+          "series_index": {
+            "anyOf": [
+              {
+                "exclusiveMaximum": 10000.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Series Index"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "title": "BookDetailsRequest",
+        "type": "object"
+      },
       "BookFormat": {
         "description": "File formats accepted for import, detected from the content, not the name.",
         "enum": [
@@ -1546,6 +1620,18 @@
             "title": "Authors",
             "type": "array"
           },
+          "cover_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The catalog cover the reader chose, if any",
+            "title": "Cover Id"
+          },
           "cover_path": {
             "anyOf": [
               {
@@ -1621,6 +1707,30 @@
             ],
             "description": "Progress declared by hand, in percent (not a device position)",
             "title": "Progress"
+          },
+          "series": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The series it belongs to",
+            "title": "Series"
+          },
+          "series_index": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Its volume number in it",
+            "title": "Series Index"
           },
           "sha256": {
             "anyOf": [
@@ -2510,6 +2620,17 @@
             "title": "Authors",
             "type": "array"
           },
+          "cover_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover Path"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -2552,6 +2673,19 @@
               }
             ],
             "title": "Url"
+          },
+          "work_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The catalog work, for its page",
+            "title": "Work Id"
           }
         },
         "required": [
@@ -4104,7 +4238,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.26.2"
+    "version": "0.27.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -6329,6 +6463,80 @@
           }
         ],
         "summary": "Remove From Library",
+        "tags": [
+          "library"
+        ]
+      },
+      "patch": {
+        "description": "Correct a book's title, authors, series, volume number or cover.",
+        "operationId": "updateBookDetails",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookDetailsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Details",
         "tags": [
           "library"
         ]

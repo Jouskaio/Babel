@@ -7,6 +7,7 @@ import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
+import '../../../core/widgets/loading_bar.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
@@ -656,7 +657,7 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
                 ),
               ),
           ],
-          AsyncLoading() => [const LinearProgressIndicator(minHeight: 2)],
+          AsyncLoading() => [const LoadingBar()],
           _ => [
             Text(l10n.noSourceMatch, style: BabelText.body(13)),
             const SizedBox(height: 10),

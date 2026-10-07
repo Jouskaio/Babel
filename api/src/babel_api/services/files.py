@@ -13,6 +13,7 @@ from babel_api.domain.errors import (
     BlockedFileError,
     BookAlreadyInLibraryError,
     ForbiddenError,
+    InvalidBookDetailsError,
     NotFoundError,
     UnsupportedFileError,
 )
@@ -25,6 +26,7 @@ from babel_api.domain.ports import (
     FileRepository,
     MetadataReader,
 )
+from babel_api.domain.series import guess_series
 from babel_api.domain.sync import ChangeOp, EntityKind
 
 FileAccess = Literal["everyone", "entitled"]
@@ -42,6 +44,9 @@ def item_data(item: LibraryItem) -> dict[str, Any]:
         "edition_id": str(item.file.edition_id) if item.file and item.file.edition_id else None,
         "cover_path": item.cover_path,
         "paper": item.paper,
+        "series": item.series,
+        "series_index": item.series_index,
+        "cover_id": item.cover_id,
         "audio_duration": item.audio.duration if item.audio else None,
         "added_at": item.added_at.isoformat(),
         "status": item.state.status.value if item.state.status else None,
@@ -211,8 +216,16 @@ class FileService:
             raise NotFoundError
         item = await self._files.find_item_of_work(user_id, work_id)
         if item is None:
+            guess = guess_series(work.title)
             item = await self._files.add_item(
-                user_id, None, work.title, tuple(work.authors), work_id, paper=True
+                user_id,
+                None,
+                work.title,
+                tuple(work.authors),
+                work_id,
+                paper=True,
+                series=guess.series if guess else None,
+                series_index=guess.number if guess else None,
             )
         else:
             if item.removed_at is not None:
@@ -278,6 +291,43 @@ class FileService:
             device_id,
         )
         await self._files.commit()
+
+    async def update_details(
+        self,
+        user_id: UUID,
+        item_id: UUID,
+        changes: dict[str, Any],
+        device_id: UUID | None = None,
+    ) -> LibraryItem:
+        """The reader corrects a book's title, authors, series, volume or cover. Only the
+        keys given change; an empty series or cover clears it."""
+        item = await self._own(user_id, item_id)
+        values: dict[str, Any] = {}
+        if "title" in changes:
+            title = " ".join(str(changes["title"] or "").split())[:500]
+            if not title:
+                raise InvalidBookDetailsError
+            values["title"] = title
+        if "authors" in changes:
+            values["authors"] = [
+                a for a in (" ".join(str(x).split()) for x in changes["authors"]) if a
+            ][:8]
+        if "series" in changes:
+            series = " ".join(str(changes["series"] or "").split())[:200]
+            values["series"] = series or None
+            if not series:
+                values["series_index"] = None
+        if "series_index" in changes and values.get("series", item.series) is not None:
+            number = changes["series_index"]
+            values["series_index"] = None if number is None else float(number)
+            if values["series_index"] is not None and not 0 <= values["series_index"] < 10_000:
+                raise InvalidBookDetailsError
+        if "cover_id" in changes:
+            cover = changes["cover_id"]
+            values["cover_id"] = int(cover) if cover else None
+        updated = await self._files.update_details(item.id, values) if values else item
+        await self._record(updated, device_id)
+        return updated
 
     async def link_work(
         self, user_id: UUID, item_id: UUID, work_id: UUID | None, device_id: UUID | None = None
@@ -387,7 +437,18 @@ class FileService:
             metadata = self._reader.metadata(path, file.format)
             title = metadata.title or PurePath(filename).stem or file.original_name
             work = await self._files.guess_work(file.edition_id, title, metadata.authors)
-            item = await self._files.add_item(user_id, file.sha256, title, metadata.authors, work)
+            series, number = metadata.series, metadata.series_index
+            if series is None and (guess := guess_series(title)):
+                series, number = guess.series, guess.number
+            item = await self._files.add_item(
+                user_id,
+                file.sha256,
+                title,
+                metadata.authors,
+                work,
+                series=series,
+                series_index=number,
+            )
         await self._changes.record(
             user_id,
             EntityKind.LIBRARY_ITEM,

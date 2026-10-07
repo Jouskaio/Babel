@@ -101,6 +101,9 @@ class Recommendation:
     message: str | None
     created_at: datetime
     read_at: datetime | None = None
+    # The catalog work the title names, found when shown: for its page and cover.
+    work_id: UUID | None = None
+    cover_id: int | None = None
 
 
 @dataclass(frozen=True, slots=True)

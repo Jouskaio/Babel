@@ -2403,4 +2403,65 @@ class AppLocalizationsFr extends AppLocalizations {
   String sourceMatchImported(String title) {
     return '« $title » est dans votre bibliothèque.';
   }
+
+  @override
+  String get editDetails => 'Modifier les informations';
+
+  @override
+  String get detailsTitle => 'Informations du livre';
+
+  @override
+  String get detailsBookTitle => 'Titre';
+
+  @override
+  String get detailsAuthors => 'Auteurs, séparés par des virgules';
+
+  @override
+  String get detailsSeries => 'Série';
+
+  @override
+  String get detailsSeriesHint =>
+      'Laissez vide si ce livre n\'est pas dans une série.';
+
+  @override
+  String get detailsVolume => 'Tome';
+
+  @override
+  String get detailsCover => 'Couverture';
+
+  @override
+  String get coverDefault => 'Par défaut';
+
+  @override
+  String get coverLinkFirst =>
+      'Associez d\'abord ce livre à une fiche pour choisir parmi les couvertures de ses éditions.';
+
+  @override
+  String volumeNumber(String number) {
+    return 'Tome $number';
+  }
+
+  @override
+  String seriesVolumes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tomes',
+      one: '1 tome',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String seriesRead(int count) {
+    return '$count lus';
+  }
+
+  @override
+  String get detailsSaved => 'Informations enregistrées.';
+
+  @override
+  String seriesOf(String series, String number) {
+    return '$series · tome $number';
+  }
 }

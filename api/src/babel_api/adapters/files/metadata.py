@@ -10,6 +10,7 @@ from defusedxml import ElementTree
 
 from babel_api.domain.files import BookFormat, BookMetadata, Cover
 from babel_api.domain.isbn import try_normalize_isbn
+from babel_api.domain.series import parse_number
 
 _IMAGES = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif"}
 # Package files are small; anything bigger is refused (zip bombs).
@@ -80,8 +81,36 @@ def _image(archive: zipfile.ZipFile, name: str) -> Cover | None:
     return Cover(content, media_type)
 
 
-def _comic_genres(path: Path) -> tuple[str, ...]:
-    """Genres from a comic's ComicInfo.xml ("Genre", "Manga"), if it has one."""
+def _epub_series(package: Any) -> tuple[str | None, float | None]:
+    """The series of an EPUB: Calibre's meta tags, or EPUB 3's collection."""
+    named: dict[str, str] = {}
+    for meta in package.iterfind(".//opf:meta", _NS):
+        name = meta.get("name")
+        if name in ("calibre:series", "calibre:series_index") and meta.get("content"):
+            named[name] = str(meta.get("content"))
+    if named.get("calibre:series"):
+        return named["calibre:series"].strip(), parse_number(named.get("calibre:series_index"))
+    # EPUB 3: <meta property="belongs-to-collection" id="c">Name</meta>, its position
+    # given by <meta refines="#c" property="group-position">3</meta>.
+    for meta in package.iterfind(".//opf:meta", _NS):
+        if meta.get("property") == "belongs-to-collection" and (meta.text or "").strip():
+            collection_id = meta.get("id")
+            position = next(
+                (
+                    parse_number(m.text)
+                    for m in package.iterfind(".//opf:meta", _NS)
+                    if m.get("property") == "group-position"
+                    and collection_id
+                    and m.get("refines") == f"#{collection_id}"
+                ),
+                None,
+            )
+            return (meta.text or "").strip(), position
+    return None, None
+
+
+def _comic_info(path: Path) -> BookMetadata:
+    """A comic's ComicInfo.xml: genres, series and volume."""
     try:
         with zipfile.ZipFile(path) as archive:
             name = next(
@@ -89,23 +118,27 @@ def _comic_genres(path: Path) -> tuple[str, ...]:
                 None,
             )
             if name is None:
-                return ()
+                return BookMetadata()
             root = ElementTree.fromstring(archive.read(name))
     except (zipfile.BadZipFile, ElementTree.ParseError, ValueError, OSError):
-        return ()
-    genres = [
-        g.strip()
-        for e in root.iter()
-        if e.tag.rsplit("}", 1)[-1] == "Genre" and e.text
-        for g in e.text.split(",")
-        if g.strip()
-    ]
-    if any(
-        e.tag.rsplit("}", 1)[-1] == "Manga" and (e.text or "").lower().startswith("yes")
-        for e in root.iter()
-    ):
+        return BookMetadata()
+
+    def field(tag: str) -> str | None:
+        for e in root.iter():
+            if e.tag.rsplit("}", 1)[-1] == tag and e.text and e.text.strip():
+                return e.text.strip()
+        return None
+
+    genres = [g.strip() for g in (field("Genre") or "").split(",") if g.strip()]
+    if (field("Manga") or "").lower().startswith("yes"):
         genres.append("Manga")
-    return tuple(dict.fromkeys(genres))[:20]
+    authors = [a.strip() for a in (field("Writer") or "").split(",") if a.strip()]
+    return BookMetadata(
+        authors=tuple(authors[:3]),
+        subjects=tuple(dict.fromkeys(genres))[:20],
+        series=field("Series"),
+        series_index=parse_number(field("Number")),
+    )
 
 
 class EbookMetadataReader:
@@ -131,7 +164,7 @@ class EbookMetadataReader:
 
     def metadata(self, path: Path, file_format: BookFormat) -> BookMetadata:
         if file_format is BookFormat.CBZ:
-            return BookMetadata(subjects=_comic_genres(path))
+            return _comic_info(path)
         if file_format is not BookFormat.EPUB:
             return BookMetadata()
         try:
@@ -163,12 +196,15 @@ class EbookMetadataReader:
         )
         titles = texts("title")
         languages = texts("language")
+        series, series_index = _epub_series(package)
         return BookMetadata(
             title=titles[0] if titles else None,
             authors=tuple(texts("creator")[:3]),
             isbn13=isbn,
             language=languages[0].split("-")[0].lower() if languages else None,
             subjects=tuple(dict.fromkeys(texts("subject")))[:40],
+            series=series,
+            series_index=series_index,
         )
 
     def cover(self, path: Path, file_format: BookFormat) -> Cover | None:

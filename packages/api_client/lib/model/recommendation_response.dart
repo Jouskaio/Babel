@@ -14,6 +14,7 @@ class RecommendationResponse {
   /// Returns a new [RecommendationResponse] instance.
   RecommendationResponse({
     this.authors = const [],
+    this.coverPath,
     required this.createdAt,
     required this.id,
     this.message,
@@ -21,9 +22,12 @@ class RecommendationResponse {
     required this.sender,
     required this.title,
     this.url,
+    this.workId,
   });
 
   List<String> authors;
+
+  String? coverPath;
 
   DateTime createdAt;
 
@@ -39,35 +43,47 @@ class RecommendationResponse {
 
   String? url;
 
+  /// The catalog work, for its page
+  String? workId;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is RecommendationResponse &&
     _deepEquality.equals(other.authors, authors) &&
+    other.coverPath == coverPath &&
     other.createdAt == createdAt &&
     other.id == id &&
     other.message == message &&
     other.read == read &&
     other.sender == sender &&
     other.title == title &&
-    other.url == url;
+    other.url == url &&
+    other.workId == workId;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (authors.hashCode) +
+    (coverPath == null ? 0 : coverPath!.hashCode) +
     (createdAt.hashCode) +
     (id.hashCode) +
     (message == null ? 0 : message!.hashCode) +
     (read.hashCode) +
     (sender.hashCode) +
     (title.hashCode) +
-    (url == null ? 0 : url!.hashCode);
+    (url == null ? 0 : url!.hashCode) +
+    (workId == null ? 0 : workId!.hashCode);
 
   @override
-  String toString() => 'RecommendationResponse[authors=$authors, createdAt=$createdAt, id=$id, message=$message, read=$read, sender=$sender, title=$title, url=$url]';
+  String toString() => 'RecommendationResponse[authors=$authors, coverPath=$coverPath, createdAt=$createdAt, id=$id, message=$message, read=$read, sender=$sender, title=$title, url=$url, workId=$workId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'authors'] = this.authors;
+    if (this.coverPath != null) {
+      json[r'cover_path'] = this.coverPath;
+    } else {
+      json[r'cover_path'] = null;
+    }
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'id'] = this.id;
     if (this.message != null) {
@@ -82,6 +98,11 @@ class RecommendationResponse {
       json[r'url'] = this.url;
     } else {
       json[r'url'] = null;
+    }
+    if (this.workId != null) {
+      json[r'work_id'] = this.workId;
+    } else {
+      json[r'work_id'] = null;
     }
     return json;
   }
@@ -108,6 +129,7 @@ class RecommendationResponse {
         authors: json[r'authors'] is Iterable
             ? (json[r'authors'] as Iterable).cast<String>().toList(growable: false)
             : const [],
+        coverPath: mapValueOfType<String>(json, r'cover_path'),
         createdAt: mapDateTime(json, r'created_at', r'')!,
         id: mapValueOfType<String>(json, r'id')!,
         message: mapValueOfType<String>(json, r'message'),
@@ -115,6 +137,7 @@ class RecommendationResponse {
         sender: AuthorResponse.fromJson(json[r'sender'])!,
         title: mapValueOfType<String>(json, r'title')!,
         url: mapValueOfType<String>(json, r'url'),
+        workId: mapValueOfType<String>(json, r'work_id'),
       );
     }
     return null;

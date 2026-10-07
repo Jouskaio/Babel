@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/loading_bar.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../application/social_providers.dart';
@@ -284,7 +285,7 @@ class _RecommendSheetState extends ConsumerState<_RecommendSheet> {
                   l10n.errorNetwork,
                   style: BabelText.body(14),
                 ),
-                _ => const LinearProgressIndicator(),
+                _ => const LoadingBar(),
               },
               const SizedBox(height: 8),
               TextField(

@@ -60,6 +60,11 @@ class LibraryItemResponse(BaseModel):
         default=None,
         description="An audiobook from the reader's Audiobookshelf: its length in seconds",
     )
+    series: str | None = Field(default=None, description="The series it belongs to")
+    series_index: float | None = Field(default=None, description="Its volume number in it")
+    cover_id: int | None = Field(
+        default=None, description="The catalog cover the reader chose, if any"
+    )
 
     @classmethod
     def of(cls, item: LibraryItem) -> "LibraryItemResponse":
@@ -82,6 +87,9 @@ class LibraryItemResponse(BaseModel):
             work_id=item.work_id,
             paper=item.paper,
             audio_duration=item.audio.duration if item.audio else None,
+            series=item.series,
+            series_index=item.series_index,
+            cover_id=item.cover_id,
         )
 
 
@@ -139,6 +147,34 @@ async def remove_from_library(
     """Take a book out of the library. Its status, review, notes and positions are kept and
     come back if the same file is added again."""
     await files.remove_from_library(user_id, item_id, device_id)
+
+
+class BookDetailsRequest(BaseModel):
+    """Only the fields sent change. An empty series clears it (and its volume); a null
+    cover goes back to the file's."""
+
+    title: Annotated[str, Field(min_length=1, max_length=500)] | None = None
+    authors: Annotated[list[Annotated[str, Field(max_length=200)]], Field(max_length=8)] | None = (
+        None
+    )
+    series: Annotated[str, Field(max_length=200)] | None = None
+    series_index: Annotated[float, Field(ge=0, lt=10_000)] | None = None
+    cover_id: int | None = Field(
+        default=None, ge=1, description="A cover of the catalog, from the book's work"
+    )
+
+
+@router.patch("/library/{item_id}", operation_id="updateBookDetails")
+async def update_details(
+    user_id: CurrentUserId,
+    files: FileServiceDep,
+    item_id: UUID,
+    body: BookDetailsRequest,
+    device_id: DeviceHeader = None,
+) -> LibraryItemResponse:
+    """Correct a book's title, authors, series, volume number or cover."""
+    changes = {name: getattr(body, name) for name in body.model_fields_set}
+    return LibraryItemResponse.of(await files.update_details(user_id, item_id, changes, device_id))
 
 
 class PaperBookRequest(BaseModel):
