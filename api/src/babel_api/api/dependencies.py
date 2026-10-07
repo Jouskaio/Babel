@@ -363,3 +363,9 @@ def get_request_service(
 
 
 RequestServiceDep = Annotated[RequestService, Depends(get_request_service)]
+
+
+async def fulfill_request(container: Container, user_id: UUID, work_id: UUID) -> None:
+    """Background task: asks Chaptarr, with its own database session."""
+    async with container.sessions() as session:
+        await make_request_service(container, session).fulfill(user_id, work_id)

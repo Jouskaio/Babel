@@ -46,30 +46,40 @@ class RequestService:
         if user is None or not user.has_premium:
             raise PremiumRequiredError
 
-    async def request(self, user_id: UUID, work_id: UUID) -> BookRequest:
+    async def request(self, user_id: UUID, work_id: UUID) -> tuple[BookRequest, bool]:
+        """Records the request at once (and whether it is new); [fulfill] then asks Chaptarr."""
         await self._premium(user_id)
         if self._chaptarr is None:
             raise RequestsUnavailableError
         existing = await self._requests.get(user_id, work_id)
         if existing is not None and existing.status is not RequestStatus.NOT_FOUND:
-            return existing
+            return existing, False
+        await self._works.get(work_id)  # unknown work: not found
+        saved = await self._requests.save(user_id, work_id, RequestStatus.REQUESTED, None)
+        await self._requests.commit()
+        return saved, True
+
+    async def fulfill(self, user_id: UUID, work_id: UUID) -> None:
+        """Finds the book in Chaptarr and adds it; a miss or a failure reads as "not found"
+        (the reader can ask again)."""
+        if self._chaptarr is None:
+            return
         work = (await self._works.get(work_id)).work
         client = self._chaptarr()
         try:
             found = await client.lookup(work.title, work.authors)
             if found is None:
-                saved = await self._requests.save(user_id, work_id, RequestStatus.NOT_FOUND, None)
+                await self._requests.save(user_id, work_id, RequestStatus.NOT_FOUND, None)
             else:
-                saved = await self._requests.save(
+                await self._requests.save(
                     user_id, work_id, RequestStatus.REQUESTED, await client.add(found)
                 )
         except ChaptarrError as error:
             log.warning("Chaptarr request failed: %s", error.reason)
-            raise RequestsUnavailableError from error
+            await self._requests.save(user_id, work_id, RequestStatus.NOT_FOUND, None)
         finally:
             await client.aclose()
         await self._requests.commit()
-        return saved
 
     async def list(self, user_id: UUID) -> list[BookRequest]:
         """The reader's requests; those still waiting are checked with Chaptarr first."""

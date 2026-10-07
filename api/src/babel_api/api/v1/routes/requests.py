@@ -3,10 +3,15 @@
 from datetime import datetime
 from uuid import UUID
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, BackgroundTasks, status
 from pydantic import BaseModel, Field
 
-from babel_api.api.dependencies import CurrentUserId, RequestServiceDep
+from babel_api.api.dependencies import (
+    ContainerDep,
+    CurrentUserId,
+    RequestServiceDep,
+    fulfill_request,
+)
 from babel_api.domain.requests import BookRequest, RequestStatus
 
 router = APIRouter(prefix="/requests", tags=["requests"])
@@ -42,7 +47,15 @@ async def list_requests(user_id: CurrentUserId, requests: RequestServiceDep) -> 
 
 @router.post("", operation_id="requestBook", status_code=status.HTTP_201_CREATED)
 async def request_book(
-    user_id: CurrentUserId, requests: RequestServiceDep, body: NewRequest
+    user_id: CurrentUserId,
+    requests: RequestServiceDep,
+    container: ContainerDep,
+    background: BackgroundTasks,
+    body: NewRequest,
 ) -> BookRequestResponse:
-    """Ask the server to find and download a book (premium readers)."""
-    return BookRequestResponse.of(await requests.request(user_id, body.work_id))
+    """Ask the server to find and download a book (premium readers). The answer is
+    immediate; the search goes on in the background, see the status of your requests."""
+    request, created = await requests.request(user_id, body.work_id)
+    if created:
+        background.add_task(fulfill_request, container, user_id, body.work_id)
+    return BookRequestResponse.of(request)

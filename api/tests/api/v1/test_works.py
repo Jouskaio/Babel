@@ -386,7 +386,9 @@ def test_a_book_chaptarr_does_not_know_is_reported(
     admin = account(client, "admin@example.com")
     (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=admin).json()
     response = client.post("/v1/requests", json={"work_id": hit["id"]}, headers=admin)
-    assert response.json()["status"] == "not_found"
+    assert response.json()["status"] == "requested"  # answered at once; the search follows
+    listed = client.get("/v1/requests", headers=admin).json()["items"]
+    assert [i["status"] for i in listed] == ["not_found"]
     assert chaptarr.added == []
 
 

@@ -63,7 +63,7 @@ This endpoint does not need any parameter.
 
 Request Book
 
-Ask the server to find and download a book (premium readers).
+Ask the server to find and download a book (premium readers). The answer is immediate; the search goes on in the background, see the status of your requests.
 
 ### Example
 ```dart
