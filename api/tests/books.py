@@ -4,6 +4,17 @@ import io
 import zipfile
 
 
+class _FixedZip(zipfile.ZipFile):
+    """Entries dated 1980-01-01: the same book is the same bytes, whatever the clock says."""
+
+    def writestr(self, zinfo_or_arcname, data, compress_type=None, compresslevel=None):  # type: ignore[no-untyped-def,override]
+        if isinstance(zinfo_or_arcname, str):
+            info = zipfile.ZipInfo(zinfo_or_arcname, date_time=(1980, 1, 1, 0, 0, 0))
+            info.compress_type = compress_type if compress_type is not None else self.compression
+            zinfo_or_arcname = info
+        super().writestr(zinfo_or_arcname, data, compress_type, compresslevel)
+
+
 def epub(
     title: str = "Jane Eyre",
     author: str = "Charlotte Brontë",
@@ -17,7 +28,7 @@ def epub(
     """A minimal EPUB; ``cover`` adds a JPEG cover declared the EPUB 3 or EPUB 2 way."""
     identifier = f"<dc:identifier>urn:isbn:{isbn}</dc:identifier>" if isbn else ""
     buffer = io.BytesIO()
-    with zipfile.ZipFile(buffer, "w") as archive:
+    with _FixedZip(buffer, "w") as archive:
         archive.writestr("mimetype", "application/epub+zip", compress_type=zipfile.ZIP_STORED)
         archive.writestr(
             "META-INF/container.xml",
@@ -68,7 +79,7 @@ JPEG = b"\xff\xd8\xff\xe0" + b"cover" * 20
 
 def cbz(comic_info: str | None = None) -> bytes:
     buffer = io.BytesIO()
-    with zipfile.ZipFile(buffer, "w") as archive:
+    with _FixedZip(buffer, "w") as archive:
         archive.writestr("001.jpg", b"\xff\xd8\xff" + b"0" * 100)
         if comic_info:
             archive.writestr(

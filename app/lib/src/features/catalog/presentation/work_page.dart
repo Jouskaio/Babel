@@ -573,6 +573,10 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
           .read(requestsApiProvider)
           .requestBook(NewRequest(workId: widget.workId));
       ref.invalidate(bookRequestsProvider);
+      // The search goes on in the background: look again shortly for a miss.
+      Future<void>.delayed(const Duration(seconds: 8), () {
+        if (mounted) ref.invalidate(bookRequestsProvider);
+      });
     } on ApiException {
       messenger.showSnackBar(SnackBar(content: Text(l10n.requestFailed)));
     } finally {

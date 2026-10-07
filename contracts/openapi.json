@@ -4649,7 +4649,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.31.3"
+    "version": "0.31.4"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -8453,7 +8453,7 @@
         ]
       },
       "post": {
-        "description": "Ask the server to find and download a book (premium readers).",
+        "description": "Ask the server to find and download a book (premium readers). The answer is\nimmediate; the search goes on in the background, see the status of your requests.",
         "operationId": "requestBook",
         "requestBody": {
           "content": {

@@ -66,7 +66,7 @@ class RequestsApi {
 
   /// Request Book
   ///
-  /// Ask the server to find and download a book (premium readers).
+  /// Ask the server to find and download a book (premium readers). The answer is immediate; the search goes on in the background, see the status of your requests.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -100,7 +100,7 @@ class RequestsApi {
 
   /// Request Book
   ///
-  /// Ask the server to find and download a book (premium readers).
+  /// Ask the server to find and download a book (premium readers). The answer is immediate; the search goes on in the background, see the status of your requests.
   ///
   /// Parameters:
   ///
