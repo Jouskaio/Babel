@@ -22,6 +22,7 @@ import '../features/landing/presentation/landing_page.dart';
 import '../features/library/presentation/library_page.dart';
 import '../features/library/presentation/link_import_page.dart';
 import '../features/reader/presentation/reader_page.dart';
+import '../features/saga/saga_page.dart';
 import '../features/shell/app_shell.dart';
 import '../features/social/presentation/friends_page.dart';
 import '../features/social/presentation/profile_page.dart';
@@ -54,6 +55,10 @@ abstract final class Routes {
   static const importLink = '/import-link';
   static const stats = '/stats';
   static const audiobooks = '/audiobooks';
+  static String saga(String series, {String? author}) => Uri(
+    path: '/saga',
+    queryParameters: {'series': series, 'author': ?author},
+  ).toString();
   static String wrap(int year) => '/stats/wrap/$year';
   static const sources = '/sources';
   static const newSource = '/sources/new';
@@ -137,6 +142,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.account, builder: (_, _) => const AccountPage()),
       GoRoute(path: Routes.friends, builder: (_, _) => const FriendsPage()),
       GoRoute(path: Routes.stats, builder: (_, _) => const StatsPage()),
+      GoRoute(
+        path: '/saga',
+        builder: (_, state) => SagaPage(
+          series: state.uri.queryParameters['series'] ?? '',
+          author: state.uri.queryParameters['author'],
+        ),
+      ),
       GoRoute(
         path: Routes.audiobooks,
         builder: (_, _) => const AudiobooksPage(),

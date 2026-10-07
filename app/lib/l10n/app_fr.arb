@@ -1500,5 +1500,33 @@
   "commentsEmpty": "Pas encore de commentaire.",
   "audioDownload": "Écouter hors ligne",
   "audioDownloading": "Téléchargement…",
-  "audioOffline": "Disponible hors ligne"
+  "audioOffline": "Disponible hors ligne",
+  "sagaTitle": "Saga",
+  "sagaSee": "Voir toute la saga",
+  "sagaOf": "{series} · tome {number}",
+  "@sagaOf": {
+    "placeholders": {
+      "series": {
+        "type": "String"
+      },
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "sagaCount": "{count, plural, =1{1 tome} other{{count} tomes}} dans le catalogue · {owned} dans votre bibliothèque",
+  "@sagaCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "owned": {
+        "type": "int"
+      }
+    }
+  },
+  "sagaMissing": "Introuvable dans le catalogue",
+  "sagaNotOwned": "Pas dans votre bibliothèque",
+  "sagaEmpty": "Aucun tome trouvé pour cette saga.",
+  "sagaHint": "Les tomes viennent du catalogue : ouvrez-en un pour l'ajouter, ou le chercher dans vos sources."
 }

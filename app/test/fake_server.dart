@@ -478,6 +478,23 @@ class FakeServer {
         'cover_id': body['cover_id'],
       });
     }
+    if (path == '/v1/catalog/saga') {
+      return json([
+        for (final n in [1, 2, 4])
+          {
+            'number': n,
+            'work': {
+              'id': 'hw$n',
+              'title': 'Homunculus $n',
+              'original_title': 'Homunculus $n',
+              'authors': ['Hideo Yamamoto'],
+              'first_publish_year': 2007,
+              'cover_path': null,
+              'edition_count': 1,
+            },
+          },
+      ]);
+    }
     if (path == '/v1/catalog/trending') {
       return json([
         {

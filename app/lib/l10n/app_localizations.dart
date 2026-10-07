@@ -4201,6 +4201,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Disponible hors ligne'**
   String get audioOffline;
+
+  /// No description provided for @sagaTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saga'**
+  String get sagaTitle;
+
+  /// No description provided for @sagaSee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir toute la saga'**
+  String get sagaSee;
+
+  /// No description provided for @sagaOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{series} · tome {number}'**
+  String sagaOf(String series, String number);
+
+  /// No description provided for @sagaCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 tome} other{{count} tomes}} dans le catalogue · {owned} dans votre bibliothèque'**
+  String sagaCount(int count, int owned);
+
+  /// No description provided for @sagaMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Introuvable dans le catalogue'**
+  String get sagaMissing;
+
+  /// No description provided for @sagaNotOwned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas dans votre bibliothèque'**
+  String get sagaNotOwned;
+
+  /// No description provided for @sagaEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun tome trouvé pour cette saga.'**
+  String get sagaEmpty;
+
+  /// No description provided for @sagaHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les tomes viennent du catalogue : ouvrez-en un pour l\'ajouter, ou le chercher dans vos sources.'**
+  String get sagaHint;
 }
 
 class _AppLocalizationsDelegate

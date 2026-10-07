@@ -2536,4 +2536,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get audioOffline => 'Available offline';
+
+  @override
+  String get sagaTitle => 'Saga';
+
+  @override
+  String get sagaSee => 'See the whole saga';
+
+  @override
+  String sagaOf(String series, String number) {
+    return '$series · volume $number';
+  }
+
+  @override
+  String sagaCount(int count, int owned) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count volumes',
+      one: '1 volume',
+    );
+    return '$_temp0 in the catalog · $owned in your library';
+  }
+
+  @override
+  String get sagaMissing => 'Not found in the catalog';
+
+  @override
+  String get sagaNotOwned => 'Not in your library';
+
+  @override
+  String get sagaEmpty => 'No volume found for this saga.';
+
+  @override
+  String get sagaHint =>
+      'Volumes come from the catalog: open one to add it, or to look for it in your sources.';
 }
