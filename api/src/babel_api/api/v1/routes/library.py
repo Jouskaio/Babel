@@ -62,6 +62,9 @@ class LibraryItemResponse(BaseModel):
     )
     series: str | None = Field(default=None, description="The series it belongs to")
     series_index: float | None = Field(default=None, description="Its volume number in it")
+    cover_id: int | None = Field(
+        default=None, description="The catalog cover the reader chose, if any"
+    )
 
     @classmethod
     def of(cls, item: LibraryItem) -> "LibraryItemResponse":
@@ -86,6 +89,7 @@ class LibraryItemResponse(BaseModel):
             audio_duration=item.audio.duration if item.audio else None,
             series=item.series,
             series_index=item.series_index,
+            cover_id=item.cover_id,
         )
 
 

@@ -16,6 +16,7 @@ class LibraryItemResponse {
     required this.addedAt,
     this.audioDuration,
     this.authors = const [],
+    this.coverId,
     this.coverPath,
     this.editionId,
     this.finishedAt,
@@ -41,6 +42,9 @@ class LibraryItemResponse {
   num? audioDuration;
 
   List<String> authors;
+
+  /// The catalog cover the reader chose, if any
+  int? coverId;
 
   /// Cover found in the file, relative to the API base URL (may answer 404)
   String? coverPath;
@@ -102,6 +106,7 @@ class LibraryItemResponse {
     other.addedAt == addedAt &&
     other.audioDuration == audioDuration &&
     _deepEquality.equals(other.authors, authors) &&
+    other.coverId == coverId &&
     other.coverPath == coverPath &&
     other.editionId == editionId &&
     other.finishedAt == finishedAt &&
@@ -126,6 +131,7 @@ class LibraryItemResponse {
     (addedAt.hashCode) +
     (audioDuration == null ? 0 : audioDuration!.hashCode) +
     (authors.hashCode) +
+    (coverId == null ? 0 : coverId!.hashCode) +
     (coverPath == null ? 0 : coverPath!.hashCode) +
     (editionId == null ? 0 : editionId!.hashCode) +
     (finishedAt == null ? 0 : finishedAt!.hashCode) +
@@ -145,7 +151,7 @@ class LibraryItemResponse {
     (workId == null ? 0 : workId!.hashCode);
 
   @override
-  String toString() => 'LibraryItemResponse[addedAt=$addedAt, audioDuration=$audioDuration, authors=$authors, coverPath=$coverPath, editionId=$editionId, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, paper=$paper, progress=$progress, series=$series, seriesIndex=$seriesIndex, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title, workId=$workId]';
+  String toString() => 'LibraryItemResponse[addedAt=$addedAt, audioDuration=$audioDuration, authors=$authors, coverId=$coverId, coverPath=$coverPath, editionId=$editionId, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, paper=$paper, progress=$progress, series=$series, seriesIndex=$seriesIndex, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title, workId=$workId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -156,6 +162,11 @@ class LibraryItemResponse {
       json[r'audio_duration'] = null;
     }
       json[r'authors'] = this.authors;
+    if (this.coverId != null) {
+      json[r'cover_id'] = this.coverId;
+    } else {
+      json[r'cover_id'] = null;
+    }
     if (this.coverPath != null) {
       json[r'cover_path'] = this.coverPath;
     } else {
@@ -254,6 +265,7 @@ class LibraryItemResponse {
         authors: json[r'authors'] is Iterable
             ? (json[r'authors'] as Iterable).cast<String>().toList(growable: false)
             : const [],
+        coverId: mapValueOfType<int>(json, r'cover_id'),
         coverPath: mapValueOfType<String>(json, r'cover_path'),
         editionId: mapValueOfType<String>(json, r'edition_id'),
         finishedAt: mapDateTime(json, r'finished_at', r''),

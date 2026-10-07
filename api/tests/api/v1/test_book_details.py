@@ -63,6 +63,7 @@ def test_the_reader_corrects_a_book(client: TestClient, ada: dict[str, str]) -> 
     assert renamed["authors"] == ["Hideo Yamamoto"]
     assert (renamed["series"], renamed["series_index"]) == ("Homunculus (Big Spirits)", 3.0)
     assert renamed["cover_path"] == "/v1/catalog/covers/777/M"
+    assert renamed["cover_id"] == 777
     # The change reaches the other devices through the log.
     log = client.get("/v1/sync", params={"since": 0}, headers=ada).json()["changes"]
     assert log[-1]["data"]["title"] == "Homunculus — tome 3"
@@ -84,5 +85,7 @@ def test_invalid_details_and_other_readers(client: TestClient, ada: dict[str, st
 
     assert client.patch(url, json={"title": ""}, headers=ada).status_code == 422
     assert client.patch(url, json={"series_index": -1}, headers=ada).status_code == 422
+    # A title of spaces passes the shape check but is no title.
+    assert client.patch(url, json={"title": "   "}, headers=ada).status_code == 400
     assert client.patch(url, json={"title": "Mine"}, headers=bob).status_code == 404
     assert client.get("/v1/library", headers=ada).json()[0]["title"] == "Emma"

@@ -1620,6 +1620,18 @@
             "title": "Authors",
             "type": "array"
           },
+          "cover_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The catalog cover the reader chose, if any",
+            "title": "Cover Id"
+          },
           "cover_path": {
             "anyOf": [
               {

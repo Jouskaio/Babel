@@ -13,6 +13,7 @@ from babel_api.domain.errors import (
     BlockedFileError,
     BookAlreadyInLibraryError,
     ForbiddenError,
+    InvalidBookDetailsError,
     NotFoundError,
     UnsupportedFileError,
 )
@@ -45,6 +46,7 @@ def item_data(item: LibraryItem) -> dict[str, Any]:
         "paper": item.paper,
         "series": item.series,
         "series_index": item.series_index,
+        "cover_id": item.cover_id,
         "audio_duration": item.audio.duration if item.audio else None,
         "added_at": item.added_at.isoformat(),
         "status": item.state.status.value if item.state.status else None,
@@ -304,7 +306,7 @@ class FileService:
         if "title" in changes:
             title = " ".join(str(changes["title"] or "").split())[:500]
             if not title:
-                raise ValueError("title")
+                raise InvalidBookDetailsError
             values["title"] = title
         if "authors" in changes:
             values["authors"] = [
@@ -319,7 +321,7 @@ class FileService:
             number = changes["series_index"]
             values["series_index"] = None if number is None else float(number)
             if values["series_index"] is not None and not 0 <= values["series_index"] < 10_000:
-                raise ValueError("series_index")
+                raise InvalidBookDetailsError
         if "cover_id" in changes:
             cover = changes["cover_id"]
             values["cover_id"] = int(cover) if cover else None
