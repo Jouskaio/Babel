@@ -4369,6 +4369,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Vide : retour au défaut du serveur'**
   String get adminQuotaHint;
+
+  /// No description provided for @requestBook.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander ce livre'**
+  String get requestBook;
+
+  /// No description provided for @requestHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel le cherche et le télécharge pour vous. Il apparaîtra ici dès qu\'il est arrivé.'**
+  String get requestHint;
+
+  /// No description provided for @requestPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandé : en cours de recherche. Revenez dans un moment.'**
+  String get requestPending;
+
+  /// No description provided for @requestAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargé : il apparaît ici après le prochain scan.'**
+  String get requestAvailable;
+
+  /// No description provided for @requestNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Introuvable pour l\'instant.'**
+  String get requestNotFound;
+
+  /// No description provided for @requestFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La demande n\'a pas pu partir. Réessayez plus tard.'**
+  String get requestFailed;
+
+  /// No description provided for @addSourceHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce livre n\'est dans aucune de vos sources. Ajoutez-en une (Kavita, WebDAV, GitHub…) pour le retrouver ici.'**
+  String get addSourceHint;
 }
 
 class _AppLocalizationsDelegate

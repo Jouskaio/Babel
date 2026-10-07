@@ -116,6 +116,12 @@ class KavitaClient:
             raise KavitaError("libraries")
         return [int(lib["id"]) for lib in cast(list[dict[str, Any]], response.json())]
 
+    async def scan_all(self, admin_token: str) -> None:
+        """Asks Kavita to look for new files in every library."""
+        response = await self._call("POST", "/api/Library/scan-all", admin_token)
+        if response.status_code >= 400:
+            raise KavitaError("scan")
+
     async def invite(self, admin_token: str, email: str, libraries: list[int]) -> str:
         """Creates the account (all given libraries); returns its confirmation token."""
         response = await self._call(

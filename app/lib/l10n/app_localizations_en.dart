@@ -2663,4 +2663,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminQuotaHint => 'Empty: back to the server default';
+
+  @override
+  String get requestBook => 'Request this book';
+
+  @override
+  String get requestHint =>
+      'Babel looks for it and downloads it for you. It shows up here once it has arrived.';
+
+  @override
+  String get requestPending =>
+      'Requested: being searched. Come back in a while.';
+
+  @override
+  String get requestAvailable =>
+      'Downloaded: it shows up here after the next scan.';
+
+  @override
+  String get requestNotFound => 'Not found for now.';
+
+  @override
+  String get requestFailed => 'The request could not be sent. Try again later.';
+
+  @override
+  String get addSourceHint =>
+      'This book is in none of your sources. Add one (Kavita, WebDAV, GitHub…) to find it here.';
 }

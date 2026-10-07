@@ -137,6 +137,8 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**stopFollow**](doc//LibraryApi.md#stopfollow) | **DELETE** /v1/library/follows/{follow_id} | Stop Follow
 *LibraryApi* | [**updateBookDetails**](doc//LibraryApi.md#updatebookdetails) | **PATCH** /v1/library/{item_id} | Update Details
 *LibraryApi* | [**withdrawFile**](doc//LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
+*RequestsApi* | [**listBookRequests**](doc//RequestsApi.md#listbookrequests) | **GET** /v1/requests | List Requests
+*RequestsApi* | [**requestBook**](doc//RequestsApi.md#requestbook) | **POST** /v1/requests | Request Book
 *SocialApi* | [**addFriend**](doc//SocialApi.md#addfriend) | **PUT** /v1/social/friends/{handle} | Add Friend
 *SocialApi* | [**blockReader**](doc//SocialApi.md#blockreader) | **PUT** /v1/social/blocks/{handle} | Block Reader
 *SocialApi* | [**commentReview**](doc//SocialApi.md#commentreview) | **POST** /v1/social/reviews/{review_id}/comments | Comment Review
@@ -202,6 +204,7 @@ Class | Method | HTTP request | Description
  - [BookDetailsRequest](doc//BookDetailsRequest.md)
  - [BookFormat](doc//BookFormat.md)
  - [BookNoteResponse](doc//BookNoteResponse.md)
+ - [BookRequestResponse](doc//BookRequestResponse.md)
  - [BookTitleResponse](doc//BookTitleResponse.md)
  - [BookTraceResponse](doc//BookTraceResponse.md)
  - [ChangeOp](doc//ChangeOp.md)
@@ -244,6 +247,7 @@ Class | Method | HTTP request | Description
  - [LinkRequest](doc//LinkRequest.md)
  - [LoginRequest](doc//LoginRequest.md)
  - [MemberResponse](doc//MemberResponse.md)
+ - [NewRequest](doc//NewRequest.md)
  - [OpOutcome](doc//OpOutcome.md)
  - [OpdsConfig](doc//OpdsConfig.md)
  - [OperationRequest](doc//OperationRequest.md)
@@ -274,6 +278,8 @@ Class | Method | HTTP request | Description
  - [ReportReason](doc//ReportReason.md)
  - [ReportRequest](doc//ReportRequest.md)
  - [ReportResponse](doc//ReportResponse.md)
+ - [RequestStatus](doc//RequestStatus.md)
+ - [RequestsResponse](doc//RequestsResponse.md)
  - [ResetPasswordRequest](doc//ResetPasswordRequest.md)
  - [ReviewRequest](doc//ReviewRequest.md)
  - [ReviewResponse](doc//ReviewResponse.md)

@@ -105,3 +105,11 @@ class BookAlreadyInLibraryError(DomainError):
 
 class NotFriendsError(DomainError):
     """Only friends can be sent a recommendation."""
+
+
+class PremiumRequiredError(DomainError):
+    """Only premium readers can ask for books."""
+
+
+class RequestsUnavailableError(DomainError):
+    """Book requests are not set up on this server, or the server does not answer."""

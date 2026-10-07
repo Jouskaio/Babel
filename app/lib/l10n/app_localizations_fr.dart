@@ -2683,4 +2683,30 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get adminQuotaHint => 'Vide : retour au défaut du serveur';
+
+  @override
+  String get requestBook => 'Demander ce livre';
+
+  @override
+  String get requestHint =>
+      'Babel le cherche et le télécharge pour vous. Il apparaîtra ici dès qu\'il est arrivé.';
+
+  @override
+  String get requestPending =>
+      'Demandé : en cours de recherche. Revenez dans un moment.';
+
+  @override
+  String get requestAvailable =>
+      'Téléchargé : il apparaît ici après le prochain scan.';
+
+  @override
+  String get requestNotFound => 'Introuvable pour l\'instant.';
+
+  @override
+  String get requestFailed =>
+      'La demande n\'a pas pu partir. Réessayez plus tard.';
+
+  @override
+  String get addSourceHint =>
+      'Ce livre n\'est dans aucune de vos sources. Ajoutez-en une (Kavita, WebDAV, GitHub…) pour le retrouver ici.';
 }

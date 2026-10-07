@@ -624,6 +624,30 @@
         "title": "BookNoteResponse",
         "type": "object"
       },
+      "BookRequestResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RequestStatus"
+          },
+          "work_id": {
+            "format": "uuid",
+            "title": "Work Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "work_id",
+          "status",
+          "created_at"
+        ],
+        "title": "BookRequestResponse",
+        "type": "object"
+      },
       "BookTitleResponse": {
         "properties": {
           "authors": {
@@ -2179,6 +2203,20 @@
         "title": "MemberResponse",
         "type": "object"
       },
+      "NewRequest": {
+        "properties": {
+          "work_id": {
+            "format": "uuid",
+            "title": "Work Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "work_id"
+        ],
+        "title": "NewRequest",
+        "type": "object"
+      },
       "OpOutcome": {
         "enum": [
           "applied",
@@ -3120,6 +3158,37 @@
           "resolved"
         ],
         "title": "ReportResponse",
+        "type": "object"
+      },
+      "RequestStatus": {
+        "enum": [
+          "requested",
+          "available",
+          "not_found"
+        ],
+        "title": "RequestStatus",
+        "type": "string"
+      },
+      "RequestsResponse": {
+        "properties": {
+          "enabled": {
+            "description": "Whether the server can look for books",
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BookRequestResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "enabled",
+          "items"
+        ],
+        "title": "RequestsResponse",
         "type": "object"
       },
       "ResetPasswordRequest": {
@@ -8354,6 +8423,78 @@
         "summary": "Get Year Stats",
         "tags": [
           "stats"
+        ]
+      }
+    },
+    "/v1/requests": {
+      "get": {
+        "description": "Your requests, with their progress (the ones still waiting are checked first).",
+        "operationId": "listBookRequests",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Requests",
+        "tags": [
+          "requests"
+        ]
+      },
+      "post": {
+        "description": "Ask the server to find and download a book (premium readers).",
+        "operationId": "requestBook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookRequestResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Book",
+        "tags": [
+          "requests"
         ]
       }
     },

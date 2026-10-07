@@ -100,6 +100,9 @@ String parameterToString(dynamic value) {
   if (value is ReportReason) {
     return ReportReasonTypeTransformer().encode(value).toString();
   }
+  if (value is RequestStatus) {
+    return RequestStatusTypeTransformer().encode(value).toString();
+  }
   if (value is SourceKind) {
     return SourceKindTypeTransformer().encode(value).toString();
   }

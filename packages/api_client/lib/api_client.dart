@@ -214,6 +214,8 @@ class ApiClient {
           return BookFormatTypeTransformer().decode(value);
         case 'BookNoteResponse':
           return BookNoteResponse.fromJson(value);
+        case 'BookRequestResponse':
+          return BookRequestResponse.fromJson(value);
         case 'BookTitleResponse':
           return BookTitleResponse.fromJson(value);
         case 'BookTraceResponse':
@@ -298,6 +300,8 @@ class ApiClient {
           return LoginRequest.fromJson(value);
         case 'MemberResponse':
           return MemberResponse.fromJson(value);
+        case 'NewRequest':
+          return NewRequest.fromJson(value);
         case 'OpOutcome':
           return OpOutcomeTypeTransformer().decode(value);
         case 'OpdsConfig':
@@ -358,6 +362,10 @@ class ApiClient {
           return ReportRequest.fromJson(value);
         case 'ReportResponse':
           return ReportResponse.fromJson(value);
+        case 'RequestStatus':
+          return RequestStatusTypeTransformer().decode(value);
+        case 'RequestsResponse':
+          return RequestsResponse.fromJson(value);
         case 'ResetPasswordRequest':
           return ResetPasswordRequest.fromJson(value);
         case 'ReviewRequest':

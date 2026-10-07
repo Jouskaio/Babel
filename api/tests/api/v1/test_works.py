@@ -290,3 +290,116 @@ def test_a_saga_search_needs_a_name_and_may_find_nothing(
     books.down = True
     down = client.get("/v1/catalog/saga", params={"series": "Homunculus"}, headers=auth)
     assert down.status_code == 503
+
+
+# ---------------------------------------------------------------- requests (Chaptarr)
+class FakeChaptarr:
+    """Chaptarr's side: what it knows, what was added, and whether files arrived."""
+
+    def __init__(self) -> None:
+        self.known = [
+            {"title": "Jane Eyre: study guide", "author": {"authorName": "Some Teacher"}},
+            {"title": "Jane Eyre", "author": {"authorName": "Charlotte Brontë"}},
+        ]
+        self.added: list[dict[str, object]] = []
+        self.arrived = False
+        self.scans = 0
+
+    def __call__(self) -> "FakeChaptarr":
+        return self
+
+    async def lookup(self, title: str, authors: tuple[str, ...]) -> dict[str, object] | None:
+        from babel_api.adapters.chaptarr import best_match
+
+        return best_match(self.known, title, authors)
+
+    async def add(self, book: dict[str, object]) -> int:
+        self.added.append(book)
+        return 7
+
+    async def has_files(self, book_id: int) -> bool:
+        return self.arrived
+
+    async def aclose(self) -> None:
+        return None
+
+
+@pytest.fixture
+def chaptarr(app: FastAPI, books: FakeBooks) -> FakeChaptarr:
+    fake = FakeChaptarr()
+
+    class FakeKavita:
+        async def login_with_key(self, key: str) -> "FakeKavita":
+            self.token = "admin"
+            return self
+
+        async def scan_all(self, admin_token: str) -> None:
+            fake.scans += 1
+
+        async def aclose(self) -> None:
+            return None
+
+    def kavita_client(url: str) -> FakeKavita:
+        return FakeKavita()
+
+    app.state.container = replace(
+        app.state.container,
+        chaptarr=fake,
+        kavita_client=kavita_client,  # type: ignore[arg-type]
+    )
+    return fake
+
+
+def test_only_premium_readers_can_request_a_book(
+    client: TestClient, chaptarr: FakeChaptarr, auth: dict[str, str]
+) -> None:
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=auth).json()
+    refused = client.post("/v1/requests", json={"work_id": hit["id"]}, headers=auth)
+    assert refused.status_code == 403
+    assert chaptarr.added == []
+    assert client.get("/v1/requests", headers=auth).json()["enabled"] is True
+
+
+def test_a_premium_reader_requests_a_book_once(
+    client: TestClient, chaptarr: FakeChaptarr, books: FakeBooks
+) -> None:
+    from tests.api.v1.test_library import account
+
+    admin = account(client, "admin@example.com")  # administrators are premium
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=admin).json()
+
+    first = client.post("/v1/requests", json={"work_id": hit["id"]}, headers=admin)
+    again = client.post("/v1/requests", json={"work_id": hit["id"]}, headers=admin)
+
+    assert first.status_code == 201
+    assert first.json()["status"] == "requested" == again.json()["status"]
+    assert len(chaptarr.added) == 1  # the study guide did not match, the novel did
+    assert chaptarr.added[0]["title"] == "Jane Eyre"
+
+
+def test_a_book_chaptarr_does_not_know_is_reported(
+    client: TestClient, chaptarr: FakeChaptarr, books: FakeBooks
+) -> None:
+    from tests.api.v1.test_library import account
+
+    chaptarr.known = []
+    admin = account(client, "admin@example.com")
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=admin).json()
+    response = client.post("/v1/requests", json={"work_id": hit["id"]}, headers=admin)
+    assert response.json()["status"] == "not_found"
+    assert chaptarr.added == []
+
+
+def test_a_request_becomes_available_when_the_files_arrive(
+    client: TestClient, chaptarr: FakeChaptarr, books: FakeBooks
+) -> None:
+    from tests.api.v1.test_library import account
+
+    admin = account(client, "admin@example.com")
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=admin).json()
+    client.post("/v1/requests", json={"work_id": hit["id"]}, headers=admin)
+    assert client.get("/v1/requests", headers=admin).json()["items"][0]["status"] == "requested"
+
+    chaptarr.arrived = True
+    assert client.get("/v1/requests", headers=admin).json()["items"][0]["status"] == "available"
+    assert chaptarr.scans == 1

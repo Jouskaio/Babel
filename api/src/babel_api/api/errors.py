@@ -21,7 +21,9 @@ from babel_api.domain.errors import (
     NotFoundError,
     NotFriendsError,
     PasswordRequiredError,
+    PremiumRequiredError,
     ProviderNotConfiguredError,
+    RequestsUnavailableError,
     SecretsUnavailableError,
     SourceAddressBlockedError,
     SourceConnectionError,
@@ -68,6 +70,11 @@ _STATUS: dict[type[Exception], tuple[int, str]] = {
         "The source limits requests for now: try again later, or add an access token",
     ),
     TooManySourcesError: (status.HTTP_409_CONFLICT, "Too many sources on this account"),
+    PremiumRequiredError: (status.HTTP_403_FORBIDDEN, "Requesting books is for premium readers"),
+    RequestsUnavailableError: (
+        status.HTTP_503_SERVICE_UNAVAILABLE,
+        "Requesting books is not available right now",
+    ),
     ConnectorDisabledError: (
         status.HTTP_403_FORBIDDEN,
         "This kind of source is switched off by the administrator",

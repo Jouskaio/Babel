@@ -71,3 +71,8 @@ class RecentSearches extends Notifier<List<String>> {
     await SharedPreferencesAsync().remove(_key);
   }
 }
+
+/// The reader's book requests, and whether the server can look for books at all.
+final bookRequestsProvider = FutureProvider.autoDispose<RequestsResponse?>(
+  (ref) => ref.watch(requestsApiProvider).listBookRequests(),
+);

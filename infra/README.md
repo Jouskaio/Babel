@@ -141,3 +141,18 @@ key makes it reliable:
 echo "BABEL_GOOGLE_BOOKS_API_KEY=<the key>" >> /opt/babel/.env
 cd /opt/babel && docker compose up -d api
 ```
+
+## Book requests (Chaptarr)
+
+Premium readers can ask for a book that is in none of their sources. Babel asks Chaptarr (a
+Readarr-family manager on the media server) to find it as an ebook; Chaptarr writes it into the
+library folder Kavita reads, and Babel asks Kavita to scan once the file is there. Chaptarr
+needs an ebook root folder, an ebook quality profile and an ebook metadata profile, and at least
+one indexer and download client. Without the two settings below, requests are off.
+
+```bash
+# Chaptarr: Settings > General > API Key
+echo "BABEL_CHAPTARR_URL=http://192.168.1.104:8789" >> /opt/babel/.env
+echo "BABEL_CHAPTARR_API_KEY=<the key>" >> /opt/babel/.env
+cd /opt/babel && docker compose up -d api
+```

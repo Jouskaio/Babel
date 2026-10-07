@@ -21,6 +21,7 @@ doc/BatchImportResponse.md
 doc/BookDetailsRequest.md
 doc/BookFormat.md
 doc/BookNoteResponse.md
+doc/BookRequestResponse.md
 doc/BookTitleResponse.md
 doc/BookTraceResponse.md
 doc/CatalogApi.md
@@ -67,6 +68,7 @@ doc/LinkPreviewResponse.md
 doc/LinkRequest.md
 doc/LoginRequest.md
 doc/MemberResponse.md
+doc/NewRequest.md
 doc/OpOutcome.md
 doc/OpdsConfig.md
 doc/OperationRequest.md
@@ -97,6 +99,9 @@ doc/RemotePositionResponse.md
 doc/ReportReason.md
 doc/ReportRequest.md
 doc/ReportResponse.md
+doc/RequestStatus.md
+doc/RequestsApi.md
+doc/RequestsResponse.md
 doc/ResetPasswordRequest.md
 doc/ReviewRequest.md
 doc/ReviewResponse.md
@@ -138,6 +143,7 @@ lib/api/catalog_api.dart
 lib/api/health_api.dart
 lib/api/kavita_api.dart
 lib/api/library_api.dart
+lib/api/requests_api.dart
 lib/api/social_api.dart
 lib/api/sources_api.dart
 lib/api/stats_api.dart
@@ -166,6 +172,7 @@ lib/model/batch_import_response.dart
 lib/model/book_details_request.dart
 lib/model/book_format.dart
 lib/model/book_note_response.dart
+lib/model/book_request_response.dart
 lib/model/book_title_response.dart
 lib/model/book_trace_response.dart
 lib/model/change_op.dart
@@ -208,6 +215,7 @@ lib/model/link_preview_response.dart
 lib/model/link_request.dart
 lib/model/login_request.dart
 lib/model/member_response.dart
+lib/model/new_request.dart
 lib/model/op_outcome.dart
 lib/model/opds_config.dart
 lib/model/operation_request.dart
@@ -238,6 +246,8 @@ lib/model/remote_position_response.dart
 lib/model/report_reason.dart
 lib/model/report_request.dart
 lib/model/report_response.dart
+lib/model/request_status.dart
+lib/model/requests_response.dart
 lib/model/reset_password_request.dart
 lib/model/review_request.dart
 lib/model/review_response.dart

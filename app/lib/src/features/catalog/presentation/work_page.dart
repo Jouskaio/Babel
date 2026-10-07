@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_providers.dart';
+import '../../../core/auth/auth_controller.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
@@ -278,7 +279,7 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
             WorkReadersSection(workId: work.id),
             if (trace == null || !trace.available) ...[
               const SizedBox(height: sectionGap),
-              _SourceMatches(title: work.title),
+              _SourceMatches(title: work.title, workId: work.id),
               const SizedBox(height: sectionGap),
               SectionTitle(l10n.getThisBook),
               Container(
@@ -551,8 +552,9 @@ class _Thumb extends StatelessWidget {
 /// Books of the reader's own sources (Kavita, WebDAV, GitHub…) that match this work, to
 /// add the right one to the library. Babel offers no download from the catalog itself.
 class _SourceMatches extends ConsumerStatefulWidget {
-  const _SourceMatches({required this.title});
+  const _SourceMatches({required this.title, required this.workId});
   final String title;
+  final String workId;
 
   @override
   ConsumerState<_SourceMatches> createState() => _SourceMatchesState();
@@ -560,6 +562,23 @@ class _SourceMatches extends ConsumerStatefulWidget {
 
 class _SourceMatchesState extends ConsumerState<_SourceMatches> {
   final _adding = <String>{};
+  bool _requesting = false;
+
+  Future<void> _request() async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _requesting = true);
+    try {
+      await ref
+          .read(requestsApiProvider)
+          .requestBook(NewRequest(workId: widget.workId));
+      ref.invalidate(bookRequestsProvider);
+    } on ApiException {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.requestFailed)));
+    } finally {
+      if (mounted) setState(() => _requesting = false);
+    }
+  }
 
   Future<void> _add(SourceMatchResponse match) async {
     final l10n = context.l10n;
@@ -590,6 +609,57 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
     } finally {
       if (mounted) setState(() => _adding.remove(match.entry.id));
     }
+  }
+
+  /// Nothing in the sources: premium readers can ask the server for the book, the others
+  /// are invited to add a source.
+  List<Widget> _missing(AppLocalizations l10n) {
+    final session = ref.watch(authControllerProvider);
+    final premium = session is SignedIn && session.user.premium;
+    final requests = ref.watch(bookRequestsProvider).value;
+    if (premium && requests != null && requests.enabled) {
+      final mine = requests.items
+          .where((r) => r.workId == widget.workId)
+          .firstOrNull;
+      if (mine != null && mine.status != RequestStatus.notFound) {
+        return [
+          Text(
+            mine.status == RequestStatus.available
+                ? l10n.requestAvailable
+                : l10n.requestPending,
+            style: BabelText.body(13, color: BabelColors.gold),
+          ),
+        ];
+      }
+      return [
+        Text(
+          mine == null ? l10n.requestHint : l10n.requestNotFound,
+          style: BabelText.body(13),
+        ),
+        const SizedBox(height: 16),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: PillButton(
+            label: l10n.requestBook,
+            loading: _requesting,
+            onPressed: _request,
+          ),
+        ),
+      ];
+    }
+    return [
+      Text(l10n.addSourceHint, style: BabelText.body(13)),
+      const SizedBox(height: 16),
+      // A real button: it takes you somewhere, it is not a heading.
+      Align(
+        alignment: Alignment.centerLeft,
+        child: PillButton(
+          label: l10n.addSource,
+          kind: PillButtonKind.secondary,
+          onPressed: () => context.push(Routes.sources),
+        ),
+      ),
+    ];
   }
 
   @override
@@ -666,15 +736,7 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
           _ => [
             Text(l10n.noSourceMatch, style: BabelText.body(13)),
             const SizedBox(height: 16),
-            // A real button: it takes you somewhere, it is not a heading.
-            Align(
-              alignment: Alignment.centerLeft,
-              child: PillButton(
-                label: l10n.manageSources,
-                kind: PillButtonKind.secondary,
-                onPressed: () => context.push(Routes.sources),
-              ),
-            ),
+            ..._missing(l10n),
           ],
         },
       ],
