@@ -141,6 +141,8 @@ class _Body extends StatelessWidget {
               ].join(' · '),
               style: BabelText.body(13),
             ),
+            const SizedBox(height: 24),
+            _Goal(stats: stats),
             if (stats.finished.isNotEmpty) ...[
               const SizedBox(height: 24),
               PillButton(
@@ -197,6 +199,135 @@ class _Body extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// The yearly goal: how far along, and a way to set or change it.
+class _Goal extends ConsumerWidget {
+  const _Goal({required this.stats});
+  final YearStatsResponse stats;
+
+  Future<void> _ask(BuildContext context, WidgetRef ref) async {
+    final books = await showDialog<int>(
+      context: context,
+      builder: (_) =>
+          _GoalDialog(initial: stats.goal ?? 12, canRemove: stats.goal != null),
+    );
+    if (books == null || books < 0 || books > 1000) return;
+    await ref
+        .read(statsApiProvider)
+        .setReadingGoal(GoalRequest(books: books == 0 ? null : books));
+    ref.invalidate(yearStatsProvider);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final goal = stats.goal;
+    if (goal == null) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: PillButton(
+          label: l10n.goalSet,
+          kind: PillButtonKind.secondary,
+          onPressed: () => _ask(context, ref),
+        ),
+      );
+    }
+    final done = stats.finished.length;
+    final left = goal - done;
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: BabelColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: BabelColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.goalProgress(done, goal),
+                  style: BabelText.heading(19),
+                ),
+              ),
+              TextButton(
+                onPressed: () => _ask(context, ref),
+                child: Text(
+                  l10n.goalEdit.toUpperCase(),
+                  style: BabelText.label(10, color: BabelColors.gold),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: (done / goal).clamp(0, 1).toDouble(),
+              minHeight: 6,
+              color: BabelColors.gold,
+              backgroundColor: BabelColors.sunken,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            left <= 0 ? l10n.goalReached : l10n.goalLeft(left),
+            style: BabelText.body(13),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Asks for the yearly goal; pops the number, or 0 to remove it.
+class _GoalDialog extends StatefulWidget {
+  const _GoalDialog({required this.initial, required this.canRemove});
+  final int initial;
+  final bool canRemove;
+
+  @override
+  State<_GoalDialog> createState() => _GoalDialogState();
+}
+
+class _GoalDialogState extends State<_GoalDialog> {
+  // Owned by the dialog: it is still shown while the dialog closes.
+  late final _books = TextEditingController(text: '${widget.initial}');
+
+  @override
+  void dispose() {
+    _books.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return AlertDialog(
+      backgroundColor: BabelColors.surface,
+      title: Text(l10n.goalAsk, style: BabelText.title(26)),
+      content: TextField(
+        controller: _books,
+        autofocus: true,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(hintText: l10n.goalAskHint),
+      ),
+      actions: [
+        if (widget.canRemove)
+          TextButton(
+            onPressed: () => Navigator.pop(context, 0),
+            child: Text(l10n.goalRemove),
+          ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, int.tryParse(_books.text)),
+          child: Text(l10n.save),
+        ),
+      ],
     );
   }
 }

@@ -1440,5 +1440,65 @@
         "type": "String"
       }
     }
-  }
+  },
+  "goalSet": "Fixer un objectif",
+  "goalEdit": "Modifier",
+  "goalAsk": "Combien de livres cette année ?",
+  "goalAskHint": "Livres à terminer chaque année",
+  "goalRemove": "Retirer l'objectif",
+  "goalProgress": "{done} sur {goal} livres",
+  "@goalProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "goal": {
+        "type": "int"
+      }
+    }
+  },
+  "goalReached": "Objectif atteint, bravo !",
+  "goalLeft": "{count, plural, =1{Encore 1 livre} other{Encore {count} livres}}",
+  "@goalLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importTitle": "Importer un historique",
+  "importIntro": "Goodreads, StoryGraph ou Babelio : exportez votre liste en CSV, Babel la reprend avec statuts, notes et dates (livres papier, sans fichier).",
+  "importChoose": "Choisir le fichier CSV",
+  "csvImportDone": "{imported} importés · {skipped} déjà là · {failed} sans titre",
+  "@csvImportDone": {
+    "placeholders": {
+      "imported": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "importNotList": "Ce fichier n'est pas une liste de lecture connue.",
+  "likeReview": "J'aime",
+  "commentsTitle": "Commentaires",
+  "commentsCount": "{count, plural, =0{Commenter} =1{1 commentaire} other{{count} commentaires}}",
+  "@commentsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "commentHint": "Votre commentaire",
+  "commentSend": "Publier",
+  "commentDelete": "Supprimer",
+  "commentsEmpty": "Pas encore de commentaire.",
+  "audioDownload": "Écouter hors ligne",
+  "audioDownloading": "Téléchargement…",
+  "audioOffline": "Disponible hors ligne"
 }

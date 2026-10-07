@@ -18,6 +18,7 @@ import '../../../routing/router.dart';
 import '../../audiobooks/presentation/audiobookshelf_section.dart';
 import '../../auth/presentation/auth_layout.dart';
 import '../../kavita/presentation/kavita_section.dart';
+import '../../library/presentation/reading_list_import.dart';
 import '../../social/presentation/sharing_settings.dart';
 
 /// Profile, password, sign-out and account deletion.
@@ -96,6 +97,11 @@ class AccountPage extends ConsumerWidget {
                 _Section(
                   title: l10n.absTitle,
                   child: const AudiobookshelfSection(),
+                ),
+                const SizedBox(height: 24),
+                _Section(
+                  title: l10n.importTitle,
+                  child: const ReadingListImport(),
                 ),
                 if (user.admin) ...[
                   const SizedBox(height: 24),

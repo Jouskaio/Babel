@@ -1,12 +1,18 @@
 import 'dart:async';
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:babel_api_client/api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:sembast/sembast.dart';
 
 import '../../../core/api/api_providers.dart';
+import '../../../core/storage/local_database.dart';
 import '../../library/presentation/library_page.dart' show libraryCoverUrl;
 import '../../reader/application/reading_position.dart';
 
@@ -42,6 +48,16 @@ class SleepAtChapterEnd extends SleepTimer {
   const SleepAtChapterEnd(this.end);
   final double end;
 }
+
+/// Whether a book was downloaded for offline listening.
+final audioOfflineProvider = FutureProvider.family<bool, String>((
+  ref,
+  itemId,
+) async {
+  final db = await ref.watch(localDatabaseProvider.future);
+  return db != null &&
+      await LocalStores.meta.record('audio-offline:$itemId').get(db) == true;
+});
 
 /// The one audio player of the app: it keeps playing while the reader moves around the
 /// app (a mini player shows it), and on the lock screen. Positions are saved like reading
@@ -89,8 +105,7 @@ class AudioSession extends Notifier<NowPlaying?> {
   Future<void> open(LibraryItemResponse item) async {
     if (state?.item.id == item.id) return;
     await _saveNow();
-    final playback = await ref.read(audiobooksApiProvider).getPlayback(item.id);
-    if (playback == null) throw const FormatException('no playback');
+    final playback = await _playbackOf(item);
     final saved = await ref.read(readingPositionsProvider).latest(item.id);
     var start = saved == null
         ? 0.0
@@ -101,11 +116,15 @@ class AudioSession extends Notifier<NowPlaying?> {
       start = remote.currentTime.toDouble();
     }
     final cover = libraryCoverUrl(item);
-    final sources = [
+    final dir = kIsWeb ? null : await getApplicationSupportDirectory();
+    _tracks = [
       for (final track in playback.tracks)
-        AudioSource.uri(
+        _source(
           Uri.parse(apiUrl(track.path)),
-          tag: MediaItem(
+          dir == null
+              ? null
+              : File('${dir.path}/audio/${item.id}-${track.index}.cache'),
+          MediaItem(
             id: '${item.id}:${track.index}',
             title: item.title,
             artist: item.authors.join(', '),
@@ -115,6 +134,7 @@ class AudioSession extends Notifier<NowPlaying?> {
           ),
         ),
     ];
+    final sources = _tracks;
     final (index, offset) = _locate(playback.tracks, start);
     await player.setAudioSources(
       sources,
@@ -224,6 +244,58 @@ class AudioSession extends Notifier<NowPlaying?> {
     } on ApiException {
       // Offline or Audiobookshelf away: the synced position is enough for Babel.
     }
+  }
+
+  List<AudioSource> _tracks = const [];
+
+  /// A track kept on the device as it plays (not on the web, which cannot keep files).
+  // ponytail: LockCachingAudioSource is experimental in just_audio; if it changes, keep
+  // tracks with a plain download to the same path.
+  // ignore: experimental_member_use
+  static AudioSource _source(Uri uri, File? cache, MediaItem tag) {
+    if (cache == null) return AudioSource.uri(uri, tag: tag);
+    cache.parent.createSync(recursive: true);
+    // ignore: experimental_member_use
+    return LockCachingAudioSource(uri, cacheFile: cache, tag: tag);
+  }
+
+  /// What the player needs, from the server, kept for opening the book without network.
+  Future<PlaybackResponse> _playbackOf(LibraryItemResponse item) async {
+    final db = await ref.read(localDatabaseProvider.future);
+    final cache = LocalStores.meta.record('playback:${item.id}');
+    try {
+      final playback = await ref
+          .read(audiobooksApiProvider)
+          .getPlayback(item.id);
+      if (playback == null) throw const FormatException('no playback');
+      if (db != null) await cache.put(db, jsonDecode(jsonEncode(playback)));
+      return playback;
+    } on ApiException catch (error) {
+      final kept = db == null ? null : await cache.get(db);
+      if (error.innerException == null || kept == null) rethrow;
+      return PlaybackResponse.fromJson(kept)!;
+    }
+  }
+
+  /// Downloads every track of the open book, to listen without network. [onProgress]
+  /// goes from 0 to 1.
+  Future<void> download(void Function(double) onProgress) async {
+    final now = state;
+    if (now == null) return;
+    // ignore: experimental_member_use
+    final cached = _tracks.whereType<LockCachingAudioSource>().toList();
+    for (final (i, source) in cached.indexed) {
+      onProgress(i / cached.length);
+      await (await source.request()).stream.drain<void>();
+    }
+    onProgress(1);
+    final db = await ref.read(localDatabaseProvider.future);
+    if (db != null) {
+      await LocalStores.meta
+          .record('audio-offline:${now.item.id}')
+          .put(db, true);
+    }
+    ref.invalidate(audioOfflineProvider(now.item.id));
   }
 
   /// Stops and forgets the audiobook (the mini player goes away).

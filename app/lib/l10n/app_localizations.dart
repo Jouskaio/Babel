@@ -4063,6 +4063,144 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{series} · tome {number}'**
   String seriesOf(String series, String number);
+
+  /// No description provided for @goalSet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fixer un objectif'**
+  String get goalSet;
+
+  /// No description provided for @goalEdit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get goalEdit;
+
+  /// No description provided for @goalAsk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Combien de livres cette année ?'**
+  String get goalAsk;
+
+  /// No description provided for @goalAskHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livres à terminer chaque année'**
+  String get goalAskHint;
+
+  /// No description provided for @goalRemove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer l\'objectif'**
+  String get goalRemove;
+
+  /// No description provided for @goalProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'{done} sur {goal} livres'**
+  String goalProgress(int done, int goal);
+
+  /// No description provided for @goalReached.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif atteint, bravo !'**
+  String get goalReached;
+
+  /// No description provided for @goalLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Encore 1 livre} other{Encore {count} livres}}'**
+  String goalLeft(int count);
+
+  /// No description provided for @importTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer un historique'**
+  String get importTitle;
+
+  /// No description provided for @importIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Goodreads, StoryGraph ou Babelio : exportez votre liste en CSV, Babel la reprend avec statuts, notes et dates (livres papier, sans fichier).'**
+  String get importIntro;
+
+  /// No description provided for @importChoose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir le fichier CSV'**
+  String get importChoose;
+
+  /// No description provided for @csvImportDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'{imported} importés · {skipped} déjà là · {failed} sans titre'**
+  String csvImportDone(int imported, int skipped, int failed);
+
+  /// No description provided for @importNotList.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier n\'est pas une liste de lecture connue.'**
+  String get importNotList;
+
+  /// No description provided for @likeReview.
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'aime'**
+  String get likeReview;
+
+  /// No description provided for @commentsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commentaires'**
+  String get commentsTitle;
+
+  /// No description provided for @commentsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Commenter} =1{1 commentaire} other{{count} commentaires}}'**
+  String commentsCount(int count);
+
+  /// No description provided for @commentHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre commentaire'**
+  String get commentHint;
+
+  /// No description provided for @commentSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Publier'**
+  String get commentSend;
+
+  /// No description provided for @commentDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get commentDelete;
+
+  /// No description provided for @commentsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore de commentaire.'**
+  String get commentsEmpty;
+
+  /// No description provided for @audioDownload.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écouter hors ligne'**
+  String get audioDownload;
+
+  /// No description provided for @audioDownloading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargement…'**
+  String get audioDownloading;
+
+  /// No description provided for @audioOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Disponible hors ligne'**
+  String get audioOffline;
 }
 
 class _AppLocalizationsDelegate

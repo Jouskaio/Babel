@@ -82,4 +82,43 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('JOURS PASSÉS À LIRE'), findsOneWidget);
   });
+
+  testWidgets('a yearly goal shows how far along, and can be changed', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(500, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final server = FakeServer()..statsGoal = 12;
+    await tester.pumpWidget(
+      wrap(const StatsPage(year: 2026), overrides: server.overrides),
+    );
+    await settle(tester);
+
+    expect(find.text('2 sur 12 livres'), findsOneWidget);
+    expect(find.text('Encore 10 livres'), findsOneWidget);
+    await tester.tap(find.text('MODIFIER'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '20');
+    await tester.tap(find.text('Enregistrer'));
+    await settle(tester);
+    expect(server.goalsSent, [20]);
+  });
+
+  testWidgets('without a goal, one can be set', (tester) async {
+    tester.view.physicalSize = const Size(500, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final server = FakeServer();
+    await tester.pumpWidget(
+      wrap(const StatsPage(year: 2026), overrides: server.overrides),
+    );
+    await settle(tester);
+
+    await tester.tap(find.text('FIXER UN OBJECTIF'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Enregistrer'));
+    await settle(tester);
+    expect(server.goalsSent, [12]); // the suggested number
+  });
 }
