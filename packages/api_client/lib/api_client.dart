@@ -356,6 +356,8 @@ class ApiClient {
           return ReviewRequest.fromJson(value);
         case 'ReviewResponse':
           return ReviewResponse.fromJson(value);
+        case 'SagaVolumeResponse':
+          return SagaVolumeResponse.fromJson(value);
         case 'SharedNoteResponse':
           return SharedNoteResponse.fromJson(value);
         case 'ShelfResponse':

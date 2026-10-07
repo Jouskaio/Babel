@@ -4,7 +4,7 @@ import logging
 import unicodedata
 from collections.abc import Callable
 from dataclasses import dataclass, replace
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any, cast
 from uuid import UUID
 
@@ -29,6 +29,9 @@ from babel_api.domain.sources import (
 from babel_api.services.files import FileService, stored_sha
 
 logger = logging.getLogger(__name__)
+
+# A source searched less recently than this is scanned again first.
+SEARCH_RESCAN = timedelta(minutes=10)
 
 # At most this many books per "import all" call, to keep requests short.
 IMPORT_BATCH = 50
@@ -117,7 +120,14 @@ class SourceService:
         if not words:
             return []
         found: list[tuple[Source, SourceEntry]] = []
+        now = datetime.now(UTC)
         for source in await self._sources.list_sources(user_id):
+            if source.last_scan_at is None or now - source.last_scan_at > SEARCH_RESCAN:
+                # Books added to a source since its last look must be found: look again.
+                try:
+                    await self.scan(user_id, source.id)
+                except DomainError:
+                    logger.warning("Source %s did not answer; searching its last state", source.id)
             for entry in await self._sources.entries(source.id):
                 haystack = _plain(" ".join([entry.title or entry.name, *entry.authors]))
                 if all(w in haystack for w in words):

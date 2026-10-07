@@ -8,6 +8,7 @@ import '../../../core/locale/relative_time.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/pill_button.dart';
+import '../../../core/widgets/section_title.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../social/presentation/social_widgets.dart';
@@ -164,17 +165,20 @@ class WorkReadersSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 32),
-        Text(l10n.workReaders, style: BabelText.title(28)),
-        Text(l10n.workAllEditions.toUpperCase(), style: BabelText.label(10)),
-        if (found.rating case final rating?) ...[
-          const SizedBox(height: 8),
-          Text(
-            l10n.workRating(rating.toStringAsFixed(1), found.ratings),
-            style: BabelText.body(14, color: BabelColors.gold),
-          ),
-        ],
-        const SizedBox(height: 12),
+        const SizedBox(height: sectionGap),
+        SectionTitle(
+          l10n.workReaders,
+          caption: l10n.workAllEditions,
+          trailing: found.rating == null
+              ? null
+              : Text(
+                  l10n.workRating(
+                    found.rating!.toStringAsFixed(1),
+                    found.ratings,
+                  ),
+                  style: BabelText.body(13, color: BabelColors.gold),
+                ),
+        ),
         if (found.reviews.isEmpty && found.notes.isEmpty)
           Text(l10n.workReadersEmpty, style: BabelText.body(14)),
         for (final review in found.reviews)

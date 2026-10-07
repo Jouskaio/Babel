@@ -9,12 +9,15 @@ from babel_api.domain.catalog import Edition, IdentifierKind, SourceWork, Work
 from babel_api.domain.errors import NotFoundError, SourceUnavailableError
 from babel_api.domain.isbn import normalize_isbn
 from babel_api.domain.ports import BookSource, CatalogRepository
+from babel_api.domain.series import series_key, volume_number
 
 logger = logging.getLogger(__name__)
 
 # Editions of a work are fetched again at most this often.
 EDITIONS_TTL = timedelta(days=7)
 MAX_EDITIONS = 50
+# Works asked of the catalog when rebuilding a saga.
+MAX_SAGA = 100
 # A description this long is a real blurb; shorter ones are completed from Google Books.
 FULL_DESCRIPTION = 400
 # Editions (one per language) asked about at most, per refresh of a work.
@@ -59,6 +62,14 @@ class WorkDetail:
 
 
 @dataclass(frozen=True, slots=True)
+class SagaVolume:
+    """One volume of a saga, as the catalog knows it."""
+
+    number: float
+    work: Work
+
+
+@dataclass(frozen=True, slots=True)
 class IsbnMatch:
     detail: WorkDetail
     edition: Edition
@@ -86,6 +97,37 @@ class WorkService:
             )
         await self._repo.commit()
         return hits
+
+    async def saga(self, series: str, author: str | None) -> list[SagaVolume]:
+        """Every volume of a series the catalog lists, in order.
+
+        Catalogs rarely know series; but each volume of a manga or a numbered saga is a work
+        of its own named "Series N". So: search the series name (and author), keep the
+        works whose title names the same series and a volume number, one per number.
+        """
+        key = series_key(series)
+        if not key:
+            return []
+        query = f'title:"{series}"' + (f' author:"{author}"' if author else "")
+        try:
+            found = await self._source.search(query, MAX_SAGA, None)
+        except Exception as error:
+            raise SourceUnavailableError from error
+        by_number: dict[float, SourceWork] = {}
+        for source in found:
+            number = volume_number(source.title, series)
+            if number is None:
+                continue
+            kept = by_number.get(number)
+            # Several records for one volume (reprints): the one with a cover wins.
+            if kept is None or (kept.cover_id is None and source.cover_id is not None):
+                by_number[number] = source
+        volumes = [
+            SagaVolume(number, await self._repo.upsert_work(source))
+            for number, source in sorted(by_number.items())
+        ]
+        await self._repo.commit()
+        return volumes
 
     async def get(self, work_id: UUID) -> WorkDetail:
         work = await self._repo.get_work(work_id)

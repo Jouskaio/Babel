@@ -439,7 +439,8 @@ class _Devices extends StatelessWidget {
           spacing: 10,
           runSpacing: 10,
           children: [
-            for (final platform in ['Kobo', 'Android', 'iPhone', 'Web'])
+            // Where the app runs: Android (so e-readers on Android, like BOOX), Apple, browser.
+            for (final platform in ['Android', 'BOOX', 'iPhone', 'Mac', 'Web'])
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,

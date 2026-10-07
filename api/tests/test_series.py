@@ -1,6 +1,12 @@
 import pytest
 
-from babel_api.domain.series import SeriesGuess, guess_series, parse_number, series_key
+from babel_api.domain.series import (
+    SeriesGuess,
+    guess_series,
+    parse_number,
+    series_key,
+    volume_number,
+)
 
 
 @pytest.mark.parametrize(
@@ -33,3 +39,24 @@ def test_numbers_and_keys() -> None:
     assert parse_number("abc") is None
     assert parse_number("99999") is None
     assert series_key("Les  Cités-Obscures!") == series_key("les cités obscures")
+
+
+@pytest.mark.parametrize(
+    ("title", "number"),
+    [
+        ("Homunculus 3", 3),
+        ("Homunculus 07", 7),
+        ("Homunculus 01", 1),
+        ("homunculus, tome 12", 12),
+        ("Homunculus - Vol. 02", 2),
+        ("Homunculus (Volume 2.5)", 2.5),
+        ("Homunculus (Omnibus) Vol. 3-4", None),
+        ("Homunculus Returns", None),
+        ("Homunculus", None),
+        ("Homunkurusu 1", None),
+        ("Homunculus Origins 2", None),
+        ("The Homunculus 3", None),
+    ],
+)
+def test_the_volume_of_a_known_series(title: str, number: float | None) -> None:
+    assert volume_number(title, "Homunculus") == number
