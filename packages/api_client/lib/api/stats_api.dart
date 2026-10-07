@@ -84,4 +84,52 @@ class StatsApi {
     }
     return null;
   }
+
+  /// Set Goal
+  ///
+  /// Set (or remove) your yearly reading goal.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [GoalRequest] goalRequest (required):
+  Future<Response> setReadingGoalWithHttpInfo(GoalRequest goalRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/me/goal';
+
+    // ignore: prefer_final_locals
+    Object? postBody = goalRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'PUT',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Set Goal
+  ///
+  /// Set (or remove) your yearly reading goal.
+  ///
+  /// Parameters:
+  ///
+  /// * [GoalRequest] goalRequest (required):
+  Future<void> setReadingGoal(GoalRequest goalRequest,) async {
+    final response = await setReadingGoalWithHttpInfo(goalRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
 }

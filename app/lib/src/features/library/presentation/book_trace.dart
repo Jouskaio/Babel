@@ -193,6 +193,7 @@ class WorkReadersSection extends ConsumerWidget {
                   text,
                   style: BabelText.body(14, color: BabelColors.textPrimary),
                 ),
+              _Reactions(review: review, workId: workId),
             ],
           ),
         for (final note in found.notes)
@@ -259,6 +260,238 @@ class _Entry extends StatelessWidget {
           ),
           ...children,
         ],
+      ),
+    );
+  }
+}
+
+/// Like and comment under a review.
+class _Reactions extends ConsumerWidget {
+  const _Reactions({required this.review, required this.workId});
+  final WorkReviewResponse review;
+  final String workId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    Future<void> toggle() async {
+      final api = ref.read(socialApiProvider);
+      if (review.liked) {
+        await api.unlikeReview(review.id);
+      } else {
+        await api.likeReview(review.id);
+      }
+      ref.invalidate(workReadersProvider(workId));
+    }
+
+    return Row(
+      children: [
+        TextButton.icon(
+          onPressed: toggle,
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.only(right: 12),
+          ),
+          icon: Icon(
+            review.liked ? Icons.favorite : Icons.favorite_border,
+            size: 18,
+            color: review.liked
+                ? BabelColors.dustyRose
+                : BabelColors.textSecondary,
+          ),
+          label: Text(
+            review.likes == 0 ? l10n.likeReview : '${review.likes}',
+            style: BabelText.body(13, color: BabelColors.textSecondary),
+          ),
+        ),
+        TextButton.icon(
+          onPressed: () => showCommentsSheet(context, review, workId),
+          icon: Icon(
+            Icons.chat_bubble_outline,
+            size: 17,
+            color: BabelColors.textSecondary,
+          ),
+          label: Text(
+            l10n.commentsCount(review.comments),
+            style: BabelText.body(13, color: BabelColors.textSecondary),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+final _commentsProvider = FutureProvider.autoDispose
+    .family<List<CommentResponse>, String>(
+      (ref, reviewId) async =>
+          await ref.watch(socialApiProvider).getReviewComments(reviewId) ??
+          const [],
+    );
+
+/// The comments under a review, and a field to add one.
+Future<void> showCommentsSheet(
+  BuildContext context,
+  WorkReviewResponse review,
+  String workId,
+) => showModalBottomSheet<void>(
+  context: context,
+  useRootNavigator: true,
+  isScrollControlled: true,
+  backgroundColor: BabelColors.surface,
+  builder: (_) => _CommentsSheet(review: review, workId: workId),
+);
+
+class _CommentsSheet extends ConsumerStatefulWidget {
+  const _CommentsSheet({required this.review, required this.workId});
+  final WorkReviewResponse review;
+  final String workId;
+
+  @override
+  ConsumerState<_CommentsSheet> createState() => _CommentsSheetState();
+}
+
+class _CommentsSheetState extends ConsumerState<_CommentsSheet> {
+  final _text = TextEditingController();
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    final text = _text.text.trim();
+    if (text.isEmpty) return;
+    _text.clear();
+    await ref
+        .read(socialApiProvider)
+        .commentReview(widget.review.id, CommentRequest(text: text));
+    ref
+      ..invalidate(_commentsProvider(widget.review.id))
+      ..invalidate(workReadersProvider(widget.workId));
+  }
+
+  Future<void> _delete(CommentResponse comment) async {
+    await ref
+        .read(socialApiProvider)
+        .deleteReviewComment(widget.review.id, comment.id);
+    ref
+      ..invalidate(_commentsProvider(widget.review.id))
+      ..invalidate(workReadersProvider(widget.workId));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final comments =
+        ref.watch(_commentsProvider(widget.review.id)).value ??
+        const <CommentResponse>[];
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * 0.8,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+                child: Text(l10n.commentsTitle, style: BabelText.title(30)),
+              ),
+              Flexible(
+                child: comments.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          l10n.commentsEmpty,
+                          style: BabelText.body(14),
+                        ),
+                      )
+                    : ListView(
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        children: [
+                          for (final c in comments)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      spacing: 4,
+                                      children: [
+                                        Text(
+                                          '${c.mine ? l10n.you : (c.reader.handle != null ? '@${c.reader.handle}' : c.reader.displayName)} · ${timeAgo(context, c.createdAt)}'
+                                              .toUpperCase(),
+                                          style: BabelText.label(
+                                            9,
+                                            spacing: 1.2,
+                                          ),
+                                        ),
+                                        Text(
+                                          c.text,
+                                          style: BabelText.body(
+                                            14,
+                                            color: BabelColors.textPrimary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (c.mine || widget.review.mine)
+                                    IconButton(
+                                      tooltip: l10n.commentDelete,
+                                      onPressed: () => _delete(c),
+                                      icon: Icon(
+                                        Icons.close,
+                                        size: 16,
+                                        color: BabelColors.textSecondary,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 12, 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _text,
+                        maxLength: 1000,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (_) => _send(),
+                        style: BabelText.body(
+                          14,
+                          color: BabelColors.textPrimary,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: l10n.commentHint,
+                          counterText: '',
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: l10n.commentSend,
+                      onPressed: _send,
+                      icon: Icon(Icons.send, color: BabelColors.gold),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

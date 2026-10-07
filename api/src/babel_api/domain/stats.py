@@ -41,6 +41,7 @@ class YearStats:
     genres: list[tuple[Genre, int]] = field(default_factory=list[tuple[Genre, int]])
     # The year before, to tell what changed.
     previous_genres: list[tuple[Genre, int]] = field(default_factory=list[tuple[Genre, int]])
+    goal: int | None = None  # books to finish each year, the reader's own target
 
     @property
     def best_month(self) -> int | None:

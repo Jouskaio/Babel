@@ -18,6 +18,8 @@ from babel_api.adapters.db.models import (
     ReadingPositionRow,
     RecommendationRow,
     ReportRow,
+    ReviewCommentRow,
+    ReviewLikeRow,
     ReviewRow,
     ShelfItemRow,
     ShelfRow,
@@ -37,6 +39,8 @@ from babel_api.domain.social import (
     Report,
     ReportReason,
     Review,
+    ReviewComment,
+    ReviewReactions,
     SharedNote,
     SharedShelf,
 )
@@ -526,6 +530,93 @@ class SqlSocialRepository:
             )
             for row, title in rows
         ]
+
+    # ------------------------------------------------------------ likes and comments
+    async def review_by_id(self, review_id: UUID) -> Review | None:
+        row = await self._session.get(ReviewRow, review_id)
+        return _review(row) if row else None
+
+    async def reactions(
+        self, review_ids: Sequence[UUID], viewer: UUID
+    ) -> dict[UUID, ReviewReactions]:
+        """Likes, whether the viewer liked, and comments of each review."""
+        if not review_ids:
+            return {}
+        ids = list(review_ids)
+        likes = dict(
+            (
+                await self._session.execute(
+                    select(ReviewLikeRow.review_id, func.count())
+                    .where(ReviewLikeRow.review_id.in_(ids))
+                    .group_by(ReviewLikeRow.review_id)
+                )
+            )
+            .tuples()
+            .all()
+        )
+        mine = set(
+            await self._session.scalars(
+                select(ReviewLikeRow.review_id).where(
+                    ReviewLikeRow.review_id.in_(ids), ReviewLikeRow.user_id == viewer
+                )
+            )
+        )
+        comments = dict(
+            (
+                await self._session.execute(
+                    select(ReviewCommentRow.review_id, func.count())
+                    .where(ReviewCommentRow.review_id.in_(ids))
+                    .group_by(ReviewCommentRow.review_id)
+                )
+            )
+            .tuples()
+            .all()
+        )
+        return {
+            i: ReviewReactions(int(likes.get(i, 0)), i in mine, int(comments.get(i, 0)))
+            for i in ids
+        }
+
+    async def set_like(self, review_id: UUID, user_id: UUID, liked: bool) -> None:
+        row = await self._session.get(ReviewLikeRow, (review_id, user_id))
+        if liked and row is None:
+            self._session.add(ReviewLikeRow(review_id=review_id, user_id=user_id))
+        elif not liked and row is not None:
+            await self._session.delete(row)
+        await self._session.flush()
+
+    async def comments(self, review_id: UUID) -> list[ReviewComment]:
+        rows = await self._session.scalars(
+            select(ReviewCommentRow)
+            .where(ReviewCommentRow.review_id == review_id)
+            .order_by(ReviewCommentRow.created_at)
+        )
+        return [
+            ReviewComment(r.id, r.review_id, r.user_id, r.text, _aware(r.created_at)) for r in rows
+        ]
+
+    async def add_comment(self, comment: ReviewComment) -> None:
+        self._session.add(
+            ReviewCommentRow(
+                id=comment.id,
+                review_id=comment.review_id,
+                user_id=comment.user_id,
+                text=comment.text,
+                created_at=comment.created_at,
+            )
+        )
+        await self._session.flush()
+
+    async def comment(self, comment_id: UUID) -> ReviewComment | None:
+        r = await self._session.get(ReviewCommentRow, comment_id)
+        return (
+            ReviewComment(r.id, r.review_id, r.user_id, r.text, _aware(r.created_at)) if r else None
+        )
+
+    async def delete_comment(self, comment_id: UUID) -> None:
+        await self._session.execute(
+            delete(ReviewCommentRow).where(ReviewCommentRow.id == comment_id)
+        )
 
     # ------------------------------------------------------------ a work, all editions
     def _seen_by(self, column: Any, owner: Any, viewer: UUID, friends: Sequence[UUID]) -> Any:

@@ -2464,4 +2464,96 @@ class AppLocalizationsFr extends AppLocalizations {
   String seriesOf(String series, String number) {
     return '$series · tome $number';
   }
+
+  @override
+  String get goalSet => 'Fixer un objectif';
+
+  @override
+  String get goalEdit => 'Modifier';
+
+  @override
+  String get goalAsk => 'Combien de livres cette année ?';
+
+  @override
+  String get goalAskHint => 'Livres à terminer chaque année';
+
+  @override
+  String get goalRemove => 'Retirer l\'objectif';
+
+  @override
+  String goalProgress(int done, int goal) {
+    return '$done sur $goal livres';
+  }
+
+  @override
+  String get goalReached => 'Objectif atteint, bravo !';
+
+  @override
+  String goalLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Encore $count livres',
+      one: 'Encore 1 livre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importTitle => 'Importer un historique';
+
+  @override
+  String get importIntro =>
+      'Goodreads, StoryGraph ou Babelio : exportez votre liste en CSV, Babel la reprend avec statuts, notes et dates (livres papier, sans fichier).';
+
+  @override
+  String get importChoose => 'Choisir le fichier CSV';
+
+  @override
+  String csvImportDone(int imported, int skipped, int failed) {
+    return '$imported importés · $skipped déjà là · $failed sans titre';
+  }
+
+  @override
+  String get importNotList =>
+      'Ce fichier n\'est pas une liste de lecture connue.';
+
+  @override
+  String get likeReview => 'J\'aime';
+
+  @override
+  String get commentsTitle => 'Commentaires';
+
+  @override
+  String commentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count commentaires',
+      one: '1 commentaire',
+      zero: 'Commenter',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get commentHint => 'Votre commentaire';
+
+  @override
+  String get commentSend => 'Publier';
+
+  @override
+  String get commentDelete => 'Supprimer';
+
+  @override
+  String get commentsEmpty => 'Pas encore de commentaire.';
+
+  @override
+  String get audioDownload => 'Écouter hors ligne';
+
+  @override
+  String get audioDownloading => 'Téléchargement…';
+
+  @override
+  String get audioOffline => 'Disponible hors ligne';
 }

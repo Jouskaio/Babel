@@ -2445,4 +2445,95 @@ class AppLocalizationsEn extends AppLocalizations {
   String seriesOf(String series, String number) {
     return '$series · volume $number';
   }
+
+  @override
+  String get goalSet => 'Set a goal';
+
+  @override
+  String get goalEdit => 'Change';
+
+  @override
+  String get goalAsk => 'How many books this year?';
+
+  @override
+  String get goalAskHint => 'Books to finish each year';
+
+  @override
+  String get goalRemove => 'Remove the goal';
+
+  @override
+  String goalProgress(int done, int goal) {
+    return '$done of $goal books';
+  }
+
+  @override
+  String get goalReached => 'Goal reached, well done!';
+
+  @override
+  String goalLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count books to go',
+      one: '1 book to go',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importTitle => 'Import a reading history';
+
+  @override
+  String get importIntro =>
+      'Goodreads, StoryGraph or Babelio: export your list as CSV and Babel takes it with statuses, ratings and dates (paper books, no file).';
+
+  @override
+  String get importChoose => 'Choose the CSV file';
+
+  @override
+  String csvImportDone(int imported, int skipped, int failed) {
+    return '$imported imported · $skipped already there · $failed without a title';
+  }
+
+  @override
+  String get importNotList => 'This file is not a reading list Babel knows.';
+
+  @override
+  String get likeReview => 'Like';
+
+  @override
+  String get commentsTitle => 'Comments';
+
+  @override
+  String commentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count comments',
+      one: '1 comment',
+      zero: 'Comment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get commentHint => 'Your comment';
+
+  @override
+  String get commentSend => 'Post';
+
+  @override
+  String get commentDelete => 'Delete';
+
+  @override
+  String get commentsEmpty => 'No comments yet.';
+
+  @override
+  String get audioDownload => 'Listen offline';
+
+  @override
+  String get audioDownloading => 'Downloading…';
+
+  @override
+  String get audioOffline => 'Available offline';
 }

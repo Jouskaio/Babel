@@ -11,7 +11,9 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**addFriend**](SocialApi.md#addfriend) | **PUT** /v1/social/friends/{handle} | Add Friend
 [**blockReader**](SocialApi.md#blockreader) | **PUT** /v1/social/blocks/{handle} | Block Reader
+[**commentReview**](SocialApi.md#commentreview) | **POST** /v1/social/reviews/{review_id}/comments | Comment Review
 [**deleteReview**](SocialApi.md#deletereview) | **DELETE** /v1/library/{item_id}/review | Delete Review
+[**deleteReviewComment**](SocialApi.md#deletereviewcomment) | **DELETE** /v1/social/reviews/{review_id}/comments/{comment_id} | Delete Review Comment
 [**followReader**](SocialApi.md#followreader) | **PUT** /v1/social/following/{handle} | Follow Reader
 [**getBlocked**](SocialApi.md#getblocked) | **GET** /v1/social/blocks | Get Blocked
 [**getFeed**](SocialApi.md#getfeed) | **GET** /v1/social/feed | Get Feed
@@ -19,8 +21,10 @@ Method | HTTP request | Description
 [**getReader**](SocialApi.md#getreader) | **GET** /v1/social/readers/{handle} | Get Reader
 [**getRecommendations**](SocialApi.md#getrecommendations) | **GET** /v1/social/recommendations | Get Recommendations
 [**getReview**](SocialApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
+[**getReviewComments**](SocialApi.md#getreviewcomments) | **GET** /v1/social/reviews/{review_id}/comments | Get Review Comments
 [**getSocialProfile**](SocialApi.md#getsocialprofile) | **GET** /v1/me/profile | Get Profile
 [**getWorkReaders**](SocialApi.md#getworkreaders) | **GET** /v1/catalog/works/{work_id}/readers | Get Work Readers
+[**likeReview**](SocialApi.md#likereview) | **PUT** /v1/social/reviews/{review_id}/like | Like Review
 [**listReports**](SocialApi.md#listreports) | **GET** /v1/admin/reports | List Reports
 [**markRecommendationRead**](SocialApi.md#markrecommendationread) | **POST** /v1/social/recommendations/{recommendation_id}/read | Mark Read
 [**recommend**](SocialApi.md#recommend) | **POST** /v1/social/recommendations | Recommend
@@ -31,6 +35,7 @@ Method | HTTP request | Description
 [**searchReaders**](SocialApi.md#searchreaders) | **GET** /v1/social/readers | Search Readers
 [**unblockReader**](SocialApi.md#unblockreader) | **DELETE** /v1/social/blocks/{handle} | Unblock Reader
 [**unfollowReader**](SocialApi.md#unfollowreader) | **DELETE** /v1/social/following/{handle} | Unfollow Reader
+[**unlikeReview**](SocialApi.md#unlikereview) | **DELETE** /v1/social/reviews/{review_id}/like | Unlike Review
 [**updateSocialProfile**](SocialApi.md#updatesocialprofile) | **PATCH** /v1/me/profile | Update Profile
 
 
@@ -131,6 +136,55 @@ void (empty response body)
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **commentReview**
+> CommentResponse commentReview(reviewId, commentRequest)
+
+Comment Review
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SocialApi();
+final reviewId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final commentRequest = CommentRequest(); // CommentRequest | 
+
+try {
+    final result = api_instance.commentReview(reviewId, commentRequest);
+    print(result);
+} catch (e) {
+    print('Exception when calling SocialApi->commentReview: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **reviewId** | **String**|  | 
+ **commentRequest** | [**CommentRequest**](CommentRequest.md)|  | 
+
+### Return type
+
+[**CommentResponse**](CommentResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **deleteReview**
 > deleteReview(itemId)
 
@@ -161,6 +215,56 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **itemId** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **deleteReviewComment**
+> deleteReviewComment(reviewId, commentId)
+
+Delete Review Comment
+
+Delete your comment, or any comment under your review.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SocialApi();
+final reviewId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final commentId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    api_instance.deleteReviewComment(reviewId, commentId);
+} catch (e) {
+    print('Exception when calling SocialApi->deleteReviewComment: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **reviewId** | **String**|  | 
+ **commentId** | **String**|  | 
 
 ### Return type
 
@@ -502,6 +606,53 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **getReviewComments**
+> List<CommentResponse> getReviewComments(reviewId)
+
+Get Review Comments
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SocialApi();
+final reviewId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.getReviewComments(reviewId);
+    print(result);
+} catch (e) {
+    print('Exception when calling SocialApi->getReviewComments: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **reviewId** | **String**|  | 
+
+### Return type
+
+[**List<CommentResponse>**](CommentResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **getSocialProfile**
 > SocialProfileResponse getSocialProfile()
 
@@ -593,6 +744,54 @@ Name | Type | Description  | Notes
 
  - **Content-Type**: Not defined
  - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **likeReview**
+> likeReview(reviewId)
+
+Like Review
+
+Like a review you may see.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SocialApi();
+final reviewId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    api_instance.likeReview(reviewId);
+} catch (e) {
+    print('Exception when calling SocialApi->likeReview: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **reviewId** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -1069,6 +1268,52 @@ Name | Type | Description  | Notes
 
  - **Content-Type**: Not defined
  - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **unlikeReview**
+> unlikeReview(reviewId)
+
+Unlike Review
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SocialApi();
+final reviewId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    api_instance.unlikeReview(reviewId);
+} catch (e) {
+    print('Exception when calling SocialApi->unlikeReview: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **reviewId** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

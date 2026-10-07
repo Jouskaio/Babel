@@ -22,6 +22,7 @@ class YearStatsResponse {
     this.finished = const [],
     this.formats = const {},
     this.genres = const [],
+    this.goal,
     required this.longestStreak,
     required this.notes,
     this.previousGenres = const [],
@@ -55,6 +56,9 @@ class YearStatsResponse {
 
   /// Genres of the books finished, most read first (a book counts in up to two)
   List<GenreCountResponse> genres;
+
+  /// Books you mean to finish each year
+  int? goal;
 
   /// Longest run of consecutive reading days
   int longestStreak;
@@ -90,6 +94,7 @@ class YearStatsResponse {
     _deepEquality.equals(other.finished, finished) &&
     _deepEquality.equals(other.formats, formats) &&
     _deepEquality.equals(other.genres, genres) &&
+    other.goal == goal &&
     other.longestStreak == longestStreak &&
     other.notes == notes &&
     _deepEquality.equals(other.previousGenres, previousGenres) &&
@@ -112,6 +117,7 @@ class YearStatsResponse {
     (finished.hashCode) +
     (formats.hashCode) +
     (genres.hashCode) +
+    (goal == null ? 0 : goal!.hashCode) +
     (longestStreak.hashCode) +
     (notes.hashCode) +
     (previousGenres.hashCode) +
@@ -123,7 +129,7 @@ class YearStatsResponse {
     (years.hashCode);
 
   @override
-  String toString() => 'YearStatsResponse[abandoned=$abandoned, averageRating=$averageRating, bestMonth=$bestMonth, busiestDay=$busiestDay, byMonth=$byMonth, currentStreak=$currentStreak, finished=$finished, formats=$formats, genres=$genres, longestStreak=$longestStreak, notes=$notes, previousGenres=$previousGenres, readingDays=$readingDays, reviews=$reviews, started=$started, topAuthors=$topAuthors, year=$year, years=$years]';
+  String toString() => 'YearStatsResponse[abandoned=$abandoned, averageRating=$averageRating, bestMonth=$bestMonth, busiestDay=$busiestDay, byMonth=$byMonth, currentStreak=$currentStreak, finished=$finished, formats=$formats, genres=$genres, goal=$goal, longestStreak=$longestStreak, notes=$notes, previousGenres=$previousGenres, readingDays=$readingDays, reviews=$reviews, started=$started, topAuthors=$topAuthors, year=$year, years=$years]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -148,6 +154,11 @@ class YearStatsResponse {
       json[r'finished'] = this.finished;
       json[r'formats'] = this.formats;
       json[r'genres'] = this.genres;
+    if (this.goal != null) {
+      json[r'goal'] = this.goal;
+    } else {
+      json[r'goal'] = null;
+    }
       json[r'longest_streak'] = this.longestStreak;
       json[r'notes'] = this.notes;
       json[r'previous_genres'] = this.previousGenres;
@@ -192,6 +203,7 @@ class YearStatsResponse {
         finished: FinishedBookResponse.listFromJson(json[r'finished']),
         formats: mapCastOfType<String, int>(json, r'formats')!,
         genres: GenreCountResponse.listFromJson(json[r'genres']),
+        goal: mapValueOfType<int>(json, r'goal'),
         longestStreak: mapValueOfType<int>(json, r'longest_streak')!,
         notes: mapValueOfType<int>(json, r'notes')!,
         previousGenres: GenreCountResponse.listFromJson(json[r'previous_genres']),

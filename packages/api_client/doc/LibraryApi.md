@@ -25,6 +25,7 @@ Method | HTTP request | Description
 [**getReview**](LibraryApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
 [**importFile**](LibraryApi.md#importfile) | **POST** /v1/library/files | Import File
 [**importLink**](LibraryApi.md#importlink) | **POST** /v1/library/links | Import Link
+[**importReadingList**](LibraryApi.md#importreadinglist) | **POST** /v1/library/import-csv | Import Reading List
 [**linkWork**](LibraryApi.md#linkwork) | **PUT** /v1/library/{item_id}/work | Link Work
 [**previewLink**](LibraryApi.md#previewlink) | **POST** /v1/library/links/preview | Preview Link
 [**removeFromLibrary**](LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
@@ -803,6 +804,57 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **importReadingList**
+> CsvImportResponse importReadingList(file, xBabelDevice)
+
+Import Reading List
+
+Import a Goodreads, StoryGraph or Babelio CSV export: paper books with their status, dates and rating.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = LibraryApi();
+final file = BINARY_DATA_HERE; // MultipartFile | 
+final xBabelDevice = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.importReadingList(file, xBabelDevice);
+    print(result);
+} catch (e) {
+    print('Exception when calling LibraryApi->importReadingList: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **file** | **MultipartFile**|  | 
+ **xBabelDevice** | **String**|  | [optional] 
+
+### Return type
+
+[**CsvImportResponse**](CsvImportResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: multipart/form-data
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

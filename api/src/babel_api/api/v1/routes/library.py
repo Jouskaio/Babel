@@ -15,16 +15,20 @@ from babel_api.api.dependencies import (
     FileServiceDep,
     FollowServiceDep,
     LinkServiceDep,
+    SocialServiceDep,
     SyncServiceDep,
 )
+from babel_api.domain.errors import FileTooLargeError
 from babel_api.domain.files import BookFormat, LibraryItem, ReadingStatus
 from babel_api.domain.follows import Follow
+from babel_api.services.imports import ImportService
 from babel_api.services.links import LinkKind
 
 router = APIRouter(tags=["library"])
 
 Sha256 = Annotated[str, Path(pattern=r"^[0-9a-f]{64}$")]
 _CHUNK = 1024 * 1024
+_CSV_MAX = 2 * 1024 * 1024
 
 
 class LibraryItemResponse(BaseModel):
@@ -175,6 +179,29 @@ async def update_details(
     """Correct a book's title, authors, series, volume number or cover."""
     changes = {name: getattr(body, name) for name in body.model_fields_set}
     return LibraryItemResponse.of(await files.update_details(user_id, item_id, changes, device_id))
+
+
+class CsvImportResponse(BaseModel):
+    imported: int
+    skipped: int = Field(description="Titles already in your library")
+    failed: int = Field(description="Rows without a title")
+
+
+@router.post("/library/import-csv", operation_id="importReadingList")
+async def import_reading_list(
+    user_id: CurrentUserId,
+    files: FileServiceDep,
+    social: SocialServiceDep,
+    file: Annotated[UploadFile, File()],
+    device_id: DeviceHeader = None,
+) -> CsvImportResponse:
+    """Import a Goodreads, StoryGraph or Babelio CSV export: paper books with their status,
+    dates and rating."""
+    content = await file.read(_CSV_MAX + 1)
+    if len(content) > _CSV_MAX:
+        raise FileTooLargeError
+    result = await ImportService(files, social).import_csv(user_id, content, device_id)
+    return CsvImportResponse(imported=result.imported, skipped=result.skipped, failed=result.failed)
 
 
 class PaperBookRequest(BaseModel):

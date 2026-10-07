@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.file_repository import _to_item  # pyright: ignore[reportPrivateUsage]
@@ -13,6 +13,7 @@ from babel_api.adapters.db.models import (
     ChangeRow,
     LibraryItemRow,
     ReviewRow,
+    UserRow,
     WorkRow,
 )
 from babel_api.domain.files import LibraryItem
@@ -41,6 +42,15 @@ class SqlStatsRepository:
             select(WorkRow.id, WorkRow.subjects).where(WorkRow.id.in_(list(work_ids)))
         )
         return {work: tuple(subjects or ()) for work, subjects in rows.all()}
+
+    async def goal(self, user_id: UUID) -> int | None:
+        return await self._session.scalar(select(UserRow.reading_goal).where(UserRow.id == user_id))
+
+    async def set_goal(self, user_id: UUID, books: int | None) -> None:
+        await self._session.execute(
+            update(UserRow).where(UserRow.id == user_id).values(reading_goal=books)
+        )
+        await self._session.commit()
 
     async def ratings(self, user_id: UUID) -> dict[UUID, int]:
         rows = await self._session.execute(

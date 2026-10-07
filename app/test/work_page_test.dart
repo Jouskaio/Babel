@@ -112,4 +112,34 @@ void main() {
     expect(find.textContaining('Babel ne télécharge pas'), findsOneWidget);
     expect(find.text('GÉRER MES SOURCES'), findsOneWidget);
   });
+
+  testWidgets('reviews can be liked and commented', (tester) async {
+    final server = FakeServer()
+      ..workReviews.add({
+        'id': 'r1',
+        'likes': 2,
+        'liked': false,
+        'comments': 1,
+        'reader': {'handle': 'camille', 'display_name': 'Camille'},
+        'rating': 4,
+        'text': 'Un classique.',
+        'audience': 'public',
+        'updated_at': '2026-10-05T10:00:00Z',
+        'mine': false,
+      });
+    await open(tester, server);
+
+    await tester.ensureVisible(find.text('Un classique.'));
+    await tester.tap(find.text('2'));
+    await settle(tester);
+    expect(server.socialCalls, contains('PUT /v1/social/reviews/r1/like'));
+
+    await tester.tap(find.text('1 commentaire'));
+    await tester.pumpAndSettle();
+    expect(find.text('Commentaires'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).last, 'Je confirme.');
+    await tester.tap(find.byTooltip('Publier'));
+    await settle(tester);
+    expect(server.socialCalls, contains('POST /v1/social/reviews/r1/comments'));
+  });
 }

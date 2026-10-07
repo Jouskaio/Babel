@@ -15,6 +15,7 @@ class ReviewResponse {
   ReviewResponse({
     required this.audience,
     this.authors = const [],
+    required this.id,
     required this.itemId,
     this.rating,
     this.text,
@@ -25,6 +26,8 @@ class ReviewResponse {
   Audience audience;
 
   List<String> authors;
+
+  String id;
 
   String itemId;
 
@@ -40,6 +43,7 @@ class ReviewResponse {
   bool operator ==(Object other) => identical(this, other) || other is ReviewResponse &&
     other.audience == audience &&
     _deepEquality.equals(other.authors, authors) &&
+    other.id == id &&
     other.itemId == itemId &&
     other.rating == rating &&
     other.text == text &&
@@ -51,6 +55,7 @@ class ReviewResponse {
     // ignore: unnecessary_parenthesis
     (audience.hashCode) +
     (authors.hashCode) +
+    (id.hashCode) +
     (itemId.hashCode) +
     (rating == null ? 0 : rating!.hashCode) +
     (text == null ? 0 : text!.hashCode) +
@@ -58,12 +63,13 @@ class ReviewResponse {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'ReviewResponse[audience=$audience, authors=$authors, itemId=$itemId, rating=$rating, text=$text, title=$title, updatedAt=$updatedAt]';
+  String toString() => 'ReviewResponse[audience=$audience, authors=$authors, id=$id, itemId=$itemId, rating=$rating, text=$text, title=$title, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'audience'] = this.audience;
       json[r'authors'] = this.authors;
+      json[r'id'] = this.id;
       json[r'item_id'] = this.itemId;
     if (this.rating != null) {
       json[r'rating'] = this.rating;
@@ -103,6 +109,7 @@ class ReviewResponse {
         authors: json[r'authors'] is Iterable
             ? (json[r'authors'] as Iterable).cast<String>().toList(growable: false)
             : const [],
+        id: mapValueOfType<String>(json, r'id')!,
         itemId: mapValueOfType<String>(json, r'item_id')!,
         rating: mapValueOfType<int>(json, r'rating'),
         text: mapValueOfType<String>(json, r'text'),
@@ -157,6 +164,7 @@ class ReviewResponse {
   static const requiredKeys = <String>{
     'audience',
     'authors',
+    'id',
     'item_id',
     'title',
     'updated_at',

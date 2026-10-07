@@ -941,6 +941,80 @@ class LibraryApi {
     return null;
   }
 
+  /// Import Reading List
+  ///
+  /// Import a Goodreads, StoryGraph or Babelio CSV export: paper books with their status, dates and rating.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [MultipartFile] file (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<Response> importReadingListWithHttpInfo(MultipartFile file, { String? xBabelDevice, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/import-csv';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (xBabelDevice != null) {
+      headerParams[r'X-Babel-Device'] = parameterToString(xBabelDevice);
+    }
+
+    const contentTypes = <String>['multipart/form-data'];
+
+    bool hasFields = false;
+    final mp = MultipartRequest('POST', Uri.parse(path));
+    if (file != null) {
+      hasFields = true;
+      mp.fields[r'file'] = file.field;
+      mp.files.add(file);
+    }
+    if (hasFields) {
+      postBody = mp;
+    }
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Import Reading List
+  ///
+  /// Import a Goodreads, StoryGraph or Babelio CSV export: paper books with their status, dates and rating.
+  ///
+  /// Parameters:
+  ///
+  /// * [MultipartFile] file (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<CsvImportResponse?> importReadingList(MultipartFile file, { String? xBabelDevice, }) async {
+    final response = await importReadingListWithHttpInfo(file,  xBabelDevice: xBabelDevice, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'CsvImportResponse',) as CsvImportResponse;
+    
+    }
+    return null;
+  }
+
   /// Link Work
   ///
   /// Say which catalog work a book is, so its reviews and notes join the work's page.
