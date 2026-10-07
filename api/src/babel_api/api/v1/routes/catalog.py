@@ -182,6 +182,27 @@ async def get_work(
     return WorkResponse.of_detail(await works.get(work_id), lang)
 
 
+class SagaVolumeResponse(BaseModel):
+    number: float = Field(description="The volume number in the saga")
+    work: WorkSummaryResponse
+
+
+@router.get("/saga", operation_id="getSaga")
+async def get_saga(
+    _: CurrentUserId,
+    works: WorkServiceDep,
+    series: Annotated[str, Query(min_length=2, max_length=200)],
+    author: Annotated[str | None, Query(max_length=200)] = None,
+) -> list[SagaVolumeResponse]:
+    """Every volume of a saga the catalog lists, in order (e.g. all of Homunculus)."""
+    return [
+        SagaVolumeResponse(
+            number=v.number, work=WorkSummaryResponse.of(v.work, v.work.title, v.work.cover_id)
+        )
+        for v in await works.saga(series, author)
+    ]
+
+
 @router.get("/isbn/{isbn}", operation_id="lookupIsbn")
 async def lookup_isbn(
     _: CurrentUserId,

@@ -3152,6 +3152,24 @@
         "title": "ReviewResponse",
         "type": "object"
       },
+      "SagaVolumeResponse": {
+        "properties": {
+          "number": {
+            "description": "The volume number in the saga",
+            "title": "Number",
+            "type": "number"
+          },
+          "work": {
+            "$ref": "#/components/schemas/WorkSummaryResponse"
+          }
+        },
+        "required": [
+          "number",
+          "work"
+        ],
+        "title": "SagaVolumeResponse",
+        "type": "object"
+      },
       "SharedNoteResponse": {
         "properties": {
           "at": {
@@ -5479,6 +5497,77 @@
           }
         ],
         "summary": "Lookup Isbn",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/saga": {
+      "get": {
+        "description": "Every volume of a saga the catalog lists, in order (e.g. all of Homunculus).",
+        "operationId": "getSaga",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "series",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 2,
+              "title": "Series",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "author",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Author"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SagaVolumeResponse"
+                  },
+                  "title": "Response Getsaga",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Saga",
         "tags": [
           "catalog"
         ]

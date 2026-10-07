@@ -24,6 +24,9 @@ class FakeBooks:
         # What Google Books would answer, and what it was asked.
         self.blurb_text: str | None = None
         self.blurbs: list[tuple[str | None, str, str | None]] = []
+        # What a saga search answers, and the searches made.
+        self.saga: list[SourceWork] = []
+        self.queries: list[str] = []
 
     def _call(self, name: str) -> None:
         self.calls.append(name)
@@ -32,6 +35,9 @@ class FakeBooks:
 
     async def search(self, query: str, limit: int, language: str | None = None) -> list[SourceWork]:
         self._call("search")
+        if query.startswith("title:"):
+            self.queries.append(query)
+            return self.saga
         if language == "fr":
             return [replace(JANE, localized_title="Jane Eyre (FR)", localized_cover_id=123)]
         return [JANE]
@@ -230,3 +236,52 @@ def test_a_missing_blurb_source_changes_nothing(
     work = client.get(f"/v1/catalog/works/{hit['id']}", headers=auth).json()
 
     assert work["description"].startswith("Orpheline")
+
+
+def volume(key: str, title: str, cover: int | None = None) -> SourceWork:
+    return SourceWork(key, title, ("Hideo Yamamoto",), 2007, cover, None, 1)
+
+
+def test_a_saga_lists_every_volume_in_order(
+    client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    books.saga = [
+        volume("OL3W", "Homunculus 3", 33),
+        volume("OL10W", "Homunculus 10", 100),
+        volume("OL1W", "Homunculus 01"),  # no cover
+        volume("OL1bW", "Homunculus 1", 11),  # a reprint of volume 1, with a cover
+        volume("OL2W", "Homunculus, Tome 2", 22),
+        volume("OL9W", "Homunculus (Omnibus) Vol. 3-4"),  # not one volume
+        volume("OL5W", "Homunkurusu 5", 55),  # another spelling: another series
+        volume("OL7W", "Homunculus Returns"),  # no volume number
+    ]
+
+    found = client.get(
+        "/v1/catalog/saga",
+        params={"series": "Homunculus", "author": "Hideo Yamamoto"},
+        headers=auth,
+    ).json()
+
+    assert [v["number"] for v in found] == [1, 2, 3, 10]
+    assert [v["work"]["title"] for v in found] == [
+        "Homunculus 1",
+        "Homunculus, Tome 2",
+        "Homunculus 3",
+        "Homunculus 10",
+    ]
+    assert found[0]["work"]["cover_path"] == "/v1/catalog/covers/11/M"
+    assert books.queries == ['title:"Homunculus" author:"Hideo Yamamoto"']
+    # Each volume is a work of its own that can be opened.
+    opened = client.get(f"/v1/catalog/works/{found[2]['work']['id']}", headers=auth)
+    assert opened.status_code == 200
+
+
+def test_a_saga_search_needs_a_name_and_may_find_nothing(
+    client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    assert client.get("/v1/catalog/saga", params={"series": "x"}, headers=auth).status_code == 422
+    nothing = client.get("/v1/catalog/saga", params={"series": "Unknown saga"}, headers=auth)
+    assert nothing.json() == []
+    books.down = True
+    down = client.get("/v1/catalog/saga", params={"series": "Homunculus"}, headers=auth)
+    assert down.status_code == 503
