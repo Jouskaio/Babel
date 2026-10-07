@@ -90,7 +90,7 @@ class ChaptarrClient:
         raise ChaptarrError(f"no {path}")
 
     async def add(self, book: dict[str, Any]) -> int:
-        """Adds the book as an ebook and starts the search; returns Chaptarr's book id."""
+        """Adds the book as an ebook, watches it and starts the search; returns its book id."""
         quality = await self._first_id("qualityprofile", EBOOK_QUALITY)
         metadata = await self._first_id("metadataprofile", 2)  # 2 is the ebook type
         roots = cast(list[dict[str, Any]], await self._call("GET", "rootfolder"))
@@ -113,7 +113,16 @@ class ChaptarrClient:
         )
         book["author"] = author
         created = cast(dict[str, Any], await self._call("POST", "book", json=book))
-        return int(created["id"])
+        book_id = int(created["id"])
+        # The root folder's "monitor" default (none) wins over the flag sent above: watch the
+        # book and search for it explicitly.
+        await self._call(
+            "PUT",
+            "book/monitor",
+            json={"bookIds": [book_id], "monitored": True, "mediaType": "ebook"},
+        )
+        await self._call("POST", "command", json={"name": "BookSearch", "bookIds": [book_id]})
+        return book_id
 
     async def has_files(self, book_id: int) -> bool:
         book = cast(dict[str, Any], await self._call("GET", f"book/{book_id}"))

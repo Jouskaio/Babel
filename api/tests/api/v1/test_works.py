@@ -433,3 +433,35 @@ def test_the_title_alone_is_searched_before_the_title_with_its_author() -> None:
     found = asyncio.run(client.lookup("Jane Eyre", ("Charlotte Brontë",)))
     assert found == novel
     assert asked == ["Jane Eyre"]  # found at once, no second search
+
+
+def test_a_requested_book_is_watched_and_searched_after_it_is_added() -> None:
+    import asyncio
+    from typing import Any
+
+    from babel_api.adapters.chaptarr import ChaptarrClient
+
+    calls: list[tuple[str, str]] = []
+
+    class Fake(ChaptarrClient):
+        async def _call(  # type: ignore[override]
+            self,
+            method: str,
+            path: str,
+            json: object | None = None,
+            params: dict[str, str] | None = None,
+        ) -> Any:
+            calls.append((method, path))
+            if path == "qualityprofile":
+                return [{"id": 1, "profileType": "ebook"}]
+            if path == "metadataprofile":
+                return [{"id": 2, "profileType": 2}]
+            if path == "rootfolder":
+                return [{"path": "/data/books/ebooks"}]
+            if path == "book":
+                return {"id": 671}
+            return []
+
+    book_id = asyncio.run(Fake("http://x", "k").add({"title": "Frankenstein", "author": {}}))
+    assert book_id == 671
+    assert calls[-2:] == [("PUT", "book/monitor"), ("POST", "command")]
