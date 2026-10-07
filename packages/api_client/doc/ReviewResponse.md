@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **audience** | [**Audience**](Audience.md) |  | 
 **authors** | **List<String>** |  | [default to const []]
+**id** | **String** |  | 
 **itemId** | **String** |  | 
 **rating** | **int** |  | [optional] 
 **text** | **String** |  | [optional] 

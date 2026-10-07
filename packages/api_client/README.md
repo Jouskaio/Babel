@@ -124,6 +124,7 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**getReview**](doc//LibraryApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
 *LibraryApi* | [**importFile**](doc//LibraryApi.md#importfile) | **POST** /v1/library/files | Import File
 *LibraryApi* | [**importLink**](doc//LibraryApi.md#importlink) | **POST** /v1/library/links | Import Link
+*LibraryApi* | [**importReadingList**](doc//LibraryApi.md#importreadinglist) | **POST** /v1/library/import-csv | Import Reading List
 *LibraryApi* | [**linkWork**](doc//LibraryApi.md#linkwork) | **PUT** /v1/library/{item_id}/work | Link Work
 *LibraryApi* | [**previewLink**](doc//LibraryApi.md#previewlink) | **POST** /v1/library/links/preview | Preview Link
 *LibraryApi* | [**removeFromLibrary**](doc//LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
@@ -134,7 +135,9 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**withdrawFile**](doc//LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
 *SocialApi* | [**addFriend**](doc//SocialApi.md#addfriend) | **PUT** /v1/social/friends/{handle} | Add Friend
 *SocialApi* | [**blockReader**](doc//SocialApi.md#blockreader) | **PUT** /v1/social/blocks/{handle} | Block Reader
+*SocialApi* | [**commentReview**](doc//SocialApi.md#commentreview) | **POST** /v1/social/reviews/{review_id}/comments | Comment Review
 *SocialApi* | [**deleteReview**](doc//SocialApi.md#deletereview) | **DELETE** /v1/library/{item_id}/review | Delete Review
+*SocialApi* | [**deleteReviewComment**](doc//SocialApi.md#deletereviewcomment) | **DELETE** /v1/social/reviews/{review_id}/comments/{comment_id} | Delete Review Comment
 *SocialApi* | [**followReader**](doc//SocialApi.md#followreader) | **PUT** /v1/social/following/{handle} | Follow Reader
 *SocialApi* | [**getBlocked**](doc//SocialApi.md#getblocked) | **GET** /v1/social/blocks | Get Blocked
 *SocialApi* | [**getFeed**](doc//SocialApi.md#getfeed) | **GET** /v1/social/feed | Get Feed
@@ -142,8 +145,10 @@ Class | Method | HTTP request | Description
 *SocialApi* | [**getReader**](doc//SocialApi.md#getreader) | **GET** /v1/social/readers/{handle} | Get Reader
 *SocialApi* | [**getRecommendations**](doc//SocialApi.md#getrecommendations) | **GET** /v1/social/recommendations | Get Recommendations
 *SocialApi* | [**getReview**](doc//SocialApi.md#getreview) | **GET** /v1/library/{item_id}/review | Get Review
+*SocialApi* | [**getReviewComments**](doc//SocialApi.md#getreviewcomments) | **GET** /v1/social/reviews/{review_id}/comments | Get Review Comments
 *SocialApi* | [**getSocialProfile**](doc//SocialApi.md#getsocialprofile) | **GET** /v1/me/profile | Get Profile
 *SocialApi* | [**getWorkReaders**](doc//SocialApi.md#getworkreaders) | **GET** /v1/catalog/works/{work_id}/readers | Get Work Readers
+*SocialApi* | [**likeReview**](doc//SocialApi.md#likereview) | **PUT** /v1/social/reviews/{review_id}/like | Like Review
 *SocialApi* | [**listReports**](doc//SocialApi.md#listreports) | **GET** /v1/admin/reports | List Reports
 *SocialApi* | [**markRecommendationRead**](doc//SocialApi.md#markrecommendationread) | **POST** /v1/social/recommendations/{recommendation_id}/read | Mark Read
 *SocialApi* | [**recommend**](doc//SocialApi.md#recommend) | **POST** /v1/social/recommendations | Recommend
@@ -154,6 +159,7 @@ Class | Method | HTTP request | Description
 *SocialApi* | [**searchReaders**](doc//SocialApi.md#searchreaders) | **GET** /v1/social/readers | Search Readers
 *SocialApi* | [**unblockReader**](doc//SocialApi.md#unblockreader) | **DELETE** /v1/social/blocks/{handle} | Unblock Reader
 *SocialApi* | [**unfollowReader**](doc//SocialApi.md#unfollowreader) | **DELETE** /v1/social/following/{handle} | Unfollow Reader
+*SocialApi* | [**unlikeReview**](doc//SocialApi.md#unlikereview) | **DELETE** /v1/social/reviews/{review_id}/like | Unlike Review
 *SocialApi* | [**updateSocialProfile**](doc//SocialApi.md#updatesocialprofile) | **PATCH** /v1/me/profile | Update Profile
 *SourcesApi* | [**checkSource**](doc//SourcesApi.md#checksource) | **POST** /v1/sources/check | Check Source
 *SourcesApi* | [**createSource**](doc//SourcesApi.md#createsource) | **POST** /v1/sources | Create Source
@@ -165,6 +171,7 @@ Class | Method | HTTP request | Description
 *SourcesApi* | [**scanSource**](doc//SourcesApi.md#scansource) | **POST** /v1/sources/{source_id}/scan | Scan Source
 *SourcesApi* | [**searchSources**](doc//SourcesApi.md#searchsources) | **GET** /v1/sources/search | Search Sources
 *StatsApi* | [**getYearStats**](doc//StatsApi.md#getyearstats) | **GET** /v1/me/stats | Get Year Stats
+*StatsApi* | [**setReadingGoal**](doc//StatsApi.md#setreadinggoal) | **PUT** /v1/me/goal | Set Goal
 *SyncApi* | [**getDevices**](doc//SyncApi.md#getdevices) | **GET** /v1/devices | Get Devices
 *SyncApi* | [**pullChanges**](doc//SyncApi.md#pullchanges) | **GET** /v1/sync | Pull Changes
 *SyncApi* | [**pushOperations**](doc//SyncApi.md#pushoperations) | **POST** /v1/sync/{device_id} | Push Operations
@@ -196,7 +203,10 @@ Class | Method | HTTP request | Description
  - [ChangePasswordRequest](doc//ChangePasswordRequest.md)
  - [ChangeResponse](doc//ChangeResponse.md)
  - [CheckSourceResponse](doc//CheckSourceResponse.md)
+ - [CommentRequest](doc//CommentRequest.md)
+ - [CommentResponse](doc//CommentResponse.md)
  - [CreateSourceRequest](doc//CreateSourceRequest.md)
+ - [CsvImportResponse](doc//CsvImportResponse.md)
  - [DeviceKind](doc//DeviceKind.md)
  - [DeviceResponse](doc//DeviceResponse.md)
  - [EditionResponse](doc//EditionResponse.md)
@@ -213,6 +223,7 @@ Class | Method | HTTP request | Description
  - [Genre](doc//Genre.md)
  - [GenreCountResponse](doc//GenreCountResponse.md)
  - [GitHubConfig](doc//GitHubConfig.md)
+ - [GoalRequest](doc//GoalRequest.md)
  - [HealthResponse](doc//HealthResponse.md)
  - [IdentityProvider](doc//IdentityProvider.md)
  - [ImportResponse](doc//ImportResponse.md)

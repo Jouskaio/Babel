@@ -17,6 +17,7 @@ Name | Type | Description | Notes
 **finished** | [**List<FinishedBookResponse>**](FinishedBookResponse.md) | Books finished, in order | [default to const []]
 **formats** | **Map<String, int>** |  | [default to const {}]
 **genres** | [**List<GenreCountResponse>**](GenreCountResponse.md) | Genres of the books finished, most read first (a book counts in up to two) | [default to const []]
+**goal** | **int** | Books you mean to finish each year | [optional] 
 **longestStreak** | **int** | Longest run of consecutive reading days | 
 **notes** | **int** | Highlights and notes made this year | 
 **previousGenres** | [**List<GenreCountResponse>**](GenreCountResponse.md) | The same, the year before | [default to const []]

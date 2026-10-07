@@ -14,6 +14,10 @@ class WorkReviewResponse {
   /// Returns a new [WorkReviewResponse] instance.
   WorkReviewResponse({
     required this.audience,
+    required this.comments,
+    required this.id,
+    required this.liked,
+    required this.likes,
     required this.mine,
     this.rating,
     required this.reader,
@@ -22,6 +26,15 @@ class WorkReviewResponse {
   });
 
   Audience audience;
+
+  int comments;
+
+  String id;
+
+  /// You liked it
+  bool liked;
+
+  int likes;
 
   bool mine;
 
@@ -36,6 +49,10 @@ class WorkReviewResponse {
   @override
   bool operator ==(Object other) => identical(this, other) || other is WorkReviewResponse &&
     other.audience == audience &&
+    other.comments == comments &&
+    other.id == id &&
+    other.liked == liked &&
+    other.likes == likes &&
     other.mine == mine &&
     other.rating == rating &&
     other.reader == reader &&
@@ -46,6 +63,10 @@ class WorkReviewResponse {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (audience.hashCode) +
+    (comments.hashCode) +
+    (id.hashCode) +
+    (liked.hashCode) +
+    (likes.hashCode) +
     (mine.hashCode) +
     (rating == null ? 0 : rating!.hashCode) +
     (reader.hashCode) +
@@ -53,11 +74,15 @@ class WorkReviewResponse {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'WorkReviewResponse[audience=$audience, mine=$mine, rating=$rating, reader=$reader, text=$text, updatedAt=$updatedAt]';
+  String toString() => 'WorkReviewResponse[audience=$audience, comments=$comments, id=$id, liked=$liked, likes=$likes, mine=$mine, rating=$rating, reader=$reader, text=$text, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'audience'] = this.audience;
+      json[r'comments'] = this.comments;
+      json[r'id'] = this.id;
+      json[r'liked'] = this.liked;
+      json[r'likes'] = this.likes;
       json[r'mine'] = this.mine;
     if (this.rating != null) {
       json[r'rating'] = this.rating;
@@ -94,6 +119,10 @@ class WorkReviewResponse {
 
       return WorkReviewResponse(
         audience: Audience.fromJson(json[r'audience'])!,
+        comments: mapValueOfType<int>(json, r'comments')!,
+        id: mapValueOfType<String>(json, r'id')!,
+        liked: mapValueOfType<bool>(json, r'liked')!,
+        likes: mapValueOfType<int>(json, r'likes')!,
         mine: mapValueOfType<bool>(json, r'mine')!,
         rating: mapValueOfType<int>(json, r'rating'),
         reader: AuthorResponse.fromJson(json[r'reader'])!,
@@ -147,6 +176,10 @@ class WorkReviewResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'audience',
+    'comments',
+    'id',
+    'liked',
+    'likes',
     'mine',
     'reader',
     'updated_at',

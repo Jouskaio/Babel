@@ -224,8 +224,14 @@ class ApiClient {
           return ChangeResponse.fromJson(value);
         case 'CheckSourceResponse':
           return CheckSourceResponse.fromJson(value);
+        case 'CommentRequest':
+          return CommentRequest.fromJson(value);
+        case 'CommentResponse':
+          return CommentResponse.fromJson(value);
         case 'CreateSourceRequest':
           return CreateSourceRequest.fromJson(value);
+        case 'CsvImportResponse':
+          return CsvImportResponse.fromJson(value);
         case 'DeviceKind':
           return DeviceKindTypeTransformer().decode(value);
         case 'DeviceResponse':
@@ -258,6 +264,8 @@ class ApiClient {
           return GenreCountResponse.fromJson(value);
         case 'GitHubConfig':
           return GitHubConfig.fromJson(value);
+        case 'GoalRequest':
+          return GoalRequest.fromJson(value);
         case 'HealthResponse':
           return HealthResponse.fromJson(value);
         case 'IdentityProvider':

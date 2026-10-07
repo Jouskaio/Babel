@@ -1,4 +1,4 @@
-# babel_api_client.model.WorkReviewResponse
+# babel_api_client.model.CommentResponse
 
 ## Load the model package
 ```dart
@@ -8,16 +8,11 @@ import 'package:babel_api_client/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**audience** | [**Audience**](Audience.md) |  | 
-**comments** | **int** |  | 
+**createdAt** | [**DateTime**](DateTime.md) |  | 
 **id** | **String** |  | 
-**liked** | **bool** | You liked it | 
-**likes** | **int** |  | 
 **mine** | **bool** |  | 
-**rating** | **int** |  | [optional] 
 **reader** | [**AuthorResponse**](AuthorResponse.md) |  | 
-**text** | **String** |  | [optional] 
-**updatedAt** | [**DateTime**](DateTime.md) |  | 
+**text** | **String** |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

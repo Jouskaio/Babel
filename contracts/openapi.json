@@ -377,6 +377,20 @@
         "title": "Body_importFile",
         "type": "object"
       },
+      "Body_importReadingList": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_importReadingList",
+        "type": "object"
+      },
       "BookDetailsRequest": {
         "description": "Only the fields sent change. An empty series clears it (and its volume); a null\ncover goes back to the file's.",
         "properties": {
@@ -760,6 +774,55 @@
         "title": "CheckSourceResponse",
         "type": "object"
       },
+      "CommentRequest": {
+        "properties": {
+          "text": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "CommentRequest",
+        "type": "object"
+      },
+      "CommentResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "mine": {
+            "title": "Mine",
+            "type": "boolean"
+          },
+          "reader": {
+            "$ref": "#/components/schemas/AuthorResponse"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reader",
+          "text",
+          "created_at",
+          "mine"
+        ],
+        "title": "CommentResponse",
+        "type": "object"
+      },
       "CreateSourceRequest": {
         "description": "A source to connect; give the settings block matching ``kind``.",
         "properties": {
@@ -840,6 +903,31 @@
           "name"
         ],
         "title": "CreateSourceRequest",
+        "type": "object"
+      },
+      "CsvImportResponse": {
+        "properties": {
+          "failed": {
+            "description": "Rows without a title",
+            "title": "Failed",
+            "type": "integer"
+          },
+          "imported": {
+            "title": "Imported",
+            "type": "integer"
+          },
+          "skipped": {
+            "description": "Titles already in your library",
+            "title": "Skipped",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "imported",
+          "skipped",
+          "failed"
+        ],
+        "title": "CsvImportResponse",
         "type": "object"
       },
       "DeviceKind": {
@@ -1445,6 +1533,29 @@
           "repository"
         ],
         "title": "GitHubConfig",
+        "type": "object"
+      },
+      "GoalRequest": {
+        "properties": {
+          "books": {
+            "anyOf": [
+              {
+                "maximum": 1000.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Books to finish each year; null removes the goal",
+            "title": "Books"
+          }
+        },
+        "required": [
+          "books"
+        ],
+        "title": "GoalRequest",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -2986,6 +3097,11 @@
             "title": "Authors",
             "type": "array"
           },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
           "item_id": {
             "format": "uuid",
             "title": "Item Id",
@@ -3024,6 +3140,7 @@
           }
         },
         "required": [
+          "id",
           "item_id",
           "title",
           "authors",
@@ -3961,6 +4078,24 @@
           "audience": {
             "$ref": "#/components/schemas/Audience"
           },
+          "comments": {
+            "title": "Comments",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "liked": {
+            "description": "You liked it",
+            "title": "Liked",
+            "type": "boolean"
+          },
+          "likes": {
+            "title": "Likes",
+            "type": "integer"
+          },
           "mine": {
             "title": "Mine",
             "type": "boolean"
@@ -3997,6 +4132,10 @@
           }
         },
         "required": [
+          "id",
+          "likes",
+          "liked",
+          "comments",
           "reader",
           "rating",
           "text",
@@ -4153,6 +4292,18 @@
             "title": "Genres",
             "type": "array"
           },
+          "goal": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Books you mean to finish each year",
+            "title": "Goal"
+          },
           "longest_streak": {
             "description": "Longest run of consecutive reading days",
             "title": "Longest Streak",
@@ -4222,7 +4373,8 @@
           "formats",
           "years",
           "genres",
-          "previous_genres"
+          "previous_genres",
+          "goal"
         ],
         "title": "YearStatsResponse",
         "type": "object"
@@ -6230,6 +6382,72 @@
         ]
       }
     },
+    "/v1/library/import-csv": {
+      "post": {
+        "description": "Import a Goodreads, StoryGraph or Babelio CSV export: paper books with their status,\ndates and rating.",
+        "operationId": "importReadingList",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_importReadingList"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CsvImportResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Import Reading List",
+        "tags": [
+          "library"
+        ]
+      }
+    },
     "/v1/library/links": {
       "post": {
         "description": "Import the book a link points to (AO3 works are fetched at AO3's pace).",
@@ -7406,6 +7624,46 @@
         ]
       }
     },
+    "/v1/me/goal": {
+      "put": {
+        "description": "Set (or remove) your yearly reading goal.",
+        "operationId": "setReadingGoal",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Set Goal",
+        "tags": [
+          "stats"
+        ]
+      }
+    },
     "/v1/me/kavita": {
       "delete": {
         "description": "Forget the linked Kavita; books already imported stay.",
@@ -8317,6 +8575,247 @@
           }
         ],
         "summary": "Report Reader",
+        "tags": [
+          "social"
+        ]
+      }
+    },
+    "/v1/social/reviews/{review_id}/comments": {
+      "get": {
+        "operationId": "getReviewComments",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Review Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CommentResponse"
+                  },
+                  "title": "Response Getreviewcomments",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Review Comments",
+        "tags": [
+          "social"
+        ]
+      },
+      "post": {
+        "operationId": "commentReview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Review Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Comment Review",
+        "tags": [
+          "social"
+        ]
+      }
+    },
+    "/v1/social/reviews/{review_id}/comments/{comment_id}": {
+      "delete": {
+        "description": "Delete your comment, or any comment under your review.",
+        "operationId": "deleteReviewComment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Review Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "comment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Comment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Review Comment",
+        "tags": [
+          "social"
+        ]
+      }
+    },
+    "/v1/social/reviews/{review_id}/like": {
+      "delete": {
+        "operationId": "unlikeReview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Review Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unlike Review",
+        "tags": [
+          "social"
+        ]
+      },
+      "put": {
+        "description": "Like a review you may see.",
+        "operationId": "likeReview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Review Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Like Review",
         "tags": [
           "social"
         ]

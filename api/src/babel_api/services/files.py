@@ -17,7 +17,7 @@ from babel_api.domain.errors import (
     NotFoundError,
     UnsupportedFileError,
 )
-from babel_api.domain.files import BookFormat, LibraryItem, StoredFile
+from babel_api.domain.files import BookFormat, LibraryItem, ReadingState, StoredFile
 from babel_api.domain.ports import (
     BlobStore,
     CatalogRepository,
@@ -205,6 +205,32 @@ class FileService:
         await self._files.set_subjects(file.sha256, subjects)
         await self._files.commit()
         return subjects
+
+    async def add_imported(
+        self,
+        user_id: UUID,
+        title: str,
+        authors: tuple[str, ...],
+        state: ReadingState,
+        device_id: UUID | None = None,
+    ) -> LibraryItem:
+        """A paper book from an imported reading list, with its status and dates."""
+        work = await self._files.guess_work(None, title, authors)
+        guess = guess_series(title)
+        item = await self._files.add_item(
+            user_id,
+            None,
+            title,
+            authors,
+            work,
+            paper=True,
+            series=guess.series if guess else None,
+            series_index=guess.number if guess else None,
+        )
+        if state.status is not None:
+            item = await self._files.save_state(item.id, state)
+        await self._record(item, device_id)
+        return item
 
     async def add_paper(
         self, user_id: UUID, work_id: UUID, device_id: UUID | None = None
