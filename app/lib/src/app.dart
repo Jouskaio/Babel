@@ -120,12 +120,22 @@ class _BabelAppState extends ConsumerState<BabelApp> {
       title: 'Babel',
       debugShowCheckedModeBanner: false,
       theme: BabelTheme.current(eink: eink),
-      builder: (context, child) => eink
-          ? MediaQuery(
-              data: MediaQuery.of(context).copyWith(disableAnimations: true),
-              child: child!,
-            )
-          : child!,
+      // Every text can be selected and copied (an error message, an address, a title). The
+      // selection menu needs an Overlay above the pages, hence the entry. The e-ink setting
+      // sits outside it: an entry is not rebuilt when this builder runs again.
+      builder: (context, child) {
+        final pages = Overlay(
+          initialEntries: [
+            OverlayEntry(builder: (_) => SelectionArea(child: child!)),
+          ],
+        );
+        return eink
+            ? MediaQuery(
+                data: MediaQuery.of(context).copyWith(disableAnimations: true),
+                child: pages,
+              )
+            : pages;
+      },
       locale: ref.watch(localeControllerProvider),
       localeListResolutionCallback: LocaleController.resolve,
       localizationsDelegates: AppLocalizations.localizationsDelegates,

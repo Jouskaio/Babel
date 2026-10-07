@@ -19,6 +19,7 @@ import httpx
 from bs4 import BeautifulSoup, Tag
 
 from babel_api.adapters.sources.http import TIMEOUT, USER_AGENT, Throttle, retry_after
+from babel_api.adapters.sources.stdlib_transport import StdlibTransport
 from babel_api.domain.errors import SourceConnectionError, SourceRateLimitedError
 from babel_api.domain.sources import RemoteEntry
 
@@ -52,7 +53,7 @@ class Ao3Connector:
         pause: float = 3.0,
         download_pause: float = 15.0,
     ) -> None:
-        self._transport = transport or httpx.AsyncHTTPTransport(retries=1)
+        self._transport = transport or StdlibTransport()
         self._pause = pause
         self._requests = Throttle(pause)
         self._downloads = Throttle(download_pause)
