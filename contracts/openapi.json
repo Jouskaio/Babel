@@ -2620,6 +2620,17 @@
             "title": "Authors",
             "type": "array"
           },
+          "cover_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover Path"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -2662,6 +2673,19 @@
               }
             ],
             "title": "Url"
+          },
+          "work_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The catalog work, for its page",
+            "title": "Work Id"
           }
         },
         "required": [

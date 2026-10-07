@@ -294,6 +294,16 @@ class SqlFileRepository:
         await self._session.refresh(row, ["work"])
         return _to_item(row)
 
+    async def work_with_cover(
+        self, title: str, authors: tuple[str, ...]
+    ) -> tuple[UUID, int | None] | None:
+        """The catalog work a title and authors name, and its cover."""
+        work_id = await self.guess_work(None, title, authors)
+        if work_id is None:
+            return None
+        work = await self._session.get(WorkRow, work_id)
+        return (work_id, work.cover_id if work else None)
+
     async def guess_work(
         self, edition_id: UUID | None, title: str, authors: tuple[str, ...]
     ) -> UUID | None:

@@ -198,6 +198,8 @@ class RecommendationResponse(BaseModel):
     message: str | None
     created_at: datetime
     read: bool
+    work_id: UUID | None = Field(default=None, description="The catalog work, for its page")
+    cover_path: str | None = None
 
 
 def _author(profile: Profile | None) -> AuthorResponse:
@@ -395,6 +397,8 @@ def _recommendation(r: Recommendation, sender: Profile | None) -> Recommendation
         message=r.message,
         created_at=r.created_at,
         read=r.read_at is not None,
+        work_id=r.work_id,
+        cover_path=f"/v1/catalog/covers/{r.cover_id}/M" if r.cover_id else None,
     )
 
 
