@@ -60,6 +60,7 @@ doc/IsbnLookupResponse.md
 doc/KavitaApi.md
 doc/KavitaLinkResponse.md
 doc/KavitaStatus.md
+doc/KnownVolumeResponse.md
 doc/LibraryApi.md
 doc/LibraryItemResponse.md
 doc/LinkKavitaRequest.md
@@ -208,6 +209,7 @@ lib/model/import_response.dart
 lib/model/isbn_lookup_response.dart
 lib/model/kavita_link_response.dart
 lib/model/kavita_status.dart
+lib/model/known_volume_response.dart
 lib/model/library_item_response.dart
 lib/model/link_kavita_request.dart
 lib/model/link_kind.dart

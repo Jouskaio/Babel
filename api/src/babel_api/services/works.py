@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
+from babel_api.adapters.hardcover import HardcoverClient
 from babel_api.domain.catalog import Edition, IdentifierKind, SourceWork, Work
 from babel_api.domain.errors import NotFoundError, SourceUnavailableError
 from babel_api.domain.isbn import normalize_isbn
@@ -76,9 +77,15 @@ class IsbnMatch:
 
 
 class WorkService:
-    def __init__(self, repository: CatalogRepository, source: BookSource) -> None:
+    def __init__(
+        self,
+        repository: CatalogRepository,
+        source: BookSource,
+        hardcover: HardcoverClient | None = None,
+    ) -> None:
         self._repo = repository
         self._source = source
+        self._hardcover = hardcover
 
     async def search(self, query: str, limit: int, language: str | None = None) -> list[SearchHit]:
         try:
@@ -128,6 +135,12 @@ class WorkService:
         ]
         await self._repo.commit()
         return volumes
+
+    async def known_volumes(self, series: str, author: str | None) -> list[tuple[float, str]]:
+        """Titles of the volumes Hardcover knows for a series (none without its key)."""
+        if self._hardcover is None:
+            return []
+        return await self._hardcover.series_volumes(series, author)
 
     async def get(self, work_id: UUID) -> WorkDetail:
         work = await self._repo.get_work(work_id)
@@ -194,6 +207,9 @@ class WorkService:
                 await self._repo.set_edition_description(edition.id, text)
         if not work.description or len(work.description) < FULL_DESCRIPTION:
             text = await self._blurb(None, work.title, work, None)
+            if (not text or len(text) < FULL_DESCRIPTION) and self._hardcover is not None:
+                # Still short: Hardcover often has a full blurb (English, one request).
+                text = await self._hardcover.description(work.title, work.authors) or text
             if text and len(text) > len(work.description or ""):
                 await self._repo.set_work_description(work.id, text)
 

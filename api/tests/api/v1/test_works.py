@@ -1,9 +1,12 @@
+from collections.abc import Callable
 from dataclasses import replace
 
+import httpx
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from babel_api.adapters.hardcover import HardcoverClient
 from babel_api.domain.catalog import SourceEdition, SourceWork
 
 JANE = SourceWork("OL1W", "Jane Eyre", ("Charlotte Brontë",), 1847, 8235363, None, 1170)
@@ -495,3 +498,111 @@ def test_a_volume_matches_however_chaptarr_spells_it() -> None:
         )
         is novel
     )
+
+
+def test_hardcover_names_the_volumes_of_a_series() -> None:
+    import asyncio
+
+    import httpx
+
+    from babel_api.adapters.hardcover import HardcoverClient
+
+    asked: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        import json
+
+        body = json.loads(request.content)
+        asked.append(body["query"][:20])
+        assert request.headers["authorization"] == "Bearer secret"
+        if "search" in body["query"]:
+            doc = {"name": "Homunculus", "author_name": "Hideo Yamamoto"}
+            other = {"name": "Homunculus Returns", "author_name": "X"}
+            hits = {"hits": [{"document": other}, {"document": doc}]}
+            return httpx.Response(200, json={"data": {"search": {"ids": [1, 2], "results": hits}}})
+        links = [
+            {"position": 1, "book": {"title": "Homunculus 1"}},
+            {"position": 2.5, "book": {"title": "Interlude"}},
+            {"position": None, "book": {"title": "Artbook"}},
+        ]
+        return httpx.Response(200, json={"data": {"series": [{"book_series": links}]}})
+
+    client = HardcoverClient("secret", httpx.AsyncClient(transport=httpx.MockTransport(handler)))
+    found = asyncio.run(client.series_volumes("Homunculus", "Hideo Yamamoto"))
+    assert found == [(1.0, "Homunculus 1"), (2.5, "Interlude")]  # no position, no volume
+    assert asyncio.run(client.series_volumes("Homunculus", "Hideo Yamamoto")) == found
+    assert len(asked) == 2  # the second answer came from the cache
+
+
+def test_a_hardcover_failure_reads_as_nothing_known() -> None:
+    import asyncio
+
+    import httpx
+
+    from babel_api.adapters.hardcover import HardcoverClient
+
+    def down(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(503)
+
+    client = HardcoverClient("k", httpx.AsyncClient(transport=httpx.MockTransport(down)))
+    assert asyncio.run(client.series_volumes("Homunculus", None)) == []
+
+
+def _hardcover(handler: Callable[[httpx.Request], httpx.Response]) -> HardcoverClient:
+
+    return HardcoverClient("k", httpx.AsyncClient(transport=httpx.MockTransport(handler)))
+
+
+def test_hardcover_gives_the_description_of_the_right_book() -> None:
+    import asyncio
+
+    import httpx
+
+    long_text = "<p>An orphan becomes a governess at Thornfield Hall.</p> " + "x" * 80
+    wrong = {
+        "title": "Jane Eyre Study Guide",
+        "author_names": ["A. Teacher"],
+        "description": long_text,
+    }
+    right = {"title": "Jane Eyre", "author_names": ["Charlotte Brontë"], "description": long_text}
+    calls: list[int] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(1)
+        hits = {"hits": [{"document": wrong}, {"document": right}]}
+        return httpx.Response(200, json={"data": {"search": {"results": hits}}})
+
+    client = _hardcover(handler)
+    text = asyncio.run(client.description("Jane Eyre", ("Charlotte Brontë",)))
+    assert text is not None
+    assert text.startswith("An orphan")
+    assert "<p>" not in text
+    asyncio.run(client.description("Jane Eyre", ("Charlotte Brontë",)))
+    assert len(calls) == 1  # kept for the day
+
+
+def test_hardcover_rests_after_a_429_and_stops_at_its_daily_budget() -> None:
+    import asyncio
+
+    import httpx
+
+    from babel_api.adapters import hardcover
+
+    calls: list[int] = []
+
+    def limited(request: httpx.Request) -> httpx.Response:
+        calls.append(1)
+        return httpx.Response(429, headers={"retry-after": "120"})
+
+    client = _hardcover(limited)
+    assert asyncio.run(client.description("Jane Eyre", ("Charlotte Brontë",))) is None
+    assert asyncio.run(client.description("Emma", ("Jane Austen",))) is None
+    assert len(calls) == 1  # the second one did not even ask
+
+    def empty(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"data": {"search": {"results": {}}}})
+
+    ok = _hardcover(empty)
+    ok._used = hardcover.DAILY_BUDGET  # type: ignore[attr-defined]
+    assert asyncio.run(ok.description("Emma", ("Jane Austen",))) is None
+    assert ok._used == hardcover.DAILY_BUDGET  # type: ignore[attr-defined]

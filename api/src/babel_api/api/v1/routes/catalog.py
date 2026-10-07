@@ -211,6 +211,24 @@ async def get_saga(
     ]
 
 
+class KnownVolumeResponse(BaseModel):
+    number: float = Field(description="The volume number in the saga")
+    title: str = Field(description="Its title, from Hardcover")
+
+
+@router.get("/saga/known", operation_id="getKnownVolumes")
+async def get_known_volumes(
+    _: CurrentUserId,
+    works: WorkServiceDep,
+    series: Annotated[str, Query(min_length=2, max_length=200)],
+    author: Annotated[str | None, Query(max_length=200)] = None,
+) -> list[KnownVolumeResponse]:
+    """Volumes Hardcover lists for a saga, to name the ones the catalog lacks (may be empty)."""
+    return [
+        KnownVolumeResponse(number=n, title=t) for n, t in await works.known_volumes(series, author)
+    ]
+
+
 @router.get("/isbn/{isbn}", operation_id="lookupIsbn")
 async def lookup_isbn(
     _: CurrentUserId,

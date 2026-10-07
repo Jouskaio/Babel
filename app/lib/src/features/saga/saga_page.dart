@@ -25,6 +25,19 @@ final sagaProvider = FutureProvider.autoDispose
           const [],
     );
 
+/// Titles Hardcover gives to a saga's volumes, by number (empty when it knows none).
+final knownVolumesProvider = FutureProvider.autoDispose
+    .family<Map<double, String>, ({String series, String? author})>(
+      (ref, args) async => {
+        for (final v
+            in await ref
+                    .watch(authedCatalogApiProvider)
+                    .getKnownVolumes(args.series, author: args.author) ??
+                const <KnownVolumeResponse>[])
+          v.number.toDouble(): v.title,
+      },
+    );
+
 /// The whole of a saga: its volumes in order, the ones in the library marked, the
 /// numbers the catalog does not know shown as gaps.
 class SagaPage extends ConsumerWidget {
@@ -37,6 +50,11 @@ class SagaPage extends ConsumerWidget {
     final l10n = context.l10n;
     final volumes = ref.watch(sagaProvider((series: series, author: author)));
     final library = ref.watch(libraryControllerProvider).value ?? const [];
+    final known =
+        ref
+            .watch(knownVolumesProvider((series: series, author: author)))
+            .value ??
+        const <double, String>{};
 
     LibraryItemResponse? owned(SagaVolumeResponse v) {
       for (final item in library) {
@@ -71,7 +89,7 @@ class SagaPage extends ConsumerWidget {
                 AsyncData(:final value) when value.isEmpty => [
                   Text(l10n.sagaEmpty, style: BabelText.body(15)),
                 ],
-                AsyncData(:final value) => _rows(context, value, owned),
+                AsyncData(:final value) => _rows(context, known, value, owned),
                 AsyncError() => [
                   TextButton(
                     onPressed: () => ref.invalidate(sagaProvider),
@@ -89,12 +107,17 @@ class SagaPage extends ConsumerWidget {
 
   List<Widget> _rows(
     BuildContext context,
+    Map<double, String> known,
     List<SagaVolumeResponse> volumes,
     LibraryItemResponse? Function(SagaVolumeResponse) owned,
   ) {
     final l10n = context.l10n;
     final byNumber = {for (final v in volumes) v.number.toDouble(): v};
-    final last = volumes.last.number.floor();
+    // Up to the latest volume the catalog or Hardcover knows.
+    final last = [
+      volumes.last.number.floor(),
+      for (final n in known.keys) n.floor(),
+    ].reduce((a, b) => a > b ? a : b);
     final mine = volumes.where((v) => owned(v) != null).length;
     return [
       SectionTitle(
@@ -108,7 +131,7 @@ class SagaPage extends ConsumerWidget {
         if (byNumber[n.toDouble()] case final volume?)
           _VolumeRow(volume: volume, item: owned(volume))
         else
-          _GapRow(number: n),
+          _GapRow(number: n, title: known[n.toDouble()]),
       // Volumes numbered otherwise (2.5, 0), after the whole ones.
       for (final volume in volumes)
         if (volume.number != volume.number.floor() || volume.number < 1)
@@ -179,8 +202,9 @@ class _VolumeRow extends StatelessWidget {
 }
 
 class _GapRow extends StatelessWidget {
-  const _GapRow({required this.number});
+  const _GapRow({required this.number, this.title});
   final int number;
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
@@ -212,6 +236,11 @@ class _GapRow extends StatelessWidget {
                   style: BabelText.label(9, color: BabelColors.textSecondary),
                 ),
                 const SizedBox(height: 4),
+                if (title case final title?)
+                  Text(
+                    title,
+                    style: BabelText.body(14, color: BabelColors.textPrimary),
+                  ),
                 Text(l10n.sagaMissing, style: BabelText.body(13)),
               ],
             ),

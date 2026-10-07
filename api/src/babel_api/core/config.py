@@ -85,6 +85,10 @@ class Settings(BaseSettings):
     chaptarr_url: str = ""
     chaptarr_api_key: SecretStr = SecretStr("")
 
+    # Hardcover (free API key, hardcover.app > Settings > Hardcover API): names the volumes of
+    # a saga the catalog lacks. Public book data only. Empty: not used.
+    hardcover_api_key: SecretStr = SecretStr("")
+
     # Google Books completes the one-line descriptions of Open Library. Without a key its
     # shared anonymous quota is often used up: a free key (Google Cloud, Books API)
     # makes it reliable. Empty: tried anyway, and given up on quietly when refused.
