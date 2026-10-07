@@ -465,3 +465,31 @@ def test_a_requested_book_is_watched_and_searched_after_it_is_added() -> None:
     book_id = asyncio.run(Fake("http://x", "k").add({"title": "Frankenstein", "author": {}}))
     assert book_id == 671
     assert calls[-2:] == [("PUT", "book/monitor"), ("POST", "command")]
+
+
+def test_a_volume_matches_however_chaptarr_spells_it() -> None:
+    from babel_api.adapters.chaptarr import best_match
+
+    def book(title: str, author: str = "Hideo Yamamoto") -> dict[str, object]:
+        return {"title": title, "author": {"authorName": author}}
+
+    volume = book("Homunculus, Band 3")
+    found = [
+        book("Homunculus, Band 2"),
+        book("Homunculus, Vol. 3-4"),  # omnibus
+        book("Homunculus 3", "Someone Else"),  # another author
+        book("Homunculus Returns"),
+        volume,
+    ]
+    assert best_match(found, "Homunculus 3", ("Hideo Yamamoto",)) is volume
+    assert best_match(found, "Homunculus 5", ("Hideo Yamamoto",)) is None
+    # A plain title still matches as before.
+    novel = book("Jane Eyre", "Charlotte Brontë")
+    assert (
+        best_match(
+            [book("Jane Eyre: study guide", "A. Teacher"), novel],
+            "Jane Eyre",
+            ("Charlotte Brontë",),
+        )
+        is novel
+    )
