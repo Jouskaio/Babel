@@ -78,6 +78,41 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     return shown;
   }
 
+  /// Removes every finished book at once; their data stays (ADR 0012).
+  Future<void> _cleanFinished(List<LibraryItemResponse> finished) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: BabelColors.surface,
+        title: Text(
+          l10n.cleanFinishedAsk(finished.length),
+          style: BabelText.title(24),
+        ),
+        content: Text(l10n.cleanFinishedBody, style: BabelText.body(13)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.removeFromLibrary),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final controller = ref.read(libraryControllerProvider.notifier);
+    for (final item in finished) {
+      await controller.remove(item);
+    }
+    messenger.showSnackBar(
+      SnackBar(content: Text(l10n.cleanFinishedDone(finished.length))),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -226,6 +261,26 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               onNewShelf: _newShelf,
             ),
           ),
+          if (_filter == ReadingStatus.finished && items.isNotEmpty)
+            SliverToBoxAdapter(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+                  child: TextButton(
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                    onPressed: () => _cleanFinished(items),
+                    child: Text(
+                      l10n.cleanFinished(items.length),
+                      style: BabelText.body(
+                        12,
+                        color: BabelColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           if (_importing case final name?)
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),

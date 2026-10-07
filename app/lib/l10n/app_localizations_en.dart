@@ -2571,4 +2571,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get sagaHint =>
       'Volumes come from the catalog: open one to add it, or to look for it in your sources.';
+
+  @override
+  String get progressAskPageHint => 'Page number';
+
+  @override
+  String cleanFinished(int count) {
+    return 'Remove finished books ($count)';
+  }
+
+  @override
+  String cleanFinishedAsk(int count) {
+    return 'Remove $count finished books from the library?';
+  }
+
+  @override
+  String get cleanFinishedBody =>
+      'The files go, not your notes, reviews or progress: add a book back and you get them again.';
+
+  @override
+  String cleanFinishedDone(int count) {
+    return '$count books removed.';
+  }
 }

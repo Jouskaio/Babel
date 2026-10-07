@@ -4249,6 +4249,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Les tomes viennent du catalogue : ouvrez-en un pour l\'ajouter, ou le chercher dans vos sources.'**
   String get sagaHint;
+
+  /// No description provided for @progressAskPageHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de la page'**
+  String get progressAskPageHint;
+
+  /// No description provided for @cleanFinished.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer les livres lus ({count})'**
+  String cleanFinished(int count);
+
+  /// No description provided for @cleanFinishedAsk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer {count} livres lus de la bibliothèque ?'**
+  String cleanFinishedAsk(int count);
+
+  /// No description provided for @cleanFinishedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les fichiers sont retirés, pas vos notes, avis ni progression : en remettant un livre, vous les retrouvez.'**
+  String get cleanFinishedBody;
+
+  /// No description provided for @cleanFinishedDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} livres retirés.'**
+  String cleanFinishedDone(int count);
 }
 
 class _AppLocalizationsDelegate

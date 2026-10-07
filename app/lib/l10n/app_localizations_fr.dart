@@ -2591,4 +2591,26 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get sagaHint =>
       'Les tomes viennent du catalogue : ouvrez-en un pour l\'ajouter, ou le chercher dans vos sources.';
+
+  @override
+  String get progressAskPageHint => 'Numéro de la page';
+
+  @override
+  String cleanFinished(int count) {
+    return 'Retirer les livres lus ($count)';
+  }
+
+  @override
+  String cleanFinishedAsk(int count) {
+    return 'Retirer $count livres lus de la bibliothèque ?';
+  }
+
+  @override
+  String get cleanFinishedBody =>
+      'Les fichiers sont retirés, pas vos notes, avis ni progression : en remettant un livre, vous les retrouvez.';
+
+  @override
+  String cleanFinishedDone(int count) {
+    return '$count livres retirés.';
+  }
 }
