@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **addedAt** | [**DateTime**](DateTime.md) |  | 
 **audioDuration** | **num** | An audiobook from the reader's Audiobookshelf: its length in seconds | [optional] 
 **authors** | **List<String>** |  | [default to const []]
+**coverId** | **int** | The catalog cover the reader chose, if any | [optional] 
 **coverPath** | **String** | Cover found in the file, relative to the API base URL (may answer 404) | [optional] 
 **editionId** | **String** |  | [optional] 
 **finishedAt** | [**DateTime**](DateTime.md) |  | [optional] 
@@ -19,6 +20,8 @@ Name | Type | Description | Notes
 **id** | **String** |  | 
 **paper** | **bool** | Owned on paper (it may have a file too) | [optional] [default to false]
 **progress** | **num** | Progress declared by hand, in percent (not a device position) | [optional] 
+**series** | **String** | The series it belongs to | [optional] 
+**seriesIndex** | **num** | Its volume number in it | [optional] 
 **sha256** | **String** | Identifies the file; download it from /v1/files/{sha256}. Null for a paper book without a file | [optional] 
 **size** | **int** |  | [optional] 
 **startedAt** | [**DateTime**](DateTime.md) |  | [optional] 

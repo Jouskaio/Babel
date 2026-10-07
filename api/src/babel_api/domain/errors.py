@@ -91,6 +91,10 @@ class InvalidHandleError(DomainError):
     """Handles are 3 to 30 letters, digits, dots or underscores."""
 
 
+class InvalidBookDetailsError(DomainError):
+    """A title, volume number or other detail of a book is not acceptable."""
+
+
 class BookAlreadyInLibraryError(DomainError):
     """The file is already another book of the library."""
 

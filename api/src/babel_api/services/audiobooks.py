@@ -29,6 +29,7 @@ from babel_api.domain.audiobooks import AbsLink
 from babel_api.domain.errors import NotFoundError
 from babel_api.domain.files import AudioRef, Cover, LibraryItem
 from babel_api.domain.ports import ChangeLog, CoverCache, FileRepository
+from babel_api.domain.series import guess_series
 from babel_api.domain.sync import ChangeOp, EntityKind
 from babel_api.services.files import item_data
 
@@ -179,12 +180,15 @@ class AbsService:
             key = self._keep_cover(user_id, remote_id, cover)
             book = detail.book
             work = await self._files.guess_work(None, book.title, book.authors)
+            guess = guess_series(book.title)
             item = await self._files.add_audio_item(
                 user_id,
                 book.title,
                 book.authors,
                 AudioRef(remote_id, book.duration, key),
                 work,
+                series=book.series or (guess.series if guess else None),
+                series_index=guess.number if guess else None,
             )
         await self._changes.record(
             user_id,

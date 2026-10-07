@@ -122,3 +122,31 @@ def test_every_edition_of_a_work_shares_its_reviews_and_notes(
     assert seen_by_dan["notes"] == []
     client.put("/v1/social/blocks/dan", headers=cleo)
     assert client.get(f"/v1/catalog/works/{work}/readers", headers=dan).json()["reviews"] == []
+
+
+def test_recommendations_carry_the_work_and_its_cover(client: TestClient, books: FakeBooks) -> None:
+    ada, bob = account(client, "ada@example.com"), account(client, "bob@example.com")
+    handle(client, ada, "ada")
+    handle(client, bob, "bob")
+    befriend(client, ada, bob, "ada", "bob")
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=ada).json()
+    for title in ("Jane Eyre", "Un livre inconnu"):
+        sent = client.post(
+            "/v1/social/recommendations",
+            json={"to": "bob", "title": title, "authors": ["Charlotte Brontë"]},
+            headers=ada,
+        )
+        assert sent.status_code == 201, sent.text
+
+    received = client.get("/v1/social/recommendations", headers=bob).json()
+
+    by_title = {r["title"]: r for r in received}
+    assert by_title["Jane Eyre"]["work_id"] == hit["id"]
+    assert by_title["Jane Eyre"]["cover_path"] == "/v1/catalog/covers/8235363/M"
+    assert (
+        by_title["Un livre inconnu"]["work_id"],
+        by_title["Un livre inconnu"]["cover_path"],
+    ) == (
+        None,
+        None,
+    )

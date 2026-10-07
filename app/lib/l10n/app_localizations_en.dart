@@ -2384,4 +2384,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String sourceMatchImported(String title) {
     return '“$title” is in your library.';
   }
+
+  @override
+  String get editDetails => 'Edit details';
+
+  @override
+  String get detailsTitle => 'Book details';
+
+  @override
+  String get detailsBookTitle => 'Title';
+
+  @override
+  String get detailsAuthors => 'Authors, separated by commas';
+
+  @override
+  String get detailsSeries => 'Series';
+
+  @override
+  String get detailsSeriesHint =>
+      'Leave empty if this book is not in a series.';
+
+  @override
+  String get detailsVolume => 'Volume';
+
+  @override
+  String get detailsCover => 'Cover';
+
+  @override
+  String get coverDefault => 'Default';
+
+  @override
+  String get coverLinkFirst =>
+      'Link this book to a book page first to choose among its editions\' covers.';
+
+  @override
+  String volumeNumber(String number) {
+    return 'Volume $number';
+  }
+
+  @override
+  String seriesVolumes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count volumes',
+      one: '1 volume',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String seriesRead(int count) {
+    return '$count read';
+  }
+
+  @override
+  String get detailsSaved => 'Details saved.';
+
+  @override
+  String seriesOf(String series, String number) {
+    return '$series · volume $number';
+  }
 }

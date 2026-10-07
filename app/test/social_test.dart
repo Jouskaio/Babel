@@ -104,12 +104,17 @@ void main() {
         'message': 'Lis ça !',
         'created_at': '2026-10-05T10:00:00Z',
         'read': false,
+        'work_id': 'w1',
+        'cover_path': '/v1/catalog/covers/1/M',
       });
     await show(tester, server, const HomePage());
 
     expect(find.text('Camille lit Arcane'), findsOneWidget);
     expect(find.text('RECOMMANDÉ PAR CAMILLE'), findsOneWidget);
-    expect(find.text('« Lis ça ! »'), findsOneWidget);
+    expect(find.text('Lis ça !'), findsOneWidget);
+    // Its cover stands beside it, and the book's page is one tap away.
+    expect(find.byType(Image), findsWidgets);
+    expect(find.text('VOIR LA FICHE'), findsOneWidget);
 
     await tester.tap(find.text('VU'));
     await settle(tester);

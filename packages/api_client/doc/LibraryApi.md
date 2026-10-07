@@ -31,6 +31,7 @@ Method | HTTP request | Description
 [**saveReview**](LibraryApi.md#savereview) | **PUT** /v1/library/{item_id}/review | Save Review
 [**setPaper**](LibraryApi.md#setpaper) | **PUT** /v1/library/{item_id}/paper | Set Paper
 [**stopFollow**](LibraryApi.md#stopfollow) | **DELETE** /v1/library/follows/{follow_id} | Stop Follow
+[**updateBookDetails**](LibraryApi.md#updatebookdetails) | **PATCH** /v1/library/{item_id} | Update Details
 [**withdrawFile**](LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
 
 
@@ -1107,6 +1108,59 @@ void (empty response body)
 
  - **Content-Type**: Not defined
  - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **updateBookDetails**
+> LibraryItemResponse updateBookDetails(itemId, bookDetailsRequest, xBabelDevice)
+
+Update Details
+
+Correct a book's title, authors, series, volume number or cover.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = LibraryApi();
+final itemId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final bookDetailsRequest = BookDetailsRequest(); // BookDetailsRequest | 
+final xBabelDevice = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.updateBookDetails(itemId, bookDetailsRequest, xBabelDevice);
+    print(result);
+} catch (e) {
+    print('Exception when calling LibraryApi->updateBookDetails: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **itemId** | **String**|  | 
+ **bookDetailsRequest** | [**BookDetailsRequest**](BookDetailsRequest.md)|  | 
+ **xBabelDevice** | **String**|  | [optional] 
+
+### Return type
+
+[**LibraryItemResponse**](LibraryItemResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

@@ -826,5 +826,20 @@
   "noSourceMatch": "None of your sources has this book. Babel does not download catalog books: add a source, or import your file.",
   "manageSources": "Manage my sources",
   "addToLibrary": "Add to the library",
-  "sourceMatchImported": "“{title}” is in your library."
+  "sourceMatchImported": "“{title}” is in your library.",
+  "editDetails": "Edit details",
+  "detailsTitle": "Book details",
+  "detailsBookTitle": "Title",
+  "detailsAuthors": "Authors, separated by commas",
+  "detailsSeries": "Series",
+  "detailsSeriesHint": "Leave empty if this book is not in a series.",
+  "detailsVolume": "Volume",
+  "detailsCover": "Cover",
+  "coverDefault": "Default",
+  "coverLinkFirst": "Link this book to a book page first to choose among its editions' covers.",
+  "volumeNumber": "Volume {number}",
+  "seriesVolumes": "{count, plural, =1{1 volume} other{{count} volumes}}",
+  "seriesRead": "{count} read",
+  "detailsSaved": "Details saved.",
+  "seriesOf": "{series} · volume {number}"
 }

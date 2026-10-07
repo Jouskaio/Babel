@@ -67,6 +67,24 @@ class FakeServer {
   /// Books of the reader's sources matching the work page's title.
   final sourceMatches = <Map<String, Object?>>[];
 
+  /// Bodies of the book corrections sent.
+  final detailsPatches = <Map<String, Object?>>[];
+
+  /// A volume of a series.
+  void addVolume(String id, String title, String series, num number) =>
+      changes.add({
+        'seq': changes.length + 1,
+        'entity': 'library_item',
+        'entity_id': id,
+        'op': 'upsert',
+        'data': {
+          ...libraryItem(id, title),
+          'series': series,
+          'series_index': number,
+        },
+        'device_id': null,
+      });
+
   /// The work page's answer.
   Map<String, Object?> work = {
     'id': 'w1',
@@ -437,6 +455,21 @@ class FakeServer {
       });
     }
     if (path.endsWith('/reader-notes')) return json(readerNotes);
+    if (request.method == 'PATCH' &&
+        RegExp(r'^/v1/library/[^/]+$').hasMatch(path)) {
+      final body = jsonDecode(request.body) as Map<String, Object?>;
+      detailsPatches.add(body);
+      final id = path.split('/').last;
+      return json({
+        ...libraryItem(id, body['title']! as String),
+        'authors': body['authors'],
+        'series': (body['series'] as String?)?.isEmpty ?? true
+            ? null
+            : body['series'],
+        'series_index': body['series_index'],
+        'cover_id': body['cover_id'],
+      });
+    }
     if (path == '/v1/catalog/trending') {
       return json([
         {

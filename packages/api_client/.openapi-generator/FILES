@@ -17,6 +17,7 @@ doc/AuthApi.md
 doc/AuthorCountResponse.md
 doc/AuthorResponse.md
 doc/BatchImportResponse.md
+doc/BookDetailsRequest.md
 doc/BookFormat.md
 doc/BookNoteResponse.md
 doc/BookTitleResponse.md
@@ -151,6 +152,7 @@ lib/model/audio_track_response.dart
 lib/model/author_count_response.dart
 lib/model/author_response.dart
 lib/model/batch_import_response.dart
+lib/model/book_details_request.dart
 lib/model/book_format.dart
 lib/model/book_note_response.dart
 lib/model/book_title_response.dart

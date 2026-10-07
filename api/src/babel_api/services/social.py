@@ -4,7 +4,7 @@ Every read goes through the viewer's relation to the reader: a reader's private 
 never returned to anyone else, friends-only content only to mutual friends.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from uuid import UUID, uuid4
 
@@ -498,7 +498,11 @@ class SocialService:
         self, user_id: UUID
     ) -> tuple[list[Recommendation], dict[UUID, Profile]]:
         found = await self._social.recommendations(user_id, 100)
-        return found, await self._social.profiles(list({r.sender_id for r in found}))
+        shown: list[Recommendation] = []
+        for r in found:
+            match = await self._files.work_with_cover(r.title, r.authors)
+            shown.append(replace(r, work_id=match[0], cover_id=match[1]) if match else r)
+        return shown, await self._social.profiles(list({r.sender_id for r in found}))
 
     async def mark_read(self, user_id: UUID, recommendation_id: UUID) -> None:
         if not await self._social.mark_read(user_id, recommendation_id, datetime.now(UTC)):

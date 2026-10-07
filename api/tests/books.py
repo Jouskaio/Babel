@@ -12,6 +12,7 @@ def epub(
     cover: bytes | None = None,
     cover_style: str = "epub3",
     subjects: tuple[str, ...] = (),
+    series: tuple[str, str] | None = None,
 ) -> bytes:
     """A minimal EPUB; ``cover`` adds a JPEG cover declared the EPUB 3 or EPUB 2 way."""
     identifier = f"<dc:identifier>urn:isbn:{isbn}</dc:identifier>" if isbn else ""
@@ -32,6 +33,12 @@ def epub(
             f"<dc:title>{title}</dc:title><dc:creator>{author}</dc:creator>"
             f"{identifier}<dc:language>fr-FR</dc:language>{_cover_meta(cover, cover_style)}"
             + "".join(f"<dc:subject>{s}</dc:subject>" for s in subjects)
+            + (
+                f'<meta name="calibre:series" content="{series[0]}"/>'
+                f'<meta name="calibre:series_index" content="{series[1]}"/>'
+                if series
+                else ""
+            )
             + f"</metadata>{_manifest(cover, cover_style)}</package>",
         )
         if cover is not None:
@@ -59,10 +66,14 @@ def _manifest(cover: bytes | None, style: str) -> str:
 JPEG = b"\xff\xd8\xff\xe0" + b"cover" * 20
 
 
-def cbz() -> bytes:
+def cbz(comic_info: str | None = None) -> bytes:
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w") as archive:
         archive.writestr("001.jpg", b"\xff\xd8\xff" + b"0" * 100)
+        if comic_info:
+            archive.writestr(
+                "ComicInfo.xml", f"<?xml version='1.0'?><ComicInfo>{comic_info}</ComicInfo>"
+            )
     return buffer.getvalue()
 
 

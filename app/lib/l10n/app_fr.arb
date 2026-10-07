@@ -1394,5 +1394,51 @@
         "type": "String"
       }
     }
+  },
+  "editDetails": "Modifier les informations",
+  "detailsTitle": "Informations du livre",
+  "detailsBookTitle": "Titre",
+  "detailsAuthors": "Auteurs, séparés par des virgules",
+  "detailsSeries": "Série",
+  "detailsSeriesHint": "Laissez vide si ce livre n'est pas dans une série.",
+  "detailsVolume": "Tome",
+  "detailsCover": "Couverture",
+  "coverDefault": "Par défaut",
+  "coverLinkFirst": "Associez d'abord ce livre à une fiche pour choisir parmi les couvertures de ses éditions.",
+  "volumeNumber": "Tome {number}",
+  "@volumeNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "seriesVolumes": "{count, plural, =1{1 tome} other{{count} tomes}}",
+  "@seriesVolumes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesRead": "{count} lus",
+  "@seriesRead": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "detailsSaved": "Informations enregistrées.",
+  "seriesOf": "{series} · tome {number}",
+  "@seriesOf": {
+    "placeholders": {
+      "series": {
+        "type": "String"
+      },
+      "number": {
+        "type": "String"
+      }
+    }
   }
 }

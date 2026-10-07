@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/auth/auth_controller.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/loading_bar.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../library/application/library_controller.dart';
@@ -230,7 +231,7 @@ class _FriendsSectionState extends ConsumerState<_FriendsSection> {
             AsyncError() => [
               Text(l10n.errorNetwork, style: BabelText.body(14)),
             ],
-            _ => [const LinearProgressIndicator()],
+            _ => [const LoadingBar()],
           },
         ],
         const SizedBox(height: 16),
