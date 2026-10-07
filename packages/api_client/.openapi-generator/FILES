@@ -27,7 +27,10 @@ doc/ChangeOp.md
 doc/ChangePasswordRequest.md
 doc/ChangeResponse.md
 doc/CheckSourceResponse.md
+doc/CommentRequest.md
+doc/CommentResponse.md
 doc/CreateSourceRequest.md
+doc/CsvImportResponse.md
 doc/DeviceKind.md
 doc/DeviceResponse.md
 doc/EditionResponse.md
@@ -44,6 +47,7 @@ doc/GenericConfig.md
 doc/Genre.md
 doc/GenreCountResponse.md
 doc/GitHubConfig.md
+doc/GoalRequest.md
 doc/HealthApi.md
 doc/HealthResponse.md
 doc/IdentityProvider.md
@@ -161,7 +165,10 @@ lib/model/change_op.dart
 lib/model/change_password_request.dart
 lib/model/change_response.dart
 lib/model/check_source_response.dart
+lib/model/comment_request.dart
+lib/model/comment_response.dart
 lib/model/create_source_request.dart
+lib/model/csv_import_response.dart
 lib/model/device_kind.dart
 lib/model/device_response.dart
 lib/model/edition_response.dart
@@ -178,6 +185,7 @@ lib/model/generic_config.dart
 lib/model/genre.dart
 lib/model/genre_count_response.dart
 lib/model/git_hub_config.dart
+lib/model/goal_request.dart
 lib/model/health_response.dart
 lib/model/identity_provider.dart
 lib/model/import_response.dart

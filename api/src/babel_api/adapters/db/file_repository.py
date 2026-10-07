@@ -266,7 +266,8 @@ class SqlFileRepository:
     async def list_items(self, user_id: UUID) -> list[LibraryItem]:
         rows = await self._session.scalars(
             select(LibraryItemRow)
-            .join(StoredFileRow)
+            # Paper books and audiobooks have no file: they stay in the list.
+            .outerjoin(StoredFileRow)
             .where(
                 LibraryItemRow.user_id == user_id,
                 LibraryItemRow.removed_at.is_(None),

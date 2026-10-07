@@ -67,6 +67,13 @@ class FakeServer {
   /// Books of the reader's sources matching the work page's title.
   final sourceMatches = <Map<String, Object?>>[];
 
+  /// The yearly goal answered by the stats, and the goals sent.
+  int? statsGoal;
+  final goalsSent = <Object?>[];
+
+  /// Reviews of the work page's readers list.
+  final workReviews = <Map<String, Object?>>[];
+
   /// Bodies of the book corrections sent.
   final detailsPatches = <Map<String, Object?>>[];
 
@@ -370,6 +377,7 @@ class FakeServer {
           ],
           'reviews': [
             {
+              'id': 'r9',
               'item_id': 'x',
               'title': 'Jane Eyre',
               'authors': ['Charlotte Brontë'],
@@ -495,9 +503,9 @@ class FakeServer {
     }
     if (path.endsWith('/readers')) {
       return json({
-        'rating': null,
-        'ratings': 0,
-        'reviews': <Object?>[],
+        'rating': workReviews.isEmpty ? null : 4.0,
+        'ratings': workReviews.length,
+        'reviews': workReviews,
         'notes': <Object?>[],
       });
     }
@@ -546,6 +554,17 @@ class FakeServer {
         'cover_path': null,
         'audio_duration': 7200.0,
       }, 201);
+    }
+    if (path == '/v1/me/goal') {
+      goalsSent.add(
+        (jsonDecode(request.body) as Map<String, Object?>)['books'],
+      );
+      return http.Response('', 204);
+    }
+    if (path.startsWith('/v1/social/reviews/')) {
+      socialCalls.add('${request.method} $path');
+      if (request.method == 'GET') return json(<Object?>[]);
+      return http.Response('', 204);
     }
     if (path == '/v1/me/stats') {
       return json({
@@ -599,6 +618,7 @@ class FakeServer {
         'previous_genres': [
           {'genre': 'mystery', 'books': 3},
         ],
+        'goal': statsGoal,
       });
     }
     if (path.startsWith('/v1/sync/') && request.method == 'POST') {

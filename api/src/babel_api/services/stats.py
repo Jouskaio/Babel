@@ -145,4 +145,8 @@ class StatsService:
             years=sorted(years | {now.year}, reverse=True),
             genres=tally(year),
             previous_genres=tally(year - 1),
+            goal=await self._stats.goal(user_id),
         )
+
+    async def set_goal(self, user_id: UUID, books: int | None) -> None:
+        await self._stats.set_goal(user_id, books)

@@ -41,6 +41,8 @@ class UserRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     is_admin: Mapped[bool] = mapped_column(default=False, server_default=false())
     premium: Mapped[bool] = mapped_column(default=False, server_default=false())
+    # Books the reader means to finish each year (one number for every year).
+    reading_goal: Mapped[int | None] = mapped_column(Integer)
 
     identities: Mapped[list["IdentityRow"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", lazy="selectin"
@@ -461,6 +463,33 @@ class ReviewRow(Base):
     audience: Mapped[str] = mapped_column(String(16), default="public")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, index=True)
+
+
+class ReviewLikeRow(Base):
+    """A reader liking a review."""
+
+    __tablename__ = "review_likes"
+
+    review_id: Mapped[UUID] = mapped_column(
+        ForeignKey("reviews.id", ondelete="CASCADE"), primary_key=True
+    )
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+
+
+class ReviewCommentRow(Base):
+    """A comment under a review."""
+
+    __tablename__ = "review_comments"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    review_id: Mapped[UUID] = mapped_column(
+        ForeignKey("reviews.id", ondelete="CASCADE"), index=True
+    )
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    text: Mapped[str] = mapped_column(String(1000))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
 class RecommendationRow(Base):

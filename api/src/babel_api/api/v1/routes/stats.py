@@ -57,6 +57,7 @@ class YearStatsResponse(BaseModel):
         description="Genres of the books finished, most read first (a book counts in up to two)"
     )
     previous_genres: list[GenreCountResponse] = Field(description="The same, the year before")
+    goal: int | None = Field(description="Books you mean to finish each year")
 
 
 @router.get("/me/stats", operation_id="getYearStats")
@@ -103,4 +104,17 @@ async def get_year_stats(
         years=found.years,
         genres=[GenreCountResponse(genre=g, books=n) for g, n in found.genres],
         previous_genres=[GenreCountResponse(genre=g, books=n) for g, n in found.previous_genres],
+        goal=found.goal,
     )
+
+
+class GoalRequest(BaseModel):
+    books: Annotated[int, Field(ge=1, le=1000)] | None = Field(
+        description="Books to finish each year; null removes the goal"
+    )
+
+
+@router.put("/me/goal", operation_id="setReadingGoal", status_code=204)
+async def set_goal(user_id: CurrentUserId, stats: StatsServiceDep, body: GoalRequest) -> None:
+    """Set (or remove) your yearly reading goal."""
+    await stats.set_goal(user_id, body.books)

@@ -91,6 +91,24 @@ class BookTrace:
 
 
 @dataclass(frozen=True, slots=True)
+class ReviewReactions:
+    """What readers did on a review, as the viewer sees it."""
+
+    likes: int = 0
+    liked: bool = False
+    comments: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class ReviewComment:
+    id: UUID
+    review_id: UUID
+    user_id: UUID
+    text: str
+    created_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
 class Recommendation:
     id: UUID
     sender_id: UUID

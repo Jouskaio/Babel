@@ -10,6 +10,7 @@ from uuid import UUID, uuid4
 
 from babel_api.adapters.db.social_repository import SqlSocialRepository
 from babel_api.domain.errors import (
+    ForbiddenError,
     InvalidHandleError,
     NotFoundError,
     NotFriendsError,
@@ -30,6 +31,8 @@ from babel_api.domain.social import (
     Report,
     ReportReason,
     Review,
+    ReviewComment,
+    ReviewReactions,
     SharedNote,
     SharedShelf,
     normalize_handle,
@@ -38,6 +41,7 @@ from babel_api.services.notifications import Notifier
 
 MAX_REVIEW = 5000
 MAX_MESSAGE = 1000
+MAX_COMMENT = 1000
 READING_WINDOW = timedelta(days=60)
 
 
@@ -70,6 +74,7 @@ class WorkReaders:
     reviews: list[Review]
     notes: list[SharedNote]
     profiles: dict[UUID, Profile]
+    reactions: dict[UUID, ReviewReactions]
 
     @property
     def rating(self) -> tuple[float | None, int]:
@@ -361,9 +366,58 @@ class SocialService:
         hidden = list(await self._social.hidden(viewer))
         friends = await self._social.friends(viewer)
         reviews = await self._social.work_reviews(work_id, viewer, friends, hidden, 100)
+        reactions = await self._social.reactions([r.id for r in reviews], viewer)
         notes = await self._social.work_notes(work_id, viewer, friends, hidden, 100)
         people = list({r.user_id for r in reviews} | {n.user_id for n in notes})
-        return WorkReaders(reviews, notes, await self._social.profiles(people))
+        return WorkReaders(reviews, notes, await self._social.profiles(people), reactions)
+
+    # ------------------------------------------------------------ likes and comments
+    async def _visible_review(self, viewer: UUID, review_id: UUID) -> Review:
+        """A review the viewer may see (their own, public, or friends'), else not found."""
+        review = await self._social.review_by_id(review_id)
+        if review is None or review.user_id in await self._social.hidden(viewer):
+            raise NotFoundError
+        if review.user_id != viewer:
+            relation = await self.relation(viewer, review.user_id)
+            if not relation.sees(review.audience):
+                raise NotFoundError
+        return review
+
+    async def like(self, viewer: UUID, review_id: UUID, liked: bool) -> None:
+        await self._visible_review(viewer, review_id)
+        await self._social.set_like(review_id, viewer, liked)
+        await self._social.commit()
+
+    async def review_comments(
+        self, viewer: UUID, review_id: UUID
+    ) -> tuple[list[ReviewComment], dict[UUID, Profile]]:
+        await self._visible_review(viewer, review_id)
+        hidden = await self._social.hidden(viewer)
+        found = [c for c in await self._social.comments(review_id) if c.user_id not in hidden]
+        return found, await self._social.profiles(list({c.user_id for c in found}))
+
+    async def comment(
+        self, viewer: UUID, review_id: UUID, text: str
+    ) -> tuple[ReviewComment, Profile | None]:
+        await self._visible_review(viewer, review_id)
+        text = " ".join(text.split())[:MAX_COMMENT]
+        if not text:
+            raise ValueError("text")
+        comment = ReviewComment(uuid4(), review_id, viewer, text, datetime.now(UTC))
+        await self._social.add_comment(comment)
+        await self._social.commit()
+        return comment, (await self._social.profiles([viewer])).get(viewer)
+
+    async def delete_comment(self, viewer: UUID, review_id: UUID, comment_id: UUID) -> None:
+        """Its author, or the review's, removes a comment."""
+        review = await self._visible_review(viewer, review_id)
+        comment = await self._social.comment(comment_id)
+        if comment is None or comment.review_id != review_id:
+            raise NotFoundError
+        if viewer not in (comment.user_id, review.user_id):
+            raise ForbiddenError
+        await self._social.delete_comment(comment_id)
+        await self._social.commit()
 
     async def book_notes(
         self, viewer: UUID, item_id: UUID

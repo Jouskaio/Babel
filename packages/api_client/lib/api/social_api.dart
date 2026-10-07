@@ -122,6 +122,63 @@ class SocialApi {
     }
   }
 
+  /// Comment Review
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] reviewId (required):
+  ///
+  /// * [CommentRequest] commentRequest (required):
+  Future<Response> commentReviewWithHttpInfo(String reviewId, CommentRequest commentRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/social/reviews/{review_id}/comments'
+      .replaceAll('{review_id}', reviewId);
+
+    // ignore: prefer_final_locals
+    Object? postBody = commentRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Comment Review
+  ///
+  /// Parameters:
+  ///
+  /// * [String] reviewId (required):
+  ///
+  /// * [CommentRequest] commentRequest (required):
+  Future<CommentResponse?> commentReview(String reviewId, CommentRequest commentRequest,) async {
+    final response = await commentReviewWithHttpInfo(reviewId, commentRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'CommentResponse',) as CommentResponse;
+    
+    }
+    return null;
+  }
+
   /// Delete Review
   ///
   /// Note: This method returns the HTTP [Response].
@@ -162,6 +219,60 @@ class SocialApi {
   /// * [String] itemId (required):
   Future<void> deleteReview(String itemId,) async {
     final response = await deleteReviewWithHttpInfo(itemId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
+  /// Delete Review Comment
+  ///
+  /// Delete your comment, or any comment under your review.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] reviewId (required):
+  ///
+  /// * [String] commentId (required):
+  Future<Response> deleteReviewCommentWithHttpInfo(String reviewId, String commentId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/social/reviews/{review_id}/comments/{comment_id}'
+      .replaceAll('{review_id}', reviewId)
+      .replaceAll('{comment_id}', commentId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'DELETE',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Delete Review Comment
+  ///
+  /// Delete your comment, or any comment under your review.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] reviewId (required):
+  ///
+  /// * [String] commentId (required):
+  Future<void> deleteReviewComment(String reviewId, String commentId,) async {
+    final response = await deleteReviewCommentWithHttpInfo(reviewId, commentId,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -535,6 +646,62 @@ class SocialApi {
     return null;
   }
 
+  /// Get Review Comments
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] reviewId (required):
+  Future<Response> getReviewCommentsWithHttpInfo(String reviewId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/social/reviews/{review_id}/comments'
+      .replaceAll('{review_id}', reviewId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Review Comments
+  ///
+  /// Parameters:
+  ///
+  /// * [String] reviewId (required):
+  Future<List<CommentResponse>?> getReviewComments(String reviewId,) async {
+    final response = await getReviewCommentsWithHttpInfo(reviewId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<CommentResponse>') as List)
+        .cast<CommentResponse>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
   /// Get Profile
   ///
   /// Your handle and what you share.
@@ -638,6 +805,55 @@ class SocialApi {
     
     }
     return null;
+  }
+
+  /// Like Review
+  ///
+  /// Like a review you may see.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] reviewId (required):
+  Future<Response> likeReviewWithHttpInfo(String reviewId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/social/reviews/{review_id}/like'
+      .replaceAll('{review_id}', reviewId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'PUT',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Like Review
+  ///
+  /// Like a review you may see.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] reviewId (required):
+  Future<void> likeReview(String reviewId,) async {
+    final response = await likeReviewWithHttpInfo(reviewId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
   }
 
   /// List Reports
@@ -1160,6 +1376,51 @@ class SocialApi {
     
     }
     return null;
+  }
+
+  /// Unlike Review
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] reviewId (required):
+  Future<Response> unlikeReviewWithHttpInfo(String reviewId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/social/reviews/{review_id}/like'
+      .replaceAll('{review_id}', reviewId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'DELETE',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Unlike Review
+  ///
+  /// Parameters:
+  ///
+  /// * [String] reviewId (required):
+  Future<void> unlikeReview(String reviewId,) async {
+    final response = await unlikeReviewWithHttpInfo(reviewId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
   }
 
   /// Update Profile

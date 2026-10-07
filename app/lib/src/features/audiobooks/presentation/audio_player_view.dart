@@ -1,4 +1,5 @@
 import 'package:babel_api_client/api.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -212,6 +213,7 @@ class _AudioPlayerViewState extends ConsumerState<AudioPlayerView> {
                     onTap: () => _chooseSleep(context, session),
                   ),
                 ),
+                if (!kIsWeb) _OfflineChip(itemId: now.item.id),
                 if (now.playback.chapters.isNotEmpty)
                   _Chip(
                     icon: Icons.format_list_numbered,
@@ -316,6 +318,55 @@ class _AudioPlayerViewState extends ConsumerState<AudioPlayerView> {
       );
     },
   );
+}
+
+/// Download the book to listen without network; says so once it is there.
+class _OfflineChip extends ConsumerStatefulWidget {
+  const _OfflineChip({required this.itemId});
+  final String itemId;
+
+  @override
+  ConsumerState<_OfflineChip> createState() => _OfflineChipState();
+}
+
+class _OfflineChipState extends ConsumerState<_OfflineChip> {
+  double? _progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final offline =
+        ref.watch(audioOfflineProvider(widget.itemId)).value ?? false;
+    final progress = _progress;
+    return _Chip(
+      icon: offline ? Icons.offline_pin_outlined : Icons.download_outlined,
+      label: progress != null
+          ? '${l10n.audioDownloading} ${(progress * 100).round()} %'
+          : offline
+          ? l10n.audioOffline
+          : l10n.audioDownload,
+      selected: offline,
+      onTap: offline || progress != null
+          ? () {}
+          : () async {
+              final messenger = ScaffoldMessenger.of(context);
+              setState(() => _progress = 0);
+              try {
+                await ref
+                    .read(audioSessionProvider.notifier)
+                    .download(
+                      (p) => mounted ? setState(() => _progress = p) : null,
+                    );
+              } on Object {
+                messenger.showSnackBar(
+                  SnackBar(content: Text(l10n.playerError)),
+                );
+              } finally {
+                if (mounted) setState(() => _progress = null);
+              }
+            },
+    );
+  }
 }
 
 class _Chip extends StatelessWidget {

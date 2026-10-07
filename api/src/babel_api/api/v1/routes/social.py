@@ -19,6 +19,7 @@ from babel_api.domain.social import (
     Recommendation,
     ReportReason,
     Review,
+    ReviewComment,
 )
 from babel_api.services.social import Reader
 
@@ -101,6 +102,7 @@ class ShelfResponse(BaseModel):
 
 
 class ReviewResponse(BaseModel):
+    id: UUID
     item_id: UUID
     title: str
     authors: list[str]
@@ -112,6 +114,7 @@ class ReviewResponse(BaseModel):
     @classmethod
     def of(cls, review: Review) -> "ReviewResponse":
         return cls(
+            id=review.id,
             item_id=review.item_id,
             title=review.title,
             authors=list(review.authors),
@@ -519,8 +522,86 @@ async def resolve_report(_: CurrentAdminId, social: SocialServiceDep, report_id:
     await social.resolve_report(report_id)
 
 
+# ---------------------------------------------------------------- likes and comments
+class CommentResponse(BaseModel):
+    id: UUID
+    reader: AuthorResponse
+    text: str
+    created_at: datetime
+    mine: bool
+
+
+class CommentRequest(BaseModel):
+    text: Annotated[str, Field(min_length=1, max_length=1000)]
+
+
+@router.put(
+    "/social/reviews/{review_id}/like",
+    operation_id="likeReview",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def like_review(user_id: CurrentUserId, social: SocialServiceDep, review_id: UUID) -> None:
+    """Like a review you may see."""
+    await social.like(user_id, review_id, True)
+
+
+@router.delete(
+    "/social/reviews/{review_id}/like",
+    operation_id="unlikeReview",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def unlike_review(user_id: CurrentUserId, social: SocialServiceDep, review_id: UUID) -> None:
+    await social.like(user_id, review_id, False)
+
+
+def _comment(c: ReviewComment, viewer: UUID, profile: Profile | None) -> CommentResponse:
+    return CommentResponse(
+        id=c.id,
+        reader=_author(profile),
+        text=c.text,
+        created_at=c.created_at,
+        mine=c.user_id == viewer,
+    )
+
+
+@router.get("/social/reviews/{review_id}/comments", operation_id="getReviewComments")
+async def get_review_comments(
+    user_id: CurrentUserId, social: SocialServiceDep, review_id: UUID
+) -> list[CommentResponse]:
+    found, profiles = await social.review_comments(user_id, review_id)
+    return [_comment(c, user_id, profiles.get(c.user_id)) for c in found]
+
+
+@router.post(
+    "/social/reviews/{review_id}/comments",
+    operation_id="commentReview",
+    status_code=status.HTTP_201_CREATED,
+)
+async def comment_review(
+    user_id: CurrentUserId, social: SocialServiceDep, review_id: UUID, body: CommentRequest
+) -> CommentResponse:
+    comment, profile = await social.comment(user_id, review_id, body.text)
+    return _comment(comment, user_id, profile)
+
+
+@router.delete(
+    "/social/reviews/{review_id}/comments/{comment_id}",
+    operation_id="deleteReviewComment",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_review_comment(
+    user_id: CurrentUserId, social: SocialServiceDep, review_id: UUID, comment_id: UUID
+) -> None:
+    """Delete your comment, or any comment under your review."""
+    await social.delete_comment(user_id, review_id, comment_id)
+
+
 # ---------------------------------------------------------------- a work
 class WorkReviewResponse(BaseModel):
+    id: UUID
+    likes: int
+    liked: bool = Field(description="You liked it")
+    comments: int
     reader: AuthorResponse
     rating: int | None
     text: str | None
@@ -560,6 +641,10 @@ async def get_work_readers(
         ratings=ratings,
         reviews=[
             WorkReviewResponse(
+                id=r.id,
+                likes=found.reactions[r.id].likes,
+                liked=found.reactions[r.id].liked,
+                comments=found.reactions[r.id].comments,
                 reader=_author(found.profiles.get(r.user_id)),
                 rating=r.rating,
                 text=r.text,
