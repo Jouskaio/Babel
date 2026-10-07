@@ -63,17 +63,24 @@ def pick_description(search: dict[str, Any], title: str, authors: tuple[str, ...
 
 
 def pick_series(search: dict[str, Any], name: str, author: str | None) -> int | None:
-    """The id of the series called [name] (by this author when given), among search hits."""
+    """The id of the series called [name], among search hits. With several of that name, the
+    one by this author; with a single one, that one (its author may be spelled otherwise)."""
     ids = cast(list[Any], search.get("ids") or [])
     surname = series_key(author).split(" ")[-1] if author and series_key(author) else None
-    for i, doc in enumerate(_hits(search)):
-        if series_key(str(doc.get("name", ""))) != series_key(name):
-            continue
-        who = series_key(str(doc.get("author_name", "")))
-        if surname and surname not in who:
-            continue
-        return int(ids[i]) if i < len(ids) else int(doc["id"])
-    return None
+    named: list[tuple[int, dict[str, Any]]] = [
+        (i, doc)
+        for i, doc in enumerate(_hits(search))
+        if series_key(str(doc.get("name", ""))) == series_key(name)
+    ]
+    chosen = [
+        (i, doc)
+        for i, doc in named
+        if not surname or surname in series_key(str(doc.get("author_name", "")))
+    ] or (named if len(named) == 1 else [])
+    if not chosen:
+        return None
+    i, doc = chosen[0]
+    return int(ids[i]) if i < len(ids) else int(doc["id"])
 
 
 class HardcoverClient:
@@ -125,7 +132,11 @@ class HardcoverClient:
             return cached[1]
         try:
             found = await self._query(_SEARCH, {"q": f"{name} {author or ''}".strip()})
-            series_id = pick_series(cast(dict[str, Any], found.get("search") or {}), name, author)
+            search = cast(dict[str, Any], found.get("search") or {})
+            series_id = pick_series(search, name, author)
+            if series_id is None:
+                seen = [(str(d.get("name")), str(d.get("author_name"))) for d in _hits(search)]
+                log.info("Hardcover has no series %r by %r; it found %s", name, author, seen)
             volumes: list[tuple[float, str]] = []
             if series_id is not None:
                 data = await self._query(_VOLUMES, {"id": series_id})

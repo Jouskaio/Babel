@@ -606,3 +606,20 @@ def test_hardcover_rests_after_a_429_and_stops_at_its_daily_budget() -> None:
     ok._used = hardcover.DAILY_BUDGET  # type: ignore[attr-defined]
     assert asyncio.run(ok.description("Emma", ("Jane Austen",))) is None
     assert ok._used == hardcover.DAILY_BUDGET  # type: ignore[attr-defined]
+
+
+def test_a_single_series_of_that_name_is_taken_whatever_its_author_spelling() -> None:
+    from typing import Any
+
+    from babel_api.adapters.hardcover import pick_series
+
+    def search(*docs: dict[str, Any]) -> dict[str, Any]:
+        hits = {"hits": [{"document": d} for d in docs]}
+        return {"ids": list(range(1, len(docs) + 1)), "results": hits}
+
+    only = {"name": "Homunculus", "author_name": "山本英夫"}
+    assert pick_series(search(only), "Homunculus", "Hideo Yamamoto") == 1
+    other = {"name": "Homunculus", "author_name": "Christian Gude"}
+    mine = {"name": "Homunculus", "author_name": "Hideo Yamamoto"}
+    assert pick_series(search(other, mine), "Homunculus", "Hideo Yamamoto") == 2
+    assert pick_series(search(other, only), "Homunculus", "Hideo Yamamoto") is None  # ambiguous
