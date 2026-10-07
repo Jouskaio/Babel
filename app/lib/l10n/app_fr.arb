@@ -1555,5 +1555,65 @@
         "type": "int"
       }
     }
-  }
+  },
+  "monthWrapBooks": "{count, plural, =0{livre terminé} =1{livre terminé} other{livres terminés}}",
+  "@monthWrapBooks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monthWrapEmpty": "Aucun livre terminé ce mois-ci.",
+  "monthWrapShare": "Partager l'image",
+  "statsOpenMonth": "Récap de {month}",
+  "@statsOpenMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "scanBurst": "Rafale : ajouter chaque livre en papier",
+  "scanBurstAdded": "{count, plural, =1{1 livre ajouté} other{{count} livres ajoutés}} : {titles}",
+  "@scanBurstAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "titles": {
+        "type": "String"
+      }
+    }
+  },
+  "adminConnectors": "Connecteurs",
+  "adminSourcesHealth": "Santé des sources",
+  "adminNoSources": "Aucune source connectée.",
+  "adminScanned": "scan {date}",
+  "@adminScanned": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "adminNeverScanned": "jamais scanné",
+  "adminQuota": "Sources : {value}",
+  "@adminQuota": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "adminQuotaDefault": "défaut ({count})",
+  "@adminQuotaDefault": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminQuotaAsk": "Combien de sources ?",
+  "adminQuotaHint": "Vide : retour au défaut du serveur"
 }

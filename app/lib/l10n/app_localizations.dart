@@ -4279,6 +4279,96 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count} livres retirés.'**
   String cleanFinishedDone(int count);
+
+  /// No description provided for @monthWrapBooks.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{livre terminé} =1{livre terminé} other{livres terminés}}'**
+  String monthWrapBooks(int count);
+
+  /// No description provided for @monthWrapEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun livre terminé ce mois-ci.'**
+  String get monthWrapEmpty;
+
+  /// No description provided for @monthWrapShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager l\'image'**
+  String get monthWrapShare;
+
+  /// No description provided for @statsOpenMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récap de {month}'**
+  String statsOpenMonth(String month);
+
+  /// No description provided for @scanBurst.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rafale : ajouter chaque livre en papier'**
+  String get scanBurst;
+
+  /// No description provided for @scanBurstAdded.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 livre ajouté} other{{count} livres ajoutés}} : {titles}'**
+  String scanBurstAdded(int count, String titles);
+
+  /// No description provided for @adminConnectors.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connecteurs'**
+  String get adminConnectors;
+
+  /// No description provided for @adminSourcesHealth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Santé des sources'**
+  String get adminSourcesHealth;
+
+  /// No description provided for @adminNoSources.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune source connectée.'**
+  String get adminNoSources;
+
+  /// No description provided for @adminScanned.
+  ///
+  /// In fr, this message translates to:
+  /// **'scan {date}'**
+  String adminScanned(String date);
+
+  /// No description provided for @adminNeverScanned.
+  ///
+  /// In fr, this message translates to:
+  /// **'jamais scanné'**
+  String get adminNeverScanned;
+
+  /// No description provided for @adminQuota.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sources : {value}'**
+  String adminQuota(String value);
+
+  /// No description provided for @adminQuotaDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'défaut ({count})'**
+  String adminQuotaDefault(int count);
+
+  /// No description provided for @adminQuotaAsk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Combien de sources ?'**
+  String get adminQuotaAsk;
+
+  /// No description provided for @adminQuotaHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vide : retour au défaut du serveur'**
+  String get adminQuotaHint;
 }
 
 class _AppLocalizationsDelegate

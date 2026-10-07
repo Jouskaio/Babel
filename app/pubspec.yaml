@@ -1,7 +1,7 @@
 name: babel
 description: "Babel — personal and social library (Flutter client, no server logic)."
 publish_to: "none"
-version: 0.28.0+43
+version: 0.29.0+44
 
 environment:
   sdk: ^3.13.0
@@ -43,6 +43,7 @@ dependencies:
   firebase_messaging: ^16.7.0
   just_audio: ^0.10.6
   just_audio_background: ^0.0.1-beta.17
+  share_plus: ^13.3.1
 
 dev_dependencies:
   flutter_test:

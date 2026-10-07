@@ -2593,4 +2593,74 @@ class AppLocalizationsEn extends AppLocalizations {
   String cleanFinishedDone(int count) {
     return '$count books removed.';
   }
+
+  @override
+  String monthWrapBooks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'books finished',
+      one: 'book finished',
+      zero: 'books finished',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get monthWrapEmpty => 'No book finished this month.';
+
+  @override
+  String get monthWrapShare => 'Share the image';
+
+  @override
+  String statsOpenMonth(String month) {
+    return '$month recap';
+  }
+
+  @override
+  String get scanBurst => 'Burst: add each book as paper';
+
+  @override
+  String scanBurstAdded(int count, String titles) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count books added',
+      one: '1 book added',
+    );
+    return '$_temp0: $titles';
+  }
+
+  @override
+  String get adminConnectors => 'Connectors';
+
+  @override
+  String get adminSourcesHealth => 'Source health';
+
+  @override
+  String get adminNoSources => 'No source connected.';
+
+  @override
+  String adminScanned(String date) {
+    return 'scanned $date';
+  }
+
+  @override
+  String get adminNeverScanned => 'never scanned';
+
+  @override
+  String adminQuota(String value) {
+    return 'Sources: $value';
+  }
+
+  @override
+  String adminQuotaDefault(int count) {
+    return 'default ($count)';
+  }
+
+  @override
+  String get adminQuotaAsk => 'How many sources?';
+
+  @override
+  String get adminQuotaHint => 'Empty: back to the server default';
 }

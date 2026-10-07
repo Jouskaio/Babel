@@ -1,4 +1,4 @@
-# babel_api_client.model.MemberResponse
+# babel_api_client.model.ConnectorRequest
 
 ## Load the model package
 ```dart
@@ -8,14 +8,7 @@ import 'package:babel_api_client/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**admin** | **bool** |  | 
-**createdAt** | [**DateTime**](DateTime.md) |  | 
-**displayName** | **String** |  | 
-**email** | **String** |  | 
-**id** | **String** |  | 
-**kavita** | [**KavitaStatus**](KavitaStatus.md) |  | [optional] 
-**maxSources** | **int** |  | [optional] 
-**premium** | **bool** |  | 
+**enabled** | **bool** |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

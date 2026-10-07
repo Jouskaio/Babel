@@ -14,6 +14,7 @@ from babel_api.api.dependencies import (
     CurrentAdminId,
     CurrentUserId,
     KavitaServiceDep,
+    SourceServiceDep,
 )
 from babel_api.domain.kavita import KavitaLink, KavitaStatus
 
@@ -101,6 +102,7 @@ class MemberResponse(BaseModel):
     premium: bool
     created_at: datetime
     kavita: KavitaStatus | None
+    max_sources: int | None = None  # set by an administrator; null is the server default
 
 
 class PremiumRequest(BaseModel):
@@ -109,7 +111,7 @@ class PremiumRequest(BaseModel):
 
 @router.get("/admin/users", operation_id="listMembers", tags=["admin"])
 async def list_members(
-    _: CurrentAdminId, auth: AuthServiceDep, kavita: KavitaServiceDep
+    _: CurrentAdminId, auth: AuthServiceDep, kavita: KavitaServiceDep, sources: SourceServiceDep
 ) -> list[MemberResponse]:
     """Every account, with its roles and Kavita account."""
     members: list[MemberResponse] = []
@@ -124,6 +126,7 @@ async def list_members(
                 premium=user.has_premium,
                 created_at=user.created_at,
                 kavita=link.status if link else None,
+                max_sources=await sources.quota(user.id),
             )
         )
     return members

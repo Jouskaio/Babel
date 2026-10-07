@@ -2613,4 +2613,74 @@ class AppLocalizationsFr extends AppLocalizations {
   String cleanFinishedDone(int count) {
     return '$count livres retirés.';
   }
+
+  @override
+  String monthWrapBooks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'livres terminés',
+      one: 'livre terminé',
+      zero: 'livre terminé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get monthWrapEmpty => 'Aucun livre terminé ce mois-ci.';
+
+  @override
+  String get monthWrapShare => 'Partager l\'image';
+
+  @override
+  String statsOpenMonth(String month) {
+    return 'Récap de $month';
+  }
+
+  @override
+  String get scanBurst => 'Rafale : ajouter chaque livre en papier';
+
+  @override
+  String scanBurstAdded(int count, String titles) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count livres ajoutés',
+      one: '1 livre ajouté',
+    );
+    return '$_temp0 : $titles';
+  }
+
+  @override
+  String get adminConnectors => 'Connecteurs';
+
+  @override
+  String get adminSourcesHealth => 'Santé des sources';
+
+  @override
+  String get adminNoSources => 'Aucune source connectée.';
+
+  @override
+  String adminScanned(String date) {
+    return 'scan $date';
+  }
+
+  @override
+  String get adminNeverScanned => 'jamais scanné';
+
+  @override
+  String adminQuota(String value) {
+    return 'Sources : $value';
+  }
+
+  @override
+  String adminQuotaDefault(int count) {
+    return 'défaut ($count)';
+  }
+
+  @override
+  String get adminQuotaAsk => 'Combien de sources ?';
+
+  @override
+  String get adminQuotaHint => 'Vide : retour au défaut du serveur';
 }

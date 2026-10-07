@@ -151,6 +151,18 @@ class _Body extends StatelessWidget {
                 expand: true,
                 onPressed: () => context.push(Routes.wrap(stats.year)),
               ),
+              const SizedBox(height: 8),
+              // The latest month with something finished.
+              PillButton(
+                label: l10n.statsOpenMonth(
+                  DateFormat.MMMM(Localizations.localeOf(context).toString())
+                      .format(DateTime(stats.year, _lastMonth(stats))),
+                ),
+                expand: true,
+                onPressed: () => context.push(
+                  Routes.monthWrap(stats.year, _lastMonth(stats)),
+                ),
+              ),
             ],
             const SizedBox(height: 32),
             Text(l10n.statsByMonth, style: BabelText.title(28)),
@@ -518,3 +530,6 @@ class _FinishedRow extends StatelessWidget {
     );
   }
 }
+
+int _lastMonth(YearStatsResponse stats) =>
+    stats.byMonth.lastIndexWhere((n) => n > 0) + 1;

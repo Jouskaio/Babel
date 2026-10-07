@@ -10,6 +10,7 @@ from uuid import UUID
 
 from babel_api.adapters.security.secrets import SecretBox
 from babel_api.domain.errors import (
+    ConnectorDisabledError,
     DomainError,
     NotFoundError,
     SourceConnectionError,
@@ -80,7 +81,9 @@ class SourceService:
         config: dict[str, Any],
         token: str | None,
     ) -> SourceDetail:
-        if await self._sources.count(user_id) >= self._max_sources:
+        await self._enabled(kind)
+        limit = await self._sources.quota(user_id)
+        if await self._sources.count(user_id) >= (self._max_sources if limit is None else limit):
             raise TooManySourcesError
         config, token = self._split_secret(kind, config, token)
         encrypted = self._secrets.encrypt(token) if token else None
@@ -171,8 +174,34 @@ class SourceService:
         await self._sources.commit()
         return removed
 
+    async def _enabled(self, kind: SourceKind) -> None:
+        if kind.value in await self._sources.disabled_kinds():
+            raise ConnectorDisabledError
+
+    # ------------------------------------------------------------ administration
+    async def health(self) -> list[tuple[str, Source]]:
+        return await self._sources.all_sources()
+
+    async def connectors_off(self) -> set[str]:
+        return await self._sources.disabled_kinds()
+
+    async def set_connector(self, kind: SourceKind, enabled: bool) -> None:
+        await self._sources.set_disabled(kind, not enabled)
+        await self._sources.commit()
+
+    async def set_quota(self, user_id: UUID, max_sources: int | None) -> None:
+        await self._sources.set_quota(user_id, max_sources)
+        await self._sources.commit()
+
+    async def quota(self, user_id: UUID) -> int | None:
+        return await self._sources.quota(user_id)
+
+    async def default_quota(self) -> int:
+        return self._max_sources
+
     async def scan(self, user_id: UUID, source_id: UUID) -> SourceDetail:
         source = await self._own(user_id, source_id)
+        await self._enabled(source.kind)
         now = datetime.now(UTC)
         try:
             found = await self._connectors[source.kind].list_entries(

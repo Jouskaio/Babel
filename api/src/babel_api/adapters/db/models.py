@@ -573,3 +573,22 @@ class ReportRow(Base):
     note: Mapped[str | None] = mapped_column(String(1000))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class SourceQuotaRow(Base):
+    """A per-account limit of sources, replacing the server default."""
+
+    __tablename__ = "source_quotas"
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    max_sources: Mapped[int] = mapped_column(Integer)
+
+
+class DisabledConnectorRow(Base):
+    """A connector kind an administrator switched off for everyone."""
+
+    __tablename__ = "disabled_connectors"
+
+    kind: Mapped[str] = mapped_column(String(20), primary_key=True)

@@ -31,6 +31,7 @@ import '../features/sources/presentation/new_source_page.dart';
 import '../features/sources/presentation/source_detail_page.dart';
 import '../features/sources/presentation/source_form_page.dart';
 import '../features/sources/presentation/sources_page.dart';
+import '../features/stats/presentation/month_wrap_page.dart';
 import '../features/stats/presentation/stats_page.dart';
 import '../features/stats/presentation/wrap_page.dart';
 import 'splash_page.dart';
@@ -60,6 +61,7 @@ abstract final class Routes {
     queryParameters: {'series': series, 'author': ?author},
   ).toString();
   static String wrap(int year) => '/stats/wrap/$year';
+  static String monthWrap(int year, int month) => '/stats/wrap/$year/$month';
   static const sources = '/sources';
   static const newSource = '/sources/new';
   static String newSourceOf(String kind) => '/sources/new/$kind';
@@ -152,6 +154,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.audiobooks,
         builder: (_, _) => const AudiobooksPage(),
+      ),
+      GoRoute(
+        path: '/stats/wrap/:year/:month',
+        builder: (_, state) => MonthWrapPage(
+          year:
+              int.tryParse(state.pathParameters['year']!) ??
+              DateTime.now().year,
+          month: int.tryParse(state.pathParameters['month']!) ?? 1,
+        ),
       ),
       GoRoute(
         path: '/stats/wrap/:year',

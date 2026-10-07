@@ -190,6 +190,8 @@ class ApiClient {
           return AbsLinkRequest.fromJson(value);
         case 'AbsLinkResponse':
           return AbsLinkResponse.fromJson(value);
+        case 'AdminOverview':
+          return AdminOverview.fromJson(value);
         case 'Ao3Config':
           return Ao3Config.fromJson(value);
         case 'Audience':
@@ -228,6 +230,10 @@ class ApiClient {
           return CommentRequest.fromJson(value);
         case 'CommentResponse':
           return CommentResponse.fromJson(value);
+        case 'ConnectorRequest':
+          return ConnectorRequest.fromJson(value);
+        case 'ConnectorStatus':
+          return ConnectorStatus.fromJson(value);
         case 'CreateSourceRequest':
           return CreateSourceRequest.fromJson(value);
         case 'CsvImportResponse':
@@ -320,6 +326,8 @@ class ApiClient {
           return PushResponse.fromJson(value);
         case 'PushTokenRequest':
           return PushTokenRequest.fromJson(value);
+        case 'QuotaRequest':
+          return QuotaRequest.fromJson(value);
         case 'ReaderPageResponse':
           return ReaderPageResponse.fromJson(value);
         case 'ReaderResponse':
@@ -368,6 +376,8 @@ class ApiClient {
           return SourceDetailResponse.fromJson(value);
         case 'SourceEntryResponse':
           return SourceEntryResponse.fromJson(value);
+        case 'SourceHealth':
+          return SourceHealth.fromJson(value);
         case 'SourceKind':
           return SourceKindTypeTransformer().decode(value);
         case 'SourceMatchResponse':
