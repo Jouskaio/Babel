@@ -130,6 +130,7 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**saveReview**](doc//LibraryApi.md#savereview) | **PUT** /v1/library/{item_id}/review | Save Review
 *LibraryApi* | [**setPaper**](doc//LibraryApi.md#setpaper) | **PUT** /v1/library/{item_id}/paper | Set Paper
 *LibraryApi* | [**stopFollow**](doc//LibraryApi.md#stopfollow) | **DELETE** /v1/library/follows/{follow_id} | Stop Follow
+*LibraryApi* | [**updateBookDetails**](doc//LibraryApi.md#updatebookdetails) | **PATCH** /v1/library/{item_id} | Update Details
 *LibraryApi* | [**withdrawFile**](doc//LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
 *SocialApi* | [**addFriend**](doc//SocialApi.md#addfriend) | **PUT** /v1/social/friends/{handle} | Add Friend
 *SocialApi* | [**blockReader**](doc//SocialApi.md#blockreader) | **PUT** /v1/social/blocks/{handle} | Block Reader
@@ -186,6 +187,7 @@ Class | Method | HTTP request | Description
  - [AuthorCountResponse](doc//AuthorCountResponse.md)
  - [AuthorResponse](doc//AuthorResponse.md)
  - [BatchImportResponse](doc//BatchImportResponse.md)
+ - [BookDetailsRequest](doc//BookDetailsRequest.md)
  - [BookFormat](doc//BookFormat.md)
  - [BookNoteResponse](doc//BookNoteResponse.md)
  - [BookTitleResponse](doc//BookTitleResponse.md)

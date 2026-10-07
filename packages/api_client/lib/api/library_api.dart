@@ -1302,6 +1302,75 @@ class LibraryApi {
     }
   }
 
+  /// Update Details
+  ///
+  /// Correct a book's title, authors, series, volume number or cover.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [BookDetailsRequest] bookDetailsRequest (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<Response> updateBookDetailsWithHttpInfo(String itemId, BookDetailsRequest bookDetailsRequest, { String? xBabelDevice, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/{item_id}'
+      .replaceAll('{item_id}', itemId);
+
+    // ignore: prefer_final_locals
+    Object? postBody = bookDetailsRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (xBabelDevice != null) {
+      headerParams[r'X-Babel-Device'] = parameterToString(xBabelDevice);
+    }
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'PATCH',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Update Details
+  ///
+  /// Correct a book's title, authors, series, volume number or cover.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [BookDetailsRequest] bookDetailsRequest (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<LibraryItemResponse?> updateBookDetails(String itemId, BookDetailsRequest bookDetailsRequest, { String? xBabelDevice, }) async {
+    final response = await updateBookDetailsWithHttpInfo(itemId, bookDetailsRequest,  xBabelDevice: xBabelDevice, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'LibraryItemResponse',) as LibraryItemResponse;
+    
+    }
+    return null;
+  }
+
   /// Withdraw File
   ///
   /// Withdraw a file from every library and delete it; by default its hash is blocked.

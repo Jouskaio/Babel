@@ -2,6 +2,7 @@
 
 import re
 from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import delete, func, select
@@ -78,6 +79,9 @@ def _to_item(row: LibraryItemRow) -> LibraryItem:
         audio=AudioRef(row.audio_id, row.audio_duration or 0, row.audio_cover)
         if row.audio_id
         else None,
+        series=row.series,
+        series_index=row.series_index,
+        cover_id=row.cover_id,
     )
 
 
@@ -142,6 +146,8 @@ class SqlFileRepository:
         authors: tuple[str, ...],
         work_id: UUID | None = None,
         paper: bool = False,
+        series: str | None = None,
+        series_index: float | None = None,
     ) -> LibraryItem:
         row = LibraryItemRow(
             user_id=user_id,
@@ -150,6 +156,8 @@ class SqlFileRepository:
             authors=list(authors),
             work_id=work_id,
             paper=paper,
+            series=series[:200] if series else None,
+            series_index=series_index,
         )
         self._session.add(row)
         await self._session.flush()
@@ -172,6 +180,8 @@ class SqlFileRepository:
         authors: tuple[str, ...],
         audio: AudioRef,
         work_id: UUID | None,
+        series: str | None = None,
+        series_index: float | None = None,
     ) -> LibraryItem:
         row = LibraryItemRow(
             user_id=user_id,
@@ -182,6 +192,8 @@ class SqlFileRepository:
             audio_id=audio.remote_id,
             audio_duration=audio.duration,
             audio_cover=audio.cover,
+            series=series[:200] if series else None,
+            series_index=series_index,
         )
         self._session.add(row)
         await self._session.flush()
@@ -197,6 +209,15 @@ class SqlFileRepository:
             .limit(1)
         )
         return _to_item(row) if row else None
+
+    async def update_details(self, item_id: UUID, changes: dict[str, Any]) -> LibraryItem:
+        """Sets the given fields of a book (title, authors, series, series_index, cover_id)."""
+        row = await self._session.get_one(LibraryItemRow, item_id)
+        for field, value in changes.items():
+            setattr(row, field, value)
+        await self._session.flush()
+        await self._session.refresh(row, ["file", "work"])
+        return _to_item(row)
 
     async def set_file(self, item_id: UUID, sha256: str) -> LibraryItem:
         row = await self._session.get_one(LibraryItemRow, item_id)

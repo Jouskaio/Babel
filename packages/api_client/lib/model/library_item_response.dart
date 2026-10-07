@@ -24,6 +24,8 @@ class LibraryItemResponse {
     required this.id,
     this.paper = false,
     this.progress,
+    this.series,
+    this.seriesIndex,
     this.sha256,
     this.size,
     this.startedAt,
@@ -66,6 +68,12 @@ class LibraryItemResponse {
   /// Progress declared by hand, in percent (not a device position)
   num? progress;
 
+  /// The series it belongs to
+  String? series;
+
+  /// Its volume number in it
+  num? seriesIndex;
+
   /// Identifies the file; download it from /v1/files/{sha256}. Null for a paper book without a file
   String? sha256;
 
@@ -102,6 +110,8 @@ class LibraryItemResponse {
     other.id == id &&
     other.paper == paper &&
     other.progress == progress &&
+    other.series == series &&
+    other.seriesIndex == seriesIndex &&
     other.sha256 == sha256 &&
     other.size == size &&
     other.startedAt == startedAt &&
@@ -124,6 +134,8 @@ class LibraryItemResponse {
     (id.hashCode) +
     (paper.hashCode) +
     (progress == null ? 0 : progress!.hashCode) +
+    (series == null ? 0 : series!.hashCode) +
+    (seriesIndex == null ? 0 : seriesIndex!.hashCode) +
     (sha256 == null ? 0 : sha256!.hashCode) +
     (size == null ? 0 : size!.hashCode) +
     (startedAt == null ? 0 : startedAt!.hashCode) +
@@ -133,7 +145,7 @@ class LibraryItemResponse {
     (workId == null ? 0 : workId!.hashCode);
 
   @override
-  String toString() => 'LibraryItemResponse[addedAt=$addedAt, audioDuration=$audioDuration, authors=$authors, coverPath=$coverPath, editionId=$editionId, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, paper=$paper, progress=$progress, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title, workId=$workId]';
+  String toString() => 'LibraryItemResponse[addedAt=$addedAt, audioDuration=$audioDuration, authors=$authors, coverPath=$coverPath, editionId=$editionId, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, paper=$paper, progress=$progress, series=$series, seriesIndex=$seriesIndex, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title, workId=$workId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -171,6 +183,16 @@ class LibraryItemResponse {
       json[r'progress'] = this.progress;
     } else {
       json[r'progress'] = null;
+    }
+    if (this.series != null) {
+      json[r'series'] = this.series;
+    } else {
+      json[r'series'] = null;
+    }
+    if (this.seriesIndex != null) {
+      json[r'series_index'] = this.seriesIndex;
+    } else {
+      json[r'series_index'] = null;
     }
     if (this.sha256 != null) {
       json[r'sha256'] = this.sha256;
@@ -242,6 +264,10 @@ class LibraryItemResponse {
         progress: json[r'progress'] == null
             ? null
             : num.parse('${json[r'progress']}'),
+        series: mapValueOfType<String>(json, r'series'),
+        seriesIndex: json[r'series_index'] == null
+            ? null
+            : num.parse('${json[r'series_index']}'),
         sha256: mapValueOfType<String>(json, r'sha256'),
         size: mapValueOfType<int>(json, r'size'),
         startedAt: mapDateTime(json, r'started_at', r''),

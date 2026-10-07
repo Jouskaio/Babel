@@ -192,6 +192,10 @@ class LibraryItemRow(Base):
     authors: Mapped[list[str]] = mapped_column(JSON, default=list)
     added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     paper: Mapped[bool] = mapped_column(default=False, server_default=false())
+    series: Mapped[str | None] = mapped_column(String(200), index=True)
+    series_index: Mapped[float | None] = mapped_column(Float)
+    # A catalog cover chosen by the reader instead of the file's.
+    cover_id: Mapped[int | None] = mapped_column(Integer)
     # An audiobook of the reader's Audiobookshelf (domain AudioRef).
     audio_id: Mapped[str | None] = mapped_column(String(64), index=True)
     audio_duration: Mapped[float | None] = mapped_column(Float)

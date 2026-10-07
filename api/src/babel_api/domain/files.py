@@ -33,6 +33,9 @@ class BookMetadata:
     isbn13: str | None = None
     language: str | None = None
     subjects: tuple[str, ...] = ()
+    # The series the file says it belongs to, and its volume number.
+    series: str | None = None
+    series_index: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -133,6 +136,11 @@ class LibraryItem:
     work_cover_id: int | None = None
     # An audiobook of the reader's Audiobookshelf, streamed through Babel.
     audio: "AudioRef | None" = None
+    # The series the book belongs to and its volume number (from the file, a guess from the
+    # title, or the reader's own); and a cover the reader chose from the catalog's.
+    series: str | None = None
+    series_index: float | None = None
+    cover_id: int | None = None
 
     @property
     def sha256(self) -> str | None:
@@ -147,6 +155,8 @@ class LibraryItem:
 
     @property
     def cover_path(self) -> str | None:
+        if self.cover_id:
+            return f"/v1/catalog/covers/{self.cover_id}/M"
         if self.file and self.file.cover_path:
             return self.file.cover_path
         if self.audio and self.audio.cover:
