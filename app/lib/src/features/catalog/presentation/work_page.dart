@@ -616,7 +616,10 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
   List<Widget> _missing(AppLocalizations l10n) {
     final session = ref.watch(authControllerProvider);
     final premium = session is SignedIn && session.user.premium;
-    final requests = ref.watch(bookRequestsProvider).value;
+    final loading = ref.watch(bookRequestsProvider);
+    // Wait for the answer: showing "add a source" first would flicker for premium readers.
+    if (premium && loading.isLoading && !loading.hasValue) return const [];
+    final requests = loading.value;
     if (premium && requests != null && requests.enabled) {
       final mine = requests.items
           .where((r) => r.workId == widget.workId)
