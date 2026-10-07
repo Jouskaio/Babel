@@ -156,3 +156,16 @@ echo "BABEL_CHAPTARR_URL=http://192.168.1.104:8789" >> /opt/babel/.env
 echo "BABEL_CHAPTARR_API_KEY=<the key>" >> /opt/babel/.env
 cd /opt/babel && docker compose up -d api
 ```
+
+## Hardcover (saga volumes)
+
+Hardcover names the volumes of a saga that the catalog lacks, so the saga page shows their titles
+instead of an empty "missing" row. Public book data only, kept for a day (free key: 5000
+requests a day). Hardcover's API is in beta and may change. Without the key, nothing changes.
+
+```bash
+# hardcover.app > Settings > Hardcover API > New API Key (read access is enough)
+echo "BABEL_HARDCOVER_API_KEY=<the key>" >> /opt/babel/.env
+cd /opt/babel && docker compose up -d api
+```
+

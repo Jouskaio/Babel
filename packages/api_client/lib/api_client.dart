@@ -286,6 +286,8 @@ class ApiClient {
           return KavitaLinkResponse.fromJson(value);
         case 'KavitaStatus':
           return KavitaStatusTypeTransformer().decode(value);
+        case 'KnownVolumeResponse':
+          return KnownVolumeResponse.fromJson(value);
         case 'LibraryItemResponse':
           return LibraryItemResponse.fromJson(value);
         case 'LinkKavitaRequest':

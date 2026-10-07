@@ -94,6 +94,7 @@ part 'model/import_response.dart';
 part 'model/isbn_lookup_response.dart';
 part 'model/kavita_link_response.dart';
 part 'model/kavita_status.dart';
+part 'model/known_volume_response.dart';
 part 'model/library_item_response.dart';
 part 'model/link_kavita_request.dart';
 part 'model/link_kind.dart';

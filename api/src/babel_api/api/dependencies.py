@@ -24,6 +24,7 @@ from babel_api.adapters.db.source_repository import SqlSourceRepository
 from babel_api.adapters.db.stats_repository import SqlStatsRepository
 from babel_api.adapters.db.sync_repository import SqlSyncRepository
 from babel_api.adapters.files.comics import ComicConverter
+from babel_api.adapters.hardcover import HardcoverClient
 from babel_api.adapters.kavita import KavitaClient
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
 from babel_api.adapters.security.secrets import SecretBox
@@ -84,6 +85,7 @@ class Container:
     kavita: KavitaProvisioner
     abs_client: Callable[[str], AbsClient]
     chaptarr: Callable[[], ChaptarrClient] | None = None
+    hardcover: HardcoverClient | None = None
 
 
 def get_container(request: Request) -> Container:
@@ -119,7 +121,7 @@ AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 def get_work_service(
     container: ContainerDep, session: Annotated[AsyncSession, Depends(get_session)]
 ) -> WorkService:
-    return WorkService(SqlCatalogRepository(session), container.books)
+    return WorkService(SqlCatalogRepository(session), container.books, container.hardcover)
 
 
 WorkServiceDep = Annotated[WorkService, Depends(get_work_service)]

@@ -1789,6 +1789,26 @@
         "title": "KavitaStatus",
         "type": "string"
       },
+      "KnownVolumeResponse": {
+        "properties": {
+          "number": {
+            "description": "The volume number in the saga",
+            "title": "Number",
+            "type": "number"
+          },
+          "title": {
+            "description": "Its title, from Hardcover",
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "number",
+          "title"
+        ],
+        "title": "KnownVolumeResponse",
+        "type": "object"
+      },
       "LibraryItemResponse": {
         "properties": {
           "added_at": {
@@ -4649,7 +4669,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.31.4"
+    "version": "0.32.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -5938,6 +5958,77 @@
           }
         ],
         "summary": "Get Saga",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/saga/known": {
+      "get": {
+        "description": "Volumes Hardcover lists for a saga, to name the ones the catalog lacks (may be empty).",
+        "operationId": "getKnownVolumes",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "series",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 2,
+              "title": "Series",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "author",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Author"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/KnownVolumeResponse"
+                  },
+                  "title": "Response Getknownvolumes",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Known Volumes",
         "tags": [
           "catalog"
         ]

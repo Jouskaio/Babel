@@ -70,6 +70,74 @@ class CatalogApi {
     }
   }
 
+  /// Get Known Volumes
+  ///
+  /// Volumes Hardcover lists for a saga, to name the ones the catalog lacks (may be empty).
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] series (required):
+  ///
+  /// * [String] author:
+  Future<Response> getKnownVolumesWithHttpInfo(String series, { String? author, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/catalog/saga/known';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+      queryParams.addAll(_queryParams('', 'series', series));
+    if (author != null) {
+      queryParams.addAll(_queryParams('', 'author', author));
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Known Volumes
+  ///
+  /// Volumes Hardcover lists for a saga, to name the ones the catalog lacks (may be empty).
+  ///
+  /// Parameters:
+  ///
+  /// * [String] series (required):
+  ///
+  /// * [String] author:
+  Future<List<KnownVolumeResponse>?> getKnownVolumes(String series, { String? author, }) async {
+    final response = await getKnownVolumesWithHttpInfo(series,  author: author, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<KnownVolumeResponse>') as List)
+        .cast<KnownVolumeResponse>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
   /// Get Saga
   ///
   /// Every volume of a saga the catalog lists, in order (e.g. all of Homunculus).

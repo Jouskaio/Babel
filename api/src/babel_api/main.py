@@ -22,6 +22,7 @@ from babel_api.adapters.files.blob_store import LocalBlobStore
 from babel_api.adapters.files.comics import ComicConverter
 from babel_api.adapters.files.covers import LocalCoverCache
 from babel_api.adapters.files.metadata import EbookMetadataReader
+from babel_api.adapters.hardcover import HardcoverClient
 from babel_api.adapters.kavita import KavitaClient
 from babel_api.adapters.mail.mailers import BackgroundMailer, LogMailer, SmtpMailer
 from babel_api.adapters.push.fcm import FcmPusher, LogPusher
@@ -106,6 +107,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             )
 
         chaptarr = chaptarr_client
+
+    hardcover = (
+        HardcoverClient(settings.hardcover_api_key.get_secret_value())
+        if settings.hardcover_api_key.get_secret_value()
+        else None
+    )
 
     @asynccontextmanager
     async def kavita_services() -> AsyncGenerator[KavitaService]:
@@ -194,6 +201,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         kavita=kavita,
         abs_client=abs_client,
         chaptarr=chaptarr,
+        hardcover=hardcover,
     )
     if settings.cors_origins:
         app.add_middleware(
