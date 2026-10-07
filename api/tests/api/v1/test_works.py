@@ -248,12 +248,13 @@ def test_a_saga_lists_every_volume_in_order(
     books.saga = [
         volume("OL3W", "Homunculus 3", 33),
         volume("OL10W", "Homunculus 10", 100),
-        volume("OL1W", "Homunculus 01"),  # no cover
+        volume("OL7W", "Homunculus 07", 77),
+        volume("OL1W", "Homunculus 01"),  # no cover, a leading zero
         volume("OL1bW", "Homunculus 1", 11),  # a reprint of volume 1, with a cover
         volume("OL2W", "Homunculus, Tome 2", 22),
         volume("OL9W", "Homunculus (Omnibus) Vol. 3-4"),  # not one volume
         volume("OL5W", "Homunkurusu 5", 55),  # another spelling: another series
-        volume("OL7W", "Homunculus Returns"),  # no volume number
+        volume("OL8W", "Homunculus Returns"),  # no volume number
     ]
 
     found = client.get(
@@ -262,11 +263,12 @@ def test_a_saga_lists_every_volume_in_order(
         headers=auth,
     ).json()
 
-    assert [v["number"] for v in found] == [1, 2, 3, 10]
+    assert [v["number"] for v in found] == [1, 2, 3, 7, 10]
     assert [v["work"]["title"] for v in found] == [
         "Homunculus 1",
         "Homunculus, Tome 2",
         "Homunculus 3",
+        "Homunculus 07",
         "Homunculus 10",
     ]
     assert found[0]["work"]["cover_path"] == "/v1/catalog/covers/11/M"

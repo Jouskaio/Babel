@@ -9,7 +9,7 @@ from babel_api.domain.catalog import Edition, IdentifierKind, SourceWork, Work
 from babel_api.domain.errors import NotFoundError, SourceUnavailableError
 from babel_api.domain.isbn import normalize_isbn
 from babel_api.domain.ports import BookSource, CatalogRepository
-from babel_api.domain.series import guess_series, series_key
+from babel_api.domain.series import series_key, volume_number
 
 logger = logging.getLogger(__name__)
 
@@ -115,13 +115,13 @@ class WorkService:
             raise SourceUnavailableError from error
         by_number: dict[float, SourceWork] = {}
         for source in found:
-            guess = guess_series(source.title)
-            if guess is None or series_key(guess.series) != key:
+            number = volume_number(source.title, series)
+            if number is None:
                 continue
-            kept = by_number.get(guess.number)
+            kept = by_number.get(number)
             # Several records for one volume (reprints): the one with a cover wins.
             if kept is None or (kept.cover_id is None and source.cover_id is not None):
-                by_number[guess.number] = source
+                by_number[number] = source
         volumes = [
             SagaVolume(number, await self._repo.upsert_work(source))
             for number, source in sorted(by_number.items())
