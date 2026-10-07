@@ -872,5 +872,10 @@
   "sagaMissing": "Not found in the catalog",
   "sagaNotOwned": "Not in your library",
   "sagaEmpty": "No volume found for this saga.",
-  "sagaHint": "Volumes come from the catalog: open one to add it, or to look for it in your sources."
+  "sagaHint": "Volumes come from the catalog: open one to add it, or to look for it in your sources.",
+  "progressAskPageHint": "Page number",
+  "cleanFinished": "Remove finished books ({count})",
+  "cleanFinishedAsk": "Remove {count} finished books from the library?",
+  "cleanFinishedBody": "The files go, not your notes, reviews or progress: add a book back and you get them again.",
+  "cleanFinishedDone": "{count} books removed."
 }

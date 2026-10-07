@@ -7,6 +7,7 @@ import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
+import '../../catalog/application/catalog_providers.dart';
 import '../../social/presentation/sharing_settings.dart';
 import '../application/library_controller.dart';
 import '../application/shelves.dart';
@@ -82,6 +83,18 @@ class ProgressEditor extends ConsumerWidget {
     final current = liveItem(ref, item);
     final positions = ref.watch(positionPercentsProvider).value ?? const {};
     final shown = effectiveProgress(current, positions) ?? 0;
+    final workId = item.workId;
+    final lang = Localizations.localeOf(context).languageCode;
+    // The page count of the work's editions, so progress can be given as a page.
+    final pages = workId == null
+        ? null
+        : ref
+              .watch(workProvider((id: workId, lang: lang)))
+              .value
+              ?.editions
+              .map((e) => e.pageCount)
+              .nonNulls
+              .firstOrNull;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -114,7 +127,7 @@ class ProgressEditor extends ConsumerWidget {
           child: TextButton(
             style: TextButton.styleFrom(padding: EdgeInsets.zero),
             onPressed: () async {
-              final percent = await _askProgress(context, shown.round());
+              final percent = await _askProgress(context, shown.round(), pages);
               if (percent != null) {
                 await ref
                     .read(readingStateProvider)
@@ -132,21 +145,27 @@ class ProgressEditor extends ConsumerWidget {
   }
 }
 
-Future<int?> _askProgress(BuildContext context, int initial) => showDialog<int>(
-  context: context,
-  builder: (_) => _ProgressDialog(initial: initial),
-);
+Future<int?> _askProgress(BuildContext context, int initial, int? pages) =>
+    showDialog<int>(
+      context: context,
+      builder: (_) => _ProgressDialog(initial: initial, pages: pages),
+    );
 
 class _ProgressDialog extends StatefulWidget {
-  const _ProgressDialog({required this.initial});
+  const _ProgressDialog({required this.initial, this.pages});
   final int initial;
+  final int?
+  pages; // when known, the reader gives a page instead of a percentage
 
   @override
   State<_ProgressDialog> createState() => _ProgressDialogState();
 }
 
 class _ProgressDialogState extends State<_ProgressDialog> {
-  late final _value = TextEditingController(text: '${widget.initial}');
+  late final _value = TextEditingController(
+    text:
+        '${widget.pages == null ? widget.initial : (widget.initial * widget.pages! / 100).round()}',
+  );
 
   @override
   void dispose() {
@@ -155,7 +174,11 @@ class _ProgressDialogState extends State<_ProgressDialog> {
   }
 
   void _submit() {
-    final percent = int.tryParse(_value.text.trim());
+    final entered = int.tryParse(_value.text.trim());
+    final pages = widget.pages;
+    final percent = entered == null || pages == null
+        ? entered
+        : (entered > pages ? null : (entered * 100 / pages).round());
     if (percent == null || percent < 0 || percent > 100) return;
     Navigator.pop(context, percent);
   }
@@ -176,8 +199,12 @@ class _ProgressDialogState extends State<_ProgressDialog> {
             keyboardType: TextInputType.number,
             style: BabelText.body(15, color: BabelColors.textPrimary),
             decoration: InputDecoration(
-              hintText: l10n.progressAskHint,
-              suffixText: '%',
+              hintText: widget.pages == null
+                  ? l10n.progressAskHint
+                  : l10n.progressAskPageHint,
+              suffixText: widget.pages == null
+                  ? '%'
+                  : '/ ${l10n.pages(widget.pages!)}',
             ),
             onSubmitted: (_) => _submit(),
           ),
