@@ -2556,4 +2556,39 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get audioOffline => 'Disponible hors ligne';
+
+  @override
+  String get sagaTitle => 'Saga';
+
+  @override
+  String get sagaSee => 'Voir toute la saga';
+
+  @override
+  String sagaOf(String series, String number) {
+    return '$series · tome $number';
+  }
+
+  @override
+  String sagaCount(int count, int owned) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tomes',
+      one: '1 tome',
+    );
+    return '$_temp0 dans le catalogue · $owned dans votre bibliothèque';
+  }
+
+  @override
+  String get sagaMissing => 'Introuvable dans le catalogue';
+
+  @override
+  String get sagaNotOwned => 'Pas dans votre bibliothèque';
+
+  @override
+  String get sagaEmpty => 'Aucun tome trouvé pour cette saga.';
+
+  @override
+  String get sagaHint =>
+      'Les tomes viennent du catalogue : ouvrez-en un pour l\'ajouter, ou le chercher dans vos sources.';
 }

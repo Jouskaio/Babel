@@ -1,11 +1,14 @@
 import 'package:babel_api_client/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
+import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
+import '../../../routing/router.dart';
 import '../application/library_controller.dart';
 import '../application/series.dart';
 import '../application/shelves.dart';
@@ -54,7 +57,24 @@ class _SeriesSheet extends ConsumerWidget {
               l10n.seriesVolumes(volumes.length).toUpperCase(),
               style: BabelText.label(10),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: PillButton(
+                label: l10n.sagaSee,
+                kind: PillButtonKind.secondary,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  context.push(
+                    Routes.saga(
+                      group.name,
+                      author: group.first.authors.firstOrNull,
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 10),
             for (final item in volumes)
               InkWell(
                 borderRadius: BorderRadius.circular(14),

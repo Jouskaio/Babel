@@ -21,6 +21,8 @@ class WorkResponse {
     this.firstPublishYear,
     required this.id,
     required this.originalTitle,
+    this.series,
+    this.seriesIndex,
     required this.title,
   });
 
@@ -40,6 +42,12 @@ class WorkResponse {
 
   String originalTitle;
 
+  /// The saga this work is a volume of, when its title says so
+  String? series;
+
+  /// Its volume number
+  num? seriesIndex;
+
   String title;
 
   @override
@@ -52,6 +60,8 @@ class WorkResponse {
     other.firstPublishYear == firstPublishYear &&
     other.id == id &&
     other.originalTitle == originalTitle &&
+    other.series == series &&
+    other.seriesIndex == seriesIndex &&
     other.title == title;
 
   @override
@@ -65,10 +75,12 @@ class WorkResponse {
     (firstPublishYear == null ? 0 : firstPublishYear!.hashCode) +
     (id.hashCode) +
     (originalTitle.hashCode) +
+    (series == null ? 0 : series!.hashCode) +
+    (seriesIndex == null ? 0 : seriesIndex!.hashCode) +
     (title.hashCode);
 
   @override
-  String toString() => 'WorkResponse[authors=$authors, coverPath=$coverPath, description=$description, editionCount=$editionCount, editions=$editions, firstPublishYear=$firstPublishYear, id=$id, originalTitle=$originalTitle, title=$title]';
+  String toString() => 'WorkResponse[authors=$authors, coverPath=$coverPath, description=$description, editionCount=$editionCount, editions=$editions, firstPublishYear=$firstPublishYear, id=$id, originalTitle=$originalTitle, series=$series, seriesIndex=$seriesIndex, title=$title]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -96,6 +108,16 @@ class WorkResponse {
     }
       json[r'id'] = this.id;
       json[r'original_title'] = this.originalTitle;
+    if (this.series != null) {
+      json[r'series'] = this.series;
+    } else {
+      json[r'series'] = null;
+    }
+    if (this.seriesIndex != null) {
+      json[r'series_index'] = this.seriesIndex;
+    } else {
+      json[r'series_index'] = null;
+    }
       json[r'title'] = this.title;
     return json;
   }
@@ -129,6 +151,10 @@ class WorkResponse {
         firstPublishYear: mapValueOfType<int>(json, r'first_publish_year'),
         id: mapValueOfType<String>(json, r'id')!,
         originalTitle: mapValueOfType<String>(json, r'original_title')!,
+        series: mapValueOfType<String>(json, r'series'),
+        seriesIndex: json[r'series_index'] == null
+            ? null
+            : num.parse('${json[r'series_index']}'),
         title: mapValueOfType<String>(json, r'title')!,
       );
     }

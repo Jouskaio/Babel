@@ -9,6 +9,7 @@ import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/loading_bar.dart';
 import '../../../core/widgets/pill_button.dart';
+import '../../../core/widgets/section_title.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../library/application/history.dart';
@@ -241,40 +242,45 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
               textAlign: TextAlign.center,
               style: BabelText.label(10),
             ),
+            if (work.series case final series?) ...[
+              const SizedBox(height: 18),
+              Center(
+                child: PillButton(
+                  label: l10n.sagaSee,
+                  kind: PillButtonKind.secondary,
+                  onPressed: () => context.push(
+                    Routes.saga(series, author: work.authors.firstOrNull),
+                  ),
+                ),
+              ),
+            ],
             if (work.description case final description?) ...[
-              const SizedBox(height: 32),
-              Text(l10n.workSummary.toUpperCase(), style: BabelText.label(11)),
-              const SizedBox(height: 12),
+              const SizedBox(height: sectionGap),
+              SectionTitle(l10n.workSummary),
               _Description(text: description),
             ],
             if (work.editions.isNotEmpty) ...[
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(l10n.workEditions, style: BabelText.title(28)),
-                  ),
-                  Text(
-                    l10n.editionsCount(work.editions.length).toUpperCase(),
-                    style: BabelText.label(10),
-                  ),
-                ],
+              const SizedBox(height: sectionGap),
+              SectionTitle(
+                l10n.workEditions,
+                trailing: Text(
+                  l10n.editionsCount(work.editions.length).toUpperCase(),
+                  style: BabelText.label(10),
+                ),
               ),
-              const SizedBox(height: 12),
               for (final edition in work.editions.take(20))
                 _EditionRow(edition: edition, onPickCover: _pickCover),
             ],
             if (trace != null) ...[
-              const SizedBox(height: 28),
+              const SizedBox(height: sectionGap),
               BookTraceCard(trace: trace),
             ],
             WorkReadersSection(workId: work.id),
             if (trace == null || !trace.available) ...[
-              const SizedBox(height: 32),
+              const SizedBox(height: sectionGap),
               _SourceMatches(title: work.title),
-              const SizedBox(height: 32),
-              Text(l10n.getThisBook, style: BabelText.title(28)),
-              const SizedBox(height: 12),
+              const SizedBox(height: sectionGap),
+              SectionTitle(l10n.getThisBook),
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -593,12 +599,11 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.inMySources, style: BabelText.title(28)),
-        const SizedBox(height: 8),
+        SectionTitle(l10n.inMySources),
         ...switch (found) {
           AsyncData(:final value) when value.isNotEmpty => [
             Text(l10n.inMySourcesHint, style: BabelText.body(13)),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             for (final match in value)
               Container(
                 margin: const EdgeInsets.only(bottom: 10),
@@ -660,15 +665,14 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
           AsyncLoading() => [const LoadingBar()],
           _ => [
             Text(l10n.noSourceMatch, style: BabelText.body(13)),
-            const SizedBox(height: 10),
+            const SizedBox(height: 16),
+            // A real button: it takes you somewhere, it is not a heading.
             Align(
               alignment: Alignment.centerLeft,
-              child: TextButton(
+              child: PillButton(
+                label: l10n.manageSources,
+                kind: PillButtonKind.secondary,
                 onPressed: () => context.push(Routes.sources),
-                child: Text(
-                  l10n.manageSources.toUpperCase(),
-                  style: BabelText.label(10, color: BabelColors.gold),
-                ),
               ),
             ),
           ],

@@ -65,6 +65,31 @@ def guess_series(title: str) -> SeriesGuess | None:
     return None
 
 
+_AFTER_SERIES = re.compile(
+    rf"^[\s,:;\-–—(]*(?:{_WORD}\.?\s*)?0*(?P<number>\d{{1,4}}(?:[.,]\d)?)\)?$", re.IGNORECASE
+)
+
+
+def volume_number(title: str, series: str) -> float | None:
+    """The volume a title names within a series already known ("Homunculus 07" of
+    "Homunculus" is 7; "Homunculus Returns" and an omnibus "Vol. 3-4" are none).
+
+    Looser than guessing a series from a title alone: the series name settles what the
+    rest of the title may be, so a leading zero is no doubt.
+    """
+    text = " ".join(title.split())
+    key = series_key(series)
+    words = text.split(" ")
+    # The title starts with the series' words, however they are spelled and separated.
+    for cut in range(1, len(words) + 1):
+        if series_key(" ".join(words[:cut])) == key:
+            match = _AFTER_SERIES.match(" ".join(words[cut:]))
+            return parse_number(match["number"]) if match else None
+        if len(series_key(" ".join(words[:cut]))) > len(key):
+            return None
+    return None
+
+
 def series_key(name: str) -> str:
     """What makes two spellings the same series: letters and digits, lower case."""
     return re.sub(r"[^\w]+", " ", name.lower()).strip()

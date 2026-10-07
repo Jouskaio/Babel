@@ -96,6 +96,7 @@ doc/ReportResponse.md
 doc/ResetPasswordRequest.md
 doc/ReviewRequest.md
 doc/ReviewResponse.md
+doc/SagaVolumeResponse.md
 doc/SharedNoteResponse.md
 doc/ShelfResponse.md
 doc/SocialApi.md
@@ -231,6 +232,7 @@ lib/model/report_response.dart
 lib/model/reset_password_request.dart
 lib/model/review_request.dart
 lib/model/review_response.dart
+lib/model/saga_volume_response.dart
 lib/model/shared_note_response.dart
 lib/model/shelf_response.dart
 lib/model/social_profile_response.dart

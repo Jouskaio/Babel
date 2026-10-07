@@ -70,6 +70,74 @@ class CatalogApi {
     }
   }
 
+  /// Get Saga
+  ///
+  /// Every volume of a saga the catalog lists, in order (e.g. all of Homunculus).
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] series (required):
+  ///
+  /// * [String] author:
+  Future<Response> getSagaWithHttpInfo(String series, { String? author, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/catalog/saga';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+      queryParams.addAll(_queryParams('', 'series', series));
+    if (author != null) {
+      queryParams.addAll(_queryParams('', 'author', author));
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Saga
+  ///
+  /// Every volume of a saga the catalog lists, in order (e.g. all of Homunculus).
+  ///
+  /// Parameters:
+  ///
+  /// * [String] series (required):
+  ///
+  /// * [String] author:
+  Future<List<SagaVolumeResponse>?> getSaga(String series, { String? author, }) async {
+    final response = await getSagaWithHttpInfo(series,  author: author, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<SagaVolumeResponse>') as List)
+        .cast<SagaVolumeResponse>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
   /// Get Trending
   ///
   /// Works that are popular this week. Empty when no source is reachable.

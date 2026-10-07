@@ -1,0 +1,223 @@
+import 'package:babel_api_client/api.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../core/api/api_providers.dart';
+import '../../core/theme/babel_colors.dart';
+import '../../core/theme/babel_text.dart';
+import '../../core/widgets/book_cover.dart';
+import '../../core/widgets/loading_bar.dart';
+import '../../core/widgets/section_title.dart';
+import '../../l10n.dart';
+import '../../routing/router.dart';
+import '../library/application/library_controller.dart';
+import '../library/application/series.dart';
+import '../library/presentation/book_state.dart' show statusLabel;
+
+/// Every volume of a saga the catalog lists.
+final sagaProvider = FutureProvider.autoDispose
+    .family<List<SagaVolumeResponse>, ({String series, String? author})>(
+      (ref, args) async =>
+          await ref
+              .watch(authedCatalogApiProvider)
+              .getSaga(args.series, author: args.author) ??
+          const [],
+    );
+
+/// The whole of a saga: its volumes in order, the ones in the library marked, the
+/// numbers the catalog does not know shown as gaps.
+class SagaPage extends ConsumerWidget {
+  const SagaPage({required this.series, this.author, super.key});
+  final String series;
+  final String? author;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final volumes = ref.watch(sagaProvider((series: series, author: author)));
+    final library = ref.watch(libraryControllerProvider).value ?? const [];
+
+    LibraryItemResponse? owned(SagaVolumeResponse v) {
+      for (final item in library) {
+        if (item.workId == v.work.id) return item;
+        if (item.series != null &&
+            seriesKey(item.series!) == seriesKey(series) &&
+            item.seriesIndex == v.number) {
+          return item;
+        }
+      }
+      return null;
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: BabelColors.canvas,
+        scrolledUnderElevation: 0,
+      ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 48),
+            children: [
+              Text(series, style: BabelText.title(40)),
+              if (author != null) ...[
+                const SizedBox(height: 6),
+                Text(author!.toUpperCase(), style: BabelText.label(10)),
+              ],
+              const SizedBox(height: 24),
+              ...switch (volumes) {
+                AsyncData(:final value) when value.isEmpty => [
+                  Text(l10n.sagaEmpty, style: BabelText.body(15)),
+                ],
+                AsyncData(:final value) => _rows(context, value, owned),
+                AsyncError() => [
+                  TextButton(
+                    onPressed: () => ref.invalidate(sagaProvider),
+                    child: Text(l10n.retry),
+                  ),
+                ],
+                _ => [const LoadingBar()],
+              },
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _rows(
+    BuildContext context,
+    List<SagaVolumeResponse> volumes,
+    LibraryItemResponse? Function(SagaVolumeResponse) owned,
+  ) {
+    final l10n = context.l10n;
+    final byNumber = {for (final v in volumes) v.number.toDouble(): v};
+    final last = volumes.last.number.floor();
+    final mine = volumes.where((v) => owned(v) != null).length;
+    return [
+      SectionTitle(
+        l10n.sagaTitle,
+        caption: l10n.sagaCount(volumes.length, mine),
+      ),
+      Text(l10n.sagaHint, style: BabelText.body(13)),
+      const SizedBox(height: 18),
+      // Whole numbers up to the last known volume: a hole is a volume the catalog lacks.
+      for (var n = 1; n <= last; n++)
+        if (byNumber[n.toDouble()] case final volume?)
+          _VolumeRow(volume: volume, item: owned(volume))
+        else
+          _GapRow(number: n),
+      // Volumes numbered otherwise (2.5, 0), after the whole ones.
+      for (final volume in volumes)
+        if (volume.number != volume.number.floor() || volume.number < 1)
+          _VolumeRow(volume: volume, item: owned(volume)),
+    ];
+  }
+}
+
+class _VolumeRow extends StatelessWidget {
+  const _VolumeRow({required this.volume, required this.item});
+  final SagaVolumeResponse volume;
+  final LibraryItemResponse? item;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final work = volume.work;
+    final status = item?.status;
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: () => context.push(Routes.work(work.id)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            BookCover(
+              width: 52,
+              url: switch (work.coverPath) {
+                final path? => apiUrl(path),
+                _ => null,
+              },
+              title: work.title,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.volumeNumber(volumeText(volume.number)).toUpperCase(),
+                    style: BabelText.label(9, color: BabelColors.gold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(work.title, style: BabelText.heading(18)),
+                  const SizedBox(height: 4),
+                  Text(
+                    item == null
+                        ? l10n.sagaNotOwned
+                        : (status == null
+                              ? l10n.traceInLibrary
+                              : statusLabel(l10n, status)),
+                    style: BabelText.body(
+                      12,
+                      color: item == null
+                          ? BabelColors.textSecondary
+                          : BabelColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: BabelColors.textSecondary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GapRow extends StatelessWidget {
+  const _GapRow({required this.number});
+  final int number;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 52,
+            height: 78,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: BabelColors.border),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              '$number',
+              style: BabelText.figure(24, color: BabelColors.textSecondary),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.volumeNumber('$number').toUpperCase(),
+                  style: BabelText.label(9, color: BabelColors.textSecondary),
+                ),
+                const SizedBox(height: 4),
+                Text(l10n.sagaMissing, style: BabelText.body(13)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

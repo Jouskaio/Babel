@@ -142,4 +142,23 @@ void main() {
     await settle(tester);
     expect(server.socialCalls, contains('POST /v1/social/reviews/r1/comments'));
   });
+
+  testWidgets('a volume offers the whole of its saga', (tester) async {
+    final server = FakeServer();
+    server.work = {
+      ...server.work,
+      'title': 'Homunculus 3',
+      'series': 'Homunculus',
+      'series_index': 3,
+    };
+    await open(tester, server);
+
+    expect(find.text('VOIR TOUTE LA SAGA'), findsOneWidget);
+  });
+
+  testWidgets('a work that is no volume has no saga button', (tester) async {
+    await open(tester, FakeServer());
+
+    expect(find.text('VOIR TOUTE LA SAGA'), findsNothing);
+  });
 }

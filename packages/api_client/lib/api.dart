@@ -128,6 +128,7 @@ part 'model/report_response.dart';
 part 'model/reset_password_request.dart';
 part 'model/review_request.dart';
 part 'model/review_response.dart';
+part 'model/saga_volume_response.dart';
 part 'model/shared_note_response.dart';
 part 'model/shelf_response.dart';
 part 'model/social_profile_response.dart';
