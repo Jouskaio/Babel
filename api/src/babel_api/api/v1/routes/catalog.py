@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 from babel_api.api.dependencies import ContainerDep, CurrentUserId, WorkServiceDep
 from babel_api.domain.catalog import Edition, IdentifierKind, Work
+from babel_api.domain.series import guess_series
 from babel_api.services.works import SearchHit, WorkDetail
 
 Language = Literal["fr", "en"]
@@ -144,12 +145,19 @@ class WorkResponse(WorkSummaryResponse):
 
     description: str | None
     editions: list[EditionResponse]
+    series: str | None = Field(
+        default=None, description="The saga this work is a volume of, when its title says so"
+    )
+    series_index: float | None = Field(default=None, description="Its volume number")
 
     @classmethod
     def of_detail(cls, detail: WorkDetail, language: str | None) -> "WorkResponse":
         summary = WorkSummaryResponse.of(detail.work, *detail.localized(language))
+        guess = guess_series(detail.work.title)
         return cls(
             **summary.model_dump(),
+            series=guess.series if guess else None,
+            series_index=guess.number if guess else None,
             description=detail.described(language),
             editions=[EditionResponse.of(e) for e in detail.editions],
         )

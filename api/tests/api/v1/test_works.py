@@ -271,6 +271,9 @@ def test_a_saga_lists_every_volume_in_order(
     ]
     assert found[0]["work"]["cover_path"] == "/v1/catalog/covers/11/M"
     assert books.queries == ['title:"Homunculus" author:"Hideo Yamamoto"']
+    # A volume's page says which saga it belongs to, so the app can offer the whole of it.
+    third = client.get(f"/v1/catalog/works/{found[2]['work']['id']}", headers=auth).json()
+    assert (third["series"], third["series_index"]) == ("Homunculus", 3)
     # Each volume is a work of its own that can be opened.
     opened = client.get(f"/v1/catalog/works/{found[2]['work']['id']}", headers=auth)
     assert opened.status_code == 200

@@ -4072,6 +4072,30 @@
             "title": "Original Title",
             "type": "string"
           },
+          "series": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The saga this work is a volume of, when its title says so",
+            "title": "Series"
+          },
+          "series_index": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Its volume number",
+            "title": "Series Index"
+          },
           "title": {
             "title": "Title",
             "type": "string"

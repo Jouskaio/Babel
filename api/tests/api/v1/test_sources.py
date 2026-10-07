@@ -1,5 +1,6 @@
 from collections.abc import AsyncIterator
 from dataclasses import replace
+from datetime import timedelta
 from typing import Any
 
 import pytest
@@ -434,3 +435,27 @@ def test_books_are_found_across_the_sources_and_imported(
 
     # Another reader's sources are theirs alone.
     assert client.get("/v1/sources/search", params={"q": "emma"}, headers=bob).json() == []
+
+
+def test_searching_looks_again_at_sources_scanned_a_while_ago(
+    client: TestClient,
+    github: FakeGitHub,
+    ada: dict[str, str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    connect(client, ada)
+    github.files["books/Dune.epub"] = ("sha-dune", epub(title="Dune", isbn=None))
+
+    # Just scanned: the new book is not looked for yet.
+    assert client.get("/v1/sources/search", params={"q": "dune"}, headers=ada).json() == []
+
+    # A source left alone longer than the delay is scanned again before searching.
+    monkeypatch.setattr("babel_api.services.sources.SEARCH_RESCAN", timedelta(0))
+    found = client.get("/v1/sources/search", params={"q": "dune"}, headers=ada).json()
+    assert [m["entry"]["name"] for m in found] == ["Dune.epub"]
+
+    # A source that no longer answers is searched as it was last seen.
+    github.down = True
+    again = client.get("/v1/sources/search", params={"q": "dune"}, headers=ada)
+    assert again.status_code == 200
+    assert [m["entry"]["name"] for m in again.json()] == ["Dune.epub"]
