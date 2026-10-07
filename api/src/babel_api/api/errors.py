@@ -7,6 +7,7 @@ from babel_api.adapters.audiobookshelf import AbsError
 from babel_api.domain.errors import (
     BlockedFileError,
     BookAlreadyInLibraryError,
+    ConnectorDisabledError,
     DomainError,
     EmailAlreadyUsedError,
     FileTooLargeError,
@@ -67,6 +68,10 @@ _STATUS: dict[type[Exception], tuple[int, str]] = {
         "The source limits requests for now: try again later, or add an access token",
     ),
     TooManySourcesError: (status.HTTP_409_CONFLICT, "Too many sources on this account"),
+    ConnectorDisabledError: (
+        status.HTTP_403_FORBIDDEN,
+        "This kind of source is switched off by the administrator",
+    ),
     SecretsUnavailableError: (
         status.HTTP_503_SERVICE_UNAVAILABLE,
         "Access tokens cannot be stored on this server yet",

@@ -16,6 +16,54 @@ class AdminApi {
 
   final ApiClient apiClient;
 
+  /// Overview
+  ///
+  /// Connectors on or off, and how every account's sources last scanned.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> getAdminOverviewWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/admin/overview';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Overview
+  ///
+  /// Connectors on or off, and how every account's sources last scanned.
+  Future<AdminOverview?> getAdminOverview() async {
+    final response = await getAdminOverviewWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'AdminOverview',) as AdminOverview;
+    
+    }
+    return null;
+  }
+
   /// List Members
   ///
   /// Every account, with its roles and Kavita account.
@@ -163,6 +211,59 @@ class AdminApi {
     }
   }
 
+  /// Set Connector
+  ///
+  /// Switch a kind of source on or off for everyone; sources already added stay.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [SourceKind] kind (required):
+  ///
+  /// * [ConnectorRequest] connectorRequest (required):
+  Future<Response> setConnectorEnabledWithHttpInfo(SourceKind kind, ConnectorRequest connectorRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/admin/connectors/{kind}'
+      .replaceAll('{kind}', kind.toString());
+
+    // ignore: prefer_final_locals
+    Object? postBody = connectorRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'PUT',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Set Connector
+  ///
+  /// Switch a kind of source on or off for everyone; sources already added stay.
+  ///
+  /// Parameters:
+  ///
+  /// * [SourceKind] kind (required):
+  ///
+  /// * [ConnectorRequest] connectorRequest (required):
+  Future<void> setConnectorEnabled(SourceKind kind, ConnectorRequest connectorRequest,) async {
+    final response = await setConnectorEnabledWithHttpInfo(kind, connectorRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Set Premium
   ///
   /// Make an account premium (it gets an account on Babel's Kavita), or not any more.
@@ -222,6 +323,59 @@ class AdminApi {
     
     }
     return null;
+  }
+
+  /// Set Quota
+  ///
+  /// Limit how many sources one account may connect.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] memberId (required):
+  ///
+  /// * [QuotaRequest] quotaRequest (required):
+  Future<Response> setSourceQuotaWithHttpInfo(String memberId, QuotaRequest quotaRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/admin/users/{member_id}/quota'
+      .replaceAll('{member_id}', memberId);
+
+    // ignore: prefer_final_locals
+    Object? postBody = quotaRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'PUT',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Set Quota
+  ///
+  /// Limit how many sources one account may connect.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] memberId (required):
+  ///
+  /// * [QuotaRequest] quotaRequest (required):
+  Future<void> setSourceQuota(String memberId, QuotaRequest quotaRequest,) async {
+    final response = await setSourceQuotaWithHttpInfo(memberId, quotaRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
   }
 
   /// Withdraw File

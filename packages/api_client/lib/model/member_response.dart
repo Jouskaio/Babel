@@ -19,6 +19,7 @@ class MemberResponse {
     required this.email,
     required this.id,
     this.kavita,
+    this.maxSources,
     required this.premium,
   });
 
@@ -40,6 +41,8 @@ class MemberResponse {
   ///
   KavitaStatus? kavita;
 
+  int? maxSources;
+
   bool premium;
 
   @override
@@ -50,6 +53,7 @@ class MemberResponse {
     other.email == email &&
     other.id == id &&
     other.kavita == kavita &&
+    other.maxSources == maxSources &&
     other.premium == premium;
 
   @override
@@ -61,10 +65,11 @@ class MemberResponse {
     (email.hashCode) +
     (id.hashCode) +
     (kavita == null ? 0 : kavita!.hashCode) +
+    (maxSources == null ? 0 : maxSources!.hashCode) +
     (premium.hashCode);
 
   @override
-  String toString() => 'MemberResponse[admin=$admin, createdAt=$createdAt, displayName=$displayName, email=$email, id=$id, kavita=$kavita, premium=$premium]';
+  String toString() => 'MemberResponse[admin=$admin, createdAt=$createdAt, displayName=$displayName, email=$email, id=$id, kavita=$kavita, maxSources=$maxSources, premium=$premium]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -77,6 +82,11 @@ class MemberResponse {
       json[r'kavita'] = this.kavita;
     } else {
       json[r'kavita'] = null;
+    }
+    if (this.maxSources != null) {
+      json[r'max_sources'] = this.maxSources;
+    } else {
+      json[r'max_sources'] = null;
     }
       json[r'premium'] = this.premium;
     return json;
@@ -107,6 +117,7 @@ class MemberResponse {
         email: mapValueOfType<String>(json, r'email')!,
         id: mapValueOfType<String>(json, r'id')!,
         kavita: KavitaStatus.fromJson(json[r'kavita']),
+        maxSources: mapValueOfType<int>(json, r'max_sources'),
         premium: mapValueOfType<bool>(json, r'premium')!,
       );
     }

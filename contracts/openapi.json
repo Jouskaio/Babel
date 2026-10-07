@@ -174,6 +174,36 @@
         "title": "AbsLinkResponse",
         "type": "object"
       },
+      "AdminOverview": {
+        "properties": {
+          "connectors": {
+            "items": {
+              "$ref": "#/components/schemas/ConnectorStatus"
+            },
+            "title": "Connectors",
+            "type": "array"
+          },
+          "default_quota": {
+            "description": "Sources allowed per account unless set otherwise",
+            "title": "Default Quota",
+            "type": "integer"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/SourceHealth"
+            },
+            "title": "Sources",
+            "type": "array"
+          }
+        },
+        "required": [
+          "default_quota",
+          "connectors",
+          "sources"
+        ],
+        "title": "AdminOverview",
+        "type": "object"
+      },
       "Ao3Config": {
         "properties": {
           "username": {
@@ -821,6 +851,36 @@
           "mine"
         ],
         "title": "CommentResponse",
+        "type": "object"
+      },
+      "ConnectorRequest": {
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "title": "ConnectorRequest",
+        "type": "object"
+      },
+      "ConnectorStatus": {
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/SourceKind"
+          }
+        },
+        "required": [
+          "kind",
+          "enabled"
+        ],
+        "title": "ConnectorStatus",
         "type": "object"
       },
       "CreateSourceRequest": {
@@ -2091,6 +2151,17 @@
               }
             ]
           },
+          "max_sources": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Sources"
+          },
           "premium": {
             "title": "Premium",
             "type": "boolean"
@@ -2454,6 +2525,29 @@
           "token"
         ],
         "title": "PushTokenRequest",
+        "type": "object"
+      },
+      "QuotaRequest": {
+        "properties": {
+          "max_sources": {
+            "anyOf": [
+              {
+                "maximum": 1000.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Sources allowed for this account; null returns to the server default",
+            "title": "Max Sources"
+          }
+        },
+        "required": [
+          "max_sources"
+        ],
+        "title": "QuotaRequest",
         "type": "object"
       },
       "ReaderPageResponse": {
@@ -3405,6 +3499,60 @@
           "format"
         ],
         "title": "SourceEntryResponse",
+        "type": "object"
+      },
+      "SourceHealth": {
+        "properties": {
+          "entries": {
+            "title": "Entries",
+            "type": "integer"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/SourceKind"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null when the last scan worked",
+            "title": "Last Error"
+          },
+          "last_scan_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Scan At"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "owner": {
+            "description": "Email of the account",
+            "title": "Owner",
+            "type": "string"
+          }
+        },
+        "required": [
+          "owner",
+          "kind",
+          "name",
+          "entries",
+          "last_scan_at",
+          "last_error"
+        ],
+        "title": "SourceHealth",
         "type": "object"
       },
       "SourceKind": {
@@ -4436,6 +4584,56 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/v1/admin/connectors/{kind}": {
+      "put": {
+        "description": "Switch a kind of source on or off for everyone; sources already added stay.",
+        "operationId": "setConnectorEnabled",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SourceKind"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Set Connector",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/v1/admin/files/{sha256}/withdraw": {
       "post": {
         "description": "Withdraw a file from every library and delete it; by default its hash is blocked.",
@@ -4485,6 +4683,33 @@
         "summary": "Withdraw File",
         "tags": [
           "library",
+          "admin"
+        ]
+      }
+    },
+    "/v1/admin/overview": {
+      "get": {
+        "description": "Connectors on or off, and how every account's sources last scanned.",
+        "operationId": "getAdminOverview",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOverview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Overview",
+        "tags": [
           "admin"
         ]
       }
@@ -4651,6 +4876,58 @@
         "summary": "Set Premium",
         "tags": [
           "kavita",
+          "admin"
+        ]
+      }
+    },
+    "/v1/admin/users/{member_id}/quota": {
+      "put": {
+        "description": "Limit how many sources one account may connect.",
+        "operationId": "setSourceQuota",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "member_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Member Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuotaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Set Quota",
+        "tags": [
           "admin"
         ]
       }

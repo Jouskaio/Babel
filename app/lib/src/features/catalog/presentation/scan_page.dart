@@ -14,6 +14,7 @@ import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
+import '../../library/application/library_controller.dart';
 
 /// Barcode scanning on phones and tablets; manual ISBN entry everywhere.
 bool get _cameraSupported =>
@@ -38,6 +39,8 @@ class _ScanPageState extends ConsumerState<ScanPage> {
   bool _busy = false;
   IsbnLookupResponse? _found;
   String? _error;
+  bool _burst = false;
+  final _added = <String>[];
 
   @override
   void dispose() {
@@ -70,6 +73,7 @@ class _ScanPageState extends ConsumerState<ScanPage> {
           .read(authedCatalogApiProvider)
           .lookupIsbn(isbn, lang: lang);
       if (mounted) setState(() => _found = found);
+      if (_burst && found != null) await _addPaper(found.work);
     } on ApiException catch (error) {
       if (mounted) {
         setState(() {
@@ -94,6 +98,16 @@ class _ScanPageState extends ConsumerState<ScanPage> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  /// Burst mode: the scanned book joins the library as a paper book.
+  Future<void> _addPaper(WorkResponse work) async {
+    final item = await ref
+        .read(libraryApiProvider)
+        .addPaperBook(PaperBookRequest(workId: work.id));
+    if (item == null) return;
+    await ref.read(libraryControllerProvider.notifier).keep(item);
+    if (mounted) setState(() => _added.add(item.title));
   }
 
   @override
@@ -145,6 +159,22 @@ class _ScanPageState extends ConsumerState<ScanPage> {
                         ),
                       ),
                       Positioned(
+                        top: 8,
+                        left: 16,
+                        right: 16,
+                        child: SwitchListTile(
+                          value: _burst,
+                          onChanged: (v) => setState(() => _burst = v),
+                          title: Text(
+                            l10n.scanBurst,
+                            style: BabelText.body(
+                              13,
+                              color: BabelColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
                         bottom: 24,
                         child: Text(
                           l10n.scanHint,
@@ -162,6 +192,7 @@ class _ScanPageState extends ConsumerState<ScanPage> {
             busy: _busy,
             found: _found,
             error: _error,
+            added: _added,
             onLookup: () => _lookup(_isbn.text),
           ),
         ],
@@ -176,6 +207,7 @@ class _ResultSheet extends StatelessWidget {
     required this.busy,
     required this.found,
     required this.error,
+    required this.added,
     required this.onLookup,
   });
 
@@ -183,6 +215,7 @@ class _ResultSheet extends StatelessWidget {
   final bool busy;
   final IsbnLookupResponse? found;
   final String? error;
+  final List<String> added;
   final VoidCallback onLookup;
 
   @override
@@ -251,6 +284,17 @@ class _ResultSheet extends StatelessWidget {
               ),
               const SizedBox(height: 16),
             ],
+            if (added.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  l10n.scanBurstAdded(
+                    added.length,
+                    added.reversed.take(3).join(', '),
+                  ),
+                  style: BabelText.body(13, color: BabelColors.gold),
+                ),
+              ),
             if (error case final message?)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),

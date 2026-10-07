@@ -30,3 +30,8 @@ final kavitaLinkProvider = FutureProvider.autoDispose<KavitaLinkResponse?>((
 final membersProvider = FutureProvider.autoDispose<List<MemberResponse>>(
   (ref) async => await ref.watch(kavitaApiProvider).listMembers() ?? const [],
 );
+
+/// Administrators: connectors on or off, and how sources last scanned.
+final adminOverviewProvider = FutureProvider.autoDispose<AdminOverview?>(
+  (ref) => ref.watch(adminApiProvider).getAdminOverview(),
+);

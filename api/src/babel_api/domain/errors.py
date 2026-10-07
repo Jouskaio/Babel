@@ -79,6 +79,10 @@ class TooManySourcesError(DomainError):
     """The account reached the maximum number of sources."""
 
 
+class ConnectorDisabledError(DomainError):
+    """An administrator switched this kind of source off."""
+
+
 class SecretsUnavailableError(DomainError):
     """Credentials cannot be stored: the server has no encryption key configured."""
 

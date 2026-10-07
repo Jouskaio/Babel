@@ -7,6 +7,7 @@ doc/AbsLinkRequest.md
 doc/AbsLinkResponse.md
 doc/AccountApi.md
 doc/AdminApi.md
+doc/AdminOverview.md
 doc/Ao3Config.md
 doc/Audience.md
 doc/AudioChapterResponse.md
@@ -29,6 +30,8 @@ doc/ChangeResponse.md
 doc/CheckSourceResponse.md
 doc/CommentRequest.md
 doc/CommentResponse.md
+doc/ConnectorRequest.md
+doc/ConnectorStatus.md
 doc/CreateSourceRequest.md
 doc/CsvImportResponse.md
 doc/DeviceKind.md
@@ -78,6 +81,7 @@ doc/PullResponse.md
 doc/PushRequest.md
 doc/PushResponse.md
 doc/PushTokenRequest.md
+doc/QuotaRequest.md
 doc/ReaderPageResponse.md
 doc/ReaderResponse.md
 doc/ReadingPositionResponse.md
@@ -103,6 +107,7 @@ doc/SocialApi.md
 doc/SocialProfileResponse.md
 doc/SourceDetailResponse.md
 doc/SourceEntryResponse.md
+doc/SourceHealth.md
 doc/SourceKind.md
 doc/SourceMatchResponse.md
 doc/SourceResponse.md
@@ -149,6 +154,7 @@ lib/model/abs_book_response.dart
 lib/model/abs_library_response.dart
 lib/model/abs_link_request.dart
 lib/model/abs_link_response.dart
+lib/model/admin_overview.dart
 lib/model/ao3_config.dart
 lib/model/audience.dart
 lib/model/audio_chapter_response.dart
@@ -168,6 +174,8 @@ lib/model/change_response.dart
 lib/model/check_source_response.dart
 lib/model/comment_request.dart
 lib/model/comment_response.dart
+lib/model/connector_request.dart
+lib/model/connector_status.dart
 lib/model/create_source_request.dart
 lib/model/csv_import_response.dart
 lib/model/device_kind.dart
@@ -214,6 +222,7 @@ lib/model/pull_response.dart
 lib/model/push_request.dart
 lib/model/push_response.dart
 lib/model/push_token_request.dart
+lib/model/quota_request.dart
 lib/model/reader_page_response.dart
 lib/model/reader_response.dart
 lib/model/reading_position_response.dart
@@ -238,6 +247,7 @@ lib/model/shelf_response.dart
 lib/model/social_profile_response.dart
 lib/model/source_detail_response.dart
 lib/model/source_entry_response.dart
+lib/model/source_health.dart
 lib/model/source_kind.dart
 lib/model/source_match_response.dart
 lib/model/source_response.dart

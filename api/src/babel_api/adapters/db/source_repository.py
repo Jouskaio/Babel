@@ -7,7 +7,14 @@ from uuid import UUID
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from babel_api.adapters.db.models import KnownSourceFileRow, SourceEntryRow, SourceRow
+from babel_api.adapters.db.models import (
+    DisabledConnectorRow,
+    KnownSourceFileRow,
+    SourceEntryRow,
+    SourceQuotaRow,
+    SourceRow,
+    UserRow,
+)
 from babel_api.domain.sources import EntryStatus, RemoteEntry, Source, SourceEntry, SourceKind
 
 
@@ -83,6 +90,45 @@ class SqlSourceRepository:
             select(func.count()).select_from(SourceRow).where(SourceRow.user_id == user_id)
         )
         return int(total or 0)
+
+    async def quota(self, user_id: UUID) -> int | None:
+        row = await self._session.get(SourceQuotaRow, user_id)
+        return row.max_sources if row else None
+
+    async def set_quota(self, user_id: UUID, max_sources: int | None) -> None:
+        row = await self._session.get(SourceQuotaRow, user_id)
+        if max_sources is None:
+            if row:
+                await self._session.delete(row)
+        elif row:
+            row.max_sources = max_sources
+        else:
+            self._session.add(SourceQuotaRow(user_id=user_id, max_sources=max_sources))
+
+    async def disabled_kinds(self) -> set[str]:
+        return set(await self._session.scalars(select(DisabledConnectorRow.kind)))
+
+    async def set_disabled(self, kind: SourceKind, disabled: bool) -> None:
+        row = await self._session.get(DisabledConnectorRow, kind.value)
+        if disabled and row is None:
+            self._session.add(DisabledConnectorRow(kind=kind.value))
+        elif not disabled and row is not None:
+            await self._session.delete(row)
+
+    async def all_sources(self) -> list[tuple[str, Source]]:
+        """Every source with its owner's email, for the administrator's health view."""
+        result = await self._session.execute(
+            select(SourceRow, UserRow.email)
+            .join(UserRow, UserRow.id == SourceRow.user_id)
+            .order_by(SourceRow.created_at)
+        )
+        counts = {
+            sid: n
+            for sid, n in await self._session.execute(
+                select(SourceEntryRow.source_id, func.count()).group_by(SourceEntryRow.source_id)
+            )
+        }
+        return [(email, _to_source(row, counts.get(row.id, 0))) for row, email in result]
 
     async def delete(self, source_id: UUID) -> None:
         # Explicit: SQLite does not enforce ON DELETE CASCADE by default.

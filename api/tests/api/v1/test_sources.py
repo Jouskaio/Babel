@@ -459,3 +459,50 @@ def test_searching_looks_again_at_sources_scanned_a_while_ago(
     again = client.get("/v1/sources/search", params={"q": "dune"}, headers=ada)
     assert again.status_code == 200
     assert [m["entry"]["name"] for m in again.json()] == ["Dune.epub"]
+
+
+def test_an_administrator_sees_health_and_switches_a_connector_off(
+    client: TestClient, github: FakeGitHub
+) -> None:
+    admin = account(client, "admin@example.com")  # listed in BABEL_ADMIN_EMAILS in tests
+    reader = account(client, "reader@example.com")
+    assert connect(client, reader).status_code == 201
+
+    overview = client.get("/v1/admin/overview", headers=admin).json()
+    assert [(s["owner"], s["kind"], s["entries"]) for s in overview["sources"]] == [
+        ("reader@example.com", "github", 2)
+    ]
+    assert all(c["enabled"] for c in overview["connectors"])
+    assert client.get("/v1/admin/overview", headers=reader).status_code == 403
+
+    off = client.put("/v1/admin/connectors/github", json={"enabled": False}, headers=admin)
+    assert off.status_code == 204
+    assert connect(client, reader, repository="ada/other").status_code == 403
+    on = client.put("/v1/admin/connectors/github", json={"enabled": True}, headers=admin)
+    assert on.status_code == 204
+    assert connect(client, reader, repository="ada/other").status_code == 201
+
+
+def test_an_administrator_limits_the_sources_of_one_account(
+    client: TestClient, github: FakeGitHub
+) -> None:
+    admin = account(client, "admin@example.com")
+    reader = account(client, "reader@example.com")
+    members = {m["email"]: m for m in client.get("/v1/admin/users", headers=admin).json()}
+    assert members["reader@example.com"]["max_sources"] is None
+
+    reader_id = members["reader@example.com"]["id"]
+    body = {"max_sources": 1}
+    assert (
+        client.put(f"/v1/admin/users/{reader_id}/quota", json=body, headers=admin).status_code
+        == 204
+    )
+    assert connect(client, reader).status_code == 201
+    assert connect(client, reader, repository="ada/second").status_code == 409
+
+    reset = {"max_sources": None}
+    assert (
+        client.put(f"/v1/admin/users/{reader_id}/quota", json=reset, headers=admin).status_code
+        == 204
+    )
+    assert connect(client, reader, repository="ada/second").status_code == 201
