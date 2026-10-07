@@ -193,7 +193,8 @@ class SyncEngine extends Notifier<SyncStatus> {
       db,
       finder: Finder(sortOrders: [SortOrder(Field.key)]),
     );
-    if (queued.isEmpty) return;
+    // The engine can be gone by now (signed out): nothing to push.
+    if (queued.isEmpty || !ref.mounted) return;
     final deviceId = ref.read(deviceSessionProvider).id!;
     final operations = [
       for (final record in queued)

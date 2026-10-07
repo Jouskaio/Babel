@@ -3953,7 +3953,7 @@ abstract class AppLocalizations {
   /// No description provided for @noSourceMatch.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun livre de vos sources ne correspond. Babel ne télécharge pas de livres du catalogue : ajoutez une source, ou importez votre fichier.'**
+  /// **'Aucun livre de vos sources ne correspond.'**
   String get noSourceMatch;
 
   /// No description provided for @manageSources.

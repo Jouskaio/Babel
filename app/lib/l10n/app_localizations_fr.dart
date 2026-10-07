@@ -2390,8 +2390,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Des livres de vos sources (Kavita, WebDAV, GitHub…) correspondent à cette œuvre.';
 
   @override
-  String get noSourceMatch =>
-      'Aucun livre de vos sources ne correspond. Babel ne télécharge pas de livres du catalogue : ajoutez une source, ou importez votre fichier.';
+  String get noSourceMatch => 'Aucun livre de vos sources ne correspond.';
 
   @override
   String get manageSources => 'Gérer mes sources';
