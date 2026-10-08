@@ -154,9 +154,25 @@ class ChaptarrClient:
         await self._call("POST", "command", json={"name": "BookSearch", "bookIds": [book_id]})
         return book_id
 
+    async def queue_progress(self) -> dict[int, float]:
+        """How far each book being downloaded has come, in percent, by Chaptarr's book id."""
+        found = cast(dict[str, Any], await self._call("GET", "queue", params={"pageSize": "200"}))
+        progress: dict[int, float] = {}
+        for record in cast(list[dict[str, Any]], found.get("records") or []):
+            book, size, left = record.get("bookId"), record.get("size"), record.get("sizeleft")
+            if isinstance(book, int) and isinstance(size, int | float) and size > 0:
+                done = 100 * (size - float(left or 0)) / size
+                progress[book] = max(progress.get(book, 0.0), min(100.0, max(0.0, done)))
+        return progress
+
     async def check(self) -> None:
         """The address is a Chaptarr and the key is accepted; [ChaptarrError] otherwise."""
-        status = cast(dict[str, Any], await self._call("GET", "system/status"))
+        try:
+            status = cast(dict[str, Any], await self._call("GET", "system/status"))
+        except ChaptarrError as error:
+            if error.reason.startswith("status 4"):  # a site that has no such API
+                raise ChaptarrError("not_chaptarr") from error
+            raise
         if "chaptarr" not in str(status.get("appName", "")).lower():
             raise ChaptarrError("not_chaptarr")
 

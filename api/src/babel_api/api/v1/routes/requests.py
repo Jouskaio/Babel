@@ -22,10 +22,18 @@ class BookRequestResponse(BaseModel):
     work_id: UUID
     status: RequestStatus
     created_at: datetime
+    progress: float | None = Field(
+        default=None, description="Percent downloaded while it runs; null before it starts"
+    )
 
     @classmethod
     def of(cls, request: BookRequest) -> "BookRequestResponse":
-        return cls(work_id=request.work_id, status=request.status, created_at=request.created_at)
+        return cls(
+            work_id=request.work_id,
+            status=request.status,
+            created_at=request.created_at,
+            progress=request.progress,
+        )
 
 
 class RequestsResponse(BaseModel):

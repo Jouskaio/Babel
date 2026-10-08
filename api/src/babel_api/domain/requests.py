@@ -20,6 +20,8 @@ class BookRequest:
     status: RequestStatus
     created_at: datetime
     chaptarr_id: int | None = None
+    # How far the download is (0 to 100) while it runs; None when it has not started.
+    progress: float | None = None
 
 
 @dataclass(frozen=True, slots=True)

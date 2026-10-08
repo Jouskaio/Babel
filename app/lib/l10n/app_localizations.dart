@@ -4507,6 +4507,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Babel n\'a pas pu joindre ce Chaptarr. L\'adresse doit être joignable depuis internet.'**
   String get chaptarrUnreachable;
+
+  /// No description provided for @requestDownloading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargement : {percent} %'**
+  String requestDownloading(int percent);
 }
 
 class _AppLocalizationsDelegate

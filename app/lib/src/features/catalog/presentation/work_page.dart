@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:babel_api_client/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -564,6 +566,14 @@ class _SourceMatches extends ConsumerStatefulWidget {
 class _SourceMatchesState extends ConsumerState<_SourceMatches> {
   final _adding = <String>{};
   bool _requesting = false;
+  // While a request is under way, ask again every few seconds to show how far it has come.
+  Timer? _poll;
+
+  @override
+  void dispose() {
+    _poll?.cancel();
+    super.dispose();
+  }
 
   Future<void> _request() async {
     final l10n = context.l10n;
@@ -628,13 +638,28 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
           .where((r) => r.workId == widget.workId)
           .firstOrNull;
       if (mine != null && mine.status != RequestStatus.notFound) {
+        final percent = mine.progress;
         return [
           Text(
             mine.status == RequestStatus.available
                 ? l10n.requestAvailable
+                : percent != null
+                ? l10n.requestDownloading(percent.round())
                 : l10n.requestPending,
             style: BabelText.body(13, color: BabelColors.gold),
           ),
+          if (mine.status == RequestStatus.requested && percent != null) ...[
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(2),
+              child: LinearProgressIndicator(
+                value: (percent / 100).clamp(0, 1).toDouble(),
+                minHeight: 4,
+                color: BabelColors.gold,
+                backgroundColor: BabelColors.sunken,
+              ),
+            ),
+          ],
         ];
       }
       return [
@@ -671,6 +696,24 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    ref.listen(bookRequestsProvider, (_, next) {
+      final waiting =
+          next.value?.items.any(
+            (r) =>
+                r.workId == widget.workId &&
+                r.status == RequestStatus.requested,
+          ) ??
+          false;
+      if (waiting) {
+        _poll ??= Timer.periodic(
+          const Duration(seconds: 8),
+          (_) => ref.invalidate(bookRequestsProvider),
+        );
+      } else {
+        _poll?.cancel();
+        _poll = null;
+      }
+    });
     final found = ref.watch(sourceMatchesProvider(widget.title));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
