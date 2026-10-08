@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/auth/auth_controller.dart';
 import '../../core/sync/sync_engine.dart';
 import '../../core/theme/babel_colors.dart';
 import '../../core/theme/babel_text.dart';
@@ -17,10 +19,81 @@ class _Destination {
   final String? route; // or a full-screen page
 }
 
-/// Signed-in frame: floating bottom bar on phones, sidebar on wide screens.
-class AppShell extends ConsumerWidget {
-  const AppShell({required this.shell, super.key});
-  final StatefulNavigationShell shell;
+/// The tab a page belongs to, so the bar lights it up: null for a page outside the tabs.
+int? branchOf(String path) {
+  bool under(String root) => path == root || path.startsWith('$root/');
+  if (under(Routes.home)) return 0;
+  if (under(Routes.search) || under('/works') || under('/saga')) return 1;
+  if (under(Routes.library) ||
+      under(Routes.sources) ||
+      under(Routes.importLink) ||
+      under(Routes.audiobooks)) {
+    return 2;
+  }
+  if (under(Routes.profile) ||
+      under(Routes.account) ||
+      under(Routes.stats) ||
+      under(Routes.friends) ||
+      under(Routes.kavita) ||
+      under(Routes.admin) ||
+      under('/readers')) {
+    return 3;
+  }
+  return null;
+}
+
+/// Pages shown without the bar: signing in, and the reader, which takes the whole screen.
+bool _framed(String path) =>
+    !Routes.public.contains(path) &&
+    !Routes.open.contains(path) &&
+    path != Routes.splash &&
+    !path.startsWith('/read/');
+
+/// Signed-in frame around every page: floating bottom bar on phones, sidebar on wide screens.
+class AppChrome extends ConsumerStatefulWidget {
+  const AppChrome({required this.router, required this.child, super.key});
+  final GoRouter router;
+  final Widget child;
+
+  @override
+  ConsumerState<AppChrome> createState() => _AppChromeState();
+}
+
+class _AppChromeState extends ConsumerState<AppChrome> {
+  GoRouter get router => widget.router;
+  Widget get child => widget.child;
+
+  @override
+  void initState() {
+    super.initState();
+    router.routerDelegate.addListener(_routeChanged);
+  }
+
+  @override
+  void dispose() {
+    router.routerDelegate.removeListener(_routeChanged);
+    super.dispose();
+  }
+
+  /// The router can announce a new page while the frame is being built: look again after it.
+  void _routeChanged() {
+    if (!mounted) return;
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
+      });
+    } else {
+      setState(() {});
+    }
+  }
+
+  static const _tabs = [
+    Routes.home,
+    Routes.search,
+    Routes.library,
+    Routes.profile,
+  ];
 
   List<_Destination> _destinations(AppLocalizations l10n) => [
     _Destination(Icons.home_outlined, l10n.navHome, branch: 0),
@@ -30,19 +103,24 @@ class AppShell extends ConsumerWidget {
     _Destination(Icons.person_outline, l10n.navProfile, branch: 3),
   ];
 
-  void _open(BuildContext context, _Destination d) {
+  void _open(_Destination d) {
     if (d.route != null) {
-      context.push(d.route!);
+      router.push(d.route!);
     } else {
-      shell.goBranch(
-        d.branch!,
-        initialLocation: d.branch == shell.currentIndex,
-      );
+      // Each tab keeps its own pages: going to its root shows where it was left.
+      router.go(_tabs[d.branch!]);
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final signedIn = ref.watch(authControllerProvider) is SignedIn;
+    final path = router.routerDelegate.currentConfiguration.uri.path;
+    if (!signedIn || !_framed(path)) return child;
+    return _frame(context, branchOf(path) ?? -1);
+  }
+
+  Widget _frame(BuildContext context, int current) {
     // Watching the engine keeps it running while signed in.
     final sync = ref.watch(syncEngineProvider);
     final destinations = _destinations(context.l10n);
@@ -54,15 +132,15 @@ class AppShell extends ConsumerWidget {
               children: [
                 _Sidebar(
                   destinations: destinations,
-                  current: shell.currentIndex,
-                  onOpen: (d) => _open(context, d),
+                  current: current,
+                  onOpen: _open,
                 ),
                 Expanded(
                   child: SafeArea(
                     child: Column(
                       children: [
                         if (!sync.online) _OfflinePill(pending: sync.pending),
-                        Expanded(child: shell),
+                        Expanded(child: child),
                         const Padding(
                           padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
                           child: MiniPlayer(),
@@ -76,8 +154,8 @@ class AppShell extends ConsumerWidget {
           );
         }
         return Scaffold(
-          extendBody: true,
-          body: SafeArea(bottom: false, child: shell),
+          // The pages end above the bar: those outside the tabs are not padded for it.
+          body: SafeArea(bottom: false, child: child),
           bottomNavigationBar: SafeArea(
             minimum: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: Column(
@@ -87,8 +165,8 @@ class AppShell extends ConsumerWidget {
                 const MiniPlayer(),
                 _BottomBar(
                   destinations: destinations,
-                  current: shell.currentIndex,
-                  onOpen: (d) => _open(context, d),
+                  current: current,
+                  onOpen: _open,
                 ),
               ],
             ),

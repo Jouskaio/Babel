@@ -11,6 +11,7 @@ import 'core/share/share_intake.dart';
 import 'core/theme/babel_colors.dart';
 import 'core/theme/babel_theme.dart';
 import 'core/theme/palette_scope.dart';
+import 'features/shell/app_shell.dart';
 import 'l10n.dart';
 import 'routing/router.dart';
 
@@ -124,9 +125,14 @@ class _BabelAppState extends ConsumerState<BabelApp> {
       // selection menu needs an Overlay above the pages, hence the entry. The e-ink setting
       // sits outside it: an entry is not rebuilt when this builder runs again.
       builder: (context, child) {
+        final router = ref.read(routerProvider);
         final pages = Overlay(
           initialEntries: [
-            OverlayEntry(builder: (_) => SelectionArea(child: child!)),
+            OverlayEntry(
+              builder: (_) => SelectionArea(
+                child: AppChrome(router: router, child: child!),
+              ),
+            ),
           ],
         );
         return eink

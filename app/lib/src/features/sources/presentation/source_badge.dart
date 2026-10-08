@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/back_leading.dart';
 
 /// The square badge identifying a kind of source ("GH", "OPDS"…).
 class SourceBadge extends StatelessWidget {
@@ -81,6 +82,7 @@ PreferredSizeWidget sourcesAppBar(String title, {List<Widget>? actions}) =>
       backgroundColor: BabelColors.canvas,
       scrolledUnderElevation: 0,
       centerTitle: true,
+      leading: const BackLeading(),
       iconTheme: IconThemeData(color: BabelColors.textPrimary),
       title: Text(title, style: BabelText.heading(22)),
       actions: actions,
