@@ -121,24 +121,44 @@ class Ao3Connector:
         if cached and cached[1] > time.monotonic():
             return self._client(cached[0])
         client = self._client()
-        form = _soup(await self._get(client, "/users/login"))
+        page = await self._get(client, "/users/login", retries=LISTING_RETRIES)
+        if page.status_code >= 400:
+            raise SourceConnectionError("unreachable")
+        form = _soup(page)
         token = form.find("input", attrs={"name": "authenticity_token"})
         if not isinstance(token, Tag):
             raise SourceConnectionError("unreachable")
-        await self._requests.wait()
-        try:
-            response = await client.post(
-                "/users/login",
-                data={
-                    "authenticity_token": str(token.get("value") or ""),
-                    "user[login]": username,
-                    "user[password]": password,
-                    "user[remember_me]": "0",
-                    "commit": "Log in",
-                },
-            )
-        except httpx.HTTPError as error:
-            raise SourceConnectionError("unreachable") from error
+        data = {
+            "authenticity_token": str(token.get("value") or ""),
+            "user[login]": username,
+            "user[password]": password,
+            "user[remember_me]": "0",
+            "commit": "Log in",
+        }
+        # AO3's front often fails (525) before the login reaches AO3: nothing was processed, so
+        # sending it again is safe. A failure is "unreachable", never "wrong password".
+        response: httpx.Response | None = None
+        for attempt in range(LISTING_RETRIES + 1):
+            if attempt:
+                await asyncio.sleep(min(self._pause * 2 * attempt, MAX_RETRY_WAIT))
+            await self._requests.wait()
+            try:
+                response = await client.post("/users/login", data=data)
+            except httpx.HTTPError as error:
+                if attempt == LISTING_RETRIES:
+                    raise SourceConnectionError("unreachable") from error
+                continue
+            if response.status_code == 429:
+                self._limited(response)
+            if response.status_code < 500:
+                break
+            if attempt == LISTING_RETRIES:
+                log.warning(
+                    "AO3 answered %s to the login after %s tries", response.status_code, attempt + 1
+                )
+                raise SourceConnectionError("unreachable")
+        if response is None:  # pragma: no cover - the loop always answers or raises
+            raise SourceConnectionError("unreachable")
         body = _soup(response).find("body")
         classes = body.get("class") if isinstance(body, Tag) else None
         if not classes or "logged-in" not in classes:

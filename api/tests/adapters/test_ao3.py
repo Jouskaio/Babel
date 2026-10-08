@@ -34,6 +34,7 @@ class FakeAo3:
         self.requests: list[httpx.Request] = []
         self.limited = False
         self.flaky = 0
+        self.login_525 = 0  # answers to the login post that fail in AO3's front
 
     def __call__(self, request: httpx.Request) -> httpx.Response:
         self.requests.append(request)
@@ -48,6 +49,9 @@ class FakeAo3:
             return httpx.Response(
                 200, text='<form><input name="authenticity_token" value="tok"/></form>'
             )
+        if path == "/users/login" and self.login_525:
+            self.login_525 -= 1
+            return httpx.Response(525)
         if path == "/users/login":
             ok = b"user%5Bpassword%5D=right" in request.content and b"tok" in request.content
             return httpx.Response(
@@ -172,6 +176,21 @@ def test_a_slow_bookmarks_page_is_retried_longer_than_other_requests() -> None:
     fake.flaky = 6
     with pytest.raises(SourceConnectionError):
         asyncio.run(connector(fake).list_entries({"username": "ada"}, None))
+
+
+def test_a_failing_login_post_is_sent_again_and_never_read_as_a_wrong_password() -> None:
+    fake = FakeAo3()
+    fake.login_525 = 2
+    found = asyncio.run(connector(fake).list_entries({"username": "ada"}, "right"))
+    assert {e.path for e in found} >= {"/works/2"}  # signed in after two failed posts
+
+    fake = FakeAo3()
+    fake.login_525 = 99
+    with pytest.raises(SourceConnectionError, match="unreachable"):
+        asyncio.run(connector(fake).list_entries({"username": "ada"}, "right"))
+    # ... and a wrong password is still a wrong password
+    with pytest.raises(SourceConnectionError, match="401"):
+        asyncio.run(connector(FakeAo3()).list_entries({"username": "ada"}, "wrong"))
 
 
 def test_a_rate_limit_pauses_every_request() -> None:
