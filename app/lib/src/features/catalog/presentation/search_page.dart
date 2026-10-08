@@ -15,6 +15,7 @@ import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../landing/application/trending_provider.dart';
 import '../../library/application/history.dart';
+import '../../library/application/series.dart';
 import '../../library/presentation/book_trace.dart';
 import '../application/catalog_providers.dart';
 
@@ -371,16 +372,127 @@ class _Results extends ConsumerWidget {
           ? Text(l10n.noResults(query), style: BabelText.body(15))
           : Column(
               children: [
-                for (final work in works)
-                  WorkRow(
-                    work: work,
-                    onTap: () {
-                      onOpen();
-                      context.push(Routes.work(work.id));
-                    },
-                  ),
+                for (final entry in groupVolumes(works))
+                  if (entry.volumes.length < 2)
+                    WorkRow(
+                      work: entry.first,
+                      onTap: () {
+                        onOpen();
+                        context.push(Routes.work(entry.first.id));
+                      },
+                    )
+                  else
+                    _SagaRow(
+                      entry: entry,
+                      onTap: () {
+                        onOpen();
+                        context.push(
+                          Routes.saga(
+                            entry.title,
+                            author: entry.first.authors.firstOrNull,
+                          ),
+                        );
+                      },
+                    ),
               ],
             ),
+    );
+  }
+}
+
+/// Search results where the volumes of one series are gathered under its name.
+class VolumeGroup {
+  VolumeGroup(this.title, this.volumes);
+  final String title;
+  final List<WorkSummaryResponse> volumes;
+  WorkSummaryResponse get first => volumes.first;
+}
+
+final _volumeMark = RegExp(
+  r'[\s,:\-–]*\b(?:tome|to|t|vol\.?|volume|book|livre|band|#)?\s*\d{1,3}\s*$',
+  caseSensitive: false,
+);
+
+/// "Les carnets de l'apothicaire - Enquêtes à la cour To3" and "…, Tome 13" are volumes
+/// of "Les carnets de l'apothicaire": the title without its number and subtitle, or null
+/// when the title names no volume.
+String? seriesOfTitle(String title) {
+  final match = _volumeMark.firstMatch(title.trim());
+  // A bare trailing number ("Fahrenheit 451") is not enough: a volume word is needed.
+  if (match == null || !RegExp(r'[A-Za-z#]').hasMatch(match[0]!)) return null;
+  final base = title
+      .trim()
+      .substring(0, match.start)
+      .split(RegExp(r'\s[-–:]\s|:|,'))
+      .first
+      .trim();
+  return base.length >= 2 ? base : null;
+}
+
+/// Gathers the results that are volumes of the same series (two or more); the others,
+/// and the order of the list, stay as they are.
+List<VolumeGroup> groupVolumes(List<WorkSummaryResponse> works) {
+  final groups = <String, VolumeGroup>{};
+  final out = <VolumeGroup>[];
+  for (final work in works) {
+    final series = seriesOfTitle(work.title);
+    if (series == null) {
+      out.add(VolumeGroup(work.title, [work]));
+      continue;
+    }
+    final key = seriesKey(series);
+    final group = groups[key];
+    if (group == null) {
+      final created = VolumeGroup(series, [work]);
+      groups[key] = created;
+      out.add(created);
+    } else {
+      group.volumes.add(work);
+    }
+  }
+  return out;
+}
+
+class _SagaRow extends StatelessWidget {
+  const _SagaRow({required this.entry, required this.onTap});
+  final VolumeGroup entry;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final work = entry.first;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            BookCover(
+              width: 56,
+              url: work.coverPath == null ? null : apiUrl(work.coverPath!),
+              title: entry.title,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(entry.title, style: BabelText.heading(19)),
+                  if (work.authors.isNotEmpty)
+                    Text(work.authors.join(', '), style: BabelText.body(13)),
+                  Text(
+                    context.l10n
+                        .searchSagaVolumes(entry.volumes.length)
+                        .toUpperCase(),
+                    style: BabelText.label(9, color: BabelColors.gold),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

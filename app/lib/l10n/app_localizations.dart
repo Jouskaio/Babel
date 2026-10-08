@@ -4040,6 +4040,12 @@ abstract class AppLocalizations {
   /// **'Toutes langues'**
   String get requestAnyLanguage;
 
+  /// No description provided for @searchSagaVolumes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{# tome} other{# tomes}}'**
+  String searchSagaVolumes(int count);
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

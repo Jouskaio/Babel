@@ -1406,6 +1406,8 @@
   "coverUpload": "Importer ma propre image",
   "coverInvalid": "Image invalide (JPEG, PNG ou WebP, 5 Mo maximum).",
   "requestAnyLanguage": "Toutes langues",
+  "searchSagaVolumes": "{count, plural, one{# tome} other{# tomes}}",
+  "@searchSagaVolumes": {"placeholders": {"count": {"type": "int"}}},
   "coverDefault": "Par défaut",
   "coverLinkFirst": "Associez d'abord ce livre à une fiche pour choisir parmi les couvertures de ses éditions.",
   "volumeNumber": "Tome {number}",

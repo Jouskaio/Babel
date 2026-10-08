@@ -838,6 +838,8 @@
   "coverUpload": "Use my own picture",
   "coverInvalid": "Invalid picture (JPEG, PNG or WebP, 5 MB at most).",
   "requestAnyLanguage": "Any language",
+  "searchSagaVolumes": "{count, plural, one{# volume} other{# volumes}}",
+  "@searchSagaVolumes": {"placeholders": {"count": {"type": "int"}}},
   "coverDefault": "Default",
   "coverLinkFirst": "Link this book to a book page first to choose among its editions' covers.",
   "volumeNumber": "Volume {number}",
