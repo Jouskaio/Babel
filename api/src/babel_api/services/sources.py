@@ -80,6 +80,8 @@ class SourceService:
         name: str,
         config: dict[str, Any],
         token: str | None,
+        *,
+        scan: bool = True,
     ) -> SourceDetail:
         await self._enabled(kind)
         limit = await self._sources.quota(user_id)
@@ -90,7 +92,9 @@ class SourceService:
         checked = await self._connectors[kind].check(config, token)
         source = await self._sources.add(user_id, kind, name.strip()[:120], checked, encrypted)
         await self._sources.commit()
-        return await self.scan(user_id, source.id)
+        return (
+            await self.scan(user_id, source.id) if scan else await self.detail(user_id, source.id)
+        )
 
     async def check(self, kind: SourceKind, config: dict[str, Any], token: str | None) -> int:
         """Tries a source without saving it: the number of books it holds."""

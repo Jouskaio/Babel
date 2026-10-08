@@ -74,7 +74,7 @@ Name | Type | Description  | Notes
 
 Create Source
 
-Connect a source: access is checked, then it is scanned right away.
+Connect a source: access is checked, then it is scanned right away (a slow one, such as AO3, in the background: the answer says so and the scan follows).
 
 ### Example
 ```dart
@@ -371,7 +371,7 @@ Name | Type | Description  | Notes
 
 Scan Source
 
-Look for new books in the source.
+Look for new books in the source (in the background for a slow one: see ``scanning``).
 
 ### Example
 ```dart

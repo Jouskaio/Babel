@@ -24,6 +24,7 @@ class SourceResponse {
     required this.location,
     required this.name,
     this.repository,
+    this.scanning = false,
     this.username,
   });
 
@@ -51,6 +52,9 @@ class SourceResponse {
 
   String? repository;
 
+  /// A scan is under way in the background: ask again shortly
+  bool scanning;
+
   String? username;
 
   @override
@@ -66,6 +70,7 @@ class SourceResponse {
     other.location == location &&
     other.name == name &&
     other.repository == repository &&
+    other.scanning == scanning &&
     other.username == username;
 
   @override
@@ -82,10 +87,11 @@ class SourceResponse {
     (location.hashCode) +
     (name.hashCode) +
     (repository == null ? 0 : repository!.hashCode) +
+    (scanning.hashCode) +
     (username == null ? 0 : username!.hashCode);
 
   @override
-  String toString() => 'SourceResponse[bookCount=$bookCount, createdAt=$createdAt, folder=$folder, hasToken=$hasToken, id=$id, kind=$kind, lastError=$lastError, lastScanAt=$lastScanAt, location=$location, name=$name, repository=$repository, username=$username]';
+  String toString() => 'SourceResponse[bookCount=$bookCount, createdAt=$createdAt, folder=$folder, hasToken=$hasToken, id=$id, kind=$kind, lastError=$lastError, lastScanAt=$lastScanAt, location=$location, name=$name, repository=$repository, scanning=$scanning, username=$username]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -116,6 +122,7 @@ class SourceResponse {
     } else {
       json[r'repository'] = null;
     }
+      json[r'scanning'] = this.scanning;
     if (this.username != null) {
       json[r'username'] = this.username;
     } else {
@@ -154,6 +161,7 @@ class SourceResponse {
         location: mapValueOfType<String>(json, r'location')!,
         name: mapValueOfType<String>(json, r'name')!,
         repository: mapValueOfType<String>(json, r'repository'),
+        scanning: mapValueOfType<bool>(json, r'scanning') ?? false,
         username: mapValueOfType<String>(json, r'username'),
       );
     }

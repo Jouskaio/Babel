@@ -3757,6 +3757,12 @@
             ],
             "title": "Repository"
           },
+          "scanning": {
+            "default": false,
+            "description": "A scan is under way in the background: ask again shortly",
+            "title": "Scanning",
+            "type": "boolean"
+          },
           "username": {
             "anyOf": [
               {
@@ -4669,7 +4675,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.32.3"
+    "version": "0.33.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -9473,7 +9479,7 @@
         ]
       },
       "post": {
-        "description": "Connect a source: access is checked, then it is scanned right away.",
+        "description": "Connect a source: access is checked, then it is scanned right away (a slow one, such as\nAO3, in the background: the answer says so and the scan follows).",
         "operationId": "createSource",
         "requestBody": {
           "content": {
@@ -9879,7 +9885,7 @@
     },
     "/v1/sources/{source_id}/scan": {
       "post": {
-        "description": "Look for new books in the source.",
+        "description": "Look for new books in the source (in the background for a slow one: see ``scanning``).",
         "operationId": "scanSource",
         "parameters": [
           {

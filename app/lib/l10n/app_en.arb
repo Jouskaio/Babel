@@ -899,5 +899,6 @@
   "requestAvailable": "Downloaded: it shows up here after the next scan.",
   "requestNotFound": "Not found for now.",
   "requestFailed": "The request could not be sent. Try again later.",
-  "addSourceHint": "This book is in none of your sources. Add one (Kavita, WebDAV, GitHub…) to find it here."
+  "addSourceHint": "This book is in none of your sources. Add one (Kavita, WebDAV, GitHub…) to find it here.",
+  "sourceScanning": "Scanning… a big account can take several minutes."
 }

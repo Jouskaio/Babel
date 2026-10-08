@@ -2687,4 +2687,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get addSourceHint =>
       'This book is in none of your sources. Add one (Kavita, WebDAV, GitHub…) to find it here.';
+
+  @override
+  String get sourceScanning =>
+      'Scanning… a big account can take several minutes.';
 }

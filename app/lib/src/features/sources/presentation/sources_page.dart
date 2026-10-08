@@ -122,7 +122,9 @@ class _SourceTile extends ConsumerWidget {
                     StatusDot(ok: !failed && scanned != null),
                     Flexible(
                       child: Text(
-                        failed
+                        source.scanning
+                            ? l10n.sourceScanning
+                            : failed
                             ? l10n.sourceUnreachable
                             : scanned == null
                             ? l10n.sourceNeverScanned

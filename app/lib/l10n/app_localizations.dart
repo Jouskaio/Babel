@@ -4411,6 +4411,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ce livre n\'est dans aucune de vos sources. Ajoutez-en une (Kavita, WebDAV, GitHub…) pour le retrouver ici.'**
   String get addSourceHint;
+
+  /// No description provided for @sourceScanning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scan en cours… un gros compte peut prendre plusieurs minutes.'**
+  String get sourceScanning;
 }
 
 class _AppLocalizationsDelegate

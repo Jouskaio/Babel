@@ -1,7 +1,8 @@
 """Request-scoped dependencies: database session, services and the current user."""
 
+import logging
 from collections.abc import AsyncIterator, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import timedelta
 from typing import Annotated
 from uuid import UUID
@@ -86,6 +87,8 @@ class Container:
     abs_client: Callable[[str], AbsClient]
     chaptarr: Callable[[], ChaptarrClient] | None = None
     hardcover: HardcoverClient | None = None
+    # Sources being scanned in the background (a slow connector such as AO3).
+    scanning: set[UUID] = field(default_factory=set[UUID])
 
 
 def get_container(request: Request) -> Container:
@@ -371,3 +374,15 @@ async def fulfill_request(container: Container, user_id: UUID, work_id: UUID) ->
     """Background task: asks Chaptarr, with its own database session."""
     async with container.sessions() as session:
         await make_request_service(container, session).fulfill(user_id, work_id)
+
+
+async def run_source_scan(container: Container, user_id: UUID, source_id: UUID) -> None:
+    """Background task: scans a source with its own session; [container.scanning] is set by
+    the route and cleared here."""
+    try:
+        async with container.sessions() as session:
+            await make_source_service(container, session).scan(user_id, source_id)
+    except Exception:
+        logging.getLogger(__name__).exception("Background scan of source %s failed", source_id)
+    finally:
+        container.scanning.discard(source_id)
