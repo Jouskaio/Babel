@@ -64,6 +64,31 @@ def best_match(
     return None
 
 
+_NON_LATIN = re.compile(r"[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]")
+_TRAILING_VOLUME = re.compile(r"(\d{1,3})\s*(?:\[|$)")
+
+
+def original_match(
+    candidates: list[dict[str, Any]], number: float, authors: tuple[str, ...]
+) -> dict[str, Any] | None:
+    """Among an author's books, the volume [number] under its original (Japanese, Chinese,
+    Korean) title: release indexers list manga under that title, whatever the reader's language."""
+    surnames = {_plain(a).split(" ")[-1] for a in authors if _plain(a)}
+    for found in candidates:
+        text = str(found.get("title", ""))
+        who = _plain(str(cast(dict[str, Any], found.get("author") or {}).get("authorName", "")))
+        volume = _TRAILING_VOLUME.search(text.split("[")[0].strip() + " [")
+        if (
+            _NON_LATIN.search(text)
+            and volume is not None
+            and float(volume[1]) == number
+            and not _RANGE.search(text)
+            and (not surnames or any(s in who for s in surnames))
+        ):
+            return found
+    return None
+
+
 class ChaptarrClient:
     def __init__(self, base_url: str, api_key: str, client: httpx.AsyncClient | None = None):
         self._base = base_url.strip().rstrip("/")
@@ -111,6 +136,18 @@ class ChaptarrClient:
             if match := best_match(found, title, authors):
                 return match
         return None
+
+    async def original_edition(self, title: str, authors: tuple[str, ...]) -> dict[str, Any] | None:
+        """The same volume under its original-language title, when Chaptarr knows one (one
+        search by the author's name). None for a book that is not a numbered volume."""
+        guess = guess_series(title)
+        if guess is None or not authors:
+            return None
+        found = cast(
+            list[dict[str, Any]],
+            await self._call("GET", "book/lookup", params={"term": authors[0]}),
+        )
+        return original_match(found, guess.number, authors)
 
     async def _first_id(self, path: str, profile_type: str | int) -> int:
         profiles = cast(list[dict[str, Any]], await self._call("GET", path))

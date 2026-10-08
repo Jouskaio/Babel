@@ -4040,6 +4040,18 @@ abstract class AppLocalizations {
   /// **'Toutes langues'**
   String get requestAnyLanguage;
 
+  /// No description provided for @searchSagaVolumes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{# tome} other{# tomes}}'**
+  String searchSagaVolumes(int count);
+
+  /// No description provided for @requestNoRelease.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandé, mais aucune version à télécharger n\'a été trouvée pour l\'instant. La recherche continue en arrière-plan.'**
+  String get requestNoRelease;
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

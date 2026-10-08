@@ -9,6 +9,7 @@ import logging
 from collections.abc import Awaitable, Callable
 from dataclasses import replace
 from datetime import UTC, datetime
+from typing import Any, cast
 from urllib.parse import urlsplit
 from uuid import UUID
 
@@ -127,15 +128,16 @@ class RequestService:
         title = detail.localized(language or None)[0]
         try:
             found = await client.lookup(title, work.authors)
-            if found is None:
+            original = await self._original(client, title, work.authors, found)
+            if found is None and original is None:
                 await self._requests.save(user_id, work_id, RequestStatus.NOT_FOUND, None, language)
             else:
+                # Release indexers list manga under their original title: ask for that
+                # edition too, so the reader need not know it.
+                first = await client.add(found or cast(dict[str, Any], original))
+                second = await client.add(original) if found and original else None
                 await self._requests.save(
-                    user_id,
-                    work_id,
-                    RequestStatus.REQUESTED,
-                    await client.add(found),
-                    language,
+                    user_id, work_id, RequestStatus.REQUESTED, first, language, second
                 )
         except ChaptarrError as error:
             log.warning("Chaptarr request failed: %s", error.reason)
@@ -143,6 +145,25 @@ class RequestService:
         finally:
             await client.aclose()
         await self._requests.commit()
+
+    @staticmethod
+    async def _original(
+        client: ChaptarrClient,
+        title: str,
+        authors: tuple[str, ...],
+        found: dict[str, Any] | None,
+    ) -> dict[str, Any] | None:
+        """The original-language edition of the volume; best effort, never an error."""
+        try:
+            original = await client.original_edition(title, authors)
+        except ChaptarrError:
+            return None
+        same = (
+            found is not None
+            and original is not None
+            and found.get("foreignBookId") == (original.get("foreignBookId"))
+        )
+        return None if same else original
 
     async def list(self, user_id: UUID) -> list[BookRequest]:
         """The reader's requests; those still waiting are checked with Chaptarr first, and show
@@ -158,7 +179,8 @@ class RequestService:
         progress: dict[int, float] = {}
         try:
             for request in waiting:
-                if request.chaptarr_id is not None and await client.has_files(request.chaptarr_id):
+                ids = [i for i in (request.chaptarr_id, request.alt_chaptarr_id) if i is not None]
+                if any([await client.has_files(i) for i in ids]):
                     await self._requests.save(
                         user_id,
                         request.work_id,
@@ -180,7 +202,7 @@ class RequestService:
                 log.warning("Could not ask Kavita to scan", exc_info=True)
             items = await self._requests.list_for(user_id)
         return [
-            replace(r, progress=progress.get(r.chaptarr_id))
+            replace(r, progress=progress.get(r.chaptarr_id) or progress.get(r.alt_chaptarr_id or 0))
             if r.status is RequestStatus.REQUESTED and r.chaptarr_id is not None
             else r
             for r in items

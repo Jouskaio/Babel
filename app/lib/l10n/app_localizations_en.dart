@@ -2420,6 +2420,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requestAnyLanguage => 'Any language';
 
   @override
+  String searchSagaVolumes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# volumes',
+      one: '# volume',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get requestNoRelease =>
+      'Requested, but no version to download has been found yet. The search goes on in the background.';
+
+  @override
   String get coverDefault => 'Default';
 
   @override

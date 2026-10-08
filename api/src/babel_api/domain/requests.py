@@ -21,6 +21,8 @@ class BookRequest:
     created_at: datetime
     chaptarr_id: int | None = None
     language: str = ""
+    # The same volume under its original-language title, added too so indexers find it.
+    alt_chaptarr_id: int | None = None
     # How far the download is (0 to 100) while it runs; None when it has not started.
     progress: float | None = None
 
