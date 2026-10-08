@@ -1655,6 +1655,38 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "HardcoverWorkRequest": {
+        "properties": {
+          "author": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
+          },
+          "hardcover_id": {
+            "title": "Hardcover Id",
+            "type": "integer"
+          },
+          "title": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "hardcover_id",
+          "title"
+        ],
+        "title": "HardcoverWorkRequest",
+        "type": "object"
+      },
       "HealthResponse": {
         "description": "API status.",
         "properties": {
@@ -1791,6 +1823,18 @@
       },
       "KnownVolumeResponse": {
         "properties": {
+          "hardcover_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Its id on Hardcover",
+            "title": "Hardcover Id"
+          },
           "number": {
             "description": "The volume number in the saga",
             "title": "Number",
@@ -4675,7 +4719,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.33.2"
+    "version": "0.34.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -6171,6 +6215,53 @@
           }
         },
         "summary": "Get Trending",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/works/hardcover": {
+      "post": {
+        "description": "A volume only Hardcover lists, as a work you can open (and ask for).",
+        "operationId": "openHardcoverWork",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HardcoverWorkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkSummaryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Open Hardcover Work",
         "tags": [
           "catalog"
         ]

@@ -52,6 +52,7 @@ doc/Genre.md
 doc/GenreCountResponse.md
 doc/GitHubConfig.md
 doc/GoalRequest.md
+doc/HardcoverWorkRequest.md
 doc/HealthApi.md
 doc/HealthResponse.md
 doc/IdentityProvider.md
@@ -203,6 +204,7 @@ lib/model/genre.dart
 lib/model/genre_count_response.dart
 lib/model/git_hub_config.dart
 lib/model/goal_request.dart
+lib/model/hardcover_work_request.dart
 lib/model/health_response.dart
 lib/model/identity_provider.dart
 lib/model/import_response.dart

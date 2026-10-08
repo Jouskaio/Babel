@@ -30,7 +30,7 @@ MIN_DESCRIPTION = 80  # a shorter text is no better than what the catalog alread
 _SEARCH = """query($q: String!) { search(query: $q, query_type: "Series", per_page: 5) {
   ids results } }"""
 _VOLUMES = """query($id: Int!) { series(where: {id: {_eq: $id}}) {
-  book_series(order_by: {position: asc}) { position book { title } } } }"""
+  book_series(order_by: {position: asc}) { position book { id title } } } }"""
 
 
 class HardcoverBusyError(ValueError):
@@ -122,7 +122,7 @@ class HardcoverClient:
             "user-agent": "Babel (babel.jouskaio.me)",
         }
         self._client = client or httpx.AsyncClient(timeout=10)
-        self._cache: dict[tuple[str, str], tuple[float, list[tuple[float, str]]]] = {}
+        self._cache: dict[tuple[str, str], tuple[float, list[tuple[float, str, int | None]]]] = {}
         self._described: dict[tuple[str, str], tuple[float, str | None]] = {}
         self._paused_until = 0.0
         self._day = datetime.now(UTC).date()
@@ -155,8 +155,10 @@ class HardcoverClient:
             raise ValueError(str(body["errors"])[:200])
         return cast(dict[str, Any], body.get("data") or {})
 
-    async def series_volumes(self, name: str, author: str | None) -> list[tuple[float, str]]:
-        """(position, title) of each numbered volume of a series; empty when unknown."""
+    async def series_volumes(
+        self, name: str, author: str | None
+    ) -> list[tuple[float, str, int | None]]:
+        """(position, title, Hardcover id) of a series' numbered volumes; none when unknown."""
         key = (series_key(name), series_key(author or ""))
         cached = self._cache.get(key)
         if cached is not None and time.monotonic() - cached[0] < CACHE_SECONDS:
@@ -168,16 +170,17 @@ class HardcoverClient:
             if series_id is None:
                 seen = [(str(d.get("name")), str(d.get("author_name"))) for d in _hits(search)]
                 log.info("Hardcover has no series %r by %r; it found %s", name, author, seen)
-            volumes: list[tuple[float, str]] = []
+            volumes: list[tuple[float, str, int | None]] = []
             if series_id is not None:
                 data = await self._query(_VOLUMES, {"id": series_id})
                 for series in cast(list[dict[str, Any]], data.get("series") or []):
                     for link in cast(list[dict[str, Any]], series.get("book_series") or []):
                         position = link.get("position")
                         book = cast(dict[str, Any], link.get("book") or {})
-                        title = book.get("title")
+                        title, book_id = book.get("title"), book.get("id")
                         if isinstance(position, int | float) and title:
-                            volumes.append((float(position), str(title)))
+                            hc_id = book_id if isinstance(book_id, int) else None
+                            volumes.append((float(position), str(title), hc_id))
         except (httpx.HTTPError, ValueError, KeyError, TypeError) as error:
             log.warning("Hardcover did not answer: %s", error)
             return []

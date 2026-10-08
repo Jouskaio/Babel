@@ -25,16 +25,19 @@ final sagaProvider = FutureProvider.autoDispose
           const [],
     );
 
-/// Titles Hardcover gives to a saga's volumes, by number (empty when it knows none).
+/// The saga's volumes Hardcover knows, by number (empty when it knows none).
 final knownVolumesProvider = FutureProvider.autoDispose
-    .family<Map<double, String>, ({String series, String? author})>(
+    .family<
+      Map<double, KnownVolumeResponse>,
+      ({String series, String? author})
+    >(
       (ref, args) async => {
         for (final v
             in await ref
                     .watch(authedCatalogApiProvider)
                     .getKnownVolumes(args.series, author: args.author) ??
                 const <KnownVolumeResponse>[])
-          v.number.toDouble(): v.title,
+          v.number.toDouble(): v,
       },
     );
 
@@ -54,7 +57,7 @@ class SagaPage extends ConsumerWidget {
         ref
             .watch(knownVolumesProvider((series: series, author: author)))
             .value ??
-        const <double, String>{};
+        const <double, KnownVolumeResponse>{};
 
     LibraryItemResponse? owned(SagaVolumeResponse v) {
       for (final item in library) {
@@ -89,7 +92,13 @@ class SagaPage extends ConsumerWidget {
                 AsyncData(:final value) when value.isEmpty => [
                   Text(l10n.sagaEmpty, style: BabelText.body(15)),
                 ],
-                AsyncData(:final value) => _rows(context, known, value, owned),
+                AsyncData(:final value) => _rows(
+                  context,
+                  ref,
+                  known,
+                  value,
+                  owned,
+                ),
                 AsyncError() => [
                   TextButton(
                     onPressed: () => ref.invalidate(sagaProvider),
@@ -105,9 +114,37 @@ class SagaPage extends ConsumerWidget {
     );
   }
 
+  /// A volume only Hardcover knows becomes a work: it opens like any other, where it can be
+  /// searched in the reader's sources or asked for.
+  Future<void> _open(
+    BuildContext context,
+    WidgetRef ref,
+    KnownVolumeResponse volume,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final errorText = context.l10n.errorGeneric;
+    try {
+      final work = await ref
+          .read(authedCatalogApiProvider)
+          .openHardcoverWork(
+            HardcoverWorkRequest(
+              hardcoverId: volume.hardcoverId!,
+              title: volume.title,
+              author: author,
+            ),
+          );
+      if (work != null && context.mounted) {
+        await context.push(Routes.work(work.id));
+      }
+    } on ApiException {
+      messenger.showSnackBar(SnackBar(content: Text(errorText)));
+    }
+  }
+
   List<Widget> _rows(
     BuildContext context,
-    Map<double, String> known,
+    WidgetRef ref,
+    Map<double, KnownVolumeResponse> known,
     List<SagaVolumeResponse> volumes,
     LibraryItemResponse? Function(SagaVolumeResponse) owned,
   ) {
@@ -131,7 +168,13 @@ class SagaPage extends ConsumerWidget {
         if (byNumber[n.toDouble()] case final volume?)
           _VolumeRow(volume: volume, item: owned(volume))
         else
-          _GapRow(number: n, title: known[n.toDouble()]),
+          _GapRow(
+            number: n,
+            title: known[n.toDouble()]?.title,
+            onTap: known[n.toDouble()]?.hardcoverId == null
+                ? null
+                : () => _open(context, ref, known[n.toDouble()]!),
+          ),
       // Volumes numbered otherwise (2.5, 0), after the whole ones.
       for (final volume in volumes)
         if (volume.number != volume.number.floor() || volume.number < 1)
@@ -202,50 +245,59 @@ class _VolumeRow extends StatelessWidget {
 }
 
 class _GapRow extends StatelessWidget {
-  const _GapRow({required this.number, this.title});
+  const _GapRow({required this.number, this.title, this.onTap});
   final int number;
   final String? title;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Container(
-            width: 52,
-            height: 78,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: BabelColors.border),
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            Container(
+              width: 52,
+              height: 78,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: BabelColors.border),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                '$number',
+                style: BabelText.figure(24, color: BabelColors.textSecondary),
+              ),
             ),
-            alignment: Alignment.center,
-            child: Text(
-              '$number',
-              style: BabelText.figure(24, color: BabelColors.textSecondary),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.volumeNumber('$number').toUpperCase(),
-                  style: BabelText.label(9, color: BabelColors.textSecondary),
-                ),
-                const SizedBox(height: 4),
-                if (title case final title?)
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    title,
-                    style: BabelText.body(14, color: BabelColors.textPrimary),
+                    l10n.volumeNumber('$number').toUpperCase(),
+                    style: BabelText.label(9, color: BabelColors.textSecondary),
                   ),
-                Text(l10n.sagaMissing, style: BabelText.body(13)),
-              ],
+                  const SizedBox(height: 4),
+                  if (title case final title?)
+                    Text(
+                      title,
+                      style: BabelText.body(14, color: BabelColors.textPrimary),
+                    ),
+                  Text(
+                    onTap == null ? l10n.sagaMissing : l10n.sagaOpenKnown,
+                    style: BabelText.body(13),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            if (onTap != null)
+              Icon(Icons.chevron_right, color: BabelColors.textSecondary),
+          ],
+        ),
       ),
     );
   }

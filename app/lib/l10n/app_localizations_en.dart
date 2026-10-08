@@ -2691,4 +2691,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get sourceScanning =>
       'Scanning… a big account can take several minutes.';
+
+  @override
+  String get sagaOpenKnown =>
+      'Not in the catalog: open it to look in your sources or ask for it.';
 }

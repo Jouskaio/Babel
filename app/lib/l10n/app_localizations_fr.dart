@@ -2712,4 +2712,8 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get sourceScanning =>
       'Scan en cours… un gros compte peut prendre plusieurs minutes.';
+
+  @override
+  String get sagaOpenKnown =>
+      'Pas dans le catalogue : ouvrez-le pour le chercher dans vos sources ou le demander.';
 }

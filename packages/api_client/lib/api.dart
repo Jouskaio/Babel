@@ -88,6 +88,7 @@ part 'model/genre.dart';
 part 'model/genre_count_response.dart';
 part 'model/git_hub_config.dart';
 part 'model/goal_request.dart';
+part 'model/hardcover_work_request.dart';
 part 'model/health_response.dart';
 part 'model/identity_provider.dart';
 part 'model/import_response.dart';

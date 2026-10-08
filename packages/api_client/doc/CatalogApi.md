@@ -15,6 +15,7 @@ Method | HTTP request | Description
 [**getTrendingWorks**](CatalogApi.md#gettrendingworks) | **GET** /v1/catalog/trending | Get Trending
 [**getWork**](CatalogApi.md#getwork) | **GET** /v1/catalog/works/{work_id} | Get Work
 [**lookupIsbn**](CatalogApi.md#lookupisbn) | **GET** /v1/catalog/isbn/{isbn} | Lookup Isbn
+[**openHardcoverWork**](CatalogApi.md#openhardcoverwork) | **POST** /v1/catalog/works/hardcover | Open Hardcover Work
 [**searchWorks**](CatalogApi.md#searchworks) | **GET** /v1/catalog/search | Search Works
 
 
@@ -305,6 +306,55 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **openHardcoverWork**
+> WorkSummaryResponse openHardcoverWork(hardcoverWorkRequest)
+
+Open Hardcover Work
+
+A volume only Hardcover lists, as a work you can open (and ask for).
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = CatalogApi();
+final hardcoverWorkRequest = HardcoverWorkRequest(); // HardcoverWorkRequest | 
+
+try {
+    final result = api_instance.openHardcoverWork(hardcoverWorkRequest);
+    print(result);
+} catch (e) {
+    print('Exception when calling CatalogApi->openHardcoverWork: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **hardcoverWorkRequest** | [**HardcoverWorkRequest**](HardcoverWorkRequest.md)|  | 
+
+### Return type
+
+[**WorkSummaryResponse**](WorkSummaryResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

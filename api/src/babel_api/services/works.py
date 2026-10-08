@@ -19,6 +19,8 @@ EDITIONS_TTL = timedelta(days=7)
 MAX_EDITIONS = 50
 # Works asked of the catalog when rebuilding a saga.
 MAX_SAGA = 100
+# Works only Hardcover knows are keyed "hc:<id>" in the Open Library id column.
+HARDCOVER_PREFIX = "hc:"
 # A description this long is a real blurb; shorter ones are completed from Google Books.
 FULL_DESCRIPTION = 400
 # Editions (one per language) asked about at most, per refresh of a work.
@@ -136,11 +138,26 @@ class WorkService:
         await self._repo.commit()
         return volumes
 
-    async def known_volumes(self, series: str, author: str | None) -> list[tuple[float, str]]:
+    async def known_volumes(
+        self, series: str, author: str | None
+    ) -> list[tuple[float, str, int | None]]:
         """Titles of the volumes Hardcover knows for a series (none without its key)."""
         if self._hardcover is None:
             return []
         return await self._hardcover.series_volumes(series, author)
+
+    async def work_from_hardcover(self, hardcover_id: int, title: str, author: str | None) -> Work:
+        """A volume only Hardcover knows (the catalog lacks it) as a work of its own, so it can
+        be opened, searched in the reader's sources and requested. Its key is "hc:<id>"."""
+        work = await self._repo.upsert_work(
+            SourceWork(
+                open_library_id=f"{HARDCOVER_PREFIX}{hardcover_id}",
+                title=title,
+                authors=(author,) if author else (),
+            )
+        )
+        await self._repo.commit()
+        return work
 
     async def get(self, work_id: UUID) -> WorkDetail:
         work = await self._repo.get_work(work_id)
@@ -160,7 +177,7 @@ class WorkService:
     # ------------------------------------------------------------ internals
     @staticmethod
     def _needs_sync(work: Work) -> bool:
-        if work.open_library_id is None:
+        if work.open_library_id is None or work.open_library_id.startswith(HARDCOVER_PREFIX):
             return False
         synced = work.editions_synced_at
         return synced is None or datetime.now(UTC) - synced > EDITIONS_TTL

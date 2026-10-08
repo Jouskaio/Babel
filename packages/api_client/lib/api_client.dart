@@ -274,6 +274,8 @@ class ApiClient {
           return GitHubConfig.fromJson(value);
         case 'GoalRequest':
           return GoalRequest.fromJson(value);
+        case 'HardcoverWorkRequest':
+          return HardcoverWorkRequest.fromJson(value);
         case 'HealthResponse':
           return HealthResponse.fromJson(value);
         case 'IdentityProvider':
