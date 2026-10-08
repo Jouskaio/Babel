@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/back_leading.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
@@ -42,6 +43,7 @@ class _StatsPageState extends ConsumerState<StatsPage> {
       appBar: AppBar(
         backgroundColor: BabelColors.canvas,
         scrolledUnderElevation: 0,
+        leading: const BackLeading(),
       ),
       body: stats.when(
         loading: () =>

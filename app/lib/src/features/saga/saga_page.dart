@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/api/api_providers.dart';
 import '../../core/theme/babel_colors.dart';
 import '../../core/theme/babel_text.dart';
+import '../../core/widgets/back_leading.dart';
 import '../../core/widgets/book_cover.dart';
 import '../../core/widgets/loading_bar.dart';
 import '../../core/widgets/section_title.dart';
@@ -74,6 +75,7 @@ class SagaPage extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: BabelColors.canvas,
         scrolledUnderElevation: 0,
+        leading: const BackLeading(),
       ),
       body: Center(
         child: ConstrainedBox(

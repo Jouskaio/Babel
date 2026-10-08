@@ -23,7 +23,6 @@ import '../features/library/presentation/library_page.dart';
 import '../features/library/presentation/link_import_page.dart';
 import '../features/reader/presentation/reader_page.dart';
 import '../features/saga/saga_page.dart';
-import '../features/shell/app_shell.dart';
 import '../features/social/presentation/friends_page.dart';
 import '../features/social/presentation/profile_page.dart';
 import '../features/social/presentation/reader_profile_page.dart';
@@ -108,7 +107,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             VerifyEmailPage(token: state.uri.queryParameters['token'] ?? ''),
       ),
       StatefulShellRoute.indexedStack(
-        builder: (_, _, shell) => AppShell(shell: shell),
+        // The bar around the pages is AppChrome, which also frames the pages outside the tabs.
+        builder: (_, _, shell) => shell,
         branches: [
           StatefulShellBranch(
             routes: [

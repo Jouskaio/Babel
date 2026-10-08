@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/back_leading.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../library/application/library_controller.dart';
@@ -69,6 +70,7 @@ class _AudiobooksPageState extends ConsumerState<AudiobooksPage> {
       appBar: AppBar(
         backgroundColor: BabelColors.canvas,
         scrolledUnderElevation: 0,
+        leading: const BackLeading(),
       ),
       body: Center(
         child: ConstrainedBox(
