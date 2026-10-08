@@ -53,11 +53,10 @@ class SagaPage extends ConsumerWidget {
     final l10n = context.l10n;
     final volumes = ref.watch(sagaProvider((series: series, author: author)));
     final library = ref.watch(libraryControllerProvider).value ?? const [];
-    final known =
-        ref
-            .watch(knownVolumesProvider((series: series, author: author)))
-            .value ??
-        const <double, KnownVolumeResponse>{};
+    final knownAnswer = ref.watch(
+      knownVolumesProvider((series: series, author: author)),
+    );
+    final known = knownAnswer.value ?? const <double, KnownVolumeResponse>{};
 
     LibraryItemResponse? owned(SagaVolumeResponse v) {
       for (final item in library) {
@@ -89,9 +88,11 @@ class SagaPage extends ConsumerWidget {
               ],
               const SizedBox(height: 24),
               ...switch (volumes) {
-                AsyncData(:final value) when value.isEmpty => [
-                  Text(l10n.sagaEmpty, style: BabelText.body(15)),
-                ],
+                // Nothing in the catalog: Hardcover may still know the volumes.
+                AsyncData(:final value) when value.isEmpty && known.isEmpty =>
+                  knownAnswer.isLoading
+                      ? [const LoadingBar()]
+                      : [Text(l10n.sagaEmpty, style: BabelText.body(15))],
                 AsyncData(:final value) => _rows(
                   context,
                   ref,
@@ -152,7 +153,7 @@ class SagaPage extends ConsumerWidget {
     final byNumber = {for (final v in volumes) v.number.toDouble(): v};
     // Up to the latest volume the catalog or Hardcover knows.
     final last = [
-      volumes.last.number.floor(),
+      if (volumes.isNotEmpty) volumes.last.number.floor(),
       for (final n in known.keys) n.floor(),
     ].reduce((a, b) => a > b ? a : b);
     final mine = volumes.where((v) => owned(v) != null).length;
