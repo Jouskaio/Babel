@@ -1653,5 +1653,21 @@
         "type": "int"
       }
     }
-  }
+  },
+  "sourceScanDone": "Scan terminé : {total} livres (+{added}, −{removed})",
+  "@sourceScanDone": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "added": {
+        "type": "int"
+      },
+      "removed": {
+        "type": "int"
+      }
+    }
+  },
+  "librarySearchHint": "Chercher dans ma bibliothèque",
+  "libraryNoMatch": "Aucun livre de votre bibliothèque ne correspond."
 }

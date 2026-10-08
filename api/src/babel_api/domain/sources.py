@@ -37,6 +37,9 @@ class Source:
     last_error: str | None = None
     # Book files found by the last scan.
     entry_count: int = 0
+    # What the last successful scan found new, and what had gone from the source.
+    last_added: int = 0
+    last_removed: int = 0
 
 
 @dataclass(frozen=True, slots=True)

@@ -93,6 +93,20 @@ class ReadingPositions {
   ReadingPositions(this._ref);
   final Ref _ref;
 
+  /// Asks the server for what the other devices did since this one last looked, so a book
+  /// reopens where it was left on any of them. Bounded and quiet: offline, the positions
+  /// already here are used.
+  Future<void> refresh() async {
+    try {
+      await _ref
+          .read(syncEngineProvider.notifier)
+          .sync()
+          .timeout(const Duration(seconds: 5));
+    } on Object {
+      // No network, or too slow: the local positions are the answer.
+    }
+  }
+
   /// The most recent position of [itemId] across devices, if any.
   Future<SavedPosition?> latest(String itemId) async {
     final db = await _ref.read(localDatabaseProvider.future);

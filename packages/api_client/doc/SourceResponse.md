@@ -14,7 +14,9 @@ Name | Type | Description | Notes
 **hasToken** | **bool** |  | 
 **id** | **String** |  | 
 **kind** | [**SourceKind**](SourceKind.md) |  | 
+**lastAdded** | **int** | Books the last scan found that are new | [optional] [default to 0]
 **lastError** | **String** |  | [optional] 
+**lastRemoved** | **int** | Books the last scan found gone | [optional] [default to 0]
 **lastScanAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **location** | **String** | Repository, address or account, for display | 
 **name** | **String** |  | 

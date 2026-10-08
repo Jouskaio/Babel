@@ -105,8 +105,12 @@ class AudioSession extends Notifier<NowPlaying?> {
   Future<void> open(LibraryItemResponse item) async {
     if (state?.item.id == item.id) return;
     await _saveNow();
+    final positions = ref.read(readingPositionsProvider);
+    final refreshed = positions
+        .refresh(); // what the other devices did, meanwhile
     final playback = await _playbackOf(item);
-    final saved = await ref.read(readingPositionsProvider).latest(item.id);
+    await refreshed;
+    final saved = await positions.latest(item.id);
     var start = saved == null
         ? 0.0
         : ReadingLocator.parse(saved.locator)?.seconds ?? 0.0;

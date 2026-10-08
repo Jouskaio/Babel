@@ -2749,4 +2749,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String requestDownloading(int percent) {
     return 'Downloading: $percent%';
   }
+
+  @override
+  String sourceScanDone(int total, int added, int removed) {
+    return 'Scan finished: $total books (+$added, −$removed)';
+  }
+
+  @override
+  String get librarySearchHint => 'Search my library';
+
+  @override
+  String get libraryNoMatch => 'No book in your library matches.';
 }

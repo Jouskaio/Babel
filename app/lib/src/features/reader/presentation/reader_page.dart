@@ -38,12 +38,15 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
   double? _progress;
 
   Future<_Opened> _open(LibraryItemResponse item) async {
+    // While the file loads, learn where the other devices left this book.
+    final refreshed = _positions.refresh();
     final bytes = await ref
         .read(fileTransferProvider)
         .open(
           item,
           onProgress: (p) => mounted ? setState(() => _progress = p) : null,
         );
+    await refreshed;
     final saved = await _positions.latest(item.id);
     final start = saved == null ? null : ReadingLocator.parse(saved.locator);
     return _Opened(item, bytes, start);

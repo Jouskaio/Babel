@@ -111,7 +111,11 @@ void main() {
       await tester.ensureVisible(find.text('Modifier les informations'));
       await tester.tap(find.text('Modifier les informations'));
       await tester.pumpAndSettle();
-      final fields = find.byType(TextField);
+      // The fields of the sheet, not the library's own search field behind it.
+      final fields = find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.byType(TextField),
+      );
       await tester.enterText(fields.at(0), 'Homunculus — tome 3');
       await tester.enterText(fields.at(3), '4');
       await tester.tap(find.text('ENREGISTRER'));

@@ -479,6 +479,19 @@ class WorkRow extends ConsumerWidget {
                 ],
               ),
             ),
+            // In the library, and not removed: a small mark, whatever the status.
+            if (trace != null && trace.removedAt == null)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Tooltip(
+                  message: context.l10n.traceInLibrary,
+                  child: Icon(
+                    Icons.bookmark_added,
+                    size: 22,
+                    color: BabelColors.gold,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
