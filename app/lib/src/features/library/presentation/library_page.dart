@@ -94,9 +94,15 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
           item,
     ];
     if (filter is ReadingStatus) {
+      // A book opened on any device is being read, even if no status was ever set.
+      final positions = ref.watch(positionPercentsProvider).value ?? const {};
+      bool started(LibraryItemResponse item) =>
+          filter == ReadingStatus.reading &&
+          (item.status == null || item.status == ReadingStatus.toRead) &&
+          (effectiveProgress(item, positions) ?? 0) > 0;
       return [
         for (final item in shown)
-          if (item.status == filter) item,
+          if (item.status == filter || started(item)) item,
       ];
     }
     if (filter is String) {
