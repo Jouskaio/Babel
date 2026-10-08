@@ -615,6 +615,7 @@ class BookRequestRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     # The language asked for ("fr", "en"...); empty when the reader did not choose.
     language: Mapped[str] = mapped_column(String(8), default="", server_default="")
+    alt_chaptarr_id: Mapped[int | None] = mapped_column(Integer)
 
 
 class ChaptarrLinkRow(Base):
