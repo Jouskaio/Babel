@@ -138,6 +138,7 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**setPaper**](doc//LibraryApi.md#setpaper) | **PUT** /v1/library/{item_id}/paper | Set Paper
 *LibraryApi* | [**stopFollow**](doc//LibraryApi.md#stopfollow) | **DELETE** /v1/library/follows/{follow_id} | Stop Follow
 *LibraryApi* | [**updateBookDetails**](doc//LibraryApi.md#updatebookdetails) | **PATCH** /v1/library/{item_id} | Update Details
+*LibraryApi* | [**uploadBookCover**](doc//LibraryApi.md#uploadbookcover) | **PUT** /v1/library/{item_id}/cover | Upload Cover
 *LibraryApi* | [**withdrawFile**](doc//LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
 *RequestsApi* | [**getChaptarrLink**](doc//RequestsApi.md#getchaptarrlink) | **GET** /v1/me/chaptarr | Get Chaptarr Link
 *RequestsApi* | [**linkChaptarr**](doc//RequestsApi.md#linkchaptarr) | **PUT** /v1/me/chaptarr | Link Chaptarr

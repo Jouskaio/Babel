@@ -141,6 +141,8 @@ class LibraryItem:
     series: str | None = None
     series_index: float | None = None
     cover_id: int | None = None
+    # A picture the reader uploaded as the cover (key of the image kept by Babel).
+    custom_cover: str | None = None
 
     @property
     def sha256(self) -> str | None:
@@ -155,6 +157,8 @@ class LibraryItem:
 
     @property
     def cover_path(self) -> str | None:
+        if self.custom_cover:
+            return f"/v1/audio-covers/{self.custom_cover}"
         if self.cover_id:
             return f"/v1/catalog/covers/{self.cover_id}/M"
         if self.file and self.file.cover_path:

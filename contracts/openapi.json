@@ -421,6 +421,20 @@
         "title": "Body_importReadingList",
         "type": "object"
       },
+      "Body_uploadBookCover": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_uploadBookCover",
+        "type": "object"
+      },
       "BookDetailsRequest": {
         "description": "Only the fields sent change. An empty series clears it (and its volume); a null\ncover goes back to the file's.",
         "properties": {
@@ -7852,6 +7866,82 @@
         "summary": "Stream",
         "tags": [
           "audiobooks"
+        ]
+      }
+    },
+    "/v1/library/{item_id}/cover": {
+      "put": {
+        "description": "Use your own picture (JPEG, PNG or WebP, up to 5 MB) as a book's cover.",
+        "operationId": "uploadBookCover",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_uploadBookCover"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Upload Cover",
+        "tags": [
+          "library"
         ]
       }
     },

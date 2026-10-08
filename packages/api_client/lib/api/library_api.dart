@@ -1445,6 +1445,85 @@ class LibraryApi {
     return null;
   }
 
+  /// Upload Cover
+  ///
+  /// Use your own picture (JPEG, PNG or WebP, up to 5 MB) as a book's cover.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [MultipartFile] file (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<Response> uploadBookCoverWithHttpInfo(String itemId, MultipartFile file, { String? xBabelDevice, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/{item_id}/cover'
+      .replaceAll('{item_id}', itemId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (xBabelDevice != null) {
+      headerParams[r'X-Babel-Device'] = parameterToString(xBabelDevice);
+    }
+
+    const contentTypes = <String>['multipart/form-data'];
+
+    bool hasFields = false;
+    final mp = MultipartRequest('PUT', Uri.parse(path));
+    if (file != null) {
+      hasFields = true;
+      mp.fields[r'file'] = file.field;
+      mp.files.add(file);
+    }
+    if (hasFields) {
+      postBody = mp;
+    }
+
+    return apiClient.invokeAPI(
+      path,
+      'PUT',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Upload Cover
+  ///
+  /// Use your own picture (JPEG, PNG or WebP, up to 5 MB) as a book's cover.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [MultipartFile] file (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<LibraryItemResponse?> uploadBookCover(String itemId, MultipartFile file, { String? xBabelDevice, }) async {
+    final response = await uploadBookCoverWithHttpInfo(itemId, file,  xBabelDevice: xBabelDevice, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'LibraryItemResponse',) as LibraryItemResponse;
+    
+    }
+    return null;
+  }
+
   /// Withdraw File
   ///
   /// Withdraw a file from every library and delete it; by default its hash is blocked.

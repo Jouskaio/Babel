@@ -82,6 +82,7 @@ def _to_item(row: LibraryItemRow) -> LibraryItem:
         series=row.series,
         series_index=row.series_index,
         cover_id=row.cover_id,
+        custom_cover=row.custom_cover,
     )
 
 

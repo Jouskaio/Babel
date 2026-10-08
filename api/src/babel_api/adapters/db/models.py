@@ -198,6 +198,8 @@ class LibraryItemRow(Base):
     series_index: Mapped[float | None] = mapped_column(Float)
     # A catalog cover chosen by the reader instead of the file's.
     cover_id: Mapped[int | None] = mapped_column(Integer)
+    # A picture the reader uploaded (key in the cover cache).
+    custom_cover: Mapped[str | None] = mapped_column(String(64))
     # An audiobook of the reader's Audiobookshelf (domain AudioRef).
     audio_id: Mapped[str | None] = mapped_column(String(64), index=True)
     audio_duration: Mapped[float | None] = mapped_column(Float)

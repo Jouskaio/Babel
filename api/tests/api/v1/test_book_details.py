@@ -89,3 +89,26 @@ def test_invalid_details_and_other_readers(client: TestClient, ada: dict[str, st
     assert client.patch(url, json={"title": "   "}, headers=ada).status_code == 400
     assert client.patch(url, json={"title": "Mine"}, headers=bob).status_code == 404
     assert client.get("/v1/library", headers=ada).json()[0]["title"] == "Emma"
+
+
+def test_the_reader_uploads_their_own_cover(client: TestClient, ada: dict[str, str]) -> None:
+    item = add(client, ada, epub(title="Jane Eyre", isbn=None))
+    url = f"/v1/library/{item['id']}"
+    png = b"\x89PNG\r\n\x1a\n" + b"0" * 20
+
+    done = client.put(f"{url}/cover", files={"file": ("c.png", png, "image/png")}, headers=ada)
+    assert done.status_code == 200, done.text
+    path = done.json()["cover_path"]
+    assert path.startswith("/v1/audio-covers/")
+    served = client.get(path)
+    assert (served.status_code, served.headers["content-type"], served.content) == (
+        200,
+        "image/png",
+        png,
+    )
+
+    # Not a picture: refused. Choosing a catalog cover afterwards replaces the upload.
+    bad = client.put(f"{url}/cover", files={"file": ("c.txt", b"hello", "text/plain")}, headers=ada)
+    assert bad.status_code == 400
+    chosen = client.patch(url, json={"cover_id": 5}, headers=ada).json()
+    assert chosen["cover_path"] == "/v1/catalog/covers/5/M"

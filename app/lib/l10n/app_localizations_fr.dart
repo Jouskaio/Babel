@@ -2429,6 +2429,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get detailsCover => 'Couverture';
 
   @override
+  String get coverUpload => 'Importer ma propre image';
+
+  @override
+  String get coverInvalid =>
+      'Image invalide (JPEG, PNG ou WebP, 5 Mo maximum).';
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override
