@@ -19,6 +19,7 @@ Name | Type | Description | Notes
 **location** | **String** | Repository, address or account, for display | 
 **name** | **String** |  | 
 **repository** | **String** |  | [optional] 
+**scanning** | **bool** | A scan is under way in the background: ask again shortly | [optional] [default to false]
 **username** | **String** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

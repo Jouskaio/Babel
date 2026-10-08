@@ -29,7 +29,8 @@ log = logging.getLogger(__name__)
 BASE = "https://archiveofourown.org"
 _USERNAME = re.compile(r"^[A-Za-z0-9_]{3,40}$")
 _WORK = re.compile(r"^/works/(\d+)$")
-MAX_PAGES = 30
+# A big account is scanned in the background, one page every few seconds: 150 pages is 3000 works.
+MAX_PAGES = 150
 SESSION_SECONDS = 30 * 60
 RETRIES = 2
 # A big account's bookmarks page is slow to build: AO3's front gives up (502/525) at the first
@@ -163,7 +164,10 @@ class Ao3Connector:
         for page in range(1, MAX_PAGES + 1):
             response = await self._get(client, url, retries=LISTING_RETRIES, page=page)
             if response.status_code >= 400:
-                if page == 1:
+                # A page that fails after its retries fails the scan: a silent partial list
+                # would drop the works of the pages missing from it. Only the end of the list
+                # (a 4xx after some pages) is a normal stop.
+                if page == 1 or response.status_code >= 500:
                     raise SourceConnectionError(str(response.status_code))
                 break
             soup = _soup(response)

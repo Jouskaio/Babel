@@ -2708,4 +2708,8 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get addSourceHint =>
       'Ce livre n\'est dans aucune de vos sources. Ajoutez-en une (Kavita, WebDAV, GitHub…) pour le retrouver ici.';
+
+  @override
+  String get sourceScanning =>
+      'Scan en cours… un gros compte peut prendre plusieurs minutes.';
 }

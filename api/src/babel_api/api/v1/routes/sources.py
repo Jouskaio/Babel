@@ -4,10 +4,16 @@ from datetime import datetime
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, BackgroundTasks, Query, status
 from pydantic import BaseModel, Field, model_validator
 
-from babel_api.api.dependencies import CurrentUserId, DeviceHeader, SourceServiceDep
+from babel_api.api.dependencies import (
+    ContainerDep,
+    CurrentUserId,
+    DeviceHeader,
+    SourceServiceDep,
+    run_source_scan,
+)
 from babel_api.api.v1.routes.library import LibraryItemResponse
 from babel_api.domain.sources import EntryStatus, Source, SourceDetail, SourceKind
 
@@ -83,9 +89,12 @@ class SourceResponse(BaseModel):
     last_scan_at: datetime | None
     last_error: str | None
     book_count: int = Field(description="Book files found by the last scan")
+    scanning: bool = Field(
+        default=False, description="A scan is under way in the background: ask again shortly"
+    )
 
     @classmethod
-    def of(cls, source: Source) -> "SourceResponse":
+    def of(cls, source: Source, scanning: bool = False) -> "SourceResponse":
         config: dict[str, Any] = source.config
         return cls(
             id=source.id,
@@ -102,6 +111,7 @@ class SourceResponse(BaseModel):
             last_scan_at=source.last_scan_at,
             last_error=source.last_error,
             book_count=source.entry_count,
+            scanning=scanning,
         )
 
 
@@ -123,9 +133,9 @@ class SourceDetailResponse(BaseModel):
     entries: list[SourceEntryResponse]
 
     @classmethod
-    def of(cls, detail: SourceDetail) -> "SourceDetailResponse":
+    def of(cls, detail: SourceDetail, scanning: bool = False) -> "SourceDetailResponse":
         return cls(
-            source=SourceResponse.of(detail.source),
+            source=SourceResponse.of(detail.source, scanning),
             entries=[
                 SourceEntryResponse(
                     id=e.id,
@@ -156,17 +166,46 @@ class BatchImportResponse(BaseModel):
 
 
 @router.get("", operation_id="getSources")
-async def get_sources(user_id: CurrentUserId, sources: SourceServiceDep) -> list[SourceResponse]:
-    return [SourceResponse.of(s) for s in await sources.list_sources(user_id)]
+async def get_sources(
+    user_id: CurrentUserId, sources: SourceServiceDep, container: ContainerDep
+) -> list[SourceResponse]:
+    return [
+        SourceResponse.of(s, s.id in container.scanning)
+        for s in await sources.list_sources(user_id)
+    ]
+
+
+# Connectors that scan slowly (a page every few seconds, thousands of works): the scan goes on
+# in the background and the app asks again, instead of holding the request open.
+BACKGROUND_SCAN = {SourceKind.AO3}
+
+
+def start_scan(
+    container: ContainerDep, background: BackgroundTasks, user_id: UUID, source_id: UUID
+) -> bool:
+    """Starts the background scan unless one is already running; whether it is under way."""
+    if source_id not in container.scanning:
+        container.scanning.add(source_id)
+        background.add_task(run_source_scan, container, user_id, source_id)
+    return True
 
 
 @router.post("", operation_id="createSource", status_code=status.HTTP_201_CREATED)
 async def create_source(
-    user_id: CurrentUserId, sources: SourceServiceDep, body: CreateSourceRequest
+    user_id: CurrentUserId,
+    sources: SourceServiceDep,
+    container: ContainerDep,
+    background: BackgroundTasks,
+    body: CreateSourceRequest,
 ) -> SourceDetailResponse:
-    """Connect a source: access is checked, then it is scanned right away."""
-    detail = await sources.create(user_id, body.kind, body.name, body.settings() or {}, body.token)
-    return SourceDetailResponse.of(detail)
+    """Connect a source: access is checked, then it is scanned right away (a slow one, such as
+    AO3, in the background: the answer says so and the scan follows)."""
+    slow = body.kind in BACKGROUND_SCAN
+    detail = await sources.create(
+        user_id, body.kind, body.name, body.settings() or {}, body.token, scan=not slow
+    )
+    scanning = slow and start_scan(container, background, user_id, detail.source.id)
+    return SourceDetailResponse.of(detail, scanning)
 
 
 @router.post("/check", operation_id="checkSource")
@@ -214,10 +253,12 @@ async def search_sources(
 
 @router.get("/{source_id}", operation_id="getSource")
 async def get_source(
-    user_id: CurrentUserId, sources: SourceServiceDep, source_id: UUID
+    user_id: CurrentUserId, sources: SourceServiceDep, container: ContainerDep, source_id: UUID
 ) -> SourceDetailResponse:
     """The source and the books found by its last scan."""
-    return SourceDetailResponse.of(await sources.detail(user_id, source_id))
+    return SourceDetailResponse.of(
+        await sources.detail(user_id, source_id), source_id in container.scanning
+    )
 
 
 @router.delete("/{source_id}", operation_id="deleteSource", status_code=status.HTTP_204_NO_CONTENT)
@@ -237,9 +278,17 @@ async def delete_source(
 
 @router.post("/{source_id}/scan", operation_id="scanSource")
 async def scan_source(
-    user_id: CurrentUserId, sources: SourceServiceDep, source_id: UUID
+    user_id: CurrentUserId,
+    sources: SourceServiceDep,
+    container: ContainerDep,
+    background: BackgroundTasks,
+    source_id: UUID,
 ) -> SourceDetailResponse:
-    """Look for new books in the source."""
+    """Look for new books in the source (in the background for a slow one: see ``scanning``)."""
+    detail = await sources.detail(user_id, source_id)
+    if detail.source.kind in BACKGROUND_SCAN:
+        start_scan(container, background, user_id, source_id)
+        return SourceDetailResponse.of(detail, True)
     return SourceDetailResponse.of(await sources.scan(user_id, source_id))
 
 

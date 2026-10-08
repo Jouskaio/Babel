@@ -28,6 +28,15 @@ class SourceDetailPage extends ConsumerStatefulWidget {
 class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
   bool _scanning = false;
   bool _importingAll = false;
+  // While the server scans in the background, ask again every few seconds.
+  Timer? _poll;
+
+  @override
+  void dispose() {
+    _poll?.cancel();
+    super.dispose();
+  }
+
   final _importing = <String>{};
 
   SourcesApi get _api => ref.read(sourcesApiProvider);
@@ -182,10 +191,20 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final detail = ref.watch(sourceDetailProvider(widget.sourceId));
+    ref.listen(sourceDetailProvider(widget.sourceId), (_, next) {
+      final scanning = next.value?.source_.scanning ?? false;
+      if (scanning) {
+        _poll ??= Timer.periodic(const Duration(seconds: 6), (_) => _refresh());
+      } else {
+        _poll?.cancel();
+        _poll = null;
+      }
+    });
     return Scaffold(
       appBar: sourcesAppBar(detail.value?.source_.name ?? l10n.sourcesTitle),
       body: switch (detail) {
-        AsyncData(:final value) => _content(value),
+        // A refresh keeps showing the last answer instead of a spinner.
+        AsyncValue(:final value?) => _content(value),
         AsyncError(:final error) => Center(
           child: Padding(
             padding: const EdgeInsets.all(32),
@@ -217,7 +236,7 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
         if (e.status == EntryStatus.inLibrary) e,
     ];
     final failed = source.lastError != null;
-    final busy = _scanning || _importingAll;
+    final busy = _scanning || _importingAll || source.scanning;
     return RefreshIndicator(
       color: BabelColors.gold,
       onRefresh: _scan,
@@ -250,7 +269,9 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
                           StatusDot(ok: !failed),
                           Flexible(
                             child: Text(
-                              failed
+                              source.scanning
+                                  ? l10n.sourceScanning
+                                  : failed
                                   ? (source.lastError!.contains('rate_limited')
                                         ? (source.kind == SourceKind.github
                                               ? l10n.sourceErrorRateLimited
@@ -276,7 +297,7 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
               PillButton(
                 label: l10n.rescan,
                 kind: PillButtonKind.secondary,
-                loading: _scanning,
+                loading: _scanning || source.scanning,
                 onPressed: busy ? null : _scan,
               ),
               const SizedBox(width: 10),

@@ -506,3 +506,55 @@ def test_an_administrator_limits_the_sources_of_one_account(
         == 204
     )
     assert connect(client, reader, repository="ada/second").status_code == 201
+
+
+class FakeAo3Source:
+    """A slow connector: its scans go on in the background."""
+
+    def __init__(self) -> None:
+        self.down = False
+
+    async def check(self, config: dict[str, Any], token: str | None) -> dict[str, Any]:
+        return {"username": config["username"]}
+
+    async def list_entries(self, config: dict[str, Any], token: str | None) -> list[RemoteEntry]:
+        if self.down:
+            raise SourceConnectionError("unreachable")
+        return [
+            RemoteEntry(
+                path="/works/1", size=0, remote_id="1:1/1", title="A Work", authors=("Ada",),
+                format="epub",
+            )
+        ]  # fmt: skip
+
+
+def test_a_slow_source_is_scanned_in_the_background(
+    app: FastAPI, client: TestClient, ada: dict[str, str]
+) -> None:
+    fake = FakeAo3Source()
+    app.state.container = replace(
+        app.state.container,
+        connectors={SourceKind.AO3: fake},
+        secrets=SecretBox(Fernet.generate_key().decode()),
+    )
+    body = {"kind": "ao3", "name": "AO3 · ada", "ao3": {"username": "ada"}}
+    created = client.post("/v1/sources", json=body, headers=ada)
+    assert created.status_code == 201
+    # The answer comes before the scan: it says so, and lists nothing yet.
+    assert created.json()["source"]["scanning"] is True
+    assert created.json()["entries"] == []
+    source_id = created.json()["source"]["id"]
+
+    # By the time the reader asks again, the scan is done.
+    done = client.get(f"/v1/sources/{source_id}", headers=ada).json()
+    assert done["source"]["scanning"] is False
+    assert done["source"]["book_count"] == 1
+    assert done["source"]["last_error"] is None
+
+    fake.down = True
+    again = client.post(f"/v1/sources/{source_id}/scan", headers=ada)
+    assert again.json()["source"]["scanning"] is True
+    failed = client.get(f"/v1/sources/{source_id}", headers=ada).json()
+    assert failed["source"]["scanning"] is False
+    assert failed["source"]["last_error"] is not None
+    assert failed["source"]["book_count"] == 1  # a failed scan keeps what was known
