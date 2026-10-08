@@ -8,6 +8,7 @@ import 'core/display/eink.dart';
 import 'core/locale/locale_controller.dart';
 import 'core/push/push_notifications.dart';
 import 'core/share/share_intake.dart';
+import 'core/sync/sync_engine.dart';
 import 'core/theme/babel_colors.dart';
 import 'core/theme/babel_theme.dart';
 import 'core/theme/palette_scope.dart';
@@ -23,15 +24,26 @@ class BabelApp extends ConsumerStatefulWidget {
   ConsumerState<BabelApp> createState() => _BabelAppState();
 }
 
-class _BabelAppState extends ConsumerState<BabelApp> {
+class _BabelAppState extends ConsumerState<BabelApp>
+    with WidgetsBindingObserver {
   StreamSubscription<Shared>? _shares;
   StreamSubscription<Map<String, String>>? _notifications;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _listenToNotifications();
     _listenToShares();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Back to the app (or to its tab): learn what the other devices did meanwhile.
+    if (state == AppLifecycleState.resumed &&
+        ref.read(authControllerProvider) is SignedIn) {
+      unawaited(ref.read(syncEngineProvider.notifier).sync());
+    }
   }
 
   /// Notifications are set up once signed in (the permission is asked then); tapping
@@ -82,6 +94,7 @@ class _BabelAppState extends ConsumerState<BabelApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     unawaited(_shares?.cancel());
     unawaited(_notifications?.cancel());
     super.dispose();

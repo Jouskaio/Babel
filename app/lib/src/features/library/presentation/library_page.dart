@@ -46,6 +46,28 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   /// A reading status or a shelf id; null shows every book.
   Object? _filter;
   bool _showHidden = false;
+  final _search = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  /// Lower case without accents, so "emily bronte" finds "Emily Brontë".
+  static String _fold(String text) {
+    const from = 'àáâãäåçèéêëìíîïñòóôõöùúûüýÿœæ';
+    const to = 'aaaaaaceeeeiiiinooooouuuuyyoa';
+    final lower = text.toLowerCase();
+    return String.fromCharCodes([
+      for (final c in lower.runes)
+        if (from.indexOf(String.fromCharCode(c)) case final i when i >= 0)
+          to.codeUnitAt(i)
+        else
+          c,
+    ]);
+  }
 
   Future<void> _newShelf() async {
     final name = await askShelfName(context);
@@ -59,9 +81,17 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     List<Shelf> shelves,
   ) {
     final filter = _filter;
+    final words = _fold(_query).split(' ').where((w) => w.isNotEmpty).toList();
     final shown = [
       for (final item in items)
-        if (_showHidden || item.hidden != true) item,
+        if ((_showHidden || item.hidden != true) &&
+            (words.isEmpty ||
+                words.every(
+                  _fold(
+                    '${item.title} ${item.authors.join(' ')} ${item.series ?? ''}',
+                  ).contains,
+                )))
+          item,
     ];
     if (filter is ReadingStatus) {
       return [
@@ -250,6 +280,35 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               ),
             ),
           ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+            sliver: SliverToBoxAdapter(
+              child: TextField(
+                controller: _search,
+                onChanged: (value) => setState(() => _query = value),
+                style: BabelText.body(15, color: BabelColors.textPrimary),
+                decoration: InputDecoration(
+                  hintText: l10n.librarySearchHint,
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: BabelColors.textSecondary,
+                  ),
+                  suffixIcon: _query.isEmpty
+                      ? null
+                      : IconButton(
+                          icon: Icon(
+                            Icons.close,
+                            color: BabelColors.textSecondary,
+                          ),
+                          onPressed: () {
+                            _search.clear();
+                            setState(() => _query = '');
+                          },
+                        ),
+                ),
+              ),
+            ),
+          ),
           SliverToBoxAdapter(
             child: _Filters(
               filter: _filter,
@@ -324,7 +383,11 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                 padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
                 sliver: SliverToBoxAdapter(
                   child: Text(
-                    _filter is String ? l10n.shelfEmpty : l10n.libraryEmpty,
+                    _query.isNotEmpty
+                        ? l10n.libraryNoMatch
+                        : _filter is String
+                        ? l10n.shelfEmpty
+                        : l10n.libraryEmpty,
                     style: BabelText.body(15),
                   ),
                 ),

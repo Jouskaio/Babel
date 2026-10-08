@@ -293,6 +293,9 @@ class SourceRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     last_scan_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_error: Mapped[str | None] = mapped_column(String(200))
+    # What the last successful scan found new, and what had gone from the source.
+    last_added: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    last_removed: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
 
 
 class SourceEntryRow(Base):

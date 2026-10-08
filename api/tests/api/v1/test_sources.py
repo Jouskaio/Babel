@@ -590,3 +590,44 @@ def test_a_search_never_waits_for_a_slow_source_to_be_scanned_again(
         service.SEARCH_RESCAN = original_delay
     assert scans["n"] == 0  # a slow source is searched as it was
     assert [m["entry"]["title"] for m in found] == ["A Work"]
+
+
+def test_a_background_scan_tells_the_readers_devices_how_it_went(
+    app: FastAPI, client: TestClient, ada: dict[str, str]
+) -> None:
+    from tests.api.v1.test_follows import Pushes, set_token
+    from tests.api.v1.test_sync import device
+
+    fake, pushes = FakeAo3Source(), Pushes()
+    app.state.container = replace(
+        app.state.container,
+        connectors={SourceKind.AO3: fake},
+        pusher=pushes,
+        secrets=SecretBox(Fernet.generate_key().decode()),
+    )
+    set_token(client, ada, device(client, ada, "Phone"), "phone-token")
+
+    body = {"kind": "ao3", "name": "AO3 · ada", "ao3": {"username": "ada"}}
+    source_id = client.post("/v1/sources", json=body, headers=ada).json()["source"]["id"]
+    token, title, text, data = pushes.sent[-1]
+    assert (token, title) == ("phone-token", "Source parcourue")
+    assert text == "AO3 · ada : 1 livres (+1, −0)"
+    assert data == {"kind": "source_scanned", "source_id": source_id}
+    done = client.get(f"/v1/sources/{source_id}", headers=ada).json()["source"]
+    assert (done["last_added"], done["last_removed"]) == (1, 0)
+
+    # Nothing new the second time; the book gone the third.
+    client.post(f"/v1/sources/{source_id}/scan", headers=ada)
+    assert pushes.sent[-1][2] == "AO3 · ada : 1 livres (+0, −0)"
+
+    async def empty(config: dict[str, Any], token: str | None) -> list[RemoteEntry]:
+        return []
+
+    fake.list_entries = empty  # type: ignore[method-assign]
+    client.post(f"/v1/sources/{source_id}/scan", headers=ada)
+    assert pushes.sent[-1][2] == "AO3 · ada : 0 livres (+0, −1)"
+
+    fake.down = True
+    fake.list_entries = FakeAo3Source.list_entries.__get__(fake)  # type: ignore[method-assign]
+    client.post(f"/v1/sources/{source_id}/scan", headers=ada)
+    assert pushes.sent[-1][1] == "Source injoignable"

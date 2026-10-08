@@ -19,7 +19,9 @@ class SourceResponse {
     required this.hasToken,
     required this.id,
     required this.kind,
+    this.lastAdded = 0,
     this.lastError,
+    this.lastRemoved = 0,
     this.lastScanAt,
     required this.location,
     required this.name,
@@ -41,7 +43,13 @@ class SourceResponse {
 
   SourceKind kind;
 
+  /// Books the last scan found that are new
+  int lastAdded;
+
   String? lastError;
+
+  /// Books the last scan found gone
+  int lastRemoved;
 
   DateTime? lastScanAt;
 
@@ -65,7 +73,9 @@ class SourceResponse {
     other.hasToken == hasToken &&
     other.id == id &&
     other.kind == kind &&
+    other.lastAdded == lastAdded &&
     other.lastError == lastError &&
+    other.lastRemoved == lastRemoved &&
     other.lastScanAt == lastScanAt &&
     other.location == location &&
     other.name == name &&
@@ -82,7 +92,9 @@ class SourceResponse {
     (hasToken.hashCode) +
     (id.hashCode) +
     (kind.hashCode) +
+    (lastAdded.hashCode) +
     (lastError == null ? 0 : lastError!.hashCode) +
+    (lastRemoved.hashCode) +
     (lastScanAt == null ? 0 : lastScanAt!.hashCode) +
     (location.hashCode) +
     (name.hashCode) +
@@ -91,7 +103,7 @@ class SourceResponse {
     (username == null ? 0 : username!.hashCode);
 
   @override
-  String toString() => 'SourceResponse[bookCount=$bookCount, createdAt=$createdAt, folder=$folder, hasToken=$hasToken, id=$id, kind=$kind, lastError=$lastError, lastScanAt=$lastScanAt, location=$location, name=$name, repository=$repository, scanning=$scanning, username=$username]';
+  String toString() => 'SourceResponse[bookCount=$bookCount, createdAt=$createdAt, folder=$folder, hasToken=$hasToken, id=$id, kind=$kind, lastAdded=$lastAdded, lastError=$lastError, lastRemoved=$lastRemoved, lastScanAt=$lastScanAt, location=$location, name=$name, repository=$repository, scanning=$scanning, username=$username]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -105,11 +117,13 @@ class SourceResponse {
       json[r'has_token'] = this.hasToken;
       json[r'id'] = this.id;
       json[r'kind'] = this.kind;
+      json[r'last_added'] = this.lastAdded;
     if (this.lastError != null) {
       json[r'last_error'] = this.lastError;
     } else {
       json[r'last_error'] = null;
     }
+      json[r'last_removed'] = this.lastRemoved;
     if (this.lastScanAt != null) {
       json[r'last_scan_at'] = this.lastScanAt!.toUtc().toIso8601String();
     } else {
@@ -156,7 +170,9 @@ class SourceResponse {
         hasToken: mapValueOfType<bool>(json, r'has_token')!,
         id: mapValueOfType<String>(json, r'id')!,
         kind: SourceKind.fromJson(json[r'kind'])!,
+        lastAdded: mapValueOfType<int>(json, r'last_added') ?? 0,
         lastError: mapValueOfType<String>(json, r'last_error'),
+        lastRemoved: mapValueOfType<int>(json, r'last_removed') ?? 0,
         lastScanAt: mapDateTime(json, r'last_scan_at', r''),
         location: mapValueOfType<String>(json, r'location')!,
         name: mapValueOfType<String>(json, r'name')!,

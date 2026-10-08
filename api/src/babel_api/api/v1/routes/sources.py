@@ -90,6 +90,8 @@ class SourceResponse(BaseModel):
     last_scan_at: datetime | None
     last_error: str | None
     book_count: int = Field(description="Book files found by the last scan")
+    last_added: int = Field(default=0, description="Books the last scan found that are new")
+    last_removed: int = Field(default=0, description="Books the last scan found gone")
     scanning: bool = Field(
         default=False, description="A scan is under way in the background: ask again shortly"
     )
@@ -112,6 +114,8 @@ class SourceResponse(BaseModel):
             last_scan_at=source.last_scan_at,
             last_error=source.last_error,
             book_count=source.entry_count,
+            last_added=source.last_added,
+            last_removed=source.last_removed,
             scanning=scanning,
         )
 

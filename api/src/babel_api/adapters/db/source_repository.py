@@ -36,6 +36,8 @@ def _to_source(row: SourceRow, entry_count: int = 0) -> Source:
         last_scan_at=_aware(row.last_scan_at),
         last_error=row.last_error,
         entry_count=entry_count,
+        last_added=row.last_added or 0,
+        last_removed=row.last_removed or 0,
     )
 
 
@@ -151,6 +153,8 @@ class SqlSourceRepository:
                 )
             }
             found = {e.path: e for e in entries}
+            row.last_added = len(found.keys() - existing.keys())
+            row.last_removed = len(existing.keys() - found.keys())
             for path, stale in existing.items():
                 if path not in found:
                     await self._session.delete(stale)

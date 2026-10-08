@@ -4513,6 +4513,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Téléchargement : {percent} %'**
   String requestDownloading(int percent);
+
+  /// No description provided for @sourceScanDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scan terminé : {total} livres (+{added}, −{removed})'**
+  String sourceScanDone(int total, int added, int removed);
+
+  /// No description provided for @librarySearchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chercher dans ma bibliothèque'**
+  String get librarySearchHint;
+
+  /// No description provided for @libraryNoMatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun livre de votre bibliothèque ne correspond.'**
+  String get libraryNoMatch;
 }
 
 class _AppLocalizationsDelegate

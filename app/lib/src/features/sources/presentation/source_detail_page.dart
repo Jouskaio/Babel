@@ -191,8 +191,23 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final detail = ref.watch(sourceDetailProvider(widget.sourceId));
-    ref.listen(sourceDetailProvider(widget.sourceId), (_, next) {
+    ref.listen(sourceDetailProvider(widget.sourceId), (previous, next) {
       final scanning = next.value?.source_.scanning ?? false;
+      // A background scan has just ended: say how it went.
+      if ((previous?.value?.source_.scanning ?? false) && !scanning) {
+        final source = next.value?.source_;
+        if (source != null) {
+          _say(
+            source.lastError != null
+                ? l10n.sourceScanFailed
+                : l10n.sourceScanDone(
+                    source.bookCount,
+                    source.lastAdded,
+                    source.lastRemoved,
+                  ),
+          );
+        }
+      }
       if (scanning) {
         _poll ??= Timer.periodic(const Duration(seconds: 6), (_) => _refresh());
       } else {

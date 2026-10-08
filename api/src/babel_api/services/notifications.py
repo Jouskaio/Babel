@@ -28,6 +28,18 @@ _NEW_CHAPTERS = {
 }
 
 
+_SCANNED = {
+    "fr": {
+        "done": ("Source parcourue", "{name} : {total} livres (+{added}, −{removed})"),
+        "failed": ("Source injoignable", "Le scan de {name} a échoué : réessayez plus tard"),
+    },
+    "en": {
+        "done": ("Source scanned", "{name}: {total} books (+{added}, −{removed})"),
+        "failed": ("Source unreachable", "The scan of {name} failed: try again later"),
+    },
+}
+
+
 class Notifier:
     def __init__(self, sync: SyncRepository, users: UserRepository, pusher: Pusher) -> None:
         self._sync = sync
@@ -54,6 +66,25 @@ class Notifier:
         heading, body = _NEW_CHAPTERS.get(user.locale if user else "fr", _NEW_CHAPTERS["fr"])
         text = body.format(title=title, chapters=chapters or "?")
         data = {"kind": "new_chapters", "item_id": str(item_id)}
+        return await self._send(user_id, heading, text, data)
+
+    async def source_scanned(
+        self,
+        user_id: UUID,
+        source_id: UUID,
+        name: str,
+        total: int,
+        added: int,
+        removed: int,
+        *,
+        failed: bool,
+    ) -> int:
+        """A scan that went on in the background is over: books added, removed, or a failure."""
+        user = await self._users.get_by_id(user_id)
+        texts = _SCANNED.get(user.locale if user else "fr", _SCANNED["fr"])
+        heading, body = texts["failed" if failed else "done"]
+        text = body.format(name=name, total=total, added=added, removed=removed)
+        data = {"kind": "source_scanned", "source_id": str(source_id)}
         return await self._send(user_id, heading, text, data)
 
     async def _send(self, user_id: UUID, heading: str, text: str, data: dict[str, str]) -> int:

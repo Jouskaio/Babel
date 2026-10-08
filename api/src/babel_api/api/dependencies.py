@@ -389,12 +389,25 @@ async def fulfill_request(container: Container, user_id: UUID, work_id: UUID) ->
 
 
 async def run_source_scan(container: Container, user_id: UUID, source_id: UUID) -> None:
-    """Background task: scans a source with its own session; [container.scanning] is set by
-    the route and cleared here."""
+    """Background task: scans a source with its own session, then tells the reader's devices
+    how it went; [container.scanning] is set by the route and cleared here."""
+    logger = logging.getLogger(__name__)
     try:
         async with container.sessions() as session:
-            await make_source_service(container, session).scan(user_id, source_id)
+            detail = await make_source_service(container, session).scan(user_id, source_id)
+            source = detail.source
+            await Notifier(
+                SqlSyncRepository(session), SqlUserRepository(session), container.pusher
+            ).source_scanned(
+                user_id,
+                source_id,
+                source.name,
+                source.entry_count,
+                source.last_added,
+                source.last_removed,
+                failed=source.last_error is not None,
+            )
     except Exception:
-        logging.getLogger(__name__).exception("Background scan of source %s failed", source_id)
+        logger.exception("Background scan of source %s failed", source_id)
     finally:
         container.scanning.discard(source_id)

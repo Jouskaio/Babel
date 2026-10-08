@@ -3826,6 +3826,12 @@
           "kind": {
             "$ref": "#/components/schemas/SourceKind"
           },
+          "last_added": {
+            "default": 0,
+            "description": "Books the last scan found that are new",
+            "title": "Last Added",
+            "type": "integer"
+          },
           "last_error": {
             "anyOf": [
               {
@@ -3836,6 +3842,12 @@
               }
             ],
             "title": "Last Error"
+          },
+          "last_removed": {
+            "default": 0,
+            "description": "Books the last scan found gone",
+            "title": "Last Removed",
+            "type": "integer"
           },
           "last_scan_at": {
             "anyOf": [
@@ -4787,7 +4799,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.37.0"
+    "version": "0.38.0"
   },
   "openapi": "3.1.0",
   "paths": {
