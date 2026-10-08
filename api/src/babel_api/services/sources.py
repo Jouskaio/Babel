@@ -2,7 +2,7 @@
 
 import logging
 import unicodedata
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from typing import Any, cast
@@ -67,7 +67,9 @@ class SourceService:
         secrets: SecretBox,
         *,
         max_sources: int,
+        follow: Callable[[SourceKind, LibraryItem, SourceEntry], Awaitable[None]] | None = None,
     ) -> None:
+        self._follow = follow
         self._sources = sources
         self._files = files
         self._library = library
@@ -234,7 +236,9 @@ class SourceService:
             stored = await self._files.get_file(known)
             if stored is not None and stored.available:
                 # Already on Babel: no download from the source.
-                return await self._library.add_existing(user_id, known, device_id)
+                item = await self._library.add_existing(user_id, known, device_id)
+                await self._followed(source.kind, item, entry)
+                return item
         chunks = self._connectors[source.kind].fetch(
             source.config, await self._token(source), entry.remote()
         )
@@ -246,7 +250,17 @@ class SourceService:
             raise
         await self._sources.remember_file(source.kind, entry.remote_id, stored_sha(result.item))
         await self._sources.commit()
+        await self._followed(source.kind, result.item, entry)
         return result.item
+
+    async def _followed(self, kind: SourceKind, item: LibraryItem, entry: SourceEntry) -> None:
+        """What was just imported may be followed: AO3 works still being written."""
+        if self._follow is None:
+            return
+        try:
+            await self._follow(kind, item, entry)
+        except Exception:  # following is a bonus: it never fails the import
+            logger.warning("Could not follow %s", entry.path, exc_info=True)
 
     async def import_new(
         self, user_id: UUID, source_id: UUID, device_id: UUID | None = None

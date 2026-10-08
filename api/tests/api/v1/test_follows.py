@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 
 from babel_api.adapters.sources.ao3 import Ao3Connector
 from babel_api.api.dependencies import Container, make_follow_service
+from babel_api.domain.sources import RemoteEntry
 from babel_api.services.follow_loop import check_due_follows
 from babel_api.services.follows import FollowService
 from tests.api.v1.test_library import account
@@ -287,3 +288,62 @@ def test_only_the_owner_sets_a_device_token(client: TestClient, ada: dict[str, s
     bob = account(client, "bob@example.com")
     response = client.put(f"/v1/devices/{phone}/push-token", json={"token": "x"}, headers=bob)
     assert response.status_code == 404
+
+
+class Ao3Source:
+    """An AO3 source (subscriptions) that lists the one work, as the connector would."""
+
+    def __init__(self, ao3: Ao3) -> None:
+        self._ao3 = ao3
+
+    async def check(self, config: dict[str, object], token: str | None) -> dict[str, object]:
+        return {"username": "ada"}
+
+    async def list_entries(self, config: dict[str, object], token: str | None) -> list[RemoteEntry]:
+        version = f"77:{self._ao3.chapters}|{self._ao3.updated}"
+        return [RemoteEntry(path="/works/77", size=0, remote_id=version, title="Arcane",
+                            authors=("ittybittyzz",), format="epub")]  # fmt: skip
+
+    async def fetch(
+        self, config: dict[str, object], token: str | None, entry: RemoteEntry
+    ) -> AsyncGenerator[bytes]:
+        yield epub(title="Arcane", author="ittybittyzz", isbn=None)
+
+
+def test_a_work_imported_from_an_ao3_source_is_followed_and_several_chapters_make_one_push(
+    app: FastAPI, client: TestClient, ao3: Ao3, pushes: Pushes, ada: dict[str, str]
+) -> None:
+    from cryptography.fernet import Fernet
+
+    from babel_api.adapters.security.secrets import SecretBox
+    from babel_api.domain.sources import SourceKind
+
+    container = app.state.container
+    app.state.container = replace(
+        container,
+        connectors={**container.connectors, SourceKind.AO3: Ao3Source(ao3)},
+        secrets=SecretBox(Fernet.generate_key().decode()),
+    )
+    set_token(client, ada, device(client, ada, "Phone"), "phone-token")
+
+    body = {"kind": "ao3", "name": "AO3 · ada", "ao3": {"username": "ada"}}
+    source = client.post("/v1/sources", json=body, headers=ada).json()["source"]
+    detail = client.get(f"/v1/sources/{source['id']}", headers=ada).json()
+    entry = detail["entries"][0]
+    imported = client.post(f"/v1/sources/{source['id']}/entries/{entry['id']}/import", headers=ada)
+    assert imported.status_code == 201
+
+    [follow] = follows(client, ada)
+    assert (follow["item_id"], follow["chapters"]) == (imported.json()["id"], "3/?")
+    again = client.post(f"/v1/sources/{source['id']}/entries/{entry['id']}/import", headers=ada)
+    assert again.status_code in (201, 409)
+    assert len(follows(client, ada)) == 1  # importing again does not follow twice
+
+    # The author posts three chapters at once: one notification, with the count.
+    ao3.chapters, ao3.updated = "6/?", "2026-10-05"
+    check(client, ada)
+    chapters = [p for p in pushes.sent if p[3]["kind"] == "new_chapters"]
+    assert len(chapters) == 1  # not one per chapter
+    _, title, text, _ = chapters[0]
+    assert title == "Nouveaux chapitres"
+    assert text == "Arcane · +3 chapitres (6/? au total)"

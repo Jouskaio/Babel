@@ -41,6 +41,12 @@ def ao3_chapters(entry: RemoteEntry) -> str | None:
     return entry.remote_id.split(":", 1)[1].split("|", 1)[0] or None
 
 
+def chapter_count(chapters: str | None) -> int:
+    """The chapters posted so far in "4/?" or "4/10": 4 (0 when unknown)."""
+    head = (chapters or "").split("/", 1)[0].strip()
+    return int(head) if head.isdigit() else 0
+
+
 class FollowService:
     def __init__(
         self,
@@ -65,7 +71,9 @@ class FollowService:
         chapters = ao3_chapters(entry)
         if is_complete(chapters):
             return None
-        return await self._follows.save(
+        if any(f.item_id == item.id for f in await self._follows.list_follows(item.user_id)):
+            return None  # already followed (imported again)
+        saved = await self._follows.save(
             Follow(
                 id=uuid4(),
                 user_id=item.user_id,
@@ -80,6 +88,8 @@ class FollowService:
                 last_checked_at=datetime.now(UTC),
             )
         )
+        await self._follows.commit()
+        return saved
 
     async def list_follows(self, user_id: UUID) -> list[Follow]:
         return await self._follows.list_follows(user_id)
@@ -122,8 +132,10 @@ class FollowService:
             updated_at=now if updated else None,
         )
         if updated is not None and self._notifier is not None:
+            # An author often posts several chapters at once: one notification, with the count.
+            added = chapter_count(chapters) - chapter_count(follow.chapters)
             await self._notifier.new_chapters(
-                updated.user_id, updated.id, entry.title or updated.title, chapters
+                updated.user_id, updated.id, entry.title or updated.title, chapters, added
             )
         return saved
 
