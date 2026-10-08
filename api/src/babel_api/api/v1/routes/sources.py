@@ -16,6 +16,7 @@ from babel_api.api.dependencies import (
 )
 from babel_api.api.v1.routes.library import LibraryItemResponse
 from babel_api.domain.sources import EntryStatus, Source, SourceDetail, SourceKind
+from babel_api.services.sources import SLOW_KINDS
 
 router = APIRouter(prefix="/sources", tags=["sources"])
 
@@ -177,7 +178,7 @@ async def get_sources(
 
 # Connectors that scan slowly (a page every few seconds, thousands of works): the scan goes on
 # in the background and the app asks again, instead of holding the request open.
-BACKGROUND_SCAN = {SourceKind.AO3}
+BACKGROUND_SCAN = SLOW_KINDS
 
 
 def start_scan(
