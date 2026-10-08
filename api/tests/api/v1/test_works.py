@@ -734,3 +734,22 @@ def test_the_search_adds_what_hardcover_knows_and_the_catalog_lacks(
     # Too short a query is not worth a request to Hardcover.
     client.get("/v1/catalog/search", params={"q": "ja"}, headers=auth)
     assert fake.asked == ["jane"]
+
+
+def test_the_search_still_answers_when_open_library_is_down(
+    app: FastAPI, client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    fake = FakeHardcoverSearch(
+        [HardcoverBook(5, "Le sceptre maudit", ("Sophie Audouin",), 2003, None)]
+    )
+    app.state.container = replace(app.state.container, hardcover=fake)
+    books.down = True
+    hits = client.get("/v1/catalog/search", params={"q": "sceptre"}, headers=auth)
+    assert hits.status_code == 200
+    assert [h["title"] for h in hits.json()] == ["Le sceptre maudit"]
+
+    # Both down: the search fails as before.
+    app.state.container = replace(app.state.container, hardcover=FakeHardcoverSearch([]))
+    assert (
+        client.get("/v1/catalog/search", params={"q": "sceptre"}, headers=auth).status_code == 503
+    )

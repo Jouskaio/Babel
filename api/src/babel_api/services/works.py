@@ -1,12 +1,13 @@
 """Works, editions and ISBN lookups, cached from external catalogs (ADR 0007)."""
 
+import asyncio
 import logging
 import re
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
-from babel_api.adapters.hardcover import HardcoverClient
+from babel_api.adapters.hardcover import HardcoverBook, HardcoverClient
 from babel_api.domain.catalog import Edition, IdentifierKind, SourceWork, Work
 from babel_api.domain.errors import NotFoundError, SourceUnavailableError
 from babel_api.domain.isbn import normalize_isbn
@@ -99,12 +100,19 @@ class WorkService:
         self._hardcover = hardcover
 
     async def search(self, query: str, limit: int, language: str | None = None) -> list[SearchHit]:
-        try:
-            found = await self._source.search(query, limit, language)
-        except Exception as error:
-            raise SourceUnavailableError from error
+        """Open Library's matches, completed with Hardcover's. The two are asked together, and
+        one being down is no reason to answer nothing: the search fails only when both fail."""
+        asked = asyncio.gather(
+            self._source.search(query, limit, language),
+            self._hardcover_books(query, limit),
+            return_exceptions=True,
+        )
+        found, books = await asked
+        error = found if isinstance(found, BaseException) else None
+        if error is not None:
+            logger.warning("The catalog search failed: %r", error)
         hits: list[SearchHit] = []
-        for source in found:
+        for source in [] if isinstance(found, BaseException) else found:
             work = await self._repo.upsert_work(source)
             hits.append(
                 SearchHit(
@@ -113,20 +121,27 @@ class WorkService:
                     source.localized_cover_id or work.cover_id,
                 )
             )
-        hits += await self._more_from_hardcover(query, limit, hits)
+        hits += await self._add_hardcover(
+            [] if isinstance(books, BaseException) else books, limit, hits
+        )
+        if error is not None and not hits:
+            raise SourceUnavailableError from error
         await self._repo.commit()
         return hits
 
-    async def _more_from_hardcover(
-        self, query: str, limit: int, hits: list[SearchHit]
+    async def _hardcover_books(self, query: str, limit: int) -> list[HardcoverBook]:
+        if self._hardcover is None or len(query.strip()) < 3:
+            return []
+        return await self._hardcover.search_books(query, limit)
+
+    async def _add_hardcover(
+        self, books: list[HardcoverBook], limit: int, hits: list[SearchHit]
     ) -> list[SearchHit]:
         """Open Library lacks many volumes and translations: Hardcover's matches that the
         catalog's do not already hold are added, after them (each becomes a work "hc:<id>")."""
-        if self._hardcover is None or len(query.strip()) < 3 or len(hits) >= limit:
-            return []
         known = {_hit_key(h.work.title, h.work.authors) for h in hits}
         extra: list[SearchHit] = []
-        for book in await self._hardcover.search_books(query, limit):
+        for book in books:
             if len(hits) + len(extra) >= limit or _hit_key(book.title, book.authors) in known:
                 continue
             known.add(_hit_key(book.title, book.authors))
