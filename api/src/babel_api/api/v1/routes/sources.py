@@ -15,7 +15,7 @@ from babel_api.api.dependencies import (
     run_source_scan,
 )
 from babel_api.api.v1.routes.library import LibraryItemResponse
-from babel_api.domain.sources import EntryStatus, Source, SourceDetail, SourceKind
+from babel_api.domain.sources import EntryStatus, FanficDetails, Source, SourceDetail, SourceKind
 from babel_api.services.sources import SLOW_KINDS
 
 router = APIRouter(prefix="/sources", tags=["sources"])
@@ -159,6 +159,52 @@ class SourceDetailResponse(BaseModel):
         )
 
 
+class FanficDetailsResponse(BaseModel):
+    """What AO3 says about a fanfiction."""
+
+    title: str
+    authors: list[str]
+    summary: str | None
+    rating: str | None
+    warnings: list[str]
+    categories: list[str]
+    fandoms: list[str]
+    relationships: list[str]
+    characters: list[str]
+    tags: list[str]
+    language: str | None
+    words: int | None
+    chapters: str | None = Field(description='Posted so far, "4/?" or "4/10"')
+    published: str | None
+    updated: str | None
+    kudos: int | None
+    hits: int | None
+    series: str | None
+
+    @classmethod
+    def of(cls, d: FanficDetails) -> "FanficDetailsResponse":
+        return cls(
+            title=d.title,
+            authors=list(d.authors),
+            summary=d.summary,
+            rating=d.rating,
+            warnings=list(d.warnings),
+            categories=list(d.categories),
+            fandoms=list(d.fandoms),
+            relationships=list(d.relationships),
+            characters=list(d.characters),
+            tags=list(d.tags),
+            language=d.language,
+            words=d.words,
+            chapters=d.chapters,
+            published=d.published,
+            updated=d.updated,
+            kudos=d.kudos,
+            hits=d.hits,
+            series=d.series,
+        )
+
+
 class CheckSourceResponse(BaseModel):
     books: int
 
@@ -295,6 +341,14 @@ async def scan_source(
         start_scan(container, background, user_id, source_id)
         return SourceDetailResponse.of(detail, True)
     return SourceDetailResponse.of(await sources.scan(user_id, source_id))
+
+
+@router.get("/{source_id}/entries/{entry_id}/details", operation_id="getFanficDetails")
+async def get_fanfic_details(
+    user_id: CurrentUserId, sources: SourceServiceDep, source_id: UUID, entry_id: UUID
+) -> FanficDetailsResponse:
+    """The summary, tags and numbers AO3 gives for a fanfiction of an AO3 source."""
+    return FanficDetailsResponse.of(await sources.fanfic_details(user_id, source_id, entry_id))
 
 
 @router.post(

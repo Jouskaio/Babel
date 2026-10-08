@@ -3815,7 +3815,7 @@ abstract class AppLocalizations {
   /// No description provided for @audiobooksNotLinked.
   ///
   /// In fr, this message translates to:
-  /// **'Liez d\'abord votre Audiobookshelf, dans Compte.'**
+  /// **'Pour ajouter des livres audio, liez d\'abord votre Audiobookshelf : son adresse et une clé d\'API (Audiobookshelf, Réglages, Utilisateurs). Ensuite, ses bibliothèques s\'affichent ici et chaque livre s\'ajoute à votre bibliothèque d\'un appui.'**
   String get audiobooksNotLinked;
 
   /// No description provided for @narratedBy.
@@ -4531,6 +4531,96 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Aucun livre de votre bibliothèque ne correspond.'**
   String get libraryNoMatch;
+
+  /// No description provided for @audiobooksLinkNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lier mon Audiobookshelf'**
+  String get audiobooksLinkNow;
+
+  /// No description provided for @fanficSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résumé'**
+  String get fanficSummary;
+
+  /// No description provided for @fanficFandoms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Univers'**
+  String get fanficFandoms;
+
+  /// No description provided for @fanficRelationships.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relations'**
+  String get fanficRelationships;
+
+  /// No description provided for @fanficCharacters.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personnages'**
+  String get fanficCharacters;
+
+  /// No description provided for @fanficTags.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étiquettes'**
+  String get fanficTags;
+
+  /// No description provided for @fanficWarnings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avertissements'**
+  String get fanficWarnings;
+
+  /// No description provided for @fanficWords.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} mots'**
+  String fanficWords(int count);
+
+  /// No description provided for @fanficKudos.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} kudos'**
+  String fanficKudos(int count);
+
+  /// No description provided for @fanficHits.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} vues'**
+  String fanficHits(int count);
+
+  /// No description provided for @fanficChapters.
+  ///
+  /// In fr, this message translates to:
+  /// **'{chapters} chapitres'**
+  String fanficChapters(String chapters);
+
+  /// No description provided for @fanficUpdated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mis à jour le {date}'**
+  String fanficUpdated(String date);
+
+  /// No description provided for @fanficPublished.
+  ///
+  /// In fr, this message translates to:
+  /// **'Publié le {date}'**
+  String fanficPublished(String date);
+
+  /// No description provided for @fanficOnAo3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir sur AO3'**
+  String get fanficOnAo3;
+
+  /// No description provided for @fanficUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'AO3 n\'a pas pu donner les détails de cette fanfiction (réservée aux membres, ou injoignable pour l\'instant).'**
+  String get fanficUnavailable;
 }
 
 class _AppLocalizationsDelegate

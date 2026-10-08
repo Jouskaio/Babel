@@ -80,6 +80,9 @@ class FakeAo3:
                 '<dt><a href="/works/4">Followed</a> by <a rel="author" href="/users/dan">dan</a>'
                 "</dt></dl></body></html>",
             )
+        if path == "/works/9":
+            self.pages_read = getattr(self, "pages_read", 0) + 1
+            return httpx.Response(200, text=WORK_PAGE)
         if path == "/works/1":
             return httpx.Response(
                 200,
@@ -89,6 +92,33 @@ class FakeAo3:
         if path == "/downloads/1/First.epub":
             return httpx.Response(200, content=b"epub bytes")
         return httpx.Response(404)
+
+
+WORK_PAGE = """<html><body><dl class="work meta group">
+<dt class="rating tags">Rating:</dt><dd class="rating tags"><ul class="commas"><li>
+<a class="tag" href="/tags/Teen">Teen And Up Audiences</a></li></ul></dd>
+<dt class="warning tags">Archive Warnings:</dt><dd class="warning tags"><ul class="commas"><li>
+<a class="tag" href="/tags/x">No Archive Warnings Apply</a></li></ul></dd>
+<dt class="category tags">Category:</dt><dd class="category tags"><ul class="commas"><li>
+<a class="tag" href="/tags/y">F/F</a></li></ul></dd>
+<dt class="fandom tags">Fandom:</dt><dd class="fandom tags"><ul class="commas"><li>
+<a class="tag" href="/tags/f">Arcane</a></li></ul></dd>
+<dt class="relationship tags">Relationships:</dt><dd class="relationship tags"><ul class="commas">
+<li><a class="tag" href="/tags/r">Vi/Caitlyn</a></li></ul></dd>
+<dt class="character tags">Characters:</dt><dd class="character tags"><ul class="commas">
+<li><a class="tag" href="/tags/c">Vi</a></li>
+<li><a class="tag" href="/tags/c2">Jinx</a></li></ul></dd>
+<dt class="freeform tags">Additional Tags:</dt><dd class="freeform tags"><ul class="commas">
+<li><a class="tag" href="/tags/t">Slow Burn</a></li></ul></dd>
+<dt class="language">Language:</dt><dd class="language">English</dd>
+<dd class="stats"><dl class="stats"><dt>Published:</dt><dd class="published">2026-09-01</dd>
+<dt>Updated:</dt><dd class="status">2026-10-05</dd><dt>Words:</dt><dd class="words">12,345</dd>
+<dt>Chapters:</dt><dd class="chapters">3/?</dd><dt>Kudos:</dt><dd class="kudos">1,204</dd>
+<dt>Hits:</dt><dd class="hits">20,001</dd></dl></dd></dl>
+<h2 class="title heading"> Arcane Nights </h2>
+<h3 class="byline heading"><a rel="author" href="/users/z">ittybittyzz</a></h3>
+<div class="summary module"><h3 class="heading">Summary:</h3>
+<blockquote class="userstuff"><p>Vi comes home.</p></blockquote></div></body></html>"""
 
 
 def connector(fake: FakeAo3) -> Ao3Connector:
@@ -209,3 +239,26 @@ def test_a_rate_limit_pauses_every_request() -> None:
     with pytest.raises(TimeoutError):
         asyncio.run(soon())
     assert fake.requests == []
+
+
+def test_a_fanfictions_page_gives_its_summary_tags_and_numbers() -> None:
+    fake = FakeAo3()
+    ao3 = connector(fake)
+    details = asyncio.run(ao3.details({}, None, "9"))
+    assert details.title == "Arcane Nights"
+    assert details.authors == ("ittybittyzz",)
+    assert details.summary == "Vi comes home."
+    assert details.rating == "Teen And Up Audiences"
+    assert details.warnings == ("No Archive Warnings Apply",)
+    assert details.categories == ("F/F",)
+    assert details.fandoms == ("Arcane",)
+    assert details.relationships == ("Vi/Caitlyn",)
+    assert details.characters == ("Vi", "Jinx")
+    assert details.tags == ("Slow Burn",)
+    assert details.words == 12345
+    assert details.chapters == "3/?"
+    assert (details.kudos, details.hits) == (1204, 20001)
+    assert (details.published, details.updated) == ("2026-09-01", "2026-10-05")
+    assert details.language == "English"
+    asyncio.run(ao3.details({}, None, "9"))
+    assert getattr(fake, "pages_read", 0) == 1  # the second reading came from the cache

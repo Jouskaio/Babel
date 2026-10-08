@@ -42,6 +42,7 @@ doc/DeviceResponse.md
 doc/EditionResponse.md
 doc/EntityKind.md
 doc/EntryStatus.md
+doc/FanficDetailsResponse.md
 doc/FeedEntryResponse.md
 doc/FeedKind.md
 doc/FinishedBookResponse.md
@@ -196,6 +197,7 @@ lib/model/device_response.dart
 lib/model/edition_response.dart
 lib/model/entity_kind.dart
 lib/model/entry_status.dart
+lib/model/fanfic_details_response.dart
 lib/model/feed_entry_response.dart
 lib/model/feed_kind.dart
 lib/model/finished_book_response.dart

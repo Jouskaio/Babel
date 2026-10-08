@@ -100,3 +100,27 @@ class SourceEntry:
 class SourceDetail:
     source: Source
     entries: list[SourceEntry] = field(default_factory=list[SourceEntry])
+
+
+@dataclass(frozen=True, slots=True)
+class FanficDetails:
+    """What an Archive of Our Own work page says about a fanfiction."""
+
+    title: str
+    authors: tuple[str, ...]
+    summary: str | None = None
+    rating: str | None = None
+    warnings: tuple[str, ...] = ()
+    categories: tuple[str, ...] = ()
+    fandoms: tuple[str, ...] = ()
+    relationships: tuple[str, ...] = ()
+    characters: tuple[str, ...] = ()
+    tags: tuple[str, ...] = ()
+    language: str | None = None
+    words: int | None = None
+    chapters: str | None = None
+    published: str | None = None
+    updated: str | None = None
+    kudos: int | None = None
+    hits: int | None = None
+    series: str | None = None

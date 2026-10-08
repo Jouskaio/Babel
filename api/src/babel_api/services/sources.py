@@ -5,7 +5,7 @@ import unicodedata
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
-from typing import Any, cast
+from typing import Any, Protocol, cast
 from uuid import UUID
 
 from babel_api.adapters.security.secrets import SecretBox
@@ -22,6 +22,7 @@ from babel_api.domain.files import LibraryItem
 from babel_api.domain.ports import FileRepository, SourceConnector, SourceRepository
 from babel_api.domain.sources import (
     EntryStatus,
+    FanficDetails,
     Source,
     SourceDetail,
     SourceEntry,
@@ -55,6 +56,12 @@ class BatchImport:
     remaining: int = 0
     # The source asked to slow down: the next call should wait a few minutes.
     paused: bool = False
+
+
+class Ao3Details(Protocol):
+    async def details(
+        self, config: dict[str, Any], token: str | None, work_id: str
+    ) -> FanficDetails: ...
 
 
 class SourceService:
@@ -261,6 +268,17 @@ class SourceService:
             await self._follow(kind, item, entry)
         except Exception:  # following is a bonus: it never fails the import
             logger.warning("Could not follow %s", entry.path, exc_info=True)
+
+    async def fanfic_details(self, user_id: UUID, source_id: UUID, entry_id: UUID) -> FanficDetails:
+        """What AO3 says about a fanfiction of an AO3 source."""
+        source = await self._own(user_id, source_id)
+        entry = await self._sources.get_entry(entry_id)
+        if entry is None or entry.source_id != source_id or source.kind is not SourceKind.AO3:
+            raise NotFoundError
+        connector = cast(Ao3Details, self._connectors[source.kind])
+        return await connector.details(
+            source.config, await self._token(source), entry.path.rsplit("/", 1)[-1]
+        )
 
     async def import_new(
         self, user_id: UUID, source_id: UUID, device_id: UUID | None = None

@@ -2286,7 +2286,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get audiobooksNotLinked =>
-      'Link your Audiobookshelf first, in Account.';
+      'To add audiobooks, link your Audiobookshelf first: its address and an API key (Audiobookshelf, Settings, Users). Its libraries then show here and each book is added to your library with a tap.';
 
   @override
   String narratedBy(String names) {
@@ -2760,4 +2760,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get libraryNoMatch => 'No book in your library matches.';
+
+  @override
+  String get audiobooksLinkNow => 'Link my Audiobookshelf';
+
+  @override
+  String get fanficSummary => 'Summary';
+
+  @override
+  String get fanficFandoms => 'Fandoms';
+
+  @override
+  String get fanficRelationships => 'Relationships';
+
+  @override
+  String get fanficCharacters => 'Characters';
+
+  @override
+  String get fanficTags => 'Tags';
+
+  @override
+  String get fanficWarnings => 'Warnings';
+
+  @override
+  String fanficWords(int count) {
+    return '$count words';
+  }
+
+  @override
+  String fanficKudos(int count) {
+    return '$count kudos';
+  }
+
+  @override
+  String fanficHits(int count) {
+    return '$count hits';
+  }
+
+  @override
+  String fanficChapters(String chapters) {
+    return '$chapters chapters';
+  }
+
+  @override
+  String fanficUpdated(String date) {
+    return 'Updated $date';
+  }
+
+  @override
+  String fanficPublished(String date) {
+    return 'Published $date';
+  }
+
+  @override
+  String get fanficOnAo3 => 'View on AO3';
+
+  @override
+  String get fanficUnavailable =>
+      'AO3 could not give the details of this fanfiction (members only, or unreachable for now).';
 }

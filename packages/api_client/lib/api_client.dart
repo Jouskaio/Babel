@@ -254,6 +254,8 @@ class ApiClient {
           return EntityKindTypeTransformer().decode(value);
         case 'EntryStatus':
           return EntryStatusTypeTransformer().decode(value);
+        case 'FanficDetailsResponse':
+          return FanficDetailsResponse.fromJson(value);
         case 'FeedEntryResponse':
           return FeedEntryResponse.fromJson(value);
         case 'FeedKind':

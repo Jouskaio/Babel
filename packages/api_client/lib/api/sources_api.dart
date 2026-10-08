@@ -193,6 +193,68 @@ class SourcesApi {
     }
   }
 
+  /// Get Fanfic Details
+  ///
+  /// The summary, tags and numbers AO3 gives for a fanfiction of an AO3 source.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] sourceId (required):
+  ///
+  /// * [String] entryId (required):
+  Future<Response> getFanficDetailsWithHttpInfo(String sourceId, String entryId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/sources/{source_id}/entries/{entry_id}/details'
+      .replaceAll('{source_id}', sourceId)
+      .replaceAll('{entry_id}', entryId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Fanfic Details
+  ///
+  /// The summary, tags and numbers AO3 gives for a fanfiction of an AO3 source.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] sourceId (required):
+  ///
+  /// * [String] entryId (required):
+  Future<FanficDetailsResponse?> getFanficDetails(String sourceId, String entryId,) async {
+    final response = await getFanficDetailsWithHttpInfo(sourceId, entryId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'FanficDetailsResponse',) as FanficDetailsResponse;
+    
+    }
+    return null;
+  }
+
   /// Get Source
   ///
   /// The source and the books found by its last scan.

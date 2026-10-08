@@ -17,6 +17,14 @@ final sourceDetailProvider = FutureProvider.autoDispose
       (ref, id) async => (await ref.watch(sourcesApiProvider).getSource(id))!,
     );
 
+/// What AO3 says about a fanfiction of an AO3 source (null when it cannot say).
+final fanficDetailsProvider = FutureProvider.autoDispose
+    .family<FanficDetailsResponse?, ({String sourceId, String entryId})>(
+      (ref, args) => ref
+          .watch(sourcesApiProvider)
+          .getFanficDetails(args.sourceId, args.entryId),
+    );
+
 /// Why a source request failed, in the reader's words.
 String sourceError(BuildContext context, Object error, {SourceKind? kind}) {
   final l10n = context.l10n;

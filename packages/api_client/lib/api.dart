@@ -78,6 +78,7 @@ part 'model/device_response.dart';
 part 'model/edition_response.dart';
 part 'model/entity_kind.dart';
 part 'model/entry_status.dart';
+part 'model/fanfic_details_response.dart';
 part 'model/feed_entry_response.dart';
 part 'model/feed_kind.dart';
 part 'model/finished_book_response.dart';

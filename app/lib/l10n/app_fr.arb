@@ -1333,7 +1333,7 @@
     }
   },
   "audiobooksEmpty": "Aucun livre audio ici.",
-  "audiobooksNotLinked": "Liez d'abord votre Audiobookshelf, dans Compte.",
+  "audiobooksNotLinked": "Pour ajouter des livres audio, liez d'abord votre Audiobookshelf : son adresse et une clé d'API (Audiobookshelf, Réglages, Utilisateurs). Ensuite, ses bibliothèques s'affichent ici et chaque livre s'ajoute à votre bibliothèque d'un appui.",
   "narratedBy": "Lu par {names}",
   "@narratedBy": {
     "placeholders": {
@@ -1669,5 +1669,62 @@
     }
   },
   "librarySearchHint": "Chercher dans ma bibliothèque",
-  "libraryNoMatch": "Aucun livre de votre bibliothèque ne correspond."
+  "libraryNoMatch": "Aucun livre de votre bibliothèque ne correspond.",
+  "audiobooksLinkNow": "Lier mon Audiobookshelf",
+  "fanficSummary": "Résumé",
+  "fanficFandoms": "Univers",
+  "fanficRelationships": "Relations",
+  "fanficCharacters": "Personnages",
+  "fanficTags": "Étiquettes",
+  "fanficWarnings": "Avertissements",
+  "fanficWords": "{count} mots",
+  "@fanficWords": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fanficKudos": "{count} kudos",
+  "@fanficKudos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fanficHits": "{count} vues",
+  "@fanficHits": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fanficChapters": "{chapters} chapitres",
+  "@fanficChapters": {
+    "placeholders": {
+      "chapters": {
+        "type": "String"
+      }
+    }
+  },
+  "fanficUpdated": "Mis à jour le {date}",
+  "@fanficUpdated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "fanficPublished": "Publié le {date}",
+  "@fanficPublished": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "fanficOnAo3": "Voir sur AO3",
+  "fanficUnavailable": "AO3 n'a pas pu donner les détails de cette fanfiction (réservée aux membres, ou injoignable pour l'instant)."
 }
