@@ -7,6 +7,7 @@ has the file, Babel asks Kavita to scan so the book soon shows up in the reader'
 
 import logging
 from collections.abc import Awaitable, Callable
+from dataclasses import replace
 from datetime import UTC, datetime
 from urllib.parse import urlsplit
 from uuid import UUID
@@ -135,7 +136,8 @@ class RequestService:
         await self._requests.commit()
 
     async def list(self, user_id: UUID) -> list[BookRequest]:
-        """The reader's requests; those still waiting are checked with Chaptarr first."""
+        """The reader's requests; those still waiting are checked with Chaptarr first, and show
+        how far their download has come."""
         items = await self._requests.list_for(user_id)
         waiting = [
             r for r in items if r.status is RequestStatus.REQUESTED and r.chaptarr_id is not None
@@ -144,6 +146,7 @@ class RequestService:
         if client is None:
             return items
         arrived = False
+        progress: dict[int, float] = {}
         try:
             for request in waiting:
                 if request.chaptarr_id is not None and await client.has_files(request.chaptarr_id):
@@ -151,18 +154,24 @@ class RequestService:
                         user_id, request.work_id, RequestStatus.AVAILABLE, request.chaptarr_id
                     )
                     arrived = True
+            progress = await client.queue_progress()
         except ChaptarrError:
             log.warning("Chaptarr did not answer while checking requests")
         finally:
             await client.aclose()
-        if not arrived:
-            return items
-        await self._requests.commit()
-        try:
-            await self._scan()
-        except Exception:  # best effort: Kavita also scans on its own schedule
-            log.warning("Could not ask Kavita to scan", exc_info=True)
-        return await self._requests.list_for(user_id)
+        if arrived:
+            await self._requests.commit()
+            try:
+                await self._scan()
+            except Exception:  # best effort: Kavita also scans on its own schedule
+                log.warning("Could not ask Kavita to scan", exc_info=True)
+            items = await self._requests.list_for(user_id)
+        return [
+            replace(r, progress=progress.get(r.chaptarr_id))
+            if r.status is RequestStatus.REQUESTED and r.chaptarr_id is not None
+            else r
+            for r in items
+        ]
 
     async def status_of(self, user_id: UUID, work_id: UUID) -> BookRequest:
         for request in await self.list(user_id):

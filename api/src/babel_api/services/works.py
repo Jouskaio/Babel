@@ -21,6 +21,9 @@ EDITIONS_TTL = timedelta(days=7)
 MAX_EDITIONS = 50
 # Works asked of the catalog when rebuilding a saga.
 MAX_SAGA = 100
+# Open Library can take 20 seconds to answer a search; Hardcover answers in about one. The
+# search does not wait longer than this for Open Library when Hardcover has answered.
+OPEN_LIBRARY_PATIENCE = 6.0
 # Works only Hardcover knows are keyed "hc:<id>" in the Open Library id column.
 HARDCOVER_PREFIX = "hc:"
 # A description this long is a real blurb; shorter ones are completed from Google Books.
@@ -103,7 +106,7 @@ class WorkService:
         """Open Library's matches, completed with Hardcover's. The two are asked together, and
         one being down is no reason to answer nothing: the search fails only when both fail."""
         asked = asyncio.gather(
-            self._source.search(query, limit, language),
+            self._open_library(query, limit, language),
             self._hardcover_books(query, limit),
             return_exceptions=True,
         )
@@ -129,8 +132,16 @@ class WorkService:
         await self._repo.commit()
         return hits
 
+    async def _open_library(self, query: str, limit: int, language: str | None) -> list[SourceWork]:
+        # Open Library refuses a query of fewer than 3 characters (422): do not even ask.
+        if len(query.strip()) < 3:
+            return []
+        return await asyncio.wait_for(
+            self._source.search(query, limit, language), OPEN_LIBRARY_PATIENCE
+        )
+
     async def _hardcover_books(self, query: str, limit: int) -> list[HardcoverBook]:
-        if self._hardcover is None or len(query.strip()) < 3:
+        if self._hardcover is None or len(query.strip()) < 2:
             return []
         return await self._hardcover.search_books(query, limit)
 

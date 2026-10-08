@@ -14,11 +14,15 @@ class BookRequestResponse {
   /// Returns a new [BookRequestResponse] instance.
   BookRequestResponse({
     required this.createdAt,
+    this.progress,
     required this.status,
     required this.workId,
   });
 
   DateTime createdAt;
+
+  /// Percent downloaded while it runs; null before it starts
+  num? progress;
 
   RequestStatus status;
 
@@ -27,6 +31,7 @@ class BookRequestResponse {
   @override
   bool operator ==(Object other) => identical(this, other) || other is BookRequestResponse &&
     other.createdAt == createdAt &&
+    other.progress == progress &&
     other.status == status &&
     other.workId == workId;
 
@@ -34,15 +39,21 @@ class BookRequestResponse {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (createdAt.hashCode) +
+    (progress == null ? 0 : progress!.hashCode) +
     (status.hashCode) +
     (workId.hashCode);
 
   @override
-  String toString() => 'BookRequestResponse[createdAt=$createdAt, status=$status, workId=$workId]';
+  String toString() => 'BookRequestResponse[createdAt=$createdAt, progress=$progress, status=$status, workId=$workId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    if (this.progress != null) {
+      json[r'progress'] = this.progress;
+    } else {
+      json[r'progress'] = null;
+    }
       json[r'status'] = this.status;
       json[r'work_id'] = this.workId;
     return json;
@@ -68,6 +79,9 @@ class BookRequestResponse {
 
       return BookRequestResponse(
         createdAt: mapDateTime(json, r'created_at', r'')!,
+        progress: json[r'progress'] == null
+            ? null
+            : num.parse('${json[r'progress']}'),
         status: RequestStatus.fromJson(json[r'status'])!,
         workId: mapValueOfType<String>(json, r'work_id')!,
       );

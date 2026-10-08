@@ -631,6 +631,18 @@
             "title": "Created At",
             "type": "string"
           },
+          "progress": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Percent downloaded while it runs; null before it starts",
+            "title": "Progress"
+          },
           "status": {
             "$ref": "#/components/schemas/RequestStatus"
           },

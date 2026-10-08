@@ -308,6 +308,7 @@ class FakeChaptarr:
         self.added: list[dict[str, object]] = []
         self.arrived = False
         self.scans = 0
+        self.downloading: dict[int, float] = {}
 
     def __call__(self) -> "FakeChaptarr":
         return self
@@ -323,6 +324,9 @@ class FakeChaptarr:
 
     async def has_files(self, book_id: int) -> bool:
         return self.arrived
+
+    async def queue_progress(self) -> dict[int, float]:
+        return self.downloading
 
     async def aclose(self) -> None:
         return None
@@ -407,6 +411,11 @@ def test_a_request_becomes_available_when_the_files_arrive(
     (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=admin).json()
     client.post("/v1/requests", json={"work_id": hit["id"]}, headers=admin)
     assert client.get("/v1/requests", headers=admin).json()["items"][0]["status"] == "requested"
+
+    chaptarr.downloading = {7: 42.5}  # Chaptarr's book 7 is being downloaded
+    running = client.get("/v1/requests", headers=admin).json()["items"][0]
+    assert running["status"] == "requested"
+    assert running["progress"] == 42.5
 
     chaptarr.arrived = True
     assert client.get("/v1/requests", headers=admin).json()["items"][0]["status"] == "available"
@@ -734,9 +743,13 @@ def test_the_search_adds_what_hardcover_knows_and_the_catalog_lacks(
     assert opened.status_code == 200
     assert len(books.calls) == before
 
-    # Too short a query is not worth a request to Hardcover.
-    client.get("/v1/catalog/search", params={"q": "ja"}, headers=auth)
+    # A one-letter query is not worth a request to Hardcover; two letters are (Open Library
+    # refuses them, so only Hardcover is asked: "oz").
+    client.get("/v1/catalog/search", params={"q": "j"}, headers=auth)
     assert fake.asked == ["jane"]
+    short = client.get("/v1/catalog/search", params={"q": "oz"}, headers=auth)
+    assert short.status_code == 200
+    assert fake.asked == ["jane", "oz"]
 
 
 def test_the_search_still_answers_when_open_library_is_down(
@@ -840,3 +853,51 @@ def test_a_chaptarr_that_does_not_answer_properly_is_not_linked(
         client.put("/v1/me/chaptarr", json=odd, headers=auth).json()["detail"] == "chaptarr:address"
     )
     assert client.get("/v1/me/chaptarr", headers=auth).json()["linked"] is False
+
+
+def test_the_search_does_not_wait_for_a_slow_open_library(
+    app: FastAPI, client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    import asyncio
+    import time
+
+    from babel_api.services import works as service
+
+    fake = FakeHardcoverSearch(
+        [HardcoverBook(9, "Le dragon renégat", ("Sophie Audouin",), 2004, None)]
+    )
+    app.state.container = replace(app.state.container, hardcover=fake)
+
+    async def slow_search(query: str, limit: int, language: str | None = None) -> list[SourceWork]:
+        await asyncio.sleep(5)
+        return [JANE]
+
+    books.search = slow_search  # type: ignore[method-assign]
+    patience = service.OPEN_LIBRARY_PATIENCE
+    service.OPEN_LIBRARY_PATIENCE = 0.2
+    try:
+        started = time.monotonic()
+        hits = client.get("/v1/catalog/search", params={"q": "dragon"}, headers=auth).json()
+        took = time.monotonic() - started
+    finally:
+        service.OPEN_LIBRARY_PATIENCE = patience
+    assert [h["title"] for h in hits] == ["Le dragon renégat"]
+    assert took < 3  # Open Library's 5 seconds were not waited for
+
+
+def test_an_address_without_chaptarr_api_is_not_a_chaptarr() -> None:
+    import asyncio
+
+    import httpx
+
+    from babel_api.adapters.chaptarr import ChaptarrClient
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(404)
+
+    client = ChaptarrClient(
+        "https://example.com", "k", httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    )
+    with pytest.raises(ChaptarrError) as refused:
+        asyncio.run(client.check())
+    assert refused.value.reason == "not_chaptarr"

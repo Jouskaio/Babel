@@ -1645,5 +1645,13 @@
   "chaptarrWrongKey": "Chaptarr a refusé la clé d'API.",
   "chaptarrNotChaptarr": "Cette adresse ne répond pas comme un Chaptarr.",
   "chaptarrBadAddress": "Adresse ou clé invalide : l'adresse doit commencer par http:// ou https://.",
-  "chaptarrUnreachable": "Babel n'a pas pu joindre ce Chaptarr. L'adresse doit être joignable depuis internet."
+  "chaptarrUnreachable": "Babel n'a pas pu joindre ce Chaptarr. L'adresse doit être joignable depuis internet.",
+  "requestDownloading": "Téléchargement : {percent} %",
+  "@requestDownloading": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  }
 }

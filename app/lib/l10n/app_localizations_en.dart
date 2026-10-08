@@ -2744,4 +2744,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get chaptarrUnreachable =>
       'Babel could not reach this Chaptarr. The address must be reachable from the internet.';
+
+  @override
+  String requestDownloading(int percent) {
+    return 'Downloading: $percent%';
+  }
 }
