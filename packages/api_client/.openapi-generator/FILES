@@ -28,6 +28,8 @@ doc/CatalogApi.md
 doc/ChangeOp.md
 doc/ChangePasswordRequest.md
 doc/ChangeResponse.md
+doc/ChaptarrLinkRequest.md
+doc/ChaptarrLinkResponse.md
 doc/CheckSourceResponse.md
 doc/CommentRequest.md
 doc/CommentResponse.md
@@ -180,6 +182,8 @@ lib/model/book_trace_response.dart
 lib/model/change_op.dart
 lib/model/change_password_request.dart
 lib/model/change_response.dart
+lib/model/chaptarr_link_request.dart
+lib/model/chaptarr_link_response.dart
 lib/model/check_source_response.dart
 lib/model/comment_request.dart
 lib/model/comment_response.dart

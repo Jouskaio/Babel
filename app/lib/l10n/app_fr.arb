@@ -1622,7 +1622,28 @@
   "requestAvailable": "Téléchargé : il apparaît ici après le prochain scan.",
   "requestNotFound": "Introuvable pour l'instant.",
   "requestFailed": "La demande n'a pas pu partir. Réessayez plus tard.",
-  "addSourceHint": "Ce livre n'est dans aucune de vos sources. Ajoutez-en une (Kavita, WebDAV, GitHub…) pour le retrouver ici.",
+  "addSourceHint": "Ce livre n'est dans aucune de vos sources. Ajoutez-en une (Kavita, WebDAV, GitHub…) pour le retrouver ici, ou liez votre Chaptarr dans Compte pour pouvoir le demander.",
   "sourceScanning": "Scan en cours… un gros compte peut prendre plusieurs minutes.",
-  "sagaOpenKnown": "Pas dans le catalogue : ouvrez-le pour le chercher dans vos sources ou le demander."
+  "sagaOpenKnown": "Pas dans le catalogue : ouvrez-le pour le chercher dans vos sources ou le demander.",
+  "chaptarrTitle": "Mon Chaptarr",
+  "chaptarrHint": "Si vous avez votre propre Chaptarr, liez-le : les livres que vous demandez depuis Babel y seront cherchés et téléchargés. Adresse et clé d'API sont dans Chaptarr, Réglages, Général.",
+  "chaptarrHintServer": "Sans Chaptarr à vous, les demandes passent par celui du serveur (réservé aux comptes premium). Avec le vôtre, vous pouvez demander sans être premium : adresse et clé d'API sont dans Chaptarr, Réglages, Général.",
+  "chaptarrUrl": "Adresse de votre Chaptarr",
+  "chaptarrKey": "Clé d'API",
+  "chaptarrKeyHelp": "Gardée chiffrée sur le serveur, jamais affichée.",
+  "chaptarrLink": "Lier mon Chaptarr",
+  "chaptarrUnlink": "Délier mon Chaptarr",
+  "chaptarrLinked": "Lié : {url}",
+  "@chaptarrLinked": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "chaptarrLinkedHint": "Vos demandes de livres partent chez vous.",
+  "chaptarrWrongKey": "Chaptarr a refusé la clé d'API.",
+  "chaptarrNotChaptarr": "Cette adresse ne répond pas comme un Chaptarr.",
+  "chaptarrBadAddress": "Adresse ou clé invalide : l'adresse doit commencer par http:// ou https://.",
+  "chaptarrUnreachable": "Babel n'a pas pu joindre ce Chaptarr. L'adresse doit être joignable depuis internet."
 }

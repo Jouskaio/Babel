@@ -31,6 +31,7 @@ from babel_api.adapters.security.passwords import Argon2PasswordHasher
 from babel_api.adapters.security.secrets import SecretBox
 from babel_api.adapters.security.tokens import AccessTokenError, AccessTokenIssuer
 from babel_api.adapters.sources.ao3 import Ao3Connector
+from babel_api.adapters.sources.http import guarded_client
 from babel_api.adapters.sources.links import LinkFetcher
 from babel_api.core.config import Settings
 from babel_api.domain.ports import (
@@ -87,6 +88,8 @@ class Container:
     abs_client: Callable[[str], AbsClient]
     chaptarr: Callable[[], ChaptarrClient] | None = None
     hardcover: HardcoverClient | None = None
+    # How a reader's own Chaptarr is reached (tests replace it); None: with the address guard.
+    chaptarr_for_reader: Callable[[str, str], ChaptarrClient] | None = None
     # Sources being scanned in the background (a slow connector such as AO3).
     scanning: set[UUID] = field(default_factory=set[UUID])
 
@@ -352,11 +355,20 @@ def make_request_service(container: Container, session: AsyncSession) -> Request
         finally:
             await client.aclose()
 
+    allowed = tuple(settings.source_allowed_hosts)
+
+    def reader_chaptarr(url: str, key: str) -> ChaptarrClient:
+        # A reader's address is checked on every request, redirects included: it cannot be
+        # used to reach the server's own network (unless the operator allows the host).
+        return ChaptarrClient(url, key, guarded_client(allowed))
+
     return RequestService(
         SqlRequestRepository(session),
         SqlUserRepository(session),
         WorkService(SqlCatalogRepository(session), container.books),
         container.chaptarr,
+        container.chaptarr_for_reader or reader_chaptarr,
+        container.secrets,
         scan_library,
     )
 

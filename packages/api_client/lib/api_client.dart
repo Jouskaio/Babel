@@ -226,6 +226,10 @@ class ApiClient {
           return ChangePasswordRequest.fromJson(value);
         case 'ChangeResponse':
           return ChangeResponse.fromJson(value);
+        case 'ChaptarrLinkRequest':
+          return ChaptarrLinkRequest.fromJson(value);
+        case 'ChaptarrLinkResponse':
+          return ChaptarrLinkResponse.fromJson(value);
         case 'CheckSourceResponse':
           return CheckSourceResponse.fromJson(value);
         case 'CommentRequest':

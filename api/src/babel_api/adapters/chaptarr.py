@@ -87,9 +87,14 @@ class ChaptarrClient:
             )
         except httpx.HTTPError as error:
             raise ChaptarrError("unreachable") from error
+        if response.status_code in (401, 403):
+            raise ChaptarrError("unauthorized")
         if response.status_code >= 400:
             raise ChaptarrError(f"status {response.status_code}")
-        return response.json()
+        try:
+            return response.json()
+        except ValueError as error:  # an address that answers, but is not Chaptarr's API
+            raise ChaptarrError("not_chaptarr") from error
 
     async def lookup(self, title: str, authors: tuple[str, ...]) -> dict[str, Any] | None:
         """Searches the title alone first (adding the author buries the novel under books about
@@ -148,6 +153,12 @@ class ChaptarrClient:
         )
         await self._call("POST", "command", json={"name": "BookSearch", "bookIds": [book_id]})
         return book_id
+
+    async def check(self) -> None:
+        """The address is a Chaptarr and the key is accepted; [ChaptarrError] otherwise."""
+        status = cast(dict[str, Any], await self._call("GET", "system/status"))
+        if "chaptarr" not in str(status.get("appName", "")).lower():
+            raise ChaptarrError("not_chaptarr")
 
     async def has_files(self, book_id: int) -> bool:
         book = cast(dict[str, Any], await self._call("GET", f"book/{book_id}"))

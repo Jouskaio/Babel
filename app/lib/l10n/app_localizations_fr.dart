@@ -2707,7 +2707,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get addSourceHint =>
-      'Ce livre n\'est dans aucune de vos sources. Ajoutez-en une (Kavita, WebDAV, GitHub…) pour le retrouver ici.';
+      'Ce livre n\'est dans aucune de vos sources. Ajoutez-en une (Kavita, WebDAV, GitHub…) pour le retrouver ici, ou liez votre Chaptarr dans Compte pour pouvoir le demander.';
 
   @override
   String get sourceScanning =>
@@ -2716,4 +2716,54 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get sagaOpenKnown =>
       'Pas dans le catalogue : ouvrez-le pour le chercher dans vos sources ou le demander.';
+
+  @override
+  String get chaptarrTitle => 'Mon Chaptarr';
+
+  @override
+  String get chaptarrHint =>
+      'Si vous avez votre propre Chaptarr, liez-le : les livres que vous demandez depuis Babel y seront cherchés et téléchargés. Adresse et clé d\'API sont dans Chaptarr, Réglages, Général.';
+
+  @override
+  String get chaptarrHintServer =>
+      'Sans Chaptarr à vous, les demandes passent par celui du serveur (réservé aux comptes premium). Avec le vôtre, vous pouvez demander sans être premium : adresse et clé d\'API sont dans Chaptarr, Réglages, Général.';
+
+  @override
+  String get chaptarrUrl => 'Adresse de votre Chaptarr';
+
+  @override
+  String get chaptarrKey => 'Clé d\'API';
+
+  @override
+  String get chaptarrKeyHelp =>
+      'Gardée chiffrée sur le serveur, jamais affichée.';
+
+  @override
+  String get chaptarrLink => 'Lier mon Chaptarr';
+
+  @override
+  String get chaptarrUnlink => 'Délier mon Chaptarr';
+
+  @override
+  String chaptarrLinked(String url) {
+    return 'Lié : $url';
+  }
+
+  @override
+  String get chaptarrLinkedHint => 'Vos demandes de livres partent chez vous.';
+
+  @override
+  String get chaptarrWrongKey => 'Chaptarr a refusé la clé d\'API.';
+
+  @override
+  String get chaptarrNotChaptarr =>
+      'Cette adresse ne répond pas comme un Chaptarr.';
+
+  @override
+  String get chaptarrBadAddress =>
+      'Adresse ou clé invalide : l\'adresse doit commencer par http:// ou https://.';
+
+  @override
+  String get chaptarrUnreachable =>
+      'Babel n\'a pas pu joindre ce Chaptarr. L\'adresse doit être joignable depuis internet.';
 }

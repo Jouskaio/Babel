@@ -815,6 +815,62 @@
         "title": "ChangeResponse",
         "type": "object"
       },
+      "ChaptarrLinkRequest": {
+        "properties": {
+          "api_key": {
+            "description": "Settings > General",
+            "maxLength": 200,
+            "minLength": 8,
+            "title": "Api Key",
+            "type": "string"
+          },
+          "base_url": {
+            "description": "Its address",
+            "maxLength": 500,
+            "minLength": 8,
+            "title": "Base Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "base_url",
+          "api_key"
+        ],
+        "title": "ChaptarrLinkRequest",
+        "type": "object"
+      },
+      "ChaptarrLinkResponse": {
+        "properties": {
+          "base_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Url"
+          },
+          "linked": {
+            "description": "You linked your own Chaptarr: your requests go there",
+            "title": "Linked",
+            "type": "boolean"
+          },
+          "server_offers": {
+            "description": "The server has a Chaptarr of its own, for premium readers",
+            "title": "Server Offers",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "linked",
+          "base_url",
+          "server_offers"
+        ],
+        "title": "ChaptarrLinkResponse",
+        "type": "object"
+      },
       "CheckSourceResponse": {
         "properties": {
           "books": {
@@ -8248,6 +8304,96 @@
         "summary": "Link",
         "tags": [
           "audiobooks"
+        ]
+      }
+    },
+    "/v1/me/chaptarr": {
+      "delete": {
+        "description": "Forget your Chaptarr; the books already requested stay as they are.",
+        "operationId": "unlinkChaptarr",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unlink Chaptarr",
+        "tags": [
+          "requests"
+        ]
+      },
+      "get": {
+        "description": "Whether you linked your own Chaptarr (its key is never given back).",
+        "operationId": "getChaptarrLink",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChaptarrLinkResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Chaptarr Link",
+        "tags": [
+          "requests"
+        ]
+      },
+      "put": {
+        "description": "Link your own Chaptarr: its address and API key are checked, then kept (the key\nencrypted). Your book requests then go to it.",
+        "operationId": "linkChaptarr",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChaptarrLinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChaptarrLinkResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Link Chaptarr",
+        "tags": [
+          "requests"
         ]
       }
     },
