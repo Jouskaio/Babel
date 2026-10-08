@@ -19,6 +19,7 @@ def _to_request(row: BookRequestRow) -> BookRequest:
         status=RequestStatus(row.status),
         created_at=created,
         chaptarr_id=row.chaptarr_id,
+        language=row.language,
     )
 
 
@@ -26,10 +27,12 @@ class SqlRequestRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def get(self, user_id: UUID, work_id: UUID) -> BookRequest | None:
+    async def get(self, user_id: UUID, work_id: UUID, language: str = "") -> BookRequest | None:
         row = await self._session.scalar(
             select(BookRequestRow).where(
-                BookRequestRow.user_id == user_id, BookRequestRow.work_id == work_id
+                BookRequestRow.user_id == user_id,
+                BookRequestRow.work_id == work_id,
+                BookRequestRow.language == language,
             )
         )
         return _to_request(row) if row else None
@@ -43,12 +46,19 @@ class SqlRequestRepository:
         return [_to_request(r) for r in rows]
 
     async def save(
-        self, user_id: UUID, work_id: UUID, status: RequestStatus, chaptarr_id: int | None
+        self,
+        user_id: UUID,
+        work_id: UUID,
+        status: RequestStatus,
+        chaptarr_id: int | None,
+        language: str = "",
     ) -> BookRequest:
         """Creates the request, or updates its status."""
         row = await self._session.scalar(
             select(BookRequestRow).where(
-                BookRequestRow.user_id == user_id, BookRequestRow.work_id == work_id
+                BookRequestRow.user_id == user_id,
+                BookRequestRow.work_id == work_id,
+                BookRequestRow.language == language,
             )
         )
         if row is None:
@@ -57,6 +67,7 @@ class SqlRequestRepository:
                 work_id=work_id,
                 status=status.value,
                 chaptarr_id=chaptarr_id,
+                language=language,
                 created_at=datetime.now(UTC),
             )
             self._session.add(row)

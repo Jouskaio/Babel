@@ -4022,6 +4022,24 @@ abstract class AppLocalizations {
   /// **'Couverture'**
   String get detailsCover;
 
+  /// No description provided for @coverUpload.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer ma propre image'**
+  String get coverUpload;
+
+  /// No description provided for @coverInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Image invalide (JPEG, PNG ou WebP, 5 Mo maximum).'**
+  String get coverInvalid;
+
+  /// No description provided for @requestAnyLanguage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes langues'**
+  String get requestAnyLanguage;
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

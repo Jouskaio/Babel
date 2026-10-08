@@ -2410,6 +2410,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailsCover => 'Cover';
 
   @override
+  String get coverUpload => 'Use my own picture';
+
+  @override
+  String get coverInvalid =>
+      'Invalid picture (JPEG, PNG or WebP, 5 MB at most).';
+
+  @override
+  String get requestAnyLanguage => 'Any language';
+
+  @override
   String get coverDefault => 'Default';
 
   @override

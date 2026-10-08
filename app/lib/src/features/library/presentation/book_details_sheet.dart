@@ -1,6 +1,8 @@
 import 'package:babel_api_client/api.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' show MultipartFile;
 
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
@@ -105,6 +107,48 @@ class _BookDetailsSheetState extends ConsumerState<_BookDetailsSheet> {
     }
   }
 
+  /// Uses a picture from this device as the cover; saved at once, like a catalog cover is
+  /// not (that one waits for Save).
+  Future<void> _upload() async {
+    final l10n = context.l10n;
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final picked = await FilePicker.pickFiles(type: FileType.image);
+    if (picked.isEmpty || !mounted) return;
+    final file = picked.first;
+    setState(() => _saving = true);
+    try {
+      final updated = await ref
+          .read(libraryApiProvider)
+          .uploadBookCover(
+            widget.item.id,
+            MultipartFile.fromBytes(
+              'file',
+              await file.xFile.readAsBytes(),
+              filename: file.name,
+            ),
+          );
+      if (updated != null) {
+        await ref.read(libraryControllerProvider.notifier).keep(updated);
+      }
+      navigator.pop();
+      messenger.showSnackBar(SnackBar(content: Text(l10n.detailsSaved)));
+    } on ApiException catch (error) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            error.code == 400 || error.code == 413
+                ? l10n.coverInvalid
+                : error.innerException != null
+                ? l10n.errorNetwork
+                : l10n.errorGeneric,
+          ),
+        ),
+      );
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -197,7 +241,13 @@ class _BookDetailsSheetState extends ConsumerState<_BookDetailsSheet> {
                     ],
                   ),
                 ),
-              const SizedBox(height: 22),
+              const SizedBox(height: 10),
+              TextButton.icon(
+                onPressed: _saving ? null : _upload,
+                icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
+                label: Text(l10n.coverUpload, style: BabelText.body(14)),
+              ),
+              const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerRight,
                 child: PillButton(

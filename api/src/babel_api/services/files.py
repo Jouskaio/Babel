@@ -1,5 +1,6 @@
 """Importing, downloading and withdrawing book files (ADR 0010)."""
 
+import hashlib
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -17,7 +18,7 @@ from babel_api.domain.errors import (
     NotFoundError,
     UnsupportedFileError,
 )
-from babel_api.domain.files import BookFormat, LibraryItem, ReadingState, StoredFile
+from babel_api.domain.files import BookFormat, Cover, LibraryItem, ReadingState, StoredFile
 from babel_api.domain.ports import (
     BlobStore,
     CatalogRepository,
@@ -28,6 +29,18 @@ from babel_api.domain.ports import (
 )
 from babel_api.domain.series import guess_series
 from babel_api.domain.sync import ChangeOp, EntityKind
+
+
+def _image_type(content: bytes) -> str | None:
+    """The media type of a JPEG, PNG or WebP picture, from its first bytes."""
+    if content.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+    if content.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if content[:4] == b"RIFF" and content[8:12] == b"WEBP":
+        return "image/webp"
+    return None
+
 
 FileAccess = Literal["everyone", "entitled"]
 
@@ -351,7 +364,25 @@ class FileService:
         if "cover_id" in changes:
             cover = changes["cover_id"]
             values["cover_id"] = int(cover) if cover else None
+            values["custom_cover"] = None  # the last choice wins
         updated = await self._files.update_details(item.id, values) if values else item
+        await self._record(updated, device_id)
+        return updated
+
+    async def set_cover_image(
+        self, user_id: UUID, item_id: UUID, content: bytes, device_id: UUID | None = None
+    ) -> LibraryItem:
+        """The reader uploads their own picture as a book's cover (JPEG, PNG or WebP)."""
+        item = await self._own(user_id, item_id)
+        media_type = _image_type(content)
+        if media_type is None:
+            raise InvalidBookDetailsError
+        # Served without signing in, like file covers: the name cannot be guessed.
+        key = hashlib.sha256(f"custom:{user_id}:{hashlib.sha256(content).hexdigest()}".encode())
+        self._covers.put(key.hexdigest(), Cover(content, media_type))
+        updated = await self._files.update_details(
+            item.id, {"custom_cover": key.hexdigest(), "cover_id": None}
+        )
         await self._record(updated, device_id)
         return updated
 

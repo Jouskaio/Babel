@@ -29,6 +29,7 @@ router = APIRouter(tags=["library"])
 Sha256 = Annotated[str, Path(pattern=r"^[0-9a-f]{64}$")]
 _CHUNK = 1024 * 1024
 _CSV_MAX = 2 * 1024 * 1024
+_COVER_MAX = 5 * 1024 * 1024
 
 
 class LibraryItemResponse(BaseModel):
@@ -179,6 +180,21 @@ async def update_details(
     """Correct a book's title, authors, series, volume number or cover."""
     changes = {name: getattr(body, name) for name in body.model_fields_set}
     return LibraryItemResponse.of(await files.update_details(user_id, item_id, changes, device_id))
+
+
+@router.put("/library/{item_id}/cover", operation_id="uploadBookCover")
+async def upload_cover(
+    user_id: CurrentUserId,
+    files: FileServiceDep,
+    item_id: UUID,
+    file: Annotated[UploadFile, File()],
+    device_id: DeviceHeader = None,
+) -> LibraryItemResponse:
+    """Use your own picture (JPEG, PNG or WebP, up to 5 MB) as a book's cover."""
+    content = await file.read(_COVER_MAX + 1)
+    if len(content) > _COVER_MAX:
+        raise FileTooLargeError
+    return LibraryItemResponse.of(await files.set_cover_image(user_id, item_id, content, device_id))
 
 
 class CsvImportResponse(BaseModel):
