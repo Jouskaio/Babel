@@ -26,6 +26,11 @@ _NEW_CHAPTERS = {
     "fr": ("Nouveau chapitre", "{title} · {chapters} chapitres"),
     "en": ("New chapter", "{title} · {chapters} chapters"),
 }
+# Several chapters posted at once: one notification that says how many.
+_SEVERAL_CHAPTERS = {
+    "fr": ("Nouveaux chapitres", "{title} · +{added} chapitres ({chapters} au total)"),
+    "en": ("New chapters", "{title} · +{added} chapters ({chapters} in all)"),
+}
 
 
 _SCANNED = {
@@ -59,12 +64,16 @@ class Notifier:
         return await self._send(user_id, heading, body.format(name=name, title=title or ""), data)
 
     async def new_chapters(
-        self, user_id: UUID, item_id: UUID, title: str, chapters: str | None
+        self, user_id: UUID, item_id: UUID, title: str, chapters: str | None, added: int = 1
     ) -> int:
         """Tells every device of the reader; returns how many were reached."""
         user = await self._users.get_by_id(user_id)
-        heading, body = _NEW_CHAPTERS.get(user.locale if user else "fr", _NEW_CHAPTERS["fr"])
-        text = body.format(title=title, chapters=chapters or "?")
+        locale = user.locale if user else "fr"
+        several = added > 1
+        heading, body = (_SEVERAL_CHAPTERS if several else _NEW_CHAPTERS).get(
+            locale, (_SEVERAL_CHAPTERS if several else _NEW_CHAPTERS)["fr"]
+        )
+        text = body.format(title=title, chapters=chapters or "?", added=added)
         data = {"kind": "new_chapters", "item_id": str(item_id)}
         return await self._send(user_id, heading, text, data)
 

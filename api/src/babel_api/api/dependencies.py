@@ -34,6 +34,7 @@ from babel_api.adapters.sources.ao3 import Ao3Connector
 from babel_api.adapters.sources.http import guarded_client
 from babel_api.adapters.sources.links import LinkFetcher
 from babel_api.core.config import Settings
+from babel_api.domain.files import LibraryItem
 from babel_api.domain.ports import (
     BlobStore,
     BookSource,
@@ -44,7 +45,7 @@ from babel_api.domain.ports import (
     Pusher,
     SourceConnector,
 )
-from babel_api.domain.sources import SourceKind
+from babel_api.domain.sources import SourceEntry, SourceKind
 from babel_api.domain.users import IdentityProvider
 from babel_api.services.audiobooks import AbsService
 from babel_api.services.auth import AuthService
@@ -172,14 +173,7 @@ def get_source_service(
     session: Annotated[AsyncSession, Depends(get_session)],
     files: FileServiceDep,
 ) -> SourceService:
-    return SourceService(
-        SqlSourceRepository(session),
-        SqlFileRepository(session),
-        files,
-        container.connectors,
-        container.secrets,
-        max_sources=container.settings.max_sources_per_user,
-    )
+    return make_source_service(container, session, files)
 
 
 SourceServiceDep = Annotated[SourceService, Depends(get_source_service)]
@@ -286,13 +280,27 @@ SocialServiceDep = Annotated[SocialService, Depends(get_social_service)]
 def make_source_service(
     container: Container, session: AsyncSession, files: FileService | None = None
 ) -> SourceService:
+    library = files or make_file_service(container, session)
+    follows = make_follow_service(container, session, library)
+
+    async def follow(kind: SourceKind, item: LibraryItem, entry: SourceEntry) -> None:
+        # An AO3 work still being written is followed: its new chapters come by themselves.
+        if kind is SourceKind.AO3 and entry.path.startswith("/works/"):
+            await follows.follow_ao3(
+                item,
+                entry.path.rsplit("/", 1)[-1],
+                f"https://archiveofourown.org{entry.path}",
+                entry.remote(),
+            )
+
     return SourceService(
         SqlSourceRepository(session),
         SqlFileRepository(session),
-        files or make_file_service(container, session),
+        library,
         container.connectors,
         container.secrets,
         max_sources=container.settings.max_sources_per_user,
+        follow=follow,
     )
 
 
