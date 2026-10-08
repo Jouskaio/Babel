@@ -6,7 +6,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from babel_api.adapters.hardcover import HardcoverClient
+from babel_api.adapters.hardcover import HardcoverBook, HardcoverClient
 from babel_api.domain.catalog import SourceEdition, SourceWork
 
 JANE = SourceWork("OL1W", "Jane Eyre", ("Charlotte Brontë",), 1847, 8235363, None, 1170)
@@ -693,3 +693,44 @@ def test_a_volume_only_hardcover_knows_becomes_a_work_you_can_open(
     assert opened.status_code == 200
     assert opened.json()["authors"] == ["Sophie Audouin-Mamikonian"]
     assert len(books.calls) == calls_before  # Open Library is not asked about an "hc:" work
+
+
+class FakeHardcoverSearch:
+    """Hardcover's side of a catalog search."""
+
+    def __init__(self, found: list[HardcoverBook]) -> None:
+        self.found = found
+        self.asked: list[str] = []
+
+    async def search_books(self, query: str, limit: int = 10) -> list[HardcoverBook]:
+        self.asked.append(query)
+        return self.found[:limit]
+
+
+def test_the_search_adds_what_hardcover_knows_and_the_catalog_lacks(
+    app: FastAPI, client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    fake = FakeHardcoverSearch(
+        [
+            HardcoverBook(1, "Jane Eyre: An Autobiography", ("Charlotte Brontë",), 1847, None),
+            HardcoverBook(2, "Jane Eyre, Tome 2", ("Charlotte Brontë",), 2001, None),
+            HardcoverBook(3, "Jane Eyre", ("Someone Else",), 2010, "x" * 120),
+        ]
+    )
+    app.state.container = replace(app.state.container, hardcover=fake)
+    hits = client.get("/v1/catalog/search", params={"q": "jane"}, headers=auth).json()
+    titles = [h["title"] for h in hits]
+    # The catalog's own hit first; its twin from Hardcover (same title, same author) is not
+    # added again; the others are.
+    assert titles == ["Jane Eyre", "Jane Eyre, Tome 2", "Jane Eyre"]
+    assert fake.asked == ["jane"]
+    # They open like any work, without asking Open Library about them.
+    extra = next(h for h in hits if h["title"] == "Jane Eyre, Tome 2")
+    before = len(books.calls)
+    opened = client.get(f"/v1/catalog/works/{extra['id']}", headers=auth)
+    assert opened.status_code == 200
+    assert len(books.calls) == before
+
+    # Too short a query is not worth a request to Hardcover.
+    client.get("/v1/catalog/search", params={"q": "ja"}, headers=auth)
+    assert fake.asked == ["jane"]

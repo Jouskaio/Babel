@@ -1,6 +1,7 @@
 """Works, editions and ISBN lookups, cached from external catalogs (ADR 0007)."""
 
 import logging
+import re
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
@@ -25,6 +26,14 @@ HARDCOVER_PREFIX = "hc:"
 FULL_DESCRIPTION = 400
 # Editions (one per language) asked about at most, per refresh of a work.
 MAX_BLURBS = 4
+
+
+def _hit_key(title: str, authors: tuple[str, ...]) -> tuple[str, str]:
+    """What makes two records the same book: its title without the subtitle, and the surname
+    of its first author."""
+    name = series_key(re.split(r"[:(]", title)[0])
+    surname = series_key(authors[0]).split(" ")[-1] if authors and series_key(authors[0]) else ""
+    return name, surname
 
 
 @dataclass(frozen=True, slots=True)
@@ -104,8 +113,34 @@ class WorkService:
                     source.localized_cover_id or work.cover_id,
                 )
             )
+        hits += await self._more_from_hardcover(query, limit, hits)
         await self._repo.commit()
         return hits
+
+    async def _more_from_hardcover(
+        self, query: str, limit: int, hits: list[SearchHit]
+    ) -> list[SearchHit]:
+        """Open Library lacks many volumes and translations: Hardcover's matches that the
+        catalog's do not already hold are added, after them (each becomes a work "hc:<id>")."""
+        if self._hardcover is None or len(query.strip()) < 3 or len(hits) >= limit:
+            return []
+        known = {_hit_key(h.work.title, h.work.authors) for h in hits}
+        extra: list[SearchHit] = []
+        for book in await self._hardcover.search_books(query, limit):
+            if len(hits) + len(extra) >= limit or _hit_key(book.title, book.authors) in known:
+                continue
+            known.add(_hit_key(book.title, book.authors))
+            work = await self._repo.upsert_work(
+                SourceWork(
+                    open_library_id=f"{HARDCOVER_PREFIX}{book.id}",
+                    title=book.title,
+                    authors=book.authors,
+                    first_publish_year=book.year,
+                    description=book.description,
+                )
+            )
+            extra.append(SearchHit(work, work.title, work.cover_id))
+        return extra
 
     async def saga(self, series: str, author: str | None) -> list[SagaVolume]:
         """Every volume of a series the catalog lists, in order.

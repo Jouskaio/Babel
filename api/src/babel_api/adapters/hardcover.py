@@ -11,6 +11,7 @@ import json
 import logging
 import re
 import time
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, cast
 
@@ -33,11 +34,24 @@ _VOLUMES = """query($id: Int!) { series(where: {id: {_eq: $id}}) {
   book_series(order_by: {position: asc}) { position book { id title } } } }"""
 
 
+@dataclass(frozen=True, slots=True)
+class HardcoverBook:
+    """A book as Hardcover's search describes it."""
+
+    id: int
+    title: str
+    authors: tuple[str, ...]
+    year: int | None
+    description: str | None
+
+
 class HardcoverBusyError(ValueError):
     """Out of requests for now (our own budget, or Hardcover's 429): try later."""
 
 
 _BOOK = """query($q: String!) { search(query: $q, query_type: "Book", per_page: 5) { results } }"""
+_BOOKS = """query($q: String!, $n: Int!) { search(query: $q, query_type: "Book", per_page: $n) {
+  ids results } }"""
 _TAGS = re.compile(r"<[^>]+>")
 
 
@@ -124,6 +138,7 @@ class HardcoverClient:
         self._client = client or httpx.AsyncClient(timeout=10)
         self._cache: dict[tuple[str, str], tuple[float, list[tuple[float, str, int | None]]]] = {}
         self._described: dict[tuple[str, str], tuple[float, str | None]] = {}
+        self._found: dict[tuple[str, str], tuple[float, list[HardcoverBook]]] = {}
         self._paused_until = 0.0
         self._day = datetime.now(UTC).date()
         self._used = 0
@@ -203,3 +218,39 @@ class HardcoverClient:
             return None  # not cached: it may work later
         self._described[key] = (time.monotonic(), text)
         return text
+
+    async def search_books(self, query: str, limit: int = 10) -> list[HardcoverBook]:
+        """Books matching a search, best first; empty when Hardcover does not answer. One
+        request, kept for a day."""
+        key = ("search", series_key(query))
+        cached = self._found.get(key)
+        if cached is not None and time.monotonic() - cached[0] < CACHE_SECONDS:
+            return cached[1][:limit]
+        try:
+            found = await self._query(_BOOKS, {"q": query, "n": limit})
+            search = cast(dict[str, Any], found.get("search") or {})
+            ids = cast(list[Any], search.get("ids") or [])
+            books: list[HardcoverBook] = []
+            for i, doc in enumerate(_hits(search)):
+                title = str(doc.get("title") or "").strip()
+                raw_id = ids[i] if i < len(ids) else doc.get("id")
+                if not title or not str(raw_id).isdigit():
+                    continue
+                year = doc.get("release_year")
+                text = html.unescape(_TAGS.sub("", str(doc.get("description") or ""))).strip()
+                books.append(
+                    HardcoverBook(
+                        id=int(str(raw_id)),
+                        title=title,
+                        authors=tuple(
+                            str(a) for a in cast(list[Any], doc.get("author_names") or [])
+                        )[:3],
+                        year=year if isinstance(year, int) else None,
+                        description=text if len(text) >= MIN_DESCRIPTION else None,
+                    )
+                )
+        except (httpx.HTTPError, ValueError, KeyError, TypeError) as error:
+            log.warning("Hardcover did not answer: %s", error)
+            return []
+        self._found[key] = (time.monotonic(), books)
+        return books[:limit]
