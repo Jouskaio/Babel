@@ -32,6 +32,9 @@ from babel_api.services.files import FileService, stored_sha
 logger = logging.getLogger(__name__)
 
 # A source searched less recently than this is scanned again first.
+# Connectors whose scans take minutes (a page every few seconds): scanned in the background,
+# never while a reader waits (a search looks at their last state).
+SLOW_KINDS = frozenset({SourceKind.AO3})
 SEARCH_RESCAN = timedelta(minutes=10)
 
 # At most this many books per "import all" call, to keep requests short.
@@ -129,7 +132,8 @@ class SourceService:
         found: list[tuple[Source, SourceEntry]] = []
         now = datetime.now(UTC)
         for source in await self._sources.list_sources(user_id):
-            if source.last_scan_at is None or now - source.last_scan_at > SEARCH_RESCAN:
+            stale = source.last_scan_at is None or now - source.last_scan_at > SEARCH_RESCAN
+            if stale and source.kind not in SLOW_KINDS:
                 # Books added to a source since its last look must be found: look again.
                 try:
                     await self.scan(user_id, source.id)

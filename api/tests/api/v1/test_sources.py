@@ -558,3 +558,35 @@ def test_a_slow_source_is_scanned_in_the_background(
     assert failed["source"]["scanning"] is False
     assert failed["source"]["last_error"] is not None
     assert failed["source"]["book_count"] == 1  # a failed scan keeps what was known
+
+
+def test_a_search_never_waits_for_a_slow_source_to_be_scanned_again(
+    app: FastAPI, client: TestClient, ada: dict[str, str]
+) -> None:
+    fake = FakeAo3Source()
+    app.state.container = replace(
+        app.state.container,
+        connectors={SourceKind.AO3: fake},
+        secrets=SecretBox(Fernet.generate_key().decode()),
+    )
+    body = {"kind": "ao3", "name": "AO3 · ada", "ao3": {"username": "ada"}}
+    assert client.post("/v1/sources", json=body, headers=ada).status_code == 201
+    scans = {"n": 0}
+    original = fake.list_entries
+
+    async def counting(config: dict[str, Any], token: str | None) -> list[RemoteEntry]:
+        scans["n"] += 1
+        return await original(config, token)
+
+    fake.list_entries = counting  # type: ignore[method-assign]
+    # The last scan is older than the search's rescan delay.
+    from babel_api.services import sources as service
+
+    original_delay = service.SEARCH_RESCAN
+    service.SEARCH_RESCAN = timedelta(seconds=-1)
+    try:
+        found = client.get("/v1/sources/search", params={"q": "work"}, headers=ada).json()
+    finally:
+        service.SEARCH_RESCAN = original_delay
+    assert scans["n"] == 0  # a slow source is searched as it was
+    assert [m["entry"]["title"] for m in found] == ["A Work"]
