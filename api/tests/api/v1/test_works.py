@@ -623,3 +623,52 @@ def test_a_single_series_of_that_name_is_taken_whatever_its_author_spelling() ->
     mine = {"name": "Homunculus", "author_name": "Hideo Yamamoto"}
     assert pick_series(search(other, mine), "Homunculus", "Hideo Yamamoto") == 2
     assert pick_series(search(other, only), "Homunculus", "Hideo Yamamoto") is None  # ambiguous
+
+
+def test_a_series_named_in_japanese_with_the_latin_name_in_brackets_is_found() -> None:
+    from typing import Any
+
+    from babel_api.adapters.hardcover import pick_series
+
+    def search(*docs: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "ids": list(range(1, len(docs) + 1)),
+            "results": {"hits": [{"document": d} for d in docs]},
+        }
+
+    main = {"name": "ホムンクルス [Homunculus]", "author_name": "Hideo Yamamoto"}
+    reissue = {"name": "ホムンクルス 文庫版 [Homunculus bunkoban]", "author_name": "Hideo Yamamoto"}
+    assert pick_series(search(reissue, main), "Homunculus", "Hideo Yamamoto") == 2
+    # Only the reissue exists: better than nothing, and the author agrees.
+    assert pick_series(search(reissue), "Homunculus", "Hideo Yamamoto") == 1
+
+
+def test_series_are_recognised_whatever_the_extras_around_their_name() -> None:
+    from typing import Any
+
+    from babel_api.adapters.hardcover import pick_series
+
+    def search(*docs: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "ids": [100 + n for n in range(len(docs))],
+            "results": {"hits": [{"document": d} for d in docs]},
+        }
+
+    def doc(name: str, author: str, readers: int = 0) -> dict[str, Any]:
+        return {"name": name, "author_name": author, "readers_count": readers}
+
+    collins = "Suzanne Collins"
+    hunger = search(doc("Hunger Games Trilogy", collins, 90), doc("The Hunger Games", "Someone", 5))
+    assert pick_series(hunger, "The Hunger Games", collins) == 100  # "Trilogy", and the author
+    potter = search(doc("Harry Potter Series", "J.K. Rowling", 900))
+    assert pick_series(potter, "Harry Potter", "J. K. Rowling") == 100
+    discworld = search(
+        doc("Discworld", "Terry Pratchett", 500), doc("Discworld (Death)", "Terry Pratchett", 40)
+    )
+    assert pick_series(discworld, "Discworld", None) == 100  # same name: most readers
+    spin = search(doc("Homunculus Returns", "Christian Gude", 1))
+    assert pick_series(spin, "Homunculus", "Hideo Yamamoto") is None  # another author's series
+    assert (
+        pick_series(search(doc("Dune Chronicles", "Frank Herbert", 800)), "Dune", "Frank Herbert")
+        == 100
+    )
