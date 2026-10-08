@@ -676,6 +676,11 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
                 ? l10n.requestAvailable
                 : percent != null
                 ? l10n.requestDownloading(percent.round())
+                // Long enough with nothing downloading: the search came back empty and
+                // Chaptarr keeps watching for a release.
+                : DateTime.now().difference(mine.createdAt) >
+                      const Duration(minutes: 15)
+                ? l10n.requestNoRelease
                 : l10n.requestPending,
             style: BabelText.body(13, color: BabelColors.gold),
           ),

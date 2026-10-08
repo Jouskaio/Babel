@@ -1408,6 +1408,7 @@
   "requestAnyLanguage": "Toutes langues",
   "searchSagaVolumes": "{count, plural, one{# tome} other{# tomes}}",
   "@searchSagaVolumes": {"placeholders": {"count": {"type": "int"}}},
+  "requestNoRelease": "Demandé, mais aucune version à télécharger n'a été trouvée pour l'instant. La recherche continue en arrière-plan.",
   "coverDefault": "Par défaut",
   "coverLinkFirst": "Associez d'abord ce livre à une fiche pour choisir parmi les couvertures de ses éditions.",
   "volumeNumber": "Tome {number}",

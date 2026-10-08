@@ -2431,6 +2431,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get requestNoRelease =>
+      'Requested, but no version to download has been found yet. The search goes on in the background.';
+
+  @override
   String get coverDefault => 'Default';
 
   @override

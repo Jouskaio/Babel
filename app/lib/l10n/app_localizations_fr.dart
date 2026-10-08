@@ -2450,6 +2450,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get requestNoRelease =>
+      'Demandé, mais aucune version à télécharger n\'a été trouvée pour l\'instant. La recherche continue en arrière-plan.';
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override
