@@ -175,6 +175,7 @@ Class | Method | HTTP request | Description
 *SourcesApi* | [**checkSource**](doc//SourcesApi.md#checksource) | **POST** /v1/sources/check | Check Source
 *SourcesApi* | [**createSource**](doc//SourcesApi.md#createsource) | **POST** /v1/sources | Create Source
 *SourcesApi* | [**deleteSource**](doc//SourcesApi.md#deletesource) | **DELETE** /v1/sources/{source_id} | Delete Source
+*SourcesApi* | [**getFanficDetails**](doc//SourcesApi.md#getfanficdetails) | **GET** /v1/sources/{source_id}/entries/{entry_id}/details | Get Fanfic Details
 *SourcesApi* | [**getSource**](doc//SourcesApi.md#getsource) | **GET** /v1/sources/{source_id} | Get Source
 *SourcesApi* | [**getSources**](doc//SourcesApi.md#getsources) | **GET** /v1/sources | Get Sources
 *SourcesApi* | [**importSource**](doc//SourcesApi.md#importsource) | **POST** /v1/sources/{source_id}/import | Import All
@@ -229,6 +230,7 @@ Class | Method | HTTP request | Description
  - [EditionResponse](doc//EditionResponse.md)
  - [EntityKind](doc//EntityKind.md)
  - [EntryStatus](doc//EntryStatus.md)
+ - [FanficDetailsResponse](doc//FanficDetailsResponse.md)
  - [FeedEntryResponse](doc//FeedEntryResponse.md)
  - [FeedKind](doc//FeedKind.md)
  - [FinishedBookResponse](doc//FinishedBookResponse.md)

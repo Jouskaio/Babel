@@ -12,6 +12,7 @@ Method | HTTP request | Description
 [**checkSource**](SourcesApi.md#checksource) | **POST** /v1/sources/check | Check Source
 [**createSource**](SourcesApi.md#createsource) | **POST** /v1/sources | Create Source
 [**deleteSource**](SourcesApi.md#deletesource) | **DELETE** /v1/sources/{source_id} | Delete Source
+[**getFanficDetails**](SourcesApi.md#getfanficdetails) | **GET** /v1/sources/{source_id}/entries/{entry_id}/details | Get Fanfic Details
 [**getSource**](SourcesApi.md#getsource) | **GET** /v1/sources/{source_id} | Get Source
 [**getSources**](SourcesApi.md#getsources) | **GET** /v1/sources | Get Sources
 [**importSource**](SourcesApi.md#importsource) | **POST** /v1/sources/{source_id}/import | Import All
@@ -167,6 +168,57 @@ void (empty response body)
 
  - **Content-Type**: Not defined
  - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getFanficDetails**
+> FanficDetailsResponse getFanficDetails(sourceId, entryId)
+
+Get Fanfic Details
+
+The summary, tags and numbers AO3 gives for a fanfiction of an AO3 source.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SourcesApi();
+final sourceId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final entryId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.getFanficDetails(sourceId, entryId);
+    print(result);
+} catch (e) {
+    print('Exception when calling SourcesApi->getFanficDetails: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **sourceId** | **String**|  | 
+ **entryId** | **String**|  | 
+
+### Return type
+
+[**FanficDetailsResponse**](FanficDetailsResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

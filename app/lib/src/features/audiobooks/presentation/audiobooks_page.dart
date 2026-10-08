@@ -7,6 +7,7 @@ import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/back_leading.dart';
+import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../library/application/library_controller.dart';
@@ -80,9 +81,17 @@ class _AudiobooksPageState extends ConsumerState<AudiobooksPage> {
             children: [
               Text(l10n.audiobooksTitle, style: BabelText.title(40)),
               const SizedBox(height: 16),
-              if (link == null || link.expired)
-                Text(l10n.audiobooksNotLinked, style: BabelText.body(15))
-              else ...[
+              if (link == null || link.expired) ...[
+                Text(l10n.audiobooksNotLinked, style: BabelText.body(15)),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: PillButton(
+                    label: l10n.audiobooksLinkNow,
+                    onPressed: () => context.push(Routes.account),
+                  ),
+                ),
+              ] else ...[
                 if ((libraries.value?.length ?? 0) > 1)
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,

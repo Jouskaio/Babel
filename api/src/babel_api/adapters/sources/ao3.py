@@ -22,7 +22,7 @@ from bs4 import BeautifulSoup, Tag
 from babel_api.adapters.sources.http import TIMEOUT, USER_AGENT, Throttle, retry_after
 from babel_api.adapters.sources.stdlib_transport import StdlibTransport
 from babel_api.domain.errors import SourceConnectionError, SourceRateLimitedError
-from babel_api.domain.sources import RemoteEntry
+from babel_api.domain.sources import FanficDetails, RemoteEntry
 
 log = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ _WORK = re.compile(r"^/works/(\d+)$")
 # A big account is scanned in the background, one page every few seconds: 150 pages is 3000 works.
 MAX_PAGES = 150
 SESSION_SECONDS = 30 * 60
+DETAILS_SECONDS = 6 * 3600
 RETRIES = 2
 # A big account's bookmarks page is slow to build: AO3's front gives up (502/525) at the first
 # tries, and the page is often ready for a later one. Lists are retried longer than downloads.
@@ -67,6 +68,7 @@ class Ao3Connector:
         self._downloads = Throttle(download_pause)
         # Signed-in sessions, per reader: username -> (cookies, expiry).
         self._sessions: dict[str, tuple[httpx.Cookies, float]] = {}
+        self._details: dict[str, tuple[float, FanficDetails]] = {}
 
     def _client(self, cookies: httpx.Cookies | None = None) -> httpx.AsyncClient:
         # One client per operation: cookies never leak from one reader to another.
@@ -250,6 +252,57 @@ class Ao3Connector:
             authors=tuple(_text(a) for a in page.select("h3.byline a[rel=author]"))[:5],
             format="epub",
         )
+
+    async def details(
+        self, config: dict[str, Any], token: str | None, work_id: str
+    ) -> FanficDetails:
+        """The fanfiction's page: summary, tags and numbers (kept for a few hours)."""
+        cached = self._details.get(work_id)
+        if cached is not None and time.monotonic() - cached[0] < DETAILS_SECONDS:
+            return cached[1]
+        username = str(config.get("username", "")).strip()
+        client = await self._session(username, token) if username else self._client()
+        response = await self._get(client, f"/works/{work_id}", view_adult="true")
+        if response.status_code == 404:
+            raise SourceConnectionError("404")
+        if response.status_code >= 400:
+            raise SourceConnectionError("unreachable")
+        page = _soup(response)
+        title = _text(page.select_one("h2.title"))
+        if not title:
+            raise SourceConnectionError("restricted")  # members only, or not a work page
+
+        def tags(css: str) -> tuple[str, ...]:
+            return tuple(_text(a) for a in page.select(f"dd.{css} a.tag"))
+
+        def number(css: str) -> int | None:
+            digits = _text(page.select_one(f"dl.stats dd.{css}")).replace(",", "")
+            return int(digits) if digits.isdigit() else None
+
+        summary = page.select_one("div.summary blockquote")
+        series = page.select_one("dd.series span.series a")
+        details = FanficDetails(
+            title=title,
+            authors=tuple(_text(a) for a in page.select("h3.byline a[rel=author]"))[:5],
+            summary=_text(summary) or None,
+            rating=next(iter(tags("rating")), None),
+            warnings=tags("warning"),
+            categories=tags("category"),
+            fandoms=tags("fandom"),
+            relationships=tags("relationship"),
+            characters=tags("character"),
+            tags=tags("freeform"),
+            language=_text(page.select_one("dd.language")) or None,
+            words=number("words"),
+            chapters=_text(page.select_one("dl.stats dd.chapters")) or None,
+            published=_text(page.select_one("dl.stats dd.published")) or None,
+            updated=_text(page.select_one("dl.stats dd.status")) or None,
+            kudos=number("kudos"),
+            hits=number("hits"),
+            series=_text(series) or None,
+        )
+        self._details[work_id] = (time.monotonic(), details)
+        return details
 
     async def list_entries(self, config: dict[str, Any], token: str | None) -> list[RemoteEntry]:
         username = str(config["username"])

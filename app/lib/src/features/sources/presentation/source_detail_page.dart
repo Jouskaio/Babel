@@ -14,6 +14,7 @@ import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../library/application/library_controller.dart';
 import '../application/sources_providers.dart';
+import 'fanfic_sheet.dart';
 import 'source_badge.dart';
 
 /// A source and its books (design: Penpot "sources / détail").
@@ -372,15 +373,44 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
     final title = entry.title ?? fileTitle;
     final format = entry.format?.toUpperCase() ?? fileFormat;
     final onBabel = entry.status == EntryStatus.onBabel;
+    final fanfic = _kind == SourceKind.ao3;
+    final action =
+        entry.status == EntryStatus.inLibrary ||
+            entry.status == EntryStatus.unreadable
+        ? const SizedBox.shrink()
+        : PillButton(
+            label: onBabel ? l10n.addEntry : l10n.importEntry,
+            kind: onBabel ? PillButtonKind.primary : PillButtonKind.secondary,
+            loading: _importing.contains(entry.id),
+            onPressed: _importingAll
+                ? null
+                : () {
+                    Navigator.of(context, rootNavigator: true).maybePop();
+                    unawaited(_import(entry));
+                  },
+          );
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: SourceCard(
+        // An AO3 fanfiction opens what AO3 says about it.
+        onTap: fanfic
+            ? () => showFanficSheet(
+                context,
+                sourceId: widget.sourceId,
+                entry: entry,
+                title: title,
+                action: action,
+              )
+            : null,
         child: Row(
           children: [
             BookCover(
               width: 44,
               url: entry.coverPath == null ? null : apiUrl(entry.coverPath!),
               title: title,
+              style: fanfic
+                  ? BookCoverStyle.fanfiction
+                  : BookCoverStyle.standard,
             ),
             const SizedBox(width: 14),
             Expanded(
