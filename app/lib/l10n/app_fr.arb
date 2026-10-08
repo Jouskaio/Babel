@@ -1623,5 +1623,6 @@
   "requestNotFound": "Introuvable pour l'instant.",
   "requestFailed": "La demande n'a pas pu partir. Réessayez plus tard.",
   "addSourceHint": "Ce livre n'est dans aucune de vos sources. Ajoutez-en une (Kavita, WebDAV, GitHub…) pour le retrouver ici.",
-  "sourceScanning": "Scan en cours… un gros compte peut prendre plusieurs minutes."
+  "sourceScanning": "Scan en cours… un gros compte peut prendre plusieurs minutes.",
+  "sagaOpenKnown": "Pas dans le catalogue : ouvrez-le pour le chercher dans vos sources ou le demander."
 }

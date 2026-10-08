@@ -214,6 +214,7 @@ async def get_saga(
 class KnownVolumeResponse(BaseModel):
     number: float = Field(description="The volume number in the saga")
     title: str = Field(description="Its title, from Hardcover")
+    hardcover_id: int | None = Field(default=None, description="Its id on Hardcover")
 
 
 @router.get("/saga/known", operation_id="getKnownVolumes")
@@ -225,8 +226,24 @@ async def get_known_volumes(
 ) -> list[KnownVolumeResponse]:
     """Volumes Hardcover lists for a saga, to name the ones the catalog lacks (may be empty)."""
     return [
-        KnownVolumeResponse(number=n, title=t) for n, t in await works.known_volumes(series, author)
+        KnownVolumeResponse(number=n, title=t, hardcover_id=i)
+        for n, t, i in await works.known_volumes(series, author)
     ]
+
+
+class HardcoverWorkRequest(BaseModel):
+    hardcover_id: int
+    title: Annotated[str, Field(min_length=1, max_length=500)]
+    author: Annotated[str, Field(max_length=200)] | None = None
+
+
+@router.post("/works/hardcover", operation_id="openHardcoverWork")
+async def open_hardcover_work(
+    _: CurrentUserId, works: WorkServiceDep, body: HardcoverWorkRequest
+) -> WorkSummaryResponse:
+    """A volume only Hardcover lists, as a work you can open (and ask for)."""
+    work = await works.work_from_hardcover(body.hardcover_id, body.title, body.author)
+    return WorkSummaryResponse.of(work, work.title, work.cover_id)
 
 
 @router.get("/isbn/{isbn}", operation_id="lookupIsbn")

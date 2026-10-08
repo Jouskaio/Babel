@@ -1,4 +1,4 @@
-# babel_api_client.model.KnownVolumeResponse
+# babel_api_client.model.HardcoverWorkRequest
 
 ## Load the model package
 ```dart
@@ -8,9 +8,9 @@ import 'package:babel_api_client/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**hardcoverId** | **int** | Its id on Hardcover | [optional] 
-**number** | **num** | The volume number in the saga | 
-**title** | **String** | Its title, from Hardcover | 
+**author** | **String** |  | [optional] 
+**hardcoverId** | **int** |  | 
+**title** | **String** |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

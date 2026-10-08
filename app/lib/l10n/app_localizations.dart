@@ -4417,6 +4417,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Scan en cours… un gros compte peut prendre plusieurs minutes.'**
   String get sourceScanning;
+
+  /// No description provided for @sagaOpenKnown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas dans le catalogue : ouvrez-le pour le chercher dans vos sources ou le demander.'**
+  String get sagaOpenKnown;
 }
 
 class _AppLocalizationsDelegate

@@ -900,5 +900,6 @@
   "requestNotFound": "Not found for now.",
   "requestFailed": "The request could not be sent. Try again later.",
   "addSourceHint": "This book is in none of your sources. Add one (Kavita, WebDAV, GitHub…) to find it here.",
-  "sourceScanning": "Scanning… a big account can take several minutes."
+  "sourceScanning": "Scanning… a big account can take several minutes.",
+  "sagaOpenKnown": "Not in the catalog: open it to look in your sources or ask for it."
 }

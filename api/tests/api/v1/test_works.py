@@ -521,15 +521,15 @@ def test_hardcover_names_the_volumes_of_a_series() -> None:
             hits = {"hits": [{"document": other}, {"document": doc}]}
             return httpx.Response(200, json={"data": {"search": {"ids": [1, 2], "results": hits}}})
         links = [
-            {"position": 1, "book": {"title": "Homunculus 1"}},
-            {"position": 2.5, "book": {"title": "Interlude"}},
+            {"position": 1, "book": {"id": 11, "title": "Homunculus 1"}},
+            {"position": 2.5, "book": {"id": 12, "title": "Interlude"}},
             {"position": None, "book": {"title": "Artbook"}},
         ]
         return httpx.Response(200, json={"data": {"series": [{"book_series": links}]}})
 
     client = HardcoverClient("secret", httpx.AsyncClient(transport=httpx.MockTransport(handler)))
     found = asyncio.run(client.series_volumes("Homunculus", "Hideo Yamamoto"))
-    assert found == [(1.0, "Homunculus 1"), (2.5, "Interlude")]  # no position, no volume
+    assert found == [(1.0, "Homunculus 1", 11), (2.5, "Interlude", 12)]  # no position, no volume
     assert asyncio.run(client.series_volumes("Homunculus", "Hideo Yamamoto")) == found
     assert len(asked) == 2  # the second answer came from the cache
 
@@ -672,3 +672,24 @@ def test_series_are_recognised_whatever_the_extras_around_their_name() -> None:
         pick_series(search(doc("Dune Chronicles", "Frank Herbert", 800)), "Dune", "Frank Herbert")
         == 100
     )
+
+
+def test_a_volume_only_hardcover_knows_becomes_a_work_you_can_open(
+    client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    body = {
+        "hardcover_id": 4242,
+        "title": "Le sceptre maudit",
+        "author": "Sophie Audouin-Mamikonian",
+    }
+    first = client.post("/v1/catalog/works/hardcover", json=body, headers=auth)
+    again = client.post("/v1/catalog/works/hardcover", json=body, headers=auth)
+    assert first.status_code == 200
+    assert first.json()["title"] == "Le sceptre maudit"
+    assert first.json()["id"] == again.json()["id"]  # the same volume is the same work
+
+    calls_before = len(books.calls)
+    opened = client.get(f"/v1/catalog/works/{first.json()['id']}", headers=auth)
+    assert opened.status_code == 200
+    assert opened.json()["authors"] == ["Sophie Audouin-Mamikonian"]
+    assert len(books.calls) == calls_before  # Open Library is not asked about an "hc:" work

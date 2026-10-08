@@ -10,55 +10,52 @@
 
 part of babel_api_client;
 
-class KnownVolumeResponse {
-  /// Returns a new [KnownVolumeResponse] instance.
-  KnownVolumeResponse({
-    this.hardcoverId,
-    required this.number,
+class HardcoverWorkRequest {
+  /// Returns a new [HardcoverWorkRequest] instance.
+  HardcoverWorkRequest({
+    this.author,
+    required this.hardcoverId,
     required this.title,
   });
 
-  /// Its id on Hardcover
-  int? hardcoverId;
+  String? author;
 
-  /// The volume number in the saga
-  num number;
+  int hardcoverId;
 
-  /// Its title, from Hardcover
   String title;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is KnownVolumeResponse &&
+  bool operator ==(Object other) => identical(this, other) || other is HardcoverWorkRequest &&
+    other.author == author &&
     other.hardcoverId == hardcoverId &&
-    other.number == number &&
     other.title == title;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (hardcoverId == null ? 0 : hardcoverId!.hashCode) +
-    (number.hashCode) +
+    (author == null ? 0 : author!.hashCode) +
+    (hardcoverId.hashCode) +
     (title.hashCode);
 
   @override
-  String toString() => 'KnownVolumeResponse[hardcoverId=$hardcoverId, number=$number, title=$title]';
+  String toString() => 'HardcoverWorkRequest[author=$author, hardcoverId=$hardcoverId, title=$title]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.hardcoverId != null) {
-      json[r'hardcover_id'] = this.hardcoverId;
+    if (this.author != null) {
+      json[r'author'] = this.author;
     } else {
-      json[r'hardcover_id'] = null;
+      json[r'author'] = null;
     }
-      json[r'number'] = this.number;
+      json[r'hardcover_id'] = this.hardcoverId;
       json[r'title'] = this.title;
     return json;
   }
 
-  /// Returns a new [KnownVolumeResponse] instance and imports its values from
+  /// Returns a new [HardcoverWorkRequest] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static KnownVolumeResponse? fromJson(dynamic value) {
+  static HardcoverWorkRequest? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -67,26 +64,26 @@ class KnownVolumeResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "KnownVolumeResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "KnownVolumeResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "HardcoverWorkRequest[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "HardcoverWorkRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return KnownVolumeResponse(
-        hardcoverId: mapValueOfType<int>(json, r'hardcover_id'),
-        number: num.parse('${json[r'number']}'),
+      return HardcoverWorkRequest(
+        author: mapValueOfType<String>(json, r'author'),
+        hardcoverId: mapValueOfType<int>(json, r'hardcover_id')!,
         title: mapValueOfType<String>(json, r'title')!,
       );
     }
     return null;
   }
 
-  static List<KnownVolumeResponse> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <KnownVolumeResponse>[];
+  static List<HardcoverWorkRequest> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <HardcoverWorkRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = KnownVolumeResponse.fromJson(row);
+        final value = HardcoverWorkRequest.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -95,12 +92,12 @@ class KnownVolumeResponse {
     return result.toList(growable: growable);
   }
 
-  static Map<String, KnownVolumeResponse> mapFromJson(dynamic json) {
-    final map = <String, KnownVolumeResponse>{};
+  static Map<String, HardcoverWorkRequest> mapFromJson(dynamic json) {
+    final map = <String, HardcoverWorkRequest>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = KnownVolumeResponse.fromJson(entry.value);
+        final value = HardcoverWorkRequest.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -109,14 +106,14 @@ class KnownVolumeResponse {
     return map;
   }
 
-  // maps a json object with a list of KnownVolumeResponse-objects as value to a dart map
-  static Map<String, List<KnownVolumeResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<KnownVolumeResponse>>{};
+  // maps a json object with a list of HardcoverWorkRequest-objects as value to a dart map
+  static Map<String, List<HardcoverWorkRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<HardcoverWorkRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = KnownVolumeResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = HardcoverWorkRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -124,7 +121,7 @@ class KnownVolumeResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'number',
+    'hardcover_id',
     'title',
   };
 }
