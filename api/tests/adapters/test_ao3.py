@@ -165,6 +165,15 @@ def test_passing_server_errors_are_retried() -> None:
         asyncio.run(connector(fake).check({"username": "ada"}, None))
 
 
+def test_a_slow_bookmarks_page_is_retried_longer_than_other_requests() -> None:
+    fake = FakeAo3()
+    fake.flaky = 5  # a big account: AO3's front gives up several times first
+    assert asyncio.run(connector(fake).list_entries({"username": "ada"}, None)) is not None
+    fake.flaky = 6
+    with pytest.raises(SourceConnectionError):
+        asyncio.run(connector(fake).list_entries({"username": "ada"}, None))
+
+
 def test_a_rate_limit_pauses_every_request() -> None:
     fake = FakeAo3()
     ao3 = connector(fake)
