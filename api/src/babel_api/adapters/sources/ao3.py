@@ -10,6 +10,7 @@ never shared between readers.
 """
 
 import asyncio
+import logging
 import re
 import time
 from collections.abc import AsyncIterator
@@ -23,12 +24,18 @@ from babel_api.adapters.sources.stdlib_transport import StdlibTransport
 from babel_api.domain.errors import SourceConnectionError, SourceRateLimitedError
 from babel_api.domain.sources import RemoteEntry
 
+log = logging.getLogger(__name__)
+
 BASE = "https://archiveofourown.org"
 _USERNAME = re.compile(r"^[A-Za-z0-9_]{3,40}$")
 _WORK = re.compile(r"^/works/(\d+)$")
 MAX_PAGES = 30
 SESSION_SECONDS = 30 * 60
 RETRIES = 2
+# A big account's bookmarks page is slow to build: AO3's front gives up (502/525) at the first
+# tries, and the page is often ready for a later one. Lists are retried longer than downloads.
+LISTING_RETRIES = 5
+MAX_RETRY_WAIT = 30.0
 # Pause asked by AO3 when it gives no Retry-After, and the longest one honored.
 COOL_DOWN = 120.0
 MAX_COOL_DOWN = 600.0
@@ -71,21 +78,30 @@ class Ao3Connector:
             cookies=cookies,
         )
 
-    async def _get(self, client: httpx.AsyncClient, url: str, **params: Any) -> httpx.Response:
+    async def _get(
+        self, client: httpx.AsyncClient, url: str, *, retries: int = RETRIES, **params: Any
+    ) -> httpx.Response:
         # AO3 often answers 502/525 for a moment (its Cloudflare front): try a few times.
-        for attempt in range(RETRIES + 1):
+        for attempt in range(retries + 1):
             if attempt:
-                await asyncio.sleep(self._pause * 2 * attempt)
+                await asyncio.sleep(min(self._pause * 2 * attempt, MAX_RETRY_WAIT))
             await self._requests.wait()
             try:
                 response = await client.get(url, params=params or None)
             except httpx.HTTPError as error:
-                if attempt == RETRIES:
+                if attempt == retries:
                     raise SourceConnectionError("unreachable") from error
                 continue
             if response.status_code == 429:
                 self._limited(response)
-            if response.status_code < 500 or attempt == RETRIES:
+            if response.status_code < 500 or attempt == retries:
+                if response.status_code >= 500:
+                    log.warning(
+                        "AO3 answered %s for %s after %s tries",
+                        response.status_code,
+                        url,
+                        attempt + 1,
+                    )
                 return response
         raise SourceConnectionError("unreachable")  # pragma: no cover - loop always returns
 
@@ -145,7 +161,7 @@ class Ao3Connector:
         """Works listed on every page of a bookmarks or subscriptions listing."""
         entries: list[RemoteEntry] = []
         for page in range(1, MAX_PAGES + 1):
-            response = await self._get(client, url, page=page)
+            response = await self._get(client, url, retries=LISTING_RETRIES, page=page)
             if response.status_code >= 400:
                 if page == 1:
                     raise SourceConnectionError(str(response.status_code))
@@ -157,6 +173,8 @@ class Ao3Connector:
                     entries.append(entry)
             if soup.select_one("ol.pagination li.next a[rel=next]") is None:
                 break
+        else:
+            log.warning("AO3 list %s cut after %s pages", url, MAX_PAGES)
         return entries
 
     def _entry(self, blurb: Tag) -> RemoteEntry | None:
