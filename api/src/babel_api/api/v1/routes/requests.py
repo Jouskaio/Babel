@@ -20,6 +20,7 @@ router = APIRouter(prefix="/requests", tags=["requests"])
 
 class BookRequestResponse(BaseModel):
     work_id: UUID
+    language: str = Field(default="", description="The language asked for; empty if none")
     status: RequestStatus
     created_at: datetime
     progress: float | None = Field(
@@ -30,6 +31,7 @@ class BookRequestResponse(BaseModel):
     def of(cls, request: BookRequest) -> "BookRequestResponse":
         return cls(
             work_id=request.work_id,
+            language=request.language,
             status=request.status,
             created_at=request.created_at,
             progress=request.progress,
@@ -43,6 +45,9 @@ class RequestsResponse(BaseModel):
 
 class NewRequest(BaseModel):
     work_id: UUID
+    language: Annotated[str, Field(max_length=8, pattern=r"^[a-z]{0,3}$")] = Field(
+        default="", description="The language to look for (ISO 639, e.g. fr); empty for any"
+    )
 
 
 @router.get("", operation_id="listBookRequests")
@@ -63,9 +68,9 @@ async def request_book(
 ) -> BookRequestResponse:
     """Ask the server to find and download a book (premium readers). The answer is
     immediate; the search goes on in the background, see the status of your requests."""
-    request, created = await requests.request(user_id, body.work_id)
+    request, created = await requests.request(user_id, body.work_id, body.language)
     if created:
-        background.add_task(fulfill_request, container, user_id, body.work_id)
+        background.add_task(fulfill_request, container, user_id, body.work_id, body.language)
     return BookRequestResponse.of(request)
 
 

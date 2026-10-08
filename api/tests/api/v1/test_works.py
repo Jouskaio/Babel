@@ -386,6 +386,15 @@ def test_a_premium_reader_requests_a_book_once(
     assert len(chaptarr.added) == 1  # the study guide did not match, the novel did
     assert chaptarr.added[0]["title"] == "Jane Eyre"
 
+    # The same book in another language is another request.
+    french = client.post(
+        "/v1/requests", json={"work_id": hit["id"], "language": "fr"}, headers=admin
+    )
+    assert french.status_code == 201
+    assert french.json()["language"] == "fr"
+    languages = {r["language"] for r in client.get("/v1/requests", headers=admin).json()["items"]}
+    assert languages == {"", "fr"}
+
 
 def test_a_book_chaptarr_does_not_know_is_reported(
     client: TestClient, chaptarr: FakeChaptarr, books: FakeBooks

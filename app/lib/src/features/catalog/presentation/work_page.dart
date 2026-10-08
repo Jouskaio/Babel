@@ -282,7 +282,12 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
             WorkReadersSection(workId: work.id),
             if (trace == null || !trace.available) ...[
               const SizedBox(height: sectionGap),
-              _SourceMatches(title: work.title, workId: work.id),
+              _SourceMatches(
+                title: work.title,
+                workId: work.id,
+                languages: {for (final e in work.editions) ?e.language}
+                    .toList(),
+              ),
               const SizedBox(height: sectionGap),
               SectionTitle(l10n.getThisBook),
               Container(
@@ -555,9 +560,15 @@ class _Thumb extends StatelessWidget {
 /// Books of the reader's own sources (Kavita, WebDAV, GitHub…) that match this work, to
 /// add the right one to the library. Babel offers no download from the catalog itself.
 class _SourceMatches extends ConsumerStatefulWidget {
-  const _SourceMatches({required this.title, required this.workId});
+  const _SourceMatches({
+    required this.title,
+    required this.workId,
+    this.languages = const [],
+  });
   final String title;
   final String workId;
+  // The languages the work's editions exist in, to choose which one to ask for.
+  final List<String> languages;
 
   @override
   ConsumerState<_SourceMatches> createState() => _SourceMatchesState();
@@ -566,6 +577,7 @@ class _SourceMatches extends ConsumerStatefulWidget {
 class _SourceMatchesState extends ConsumerState<_SourceMatches> {
   final _adding = <String>{};
   bool _requesting = false;
+  String _language = ''; // empty: any
   // While a request is under way, ask again every few seconds to show how far it has come.
   Timer? _poll;
 
@@ -582,7 +594,7 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
     try {
       await ref
           .read(requestsApiProvider)
-          .requestBook(NewRequest(workId: widget.workId));
+          .requestBook(NewRequest(workId: widget.workId, language: _language));
       ref.invalidate(bookRequestsProvider);
       // The search goes on in the background: look again shortly for a miss.
       Future<void>.delayed(const Duration(seconds: 8), () {
@@ -635,11 +647,30 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
     final requests = loading.value;
     if (requests != null && requests.enabled) {
       final mine = requests.items
-          .where((r) => r.workId == widget.workId)
+          .where((r) => r.workId == widget.workId && r.language == _language)
           .firstOrNull;
       if (mine != null && mine.status != RequestStatus.notFound) {
         final percent = mine.progress;
         return [
+          if (widget.languages.length > 1) ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final code in ['', ...widget.languages])
+                  ChoiceChip(
+                    label: Text(
+                      code.isEmpty
+                          ? l10n.requestAnyLanguage
+                          : code.toUpperCase(),
+                    ),
+                    selected: _language == code,
+                    onSelected: (_) => setState(() => _language = code),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
           Text(
             mine.status == RequestStatus.available
                 ? l10n.requestAvailable
@@ -668,6 +699,23 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
           style: BabelText.body(13),
         ),
         const SizedBox(height: 16),
+        if (widget.languages.length > 1) ...[
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final code in ['', ...widget.languages])
+                ChoiceChip(
+                  label: Text(
+                    code.isEmpty ? l10n.requestAnyLanguage : code.toUpperCase(),
+                  ),
+                  selected: _language == code,
+                  onSelected: (_) => setState(() => _language = code),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
         Align(
           alignment: Alignment.centerLeft,
           child: PillButton(

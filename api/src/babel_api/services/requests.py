@@ -98,39 +98,48 @@ class RequestService:
         return self._server is not None and user is not None and user.has_premium
 
     # ------------------------------------------------------------ requests
-    async def request(self, user_id: UUID, work_id: UUID) -> tuple[BookRequest, bool]:
+    async def request(
+        self, user_id: UUID, work_id: UUID, language: str = ""
+    ) -> tuple[BookRequest, bool]:
         """Records the request at once (and whether it is new); [fulfill] then asks Chaptarr."""
         client = await self._client_for(user_id)
         if client is None:
             # No Chaptarr of their own: the server's is for premium readers.
             raise PremiumRequiredError if self._server is not None else RequestsUnavailableError
         await client.aclose()
-        existing = await self._requests.get(user_id, work_id)
+        existing = await self._requests.get(user_id, work_id, language)
         if existing is not None and existing.status is not RequestStatus.NOT_FOUND:
             return existing, False
         await self._works.get(work_id)  # unknown work: not found
-        saved = await self._requests.save(user_id, work_id, RequestStatus.REQUESTED, None)
+        saved = await self._requests.save(user_id, work_id, RequestStatus.REQUESTED, None, language)
         await self._requests.commit()
         return saved, True
 
-    async def fulfill(self, user_id: UUID, work_id: UUID) -> None:
+    async def fulfill(self, user_id: UUID, work_id: UUID, language: str = "") -> None:
         """Finds the book in Chaptarr and adds it; a miss or a failure reads as "not found"
         (the reader can ask again)."""
         client = await self._client_for(user_id)
         if client is None:
             return
-        work = (await self._works.get(work_id)).work
+        detail = await self._works.get(work_id)
+        work = detail.work
+        # The title the book bears in the language asked for ("Les Misérables", not "Les Mis...").
+        title = detail.localized(language or None)[0]
         try:
-            found = await client.lookup(work.title, work.authors)
+            found = await client.lookup(title, work.authors)
             if found is None:
-                await self._requests.save(user_id, work_id, RequestStatus.NOT_FOUND, None)
+                await self._requests.save(user_id, work_id, RequestStatus.NOT_FOUND, None, language)
             else:
                 await self._requests.save(
-                    user_id, work_id, RequestStatus.REQUESTED, await client.add(found)
+                    user_id,
+                    work_id,
+                    RequestStatus.REQUESTED,
+                    await client.add(found),
+                    language,
                 )
         except ChaptarrError as error:
             log.warning("Chaptarr request failed: %s", error.reason)
-            await self._requests.save(user_id, work_id, RequestStatus.NOT_FOUND, None)
+            await self._requests.save(user_id, work_id, RequestStatus.NOT_FOUND, None, language)
         finally:
             await client.aclose()
         await self._requests.commit()
@@ -151,7 +160,11 @@ class RequestService:
             for request in waiting:
                 if request.chaptarr_id is not None and await client.has_files(request.chaptarr_id):
                     await self._requests.save(
-                        user_id, request.work_id, RequestStatus.AVAILABLE, request.chaptarr_id
+                        user_id,
+                        request.work_id,
+                        RequestStatus.AVAILABLE,
+                        request.chaptarr_id,
+                        request.language,
                     )
                     arrived = True
             progress = await client.queue_progress()
@@ -173,8 +186,8 @@ class RequestService:
             for r in items
         ]
 
-    async def status_of(self, user_id: UUID, work_id: UUID) -> BookRequest:
+    async def status_of(self, user_id: UUID, work_id: UUID, language: str = "") -> BookRequest:
         for request in await self.list(user_id):
-            if request.work_id == work_id:
+            if request.work_id == work_id and request.language == language:
                 return request
         raise NotFoundError

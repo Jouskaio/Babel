@@ -603,7 +603,9 @@ class BookRequestRow(Base):
     """A book a premium reader asked for (one per reader and work)."""
 
     __tablename__ = "book_requests"
-    __table_args__ = (UniqueConstraint("user_id", "work_id", name="uq_book_requests_user_work"),)
+    __table_args__ = (
+        UniqueConstraint("user_id", "work_id", "language", name="uq_book_requests_user_work_lang"),
+    )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
@@ -611,6 +613,8 @@ class BookRequestRow(Base):
     status: Mapped[str] = mapped_column(String(20))
     chaptarr_id: Mapped[int | None] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    # The language asked for ("fr", "en"...); empty when the reader did not choose.
+    language: Mapped[str] = mapped_column(String(8), default="", server_default="")
 
 
 class ChaptarrLinkRow(Base):

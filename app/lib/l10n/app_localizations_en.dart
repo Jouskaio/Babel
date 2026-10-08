@@ -2417,6 +2417,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Invalid picture (JPEG, PNG or WebP, 5 MB at most).';
 
   @override
+  String get requestAnyLanguage => 'Any language';
+
+  @override
   String get coverDefault => 'Default';
 
   @override

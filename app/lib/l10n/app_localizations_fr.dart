@@ -2436,6 +2436,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Image invalide (JPEG, PNG ou WebP, 5 Mo maximum).';
 
   @override
+  String get requestAnyLanguage => 'Toutes langues';
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override

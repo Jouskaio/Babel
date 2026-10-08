@@ -645,6 +645,12 @@
             "title": "Created At",
             "type": "string"
           },
+          "language": {
+            "default": "",
+            "description": "The language asked for; empty if none",
+            "title": "Language",
+            "type": "string"
+          },
           "progress": {
             "anyOf": [
               {
@@ -2542,6 +2548,14 @@
       },
       "NewRequest": {
         "properties": {
+          "language": {
+            "default": "",
+            "description": "The language to look for (ISO 639, e.g. fr); empty for any",
+            "maxLength": 8,
+            "pattern": "^[a-z]{0,3}$",
+            "title": "Language",
+            "type": "string"
+          },
           "work_id": {
             "format": "uuid",
             "title": "Work Id",

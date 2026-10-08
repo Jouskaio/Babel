@@ -4034,6 +4034,12 @@ abstract class AppLocalizations {
   /// **'Image invalide (JPEG, PNG ou WebP, 5 Mo maximum).'**
   String get coverInvalid;
 
+  /// No description provided for @requestAnyLanguage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes langues'**
+  String get requestAnyLanguage;
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

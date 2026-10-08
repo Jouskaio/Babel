@@ -13,25 +13,32 @@ part of babel_api_client;
 class NewRequest {
   /// Returns a new [NewRequest] instance.
   NewRequest({
+    this.language = '',
     required this.workId,
   });
+
+  /// The language to look for (ISO 639, e.g. fr); empty for any
+  String language;
 
   String workId;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is NewRequest &&
+    other.language == language &&
     other.workId == workId;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (language.hashCode) +
     (workId.hashCode);
 
   @override
-  String toString() => 'NewRequest[workId=$workId]';
+  String toString() => 'NewRequest[language=$language, workId=$workId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'language'] = this.language;
       json[r'work_id'] = this.workId;
     return json;
   }
@@ -55,6 +62,7 @@ class NewRequest {
       }());
 
       return NewRequest(
+        language: mapValueOfType<String>(json, r'language') ?? '',
         workId: mapValueOfType<String>(json, r'work_id')!,
       );
     }

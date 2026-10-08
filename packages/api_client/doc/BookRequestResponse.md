@@ -9,6 +9,7 @@ import 'package:babel_api_client/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **createdAt** | [**DateTime**](DateTime.md) |  | 
+**language** | **String** | The language asked for; empty if none | [optional] [default to '']
 **progress** | **num** | Percent downloaded while it runs; null before it starts | [optional] 
 **status** | [**RequestStatus**](RequestStatus.md) |  | 
 **workId** | **String** |  | 
