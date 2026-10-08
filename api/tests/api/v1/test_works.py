@@ -6,6 +6,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from babel_api.adapters.chaptarr import ChaptarrError
 from babel_api.adapters.hardcover import HardcoverBook, HardcoverClient
 from babel_api.domain.catalog import SourceEdition, SourceWork
 
@@ -360,7 +361,9 @@ def test_only_premium_readers_can_request_a_book(
     refused = client.post("/v1/requests", json={"work_id": hit["id"]}, headers=auth)
     assert refused.status_code == 403
     assert chaptarr.added == []
-    assert client.get("/v1/requests", headers=auth).json()["enabled"] is True
+    # Without premium or a Chaptarr of their own the reader cannot ask; the server does offer one.
+    assert client.get("/v1/requests", headers=auth).json()["enabled"] is False
+    assert client.get("/v1/me/chaptarr", headers=auth).json()["server_offers"] is True
 
 
 def test_a_premium_reader_requests_a_book_once(
@@ -753,3 +756,87 @@ def test_the_search_still_answers_when_open_library_is_down(
     assert (
         client.get("/v1/catalog/search", params={"q": "sceptre"}, headers=auth).status_code == 503
     )
+
+
+class ReaderChaptarr(FakeChaptarr):
+    """A reader's own Chaptarr, reached by address and key."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.reached: list[tuple[str, str]] = []
+        self.refuse: str | None = None
+
+    def __call__(self, *args: str) -> "ReaderChaptarr":  # type: ignore[override]
+        self.reached.append((args[0], args[1]))
+        return self
+
+    async def check(self) -> None:
+        if self.refuse:
+            raise ChaptarrError(self.refuse)
+
+
+def test_a_reader_links_their_own_chaptarr_and_asks_it_for_books(
+    app: FastAPI, client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    from cryptography.fernet import Fernet
+
+    from babel_api.adapters.security.secrets import SecretBox
+
+    mine = ReaderChaptarr()
+    app.state.container = replace(
+        app.state.container,
+        chaptarr=None,  # the server has none, and this reader is not premium
+        chaptarr_for_reader=mine,
+        secrets=SecretBox(Fernet.generate_key().decode()),
+    )
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=auth).json()
+    nothing = client.get("/v1/requests", headers=auth).json()
+    assert nothing["enabled"] is False
+    refused = client.post("/v1/requests", json={"work_id": hit["id"]}, headers=auth)
+    assert refused.status_code == 503  # no Chaptarr at all
+
+    body = {"base_url": "https://chaptarr.example.com/", "api_key": "my-secret-key"}
+    linked = client.put("/v1/me/chaptarr", json=body, headers=auth)
+    assert linked.status_code == 200
+    assert linked.json() == {
+        "linked": True,
+        "base_url": "https://chaptarr.example.com",
+        "server_offers": False,
+    }
+    assert "my-secret-key" not in linked.text  # the key is never given back
+    assert mine.reached[-1] == ("https://chaptarr.example.com", "my-secret-key")
+
+    assert client.get("/v1/requests", headers=auth).json()["enabled"] is True
+    asked = client.post("/v1/requests", json={"work_id": hit["id"]}, headers=auth)
+    assert asked.status_code == 201
+    assert len(mine.added) == 1  # it went to the reader's Chaptarr, with the stored key
+    assert mine.reached[-1] == ("https://chaptarr.example.com", "my-secret-key")
+
+    assert client.delete("/v1/me/chaptarr", headers=auth).status_code == 204
+    assert client.get("/v1/me/chaptarr", headers=auth).json()["linked"] is False
+    assert client.get("/v1/requests", headers=auth).json()["enabled"] is False
+
+
+def test_a_chaptarr_that_does_not_answer_properly_is_not_linked(
+    app: FastAPI, client: TestClient, auth: dict[str, str]
+) -> None:
+    from cryptography.fernet import Fernet
+
+    from babel_api.adapters.security.secrets import SecretBox
+
+    mine = ReaderChaptarr()
+    app.state.container = replace(
+        app.state.container,
+        chaptarr_for_reader=mine,
+        secrets=SecretBox(Fernet.generate_key().decode()),
+    )
+    body = {"base_url": "https://chaptarr.example.com", "api_key": "my-secret-key"}
+    mine.refuse = "unauthorized"
+    wrong = client.put("/v1/me/chaptarr", json=body, headers=auth)
+    assert wrong.status_code == 400
+    assert wrong.json()["detail"] == "chaptarr:unauthorized"
+    odd = {"base_url": "ftp://chaptarr.example.com", "api_key": "my-secret-key"}
+    assert (
+        client.put("/v1/me/chaptarr", json=odd, headers=auth).json()["detail"] == "chaptarr:address"
+    )
+    assert client.get("/v1/me/chaptarr", headers=auth).json()["linked"] is False

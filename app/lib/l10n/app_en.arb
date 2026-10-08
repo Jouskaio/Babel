@@ -899,7 +899,21 @@
   "requestAvailable": "Downloaded: it shows up here after the next scan.",
   "requestNotFound": "Not found for now.",
   "requestFailed": "The request could not be sent. Try again later.",
-  "addSourceHint": "This book is in none of your sources. Add one (Kavita, WebDAV, GitHub…) to find it here.",
+  "addSourceHint": "This book is in none of your sources. Add one (Kavita, WebDAV, GitHub…) to find it here, or link your Chaptarr in Account to ask for it.",
   "sourceScanning": "Scanning… a big account can take several minutes.",
-  "sagaOpenKnown": "Not in the catalog: open it to look in your sources or ask for it."
+  "sagaOpenKnown": "Not in the catalog: open it to look in your sources or ask for it.",
+  "chaptarrTitle": "My Chaptarr",
+  "chaptarrHint": "If you run your own Chaptarr, link it: the books you ask for in Babel are searched and downloaded there. Its address and API key are in Chaptarr, Settings, General.",
+  "chaptarrHintServer": "Without a Chaptarr of your own, requests go through the server's (premium accounts only). With yours you can ask without being premium: its address and API key are in Chaptarr, Settings, General.",
+  "chaptarrUrl": "Your Chaptarr's address",
+  "chaptarrKey": "API key",
+  "chaptarrKeyHelp": "Kept encrypted on the server, never shown.",
+  "chaptarrLink": "Link my Chaptarr",
+  "chaptarrUnlink": "Unlink my Chaptarr",
+  "chaptarrLinked": "Linked: {url}",
+  "chaptarrLinkedHint": "Your book requests go to yours.",
+  "chaptarrWrongKey": "Chaptarr refused the API key.",
+  "chaptarrNotChaptarr": "This address does not answer like a Chaptarr.",
+  "chaptarrBadAddress": "Invalid address or key: the address must start with http:// or https://.",
+  "chaptarrUnreachable": "Babel could not reach this Chaptarr. The address must be reachable from the internet."
 }

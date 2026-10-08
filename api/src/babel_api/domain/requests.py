@@ -20,3 +20,13 @@ class BookRequest:
     status: RequestStatus
     created_at: datetime
     chaptarr_id: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ChaptarrLink:
+    """A reader's own Chaptarr: their requests go there instead of to the server's."""
+
+    user_id: UUID
+    base_url: str
+    secret: str  # the API key, encrypted
+    updated_at: datetime

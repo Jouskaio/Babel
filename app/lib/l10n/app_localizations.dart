@@ -4409,7 +4409,7 @@ abstract class AppLocalizations {
   /// No description provided for @addSourceHint.
   ///
   /// In fr, this message translates to:
-  /// **'Ce livre n\'est dans aucune de vos sources. Ajoutez-en une (Kavita, WebDAV, GitHub…) pour le retrouver ici.'**
+  /// **'Ce livre n\'est dans aucune de vos sources. Ajoutez-en une (Kavita, WebDAV, GitHub…) pour le retrouver ici, ou liez votre Chaptarr dans Compte pour pouvoir le demander.'**
   String get addSourceHint;
 
   /// No description provided for @sourceScanning.
@@ -4423,6 +4423,90 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Pas dans le catalogue : ouvrez-le pour le chercher dans vos sources ou le demander.'**
   String get sagaOpenKnown;
+
+  /// No description provided for @chaptarrTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon Chaptarr'**
+  String get chaptarrTitle;
+
+  /// No description provided for @chaptarrHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Si vous avez votre propre Chaptarr, liez-le : les livres que vous demandez depuis Babel y seront cherchés et téléchargés. Adresse et clé d\'API sont dans Chaptarr, Réglages, Général.'**
+  String get chaptarrHint;
+
+  /// No description provided for @chaptarrHintServer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans Chaptarr à vous, les demandes passent par celui du serveur (réservé aux comptes premium). Avec le vôtre, vous pouvez demander sans être premium : adresse et clé d\'API sont dans Chaptarr, Réglages, Général.'**
+  String get chaptarrHintServer;
+
+  /// No description provided for @chaptarrUrl.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse de votre Chaptarr'**
+  String get chaptarrUrl;
+
+  /// No description provided for @chaptarrKey.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clé d\'API'**
+  String get chaptarrKey;
+
+  /// No description provided for @chaptarrKeyHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gardée chiffrée sur le serveur, jamais affichée.'**
+  String get chaptarrKeyHelp;
+
+  /// No description provided for @chaptarrLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lier mon Chaptarr'**
+  String get chaptarrLink;
+
+  /// No description provided for @chaptarrUnlink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délier mon Chaptarr'**
+  String get chaptarrUnlink;
+
+  /// No description provided for @chaptarrLinked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lié : {url}'**
+  String chaptarrLinked(String url);
+
+  /// No description provided for @chaptarrLinkedHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos demandes de livres partent chez vous.'**
+  String get chaptarrLinkedHint;
+
+  /// No description provided for @chaptarrWrongKey.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaptarr a refusé la clé d\'API.'**
+  String get chaptarrWrongKey;
+
+  /// No description provided for @chaptarrNotChaptarr.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette adresse ne répond pas comme un Chaptarr.'**
+  String get chaptarrNotChaptarr;
+
+  /// No description provided for @chaptarrBadAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse ou clé invalide : l\'adresse doit commencer par http:// ou https://.'**
+  String get chaptarrBadAddress;
+
+  /// No description provided for @chaptarrUnreachable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel n\'a pas pu joindre ce Chaptarr. L\'adresse doit être joignable depuis internet.'**
+  String get chaptarrUnreachable;
 }
 
 class _AppLocalizationsDelegate

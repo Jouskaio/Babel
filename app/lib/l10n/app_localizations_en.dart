@@ -2686,7 +2686,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addSourceHint =>
-      'This book is in none of your sources. Add one (Kavita, WebDAV, GitHub…) to find it here.';
+      'This book is in none of your sources. Add one (Kavita, WebDAV, GitHub…) to find it here, or link your Chaptarr in Account to ask for it.';
 
   @override
   String get sourceScanning =>
@@ -2695,4 +2695,53 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get sagaOpenKnown =>
       'Not in the catalog: open it to look in your sources or ask for it.';
+
+  @override
+  String get chaptarrTitle => 'My Chaptarr';
+
+  @override
+  String get chaptarrHint =>
+      'If you run your own Chaptarr, link it: the books you ask for in Babel are searched and downloaded there. Its address and API key are in Chaptarr, Settings, General.';
+
+  @override
+  String get chaptarrHintServer =>
+      'Without a Chaptarr of your own, requests go through the server\'s (premium accounts only). With yours you can ask without being premium: its address and API key are in Chaptarr, Settings, General.';
+
+  @override
+  String get chaptarrUrl => 'Your Chaptarr\'s address';
+
+  @override
+  String get chaptarrKey => 'API key';
+
+  @override
+  String get chaptarrKeyHelp => 'Kept encrypted on the server, never shown.';
+
+  @override
+  String get chaptarrLink => 'Link my Chaptarr';
+
+  @override
+  String get chaptarrUnlink => 'Unlink my Chaptarr';
+
+  @override
+  String chaptarrLinked(String url) {
+    return 'Linked: $url';
+  }
+
+  @override
+  String get chaptarrLinkedHint => 'Your book requests go to yours.';
+
+  @override
+  String get chaptarrWrongKey => 'Chaptarr refused the API key.';
+
+  @override
+  String get chaptarrNotChaptarr =>
+      'This address does not answer like a Chaptarr.';
+
+  @override
+  String get chaptarrBadAddress =>
+      'Invalid address or key: the address must start with http:// or https://.';
+
+  @override
+  String get chaptarrUnreachable =>
+      'Babel could not reach this Chaptarr. The address must be reachable from the internet.';
 }

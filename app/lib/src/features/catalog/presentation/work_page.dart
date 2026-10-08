@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_providers.dart';
-import '../../../core/auth/auth_controller.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/back_leading.dart';
@@ -620,13 +619,11 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
   /// Nothing in the sources: premium readers can ask the server for the book, the others
   /// are invited to add a source.
   List<Widget> _missing(AppLocalizations l10n) {
-    final session = ref.watch(authControllerProvider);
-    final premium = session is SignedIn && session.user.premium;
     final loading = ref.watch(bookRequestsProvider);
     // Wait for the answer: showing "add a source" first would flicker for premium readers.
-    if (premium && loading.isLoading && !loading.hasValue) return const [];
+    if (loading.isLoading && !loading.hasValue) return const [];
     final requests = loading.value;
-    if (premium && requests != null && requests.enabled) {
+    if (requests != null && requests.enabled) {
       final mine = requests.items
           .where((r) => r.workId == widget.workId)
           .firstOrNull;

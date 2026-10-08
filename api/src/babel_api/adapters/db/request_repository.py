@@ -3,11 +3,11 @@
 from datetime import UTC, datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from babel_api.adapters.db.models import BookRequestRow
-from babel_api.domain.requests import BookRequest, RequestStatus
+from babel_api.adapters.db.models import BookRequestRow, ChaptarrLinkRow
+from babel_api.domain.requests import BookRequest, ChaptarrLink, RequestStatus
 
 
 def _to_request(row: BookRequestRow) -> BookRequest:
@@ -65,6 +65,26 @@ class SqlRequestRepository:
             row.chaptarr_id = chaptarr_id if chaptarr_id is not None else row.chaptarr_id
         await self._session.flush()
         return _to_request(row)
+
+    async def link(self, user_id: UUID) -> ChaptarrLink | None:
+        row = await self._session.get(ChaptarrLinkRow, user_id)
+        if row is None:
+            return None
+        updated = row.updated_at if row.updated_at.tzinfo else row.updated_at.replace(tzinfo=UTC)
+        return ChaptarrLink(row.user_id, row.base_url, row.secret, updated)
+
+    async def save_link(self, link: ChaptarrLink) -> None:
+        row = await self._session.get(ChaptarrLinkRow, link.user_id)
+        if row is None:
+            row = ChaptarrLinkRow(user_id=link.user_id)
+            self._session.add(row)
+        row.base_url, row.secret, row.updated_at = link.base_url, link.secret, link.updated_at
+        await self._session.flush()
+
+    async def delete_link(self, user_id: UUID) -> None:
+        await self._session.execute(
+            delete(ChaptarrLinkRow).where(ChaptarrLinkRow.user_id == user_id)
+        )
 
     async def commit(self) -> None:
         await self._session.commit()

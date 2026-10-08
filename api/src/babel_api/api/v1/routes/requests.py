@@ -1,6 +1,7 @@
 """Premium readers ask for books that are in none of their sources."""
 
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, status
@@ -39,10 +40,9 @@ class NewRequest(BaseModel):
 @router.get("", operation_id="listBookRequests")
 async def list_requests(user_id: CurrentUserId, requests: RequestServiceDep) -> RequestsResponse:
     """Your requests, with their progress (the ones still waiting are checked first)."""
-    items = await requests.list(user_id) if requests.enabled else []
-    return RequestsResponse(
-        enabled=requests.enabled, items=[BookRequestResponse.of(r) for r in items]
-    )
+    enabled = await requests.enabled_for(user_id)
+    items = await requests.list(user_id) if enabled else []
+    return RequestsResponse(enabled=enabled, items=[BookRequestResponse.of(r) for r in items])
 
 
 @router.post("", operation_id="requestBook", status_code=status.HTTP_201_CREATED)
@@ -59,3 +59,52 @@ async def request_book(
     if created:
         background.add_task(fulfill_request, container, user_id, body.work_id)
     return BookRequestResponse.of(request)
+
+
+link_router = APIRouter(prefix="/me/chaptarr", tags=["requests"])
+
+
+class ChaptarrLinkResponse(BaseModel):
+    linked: bool = Field(description="You linked your own Chaptarr: your requests go there")
+    base_url: str | None
+    server_offers: bool = Field(
+        description="The server has a Chaptarr of its own, for premium readers"
+    )
+
+
+class ChaptarrLinkRequest(BaseModel):
+    base_url: Annotated[str, Field(min_length=8, max_length=500, description="Its address")]
+    api_key: Annotated[str, Field(min_length=8, max_length=200, description="Settings > General")]
+
+
+async def _link_status(user_id: UUID, requests: RequestServiceDep) -> ChaptarrLinkResponse:
+    link = await requests.link_status(user_id)
+    return ChaptarrLinkResponse(
+        linked=link is not None,
+        base_url=link.base_url if link else None,
+        server_offers=requests.server_enabled,
+    )
+
+
+@link_router.get("", operation_id="getChaptarrLink")
+async def get_chaptarr_link(
+    user_id: CurrentUserId, requests: RequestServiceDep
+) -> ChaptarrLinkResponse:
+    """Whether you linked your own Chaptarr (its key is never given back)."""
+    return await _link_status(user_id, requests)
+
+
+@link_router.put("", operation_id="linkChaptarr")
+async def link_chaptarr(
+    user_id: CurrentUserId, requests: RequestServiceDep, body: ChaptarrLinkRequest
+) -> ChaptarrLinkResponse:
+    """Link your own Chaptarr: its address and API key are checked, then kept (the key
+    encrypted). Your book requests then go to it."""
+    await requests.link(user_id, body.base_url, body.api_key)
+    return await _link_status(user_id, requests)
+
+
+@link_router.delete("", operation_id="unlinkChaptarr", status_code=status.HTTP_204_NO_CONTENT)
+async def unlink_chaptarr(user_id: CurrentUserId, requests: RequestServiceDep) -> None:
+    """Forget your Chaptarr; the books already requested stay as they are."""
+    await requests.unlink(user_id)

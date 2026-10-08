@@ -606,3 +606,16 @@ class BookRequestRow(Base):
     status: Mapped[str] = mapped_column(String(20))
     chaptarr_id: Mapped[int | None] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class ChaptarrLinkRow(Base):
+    """A reader's own Chaptarr, linked to Babel for their book requests."""
+
+    __tablename__ = "chaptarr_links"
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    base_url: Mapped[str] = mapped_column(String(500))
+    secret: Mapped[str] = mapped_column(Text)  # the API key, encrypted
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
