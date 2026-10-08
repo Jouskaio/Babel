@@ -48,4 +48,11 @@ class StdlibTransport(httpx.AsyncBaseTransport):
 
     async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
         body = await request.aread()
-        return await asyncio.to_thread(self._send, request, body)
+        try:
+            # urllib's timeout applies to each socket operation: a server that drips bytes could
+            # hold a scan for ever, so the whole request has a deadline too.
+            return await asyncio.wait_for(
+                asyncio.to_thread(self._send, request, body), timeout=self._timeout * 2
+            )
+        except TimeoutError as error:
+            raise httpx.ReadTimeout("deadline exceeded", request=request) from error

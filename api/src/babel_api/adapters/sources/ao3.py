@@ -171,6 +171,8 @@ class Ao3Connector:
                     raise SourceConnectionError(str(response.status_code))
                 break
             soup = _soup(response)
+            if page == 1 or page % 10 == 0:
+                log.info("AO3 %s: page %s read, %s works so far", url, page, len(entries))
             for blurb in soup.select(item):
                 entry = self._entry(blurb)
                 if entry is not None:

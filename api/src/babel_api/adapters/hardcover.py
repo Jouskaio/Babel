@@ -62,24 +62,55 @@ def pick_description(search: dict[str, Any], title: str, authors: tuple[str, ...
     return None
 
 
+_BRACKETS = re.compile(r"\[([^\]]+)\]")
+_ARTICLES = {"the", "a", "an", "le", "la", "les", "l", "un", "une", "der", "die", "das"}
+_SERIES_WORDS = {"series", "serie", "saga", "trilogy", "cycle", "collection", "novels"}
+
+
+def _norm(name: str) -> str:
+    """A series name without the words that vary: "The Hunger Games (Trilogy)" and
+    "Hunger Games Series" are both "hunger games"."""
+    words = series_key(re.sub(r"\([^)]*\)", " ", name)).split()
+    while words and words[0] in _ARTICLES:
+        words = words[1:]
+    while words and words[-1] in _SERIES_WORDS:
+        words = words[:-1]
+    return " ".join(words)
+
+
+def _spellings(name: str) -> set[str]:
+    """The ways a series is spelled: "ホムンクルス [Homunculus]" is also "Homunculus"."""
+    spellings = {_norm(name), _norm(_BRACKETS.sub(" ", name))}
+    spellings.update(_norm(inside) for inside in _BRACKETS.findall(name))
+    return spellings - {""}
+
+
 def pick_series(search: dict[str, Any], name: str, author: str | None) -> int | None:
-    """The id of the series called [name], among search hits. With several of that name, the
-    one by this author; with a single one, that one (its author may be spelled otherwise)."""
+    """The id of the series called [name] among search hits: the same name however spelled
+    (translated title in brackets, "Series" or "Trilogy" added, a leading "The"), or a longer
+    name that contains it when the author agrees ("Homunculus" in "Homunculus Bunkoban").
+
+    With an author, the series by that author wins; with several of the name and none by that
+    author, nothing is guessed; with a single one, it is taken (the author may be spelled in
+    another script). Among several, the one with the most readers."""
     ids = cast(list[Any], search.get("ids") or [])
+    wanted = _norm(name)
+    wanted_words = set(wanted.split())
     surname = series_key(author).split(" ")[-1] if author and series_key(author) else None
-    named: list[tuple[int, dict[str, Any]]] = [
-        (i, doc)
-        for i, doc in enumerate(_hits(search))
-        if series_key(str(doc.get("name", ""))) == series_key(name)
-    ]
-    chosen = [
-        (i, doc)
-        for i, doc in named
-        if not surname or surname in series_key(str(doc.get("author_name", "")))
-    ] or (named if len(named) == 1 else [])
-    if not chosen:
+    scored: list[tuple[bool, bool, int, int]] = []  # author agrees, exact, readers, hit index
+    for i, doc in enumerate(_hits(search)):
+        spellings = _spellings(str(doc.get("name", "")))
+        exact = wanted in spellings
+        contains = any(wanted_words and wanted_words <= set(sp.split()) for sp in spellings)
+        agrees = not surname or surname in series_key(str(doc.get("author_name", "")))
+        if exact or (contains and agrees):
+            readers = doc.get("readers_count")
+            scored.append((agrees, exact, int(readers) if isinstance(readers, int) else 0, i))
+    pool = [c for c in scored if c[0]] or (scored if len(scored) == 1 or not surname else [])
+    if not pool:
         return None
-    i, doc = chosen[0]
+    i = max(pool)[3]
+    doc = _hits(search)[i]
     return int(ids[i]) if i < len(ids) else int(doc["id"])
 
 
