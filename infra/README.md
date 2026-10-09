@@ -170,6 +170,10 @@ echo "BABEL_SHELFMARK_API_KEY=<the same key>" >> /opt/babel/.env
 cd /opt/babel && docker compose up -d api
 ```
 
+Readers can also link their own Shelfmark (Account > My Shelfmark: address and key); it is then used
+for them, premium or not. Babel asks the server's Shelfmark for titles for everyone, and passes
+the Latin titles it finds to Chaptarr when the Shelfmark download does not apply.
+
 Shelfmark's downloads cannot be followed from Babel: the book shows up in "In my sources" once Kavita
 has scanned it. Requests still need Chaptarr to be set (or a reader's own link).
 

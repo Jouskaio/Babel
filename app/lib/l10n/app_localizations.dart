@@ -4064,6 +4064,90 @@ abstract class AppLocalizations {
   /// **'Annuler la demande'**
   String get requestCancel;
 
+  /// No description provided for @shelfmarkTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon Shelfmark'**
+  String get shelfmarkTitle;
+
+  /// No description provided for @shelfmarkHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Si vous avez votre propre Shelfmark, liez-le : les mangas et BD que vous demandez y sont cherchés et téléchargés. Adresse et clé d\'API (variable SHELFMARK_API_KEY) sont dans la configuration de Shelfmark.'**
+  String get shelfmarkHint;
+
+  /// No description provided for @shelfmarkHintServer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans Shelfmark à vous, les mangas passent par celui du serveur (réservé aux comptes premium), puis par Chaptarr. Avec le vôtre, vous n\'avez pas besoin d\'être premium.'**
+  String get shelfmarkHintServer;
+
+  /// No description provided for @shelfmarkUrl.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse de votre Shelfmark'**
+  String get shelfmarkUrl;
+
+  /// No description provided for @shelfmarkKey.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clé d\'API'**
+  String get shelfmarkKey;
+
+  /// No description provided for @shelfmarkKeyHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gardée chiffrée sur le serveur, jamais affichée.'**
+  String get shelfmarkKeyHelp;
+
+  /// No description provided for @shelfmarkLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lier mon Shelfmark'**
+  String get shelfmarkLink;
+
+  /// No description provided for @shelfmarkUnlink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délier mon Shelfmark'**
+  String get shelfmarkUnlink;
+
+  /// No description provided for @shelfmarkLinked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lié : {url}'**
+  String shelfmarkLinked(String url);
+
+  /// No description provided for @shelfmarkLinkedHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos mangas et BD sont téléchargés chez vous.'**
+  String get shelfmarkLinkedHint;
+
+  /// No description provided for @shelfmarkWrongKey.
+  ///
+  /// In fr, this message translates to:
+  /// **'Shelfmark a refusé la clé d\'API.'**
+  String get shelfmarkWrongKey;
+
+  /// No description provided for @shelfmarkNotShelfmark.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette adresse ne répond pas comme un Shelfmark.'**
+  String get shelfmarkNotShelfmark;
+
+  /// No description provided for @shelfmarkBadAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse ou clé invalide : l\'adresse doit commencer par http:// ou https://.'**
+  String get shelfmarkBadAddress;
+
+  /// No description provided for @shelfmarkUnreachable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel n\'a pas pu joindre ce Shelfmark. L\'adresse doit être joignable depuis internet.'**
+  String get shelfmarkUnreachable;
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

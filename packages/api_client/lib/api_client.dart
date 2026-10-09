@@ -388,6 +388,10 @@ class ApiClient {
           return SharedNoteResponse.fromJson(value);
         case 'ShelfResponse':
           return ShelfResponse.fromJson(value);
+        case 'ShelfmarkLinkRequest':
+          return ShelfmarkLinkRequest.fromJson(value);
+        case 'ShelfmarkLinkResponse':
+          return ShelfmarkLinkResponse.fromJson(value);
         case 'SocialProfileResponse':
           return SocialProfileResponse.fromJson(value);
         case 'SourceDetailResponse':

@@ -70,6 +70,23 @@ def test_a_volume_is_searched_then_its_best_release_queued() -> None:
     assert not asyncio.run(shelf.fetch("Something else 9", ("Nobody",)))
 
 
+def test_a_release_must_name_the_volume_and_may_leave_its_format_unsaid() -> None:
+    releases = [
+        {"title": "Apothecary Diaries v02", "protocol": "torrent", "seeders": 9},
+        {"title": "Apothecary Diaries v01-17", "protocol": "torrent", "seeders": 90},
+        {"title": "Apothecary Diaries v01 (Digital)", "protocol": "torrent", "seeders": 4},
+        {
+            "title": "Apothecary Diaries Tome 1",
+            "format": "pdf",
+            "protocol": "torrent",
+            "seeders": 2,
+        },
+    ]
+    assert pick_release(releases, 1) == releases[2]
+    assert pick_release(releases, 3) is None
+    assert pick_release(releases) == releases[0]
+
+
 def test_a_book_known_only_by_its_original_title_is_found_by_volume() -> None:
     from babel_api.adapters.shelfmark import original_title_match
 

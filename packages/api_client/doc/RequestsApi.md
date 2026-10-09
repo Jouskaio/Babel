@@ -11,10 +11,13 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**cancelBookRequest**](RequestsApi.md#cancelbookrequest) | **DELETE** /v1/requests/{work_id} | Cancel Request
 [**getChaptarrLink**](RequestsApi.md#getchaptarrlink) | **GET** /v1/me/chaptarr | Get Chaptarr Link
+[**getShelfmarkLink**](RequestsApi.md#getshelfmarklink) | **GET** /v1/me/shelfmark | Get Shelfmark Link
 [**linkChaptarr**](RequestsApi.md#linkchaptarr) | **PUT** /v1/me/chaptarr | Link Chaptarr
+[**linkShelfmark**](RequestsApi.md#linkshelfmark) | **PUT** /v1/me/shelfmark | Link Shelfmark
 [**listBookRequests**](RequestsApi.md#listbookrequests) | **GET** /v1/requests | List Requests
 [**requestBook**](RequestsApi.md#requestbook) | **POST** /v1/requests | Request Book
 [**unlinkChaptarr**](RequestsApi.md#unlinkchaptarr) | **DELETE** /v1/me/chaptarr | Unlink Chaptarr
+[**unlinkShelfmark**](RequestsApi.md#unlinkshelfmark) | **DELETE** /v1/me/shelfmark | Unlink Shelfmark
 
 
 # **cancelBookRequest**
@@ -112,6 +115,51 @@ This endpoint does not need any parameter.
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **getShelfmarkLink**
+> ShelfmarkLinkResponse getShelfmarkLink()
+
+Get Shelfmark Link
+
+Whether you linked your own Shelfmark (its key is never given back).
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = RequestsApi();
+
+try {
+    final result = api_instance.getShelfmarkLink();
+    print(result);
+} catch (e) {
+    print('Exception when calling RequestsApi->getShelfmarkLink: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**ShelfmarkLinkResponse**](ShelfmarkLinkResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **linkChaptarr**
 > ChaptarrLinkResponse linkChaptarr(chaptarrLinkRequest)
 
@@ -149,6 +197,55 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**ChaptarrLinkResponse**](ChaptarrLinkResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **linkShelfmark**
+> ShelfmarkLinkResponse linkShelfmark(shelfmarkLinkRequest)
+
+Link Shelfmark
+
+Link your own Shelfmark: its address and key are checked, then kept (the key encrypted). Manga you ask for are then downloaded there.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = RequestsApi();
+final shelfmarkLinkRequest = ShelfmarkLinkRequest(); // ShelfmarkLinkRequest | 
+
+try {
+    final result = api_instance.linkShelfmark(shelfmarkLinkRequest);
+    print(result);
+} catch (e) {
+    print('Exception when calling RequestsApi->linkShelfmark: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **shelfmarkLinkRequest** | [**ShelfmarkLinkRequest**](ShelfmarkLinkRequest.md)|  | 
+
+### Return type
+
+[**ShelfmarkLinkResponse**](ShelfmarkLinkResponse.md)
 
 ### Authorization
 
@@ -278,6 +375,50 @@ try {
     api_instance.unlinkChaptarr();
 } catch (e) {
     print('Exception when calling RequestsApi->unlinkChaptarr: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **unlinkShelfmark**
+> unlinkShelfmark()
+
+Unlink Shelfmark
+
+Forget your Shelfmark; what it already started stays.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = RequestsApi();
+
+try {
+    api_instance.unlinkShelfmark();
+} catch (e) {
+    print('Exception when calling RequestsApi->unlinkShelfmark: $e\n');
 }
 ```
 

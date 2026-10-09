@@ -17,7 +17,7 @@ from uuid import UUID
 from babel_api.adapters.chaptarr import ChaptarrClient, ChaptarrError
 from babel_api.adapters.db.request_repository import SqlRequestRepository
 from babel_api.adapters.security.secrets import SecretBox
-from babel_api.adapters.shelfmark import ShelfmarkClient, ShelfmarkError
+from babel_api.adapters.shelfmark import CJK, ShelfmarkClient, ShelfmarkError
 from babel_api.domain.errors import (
     NotFoundError,
     PremiumRequiredError,
@@ -34,6 +34,7 @@ log = logging.getLogger(__name__)
 SHELFMARK_ID = -1
 
 ClientFactory = Callable[[str, str], ChaptarrClient]
+ShelfmarkFactory = Callable[[str, str], ShelfmarkClient]
 
 
 def volume_title(title: str) -> str:
@@ -57,8 +58,10 @@ class RequestService:
         secrets: SecretBox,
         scan_library: Callable[[], Awaitable[None]],
         shelfmark: Callable[[], ShelfmarkClient] | None = None,
+        reader_shelfmark: ShelfmarkFactory | None = None,
     ) -> None:
         self._shelfmark = shelfmark
+        self._reader_shelfmark = reader_shelfmark
         self._requests = requests
         self._users = users
         self._works = works
@@ -97,6 +100,51 @@ class RequestService:
         await self._requests.delete_link(user_id)
         await self._requests.commit()
 
+    # ------------------------------------------------------------ the reader's own Shelfmark
+    async def shelfmark_link_status(self, user_id: UUID) -> ChaptarrLink | None:
+        return await self._requests.link(user_id, "shelfmark")
+
+    @property
+    def shelfmark_server_enabled(self) -> bool:
+        return self._shelfmark is not None
+
+    async def link_shelfmark(self, user_id: UUID, url: str, api_key: str) -> ChaptarrLink:
+        """Checks the address and the key (SHELFMARK_API_KEY), then keeps them encrypted."""
+        base = url.strip().rstrip("/")
+        parts = urlsplit(base)
+        if (
+            self._reader_shelfmark is None
+            or parts.scheme not in {"http", "https"}
+            or not parts.hostname
+            or not api_key.strip()
+        ):
+            raise ShelfmarkError("address")
+        client = self._reader_shelfmark(base, api_key.strip())
+        try:
+            await client.check()
+        finally:
+            await client.aclose()
+        link = ChaptarrLink(
+            user_id, base, self._secrets.encrypt(api_key.strip()), datetime.now(UTC)
+        )
+        await self._requests.save_link(link, "shelfmark")
+        await self._requests.commit()
+        return link
+
+    async def unlink_shelfmark(self, user_id: UUID) -> None:
+        await self._requests.delete_link(user_id, "shelfmark")
+        await self._requests.commit()
+
+    async def _shelf_for(self, user_id: UUID) -> ShelfmarkClient | None:
+        """The reader's own Shelfmark, else the server's when they are premium."""
+        link = await self._requests.link(user_id, "shelfmark")
+        if link is not None and self._reader_shelfmark is not None:
+            return self._reader_shelfmark(link.base_url, self._secrets.decrypt(link.secret))
+        user = await self._users.get_by_id(user_id)
+        if self._shelfmark is not None and user is not None and user.has_premium:
+            return self._shelfmark()
+        return None
+
     # ------------------------------------------------------------ which Chaptarr
     async def _client_for(self, user_id: UUID) -> ChaptarrClient | None:
         """The reader's own Chaptarr, else the server's when they are premium."""
@@ -113,19 +161,24 @@ class RequestService:
         and they are premium."""
         if await self._requests.link(user_id) is not None:
             return True
+        if await self._requests.link(user_id, "shelfmark") is not None:
+            return True
         user = await self._users.get_by_id(user_id)
-        return self._server is not None and user is not None and user.has_premium
+        premium = user is not None and user.has_premium
+        return premium and (self._server is not None or self._shelfmark is not None)
 
     # ------------------------------------------------------------ requests
     async def request(
         self, user_id: UUID, work_id: UUID, language: str = ""
     ) -> tuple[BookRequest, bool]:
         """Records the request at once (and whether it is new); [fulfill] then asks Chaptarr."""
-        client = await self._client_for(user_id)
-        if client is None:
-            # No Chaptarr of their own: the server's is for premium readers.
-            raise PremiumRequiredError if self._server is not None else RequestsUnavailableError
-        await client.aclose()
+        if not await self.enabled_for(user_id):
+            # No Chaptarr or Shelfmark of their own: the server's are for premium readers.
+            raise (
+                PremiumRequiredError
+                if self._server is not None or self._shelfmark is not None
+                else RequestsUnavailableError
+            )
         existing = await self._requests.get(user_id, work_id, language)
         if existing is not None and existing.status is not RequestStatus.NOT_FOUND:
             return existing, False
@@ -138,21 +191,32 @@ class RequestService:
         """Finds the book in Chaptarr and adds it; a miss or a failure reads as "not found"
         (the reader can ask again)."""
         client = await self._client_for(user_id)
-        if client is None:
-            return
+        shelf = await self._shelf_for(user_id)
         detail = await self._works.get(work_id)
         work = detail.work
         # The title the book bears in the language asked for ("Les Misérables", not "Les Mis...").
         title = volume_title(detail.localized(language or None)[0])
-        if await self._via_shelfmark(title, detail, work.authors):
+        # Shelfmark's search understands titles well (original ones too): it is asked for
+        # everyone, and feeds the other titles Chaptarr is tried with.
+        names, hits = await self._titles(title, detail, work.authors)
+        if shelf is not None and await self._via_shelfmark(shelf, title, names, work.authors):
             await self._requests.save(
                 user_id, work_id, RequestStatus.REQUESTED, SHELFMARK_ID, language
             )
             await self._requests.commit()
-            await client.aclose()
+            if client is not None:
+                await client.aclose()
+            return
+        if client is None:
+            await self._requests.save(user_id, work_id, RequestStatus.NOT_FOUND, None, language)
+            await self._requests.commit()
             return
         try:
-            found = await client.lookup(title, work.authors)
+            found = None
+            for name in dict.fromkeys((title, *hits)):  # then the titles Shelfmark gave
+                found = await client.lookup(name, work.authors)
+                if found is not None:
+                    break
             original = await self._english(client, detail, title, found)
             if found is None and original is None:
                 await self._requests.save(user_id, work_id, RequestStatus.NOT_FOUND, None, language)
@@ -170,21 +234,39 @@ class RequestService:
             await client.aclose()
         await self._requests.commit()
 
-    async def _via_shelfmark(
+    async def _titles(
         self, title: str, detail: WorkDetail, authors: tuple[str, ...]
+    ) -> tuple[list[str], list[str]]:
+        """(every title to try on Shelfmark, the Latin-script titles its search found for
+        this volume). Empty second list when the server has no Shelfmark."""
+        names = [volume_title(detail.localized("en")[0]), title]
+        names += await self._works.other_titles(title, authors)
+        names = list(dict.fromkeys(names))
+        found: list[str] = []
+        if self._shelfmark is not None and guess_series(title) is not None:
+            search = self._shelfmark()
+            try:
+                for hit in await search.search(title, authors):
+                    text = str(hit.get("title", ""))
+                    guess = guess_series(text)
+                    if guess is not None and not CJK.search(text):
+                        found.append(volume_title(text))
+            except ShelfmarkError as error:
+                log.warning("Shelfmark search failed: %s", error.reason)
+            finally:
+                await search.aclose()
+        return names, [n for n in dict.fromkeys(found) if n not in names]
+
+    async def _via_shelfmark(
+        self, shelf: ShelfmarkClient, title: str, names: list[str], authors: tuple[str, ...]
     ) -> bool:
-        """Manga and other numbered volumes go to Shelfmark first (English title preferred:
-        indexers know them by it). False when it is not set, finds nothing or fails."""
-        if self._shelfmark is None or guess_series(title) is None:
-            log.info("Request %r: Shelfmark not used (set: %s)", title, self._shelfmark is not None)
-            return False
-        shelf = self._shelfmark()
-        log.info("Request %r: trying Shelfmark", title)
+        """Numbered volumes (manga, comics) are downloaded through Shelfmark first. False when
+        the book is not a volume, Shelfmark finds nothing or fails."""
         try:
-            names = [volume_title(detail.localized("en")[0]), title]
-            names += await self._works.other_titles(title, authors)
-            log.info("Request %r: Shelfmark titles to try: %s", title, list(dict.fromkeys(names)))
-            for name in dict.fromkeys(names):
+            if guess_series(title) is None:
+                return False
+            log.info("Request %r: Shelfmark titles to try: %s", title, names)
+            for name in names:
                 if await shelf.fetch(name, authors):
                     return True
         except ShelfmarkError as error:

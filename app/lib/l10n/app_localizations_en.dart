@@ -2442,6 +2442,56 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requestCancel => 'Cancel the request';
 
   @override
+  String get shelfmarkTitle => 'My Shelfmark';
+
+  @override
+  String get shelfmarkHint =>
+      'If you have your own Shelfmark, link it: the manga and comics you ask for are searched and downloaded there. Its address and API key (the SHELFMARK_API_KEY setting) are in Shelfmark\'s configuration.';
+
+  @override
+  String get shelfmarkHintServer =>
+      'Without a Shelfmark of your own, manga go through the server\'s (premium accounts only), then Chaptarr. With yours, you need not be premium.';
+
+  @override
+  String get shelfmarkUrl => 'Your Shelfmark\'s address';
+
+  @override
+  String get shelfmarkKey => 'API key';
+
+  @override
+  String get shelfmarkKeyHelp => 'Kept encrypted on the server, never shown.';
+
+  @override
+  String get shelfmarkLink => 'Link my Shelfmark';
+
+  @override
+  String get shelfmarkUnlink => 'Unlink my Shelfmark';
+
+  @override
+  String shelfmarkLinked(String url) {
+    return 'Linked: $url';
+  }
+
+  @override
+  String get shelfmarkLinkedHint =>
+      'Your manga and comics are downloaded at your place.';
+
+  @override
+  String get shelfmarkWrongKey => 'Shelfmark refused the API key.';
+
+  @override
+  String get shelfmarkNotShelfmark =>
+      'This address does not answer like a Shelfmark.';
+
+  @override
+  String get shelfmarkBadAddress =>
+      'Invalid address or key: the address must start with http:// or https://.';
+
+  @override
+  String get shelfmarkUnreachable =>
+      'Babel could not reach this Shelfmark. The address must be reachable from the internet.';
+
+  @override
   String get coverDefault => 'Default';
 
   @override

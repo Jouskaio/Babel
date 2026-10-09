@@ -17,7 +17,7 @@ from babel_api.domain.series import guess_series
 
 BOOK_FORMATS = ("epub", "cbz", "cbr", "pdf")
 MAX_VOLUME_BYTES = 400 * 1024 * 1024  # a batch of many volumes is far above this
-_CJK = re.compile(r"[぀-ヿ㐀-鿿가-힯]")  # raws, not for the reader
+CJK = re.compile(r"[぀-ヿ㐀-鿿가-힯]")  # raws, not for the reader
 
 
 log = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ def original_title_match(books: list[dict[str, Any]], title: str) -> dict[str, A
     for book in books:
         text = str(book.get("title", ""))
         number = _NUMBER_LAST.search(text.split("[")[0].strip())
-        if _CJK.search(text) and number is not None and float(number[1]) == guess.number:
+        if CJK.search(text) and number is not None and float(number[1]) == guess.number:
             return book
     return None
 
@@ -46,18 +46,36 @@ class ShelfmarkError(DomainError):
         self.reason = reason
 
 
-def pick_release(releases: list[dict[str, Any]]) -> dict[str, Any] | None:
-    """The release that suits best: a book format, not in Japanese, one volume's size; a direct
-    download first, then the torrent with the most seeders (none without seeders)."""
+_RANGE = re.compile(r"\d\s*[-–~]\s*\d")  # "1-17": a batch of volumes
+
+
+def _mentions(title: str, volume: float) -> bool:
+    """Whether a release title names this volume ("v01", "Vol. 1", "Tome 01", "#1")."""
+    wanted = f"{volume:g}"
+    return any(
+        number.lstrip("0") == wanted or (not number.lstrip("0") and wanted == "0")
+        for number in re.findall(r"(?<!\d)\d{1,3}(?!\d)", title)
+    )
+
+
+def pick_release(
+    releases: list[dict[str, Any]], volume: float | None = None
+) -> dict[str, Any] | None:
+    """The release that suits best: one volume (the wanted one), a book format when it says
+    which, not in Japanese, one volume's size; a direct download first, then the torrent with
+    the most seeders (none without seeders)."""
     scored: list[tuple[int, int, dict[str, Any]]] = []
     for release in releases:
-        fmt = str(release.get("format") or "").lower()
+        fmt = str(release.get("format") or "").lower()  # torrents often do not say
+        title = str(release.get("title", ""))
         size = release.get("size_bytes")
         torrent = str(release.get("protocol") or "").lower() == "torrent"
         seeders = release.get("seeders")
         if (
-            fmt not in BOOK_FORMATS
-            or _CJK.search(str(release.get("title", "")))
+            (fmt and fmt not in BOOK_FORMATS)
+            or CJK.search(title)
+            or _RANGE.search(title)
+            or (volume is not None and not _mentions(title, volume))
             or (isinstance(size, int) and size > MAX_VOLUME_BYTES)
             or (torrent and not (isinstance(seeders, int) and seeders > 0))
         ):
@@ -94,15 +112,25 @@ class ShelfmarkClient:
         except ValueError as error:
             raise ShelfmarkError("not_shelfmark") from error
 
-    async def fetch(self, title: str, authors: tuple[str, ...]) -> bool:
-        """Queues the best release of the book; False when Shelfmark knows none."""
-        books: list[dict[str, Any]] = []
-        # The title alone first: adding the author often finds nothing.
+    async def check(self) -> None:
+        """Whether the address is a Shelfmark and the key is accepted (/api/status)."""
+        status = await self._call("GET", "status")
+        if not isinstance(status, dict):
+            raise ShelfmarkError("not_shelfmark")
+
+    async def search(self, title: str, authors: tuple[str, ...]) -> list[dict[str, Any]]:
+        """Books Shelfmark's metadata finds for a title (alone first: adding the author often
+        finds nothing), best first; empty when it knows none."""
         for query in dict.fromkeys((title, f"{title} {authors[0]}" if authors else title)):
             found = await self._call("GET", "metadata/search", params={"query": query})
             books = cast(list[dict[str, Any]], cast(dict[str, Any], found or {}).get("books") or [])
             if books:
-                break
+                return books
+        return []
+
+    async def fetch(self, title: str, authors: tuple[str, ...]) -> bool:
+        """Queues the best release of the book; False when Shelfmark knows none."""
+        books = await self.search(title, authors)
         # Same match rule as Chaptarr's: the title (or the same volume) and a shared author.
         as_books = [
             {
@@ -133,7 +161,8 @@ class ShelfmarkClient:
         releases = cast(
             list[dict[str, Any]], cast(dict[str, Any], listing or {}).get("releases") or []
         )
-        chosen = pick_release(releases)
+        guess = guess_series(title)
+        chosen = pick_release(releases, guess.number if guess else None)
         if chosen is None:
             sample = [(r.get("title"), r.get("format"), r.get("seeders")) for r in releases[:6]]
             log.info(

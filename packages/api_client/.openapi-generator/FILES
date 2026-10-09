@@ -113,6 +113,8 @@ doc/ReviewResponse.md
 doc/SagaVolumeResponse.md
 doc/SharedNoteResponse.md
 doc/ShelfResponse.md
+doc/ShelfmarkLinkRequest.md
+doc/ShelfmarkLinkResponse.md
 doc/SocialApi.md
 doc/SocialProfileResponse.md
 doc/SourceDetailResponse.md
@@ -264,6 +266,8 @@ lib/model/review_response.dart
 lib/model/saga_volume_response.dart
 lib/model/shared_note_response.dart
 lib/model/shelf_response.dart
+lib/model/shelfmark_link_request.dart
+lib/model/shelfmark_link_response.dart
 lib/model/social_profile_response.dart
 lib/model/source_detail_response.dart
 lib/model/source_entry_response.dart

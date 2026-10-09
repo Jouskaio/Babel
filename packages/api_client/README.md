@@ -142,10 +142,13 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**withdrawFile**](doc//LibraryApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
 *RequestsApi* | [**cancelBookRequest**](doc//RequestsApi.md#cancelbookrequest) | **DELETE** /v1/requests/{work_id} | Cancel Request
 *RequestsApi* | [**getChaptarrLink**](doc//RequestsApi.md#getchaptarrlink) | **GET** /v1/me/chaptarr | Get Chaptarr Link
+*RequestsApi* | [**getShelfmarkLink**](doc//RequestsApi.md#getshelfmarklink) | **GET** /v1/me/shelfmark | Get Shelfmark Link
 *RequestsApi* | [**linkChaptarr**](doc//RequestsApi.md#linkchaptarr) | **PUT** /v1/me/chaptarr | Link Chaptarr
+*RequestsApi* | [**linkShelfmark**](doc//RequestsApi.md#linkshelfmark) | **PUT** /v1/me/shelfmark | Link Shelfmark
 *RequestsApi* | [**listBookRequests**](doc//RequestsApi.md#listbookrequests) | **GET** /v1/requests | List Requests
 *RequestsApi* | [**requestBook**](doc//RequestsApi.md#requestbook) | **POST** /v1/requests | Request Book
 *RequestsApi* | [**unlinkChaptarr**](doc//RequestsApi.md#unlinkchaptarr) | **DELETE** /v1/me/chaptarr | Unlink Chaptarr
+*RequestsApi* | [**unlinkShelfmark**](doc//RequestsApi.md#unlinkshelfmark) | **DELETE** /v1/me/shelfmark | Unlink Shelfmark
 *SocialApi* | [**addFriend**](doc//SocialApi.md#addfriend) | **PUT** /v1/social/friends/{handle} | Add Friend
 *SocialApi* | [**blockReader**](doc//SocialApi.md#blockreader) | **PUT** /v1/social/blocks/{handle} | Block Reader
 *SocialApi* | [**commentReview**](doc//SocialApi.md#commentreview) | **POST** /v1/social/reviews/{review_id}/comments | Comment Review
@@ -299,6 +302,8 @@ Class | Method | HTTP request | Description
  - [SagaVolumeResponse](doc//SagaVolumeResponse.md)
  - [SharedNoteResponse](doc//SharedNoteResponse.md)
  - [ShelfResponse](doc//ShelfResponse.md)
+ - [ShelfmarkLinkRequest](doc//ShelfmarkLinkRequest.md)
+ - [ShelfmarkLinkResponse](doc//ShelfmarkLinkResponse.md)
  - [SocialProfileResponse](doc//SocialProfileResponse.md)
  - [SourceDetailResponse](doc//SourceDetailResponse.md)
  - [SourceEntryResponse](doc//SourceEntryResponse.md)

@@ -145,6 +145,8 @@ part 'model/review_response.dart';
 part 'model/saga_volume_response.dart';
 part 'model/shared_note_response.dart';
 part 'model/shelf_response.dart';
+part 'model/shelfmark_link_request.dart';
+part 'model/shelfmark_link_response.dart';
 part 'model/social_profile_response.dart';
 part 'model/source_detail_response.dart';
 part 'model/source_entry_response.dart';

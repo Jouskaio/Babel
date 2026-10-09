@@ -3778,6 +3778,62 @@
         "title": "ShelfResponse",
         "type": "object"
       },
+      "ShelfmarkLinkRequest": {
+        "properties": {
+          "api_key": {
+            "description": "Its SHELFMARK_API_KEY setting",
+            "maxLength": 200,
+            "minLength": 8,
+            "title": "Api Key",
+            "type": "string"
+          },
+          "base_url": {
+            "description": "Its address",
+            "maxLength": 500,
+            "minLength": 8,
+            "title": "Base Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "base_url",
+          "api_key"
+        ],
+        "title": "ShelfmarkLinkRequest",
+        "type": "object"
+      },
+      "ShelfmarkLinkResponse": {
+        "properties": {
+          "base_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Url"
+          },
+          "linked": {
+            "description": "You linked your own Shelfmark: manga are downloaded there",
+            "title": "Linked",
+            "type": "boolean"
+          },
+          "server_offers": {
+            "description": "The server has a Shelfmark, for premium readers",
+            "title": "Server Offers",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "linked",
+          "base_url",
+          "server_offers"
+        ],
+        "title": "ShelfmarkLinkResponse",
+        "type": "object"
+      },
       "SocialProfileResponse": {
         "description": "The signed-in reader's public side.",
         "properties": {
@@ -9011,6 +9067,96 @@
         "tags": [
           "social",
           "account"
+        ]
+      }
+    },
+    "/v1/me/shelfmark": {
+      "delete": {
+        "description": "Forget your Shelfmark; what it already started stays.",
+        "operationId": "unlinkShelfmark",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unlink Shelfmark",
+        "tags": [
+          "requests"
+        ]
+      },
+      "get": {
+        "description": "Whether you linked your own Shelfmark (its key is never given back).",
+        "operationId": "getShelfmarkLink",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShelfmarkLinkResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Shelfmark Link",
+        "tags": [
+          "requests"
+        ]
+      },
+      "put": {
+        "description": "Link your own Shelfmark: its address and key are checked, then kept (the key\nencrypted). Manga you ask for are then downloaded there.",
+        "operationId": "linkShelfmark",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShelfmarkLinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShelfmarkLinkResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Link Shelfmark",
+        "tags": [
+          "requests"
         ]
       }
     },

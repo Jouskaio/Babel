@@ -91,6 +91,8 @@ class Container:
     chaptarr: Callable[[], ChaptarrClient] | None = None
     # Shelfmark (manga and other volumes are asked for there first); None when not set.
     shelfmark: Callable[[], ShelfmarkClient] | None = None
+    # How a reader's own Shelfmark is reached (tests replace it); None: with the address guard.
+    shelfmark_for_reader: Callable[[str, str], ShelfmarkClient] | None = None
     hardcover: HardcoverClient | None = None
     # How a reader's own Chaptarr is reached (tests replace it); None: with the address guard.
     chaptarr_for_reader: Callable[[str, str], ChaptarrClient] | None = None
@@ -373,6 +375,9 @@ def make_request_service(container: Container, session: AsyncSession) -> Request
         # used to reach the server's own network (unless the operator allows the host).
         return ChaptarrClient(url, key, guarded_client(allowed))
 
+    def reader_shelfmark(url: str, key: str) -> ShelfmarkClient:
+        return ShelfmarkClient(url, key, guarded_client(allowed, timeout=120))
+
     return RequestService(
         SqlRequestRepository(session),
         SqlUserRepository(session),
@@ -382,6 +387,7 @@ def make_request_service(container: Container, session: AsyncSession) -> Request
         container.secrets,
         scan_library,
         container.shelfmark,
+        container.shelfmark_for_reader or reader_shelfmark,
     )
 
 
