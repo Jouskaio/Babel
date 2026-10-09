@@ -6,8 +6,10 @@ from uuid import UUID
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from babel_api.adapters.db.models import BookRequestRow, ChaptarrLinkRow
+from babel_api.adapters.db.models import BookRequestRow, ChaptarrLinkRow, ShelfmarkLinkRow
 from babel_api.domain.requests import BookRequest, ChaptarrLink, RequestStatus
+
+_LINKS = {"chaptarr": ChaptarrLinkRow, "shelfmark": ShelfmarkLinkRow}
 
 
 def _to_request(row: BookRequestRow) -> BookRequest:
@@ -90,25 +92,24 @@ class SqlRequestRepository:
             )
         )
 
-    async def link(self, user_id: UUID) -> ChaptarrLink | None:
-        row = await self._session.get(ChaptarrLinkRow, user_id)
+    async def link(self, user_id: UUID, kind: str = "chaptarr") -> ChaptarrLink | None:
+        """The reader's own Chaptarr (or Shelfmark, by [kind])."""
+        row = await self._session.get(_LINKS[kind], user_id)
         if row is None:
             return None
         updated = row.updated_at if row.updated_at.tzinfo else row.updated_at.replace(tzinfo=UTC)
         return ChaptarrLink(row.user_id, row.base_url, row.secret, updated)
 
-    async def save_link(self, link: ChaptarrLink) -> None:
-        row = await self._session.get(ChaptarrLinkRow, link.user_id)
+    async def save_link(self, link: ChaptarrLink, kind: str = "chaptarr") -> None:
+        row = await self._session.get(_LINKS[kind], link.user_id)
         if row is None:
-            row = ChaptarrLinkRow(user_id=link.user_id)
+            row = _LINKS[kind](user_id=link.user_id)
             self._session.add(row)
         row.base_url, row.secret, row.updated_at = link.base_url, link.secret, link.updated_at
         await self._session.flush()
 
-    async def delete_link(self, user_id: UUID) -> None:
-        await self._session.execute(
-            delete(ChaptarrLinkRow).where(ChaptarrLinkRow.user_id == user_id)
-        )
+    async def delete_link(self, user_id: UUID, kind: str = "chaptarr") -> None:
+        await self._session.execute(delete(_LINKS[kind]).where(_LINKS[kind].user_id == user_id))
 
     async def commit(self) -> None:
         await self._session.commit()

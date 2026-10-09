@@ -985,3 +985,22 @@ def test_other_titles_come_from_hardcover() -> None:
     service: Any = WorkService(None, None, FakeHardcover())  # type: ignore[arg-type]
     found = asyncio.run(service.other_titles("Les carnets de l'apothicaire 2", ("Natsu Hyuuga",)))
     assert found == ["The Apothecary Diaries 2", "Les Carnets de l'Apothicaire 2"]
+
+
+def test_a_reader_links_and_unlinks_their_own_shelfmark(
+    client: TestClient, chaptarr: FakeChaptarr, books: FakeBooks
+) -> None:
+    from tests.api.v1.test_library import account
+
+    admin = account(client, "admin@example.com")
+    before = client.get("/v1/me/shelfmark", headers=admin).json()
+    assert before["linked"] is False
+
+    refused = client.put(
+        "/v1/me/shelfmark",
+        json={"base_url": "ftp://nowhere.example", "api_key": "long-enough-key"},
+        headers=admin,
+    )
+    assert refused.status_code == 400
+    assert refused.json()["detail"] == "shelfmark:address"
+    assert client.delete("/v1/me/shelfmark", headers=admin).status_code == 204

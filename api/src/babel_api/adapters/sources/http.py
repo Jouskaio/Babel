@@ -46,14 +46,16 @@ async def check_url(url: str, allowed_hosts: Iterable[str] = ()) -> None:
         raise SourceAddressBlockedError
 
 
-def guarded_client(allowed_hosts: Iterable[str] = ()) -> httpx.AsyncClient:
+def guarded_client(
+    allowed_hosts: Iterable[str] = (), timeout: float | httpx.Timeout = TIMEOUT
+) -> httpx.AsyncClient:
     allowed = tuple(allowed_hosts)
 
     async def check(request: httpx.Request) -> None:
         await check_url(str(request.url), allowed)
 
     return httpx.AsyncClient(
-        timeout=TIMEOUT,
+        timeout=timeout,
         follow_redirects=True,
         headers={"User-Agent": USER_AGENT},
         event_hooks={"request": [check]},

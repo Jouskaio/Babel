@@ -2461,6 +2461,57 @@ class AppLocalizationsFr extends AppLocalizations {
   String get requestCancel => 'Annuler la demande';
 
   @override
+  String get shelfmarkTitle => 'Mon Shelfmark';
+
+  @override
+  String get shelfmarkHint =>
+      'Si vous avez votre propre Shelfmark, liez-le : les mangas et BD que vous demandez y sont cherchés et téléchargés. Adresse et clé d\'API (variable SHELFMARK_API_KEY) sont dans la configuration de Shelfmark.';
+
+  @override
+  String get shelfmarkHintServer =>
+      'Sans Shelfmark à vous, les mangas passent par celui du serveur (réservé aux comptes premium), puis par Chaptarr. Avec le vôtre, vous n\'avez pas besoin d\'être premium.';
+
+  @override
+  String get shelfmarkUrl => 'Adresse de votre Shelfmark';
+
+  @override
+  String get shelfmarkKey => 'Clé d\'API';
+
+  @override
+  String get shelfmarkKeyHelp =>
+      'Gardée chiffrée sur le serveur, jamais affichée.';
+
+  @override
+  String get shelfmarkLink => 'Lier mon Shelfmark';
+
+  @override
+  String get shelfmarkUnlink => 'Délier mon Shelfmark';
+
+  @override
+  String shelfmarkLinked(String url) {
+    return 'Lié : $url';
+  }
+
+  @override
+  String get shelfmarkLinkedHint =>
+      'Vos mangas et BD sont téléchargés chez vous.';
+
+  @override
+  String get shelfmarkWrongKey => 'Shelfmark a refusé la clé d\'API.';
+
+  @override
+  String get shelfmarkNotShelfmark =>
+      'Cette adresse ne répond pas comme un Shelfmark.';
+
+  @override
+  String get shelfmarkBadAddress =>
+      'Adresse ou clé invalide : l\'adresse doit commencer par http:// ou https://.';
+
+  @override
+  String get shelfmarkUnreachable =>
+      'Babel n\'a pas pu joindre ce Shelfmark. L\'adresse doit être joignable depuis internet.';
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override

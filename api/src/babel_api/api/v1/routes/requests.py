@@ -136,3 +136,52 @@ async def link_chaptarr(
 async def unlink_chaptarr(user_id: CurrentUserId, requests: RequestServiceDep) -> None:
     """Forget your Chaptarr; the books already requested stay as they are."""
     await requests.unlink(user_id)
+
+
+shelfmark_router = APIRouter(prefix="/me/shelfmark", tags=["requests"])
+
+
+class ShelfmarkLinkResponse(BaseModel):
+    linked: bool = Field(description="You linked your own Shelfmark: manga are downloaded there")
+    base_url: str | None
+    server_offers: bool = Field(description="The server has a Shelfmark, for premium readers")
+
+
+class ShelfmarkLinkRequest(BaseModel):
+    base_url: Annotated[str, Field(min_length=8, max_length=500, description="Its address")]
+    api_key: Annotated[
+        str, Field(min_length=8, max_length=200, description="Its SHELFMARK_API_KEY setting")
+    ]
+
+
+async def _shelfmark_status(user_id: UUID, requests: RequestServiceDep) -> ShelfmarkLinkResponse:
+    link = await requests.shelfmark_link_status(user_id)
+    return ShelfmarkLinkResponse(
+        linked=link is not None,
+        base_url=link.base_url if link else None,
+        server_offers=requests.shelfmark_server_enabled,
+    )
+
+
+@shelfmark_router.get("", operation_id="getShelfmarkLink")
+async def get_shelfmark_link(
+    user_id: CurrentUserId, requests: RequestServiceDep
+) -> ShelfmarkLinkResponse:
+    """Whether you linked your own Shelfmark (its key is never given back)."""
+    return await _shelfmark_status(user_id, requests)
+
+
+@shelfmark_router.put("", operation_id="linkShelfmark")
+async def link_shelfmark(
+    user_id: CurrentUserId, requests: RequestServiceDep, body: ShelfmarkLinkRequest
+) -> ShelfmarkLinkResponse:
+    """Link your own Shelfmark: its address and key are checked, then kept (the key
+    encrypted). Manga you ask for are then downloaded there."""
+    await requests.link_shelfmark(user_id, body.base_url, body.api_key)
+    return await _shelfmark_status(user_id, requests)
+
+
+@shelfmark_router.delete("", operation_id="unlinkShelfmark", status_code=status.HTTP_204_NO_CONTENT)
+async def unlink_shelfmark(user_id: CurrentUserId, requests: RequestServiceDep) -> None:
+    """Forget your Shelfmark; what it already started stays."""
+    await requests.unlink_shelfmark(user_id)

@@ -121,6 +121,54 @@ class RequestsApi {
     return null;
   }
 
+  /// Get Shelfmark Link
+  ///
+  /// Whether you linked your own Shelfmark (its key is never given back).
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> getShelfmarkLinkWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/me/shelfmark';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Shelfmark Link
+  ///
+  /// Whether you linked your own Shelfmark (its key is never given back).
+  Future<ShelfmarkLinkResponse?> getShelfmarkLink() async {
+    final response = await getShelfmarkLinkWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ShelfmarkLinkResponse',) as ShelfmarkLinkResponse;
+    
+    }
+    return null;
+  }
+
   /// Link Chaptarr
   ///
   /// Link your own Chaptarr: its address and API key are checked, then kept (the key encrypted). Your book requests then go to it.
@@ -172,6 +220,62 @@ class RequestsApi {
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ChaptarrLinkResponse',) as ChaptarrLinkResponse;
+    
+    }
+    return null;
+  }
+
+  /// Link Shelfmark
+  ///
+  /// Link your own Shelfmark: its address and key are checked, then kept (the key encrypted). Manga you ask for are then downloaded there.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [ShelfmarkLinkRequest] shelfmarkLinkRequest (required):
+  Future<Response> linkShelfmarkWithHttpInfo(ShelfmarkLinkRequest shelfmarkLinkRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/me/shelfmark';
+
+    // ignore: prefer_final_locals
+    Object? postBody = shelfmarkLinkRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'PUT',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Link Shelfmark
+  ///
+  /// Link your own Shelfmark: its address and key are checked, then kept (the key encrypted). Manga you ask for are then downloaded there.
+  ///
+  /// Parameters:
+  ///
+  /// * [ShelfmarkLinkRequest] shelfmarkLinkRequest (required):
+  Future<ShelfmarkLinkResponse?> linkShelfmark(ShelfmarkLinkRequest shelfmarkLinkRequest,) async {
+    final response = await linkShelfmarkWithHttpInfo(shelfmarkLinkRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ShelfmarkLinkResponse',) as ShelfmarkLinkResponse;
     
     }
     return null;
@@ -316,6 +420,46 @@ class RequestsApi {
   /// Forget your Chaptarr; the books already requested stay as they are.
   Future<void> unlinkChaptarr() async {
     final response = await unlinkChaptarrWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
+  /// Unlink Shelfmark
+  ///
+  /// Forget your Shelfmark; what it already started stays.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> unlinkShelfmarkWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/me/shelfmark';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'DELETE',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Unlink Shelfmark
+  ///
+  /// Forget your Shelfmark; what it already started stays.
+  Future<void> unlinkShelfmark() async {
+    final response = await unlinkShelfmarkWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

@@ -629,3 +629,16 @@ class ChaptarrLinkRow(Base):
     base_url: Mapped[str] = mapped_column(String(500))
     secret: Mapped[str] = mapped_column(Text)  # the API key, encrypted
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class ShelfmarkLinkRow(Base):
+    """A reader's own Shelfmark, linked to Babel: their requests are downloaded there."""
+
+    __tablename__ = "shelfmark_links"
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    base_url: Mapped[str] = mapped_column(String(500))
+    secret: Mapped[str] = mapped_column(Text)  # the API key, encrypted
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
