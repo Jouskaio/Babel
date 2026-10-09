@@ -243,7 +243,7 @@ class RequestService:
         names += await self._works.other_titles(title, authors)
         names = list(dict.fromkeys(names))
         found: list[str] = []
-        if self._shelfmark is not None and guess_series(title) is not None:
+        if self._shelfmark is not None:
             search = self._shelfmark()
             try:
                 for hit in await search.search(title, authors):
@@ -260,11 +260,9 @@ class RequestService:
     async def _via_shelfmark(
         self, shelf: ShelfmarkClient, title: str, names: list[str], authors: tuple[str, ...]
     ) -> bool:
-        """Numbered volumes (manga, comics) are downloaded through Shelfmark first. False when
-        the book is not a volume, Shelfmark finds nothing or fails."""
+        """Every book is downloaded through Shelfmark first (it understands titles best).
+        False when Shelfmark finds nothing or fails: Chaptarr then takes over."""
         try:
-            if guess_series(title) is None:
-                return False
             log.info("Request %r: Shelfmark titles to try: %s", title, names)
             for name in names:
                 if await shelf.fetch(name, authors):
