@@ -3,7 +3,7 @@ import json
 
 import httpx
 
-from babel_api.adapters.shelfmark import ShelfmarkClient, pick_release
+from babel_api.adapters.shelfmark import ShelfmarkClient, pick_release, title_keys
 
 
 def test_the_best_release_is_one_volume_in_a_book_format_not_in_japanese() -> None:
@@ -48,7 +48,7 @@ def test_a_volume_is_searched_then_its_best_release_queued() -> None:
                 json={
                     "releases": [
                         {
-                            "title": "T1",
+                            "title": "The Apothecary Diaries v01",
                             "source": "p",
                             "source_id": "1",
                             "format": "cbz",
@@ -65,7 +65,13 @@ def test_a_volume_is_searched_then_its_best_release_queued() -> None:
     )
     assert asyncio.run(shelf.fetch("The Apothecary Diaries, Tome 1", ("Natsu Hyuuga",)))
     assert queued == [
-        {"title": "T1", "source": "p", "source_id": "1", "format": "cbz", "protocol": "direct"}
+        {
+            "title": "The Apothecary Diaries v01",
+            "source": "p",
+            "source_id": "1",
+            "format": "cbz",
+            "protocol": "direct",
+        }
     ]
     assert not asyncio.run(shelf.fetch("Something else 9", ("Nobody",)))
 
@@ -121,7 +127,12 @@ def test_a_volume_shelfmark_lacks_is_found_through_the_original_series_name() ->
             return httpx.Response(200, json={"books": books})
         if path == "/api/releases":
             assert request.url.params["book_id"] == "2"
-            release = {"title": "Kusuriya v02", "source": "p", "source_id": "9", "language": "en"}
+            release = {
+                "title": "薬屋のひとりごと v02",
+                "source": "p",
+                "source_id": "9",
+                "language": "en",
+            }
             return httpx.Response(200, json={"releases": [release]})
         queued.append(json.loads(request.content))
         return httpx.Response(200, json={})
@@ -131,3 +142,14 @@ def test_a_volume_shelfmark_lacks_is_found_through_the_original_series_name() ->
     )
     assert asyncio.run(shelf.fetch("Les carnets de l'apothicaire 2", ("Natsu Hyuuga",)))
     assert queued[0]["source_id"] == "9"  # type: ignore[index]
+
+
+def test_a_release_must_be_about_the_book() -> None:
+    keys = title_keys(
+        "Les carnets de l'apothicaire 1", "薬屋のひとりごと 1 [Kusuriya no Hitorigoto 1]"
+    )
+    junk = {"title": "Hacking For Beginners, 5 In 1 Book Set", "protocol": "direct"}
+    right = {"title": "Kusuriya no Hitorigoto v01 [English]", "protocol": "direct"}
+    assert pick_release([junk], 1, keys=keys) is None
+    assert pick_release([junk, right], 1, keys=keys) == right
+    assert "apothicaire" in " ".join(keys)
