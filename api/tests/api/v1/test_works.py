@@ -910,3 +910,31 @@ def test_an_address_without_chaptarr_api_is_not_a_chaptarr() -> None:
     with pytest.raises(ChaptarrError) as refused:
         asyncio.run(client.check())
     assert refused.value.reason == "not_chaptarr"
+
+
+def test_volume_titles_are_cleaned_for_the_search() -> None:
+    from babel_api.domain.series import guess_series
+    from babel_api.services.requests import volume_title
+
+    assert volume_title("Les carnets de l'apothicaire - Enquêtes à la cour To2") == (
+        "Les carnets de l'apothicaire 2"
+    )
+    assert volume_title("Les Carnets de l'Apothicaire, Tome 13") == (
+        "Les Carnets de l'Apothicaire 13"
+    )
+    assert volume_title("Jane Eyre") == "Jane Eyre"
+    assert guess_series("Back to 1984") is None  # "to" counts only glued to the number ("To5")
+
+
+def test_a_request_can_be_cancelled(
+    client: TestClient, chaptarr: FakeChaptarr, books: FakeBooks
+) -> None:
+    from tests.api.v1.test_library import account
+
+    admin = account(client, "admin@example.com")
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=admin).json()
+    client.post("/v1/requests", json={"work_id": hit["id"]}, headers=admin)
+    gone = client.delete(f"/v1/requests/{hit['id']}", headers=admin)
+    assert gone.status_code == 204
+    assert client.get("/v1/requests", headers=admin).json()["items"] == []
+    assert client.delete(f"/v1/requests/{hit['id']}", headers=admin).status_code == 404

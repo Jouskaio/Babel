@@ -6,6 +6,7 @@ has the file, Babel asks Kavita to scan so the book soon shows up in the reader'
 """
 
 import logging
+import re
 from collections.abc import Awaitable, Callable
 from dataclasses import replace
 from datetime import UTC, datetime
@@ -33,6 +34,16 @@ log = logging.getLogger(__name__)
 SHELFMARK_ID = -1
 
 ClientFactory = Callable[[str, str], ChaptarrClient]
+
+
+def volume_title(title: str) -> str:
+    """ "Series - Subtitle To2" and "Series, Tome 2" are both "Series 2": the form catalogs and
+    indexers agree on. Other titles are kept."""
+    guess = guess_series(title)
+    if guess is None:
+        return title
+    base = re.split(r"\s[-–:]\s", guess.series)[0].strip()
+    return f"{base} {guess.number:g}"
 
 
 class RequestService:
@@ -132,7 +143,7 @@ class RequestService:
         detail = await self._works.get(work_id)
         work = detail.work
         # The title the book bears in the language asked for ("Les Misérables", not "Les Mis...").
-        title = detail.localized(language or None)[0]
+        title = volume_title(detail.localized(language or None)[0])
         if await self._via_shelfmark(title, detail, work.authors):
             await self._requests.save(
                 user_id, work_id, RequestStatus.REQUESTED, SHELFMARK_ID, language
@@ -168,7 +179,7 @@ class RequestService:
             return False
         shelf = self._shelfmark()
         try:
-            for name in dict.fromkeys((detail.localized("en")[0], title)):
+            for name in dict.fromkeys((volume_title(detail.localized("en")[0]), title)):
                 if await shelf.fetch(name, authors):
                     return True
         except ShelfmarkError as error:
@@ -246,6 +257,13 @@ class RequestService:
             else r
             for r in items
         ]
+
+    async def cancel(self, user_id: UUID, work_id: UUID, language: str = "") -> None:
+        """Forgets a request (what Chaptarr or Shelfmark already started is left alone)."""
+        if await self._requests.get(user_id, work_id, language) is None:
+            raise NotFoundError
+        await self._requests.delete(user_id, work_id, language)
+        await self._requests.commit()
 
     async def status_of(self, user_id: UUID, work_id: UUID, language: str = "") -> BookRequest:
         for request in await self.list(user_id):

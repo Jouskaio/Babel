@@ -16,6 +16,63 @@ class RequestsApi {
 
   final ApiClient apiClient;
 
+  /// Cancel Request
+  ///
+  /// Cancel a request: it disappears from your list and you can ask again.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] workId (required):
+  ///
+  /// * [String] language:
+  Future<Response> cancelBookRequestWithHttpInfo(String workId, { String? language, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/requests/{work_id}'
+      .replaceAll('{work_id}', workId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (language != null) {
+      queryParams.addAll(_queryParams('', 'language', language));
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'DELETE',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Cancel Request
+  ///
+  /// Cancel a request: it disappears from your list and you can ask again.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] workId (required):
+  ///
+  /// * [String] language:
+  Future<void> cancelBookRequest(String workId, { String? language, }) async {
+    final response = await cancelBookRequestWithHttpInfo(workId,  language: language, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Get Chaptarr Link
   ///
   /// Whether you linked your own Chaptarr (its key is never given back).
