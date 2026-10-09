@@ -69,10 +69,39 @@ def _language(release: dict[str, Any]) -> str:
     return str(declared or "").strip().lower()[:2]
 
 
+_ARTICLES = {"the", "a", "an", "le", "la", "les", "l", "un", "une", "der", "die", "das"}
+
+
+def core(text: str) -> str:
+    """A title reduced to what identifies it: lower case, no punctuation, no leading article,
+    no trailing volume number or bracketed note ("The Apothecary Diaries, Vol. 2" is
+    "apothecary diaries")."""
+    text = re.split(r"[\[(]", text)[0]
+    text = re.sub(
+        r"[\s,:;\-–—]*\b(?:tome|vol|volume|book|t|v|#)?\.?\s*\d{1,3}\s*$", "", text, flags=re.I
+    )
+    words = re.sub(r"[^\w]+", " ", text.casefold()).split()
+    while words and words[0] in _ARTICLES:
+        words = words[1:]
+    return " ".join(words)
+
+
+def title_keys(*names: str) -> tuple[str, ...]:
+    """What a release title must contain (one of them) to be about this book: the cores of
+    the names the book goes by, and the romanization Shelfmark puts in brackets."""
+    found: list[str] = []
+    for name in names:
+        found.append(core(name))
+        for inside in re.findall(r"\[([^\]]+)\]", name):
+            found.append(core(inside))
+    return tuple(dict.fromkeys(k for k in found if len(k) >= 3))
+
+
 def pick_release(
     releases: list[dict[str, Any]],
     volume: float | None = None,
     languages: tuple[str, ...] = WANTED_LANGUAGES,
+    keys: tuple[str, ...] = (),
 ) -> dict[str, Any] | None:
     """The release that suits best: one volume (the wanted one), a book format when it says
     which, one volume's size, in a wanted language. The language a release declares is
@@ -86,11 +115,14 @@ def pick_release(
         torrent = str(release.get("protocol") or "").lower() == "torrent"
         seeders = release.get("seeders")
         language = _language(release)
+        # The whole title, not its core: a release says "... Vol 02" after the name.
+        core_text = re.sub(r"[^\w]+", " ", title.casefold())
         if (
             (fmt and fmt not in BOOK_FORMATS)
             or (language and language not in languages)
             or (not language and CJK.search(title))
             or _RANGE.search(title)
+            or (keys and not any(key in core_text for key in keys))
             or (volume is not None and not _mentions(title, volume))
             or (isinstance(size, int) and size > MAX_VOLUME_BYTES)
             or (torrent and not (isinstance(seeders, int) and seeders > 0))
@@ -209,7 +241,8 @@ class ShelfmarkClient:
             list[dict[str, Any]], cast(dict[str, Any], listing or {}).get("releases") or []
         )
         guess = guess_series(title)
-        chosen = pick_release(releases, guess.number if guess else None)
+        keys = title_keys(title, str(book.get("title", "")))
+        chosen = pick_release(releases, guess.number if guess else None, keys=keys)
         if chosen is None:
             sample = [(r.get("title"), r.get("format"), r.get("seeders")) for r in releases[:6]]
             log.info(
