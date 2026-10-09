@@ -183,6 +183,7 @@ class RequestService:
         try:
             names = [volume_title(detail.localized("en")[0]), title]
             names += await self._works.other_titles(title, authors)
+            log.info("Request %r: Shelfmark titles to try: %s", title, list(dict.fromkeys(names)))
             for name in dict.fromkeys(names):
                 if await shelf.fetch(name, authors):
                     return True
