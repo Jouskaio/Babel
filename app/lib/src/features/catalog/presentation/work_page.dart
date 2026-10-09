@@ -674,6 +674,8 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
           Text(
             mine.status == RequestStatus.available
                 ? l10n.requestAvailable
+                : mine.via == 'shelfmark'
+                ? l10n.requestShelfmark
                 : percent != null
                 ? l10n.requestDownloading(percent.round())
                 // Long enough with nothing downloading: the search came back empty and

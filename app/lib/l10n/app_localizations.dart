@@ -4052,6 +4052,12 @@ abstract class AppLocalizations {
   /// **'Demandé, mais aucune version à télécharger n\'a été trouvée pour l\'instant. La recherche continue en arrière-plan.'**
   String get requestNoRelease;
 
+  /// No description provided for @requestShelfmark.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyé à Shelfmark : le livre apparaîtra dans « Dans mes sources » dès qu\'il sera arrivé.'**
+  String get requestShelfmark;
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

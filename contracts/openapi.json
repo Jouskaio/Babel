@@ -666,6 +666,12 @@
           "status": {
             "$ref": "#/components/schemas/RequestStatus"
           },
+          "via": {
+            "default": "chaptarr",
+            "description": "Where it was sent: chaptarr or shelfmark",
+            "title": "Via",
+            "type": "string"
+          },
           "work_id": {
             "format": "uuid",
             "title": "Work Id",

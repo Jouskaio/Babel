@@ -17,6 +17,7 @@ class BookRequestResponse {
     this.language = '',
     this.progress,
     required this.status,
+    this.via = 'chaptarr',
     required this.workId,
   });
 
@@ -30,6 +31,9 @@ class BookRequestResponse {
 
   RequestStatus status;
 
+  /// Where it was sent: chaptarr or shelfmark
+  String via;
+
   String workId;
 
   @override
@@ -38,6 +42,7 @@ class BookRequestResponse {
     other.language == language &&
     other.progress == progress &&
     other.status == status &&
+    other.via == via &&
     other.workId == workId;
 
   @override
@@ -47,10 +52,11 @@ class BookRequestResponse {
     (language.hashCode) +
     (progress == null ? 0 : progress!.hashCode) +
     (status.hashCode) +
+    (via.hashCode) +
     (workId.hashCode);
 
   @override
-  String toString() => 'BookRequestResponse[createdAt=$createdAt, language=$language, progress=$progress, status=$status, workId=$workId]';
+  String toString() => 'BookRequestResponse[createdAt=$createdAt, language=$language, progress=$progress, status=$status, via=$via, workId=$workId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -62,6 +68,7 @@ class BookRequestResponse {
       json[r'progress'] = null;
     }
       json[r'status'] = this.status;
+      json[r'via'] = this.via;
       json[r'work_id'] = this.workId;
     return json;
   }
@@ -91,6 +98,7 @@ class BookRequestResponse {
             ? null
             : num.parse('${json[r'progress']}'),
         status: RequestStatus.fromJson(json[r'status'])!,
+        via: mapValueOfType<String>(json, r'via') ?? 'chaptarr',
         workId: mapValueOfType<String>(json, r'work_id')!,
       );
     }

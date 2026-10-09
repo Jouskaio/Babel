@@ -85,6 +85,11 @@ class Settings(BaseSettings):
     chaptarr_url: str = ""
     chaptarr_api_key: SecretStr = SecretStr("")
 
+    # Shelfmark (book search and download): manga and other numbered volumes are asked for
+    # there first. Address and its SHELFMARK_API_KEY. Empty: only Chaptarr is used.
+    shelfmark_url: str = ""
+    shelfmark_api_key: SecretStr = SecretStr("")
+
     # Hardcover (free API key, hardcover.app > Settings > Hardcover API): names the volumes of
     # a saga the catalog lacks. Public book data only. Empty: not used.
     hardcover_api_key: SecretStr = SecretStr("")

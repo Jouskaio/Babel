@@ -2454,6 +2454,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Demandé, mais aucune version à télécharger n\'a été trouvée pour l\'instant. La recherche continue en arrière-plan.';
 
   @override
+  String get requestShelfmark =>
+      'Envoyé à Shelfmark : le livre apparaîtra dans « Dans mes sources » dès qu\'il sera arrivé.';
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override
