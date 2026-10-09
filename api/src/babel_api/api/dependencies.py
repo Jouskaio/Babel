@@ -376,7 +376,7 @@ def make_request_service(container: Container, session: AsyncSession) -> Request
     return RequestService(
         SqlRequestRepository(session),
         SqlUserRepository(session),
-        WorkService(SqlCatalogRepository(session), container.books),
+        WorkService(SqlCatalogRepository(session), container.books, container.hardcover),
         container.chaptarr,
         container.chaptarr_for_reader or reader_chaptarr,
         container.secrets,
