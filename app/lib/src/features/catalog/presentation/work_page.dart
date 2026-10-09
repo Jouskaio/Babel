@@ -281,7 +281,12 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
               BookTraceCard(trace: trace),
             ],
             WorkReadersSection(workId: work.id),
-            if (trace == null || !trace.available) ...[
+            // Without a file to read (a paper book, or one taken out of the library) it can
+            // still be asked for.
+            if (trace == null ||
+                !trace.available ||
+                (trace.item.sha256 == null &&
+                    trace.item.audioDuration == null)) ...[
               const SizedBox(height: sectionGap),
               _SourceMatches(
                 title: work.title,
