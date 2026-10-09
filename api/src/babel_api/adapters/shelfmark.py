@@ -102,6 +102,7 @@ def pick_release(
     volume: float | None = None,
     languages: tuple[str, ...] = WANTED_LANGUAGES,
     keys: tuple[str, ...] = (),
+    original_ok: bool = False,
 ) -> dict[str, Any] | None:
     """The release that suits best: one volume (the wanted one), a book format when it says
     which, one volume's size, in a wanted language. The language a release declares is
@@ -119,8 +120,8 @@ def pick_release(
         core_text = re.sub(r"[^\w]+", " ", title.casefold())
         if (
             (fmt and fmt not in BOOK_FORMATS)
-            or (language and language not in languages)
-            or (not language and CJK.search(title))
+            or (language and language not in languages and not original_ok)
+            or (not language and CJK.search(title) and not original_ok)
             or _RANGE.search(title)
             or (keys and not any(key in core_text for key in keys))
             or (volume is not None and not _mentions(title, volume))
@@ -244,7 +245,11 @@ class ShelfmarkClient:
         )
         guess = guess_series(title)
         keys = title_keys(title, str(book.get("title", "")))
-        chosen = pick_release(releases, guess.number if guess else None, keys=keys)
+        volume = guess.number if guess else None
+        chosen = pick_release(releases, volume, keys=keys)
+        if chosen is None:
+            # Nothing in English or French: a release in the original language beats none.
+            chosen = pick_release(releases, volume, keys=keys, original_ok=True)
         if chosen is None:
             sample = [(r.get("title"), r.get("format"), r.get("seeders")) for r in releases[:6]]
             log.info(

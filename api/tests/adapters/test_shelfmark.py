@@ -153,3 +153,12 @@ def test_a_release_must_be_about_the_book() -> None:
     assert pick_release([junk], 1, keys=keys) is None
     assert pick_release([junk, right], 1, keys=keys) == right
     assert "apothicaire" in " ".join(keys)
+
+
+def test_a_release_in_the_original_language_is_the_last_resort() -> None:
+    raw = {"title": "薬屋のひとりごと 1巻", "protocol": "direct"}
+    english = {"title": "薬屋のひとりごと v01 [English]", "language": "en", "protocol": "direct"}
+    keys = title_keys("薬屋のひとりごと 1")
+    assert pick_release([raw], 1, keys=keys) is None
+    assert pick_release([raw], 1, keys=keys, original_ok=True) == raw
+    assert pick_release([raw, english], 1, keys=keys) == english
