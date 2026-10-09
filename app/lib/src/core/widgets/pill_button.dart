@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import '../theme/babel_colors.dart';
 import '../theme/babel_text.dart';
 
-enum PillButtonKind { primary, secondary, light }
+enum PillButtonKind { primary, secondary, light, accent }
 
-/// Rounded button of the design system: cream (primary), outlined (secondary) or white
-/// (light, for "Continue with Apple").
+/// Rounded button of the design system: cream (primary), outlined (secondary), white
+/// (light, for "Continue with Apple") or gold (accent, for the one action a page is about).
 class PillButton extends StatelessWidget {
   const PillButton({
     required this.label,
@@ -38,6 +38,7 @@ class PillButton extends StatelessWidget {
       PillButtonKind.primary => BabelColors.textPrimary,
       PillButtonKind.secondary => Colors.transparent,
       PillButtonKind.light => Colors.white,
+      PillButtonKind.accent => BabelColors.gold,
     };
     final text = uppercase
         ? Text(
@@ -57,9 +58,20 @@ class PillButton extends StatelessWidget {
             ),
           );
     final content = loading
-        ? SizedBox.square(
-            dimension: 16,
-            child: CircularProgressIndicator(strokeWidth: 2, color: foreground),
+        // The label stays: the button says what is going on, not only that something is.
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox.square(
+                dimension: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: foreground,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Flexible(child: text),
+            ],
           )
         : Row(
             mainAxisSize: MainAxisSize.min,
@@ -75,7 +87,7 @@ class PillButton extends StatelessWidget {
         style: TextButton.styleFrom(
           backgroundColor: background,
           disabledBackgroundColor: background.withValues(
-            alpha: kind == PillButtonKind.secondary ? 0 : 0.6,
+            alpha: kind == PillButtonKind.secondary ? 0 : 0.75,
           ),
           foregroundColor: foreground,
           padding: EdgeInsets.symmetric(

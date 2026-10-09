@@ -2492,6 +2492,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Babel could not reach this Shelfmark. The address must be reachable from the internet.';
 
   @override
+  String get requestSearching => 'Searching…';
+
+  @override
   String get coverDefault => 'Default';
 
   @override

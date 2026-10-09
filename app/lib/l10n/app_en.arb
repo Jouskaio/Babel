@@ -858,6 +858,7 @@
   "shelfmarkNotShelfmark": "This address does not answer like a Shelfmark.",
   "shelfmarkBadAddress": "Invalid address or key: the address must start with http:// or https://.",
   "shelfmarkUnreachable": "Babel could not reach this Shelfmark. The address must be reachable from the internet.",
+  "requestSearching": "Searching…",
   "coverDefault": "Default",
   "coverLinkFirst": "Link this book to a book page first to choose among its editions' covers.",
   "volumeNumber": "Volume {number}",

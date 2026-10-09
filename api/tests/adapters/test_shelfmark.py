@@ -87,6 +87,14 @@ def test_a_release_must_name_the_volume_and_may_leave_its_format_unsaid() -> Non
     assert pick_release(releases) == releases[0]
 
 
+def test_the_declared_language_wins_over_the_script_of_the_title() -> None:
+    translated = {"title": "薬屋のひとりごと 1", "language": "en", "protocol": "direct"}
+    raw = {"title": "Kusuriya 1", "language": "ja", "protocol": "direct"}
+    assert pick_release([raw, translated], 1) == translated
+    assert pick_release([raw], 1) is None
+    assert pick_release([{"title": "薬屋のひとりごと 1", "protocol": "direct"}], 1) is None
+
+
 def test_a_book_known_only_by_its_original_title_is_found_by_volume() -> None:
     from babel_api.adapters.shelfmark import original_title_match
 
