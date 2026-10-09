@@ -2512,6 +2512,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Babel n\'a pas pu joindre ce Shelfmark. L\'adresse doit être joignable depuis internet.';
 
   @override
+  String get requestSearching => 'Recherche en cours…';
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override

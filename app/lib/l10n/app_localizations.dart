@@ -4148,6 +4148,12 @@ abstract class AppLocalizations {
   /// **'Babel n\'a pas pu joindre ce Shelfmark. L\'adresse doit être joignable depuis internet.'**
   String get shelfmarkUnreachable;
 
+  /// No description provided for @requestSearching.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche en cours…'**
+  String get requestSearching;
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

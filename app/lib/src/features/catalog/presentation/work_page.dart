@@ -12,6 +12,7 @@ import '../../../core/widgets/back_leading.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/loading_bar.dart';
 import '../../../core/widgets/pill_button.dart';
+import '../../../core/widgets/searching_indicator.dart';
 import '../../../core/widgets/section_title.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
@@ -607,6 +608,57 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
     }
   }
 
+  /// What a request says: arrived, being downloaded, searched for (animated), or without a
+  /// release for now.
+  List<Widget> _requestState(BookRequestResponse mine, AppLocalizations l10n) {
+    final percent = mine.progress;
+    final plain = TextStyle(color: BabelColors.gold);
+    if (mine.status == RequestStatus.available) {
+      return [
+        Row(
+          children: [
+            Icon(Icons.check_circle_outline, color: BabelColors.gold, size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                l10n.requestAvailable,
+                style: BabelText.body(14, color: BabelColors.gold),
+              ),
+            ),
+          ],
+        ),
+      ];
+    }
+    if (percent != null) {
+      return [
+        SearchingIndicator(
+          text: l10n.requestDownloading(percent.round()),
+          icon: Icons.downloading_rounded,
+        ),
+      ];
+    }
+    if (mine.via != 'shelfmark' &&
+        DateTime.now().difference(mine.createdAt) >
+            const Duration(minutes: 15)) {
+      return [
+        Text(
+          l10n.requestNoRelease,
+          style: BabelText.body(13, color: plain.color),
+        ),
+      ];
+    }
+    return [
+      SearchingIndicator(
+        text: mine.via == 'shelfmark'
+            ? l10n.requestShelfmark
+            : l10n.requestPending,
+        icon: mine.via == 'shelfmark'
+            ? Icons.downloading_rounded
+            : Icons.auto_stories_outlined,
+      ),
+    ];
+  }
+
   Future<void> _cancel(BookRequestResponse request) async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
@@ -663,7 +715,6 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
           .where((r) => r.workId == widget.workId && r.language == _language)
           .firstOrNull;
       if (mine != null && mine.status != RequestStatus.notFound) {
-        final percent = mine.progress;
         return [
           if (widget.languages.length > 1) ...[
             Wrap(
@@ -684,21 +735,7 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
             ),
             const SizedBox(height: 12),
           ],
-          Text(
-            mine.status == RequestStatus.available
-                ? l10n.requestAvailable
-                : mine.via == 'shelfmark'
-                ? l10n.requestShelfmark
-                : percent != null
-                ? l10n.requestDownloading(percent.round())
-                // Long enough with nothing downloading: the search came back empty and
-                // Chaptarr keeps watching for a release.
-                : DateTime.now().difference(mine.createdAt) >
-                      const Duration(minutes: 15)
-                ? l10n.requestNoRelease
-                : l10n.requestPending,
-            style: BabelText.body(13, color: BabelColors.gold),
-          ),
+          ..._requestState(mine, l10n),
           if (mine.status == RequestStatus.requested)
             Align(
               alignment: Alignment.centerLeft,
@@ -707,18 +744,6 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
                 child: Text(l10n.requestCancel, style: BabelText.body(13)),
               ),
             ),
-          if (mine.status == RequestStatus.requested && percent != null) ...[
-            const SizedBox(height: 10),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(2),
-              child: LinearProgressIndicator(
-                value: (percent / 100).clamp(0, 1).toDouble(),
-                minHeight: 4,
-                color: BabelColors.gold,
-                backgroundColor: BabelColors.sunken,
-              ),
-            ),
-          ],
         ];
       }
       return [
@@ -744,13 +769,14 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
           ),
           const SizedBox(height: 16),
         ],
-        Align(
-          alignment: Alignment.centerLeft,
-          child: PillButton(
-            label: l10n.requestBook,
-            loading: _requesting,
-            onPressed: _request,
-          ),
+        PillButton(
+          label: _requesting ? l10n.requestSearching : l10n.requestBook,
+          kind: PillButtonKind.accent,
+          large: true,
+          expand: true,
+          icon: const Icon(Icons.download_rounded, size: 20),
+          loading: _requesting,
+          onPressed: _request,
         ),
       ];
     }

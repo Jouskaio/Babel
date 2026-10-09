@@ -1426,6 +1426,7 @@
   "shelfmarkNotShelfmark": "Cette adresse ne répond pas comme un Shelfmark.",
   "shelfmarkBadAddress": "Adresse ou clé invalide : l'adresse doit commencer par http:// ou https://.",
   "shelfmarkUnreachable": "Babel n'a pas pu joindre ce Shelfmark. L'adresse doit être joignable depuis internet.",
+  "requestSearching": "Recherche en cours…",
   "coverDefault": "Par défaut",
   "coverLinkFirst": "Associez d'abord ce livre à une fiche pour choisir parmi les couvertures de ses éditions.",
   "volumeNumber": "Tome {number}",

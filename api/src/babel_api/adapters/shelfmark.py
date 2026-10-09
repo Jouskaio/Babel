@@ -58,12 +58,26 @@ def _mentions(title: str, volume: float) -> bool:
     )
 
 
+WANTED_LANGUAGES = ("en", "fr")
+
+
+def _language(release: dict[str, Any]) -> str:
+    """The language a release declares (ISO 639-1, "" when it does not say)."""
+    extra = cast(Any, release.get("extra"))
+    nested = cast(dict[str, Any], extra).get("language") if isinstance(extra, dict) else None
+    declared = cast(Any, release.get("language") or nested)
+    return str(declared or "").strip().lower()[:2]
+
+
 def pick_release(
-    releases: list[dict[str, Any]], volume: float | None = None
+    releases: list[dict[str, Any]],
+    volume: float | None = None,
+    languages: tuple[str, ...] = WANTED_LANGUAGES,
 ) -> dict[str, Any] | None:
     """The release that suits best: one volume (the wanted one), a book format when it says
-    which, not in Japanese, one volume's size; a direct download first, then the torrent with
-    the most seeders (none without seeders)."""
+    which, one volume's size, in a wanted language. The language a release declares is
+    trusted (a Japanese title with "en" is a translation); without one, a title in Japanese
+    reads as a raw. A direct download first, then the torrent with the most seeders."""
     scored: list[tuple[int, int, dict[str, Any]]] = []
     for release in releases:
         fmt = str(release.get("format") or "").lower()  # torrents often do not say
@@ -71,9 +85,11 @@ def pick_release(
         size = release.get("size_bytes")
         torrent = str(release.get("protocol") or "").lower() == "torrent"
         seeders = release.get("seeders")
+        language = _language(release)
         if (
             (fmt and fmt not in BOOK_FORMATS)
-            or CJK.search(title)
+            or (language and language not in languages)
+            or (not language and CJK.search(title))
             or _RANGE.search(title)
             or (volume is not None and not _mentions(title, volume))
             or (isinstance(size, int) and size > MAX_VOLUME_BYTES)
