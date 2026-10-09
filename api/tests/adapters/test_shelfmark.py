@@ -102,3 +102,32 @@ def test_a_book_known_only_by_its_original_title_is_found_by_volume() -> None:
     assert original_title_match(hits, "Les carnets de l'apothicaire 1") == hits[1]
     assert original_title_match(hits, "Les carnets de l'apothicaire 3") is None
     assert original_title_match(hits, "Jane Eyre") is None
+
+
+def test_a_volume_shelfmark_lacks_is_found_through_the_original_series_name() -> None:
+    queued: list[object] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        path, query = request.url.path, request.url.params.get("query", "")
+        if path == "/api/metadata/search":
+            books = {
+                "Les carnets de l'apothicaire": [
+                    {"provider": "ol", "provider_id": "1", "title": "薬屋のひとりごと 1"}
+                ],
+                "薬屋のひとりごと 2": [
+                    {"provider": "ol", "provider_id": "2", "title": "薬屋のひとりごと 2"}
+                ],
+            }.get(query, [])
+            return httpx.Response(200, json={"books": books})
+        if path == "/api/releases":
+            assert request.url.params["book_id"] == "2"
+            release = {"title": "Kusuriya v02", "source": "p", "source_id": "9", "language": "en"}
+            return httpx.Response(200, json={"releases": [release]})
+        queued.append(json.loads(request.content))
+        return httpx.Response(200, json={})
+
+    shelf = ShelfmarkClient(
+        "http://shelf", "k", httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    )
+    assert asyncio.run(shelf.fetch("Les carnets de l'apothicaire 2", ("Natsu Hyuuga",)))
+    assert queued[0]["source_id"] == "9"  # type: ignore[index]

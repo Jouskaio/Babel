@@ -223,7 +223,7 @@ class RequestService:
             else:
                 # Indexers list manga under their English title: ask for that edition too.
                 first = await client.add(found or cast(dict[str, Any], original))
-                second = await client.add(original) if found and original else None
+                second = await self._add_extra(client, original) if found and original else None
                 await self._requests.save(
                     user_id, work_id, RequestStatus.REQUESTED, first, language, second
                 )
@@ -276,6 +276,16 @@ class RequestService:
         return False
 
     @staticmethod
+    async def _add_extra(client: ChaptarrClient, book: dict[str, Any]) -> int | None:
+        """The second edition is a bonus: if Chaptarr refuses it (already there), the request
+        still stands on the first."""
+        try:
+            return await client.add(book)
+        except ChaptarrError as error:
+            log.info("Chaptarr did not take the extra edition: %s", error.reason)
+            return None
+
+    @staticmethod
     async def _english(
         client: ChaptarrClient,
         detail: WorkDetail,
@@ -285,7 +295,7 @@ class RequestService:
         """The English edition of a volume, when its title differs: release indexers know
         manga and light novels by their English (or romanized) title, and the reader need not.
         Best effort, never an error."""
-        english = detail.localized("en")[0]
+        english = volume_title(detail.localized("en")[0])
         if guess_series(title) is None or english.casefold() == title.casefold():
             return None
         try:
