@@ -3,8 +3,8 @@
 import re
 from dataclasses import dataclass
 
-# "Tome 3", "T3", "Vol. 12", "Volume 2.5", "Book 4", "Livre 2", "Band 7", "#5", "n°5".
-_WORD = r"(?:tome|t|vol|volume|book|livre|band|nr|no|n°|n|#)"
+# "Tome 3", "T3", "To3", "Vol. 12", "Volume 2.5", "Book 4", "Livre 2", "Band 7", "#5", "n°5".
+_WORD = r"(?:tome|t|vol|volume|book|livre|band|nr|no|n°|n|#|to(?=\d))"
 _EXPLICIT = re.compile(
     rf"^(?P<series>.+?)[\s,:;\-–—(]+{_WORD}\.?\s*(?P<number>\d{{1,4}}(?:[.,]\d)?)\b\)?(?P<rest>.*)$",
     re.IGNORECASE,

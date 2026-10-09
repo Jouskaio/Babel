@@ -607,6 +607,19 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
     }
   }
 
+  Future<void> _cancel(BookRequestResponse request) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref
+          .read(requestsApiProvider)
+          .cancelBookRequest(request.workId, language: request.language);
+      ref.invalidate(bookRequestsProvider);
+    } on ApiException {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.requestFailed)));
+    }
+  }
+
   Future<void> _add(SourceMatchResponse match) async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
@@ -686,6 +699,14 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
                 : l10n.requestPending,
             style: BabelText.body(13, color: BabelColors.gold),
           ),
+          if (mine.status == RequestStatus.requested)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () => _cancel(mine),
+                child: Text(l10n.requestCancel, style: BabelText.body(13)),
+              ),
+            ),
           if (mine.status == RequestStatus.requested && percent != null) ...[
             const SizedBox(height: 10),
             ClipRRect(

@@ -81,6 +81,15 @@ class SqlRequestRepository:
         await self._session.flush()
         return _to_request(row)
 
+    async def delete(self, user_id: UUID, work_id: UUID, language: str = "") -> None:
+        await self._session.execute(
+            delete(BookRequestRow).where(
+                BookRequestRow.user_id == user_id,
+                BookRequestRow.work_id == work_id,
+                BookRequestRow.language == language,
+            )
+        )
+
     async def link(self, user_id: UUID) -> ChaptarrLink | None:
         row = await self._session.get(ChaptarrLinkRow, user_id)
         if row is None:

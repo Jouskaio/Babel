@@ -5024,7 +5024,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.43.0"
+    "version": "0.43.1"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -9152,6 +9152,60 @@
           }
         ],
         "summary": "Request Book",
+        "tags": [
+          "requests"
+        ]
+      }
+    },
+    "/v1/requests/{work_id}": {
+      "delete": {
+        "description": "Cancel a request: it disappears from your list and you can ask again.",
+        "operationId": "cancelBookRequest",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "work_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Work Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "language",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 8,
+              "pattern": "^[a-z]{0,3}$",
+              "title": "Language",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel Request",
         "tags": [
           "requests"
         ]

@@ -2458,6 +2458,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Envoyé à Shelfmark : le livre apparaîtra dans « Dans mes sources » dès qu\'il sera arrivé.';
 
   @override
+  String get requestCancel => 'Annuler la demande';
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override

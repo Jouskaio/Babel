@@ -4058,6 +4058,12 @@ abstract class AppLocalizations {
   /// **'Envoyé à Shelfmark : le livre apparaîtra dans « Dans mes sources » dès qu\'il sera arrivé.'**
   String get requestShelfmark;
 
+  /// No description provided for @requestCancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la demande'**
+  String get requestCancel;
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

@@ -842,6 +842,7 @@
   "@searchSagaVolumes": {"placeholders": {"count": {"type": "int"}}},
   "requestNoRelease": "Requested, but no version to download has been found yet. The search goes on in the background.",
   "requestShelfmark": "Sent to Shelfmark: the book will show up in “In my sources” once it has arrived.",
+  "requestCancel": "Cancel the request",
   "coverDefault": "Default",
   "coverLinkFirst": "Link this book to a book page first to choose among its editions' covers.",
   "volumeNumber": "Volume {number}",

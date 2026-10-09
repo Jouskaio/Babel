@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, status
+from fastapi import APIRouter, BackgroundTasks, Query, status
 from pydantic import BaseModel, Field
 
 from babel_api.api.dependencies import (
@@ -74,6 +74,19 @@ async def request_book(
     if created:
         background.add_task(fulfill_request, container, user_id, body.work_id, body.language)
     return BookRequestResponse.of(request)
+
+
+@router.delete(
+    "/{work_id}", operation_id="cancelBookRequest", status_code=status.HTTP_204_NO_CONTENT
+)
+async def cancel_request(
+    user_id: CurrentUserId,
+    requests: RequestServiceDep,
+    work_id: UUID,
+    language: Annotated[str, Query(max_length=8, pattern=r"^[a-z]{0,3}$")] = "",
+) -> None:
+    """Cancel a request: it disappears from your list and you can ask again."""
+    await requests.cancel(user_id, work_id, language)
 
 
 link_router = APIRouter(prefix="/me/chaptarr", tags=["requests"])
