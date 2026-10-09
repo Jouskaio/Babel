@@ -16,6 +16,7 @@ from uuid import UUID
 from babel_api.adapters.chaptarr import ChaptarrClient, ChaptarrError
 from babel_api.adapters.db.request_repository import SqlRequestRepository
 from babel_api.adapters.security.secrets import SecretBox
+from babel_api.adapters.shelfmark import ShelfmarkClient, ShelfmarkError
 from babel_api.domain.errors import (
     NotFoundError,
     PremiumRequiredError,
@@ -27,6 +28,9 @@ from babel_api.domain.series import guess_series
 from babel_api.services.works import WorkDetail, WorkService
 
 log = logging.getLogger(__name__)
+
+# chaptarr_id of a request sent to Shelfmark: it cannot be followed there.
+SHELFMARK_ID = -1
 
 ClientFactory = Callable[[str, str], ChaptarrClient]
 
@@ -41,7 +45,9 @@ class RequestService:
         reader_chaptarr: ClientFactory,
         secrets: SecretBox,
         scan_library: Callable[[], Awaitable[None]],
+        shelfmark: Callable[[], ShelfmarkClient] | None = None,
     ) -> None:
+        self._shelfmark = shelfmark
         self._requests = requests
         self._users = users
         self._works = works
@@ -127,6 +133,13 @@ class RequestService:
         work = detail.work
         # The title the book bears in the language asked for ("Les Misérables", not "Les Mis...").
         title = detail.localized(language or None)[0]
+        if await self._via_shelfmark(title, detail, work.authors):
+            await self._requests.save(
+                user_id, work_id, RequestStatus.REQUESTED, SHELFMARK_ID, language
+            )
+            await self._requests.commit()
+            await client.aclose()
+            return
         try:
             found = await client.lookup(title, work.authors)
             original = await self._english(client, detail, title, found)
@@ -145,6 +158,24 @@ class RequestService:
         finally:
             await client.aclose()
         await self._requests.commit()
+
+    async def _via_shelfmark(
+        self, title: str, detail: WorkDetail, authors: tuple[str, ...]
+    ) -> bool:
+        """Manga and other numbered volumes go to Shelfmark first (English title preferred:
+        indexers know them by it). False when it is not set, finds nothing or fails."""
+        if self._shelfmark is None or guess_series(title) is None:
+            return False
+        shelf = self._shelfmark()
+        try:
+            for name in dict.fromkeys((detail.localized("en")[0], title)):
+                if await shelf.fetch(name, authors):
+                    return True
+        except ShelfmarkError as error:
+            log.warning("Shelfmark request failed: %s", error.reason)
+        finally:
+            await shelf.aclose()
+        return False
 
     @staticmethod
     async def _english(
@@ -175,7 +206,7 @@ class RequestService:
         how far their download has come."""
         items = await self._requests.list_for(user_id)
         waiting = [
-            r for r in items if r.status is RequestStatus.REQUESTED and r.chaptarr_id is not None
+            r for r in items if r.status is RequestStatus.REQUESTED and (r.chaptarr_id or 0) > 0
         ]
         client = await self._client_for(user_id) if waiting else None
         if client is None:
@@ -184,7 +215,7 @@ class RequestService:
         progress: dict[int, float] = {}
         try:
             for request in waiting:
-                ids = [i for i in (request.chaptarr_id, request.alt_chaptarr_id) if i is not None]
+                ids = [i for i in (request.chaptarr_id, request.alt_chaptarr_id) if i and i > 0]
                 if any([await client.has_files(i) for i in ids]):
                     await self._requests.save(
                         user_id,
@@ -207,8 +238,11 @@ class RequestService:
                 log.warning("Could not ask Kavita to scan", exc_info=True)
             items = await self._requests.list_for(user_id)
         return [
-            replace(r, progress=progress.get(r.chaptarr_id) or progress.get(r.alt_chaptarr_id or 0))
-            if r.status is RequestStatus.REQUESTED and r.chaptarr_id is not None
+            replace(
+                r,
+                progress=progress.get(r.chaptarr_id or 0) or progress.get(r.alt_chaptarr_id or 0),
+            )
+            if r.status is RequestStatus.REQUESTED and (r.chaptarr_id or 0) > 0
             else r
             for r in items
         ]

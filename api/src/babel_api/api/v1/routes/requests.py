@@ -22,6 +22,7 @@ class BookRequestResponse(BaseModel):
     work_id: UUID
     language: str = Field(default="", description="The language asked for; empty if none")
     status: RequestStatus
+    via: str = Field(default="chaptarr", description="Where it was sent: chaptarr or shelfmark")
     created_at: datetime
     progress: float | None = Field(
         default=None, description="Percent downloaded while it runs; null before it starts"
@@ -33,6 +34,7 @@ class BookRequestResponse(BaseModel):
             work_id=request.work_id,
             language=request.language,
             status=request.status,
+            via="shelfmark" if request.chaptarr_id == -1 else "chaptarr",
             created_at=request.created_at,
             progress=request.progress,
         )

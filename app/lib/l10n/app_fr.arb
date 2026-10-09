@@ -1409,6 +1409,7 @@
   "searchSagaVolumes": "{count, plural, one{# tome} other{# tomes}}",
   "@searchSagaVolumes": {"placeholders": {"count": {"type": "int"}}},
   "requestNoRelease": "Demandé, mais aucune version à télécharger n'a été trouvée pour l'instant. La recherche continue en arrière-plan.",
+  "requestShelfmark": "Envoyé à Shelfmark : le livre apparaîtra dans « Dans mes sources » dès qu'il sera arrivé.",
   "coverDefault": "Par défaut",
   "coverLinkFirst": "Associez d'abord ce livre à une fiche pour choisir parmi les couvertures de ses éditions.",
   "volumeNumber": "Tome {number}",

@@ -30,6 +30,7 @@ from babel_api.adapters.security.identity import apple_verifier, google_verifier
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
 from babel_api.adapters.security.secrets import SecretBox
 from babel_api.adapters.security.tokens import AccessTokenIssuer
+from babel_api.adapters.shelfmark import ShelfmarkClient
 from babel_api.adapters.sources.ao3 import Ao3Connector
 from babel_api.adapters.sources.github import GitHubConnector
 from babel_api.adapters.sources.links import LinkFetcher
@@ -107,6 +108,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             )
 
         chaptarr = chaptarr_client
+
+    shelfmark: Callable[[], ShelfmarkClient] | None = None
+    if settings.shelfmark_url and settings.shelfmark_api_key.get_secret_value():
+
+        def shelfmark_client() -> ShelfmarkClient:
+            return ShelfmarkClient(
+                settings.shelfmark_url, settings.shelfmark_api_key.get_secret_value()
+            )
+
+        shelfmark = shelfmark_client
 
     hardcover = (
         HardcoverClient(settings.hardcover_api_key.get_secret_value())
@@ -201,6 +212,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         kavita=kavita,
         abs_client=abs_client,
         chaptarr=chaptarr,
+        shelfmark=shelfmark,
         hardcover=hardcover,
     )
     if settings.cors_origins:

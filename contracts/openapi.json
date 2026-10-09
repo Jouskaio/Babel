@@ -666,6 +666,12 @@
           "status": {
             "$ref": "#/components/schemas/RequestStatus"
           },
+          "via": {
+            "default": "chaptarr",
+            "description": "Where it was sent: chaptarr or shelfmark",
+            "title": "Via",
+            "type": "string"
+          },
           "work_id": {
             "format": "uuid",
             "title": "Work Id",
@@ -5018,7 +5024,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.42.1"
+    "version": "0.43.0"
   },
   "openapi": "3.1.0",
   "paths": {

@@ -157,6 +157,22 @@ echo "BABEL_CHAPTARR_API_KEY=<the key>" >> /opt/babel/.env
 cd /opt/babel && docker compose up -d api
 ```
 
+## Shelfmark (manga and other volumes)
+
+Numbered volumes (manga, comics, light novels) are asked for in Shelfmark first: it searches Prowlarr
+and direct sources by title, then Babel queues the best release (a book format, not Japanese, one
+volume's size, the most seeders). If Shelfmark finds nothing, the request goes to Chaptarr as before.
+Set `SHELFMARK_API_KEY` in Shelfmark's environment (it acts as its first admin), then:
+
+```bash
+echo "BABEL_SHELFMARK_URL=http://192.168.1.104:8084" >> /opt/babel/.env
+echo "BABEL_SHELFMARK_API_KEY=<the same key>" >> /opt/babel/.env
+cd /opt/babel && docker compose up -d api
+```
+
+Shelfmark's downloads cannot be followed from Babel: the book shows up in "In my sources" once Kavita
+has scanned it. Requests still need Chaptarr to be set (or a reader's own link).
+
 ## Hardcover (saga volumes)
 
 Hardcover names the volumes of a saga that the catalog lacks, so the saga page shows their titles

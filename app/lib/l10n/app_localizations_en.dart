@@ -2435,6 +2435,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Requested, but no version to download has been found yet. The search goes on in the background.';
 
   @override
+  String get requestShelfmark =>
+      'Sent to Shelfmark: the book will show up in “In my sources” once it has arrived.';
+
+  @override
   String get coverDefault => 'Default';
 
   @override

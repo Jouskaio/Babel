@@ -30,6 +30,7 @@ from babel_api.adapters.kavita import KavitaClient
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
 from babel_api.adapters.security.secrets import SecretBox
 from babel_api.adapters.security.tokens import AccessTokenError, AccessTokenIssuer
+from babel_api.adapters.shelfmark import ShelfmarkClient
 from babel_api.adapters.sources.ao3 import Ao3Connector
 from babel_api.adapters.sources.http import guarded_client
 from babel_api.adapters.sources.links import LinkFetcher
@@ -88,6 +89,8 @@ class Container:
     kavita: KavitaProvisioner
     abs_client: Callable[[str], AbsClient]
     chaptarr: Callable[[], ChaptarrClient] | None = None
+    # Shelfmark (manga and other volumes are asked for there first); None when not set.
+    shelfmark: Callable[[], ShelfmarkClient] | None = None
     hardcover: HardcoverClient | None = None
     # How a reader's own Chaptarr is reached (tests replace it); None: with the address guard.
     chaptarr_for_reader: Callable[[str, str], ChaptarrClient] | None = None
@@ -378,6 +381,7 @@ def make_request_service(container: Container, session: AsyncSession) -> Request
         container.chaptarr_for_reader or reader_chaptarr,
         container.secrets,
         scan_library,
+        container.shelfmark,
     )
 
 
