@@ -4154,6 +4154,12 @@ abstract class AppLocalizations {
   /// **'Recherche en cours…'**
   String get requestSearching;
 
+  /// No description provided for @requestShelfmarkSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyé à Shelfmark. Le livre arrivera dans « Dans mes sources » dès qu\'il sera téléchargé.'**
+  String get requestShelfmarkSent;
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

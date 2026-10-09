@@ -2515,6 +2515,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get requestSearching => 'Recherche en cours…';
 
   @override
+  String get requestShelfmarkSent =>
+      'Envoyé à Shelfmark. Le livre arrivera dans « Dans mes sources » dès qu\'il sera téléchargé.';
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override
