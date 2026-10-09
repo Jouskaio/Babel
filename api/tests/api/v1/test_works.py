@@ -318,11 +318,6 @@ class FakeChaptarr:
 
         return best_match(self.known, title, authors)
 
-    async def original_edition(
-        self, title: str, authors: tuple[str, ...]
-    ) -> dict[str, object] | None:
-        return None
-
     async def add(self, book: dict[str, object]) -> int:
         self.added.append(book)
         return 7
@@ -915,19 +910,3 @@ def test_an_address_without_chaptarr_api_is_not_a_chaptarr() -> None:
     with pytest.raises(ChaptarrError) as refused:
         asyncio.run(client.check())
     assert refused.value.reason == "not_chaptarr"
-
-
-def test_a_volume_is_also_found_under_its_original_title() -> None:
-    from babel_api.adapters.chaptarr import original_match
-
-    nekokurage = {"authorName": "Nekokurage"}
-    books = [
-        {"title": "Les Carnets de l'Apothicaire, Tome 1", "author": nekokurage},
-        {"title": "薬屋のひとりごと 2 [Kusuriya no Hitorigoto 2]", "author": nekokurage},
-        {"title": "薬屋のひとりごと 1-2巻セット", "author": nekokurage},
-        {"title": "薬屋のひとりごと 1 [Kusuriya no Hitorigoto 1]", "author": {"authorName": "X"}},
-        {"title": "薬屋のひとりごと 1 [Kusuriya no Hitorigoto 1]", "author": nekokurage},
-    ]
-    found = original_match(books, 1, ("Natsu Hyuuga", "Nekokurage"))
-    assert found is books[4]
-    assert original_match(books, 7, ("Nekokurage",)) is None
