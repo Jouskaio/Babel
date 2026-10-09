@@ -31,6 +31,12 @@ def _plain(text: str) -> str:
 _RANGE = re.compile(r"\d\s*[-–—/&]\s*\d")  # "Vol. 3-4": an omnibus, never one volume
 
 
+def _series_base(series: str) -> str:
+    """The series without its subtitle or edition note: "Les carnets - Enquêtes à la cour" and
+    "Les carnets (novel)" are both "les carnets"."""
+    return series_key(re.split(r"\s[-–:]\s|\(", series)[0])
+
+
 def _same_volume(wanted: str, found: str) -> bool:
     """ "Homunculus 3" and "Homunculus, Band 3" are the same volume of the same series;
     "Homunculus 3-4" (an omnibus) and "Homunculus 2" are not."""
@@ -38,7 +44,7 @@ def _same_volume(wanted: str, found: str) -> bool:
     return (
         mine is not None
         and theirs is not None
-        and series_key(mine.series) == series_key(theirs.series)
+        and _series_base(mine.series) == _series_base(theirs.series)
         and mine.number == theirs.number
         and not _RANGE.search(found)
     )
@@ -48,20 +54,25 @@ def best_match(
     candidates: list[dict[str, Any]], title: str, authors: tuple[str, ...]
 ) -> dict[str, Any] | None:
     """The candidate with the same title (a subtitle after ":" or "(" is ignored) or the same
-    volume of the same series, and an author that shares the work's author surname. Study
-    guides and anthologies never match."""
+    volume of the same series, and an author that shares the work's author surname (a volume
+    of the same series is taken without it as a last resort). Study guides and anthologies
+    never match."""
     wanted = _plain(title)
     surnames = {_plain(a).split(" ")[-1] for a in authors if _plain(a)}
+    volume: dict[str, Any] | None = None
     for found in candidates:
         author = cast(dict[str, Any], found.get("author") or {})
         text = str(found.get("title", ""))
         name = _plain(re.split(r"[:(]", text)[0])
         who = _plain(str(author.get("authorName", "")))
-        if (name == wanted or _same_volume(title, text)) and (
-            not surnames or any(s in who for s in surnames)
-        ):
+        agrees = not surnames or any(s in who for s in surnames)
+        if (name == wanted or _same_volume(title, text)) and agrees:
             return found
-    return None
+        # Catalogs credit a manga to its writer or its artist, the volume is still the one:
+        # the same volume of the same series is taken if no author agrees.
+        if volume is None and _same_volume(title, text):
+            volume = found
+    return volume
 
 
 class ChaptarrClient:

@@ -938,3 +938,26 @@ def test_a_request_can_be_cancelled(
     assert gone.status_code == 204
     assert client.get("/v1/requests", headers=admin).json()["items"] == []
     assert client.delete(f"/v1/requests/{hit['id']}", headers=admin).status_code == 404
+
+
+def test_a_volume_is_found_whoever_the_catalog_credits() -> None:
+    from babel_api.adapters.chaptarr import best_match
+
+    books = [
+        {
+            "title": "Les Carnets de l'Apothicaire, Tome 2 (#2)",
+            "author": {"authorName": "Nekokurage"},
+        },
+        {"title": "Les Carnets de l'Apothicaire - Study guide", "author": {"authorName": "X"}},
+    ]
+    assert best_match(books, "Les carnets de l'apothicaire 2", ("Natsu Hyuuga",)) is books[0]
+    assert best_match(books, "Les carnets de l'apothicaire 3", ("Natsu Hyuuga",)) is None
+    # A candidate by the right author still wins over one by another.
+    mixed = [
+        books[0],
+        {
+            "title": "Les Carnets de l'apothicaire (novel), tome 2",
+            "author": {"authorName": "Hyuuga"},
+        },
+    ]
+    assert best_match(mixed, "Les carnets de l'apothicaire 2", ("Natsu Hyuuga",)) is mixed[1]
