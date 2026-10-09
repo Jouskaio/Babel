@@ -12,7 +12,7 @@ from babel_api.domain.catalog import Edition, IdentifierKind, SourceWork, Work
 from babel_api.domain.errors import NotFoundError, SourceUnavailableError
 from babel_api.domain.isbn import normalize_isbn
 from babel_api.domain.ports import BookSource, CatalogRepository
-from babel_api.domain.series import series_key, volume_number
+from babel_api.domain.series import guess_series, series_key, volume_number
 
 logger = logging.getLogger(__name__)
 
@@ -139,6 +139,23 @@ class WorkService:
         return await asyncio.wait_for(
             self._source.search(query, limit, language), OPEN_LIBRARY_PATIENCE
         )
+
+    async def other_titles(self, title: str, authors: tuple[str, ...]) -> list[str]:
+        """The same book under the titles Hardcover gives it ("Les carnets de l'apothicaire 2"
+        is "The Apothecary Diaries 2" there): indexers know books by their English title.
+        Only hits by one of the authors; empty when Hardcover is off or does not answer."""
+        hits = await self._hardcover_books(f"{title} {authors[0]}" if authors else title, 5)
+        surnames = {a.split(" ")[-1].casefold() for a in authors if a.strip()}
+        found: list[str] = []
+        for hit in hits:
+            who = " ".join(hit.authors).casefold()
+            if surnames and not any(s in who for s in surnames):
+                continue
+            guess = guess_series(hit.title)
+            if guess is not None:
+                base = re.split(r"\s[-–:]\s|\(", guess.series)[0].strip()
+                found.append(f"{base} {guess.number:g}")
+        return list(dict.fromkeys(found))
 
     async def _hardcover_books(self, query: str, limit: int) -> list[HardcoverBook]:
         if self._hardcover is None or len(query.strip()) < 2:

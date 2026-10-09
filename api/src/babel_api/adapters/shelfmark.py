@@ -78,9 +78,13 @@ class ShelfmarkClient:
 
     async def fetch(self, title: str, authors: tuple[str, ...]) -> bool:
         """Queues the best release of the book; False when Shelfmark knows none."""
-        query = f"{title} {authors[0]}" if authors else title
-        found = await self._call("GET", "metadata/search", params={"query": query})
-        books = cast(list[dict[str, Any]], cast(dict[str, Any], found or {}).get("books") or [])
+        books: list[dict[str, Any]] = []
+        # The title alone first: adding the author often finds nothing.
+        for query in dict.fromkeys((title, f"{title} {authors[0]}" if authors else title)):
+            found = await self._call("GET", "metadata/search", params={"query": query})
+            books = cast(list[dict[str, Any]], cast(dict[str, Any], found or {}).get("books") or [])
+            if books:
+                break
         # Same match rule as Chaptarr's: the title (or the same volume) and a shared author.
         as_books = [
             {

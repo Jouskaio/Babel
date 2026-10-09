@@ -961,3 +961,27 @@ def test_a_volume_is_found_whoever_the_catalog_credits() -> None:
         },
     ]
     assert best_match(mixed, "Les carnets de l'apothicaire 2", ("Natsu Hyuuga",)) is mixed[1]
+
+
+def test_other_titles_come_from_hardcover() -> None:
+    import asyncio
+    from typing import Any
+
+    from babel_api.adapters.hardcover import HardcoverBook
+    from babel_api.services.works import WorkService
+
+    class FakeHardcover:
+        async def search_books(self, query: str, limit: int = 10) -> list[HardcoverBook]:
+            return [
+                HardcoverBook(
+                    1, "The Apothecary Diaries (Light Novel), Vol. 2", ("Natsu Hyuuga",), 2017, None
+                ),
+                HardcoverBook(2, "Apothecary Diaries 2: a guide", ("Someone Else",), 2020, None),
+                HardcoverBook(
+                    3, "Les Carnets de l'Apothicaire, Tome 2", ("Natsu Hyuuga",), 2022, None
+                ),
+            ]
+
+    service: Any = WorkService(None, None, FakeHardcover())  # type: ignore[arg-type]
+    found = asyncio.run(service.other_titles("Les carnets de l'apothicaire 2", ("Natsu Hyuuga",)))
+    assert found == ["The Apothecary Diaries 2", "Les Carnets de l'Apothicaire 2"]
