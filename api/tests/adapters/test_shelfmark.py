@@ -68,3 +68,12 @@ def test_a_volume_is_searched_then_its_best_release_queued() -> None:
         {"title": "T1", "source": "p", "source_id": "1", "format": "cbz", "protocol": "direct"}
     ]
     assert not asyncio.run(shelf.fetch("Something else 9", ("Nobody",)))
+
+
+def test_a_book_known_only_by_its_original_title_is_found_by_volume() -> None:
+    from babel_api.adapters.shelfmark import original_title_match
+
+    hits = [{"title": "薬屋のひとりごと 2"}, {"title": "薬屋のひとりごと 1"}, {"title": "Dune 1"}]
+    assert original_title_match(hits, "Les carnets de l'apothicaire 1") == hits[1]
+    assert original_title_match(hits, "Les carnets de l'apothicaire 3") is None
+    assert original_title_match(hits, "Jane Eyre") is None

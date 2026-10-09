@@ -13,6 +13,7 @@ import httpx
 
 from babel_api.adapters.chaptarr import best_match
 from babel_api.domain.errors import DomainError
+from babel_api.domain.series import guess_series
 
 BOOK_FORMATS = ("epub", "cbz", "cbr", "pdf")
 MAX_VOLUME_BYTES = 400 * 1024 * 1024  # a batch of many volumes is far above this
@@ -20,6 +21,23 @@ _CJK = re.compile(r"[぀-ヿ㐀-鿿가-힯]")  # raws, not for the reader
 
 
 log = logging.getLogger(__name__)
+
+
+_NUMBER_LAST = re.compile(r"(\d{1,3})\s*$")
+
+
+def original_title_match(books: list[dict[str, Any]], title: str) -> dict[str, Any] | None:
+    """Among search hits titled in Japanese, Chinese or Korean, the one of the wanted volume
+    (the number that ends the title). None for a book that is not a numbered volume."""
+    guess = guess_series(title)
+    if guess is None:
+        return None
+    for book in books:
+        text = str(book.get("title", ""))
+        number = _NUMBER_LAST.search(text.split("[")[0].strip())
+        if _CJK.search(text) and number is not None and float(number[1]) == guess.number:
+            return book
+    return None
 
 
 class ShelfmarkError(DomainError):
@@ -95,6 +113,10 @@ class ShelfmarkClient:
         ]
         match = best_match(as_books, title, authors)
         if match is None:
+            # A book Shelfmark knows only by its original title (薬屋のひとりごと 1): its search
+            # found it from ours, so the same volume number is enough.
+            match = original_title_match(as_books, title)
+        if match is None:
             seen = [(b.get("title"), b.get("authors")) for b in books[:5]]
             log.info("Shelfmark: no match for %r by %s among %s", title, authors, seen)
             return False
@@ -113,7 +135,10 @@ class ShelfmarkClient:
         )
         chosen = pick_release(releases)
         if chosen is None:
-            log.info("Shelfmark: %d releases for %r, none suitable", len(releases), title)
+            sample = [(r.get("title"), r.get("format"), r.get("seeders")) for r in releases[:6]]
+            log.info(
+                "Shelfmark: %d releases for %r, none suitable: %s", len(releases), title, sample
+            )
             return False
         log.info("Shelfmark: queueing %r for %r", chosen.get("title"), title)
         await self._call("POST", "releases/download", json=chosen)
