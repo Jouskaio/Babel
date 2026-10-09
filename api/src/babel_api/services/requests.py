@@ -23,7 +23,8 @@ from babel_api.domain.errors import (
 )
 from babel_api.domain.ports import UserRepository
 from babel_api.domain.requests import BookRequest, ChaptarrLink, RequestStatus
-from babel_api.services.works import WorkService
+from babel_api.domain.series import guess_series
+from babel_api.services.works import WorkDetail, WorkService
 
 log = logging.getLogger(__name__)
 
@@ -128,12 +129,11 @@ class RequestService:
         title = detail.localized(language or None)[0]
         try:
             found = await client.lookup(title, work.authors)
-            original = await self._original(client, title, work.authors, found)
+            original = await self._english(client, detail, title, found)
             if found is None and original is None:
                 await self._requests.save(user_id, work_id, RequestStatus.NOT_FOUND, None, language)
             else:
-                # Release indexers list manga under their original title: ask for that
-                # edition too, so the reader need not know it.
+                # Indexers list manga under their English title: ask for that edition too.
                 first = await client.add(found or cast(dict[str, Any], original))
                 second = await client.add(original) if found and original else None
                 await self._requests.save(
@@ -147,23 +147,28 @@ class RequestService:
         await self._requests.commit()
 
     @staticmethod
-    async def _original(
+    async def _english(
         client: ChaptarrClient,
+        detail: WorkDetail,
         title: str,
-        authors: tuple[str, ...],
         found: dict[str, Any] | None,
     ) -> dict[str, Any] | None:
-        """The original-language edition of the volume; best effort, never an error."""
+        """The English edition of a volume, when its title differs: release indexers know
+        manga and light novels by their English (or romanized) title, and the reader need not.
+        Best effort, never an error."""
+        english = detail.localized("en")[0]
+        if guess_series(title) is None or english.casefold() == title.casefold():
+            return None
         try:
-            original = await client.original_edition(title, authors)
+            book = await client.lookup(english, detail.work.authors)
         except ChaptarrError:
             return None
         same = (
             found is not None
-            and original is not None
-            and found.get("foreignBookId") == (original.get("foreignBookId"))
+            and book is not None
+            and found.get("foreignBookId") == (book.get("foreignBookId"))
         )
-        return None if same else original
+        return None if same else book
 
     async def list(self, user_id: UUID) -> list[BookRequest]:
         """The reader's requests; those still waiting are checked with Chaptarr first, and show
