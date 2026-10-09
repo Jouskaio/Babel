@@ -176,8 +176,10 @@ class RequestService:
         """Manga and other numbered volumes go to Shelfmark first (English title preferred:
         indexers know them by it). False when it is not set, finds nothing or fails."""
         if self._shelfmark is None or guess_series(title) is None:
+            log.info("Request %r: Shelfmark not used (set: %s)", title, self._shelfmark is not None)
             return False
         shelf = self._shelfmark()
+        log.info("Request %r: trying Shelfmark", title)
         try:
             for name in dict.fromkeys((volume_title(detail.localized("en")[0]), title)):
                 if await shelf.fetch(name, authors):
@@ -237,8 +239,8 @@ class RequestService:
                     )
                     arrived = True
             progress = await client.queue_progress()
-        except ChaptarrError:
-            log.warning("Chaptarr did not answer while checking requests")
+        except ChaptarrError as error:
+            log.warning("Chaptarr did not answer while checking requests: %s", error.reason)
         finally:
             await client.aclose()
         if arrived:

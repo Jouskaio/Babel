@@ -5,6 +5,7 @@ title, which finds them where Chaptarr's release search does not. The download l
 library folder Kavita reads. Shelfmark's API is driven by its web interface and may change.
 """
 
+import logging
 import re
 from typing import Any, cast
 
@@ -16,6 +17,9 @@ from babel_api.domain.errors import DomainError
 BOOK_FORMATS = ("epub", "cbz", "cbr", "pdf")
 MAX_VOLUME_BYTES = 400 * 1024 * 1024  # a batch of many volumes is far above this
 _CJK = re.compile(r"[぀-ヿ㐀-鿿가-힯]")  # raws, not for the reader
+
+
+log = logging.getLogger(__name__)
 
 
 class ShelfmarkError(DomainError):
@@ -87,6 +91,8 @@ class ShelfmarkClient:
         ]
         match = best_match(as_books, title, authors)
         if match is None:
+            seen = [(b.get("title"), b.get("authors")) for b in books[:5]]
+            log.info("Shelfmark: no match for %r by %s among %s", title, authors, seen)
             return False
         book = books[as_books.index(match)]
         listing = await self._call(
@@ -103,7 +109,9 @@ class ShelfmarkClient:
         )
         chosen = pick_release(releases)
         if chosen is None:
+            log.info("Shelfmark: %d releases for %r, none suitable", len(releases), title)
             return False
+        log.info("Shelfmark: queueing %r for %r", chosen.get("title"), title)
         await self._call("POST", "releases/download", json=chosen)
         return True
 
