@@ -209,11 +209,13 @@ class ShelfmarkClient:
     async def _by_original_name(self, series: str, number: float) -> dict[str, Any] | None:
         """Shelfmark often knows only one volume of a series: learn the series' original name
         from it ("薬屋のひとりごと 1" gives "薬屋のひとりごと"), then ask for the wanted volume."""
-        for hit in await self.search(series, ()):
-            text = str(hit.get("title", "")).split("[")[0].strip()
+        tried: set[str] = set()
+        for hit in (await self.search(series, ()))[:4]:
+            text = re.sub(r"\s*[\[(].*", "", str(hit.get("title", ""))).strip()
             name = re.sub(r"\s*\d{1,3}$", "", text).strip()
-            if not CJK.search(name) or not name:
+            if not CJK.search(name) or not name or name in tried:
                 continue
+            tried.add(name)
             wanted = f"{name} {number:g}"
             books = await self.search(wanted, ())
             match = original_title_match(self._as_books(books), wanted)

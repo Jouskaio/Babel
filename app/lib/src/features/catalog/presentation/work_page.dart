@@ -652,6 +652,26 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
         ),
       ];
     }
+    // Shelfmark's downloads cannot be followed: after a while, say where the book will be
+    // instead of searching forever.
+    if (mine.via == 'shelfmark' &&
+        DateTime.now().difference(mine.createdAt) >
+            const Duration(minutes: 10)) {
+      return [
+        Row(
+          children: [
+            Icon(Icons.outbox_outlined, color: BabelColors.gold, size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                l10n.requestShelfmarkSent,
+                style: BabelText.body(14, color: BabelColors.gold),
+              ),
+            ),
+          ],
+        ),
+      ];
+    }
     return [
       SearchingIndicator(
         text: mine.via == 'shelfmark'
