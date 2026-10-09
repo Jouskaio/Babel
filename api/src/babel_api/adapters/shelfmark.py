@@ -144,27 +144,58 @@ class ShelfmarkClient:
                 return books
         return []
 
-    async def fetch(self, title: str, authors: tuple[str, ...]) -> bool:
-        """Queues the best release of the book; False when Shelfmark knows none."""
-        books = await self.search(title, authors)
-        # Same match rule as Chaptarr's: the title (or the same volume) and a shared author.
-        as_books = [
+    @staticmethod
+    def _as_books(books: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Search hits in the shape the Chaptarr matching rules read."""
+        return [
             {
                 "title": b.get("title", ""),
                 "author": {"authorName": " ".join(b.get("authors") or [])},
             }
             for b in books
         ]
+
+    async def find(self, title: str, authors: tuple[str, ...]) -> dict[str, Any] | None:
+        """The book Shelfmark's metadata has for this title or volume, or None."""
+        books = await self.search(title, authors)
+        as_books = self._as_books(books)
+        # Same match rule as Chaptarr's: the title (or the same volume) and a shared author.
         match = best_match(as_books, title, authors)
         if match is None:
             # A book Shelfmark knows only by its original title (薬屋のひとりごと 1): its search
             # found it from ours, so the same volume number is enough.
             match = original_title_match(as_books, title)
-        if match is None:
-            seen = [(b.get("title"), b.get("authors")) for b in books[:5]]
-            log.info("Shelfmark: no match for %r by %s among %s", title, authors, seen)
+        if match is not None:
+            return books[as_books.index(match)]
+        guess = guess_series(title)
+        if guess is not None:
+            return await self._by_original_name(guess.series, guess.number)
+        seen = [(b.get("title"), b.get("authors")) for b in books[:5]]
+        log.info("Shelfmark: no match for %r by %s among %s", title, authors, seen)
+        return None
+
+    async def _by_original_name(self, series: str, number: float) -> dict[str, Any] | None:
+        """Shelfmark often knows only one volume of a series: learn the series' original name
+        from it ("薬屋のひとりごと 1" gives "薬屋のひとりごと"), then ask for the wanted volume."""
+        for hit in await self.search(series, ()):
+            text = str(hit.get("title", "")).split("[")[0].strip()
+            name = re.sub(r"\s*\d{1,3}$", "", text).strip()
+            if not CJK.search(name) or not name:
+                continue
+            wanted = f"{name} {number:g}"
+            books = await self.search(wanted, ())
+            match = original_title_match(self._as_books(books), wanted)
+            if match is not None:
+                log.info("Shelfmark: %r found as %r", series, wanted)
+                return books[self._as_books(books).index(match)]
+        log.info("Shelfmark: no match for %r %g, not even by its original name", series, number)
+        return None
+
+    async def fetch(self, title: str, authors: tuple[str, ...]) -> bool:
+        """Queues the best release of the book; False when Shelfmark knows none."""
+        book = await self.find(title, authors)
+        if book is None:
             return False
-        book = books[as_books.index(match)]
         listing = await self._call(
             "GET",
             "releases",
