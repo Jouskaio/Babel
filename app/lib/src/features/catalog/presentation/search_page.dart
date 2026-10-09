@@ -384,14 +384,9 @@ class _Results extends ConsumerWidget {
                   else
                     _SagaRow(
                       entry: entry,
-                      onTap: () {
+                      onOpenWork: (work) {
                         onOpen();
-                        context.push(
-                          Routes.saga(
-                            entry.title,
-                            author: entry.first.authors.firstOrNull,
-                          ),
-                        );
+                        context.push(Routes.work(work.id));
                       },
                     ),
               ],
@@ -453,46 +448,77 @@ List<VolumeGroup> groupVolumes(List<WorkSummaryResponse> works) {
   return out;
 }
 
-class _SagaRow extends StatelessWidget {
-  const _SagaRow({required this.entry, required this.onTap});
+/// A series in the results: tap to unfold its volumes (the ones the search found).
+class _SagaRow extends StatefulWidget {
+  const _SagaRow({required this.entry, required this.onOpenWork});
   final VolumeGroup entry;
-  final VoidCallback onTap;
+  final ValueChanged<WorkSummaryResponse> onOpenWork;
+
+  @override
+  State<_SagaRow> createState() => _SagaRowState();
+}
+
+class _SagaRowState extends State<_SagaRow> {
+  bool _open = false;
 
   @override
   Widget build(BuildContext context) {
+    final entry = widget.entry;
     final work = entry.first;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(
-          children: [
-            BookCover(
-              width: 56,
-              url: work.coverPath == null ? null : apiUrl(work.coverPath!),
-              title: entry.title,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(entry.title, style: BabelText.heading(19)),
-                  if (work.authors.isNotEmpty)
-                    Text(work.authors.join(', '), style: BabelText.body(13)),
-                  Text(
-                    context.l10n
-                        .searchSagaVolumes(entry.volumes.length)
-                        .toUpperCase(),
-                    style: BabelText.label(9, color: BabelColors.gold),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          onTap: () => setState(() => _open = !_open),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                BookCover(
+                  width: 56,
+                  url: work.coverPath == null ? null : apiUrl(work.coverPath!),
+                  title: entry.title,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(entry.title, style: BabelText.heading(19)),
+                      if (work.authors.isNotEmpty)
+                        Text(
+                          work.authors.join(', '),
+                          style: BabelText.body(13),
+                        ),
+                      Text(
+                        context.l10n
+                            .searchSagaVolumes(entry.volumes.length)
+                            .toUpperCase(),
+                        style: BabelText.label(9, color: BabelColors.gold),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                Icon(
+                  _open ? Icons.expand_less : Icons.expand_more,
+                  color: BabelColors.textSecondary,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+        if (_open)
+          Padding(
+            padding: const EdgeInsets.only(left: 24),
+            child: Column(
+              children: [
+                for (final volume in entry.volumes)
+                  WorkRow(work: volume, onTap: () => widget.onOpenWork(volume)),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }
