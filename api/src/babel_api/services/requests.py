@@ -42,7 +42,7 @@ def volume_title(title: str) -> str:
     guess = guess_series(title)
     if guess is None:
         return title
-    base = re.split(r"\s[-–:]\s", guess.series)[0].strip()
+    base = re.split(r"\s[-–:]\s|\(", guess.series)[0].strip()
     return f"{base} {guess.number:g}"
 
 
@@ -181,7 +181,9 @@ class RequestService:
         shelf = self._shelfmark()
         log.info("Request %r: trying Shelfmark", title)
         try:
-            for name in dict.fromkeys((volume_title(detail.localized("en")[0]), title)):
+            names = [volume_title(detail.localized("en")[0]), title]
+            names += await self._works.other_titles(title, authors)
+            for name in dict.fromkeys(names):
                 if await shelf.fetch(name, authors):
                     return True
         except ShelfmarkError as error:
