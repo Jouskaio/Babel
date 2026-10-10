@@ -226,11 +226,28 @@ class ShelfmarkClient:
         log.info("Shelfmark: no match for %r %g, not even by its original name", series, number)
         return None
 
-    async def fetch(self, title: str, authors: tuple[str, ...]) -> bool:
-        """Queues the best release of the book; False when Shelfmark knows none."""
+    async def queue_status(self) -> dict[str, tuple[str, float]]:
+        """Every task of Shelfmark's queue: id -> (status, percent). Statuses are "queued",
+        "resolving", "downloading", "complete", "error"…"""
+        data = await self._call("GET", "status")
+        found: dict[str, tuple[str, float]] = {}
+        for status, tasks in cast(dict[str, Any], data if isinstance(data, dict) else {}).items():
+            if not isinstance(tasks, dict):
+                continue
+            for task_id, task in cast(dict[str, Any], tasks).items():
+                raw = cast(dict[str, Any], task).get("progress") if isinstance(task, dict) else 0
+                found[str(task_id)] = (
+                    str(status),
+                    float(raw) if isinstance(raw, int | float) else 0.0,
+                )
+        return found
+
+    async def fetch(self, title: str, authors: tuple[str, ...]) -> str | None:
+        """Queues the best release of the book and gives its task id (to follow it); None
+        when Shelfmark knows none."""
         book = await self.find(title, authors)
         if book is None:
-            return False
+            return None
         listing = await self._call(
             "GET",
             "releases",
@@ -255,10 +272,10 @@ class ShelfmarkClient:
             log.info(
                 "Shelfmark: %d releases for %r, none suitable: %s", len(releases), title, sample
             )
-            return False
+            return None
         log.info("Shelfmark: queueing %r for %r", chosen.get("title"), title)
         await self._call("POST", "releases/download", json=chosen)
-        return True
+        return str(chosen.get("source_id") or "") or None
 
     async def aclose(self) -> None:
         await self._client.aclose()

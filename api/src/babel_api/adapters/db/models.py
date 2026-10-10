@@ -616,6 +616,8 @@ class BookRequestRow(Base):
     # The language asked for ("fr", "en"...); empty when the reader did not choose.
     language: Mapped[str] = mapped_column(String(8), default="", server_default="")
     alt_chaptarr_id: Mapped[int | None] = mapped_column(Integer)
+    # The id of the Shelfmark task (the release source id), to follow its download.
+    shelfmark_ref: Mapped[str | None] = mapped_column(String(300))
 
 
 class ChaptarrLinkRow(Base):

@@ -199,9 +199,19 @@ class RequestService:
         # Shelfmark's search understands titles well (original ones too): it is asked for
         # everyone, and feeds the other titles Chaptarr is tried with.
         names, hits = await self._titles(title, detail, work.authors)
-        if shelf is not None and await self._via_shelfmark(shelf, title, names, work.authors):
+        queued = (
+            await self._via_shelfmark(shelf, title, names, work.authors)
+            if shelf is not None
+            else None
+        )
+        if queued is not None:
             await self._requests.save(
-                user_id, work_id, RequestStatus.REQUESTED, SHELFMARK_ID, language
+                user_id,
+                work_id,
+                RequestStatus.REQUESTED,
+                SHELFMARK_ID,
+                language,
+                shelfmark_ref=queued,
             )
             await self._requests.commit()
             if client is not None:
@@ -259,19 +269,21 @@ class RequestService:
 
     async def _via_shelfmark(
         self, shelf: ShelfmarkClient, title: str, names: list[str], authors: tuple[str, ...]
-    ) -> bool:
+    ) -> str | None:
         """Every book is downloaded through Shelfmark first (it understands titles best).
-        False when Shelfmark finds nothing or fails: Chaptarr then takes over."""
+        Gives the id of the Shelfmark task, or None when it finds nothing or fails:
+        Chaptarr then takes over."""
         try:
             log.info("Request %r: Shelfmark titles to try: %s", title, names)
             for name in names:
-                if await shelf.fetch(name, authors):
-                    return True
+                task = await shelf.fetch(name, authors)
+                if task is not None:
+                    return task
         except ShelfmarkError as error:
             log.warning("Shelfmark request failed: %s", error.reason)
         finally:
             await shelf.aclose()
-        return False
+        return None
 
     @staticmethod
     async def _add_extra(client: ChaptarrClient, book: dict[str, Any]) -> int | None:
@@ -307,17 +319,85 @@ class RequestService:
         )
         return None if same else book
 
+    @staticmethod
+    def _with_progress(
+        items: list[BookRequest], progress: dict[tuple[UUID, str], float]
+    ) -> list[BookRequest]:
+        return [
+            replace(r, progress=progress[(r.work_id, r.language)])
+            if (r.work_id, r.language) in progress
+            else r
+            for r in items
+        ]
+
+    async def _scan_if(self, arrived: bool) -> None:
+        if not arrived:
+            return
+        try:
+            await self._scan()
+        except Exception:  # best effort: Kavita also scans on its own schedule
+            log.warning("Could not ask Kavita to scan", exc_info=True)
+
+    async def _follow_shelfmark(
+        self, user_id: UUID, items: list[BookRequest]
+    ) -> tuple[list[BookRequest], dict[tuple[UUID, str], float], bool]:
+        """Requests sent to Shelfmark: how far each download is, and the ones that finished
+        (available) or failed (not found). Shelfmark's queue is read once."""
+        pending = [
+            r
+            for r in items
+            if r.status is RequestStatus.REQUESTED
+            and r.chaptarr_id == SHELFMARK_ID
+            and r.shelfmark_ref
+        ]
+        shelf = await self._shelf_for(user_id) if pending else None
+        if shelf is None:
+            return items, {}, False
+        try:
+            queue = await shelf.queue_status()
+        except ShelfmarkError as error:
+            log.warning("Shelfmark did not answer while checking requests: %s", error.reason)
+            return items, {}, False
+        finally:
+            await shelf.aclose()
+        progress: dict[tuple[UUID, str], float] = {}
+        arrived = False
+        for request in pending:
+            entry = queue.get(request.shelfmark_ref or "")
+            if entry is None:
+                continue
+            state, percent = entry
+            if state == "complete":
+                status = RequestStatus.AVAILABLE
+                arrived = True
+            elif state in ("error", "cancelled"):
+                status = RequestStatus.NOT_FOUND
+            else:
+                progress[(request.work_id, request.language)] = percent
+                continue
+            await self._requests.save(
+                user_id, request.work_id, status, SHELFMARK_ID, request.language
+            )
+        if arrived or any(
+            queue.get(r.shelfmark_ref or "", ("", 0))[0] in ("error", "cancelled") for r in pending
+        ):
+            await self._requests.commit()
+            items = await self._requests.list_for(user_id)
+        return items, progress, arrived
+
     async def list(self, user_id: UUID) -> list[BookRequest]:
         """The reader's requests; those still waiting are checked with Chaptarr first, and show
         how far their download has come."""
         items = await self._requests.list_for(user_id)
+        items, shelf_progress, shelf_arrived = await self._follow_shelfmark(user_id, items)
         waiting = [
             r for r in items if r.status is RequestStatus.REQUESTED and (r.chaptarr_id or 0) > 0
         ]
         client = await self._client_for(user_id) if waiting else None
         if client is None:
-            return items
-        arrived = False
+            await self._scan_if(shelf_arrived)
+            return self._with_progress(items, shelf_progress)
+        arrived = shelf_arrived
         progress: dict[int, float] = {}
         try:
             for request in waiting:
@@ -338,20 +418,21 @@ class RequestService:
             await client.aclose()
         if arrived:
             await self._requests.commit()
-            try:
-                await self._scan()
-            except Exception:  # best effort: Kavita also scans on its own schedule
-                log.warning("Could not ask Kavita to scan", exc_info=True)
+            await self._scan_if(True)
             items = await self._requests.list_for(user_id)
-        return [
-            replace(
-                r,
-                progress=progress.get(r.chaptarr_id or 0) or progress.get(r.alt_chaptarr_id or 0),
-            )
-            if r.status is RequestStatus.REQUESTED and (r.chaptarr_id or 0) > 0
-            else r
-            for r in items
-        ]
+        return self._with_progress(
+            [
+                replace(
+                    r,
+                    progress=progress.get(r.chaptarr_id or 0)
+                    or progress.get(r.alt_chaptarr_id or 0),
+                )
+                if r.status is RequestStatus.REQUESTED and (r.chaptarr_id or 0) > 0
+                else r
+                for r in items
+            ],
+            shelf_progress,
+        )
 
     async def cancel(self, user_id: UUID, work_id: UUID, language: str = "") -> None:
         """Forgets a request (what Chaptarr or Shelfmark already started is left alone)."""
