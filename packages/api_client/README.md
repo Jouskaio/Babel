@@ -101,6 +101,7 @@ Class | Method | HTTP request | Description
 *AuthApi* | [**verifyEmail**](doc//AuthApi.md#verifyemail) | **POST** /v1/auth/email/verify | Verify Email
 *CatalogApi* | [**getCatalogImage**](doc//CatalogApi.md#getcatalogimage) | **GET** /v1/catalog/images | Get Catalog Image
 *CatalogApi* | [**getCover**](doc//CatalogApi.md#getcover) | **GET** /v1/catalog/covers/{cover_id}/{size} | Get Cover
+*CatalogApi* | [**getExternalReviews**](doc//CatalogApi.md#getexternalreviews) | **GET** /v1/catalog/works/{work_id}/external-reviews | Get External Reviews
 *CatalogApi* | [**getKnownVolumes**](doc//CatalogApi.md#getknownvolumes) | **GET** /v1/catalog/saga/known | Get Known Volumes
 *CatalogApi* | [**getRelatedWorks**](doc//CatalogApi.md#getrelatedworks) | **GET** /v1/catalog/works/{work_id}/related | Get Related Works
 *CatalogApi* | [**getSaga**](doc//CatalogApi.md#getsaga) | **GET** /v1/catalog/saga | Get Saga
@@ -247,6 +248,9 @@ Class | Method | HTTP request | Description
  - [EditionResponse](doc//EditionResponse.md)
  - [EntityKind](doc//EntityKind.md)
  - [EntryStatus](doc//EntryStatus.md)
+ - [ExternalRatingResponse](doc//ExternalRatingResponse.md)
+ - [ExternalReviewResponse](doc//ExternalReviewResponse.md)
+ - [ExternalReviewsResponse](doc//ExternalReviewsResponse.md)
  - [FanficDetailsResponse](doc//FanficDetailsResponse.md)
  - [FeedEntryResponse](doc//FeedEntryResponse.md)
  - [FeedKind](doc//FeedKind.md)

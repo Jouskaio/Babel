@@ -90,6 +90,10 @@ class Settings(BaseSettings):
     shelfmark_url: str = ""
     shelfmark_api_key: SecretStr = SecretStr("")
 
+    # Goodreads ratings come from its public search page (no API exists any more): fragile, and
+    # against its terms of use. Switch off to leave Goodreads alone.
+    scrape_goodreads: bool = True
+
     # TMDB (free key or read token, themoviedb.org > Settings > API): posters and blurbs for the
     # films and series a book was adapted into (Wikidata finds them without a key). Empty: no
     # posters.

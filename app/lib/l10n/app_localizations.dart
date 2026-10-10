@@ -4454,6 +4454,24 @@ abstract class AppLocalizations {
   /// **'Cette adresse ne répond pas comme un manifeste Babel.'**
   String get pluginsInstallFailed;
 
+  /// No description provided for @externalTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ailleurs'**
+  String get externalTitle;
+
+  /// No description provided for @reviewSpoilers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cet avis contient des spoilers · afficher'**
+  String get reviewSpoilers;
+
+  /// No description provided for @ratingsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{# note} other{# notes}}'**
+  String ratingsCount(int count);
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

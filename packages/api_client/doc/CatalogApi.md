@@ -11,6 +11,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**getCatalogImage**](CatalogApi.md#getcatalogimage) | **GET** /v1/catalog/images | Get Catalog Image
 [**getCover**](CatalogApi.md#getcover) | **GET** /v1/catalog/covers/{cover_id}/{size} | Get Cover
+[**getExternalReviews**](CatalogApi.md#getexternalreviews) | **GET** /v1/catalog/works/{work_id}/external-reviews | Get External Reviews
 [**getKnownVolumes**](CatalogApi.md#getknownvolumes) | **GET** /v1/catalog/saga/known | Get Known Volumes
 [**getRelatedWorks**](CatalogApi.md#getrelatedworks) | **GET** /v1/catalog/works/{work_id}/related | Get Related Works
 [**getSaga**](CatalogApi.md#getsaga) | **GET** /v1/catalog/saga | Get Saga
@@ -105,6 +106,55 @@ No authorization required
 
  - **Content-Type**: Not defined
  - **Accept**: image/jpeg
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getExternalReviews**
+> ExternalReviewsResponse getExternalReviews(workId)
+
+Get External Reviews
+
+What others think of the book elsewhere: ratings from Hardcover, Open Library and Goodreads, and the most liked Hardcover reviews. Each source is best effort.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = CatalogApi();
+final workId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.getExternalReviews(workId);
+    print(result);
+} catch (e) {
+    print('Exception when calling CatalogApi->getExternalReviews: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **workId** | **String**|  | 
+
+### Return type
+
+[**ExternalReviewsResponse**](ExternalReviewsResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

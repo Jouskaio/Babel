@@ -1104,3 +1104,36 @@ def test_a_book_lists_what_it_was_adapted_into(
     assert related[0]["kind"] == "film"
     assert related[0]["poster_path"].startswith("/v1/catalog/images?url=https")
     assert fake.asked[0][1] == "Brontë"
+
+
+def test_a_book_shows_what_others_think_of_it(
+    app: FastAPI, client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    from babel_api.adapters.external_ratings import ExternalRating
+    from babel_api.adapters.hardcover import HardcoverReview
+
+    class FakeRatings:
+        async def openlibrary(self, work_id: str) -> ExternalRating | None:
+            return ExternalRating(
+                "openlibrary", 4.1, 90, f"https://openlibrary.org/works/{work_id}"
+            )
+
+        async def goodreads(self, title: str, authors: tuple[str, ...]) -> ExternalRating | None:
+            return ExternalRating("goodreads", 3.9, 1000, "https://www.goodreads.com/book/show/2")
+
+    class FakeHardcoverReviews(FakeHardcoverSearch):
+        async def reviews(self, book_id: int, limit: int = 5) -> list[HardcoverReview]:
+            assert book_id == 1
+            return [HardcoverReview("reader", 4.5, "A long and loving review of it.", False, 12)]
+
+    hardcover = FakeHardcoverReviews(
+        [HardcoverBook(1, "Jane Eyre", ("Charlotte Brontë",), 1847, None, rating=4.2)]
+    )
+    app.state.container = replace(
+        app.state.container, hardcover=hardcover, external_ratings=FakeRatings()
+    )
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=auth).json()
+    out = client.get(f"/v1/catalog/works/{hit['id']}/external-reviews", headers=auth).json()
+    assert {r["source"] for r in out["ratings"]} == {"hardcover", "openlibrary", "goodreads"}
+    assert out["reviews"][0]["author"] == "reader"
+    assert out["reviews"][0]["likes"] == 12

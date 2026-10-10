@@ -26,6 +26,7 @@ from babel_api.adapters.db.social_repository import SqlSocialRepository
 from babel_api.adapters.db.source_repository import SqlSourceRepository
 from babel_api.adapters.db.stats_repository import SqlStatsRepository
 from babel_api.adapters.db.sync_repository import SqlSyncRepository
+from babel_api.adapters.external_ratings import ExternalRatings
 from babel_api.adapters.files.comics import ComicConverter
 from babel_api.adapters.hardcover import HardcoverClient
 from babel_api.adapters.kavita import KavitaClient
@@ -100,6 +101,7 @@ class Container:
     shelfmark_for_reader: Callable[[str, str], ShelfmarkClient] | None = None
     hardcover: HardcoverClient | None = None
     wikidata: WikidataClient | None = None
+    external_ratings: ExternalRatings | None = None
     # How a reader's own Chaptarr is reached (tests replace it); None: with the address guard.
     chaptarr_for_reader: Callable[[str, str], ChaptarrClient] | None = None
     # Sources being scanned in the background (a slow connector such as AO3).
@@ -140,7 +142,11 @@ def get_work_service(
     container: ContainerDep, session: Annotated[AsyncSession, Depends(get_session)]
 ) -> WorkService:
     return WorkService(
-        SqlCatalogRepository(session), container.books, container.hardcover, container.wikidata
+        SqlCatalogRepository(session),
+        container.books,
+        container.hardcover,
+        container.wikidata,
+        container.external_ratings,
     )
 
 

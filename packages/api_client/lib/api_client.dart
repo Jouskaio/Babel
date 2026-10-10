@@ -256,6 +256,12 @@ class ApiClient {
           return EntityKindTypeTransformer().decode(value);
         case 'EntryStatus':
           return EntryStatusTypeTransformer().decode(value);
+        case 'ExternalRatingResponse':
+          return ExternalRatingResponse.fromJson(value);
+        case 'ExternalReviewResponse':
+          return ExternalReviewResponse.fromJson(value);
+        case 'ExternalReviewsResponse':
+          return ExternalReviewsResponse.fromJson(value);
         case 'FanficDetailsResponse':
           return FanficDetailsResponse.fromJson(value);
         case 'FeedEntryResponse':

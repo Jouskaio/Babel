@@ -2674,6 +2674,23 @@ class AppLocalizationsFr extends AppLocalizations {
       'Cette adresse ne répond pas comme un manifeste Babel.';
 
   @override
+  String get externalTitle => 'Ailleurs';
+
+  @override
+  String get reviewSpoilers => 'Cet avis contient des spoilers · afficher';
+
+  @override
+  String ratingsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# notes',
+      one: '# note',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override

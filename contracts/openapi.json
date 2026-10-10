@@ -1348,6 +1348,111 @@
         "title": "EntryStatus",
         "type": "string"
       },
+      "ExternalRatingResponse": {
+        "properties": {
+          "average": {
+            "description": "Out of 5",
+            "title": "Average",
+            "type": "number"
+          },
+          "count": {
+            "description": "Number of ratings; 0 when the source does not say",
+            "title": "Count",
+            "type": "integer"
+          },
+          "source": {
+            "enum": [
+              "hardcover",
+              "openlibrary",
+              "goodreads"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "average",
+          "count",
+          "url"
+        ],
+        "title": "ExternalRatingResponse",
+        "type": "object"
+      },
+      "ExternalReviewResponse": {
+        "properties": {
+          "author": {
+            "title": "Author",
+            "type": "string"
+          },
+          "likes": {
+            "title": "Likes",
+            "type": "integer"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "source": {
+            "const": "hardcover",
+            "title": "Source",
+            "type": "string"
+          },
+          "spoilers": {
+            "title": "Spoilers",
+            "type": "boolean"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "author",
+          "rating",
+          "text",
+          "spoilers",
+          "likes"
+        ],
+        "title": "ExternalReviewResponse",
+        "type": "object"
+      },
+      "ExternalReviewsResponse": {
+        "properties": {
+          "ratings": {
+            "items": {
+              "$ref": "#/components/schemas/ExternalRatingResponse"
+            },
+            "title": "Ratings",
+            "type": "array"
+          },
+          "reviews": {
+            "items": {
+              "$ref": "#/components/schemas/ExternalReviewResponse"
+            },
+            "title": "Reviews",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ratings",
+          "reviews"
+        ],
+        "title": "ExternalReviewsResponse",
+        "type": "object"
+      },
       "FanficDetailsResponse": {
         "description": "What AO3 says about a fanfiction.",
         "properties": {
@@ -7234,6 +7339,55 @@
           }
         ],
         "summary": "Get Work",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/works/{work_id}/external-reviews": {
+      "get": {
+        "description": "What others think of the book elsewhere: ratings from Hardcover, Open Library and\nGoodreads, and the most liked Hardcover reviews. Each source is best effort.",
+        "operationId": "getExternalReviews",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "work_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Work Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalReviewsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get External Reviews",
         "tags": [
           "catalog"
         ]
