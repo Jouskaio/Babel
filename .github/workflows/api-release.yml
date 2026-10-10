@@ -72,7 +72,8 @@ jobs:
 
       - name: Roll out the new version
         # The deployed version is also tagged latest on the server, so a manual
-        # `docker compose up -d` never starts an older image.
+        # `docker compose up -d` never starts an older image. Images no container uses are
+        # removed first: the disk fills up with old versions ("no space left on device").
         env:
           VERSION: ${{ needs.publish.outputs.version }}
           # Short-lived workflow token: lets the server pull the image even while the
@@ -82,6 +83,7 @@ jobs:
           printf '%s' "$REGISTRY_TOKEN" | ssh -o StrictHostKeyChecking=accept-new "deploy@${DEPLOY_HOST}" \
             "docker login ghcr.io -u ${{ github.actor }} --password-stdin >/dev/null \
              && cd /opt/babel \
+             && docker image prune -af >/dev/null \
              && BABEL_API_TAG=${VERSION} docker compose pull api; \
              status=\$?; docker logout ghcr.io >/dev/null; [ \$status -eq 0 ] \
              && docker tag ghcr.io/jouskaio/babel-api:${VERSION} ghcr.io/jouskaio/babel-api:latest \
