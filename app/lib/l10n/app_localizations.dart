@@ -4472,6 +4472,138 @@ abstract class AppLocalizations {
   /// **'{count, plural, one{# note} other{# notes}}'**
   String ratingsCount(int count);
 
+  /// No description provided for @homeReading.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours'**
+  String get homeReading;
+
+  /// No description provided for @homeResume.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reprendre'**
+  String get homeResume;
+
+  /// No description provided for @homeForYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour vous'**
+  String get homeForYou;
+
+  /// No description provided for @homeSeeAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout voir'**
+  String get homeSeeAll;
+
+  /// No description provided for @homePile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pile à lire'**
+  String get homePile;
+
+  /// No description provided for @homeJourney.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre parcours'**
+  String get homeJourney;
+
+  /// No description provided for @homeBadges.
+  ///
+  /// In fr, this message translates to:
+  /// **'Badges'**
+  String get homeBadges;
+
+  /// No description provided for @homeBorn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Né de vos lectures'**
+  String get homeBorn;
+
+  /// No description provided for @homeMoods.
+  ///
+  /// In fr, this message translates to:
+  /// **'Explorer par ambiance'**
+  String get homeMoods;
+
+  /// No description provided for @homeDownloads.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargements'**
+  String get homeDownloads;
+
+  /// No description provided for @homeWrapInvite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Découvrez votre Wrap'**
+  String get homeWrapInvite;
+
+  /// No description provided for @moodDarkAcademia.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dark academia'**
+  String get moodDarkAcademia;
+
+  /// No description provided for @moodGothic.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gothique'**
+  String get moodGothic;
+
+  /// No description provided for @moodTragicRomance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Romance tragique'**
+  String get moodTragicRomance;
+
+  /// No description provided for @moodBottle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Huis clos'**
+  String get moodBottle;
+
+  /// No description provided for @moodClassics.
+  ///
+  /// In fr, this message translates to:
+  /// **'Classiques'**
+  String get moodClassics;
+
+  /// No description provided for @moodEnemies.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enemies to lovers'**
+  String get moodEnemies;
+
+  /// No description provided for @moodFantasy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fantastique'**
+  String get moodFantasy;
+
+  /// No description provided for @moodFanfiction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fanfictions'**
+  String get moodFanfiction;
+
+  /// No description provided for @homeBooksCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{# livre} other{# livres}}'**
+  String homeBooksCount(int count);
+
+  /// No description provided for @homeYourMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre {month}'**
+  String homeYourMonth(String month);
+
+  /// No description provided for @homeMonthBooks.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{# livre terminé} other{# livres terminés}} ce mois-ci'**
+  String homeMonthBooks(int count);
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

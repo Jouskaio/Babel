@@ -692,6 +692,13 @@
       },
       "BookRequestResponse": {
         "properties": {
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -717,6 +724,12 @@
           },
           "status": {
             "$ref": "#/components/schemas/RequestStatus"
+          },
+          "title": {
+            "default": "",
+            "description": "The book's title",
+            "title": "Title",
+            "type": "string"
           },
           "via": {
             "default": "chaptarr",

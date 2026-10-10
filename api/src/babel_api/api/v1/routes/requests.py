@@ -11,6 +11,7 @@ from babel_api.api.dependencies import (
     ContainerDep,
     CurrentUserId,
     RequestServiceDep,
+    WorkServiceDep,
     fulfill_request,
 )
 from babel_api.domain.requests import BookRequest, RequestStatus
@@ -20,6 +21,8 @@ router = APIRouter(prefix="/requests", tags=["requests"])
 
 class BookRequestResponse(BaseModel):
     work_id: UUID
+    title: str = Field(default="", description="The book's title")
+    authors: list[str] = Field(default_factory=list)
     language: str = Field(default="", description="The language asked for; empty if none")
     status: RequestStatus
     via: str = Field(default="chaptarr", description="Where it was sent: chaptarr or shelfmark")
@@ -29,9 +32,13 @@ class BookRequestResponse(BaseModel):
     )
 
     @classmethod
-    def of(cls, request: BookRequest) -> "BookRequestResponse":
+    def of(
+        cls, request: BookRequest, title: str = "", authors: tuple[str, ...] = ()
+    ) -> "BookRequestResponse":
         return cls(
             work_id=request.work_id,
+            title=title,
+            authors=list(authors),
             language=request.language,
             status=request.status,
             via="shelfmark" if request.chaptarr_id == -1 else "chaptarr",
@@ -53,11 +60,17 @@ class NewRequest(BaseModel):
 
 
 @router.get("", operation_id="listBookRequests")
-async def list_requests(user_id: CurrentUserId, requests: RequestServiceDep) -> RequestsResponse:
+async def list_requests(
+    user_id: CurrentUserId, requests: RequestServiceDep, works: WorkServiceDep
+) -> RequestsResponse:
     """Your requests, with their progress (the ones still waiting are checked first)."""
     enabled = await requests.enabled_for(user_id)
     items = await requests.list(user_id) if enabled else []
-    return RequestsResponse(enabled=enabled, items=[BookRequestResponse.of(r) for r in items])
+    names = await works.titles([r.work_id for r in items])
+    return RequestsResponse(
+        enabled=enabled,
+        items=[BookRequestResponse.of(r, *names.get(r.work_id, ("", ()))) for r in items],
+    )
 
 
 @router.post("", operation_id="requestBook", status_code=status.HTTP_201_CREATED)
