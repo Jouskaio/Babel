@@ -2543,6 +2543,79 @@ class AppLocalizationsFr extends AppLocalizations {
   String get relatedOther => 'Œuvre liée';
 
   @override
+  String get levelLabel => 'Niveau';
+
+  @override
+  String get titleNovice => 'Curieux';
+
+  @override
+  String get titleReader => 'Lecteur';
+
+  @override
+  String get titleBookworm => 'Rat de bibliothèque';
+
+  @override
+  String get titleScholar => 'Érudit';
+
+  @override
+  String get titleArchivist => 'Archiviste';
+
+  @override
+  String get titleLibrarian => 'Bibliothécaire de Babel';
+
+  @override
+  String get badgeFinished => 'Livres terminés';
+
+  @override
+  String get badgeStreak => 'Jours de suite';
+
+  @override
+  String get badgeReadingDays => 'Jours de lecture';
+
+  @override
+  String get badgeNotes => 'Notes et surlignages';
+
+  @override
+  String get badgeReviews => 'Avis écrits';
+
+  @override
+  String get badgeLibrary => 'Bibliothèque';
+
+  @override
+  String get badgeComplete => 'Tous les paliers atteints';
+
+  @override
+  String get firstSteps => 'Premiers pas';
+
+  @override
+  String get stepAddBook => 'Ajouter un premier livre';
+
+  @override
+  String get stepLinkSource => 'Lier une source (Kavita, GitHub…)';
+
+  @override
+  String get stepRead => 'Lire un moment';
+
+  @override
+  String get stepNote => 'Prendre une note ou surligner';
+
+  @override
+  String get stepFinish => 'Terminer un livre';
+
+  @override
+  String get stepReview => 'Donner son avis';
+
+  @override
+  String xpOf(int xp, int next) {
+    return '$xp / $next XP';
+  }
+
+  @override
+  String badgeNext(int value, int target) {
+    return '$value sur $target pour le prochain palier';
+  }
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override

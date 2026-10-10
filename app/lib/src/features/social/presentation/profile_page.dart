@@ -15,6 +15,7 @@ import '../../library/application/library_controller.dart';
 import '../../stats/application/stats_providers.dart';
 import '../application/social_providers.dart';
 import 'handle_card.dart';
+import 'progression_card.dart';
 import 'social_widgets.dart';
 
 /// The reader's profile tab (design: Penpot "screen / profil"): who they are, their
@@ -102,6 +103,8 @@ class ProfilePage extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 24),
+          const ProgressionCard(),
+          const SizedBox(height: 16),
           const _YearCard(),
           const SizedBox(height: 24),
           if (profile.hasValue && handle == null) ...[
