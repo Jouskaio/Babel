@@ -334,6 +334,55 @@ class CatalogApi {
     return null;
   }
 
+  /// Get Work Cover
+  ///
+  /// The cover of a work found at Hardcover, kept by Babel (public, like other covers).
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] workId (required):
+  Future<Response> getWorkCoverWithHttpInfo(String workId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/catalog/work-covers/{work_id}'
+      .replaceAll('{work_id}', workId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Work Cover
+  ///
+  /// The cover of a work found at Hardcover, kept by Babel (public, like other covers).
+  ///
+  /// Parameters:
+  ///
+  /// * [String] workId (required):
+  Future<void> getWorkCover(String workId,) async {
+    final response = await getWorkCoverWithHttpInfo(workId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Lookup Isbn
   ///
   /// Find the edition (and its work) of an ISBN-10 or ISBN-13, e.g. from a barcode scan.

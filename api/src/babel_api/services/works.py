@@ -243,7 +243,47 @@ class WorkService:
             raise NotFoundError
         if self._needs_sync(work):
             work = await self._sync(work)
+        work = await self._enrich(work)
         return WorkDetail(work, await self._repo.list_editions(work.id))
+
+    async def cover_url(self, work_id: UUID) -> str | None:
+        work = await self._repo.get_work(work_id)
+        return work.cover_url if work else None
+
+    async def _enrich(self, work: Work) -> Work:
+        """What the catalog lacks about a book (a blurb, genres, a cover, a rating) is looked
+        for at Hardcover, once: it knows manga and recent books well. Best effort."""
+        if self._hardcover is None:
+            return work
+        complete = (
+            work.description
+            and work.subjects
+            and (work.cover_id or work.cover_url)
+            and work.rating is not None
+        )
+        if complete:
+            return work
+        query = f"{work.title} {work.authors[0]}" if work.authors else work.title
+        hits = await self._hardcover_books(query, 5)
+        surnames = {a.split(" ")[-1].casefold() for a in work.authors if a.strip()}
+        wanted = guess_series(work.title)
+        for hit in hits:
+            who = " ".join(hit.authors).casefold()
+            theirs = guess_series(hit.title)
+            same = hit.title.casefold() == work.title.casefold() or (
+                wanted is not None
+                and theirs is not None
+                and series_key(wanted.series.split(" - ")[0]) == series_key(theirs.series)
+                and wanted.number == theirs.number
+            )
+            if not same or (surnames and not any(s in who for s in surnames)):
+                continue
+            if hit.description and not work.description:
+                await self._repo.set_work_description(work.id, hit.description)
+            await self._repo.set_work_extras(work.id, hit.genres or None, hit.image, hit.rating)
+            await self._repo.commit()
+            return await self._repo.get_work(work.id) or work
+        return work
 
     async def lookup_isbn(self, raw: str) -> IsbnMatch:
         isbn = normalize_isbn(raw)

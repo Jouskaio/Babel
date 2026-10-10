@@ -78,6 +78,9 @@ class Work:
     editions_synced_at: datetime | None = None
     # Free subjects from the catalog ("Science fiction", "Governesses -- Fiction"…).
     subjects: tuple[str, ...] = ()
+    # Where a cover found outside Open Library lives (Hardcover), and the readers' rating.
+    cover_url: str | None = None
+    rating: float | None = None
 
 
 # ------------------------------------------------------------------ external records
