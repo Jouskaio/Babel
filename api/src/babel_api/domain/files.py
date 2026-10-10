@@ -134,6 +134,8 @@ class LibraryItem:
     paper: bool = False
     # The work's cover, for paper books without a file.
     work_cover_id: int | None = None
+    # Where the work's cover was found when Open Library had none (served by Babel).
+    work_cover_url: str | None = None
     # An audiobook of the reader's Audiobookshelf, streamed through Babel.
     audio: "AudioRef | None" = None
     # The series the book belongs to and its volume number (from the file, a guess from the
@@ -167,4 +169,6 @@ class LibraryItem:
             return f"/v1/audio-covers/{self.audio.cover}"
         if self.work_cover_id:
             return f"/v1/catalog/covers/{self.work_cover_id}/M"
+        if self.work_cover_url and self.work_id:
+            return f"/v1/catalog/work-covers/{self.work_id}"
         return None

@@ -727,6 +727,9 @@ class FakeHardcoverSearch:
         self.asked.append(query)
         return self.found[:limit]
 
+    async def description(self, title: str, authors: tuple[str, ...]) -> str | None:
+        return None
+
 
 def test_the_search_adds_what_hardcover_knows_and_the_catalog_lacks(
     app: FastAPI, client: TestClient, books: FakeBooks, auth: dict[str, str]
@@ -1044,3 +1047,27 @@ def test_a_finished_download_reaches_kavita_without_anyone_looking(
     assert asyncio.run(check_requests(services)) == 1
     assert client.get("/v1/requests", headers=admin).json()["items"][0]["status"] == "available"
     assert chaptarr.scans >= 1
+
+
+def test_a_search_result_takes_what_hardcover_knows_of_it(
+    app: FastAPI, client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    fake = FakeHardcoverSearch(
+        [
+            HardcoverBook(
+                1,
+                "Jane Eyre",
+                ("Charlotte Brontë",),
+                1847,
+                None,
+                image="https://assets.hardcover.app/jane.jpg",
+                genres=("Classics", "Romance"),
+                rating=4.12,
+            )
+        ]
+    )
+    app.state.container = replace(app.state.container, hardcover=fake)
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=auth).json()
+    work = client.get(f"/v1/catalog/works/{hit['id']}", headers=auth).json()
+    assert work["subjects"] == ["Classics", "Romance"]
+    assert work["rating"] == 4.12

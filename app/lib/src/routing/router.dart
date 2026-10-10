@@ -48,6 +48,8 @@ abstract final class Routes {
   static const kavita = '/kavita';
   static const admin = '/admin';
   static const search = '/search';
+  static String searchFor(String query) =>
+      Uri(path: search, queryParameters: {'q': query}).toString();
   static const library = '/library';
   static const scan = '/scan';
   static String work(String id) => '/works/$id';
@@ -119,7 +121,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.search,
-                builder: (_, _) => const SearchPage(),
+                builder: (_, state) =>
+                    SearchPage(initialQuery: state.uri.queryParameters['q']),
               ),
             ],
           ),

@@ -21,7 +21,10 @@ import '../application/catalog_providers.dart';
 
 /// Search (design: Penpot "screen / recherche").
 class SearchPage extends ConsumerStatefulWidget {
-  const SearchPage({super.key});
+  const SearchPage({this.initialQuery, super.key});
+
+  /// A search to run on arrival (a genre tapped on a book's page).
+  final String? initialQuery;
 
   @override
   ConsumerState<SearchPage> createState() => _SearchPageState();
@@ -31,6 +34,26 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   final _controller = TextEditingController();
   Timer? _debounce;
   String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    final first = widget.initialQuery?.trim();
+    if (first != null && first.isNotEmpty) {
+      _controller.text = first;
+      _query = first;
+    }
+  }
+
+  @override
+  void didUpdateWidget(SearchPage old) {
+    super.didUpdateWidget(old);
+    final next = widget.initialQuery?.trim();
+    if (next != null && next.isNotEmpty && next != old.initialQuery?.trim()) {
+      _controller.text = next;
+      setState(() => _query = next);
+    }
+  }
 
   @override
   void dispose() {

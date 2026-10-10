@@ -124,9 +124,9 @@ class WorkService:
                     source.localized_cover_id or work.cover_id,
                 )
             )
-        hits += await self._add_hardcover(
-            [] if isinstance(books, BaseException) else books, limit, hits
-        )
+        hardcover = [] if isinstance(books, BaseException) else books
+        hits += await self._add_hardcover(hardcover, limit, hits)
+        hits = await self._fill_gaps(hits, hardcover)
         if error is not None and not hits:
             raise SourceUnavailableError from error
         await self._repo.commit()
@@ -161,6 +161,33 @@ class WorkService:
         if self._hardcover is None or len(query.strip()) < 2:
             return []
         return await self._hardcover.search_books(query, limit)
+
+    async def _fill_gaps(
+        self, hits: list[SearchHit], books: list[HardcoverBook]
+    ) -> list[SearchHit]:
+        """A result without a cover, genres or rating takes them from Hardcover's match (same
+        title and authors), kept on the work so it is asked once."""
+        by_key = {_hit_key(b.title, b.authors): b for b in books if b.image or b.genres or b.rating}
+        filled: list[SearchHit] = []
+        changed = False
+        for hit in hits:
+            work = hit.work
+            book = by_key.get(_hit_key(work.title, work.authors))
+            lacks = (
+                not (work.cover_id or work.cover_url) or not work.subjects or work.rating is None
+            )
+            if book is not None and lacks:
+                await self._repo.set_work_extras(
+                    work.id, book.genres or None, book.image, book.rating
+                )
+                if book.description and not work.description:
+                    await self._repo.set_work_description(work.id, book.description)
+                work = await self._repo.get_work(work.id) or work
+                changed = True
+            filled.append(SearchHit(work, hit.title, hit.cover_id))
+        if changed:
+            await self._repo.commit()
+        return filled
 
     async def _add_hardcover(
         self, books: list[HardcoverBook], limit: int, hits: list[SearchHit]
