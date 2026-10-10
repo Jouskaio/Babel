@@ -43,6 +43,21 @@ class BabelPalette {
     forest: Color(0xFF26362D), // color.success
   );
 
+  /// Art deco: black-green lacquer, brass and emerald, ivory ink.
+  static const deco = BabelPalette(
+    dark: true,
+    canvas: Color(0xFF0B1512),
+    surface: Color(0xFF11201B),
+    sunken: Color(0xFF18302A),
+    border: Color(0xFF5C4D26),
+    textPrimary: Color(0xFFF3E9CF),
+    textSecondary: Color(0xFFA9B8A8),
+    gold: Color(0xFFD4AF37),
+    velvet: Color(0xFF0F7A64),
+    dustyRose: Color(0xFFD39A7A),
+    forest: Color(0xFF1E3B33),
+  );
+
   /// Electronic ink: black on white, accents in black, no mid-tone backgrounds that
   /// e-ink screens render as noise.
   static const paper = BabelPalette(

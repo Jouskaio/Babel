@@ -255,6 +255,12 @@ class SuggestionResponsePlaylistEnum {
   static const historical = SuggestionResponsePlaylistEnum._(r'historical');
   static const comingOfAge = SuggestionResponsePlaylistEnum._(r'coming_of_age');
   static const fantasy = SuggestionResponsePlaylistEnum._(r'fantasy');
+  static const space = SuggestionResponsePlaylistEnum._(r'space');
+  static const sea = SuggestionResponsePlaylistEnum._(r'sea');
+  static const war = SuggestionResponsePlaylistEnum._(r'war');
+  static const magic = SuggestionResponsePlaylistEnum._(r'magic');
+  static const travel = SuggestionResponsePlaylistEnum._(r'travel');
+  static const friendship = SuggestionResponsePlaylistEnum._(r'friendship');
 
   /// List of all possible values in this [enum][SuggestionResponsePlaylistEnum].
   static const values = <SuggestionResponsePlaylistEnum>[
@@ -270,6 +276,12 @@ class SuggestionResponsePlaylistEnum {
     historical,
     comingOfAge,
     fantasy,
+    space,
+    sea,
+    war,
+    magic,
+    travel,
+    friendship,
   ];
 
   static SuggestionResponsePlaylistEnum? fromJson(dynamic value) => SuggestionResponsePlaylistEnumTypeTransformer().decode(value);
@@ -320,6 +332,12 @@ class SuggestionResponsePlaylistEnumTypeTransformer {
         case r'historical': return SuggestionResponsePlaylistEnum.historical;
         case r'coming_of_age': return SuggestionResponsePlaylistEnum.comingOfAge;
         case r'fantasy': return SuggestionResponsePlaylistEnum.fantasy;
+        case r'space': return SuggestionResponsePlaylistEnum.space;
+        case r'sea': return SuggestionResponsePlaylistEnum.sea;
+        case r'war': return SuggestionResponsePlaylistEnum.war;
+        case r'magic': return SuggestionResponsePlaylistEnum.magic;
+        case r'travel': return SuggestionResponsePlaylistEnum.travel;
+        case r'friendship': return SuggestionResponsePlaylistEnum.friendship;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

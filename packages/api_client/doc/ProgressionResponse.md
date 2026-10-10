@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **badges** | [**List<BadgeResponse>**](BadgeResponse.md) |  | [default to const []]
 **challenge** | [**ChallengeResponse**](ChallengeResponse.md) |  | 
+**extras** | [**List<ExtraChallengeResponse>**](ExtraChallengeResponse.md) | Two more challenges this month: a prize, a subject, authors or countries | [default to const []]
 **level** | **int** |  | 
 **levelStart** | **int** | Points at which this level began | 
 **nextLevel** | **int** | Points the next level asks for | 

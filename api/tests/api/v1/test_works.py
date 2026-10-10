@@ -436,6 +436,38 @@ def test_a_request_becomes_available_when_the_files_arrive(
     assert chaptarr.scans == 1
 
 
+def test_an_arrived_book_is_added_to_the_library_once_kavita_shows_it(
+    app: FastAPI, client: TestClient, chaptarr: FakeChaptarr, books: FakeBooks
+) -> None:
+    from cryptography.fernet import Fernet
+
+    from babel_api.adapters.security.secrets import SecretBox
+    from babel_api.domain.sources import SourceKind
+    from tests.api.v1.test_library import account
+    from tests.api.v1.test_sources import FakeCatalog
+
+    app.state.container = replace(
+        app.state.container,
+        connectors={SourceKind.OPDS: FakeCatalog()},
+        secrets=SecretBox(Fernet.generate_key().decode()),
+    )
+    admin = account(client, "admin@example.com")
+    client.post(
+        "/v1/sources",
+        json={"kind": "opds", "name": "Kavita", "opds": {"url": "https://books.example.com/opds"}},
+        headers=admin,
+    )
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=admin).json()
+    client.post("/v1/requests", json={"work_id": hit["id"]}, headers=admin)
+    assert client.get("/v1/library", headers=admin).json() == []
+
+    chaptarr.arrived = True
+    assert client.get("/v1/requests", headers=admin).json()["items"][0]["status"] == "available"
+    assert [i["title"] for i in client.get("/v1/library", headers=admin).json()] == ["Jane Eyre"]
+    client.get("/v1/requests", headers=admin)  # checked again: nothing is added twice
+    assert len(client.get("/v1/library", headers=admin).json()) == 1
+
+
 def test_the_title_alone_is_searched_before_the_title_with_its_author() -> None:
     import asyncio
 
@@ -1238,7 +1270,12 @@ def test_playlists_and_suggestions_come_from_open_library_subjects(
         client, auth, epub(title="Dracula", isbn=None, subjects=("Vampires", "Gothic fiction"))
     ).json()["item"]
     phone = device(client, auth, "Pixel")
-    push(client, auth, phone, state("op-fin0001", item["id"], "2026-10-01T10:00:00+00:00", "finished"))
+    push(
+        client,
+        auth,
+        phone,
+        state("op-fin0001", item["id"], "2026-10-01T10:00:00+00:00", "finished"),
+    )
     suggested = client.get("/v1/me/for-you", headers=auth).json()
     assert suggested[0]["kind"] == "genre"
     assert suggested[0]["genre"] == "horror"

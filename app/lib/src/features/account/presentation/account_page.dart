@@ -9,6 +9,7 @@ import '../../../core/auth/auth_failure.dart';
 import '../../../core/display/eink_setting.dart';
 import '../../../core/locale/language_picker.dart';
 import '../../../core/push/push_notifications.dart';
+import '../../../core/theme/appearance_setting.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/babel_text_field.dart';
@@ -101,6 +102,10 @@ class AccountPage extends ConsumerWidget {
                         alignment: Alignment.centerLeft,
                         child: LanguagePicker(),
                       ),
+                    ),
+                    _Block(
+                      title: l10n.appearanceTitle,
+                      child: const AppearanceSetting(),
                     ),
                     _Block(title: l10n.einkTitle, child: const EinkSetting()),
                     _Block(

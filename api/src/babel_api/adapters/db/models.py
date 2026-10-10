@@ -620,6 +620,8 @@ class BookRequestRow(Base):
     alt_chaptarr_id: Mapped[int | None] = mapped_column(Integer)
     # The id of the Shelfmark task (the release source id), to follow its download.
     shelfmark_ref: Mapped[str | None] = mapped_column(String(300))
+    # When the arrived book was added to the reader's library (None until then).
+    imported_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class ChaptarrLinkRow(Base):

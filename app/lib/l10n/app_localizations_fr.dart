@@ -3420,4 +3420,55 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get fanficUnavailable =>
       'AO3 n\'a pas pu donner les détails de cette fanfiction (réservée aux membres, ou injoignable pour l\'instant).';
+
+  @override
+  String get appearanceTitle => 'Thème';
+
+  @override
+  String get appearanceNight => 'Nuit';
+
+  @override
+  String get appearanceDeco => 'Art déco';
+
+  @override
+  String get playlistSpace => 'L\'espace';
+
+  @override
+  String get playlistSea => 'La mer';
+
+  @override
+  String get playlistWar => 'La guerre';
+
+  @override
+  String get playlistMagic => 'La magie';
+
+  @override
+  String get playlistTravel => 'Les voyages';
+
+  @override
+  String get playlistFriendship => 'L\'amitié';
+
+  @override
+  String extraPrize(String prize) {
+    return 'Défi · lauréats du $prize';
+  }
+
+  @override
+  String extraSubject(String subject) {
+    return 'Défi · lire sur $subject';
+  }
+
+  @override
+  String get extraAuthors => 'Défi · trois auteurs différents';
+
+  @override
+  String get extraCountries => 'Défi · trois pays différents';
+
+  @override
+  String extraProgress(int done, int target) {
+    return '$done / $target livres';
+  }
+
+  @override
+  String get extraWon => 'Défi réussi, bravo !';
 }

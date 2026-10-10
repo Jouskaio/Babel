@@ -6,10 +6,19 @@ from datetime import UTC, date, datetime, timedelta, timezone
 from uuid import UUID
 
 from babel_api.adapters.db.stats_repository import SqlStatsRepository
-from babel_api.domain.challenges import books_in, months_won
+from babel_api.adapters.wikidata import WikidataClient
+from babel_api.domain.challenges import (
+    PRIZES,
+    Extra,
+    Read,
+    books_in,
+    extra_progress,
+    extras_of,
+    months_won,
+)
 from babel_api.domain.files import LibraryItem, ReadingStatus, StoredFile
 from babel_api.domain.genres import Genre, genres_of
-from babel_api.domain.progression import Activity, Progression, compute
+from babel_api.domain.progression import Activity, ExtraChallenge, Progression, compute
 from babel_api.domain.stats import FinishedBook, YearStats
 
 # Reads (once) the subjects written in a stored file.
@@ -35,16 +44,20 @@ def streaks(days: set[date], today: date) -> tuple[int, int]:
 
 class StatsService:
     def __init__(
-        self, stats: SqlStatsRepository, file_subjects: SubjectReader | None = None
+        self,
+        stats: SqlStatsRepository,
+        file_subjects: SubjectReader | None = None,
+        wikidata: WikidataClient | None = None,
     ) -> None:
         self._stats = stats
         self._file_subjects = file_subjects
+        self._wikidata = wikidata
 
-    async def _genres(
+    async def _subjects(
         self, items: list[LibraryItem], works: dict[UUID, tuple[str, ...]]
-    ) -> dict[UUID, tuple[Genre, ...]]:
-        """Each book's genres, from its work's subjects and its file's."""
-        found: dict[UUID, tuple[Genre, ...]] = {}
+    ) -> dict[UUID, list[str]]:
+        """Each book's subjects, from its work and its file."""
+        found: dict[UUID, list[str]] = {}
         for item in items:
             subjects = list(works.get(item.work_id, ()) if item.work_id else ())
             if item.file is not None:
@@ -52,8 +65,53 @@ class StatsService:
                 if file_subjects is None and self._file_subjects is not None:
                     file_subjects = await self._file_subjects(item.file)
                 subjects.extend(file_subjects or ())
-            found[item.id] = tuple(genres_of(subjects, item.format_name))
+            found[item.id] = subjects
         return found
+
+    async def _genres(
+        self, items: list[LibraryItem], works: dict[UUID, tuple[str, ...]]
+    ) -> dict[UUID, tuple[Genre, ...]]:
+        """Each book's genres, from its work's subjects and its file's."""
+        subjects = await self._subjects(items, works)
+        return {i.id: tuple(genres_of(subjects[i.id], i.format_name)) for i in items}
+
+    async def _extras(
+        self, reads: list[Read], now: datetime
+    ) -> tuple[tuple[ExtraChallenge, ...], int]:
+        """This month's extra challenges, and how many were won in all (past months too)."""
+        months = {(r.at.year, r.at.month) for r in reads} | {(now.year, now.month)}
+        wanted = {e for y, m in months for e in extras_of(y, m)}
+        laureates: dict[str, frozenset[str]] = {}
+        if self._wikidata is not None:
+            for extra in wanted:
+                if extra.kind == "prize" and extra.key not in laureates:
+                    laureates[extra.key] = await self._wikidata.laureates(PRIZES[extra.key])
+        countries: dict[str, frozenset[str]] = {}
+        if self._wikidata is not None and any(e.kind == "countries" for e in wanted):
+            authors = [a for r in reads for a in r.authors[:1]]
+            countries = await self._wikidata.author_countries(authors)
+
+        def progress(extra: Extra, y: int, m: int) -> int:
+            month = [r for r in reads if (r.at.year, r.at.month) == (y, m)]
+            return extra_progress(extra, month, laureates.get(extra.key, frozenset()), countries)
+
+        won = sum(
+            1
+            for y, m in months
+            for extra in extras_of(y, m)
+            if progress(extra, y, m) >= extra.target
+        )
+        current = tuple(
+            ExtraChallenge(
+                kind=e.kind,
+                key=e.key,
+                target=e.target,
+                progress=progress(e, now.year, now.month),
+                done=progress(e, now.year, now.month) >= e.target,
+            )
+            for e in extras_of(now.year, now.month)
+        )
+        return current, won
 
     async def year(
         self, user_id: UUID, year: int, offset_minutes: int = 0, now: datetime | None = None
@@ -187,6 +245,13 @@ class StatsService:
         works = await self._stats.work_subjects(list({i.work_id for i in done if i.work_id}))
         genres = await self._genres(done, works)
         finished = [(i.state.finished_at, genres[i.id]) for i in done if i.state.finished_at]
+        subjects = await self._subjects(done, works)
+        reads = [
+            Read(i.state.finished_at, i.title, tuple(i.authors), tuple(subjects[i.id]))
+            for i in done
+            if i.state.finished_at
+        ]
+        extras, extras_won = await self._extras(reads, now)
         return compute(
             Activity(
                 finished=sum(1 for i in items if i.state.status is ReadingStatus.FINISHED),
@@ -198,8 +263,9 @@ class StatsService:
                 sources=await self._stats.sources_linked(user_id),
                 challenge_books=books_in(finished, now.year, now.month),
                 challenge_month=now.month,
-                challenges_won=months_won(finished),
-            )
+                challenges_won=months_won(finished) + extras_won,
+            ),
+            extras,
         )
 
     async def set_goal(self, user_id: UUID, books: int | None) -> None:

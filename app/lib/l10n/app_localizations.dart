@@ -5605,6 +5605,96 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'AO3 n\'a pas pu donner les détails de cette fanfiction (réservée aux membres, ou injoignable pour l\'instant).'**
   String get fanficUnavailable;
+
+  /// No description provided for @appearanceTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Thème'**
+  String get appearanceTitle;
+
+  /// No description provided for @appearanceNight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nuit'**
+  String get appearanceNight;
+
+  /// No description provided for @appearanceDeco.
+  ///
+  /// In fr, this message translates to:
+  /// **'Art déco'**
+  String get appearanceDeco;
+
+  /// No description provided for @playlistSpace.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'espace'**
+  String get playlistSpace;
+
+  /// No description provided for @playlistSea.
+  ///
+  /// In fr, this message translates to:
+  /// **'La mer'**
+  String get playlistSea;
+
+  /// No description provided for @playlistWar.
+  ///
+  /// In fr, this message translates to:
+  /// **'La guerre'**
+  String get playlistWar;
+
+  /// No description provided for @playlistMagic.
+  ///
+  /// In fr, this message translates to:
+  /// **'La magie'**
+  String get playlistMagic;
+
+  /// No description provided for @playlistTravel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les voyages'**
+  String get playlistTravel;
+
+  /// No description provided for @playlistFriendship.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'amitié'**
+  String get playlistFriendship;
+
+  /// No description provided for @extraPrize.
+  ///
+  /// In fr, this message translates to:
+  /// **'Défi · lauréats du {prize}'**
+  String extraPrize(String prize);
+
+  /// No description provided for @extraSubject.
+  ///
+  /// In fr, this message translates to:
+  /// **'Défi · lire sur {subject}'**
+  String extraSubject(String subject);
+
+  /// No description provided for @extraAuthors.
+  ///
+  /// In fr, this message translates to:
+  /// **'Défi · trois auteurs différents'**
+  String get extraAuthors;
+
+  /// No description provided for @extraCountries.
+  ///
+  /// In fr, this message translates to:
+  /// **'Défi · trois pays différents'**
+  String get extraCountries;
+
+  /// No description provided for @extraProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'{done} / {target} livres'**
+  String extraProgress(int done, int target);
+
+  /// No description provided for @extraWon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Défi réussi, bravo !'**
+  String get extraWon;
 }
 
 class _AppLocalizationsDelegate

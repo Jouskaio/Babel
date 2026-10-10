@@ -9,6 +9,7 @@ import 'core/locale/locale_controller.dart';
 import 'core/push/push_notifications.dart';
 import 'core/share/share_intake.dart';
 import 'core/sync/sync_engine.dart';
+import 'core/theme/appearance.dart';
 import 'core/theme/babel_colors.dart';
 import 'core/theme/babel_theme.dart';
 import 'core/theme/palette_scope.dart';
@@ -122,7 +123,7 @@ class _BabelAppState extends ConsumerState<BabelApp>
     final eink = ref.watch(einkDisplayProvider.select((d) => d.active));
     final palette =
         ref.watch(readingPaletteProvider) ??
-        (eink ? BabelPalette.paper : BabelPalette.midnight);
+        (eink ? BabelPalette.paper : ref.watch(appearanceProvider).palette);
     if (palette != BabelColors.palette) {
       BabelColors.use(palette);
       // Pages read their colors when built: rebuild them all, keeping their state.

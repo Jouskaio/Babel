@@ -15,6 +15,7 @@ class ProgressionResponse {
   ProgressionResponse({
     this.badges = const [],
     required this.challenge,
+    this.extras = const [],
     required this.level,
     required this.levelStart,
     required this.nextLevel,
@@ -26,6 +27,9 @@ class ProgressionResponse {
   List<BadgeResponse> badges;
 
   ChallengeResponse challenge;
+
+  /// Two more challenges this month: a prize, a subject, authors or countries
+  List<ExtraChallengeResponse> extras;
 
   int level;
 
@@ -46,6 +50,7 @@ class ProgressionResponse {
   bool operator ==(Object other) => identical(this, other) || other is ProgressionResponse &&
     _deepEquality.equals(other.badges, badges) &&
     other.challenge == challenge &&
+    _deepEquality.equals(other.extras, extras) &&
     other.level == level &&
     other.levelStart == levelStart &&
     other.nextLevel == nextLevel &&
@@ -58,6 +63,7 @@ class ProgressionResponse {
     // ignore: unnecessary_parenthesis
     (badges.hashCode) +
     (challenge.hashCode) +
+    (extras.hashCode) +
     (level.hashCode) +
     (levelStart.hashCode) +
     (nextLevel.hashCode) +
@@ -66,12 +72,13 @@ class ProgressionResponse {
     (xp.hashCode);
 
   @override
-  String toString() => 'ProgressionResponse[badges=$badges, challenge=$challenge, level=$level, levelStart=$levelStart, nextLevel=$nextLevel, steps=$steps, title=$title, xp=$xp]';
+  String toString() => 'ProgressionResponse[badges=$badges, challenge=$challenge, extras=$extras, level=$level, levelStart=$levelStart, nextLevel=$nextLevel, steps=$steps, title=$title, xp=$xp]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'badges'] = this.badges;
       json[r'challenge'] = this.challenge;
+      json[r'extras'] = this.extras;
       json[r'level'] = this.level;
       json[r'level_start'] = this.levelStart;
       json[r'next_level'] = this.nextLevel;
@@ -102,6 +109,7 @@ class ProgressionResponse {
       return ProgressionResponse(
         badges: BadgeResponse.listFromJson(json[r'badges']),
         challenge: ChallengeResponse.fromJson(json[r'challenge'])!,
+        extras: ExtraChallengeResponse.listFromJson(json[r'extras']),
         level: mapValueOfType<int>(json, r'level')!,
         levelStart: mapValueOfType<int>(json, r'level_start')!,
         nextLevel: mapValueOfType<int>(json, r'next_level')!,
@@ -157,6 +165,7 @@ class ProgressionResponse {
   static const requiredKeys = <String>{
     'badges',
     'challenge',
+    'extras',
     'level',
     'level_start',
     'next_level',

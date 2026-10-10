@@ -87,6 +87,7 @@ part 'model/entry_status.dart';
 part 'model/external_rating_response.dart';
 part 'model/external_review_response.dart';
 part 'model/external_reviews_response.dart';
+part 'model/extra_challenge_response.dart';
 part 'model/fanfic_details_response.dart';
 part 'model/feed_entry_response.dart';
 part 'model/feed_kind.dart';

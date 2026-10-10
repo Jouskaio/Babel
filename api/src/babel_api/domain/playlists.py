@@ -19,6 +19,13 @@ PLAYLISTS: dict[str, str] = {
     "historical": "historical_fiction",
     "coming_of_age": "coming_of_age",
     "fantasy": "fantasy_fiction",
+    # the subject challenges
+    "space": "outer_space",
+    "sea": "sea",
+    "war": "war",
+    "magic": "magic",
+    "travel": "travel",
+    "friendship": "friendship",
 }
 
 # What to suggest to a reader who finished many books of a genre.

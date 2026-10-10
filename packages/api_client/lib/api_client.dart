@@ -264,6 +264,8 @@ class ApiClient {
           return ExternalReviewResponse.fromJson(value);
         case 'ExternalReviewsResponse':
           return ExternalReviewsResponse.fromJson(value);
+        case 'ExtraChallengeResponse':
+          return ExtraChallengeResponse.fromJson(value);
         case 'FanficDetailsResponse':
           return FanficDetailsResponse.fromJson(value);
         case 'FeedEntryResponse':

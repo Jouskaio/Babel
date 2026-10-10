@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:babel_api_client/api.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -52,7 +54,11 @@ class _ScanPageState extends ConsumerState<ScanPage> {
   @override
   void dispose() {
     _isbn.dispose();
-    _scanner?.dispose();
+    // Stop the camera first: on the web, disposing alone can leave it (and its light) on.
+    final scanner = _scanner;
+    if (scanner != null) {
+      unawaited(scanner.stop().whenComplete(scanner.dispose));
+    }
     super.dispose();
   }
 
