@@ -1071,3 +1071,36 @@ def test_a_search_result_takes_what_hardcover_knows_of_it(
     work = client.get(f"/v1/catalog/works/{hit['id']}", headers=auth).json()
     assert work["subjects"] == ["Classics", "Romance"]
     assert work["rating"] == 4.12
+
+
+def test_a_book_lists_what_it_was_adapted_into(
+    app: FastAPI, client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    from babel_api.adapters.wikidata import Adaptation
+
+    class FakeWikidata:
+        def __init__(self) -> None:
+            self.asked: list[tuple[list[str], str]] = []
+
+        async def adaptations(self, titles: list[str], surname: str) -> list[Adaptation]:
+            self.asked.append((titles, surname))
+            return [
+                Adaptation(
+                    "Q1",
+                    "Jane Eyre",
+                    "film",
+                    2011,
+                    "https://www.wikidata.org/wiki/Q1",
+                    "https://image.tmdb.org/t/p/w342/x.jpg",
+                    "A governess.",
+                )
+            ]
+
+    fake = FakeWikidata()
+    app.state.container = replace(app.state.container, wikidata=fake)
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=auth).json()
+    related = client.get(f"/v1/catalog/works/{hit['id']}/related", headers=auth).json()
+    assert related[0]["title"] == "Jane Eyre"
+    assert related[0]["kind"] == "film"
+    assert related[0]["poster_path"].startswith("/v1/catalog/images?url=https")
+    assert fake.asked[0][1] == "Brontë"

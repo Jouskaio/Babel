@@ -206,6 +206,8 @@ class ApiClient {
           return AuthorCountResponse.fromJson(value);
         case 'AuthorResponse':
           return AuthorResponse.fromJson(value);
+        case 'BadgeResponse':
+          return BadgeResponse.fromJson(value);
         case 'BatchImportResponse':
           return BatchImportResponse.fromJson(value);
         case 'BookDetailsRequest':
@@ -328,6 +330,8 @@ class ApiClient {
           return PlaybackResponse.fromJson(value);
         case 'PremiumRequest':
           return PremiumRequest.fromJson(value);
+        case 'ProgressionResponse':
+          return ProgressionResponse.fromJson(value);
         case 'ProviderLoginRequest':
           return ProviderLoginRequest.fromJson(value);
         case 'ProvidersResponse':
@@ -362,6 +366,8 @@ class ApiClient {
           return RegisterDeviceRequest.fromJson(value);
         case 'RegisterRequest':
           return RegisterRequest.fromJson(value);
+        case 'RelatedWorkResponse':
+          return RelatedWorkResponse.fromJson(value);
         case 'RelationResponse':
           return RelationResponse.fromJson(value);
         case 'RemotePositionResponse':
@@ -406,6 +412,8 @@ class ApiClient {
           return SourceMatchResponse.fromJson(value);
         case 'SourceResponse':
           return SourceResponse.fromJson(value);
+        case 'StepResponse':
+          return StepResponse.fromJson(value);
         case 'TokenResponse':
           return TokenResponse.fromJson(value);
         case 'TrendingWorkResponse':

@@ -349,6 +349,58 @@
         "title": "AuthorResponse",
         "type": "object"
       },
+      "BadgeResponse": {
+        "properties": {
+          "key": {
+            "enum": [
+              "finished",
+              "streak",
+              "reading_days",
+              "notes",
+              "reviews",
+              "library"
+            ],
+            "title": "Key",
+            "type": "string"
+          },
+          "next_target": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What the next tier asks for; null at the top",
+            "title": "Next Target"
+          },
+          "tier": {
+            "description": "Tiers earned, 0 when none yet",
+            "title": "Tier",
+            "type": "integer"
+          },
+          "tiers": {
+            "description": "Tiers there are",
+            "title": "Tiers",
+            "type": "integer"
+          },
+          "value": {
+            "description": "Your count",
+            "title": "Value",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "key",
+          "tier",
+          "tiers",
+          "value",
+          "next_target"
+        ],
+        "title": "BadgeResponse",
+        "type": "object"
+      },
       "BatchImportResponse": {
         "properties": {
           "failed": {
@@ -2773,6 +2825,66 @@
         "title": "PremiumRequest",
         "type": "object"
       },
+      "ProgressionResponse": {
+        "properties": {
+          "badges": {
+            "items": {
+              "$ref": "#/components/schemas/BadgeResponse"
+            },
+            "title": "Badges",
+            "type": "array"
+          },
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "level_start": {
+            "description": "Points at which this level began",
+            "title": "Level Start",
+            "type": "integer"
+          },
+          "next_level": {
+            "description": "Points the next level asks for",
+            "title": "Next Level",
+            "type": "integer"
+          },
+          "steps": {
+            "description": "First steps: a short guided tour",
+            "items": {
+              "$ref": "#/components/schemas/StepResponse"
+            },
+            "title": "Steps",
+            "type": "array"
+          },
+          "title": {
+            "enum": [
+              "novice",
+              "reader",
+              "bookworm",
+              "scholar",
+              "archivist",
+              "librarian"
+            ],
+            "title": "Title",
+            "type": "string"
+          },
+          "xp": {
+            "title": "Xp",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "xp",
+          "level",
+          "level_start",
+          "next_level",
+          "title",
+          "badges",
+          "steps"
+        ],
+        "title": "ProgressionResponse",
+        "type": "object"
+      },
       "ProviderLoginRequest": {
         "properties": {
           "display_name": {
@@ -3379,6 +3491,74 @@
           "display_name"
         ],
         "title": "RegisterRequest",
+        "type": "object"
+      },
+      "RelatedWorkResponse": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "film",
+              "series",
+              "game",
+              "comic",
+              "stage",
+              "audio",
+              "other"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "overview": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overview"
+          },
+          "poster_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "TMDB's poster, through Babel",
+            "title": "Poster Path"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "url": {
+            "description": "Its page on Wikidata",
+            "title": "Url",
+            "type": "string"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          }
+        },
+        "required": [
+          "title",
+          "kind",
+          "year",
+          "url"
+        ],
+        "title": "RelatedWorkResponse",
         "type": "object"
       },
       "RelationResponse": {
@@ -4195,6 +4375,32 @@
           "book_count"
         ],
         "title": "SourceResponse",
+        "type": "object"
+      },
+      "StepResponse": {
+        "properties": {
+          "done": {
+            "title": "Done",
+            "type": "boolean"
+          },
+          "key": {
+            "enum": [
+              "add_book",
+              "link_source",
+              "read",
+              "note",
+              "finish",
+              "review"
+            ],
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "done"
+        ],
+        "title": "StepResponse",
         "type": "object"
       },
       "TokenResponse": {
@@ -6253,6 +6459,50 @@
         ]
       }
     },
+    "/v1/catalog/images": {
+      "get": {
+        "description": "A poster or cover from a known image host (TMDB, Hardcover), kept by Babel.",
+        "operationId": "getCatalogImage",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "maxLength": 500,
+              "minLength": 10,
+              "title": "Url",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/*": {}
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "No such image"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Catalog Image",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
     "/v1/catalog/isbn/{isbn}": {
       "get": {
         "description": "Find the edition (and its work) of an ISBN-10 or ISBN-13, e.g. from a barcode scan.",
@@ -6806,6 +7056,59 @@
         "summary": "Get Work Readers",
         "tags": [
           "social"
+        ]
+      }
+    },
+    "/v1/catalog/works/{work_id}/related": {
+      "get": {
+        "description": "What the book was adapted into: films, series, games, comics (Wikidata, TMDB).",
+        "operationId": "getRelatedWorks",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "work_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Work Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RelatedWorkResponse"
+                  },
+                  "title": "Response Getrelatedworks",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Related Works",
+        "tags": [
+          "catalog"
         ]
       }
     },
@@ -9130,6 +9433,33 @@
         "tags": [
           "social",
           "account"
+        ]
+      }
+    },
+    "/v1/me/progression": {
+      "get": {
+        "description": "Your level, badges and first steps, computed from what you did.",
+        "operationId": "getProgression",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Progression",
+        "tags": [
+          "stats"
         ]
       }
     },

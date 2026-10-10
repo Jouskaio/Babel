@@ -8,13 +8,14 @@ from uuid import UUID
 from babel_api.adapters.db.stats_repository import SqlStatsRepository
 from babel_api.domain.files import LibraryItem, ReadingStatus, StoredFile
 from babel_api.domain.genres import Genre, genres_of
+from babel_api.domain.progression import Activity, Progression, compute
 from babel_api.domain.stats import FinishedBook, YearStats
 
 # Reads (once) the subjects written in a stored file.
 SubjectReader = Callable[[StoredFile], Awaitable[tuple[str, ...]]]
 
 
-def _streaks(days: set[date], today: date) -> tuple[int, int]:
+def streaks(days: set[date], today: date) -> tuple[int, int]:
     """Longest run of consecutive days, and the run ending today or yesterday."""
     longest = 0
     for day in days:
@@ -111,7 +112,7 @@ class StatsService:
             by_month[book.finished_at.month - 1] += 1
         days = {t.date() for t in reading if t.year == year}
         per_day = Counter(t.date() for t in reading if t.year == year)
-        longest, current = _streaks(days, now.date())
+        longest, current = streaks(days, now.date())
         rated = [b.rating for b in finished if b.rating]
         authors = Counter(a for b in finished for a in b.authors[:1])
         years = {
@@ -146,6 +147,23 @@ class StatsService:
             genres=tally(year),
             previous_genres=tally(year - 1),
             goal=await self._stats.goal(user_id),
+        )
+
+    async def progression(self, user_id: UUID) -> Progression:
+        """Level, badges and first steps, from all the reader ever did."""
+        items = await self._stats.items(user_id)
+        reading_days = {t.date() for t in await self._stats.reading_times(user_id)}
+        longest, _ = streaks(reading_days, datetime.now(UTC).date())
+        return compute(
+            Activity(
+                finished=sum(1 for i in items if i.state.status is ReadingStatus.FINISHED),
+                library=len(items),
+                notes=len(await self._stats.note_times(user_id)),
+                reviews=len(await self._stats.review_times(user_id)),
+                reading_days=len(reading_days),
+                longest_streak=longest,
+                sources=await self._stats.sources_linked(user_id),
+            )
         )
 
     async def set_goal(self, user_id: UUID, books: int | None) -> None:

@@ -2499,6 +2499,30 @@ class AppLocalizationsEn extends AppLocalizations {
       'Sent to Shelfmark. The book will show up in “In my sources” once it is downloaded.';
 
   @override
+  String get relatedTitle => 'Adaptations & related works';
+
+  @override
+  String get relatedFilm => 'Film';
+
+  @override
+  String get relatedSeries => 'Series';
+
+  @override
+  String get relatedGame => 'Video game';
+
+  @override
+  String get relatedComic => 'Comic / manga';
+
+  @override
+  String get relatedStage => 'Stage';
+
+  @override
+  String get relatedAudio => 'Audio';
+
+  @override
+  String get relatedOther => 'Related work';
+
+  @override
   String get coverDefault => 'Default';
 
   @override

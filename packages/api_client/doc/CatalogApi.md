@@ -9,8 +9,10 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**getCatalogImage**](CatalogApi.md#getcatalogimage) | **GET** /v1/catalog/images | Get Catalog Image
 [**getCover**](CatalogApi.md#getcover) | **GET** /v1/catalog/covers/{cover_id}/{size} | Get Cover
 [**getKnownVolumes**](CatalogApi.md#getknownvolumes) | **GET** /v1/catalog/saga/known | Get Known Volumes
+[**getRelatedWorks**](CatalogApi.md#getrelatedworks) | **GET** /v1/catalog/works/{work_id}/related | Get Related Works
 [**getSaga**](CatalogApi.md#getsaga) | **GET** /v1/catalog/saga | Get Saga
 [**getTrendingWorks**](CatalogApi.md#gettrendingworks) | **GET** /v1/catalog/trending | Get Trending
 [**getWork**](CatalogApi.md#getwork) | **GET** /v1/catalog/works/{work_id} | Get Work
@@ -19,6 +21,48 @@ Method | HTTP request | Description
 [**openHardcoverWork**](CatalogApi.md#openhardcoverwork) | **POST** /v1/catalog/works/hardcover | Open Hardcover Work
 [**searchWorks**](CatalogApi.md#searchworks) | **GET** /v1/catalog/search | Search Works
 
+
+# **getCatalogImage**
+> getCatalogImage(url)
+
+Get Catalog Image
+
+A poster or cover from a known image host (TMDB, Hardcover), kept by Babel.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+
+final api_instance = CatalogApi();
+final url = url_example; // String | 
+
+try {
+    api_instance.getCatalogImage(url);
+} catch (e) {
+    print('Exception when calling CatalogApi->getCatalogImage: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **url** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: image/*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getCover**
 > getCover(coverId, size)
@@ -103,6 +147,55 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**List<KnownVolumeResponse>**](KnownVolumeResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getRelatedWorks**
+> List<RelatedWorkResponse> getRelatedWorks(workId)
+
+Get Related Works
+
+What the book was adapted into: films, series, games, comics (Wikidata, TMDB).
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = CatalogApi();
+final workId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.getRelatedWorks(workId);
+    print(result);
+} catch (e) {
+    print('Exception when calling CatalogApi->getRelatedWorks: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **workId** | **String**|  | 
+
+### Return type
+
+[**List<RelatedWorkResponse>**](RelatedWorkResponse.md)
 
 ### Authorization
 

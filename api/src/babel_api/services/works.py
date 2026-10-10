@@ -8,6 +8,7 @@ from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from babel_api.adapters.hardcover import HardcoverBook, HardcoverClient
+from babel_api.adapters.wikidata import Adaptation, WikidataClient
 from babel_api.domain.catalog import Edition, IdentifierKind, SourceWork, Work
 from babel_api.domain.errors import NotFoundError, SourceUnavailableError
 from babel_api.domain.isbn import normalize_isbn
@@ -97,7 +98,9 @@ class WorkService:
         repository: CatalogRepository,
         source: BookSource,
         hardcover: HardcoverClient | None = None,
+        wikidata: WikidataClient | None = None,
     ) -> None:
+        self._wikidata = wikidata
         self._repo = repository
         self._source = source
         self._hardcover = hardcover
@@ -272,6 +275,22 @@ class WorkService:
             work = await self._sync(work)
         work = await self._enrich(work)
         return WorkDetail(work, await self._repo.list_editions(work.id))
+
+    async def related(self, work_id: UUID) -> list[Adaptation]:
+        """What a book was adapted into (films, series, games, comics): Wikidata finds the work
+        by its title (the series name for a volume) and author, TMDB adds posters."""
+        detail = await self.get(work_id)
+        work = detail.work
+        if self._wikidata is None or not work.authors:
+            return []
+        guess = guess_series(work.title)
+        base = re.split(r"\s[-–:]\s|\(", guess.series if guess else work.title)[0].strip()
+        titles = [base, *await self.other_titles(work.title, work.authors)]
+        titles = [re.sub(r"\s*\d{1,3}$", "", t).strip() for t in titles]
+        surname = work.authors[0].split(" ")[-1]
+        return await self._wikidata.adaptations(
+            list(dict.fromkeys(t for t in titles if t)), surname
+        )
 
     async def cover_url(self, work_id: UUID) -> str | None:
         work = await self._repo.get_work(work_id)

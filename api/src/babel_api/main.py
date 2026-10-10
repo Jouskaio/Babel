@@ -37,6 +37,7 @@ from babel_api.adapters.sources.links import LinkFetcher
 from babel_api.adapters.sources.manifest import ManifestConnector
 from babel_api.adapters.sources.opds import OpdsConnector
 from babel_api.adapters.sources.webdav import WebDavConnector
+from babel_api.adapters.wikidata import WikidataClient
 from babel_api.api.dependencies import (
     Container,
     make_follow_service,
@@ -126,6 +127,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
         shelfmark = shelfmark_client
 
+    wikidata = WikidataClient(settings.tmdb_api_key.get_secret_value())
     hardcover = (
         HardcoverClient(settings.hardcover_api_key.get_secret_value())
         if settings.hardcover_api_key.get_secret_value()
@@ -232,6 +234,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         chaptarr=chaptarr,
         shelfmark=shelfmark,
         hardcover=hardcover,
+        wikidata=wikidata,
     )
     if settings.cors_origins:
         app.add_middleware(

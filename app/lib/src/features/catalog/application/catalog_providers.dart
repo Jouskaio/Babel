@@ -29,6 +29,17 @@ final workProvider = FutureProvider.autoDispose
           ref.watch(authedCatalogApiProvider).getWork(args.id, lang: args.lang),
     );
 
+/// What a book was adapted into (films, series, games, comics); empty when nothing is known.
+final relatedWorksProvider = FutureProvider.autoDispose
+    .family<List<RelatedWorkResponse>, String>((ref, id) async {
+      try {
+        return await ref.watch(authedCatalogApiProvider).getRelatedWorks(id) ??
+            const [];
+      } on ApiException {
+        return const []; // an extra: the page works without it
+      }
+    });
+
 final recentSearchesProvider = NotifierProvider<RecentSearches, List<String>>(
   RecentSearches.new,
 );

@@ -16,6 +16,56 @@ class CatalogApi {
 
   final ApiClient apiClient;
 
+  /// Get Catalog Image
+  ///
+  /// A poster or cover from a known image host (TMDB, Hardcover), kept by Babel.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] url (required):
+  Future<Response> getCatalogImageWithHttpInfo(String url,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/catalog/images';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+      queryParams.addAll(_queryParams('', 'url', url));
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Catalog Image
+  ///
+  /// A poster or cover from a known image host (TMDB, Hardcover), kept by Babel.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] url (required):
+  Future<void> getCatalogImage(String url,) async {
+    final response = await getCatalogImageWithHttpInfo(url,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Get Cover
   ///
   /// Cover image, proxied and cached so clients never call third parties directly.
@@ -132,6 +182,66 @@ class CatalogApi {
       final responseBody = await _decodeBodyBytes(response);
       return (await apiClient.deserializeAsync(responseBody, 'List<KnownVolumeResponse>') as List)
         .cast<KnownVolumeResponse>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
+  /// Get Related Works
+  ///
+  /// What the book was adapted into: films, series, games, comics (Wikidata, TMDB).
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] workId (required):
+  Future<Response> getRelatedWorksWithHttpInfo(String workId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/catalog/works/{work_id}/related'
+      .replaceAll('{work_id}', workId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Related Works
+  ///
+  /// What the book was adapted into: films, series, games, comics (Wikidata, TMDB).
+  ///
+  /// Parameters:
+  ///
+  /// * [String] workId (required):
+  Future<List<RelatedWorkResponse>?> getRelatedWorks(String workId,) async {
+    final response = await getRelatedWorksWithHttpInfo(workId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<RelatedWorkResponse>') as List)
+        .cast<RelatedWorkResponse>()
         .toList(growable: false);
 
     }
