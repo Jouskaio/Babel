@@ -1015,3 +1015,32 @@ def testshort_genres_are_short_labels() -> None:
         "Fiction",
         "Love stories",
     ]
+
+
+def test_a_finished_download_reaches_kavita_without_anyone_looking(
+    client: TestClient, chaptarr: FakeChaptarr, books: FakeBooks
+) -> None:
+    import asyncio
+    from collections.abc import AsyncGenerator
+    from contextlib import asynccontextmanager
+    from typing import cast
+
+    from babel_api.api.dependencies import Container, make_request_service
+    from babel_api.services.request_watch import check_requests
+    from babel_api.services.requests import RequestService
+    from tests.api.v1.test_library import account
+
+    admin = account(client, "admin@example.com")
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=admin).json()
+    client.post("/v1/requests", json={"work_id": hit["id"]}, headers=admin)
+    chaptarr.arrived = True
+    container = cast(Container, client.app.state.container)  # type: ignore[attr-defined]
+
+    @asynccontextmanager
+    async def services() -> AsyncGenerator[RequestService]:
+        async with container.sessions() as session:
+            yield make_request_service(container, session)
+
+    assert asyncio.run(check_requests(services)) == 1
+    assert client.get("/v1/requests", headers=admin).json()["items"][0]["status"] == "available"
+    assert chaptarr.scans >= 1

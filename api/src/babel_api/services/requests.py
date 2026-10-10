@@ -319,6 +319,9 @@ class RequestService:
         )
         return None if same else book
 
+    async def users_waiting(self) -> list[UUID]:
+        return await self._requests.users_waiting()
+
     @staticmethod
     def _with_progress(
         items: list[BookRequest], progress: dict[tuple[UUID, str], float]
