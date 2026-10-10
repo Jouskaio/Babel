@@ -247,6 +247,43 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
               textAlign: TextAlign.center,
               style: BabelText.label(10),
             ),
+            if (work.rating case final rating?) ...[
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.star_rounded, color: BabelColors.gold, size: 18),
+                  const SizedBox(width: 4),
+                  Text(
+                    rating.toStringAsFixed(1),
+                    style: BabelText.body(14, color: BabelColors.gold),
+                  ),
+                  Text(' / 5', style: BabelText.body(12)),
+                ],
+              ),
+            ],
+            if (work.subjects.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final genre in work.subjects.take(8))
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: BabelColors.border),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(genre, style: BabelText.body(12)),
+                    ),
+                ],
+              ),
+            ],
             if (work.series case final series?) ...[
               const SizedBox(height: 18),
               Center(

@@ -1,13 +1,18 @@
 """Catalog: trending works and covers (public), search, works and ISBN lookups."""
 
+import hashlib
 from typing import Annotated, Literal
+from urllib.parse import urlsplit
 from uuid import UUID
 
+import httpx
 from fastapi import APIRouter, HTTPException, Path, Query, Response, status
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from babel_api.api.dependencies import ContainerDep, CurrentUserId, WorkServiceDep
 from babel_api.domain.catalog import Edition, IdentifierKind, Work
+from babel_api.domain.files import Cover
 from babel_api.domain.series import guess_series
 from babel_api.services.works import SearchHit, WorkDetail
 
@@ -140,11 +145,19 @@ class EditionResponse(BaseModel):
         )
 
 
+def short_genres(subjects: tuple[str, ...]) -> list[str]:
+    """Subjects as short genre labels: "Governesses -- Fiction" is "Governesses"; once each."""
+    short = (s.split("--")[0].strip() for s in subjects)
+    return list(dict.fromkeys(s for s in short if 1 < len(s) <= 40))[:10]
+
+
 class WorkResponse(WorkSummaryResponse):
     """A work with its description and known editions."""
 
     description: str | None
     editions: list[EditionResponse]
+    subjects: list[str] = Field(default_factory=list, description="Genres and subjects")
+    rating: float | None = Field(default=None, description="The readers' rating, out of 5")
     series: str | None = Field(
         default=None, description="The saga this work is a volume of, when its title says so"
     )
@@ -153,9 +166,13 @@ class WorkResponse(WorkSummaryResponse):
     @classmethod
     def of_detail(cls, detail: WorkDetail, language: str | None) -> "WorkResponse":
         summary = WorkSummaryResponse.of(detail.work, *detail.localized(language))
+        if summary.cover_path is None and detail.work.cover_url:
+            summary.cover_path = f"/v1/catalog/work-covers/{detail.work.id}"
         guess = guess_series(detail.work.title)
         return cls(
             **summary.model_dump(),
+            subjects=short_genres(detail.work.subjects),
+            rating=detail.work.rating,
             series=guess.series if guess else None,
             series_index=guess.number if guess else None,
             description=detail.described(language),
@@ -258,3 +275,38 @@ async def lookup_isbn(
     return IsbnLookupResponse(
         edition_id=match.edition.id, work=WorkResponse.of_detail(match.detail, lang)
     )
+
+
+_COVER_HOSTS = ("hardcover.app",)
+
+
+@router.get(
+    "/work-covers/{work_id}",
+    operation_id="getWorkCover",
+    response_class=FileResponse,
+    responses={200: {"content": {"image/*": {}}}, 404: {"description": "No such cover"}},
+)
+async def get_work_cover(
+    container: ContainerDep, works: WorkServiceDep, work_id: UUID
+) -> FileResponse:
+    """The cover of a work found at Hardcover, kept by Babel (public, like other covers)."""
+    url = await works.cover_url(work_id)
+    host = (urlsplit(url).hostname or "") if url else ""
+    if not url or not any(host == h or host.endswith(f".{h}") for h in _COVER_HOSTS):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No such cover")
+    key = hashlib.sha256(url.encode()).hexdigest()
+    found = container.covers.get(key)
+    if found is None:
+        try:
+            async with httpx.AsyncClient(timeout=15, follow_redirects=False) as client:
+                response = await client.get(url)
+            media = response.headers.get("content-type", "").split(";")[0]
+            cover = Cover(response.content, media) if response.status_code == 200 else None
+        except httpx.HTTPError:
+            cover = None  # not cached: it may work later
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "No such cover") from None
+        found = container.covers.put(key, cover)
+    if not found:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No such cover")
+    path, media_type = found
+    return FileResponse(path, media_type=media_type, headers={"Cache-Control": "max-age=86400"})

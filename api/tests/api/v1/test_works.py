@@ -754,11 +754,12 @@ def test_the_search_adds_what_hardcover_knows_and_the_catalog_lacks(
 
     # A one-letter query is not worth a request to Hardcover; two letters are (Open Library
     # refuses them, so only Hardcover is asked: "oz").
+    searched = len(fake.asked)  # "jane", then the work's own lookup when it was opened
     client.get("/v1/catalog/search", params={"q": "j"}, headers=auth)
-    assert fake.asked == ["jane"]
+    assert len(fake.asked) == searched
     short = client.get("/v1/catalog/search", params={"q": "oz"}, headers=auth)
     assert short.status_code == 200
-    assert fake.asked == ["jane", "oz"]
+    assert fake.asked[-1] == "oz"
 
 
 def test_the_search_still_answers_when_open_library_is_down(
@@ -1004,3 +1005,13 @@ def test_a_reader_links_and_unlinks_their_own_shelfmark(
     assert refused.status_code == 400
     assert refused.json()["detail"] == "shelfmark:address"
     assert client.delete("/v1/me/shelfmark", headers=admin).status_code == 204
+
+
+def testshort_genres_are_short_labels() -> None:
+    from babel_api.api.v1.routes.catalog import short_genres
+
+    assert short_genres(("Governesses -- Fiction", "Fiction", "Love stories", "Governesses")) == [
+        "Governesses",
+        "Fiction",
+        "Love stories",
+    ]

@@ -35,6 +35,8 @@ def _to_work(row: WorkRow) -> Work:
         edition_count=row.edition_count,
         editions_synced_at=_aware(row.editions_synced_at),
         subjects=tuple(row.subjects or ()),
+        cover_url=row.cover_url,
+        rating=row.rating,
     )
 
 
@@ -162,6 +164,23 @@ class SqlCatalogRepository:
         if row is not None:
             row.description = description
             await self._session.flush()
+
+    async def set_work_extras(
+        self,
+        work_id: UUID,
+        subjects: tuple[str, ...] | None,
+        cover_url: str | None,
+        rating: float | None,
+    ) -> None:
+        """Fills what the work lacks (genres, a cover address, a rating); never overwrites."""
+        row = await self._session.get(WorkRow, work_id)
+        if row is None:
+            return
+        if subjects and not row.subjects:
+            row.subjects = list(subjects)
+        row.cover_url = row.cover_url or cover_url
+        row.rating = row.rating or rating
+        await self._session.flush()
 
     async def mark_editions_synced(self, work_id: UUID, at: datetime) -> None:
         row = await self._session.get_one(WorkRow, work_id)

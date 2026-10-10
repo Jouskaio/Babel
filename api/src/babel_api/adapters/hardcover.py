@@ -43,6 +43,10 @@ class HardcoverBook:
     authors: tuple[str, ...]
     year: int | None
     description: str | None
+    image: str | None = None
+    genres: tuple[str, ...] = ()
+    rating: float | None = None
+    pages: int | None = None
 
 
 class HardcoverBusyError(ValueError):
@@ -238,6 +242,14 @@ class HardcoverClient:
                     continue
                 year = doc.get("release_year")
                 text = html.unescape(_TAGS.sub("", str(doc.get("description") or ""))).strip()
+                image = cast(Any, doc.get("image"))
+                url = cast(
+                    Any,
+                    cast(dict[str, Any], image).get("url") if isinstance(image, dict) else image,
+                )
+                genres = cast(list[Any], doc.get("genres") or [])
+                rating = doc.get("rating")
+                pages = doc.get("pages")
                 books.append(
                     HardcoverBook(
                         id=int(str(raw_id)),
@@ -247,6 +259,10 @@ class HardcoverClient:
                         )[:3],
                         year=year if isinstance(year, int) else None,
                         description=text if len(text) >= MIN_DESCRIPTION else None,
+                        image=str(url) if isinstance(url, str) and url.startswith("http") else None,
+                        genres=tuple(str(g) for g in genres if isinstance(g, str))[:12],
+                        rating=round(float(rating), 2) if isinstance(rating, int | float) else None,
+                        pages=pages if isinstance(pages, int) else None,
                     )
                 )
         except (httpx.HTTPError, ValueError, KeyError, TypeError) as error:

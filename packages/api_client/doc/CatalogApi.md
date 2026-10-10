@@ -14,6 +14,7 @@ Method | HTTP request | Description
 [**getSaga**](CatalogApi.md#getsaga) | **GET** /v1/catalog/saga | Get Saga
 [**getTrendingWorks**](CatalogApi.md#gettrendingworks) | **GET** /v1/catalog/trending | Get Trending
 [**getWork**](CatalogApi.md#getwork) | **GET** /v1/catalog/works/{work_id} | Get Work
+[**getWorkCover**](CatalogApi.md#getworkcover) | **GET** /v1/catalog/work-covers/{work_id} | Get Work Cover
 [**lookupIsbn**](CatalogApi.md#lookupisbn) | **GET** /v1/catalog/isbn/{isbn} | Lookup Isbn
 [**openHardcoverWork**](CatalogApi.md#openhardcoverwork) | **POST** /v1/catalog/works/hardcover | Open Hardcover Work
 [**searchWorks**](CatalogApi.md#searchworks) | **GET** /v1/catalog/search | Search Works
@@ -256,6 +257,48 @@ Name | Type | Description  | Notes
 
  - **Content-Type**: Not defined
  - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getWorkCover**
+> getWorkCover(workId)
+
+Get Work Cover
+
+The cover of a work found at Hardcover, kept by Babel (public, like other covers).
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+
+final api_instance = CatalogApi();
+final workId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    api_instance.getWorkCover(workId);
+} catch (e) {
+    print('Exception when calling CatalogApi->getWorkCover: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **workId** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: image/*
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

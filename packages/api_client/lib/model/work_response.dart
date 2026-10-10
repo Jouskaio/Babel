@@ -21,8 +21,10 @@ class WorkResponse {
     this.firstPublishYear,
     required this.id,
     required this.originalTitle,
+    this.rating,
     this.series,
     this.seriesIndex,
+    this.subjects = const [],
     required this.title,
   });
 
@@ -42,11 +44,17 @@ class WorkResponse {
 
   String originalTitle;
 
+  /// The readers' rating, out of 5
+  num? rating;
+
   /// The saga this work is a volume of, when its title says so
   String? series;
 
   /// Its volume number
   num? seriesIndex;
+
+  /// Genres and subjects
+  List<String> subjects;
 
   String title;
 
@@ -60,8 +68,10 @@ class WorkResponse {
     other.firstPublishYear == firstPublishYear &&
     other.id == id &&
     other.originalTitle == originalTitle &&
+    other.rating == rating &&
     other.series == series &&
     other.seriesIndex == seriesIndex &&
+    _deepEquality.equals(other.subjects, subjects) &&
     other.title == title;
 
   @override
@@ -75,12 +85,14 @@ class WorkResponse {
     (firstPublishYear == null ? 0 : firstPublishYear!.hashCode) +
     (id.hashCode) +
     (originalTitle.hashCode) +
+    (rating == null ? 0 : rating!.hashCode) +
     (series == null ? 0 : series!.hashCode) +
     (seriesIndex == null ? 0 : seriesIndex!.hashCode) +
+    (subjects.hashCode) +
     (title.hashCode);
 
   @override
-  String toString() => 'WorkResponse[authors=$authors, coverPath=$coverPath, description=$description, editionCount=$editionCount, editions=$editions, firstPublishYear=$firstPublishYear, id=$id, originalTitle=$originalTitle, series=$series, seriesIndex=$seriesIndex, title=$title]';
+  String toString() => 'WorkResponse[authors=$authors, coverPath=$coverPath, description=$description, editionCount=$editionCount, editions=$editions, firstPublishYear=$firstPublishYear, id=$id, originalTitle=$originalTitle, rating=$rating, series=$series, seriesIndex=$seriesIndex, subjects=$subjects, title=$title]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -108,6 +120,11 @@ class WorkResponse {
     }
       json[r'id'] = this.id;
       json[r'original_title'] = this.originalTitle;
+    if (this.rating != null) {
+      json[r'rating'] = this.rating;
+    } else {
+      json[r'rating'] = null;
+    }
     if (this.series != null) {
       json[r'series'] = this.series;
     } else {
@@ -118,6 +135,7 @@ class WorkResponse {
     } else {
       json[r'series_index'] = null;
     }
+      json[r'subjects'] = this.subjects;
       json[r'title'] = this.title;
     return json;
   }
@@ -151,10 +169,16 @@ class WorkResponse {
         firstPublishYear: mapValueOfType<int>(json, r'first_publish_year'),
         id: mapValueOfType<String>(json, r'id')!,
         originalTitle: mapValueOfType<String>(json, r'original_title')!,
+        rating: json[r'rating'] == null
+            ? null
+            : num.parse('${json[r'rating']}'),
         series: mapValueOfType<String>(json, r'series'),
         seriesIndex: json[r'series_index'] == null
             ? null
             : num.parse('${json[r'series_index']}'),
+        subjects: json[r'subjects'] is Iterable
+            ? (json[r'subjects'] as Iterable).cast<String>().toList(growable: false)
+            : const [],
         title: mapValueOfType<String>(json, r'title')!,
       );
     }

@@ -106,6 +106,8 @@ class WorkRow(Base):
     description: Mapped[str | None] = mapped_column(Text)
     edition_count: Mapped[int | None] = mapped_column(Integer)
     subjects: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
+    cover_url: Mapped[str | None] = mapped_column(String(500))
+    rating: Mapped[float | None] = mapped_column(Float)
     editions_synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)

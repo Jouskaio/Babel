@@ -4720,6 +4720,18 @@
             "title": "Original Title",
             "type": "string"
           },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The readers' rating, out of 5",
+            "title": "Rating"
+          },
           "series": {
             "anyOf": [
               {
@@ -4743,6 +4755,14 @@
             ],
             "description": "Its volume number",
             "title": "Series Index"
+          },
+          "subjects": {
+            "description": "Genres and subjects",
+            "items": {
+              "type": "string"
+            },
+            "title": "Subjects",
+            "type": "array"
           },
           "title": {
             "title": "Title",
@@ -6576,6 +6596,49 @@
           }
         },
         "summary": "Get Trending",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/work-covers/{work_id}": {
+      "get": {
+        "description": "The cover of a work found at Hardcover, kept by Babel (public, like other covers).",
+        "operationId": "getWorkCover",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "work_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Work Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/*": {}
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "No such cover"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Work Cover",
         "tags": [
           "catalog"
         ]
