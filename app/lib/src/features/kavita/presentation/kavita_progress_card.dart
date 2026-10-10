@@ -19,7 +19,7 @@ class KavitaProgressCard extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     return Padding(
-      padding: const EdgeInsets.only(top: 24),
+      padding: const EdgeInsets.only(bottom: 32),
       child: InkWell(
         borderRadius: BorderRadius.circular(22),
         onTap: () => context.push(Routes.kavita),

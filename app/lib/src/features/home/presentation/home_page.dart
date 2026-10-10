@@ -88,7 +88,10 @@ class HomePage extends ConsumerWidget {
                 const PlaylistsRow(),
                 const ToReadList(),
                 const JourneyCard(),
-                const FeedSection(),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 32),
+                  child: FeedSection(),
+                ),
                 const BornFromReadings(),
                 const MoodChips(),
                 const DownloadsSection(),
