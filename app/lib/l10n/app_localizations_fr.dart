@@ -2786,6 +2786,71 @@ class AppLocalizationsFr extends AppLocalizations {
       'La lecture de couverture n\'est pas disponible sur ce serveur.';
 
   @override
+  String get groupAccount => 'Compte';
+
+  @override
+  String get groupAccountHint => 'Profil, mot de passe, profil public';
+
+  @override
+  String get groupDisplay => 'Affichage & appareils';
+
+  @override
+  String get groupDisplayHint => 'Langue, mode liseuse, appareils, KOReader';
+
+  @override
+  String get groupConnections => 'Sources & connexions';
+
+  @override
+  String get groupConnectionsHint =>
+      'Tes sources et plugins, Kavita, Audiobookshelf';
+
+  @override
+  String get groupRequests => 'Demandes de livres';
+
+  @override
+  String get groupRequestsHint =>
+      'Shelfmark et Chaptarr, pour télécharger les livres';
+
+  @override
+  String get groupData => 'Import';
+
+  @override
+  String get groupDataHint => 'Importer une liste de lecture';
+
+  @override
+  String get devicesHint =>
+      'Les appareils qui se synchronisent avec ton compte.';
+
+  @override
+  String get devicesEmpty => 'Aucun appareil pour l\'instant.';
+
+  @override
+  String get deviceThis => 'cet appareil';
+
+  @override
+  String get deviceForget => 'Oublier';
+
+  @override
+  String get deviceForgetBody =>
+      'Cet appareil ne sera plus synchronisé tant que tu ne t\'y reconnectes pas. Tes livres et ta progression restent.';
+
+  @override
+  String get groupSources => 'Sources';
+
+  @override
+  String deviceForgetTitle(String name) {
+    return 'Oublier $name ?';
+  }
+
+  @override
+  String deviceLastSeen(String when) {
+    return 'vu $when';
+  }
+
+  @override
+  String get mySources => 'Mes sources';
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override

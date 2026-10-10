@@ -2766,6 +2766,69 @@ class AppLocalizationsEn extends AppLocalizations {
       'Cover reading is not available on this server.';
 
   @override
+  String get groupAccount => 'Account';
+
+  @override
+  String get groupAccountHint => 'Profile, password, public profile';
+
+  @override
+  String get groupDisplay => 'Display & devices';
+
+  @override
+  String get groupDisplayHint => 'Language, e-reader mode, devices, KOReader';
+
+  @override
+  String get groupConnections => 'Sources & connections';
+
+  @override
+  String get groupConnectionsHint =>
+      'Your sources and plugins, Kavita, Audiobookshelf';
+
+  @override
+  String get groupRequests => 'Book requests';
+
+  @override
+  String get groupRequestsHint => 'Shelfmark and Chaptarr, to download books';
+
+  @override
+  String get groupData => 'Import';
+
+  @override
+  String get groupDataHint => 'Import a reading list';
+
+  @override
+  String get devicesHint => 'The devices that sync with your account.';
+
+  @override
+  String get devicesEmpty => 'No device yet.';
+
+  @override
+  String get deviceThis => 'this device';
+
+  @override
+  String get deviceForget => 'Forget';
+
+  @override
+  String get deviceForgetBody =>
+      'This device stops syncing until you sign in on it again. Your books and progress stay.';
+
+  @override
+  String get groupSources => 'Sources';
+
+  @override
+  String deviceForgetTitle(String name) {
+    return 'Forget $name?';
+  }
+
+  @override
+  String deviceLastSeen(String when) {
+    return 'seen $when';
+  }
+
+  @override
+  String get mySources => 'My sources';
+
+  @override
   String get coverDefault => 'Default';
 
   @override

@@ -21,6 +21,7 @@ import '../../kavita/presentation/kavita_section.dart';
 import '../../library/presentation/reading_list_import.dart';
 import '../../social/presentation/sharing_settings.dart';
 import 'chaptarr_section.dart';
+import 'devices_section.dart';
 import 'koreader_section.dart';
 import 'shelfmark_section.dart';
 
@@ -67,62 +68,112 @@ class AccountPage extends ConsumerWidget {
                     style: BabelText.body(13),
                   ),
                 const SizedBox(height: 24),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    Icons.cloud_sync_outlined,
-                    color: BabelColors.gold,
-                  ),
-                  title: Text(l10n.sourcesTitle, style: BabelText.heading(20)),
-                  subtitle: Text(
-                    l10n.accountSourcesHint,
-                    style: BabelText.body(13),
-                  ),
-                  trailing: Icon(
-                    Icons.chevron_right,
-                    color: BabelColors.textSecondary,
-                  ),
-                  onTap: () => context.push(Routes.sources),
+                // Four groups, closed until opened: the page reads as a table of contents.
+                _Group(
+                  icon: Icons.person_outline_rounded,
+                  title: l10n.groupAccount,
+                  subtitle: l10n.groupAccountHint,
+                  initiallyOpen: true,
+                  children: [
+                    _Block(
+                      title: l10n.accountProfile,
+                      child: _ProfileForm(user: user),
+                    ),
+                    _Block(
+                      title: l10n.accountSecurity,
+                      child: _PasswordForm(user: user),
+                    ),
+                    _Block(
+                      title: l10n.publicProfile,
+                      child: const SharingSettings(),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                _Section(
-                  title: l10n.accountProfile,
-                  child: _ProfileForm(user: user),
+                _Group(
+                  icon: Icons.devices_rounded,
+                  title: l10n.groupDisplay,
+                  subtitle: l10n.groupDisplayHint,
+                  children: [
+                    _Block(
+                      title: l10n.language,
+                      child: const Align(
+                        alignment: Alignment.centerLeft,
+                        child: LanguagePicker(),
+                      ),
+                    ),
+                    _Block(title: l10n.einkTitle, child: const EinkSetting()),
+                    _Block(
+                      title: l10n.devicesTitle,
+                      child: const DevicesSection(),
+                    ),
+                    _Block(
+                      title: l10n.koreaderTitle,
+                      child: const KoreaderSection(),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                _Section(
-                  title: l10n.accountSecurity,
-                  child: _PasswordForm(user: user),
+                _Group(
+                  icon: Icons.hub_outlined,
+                  title: l10n.groupConnections,
+                  subtitle: l10n.groupConnectionsHint,
+                  children: [
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(
+                        Icons.cloud_sync_outlined,
+                        color: BabelColors.gold,
+                      ),
+                      title: Text(
+                        l10n.sourcesTitle,
+                        style: BabelText.heading(18),
+                      ),
+                      subtitle: Text(
+                        l10n.accountSourcesHint,
+                        style: BabelText.body(13),
+                      ),
+                      trailing: Icon(
+                        Icons.chevron_right,
+                        color: BabelColors.textSecondary,
+                      ),
+                      onTap: () => context.push(Routes.sources),
+                    ),
+                    _Block(
+                      title: l10n.kavitaTitle,
+                      child: const KavitaSection(),
+                    ),
+                    _Block(
+                      title: l10n.absTitle,
+                      child: const AudiobookshelfSection(),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                _Section(title: l10n.kavitaTitle, child: const KavitaSection()),
-                const SizedBox(height: 24),
-                _Section(
-                  title: l10n.absTitle,
-                  child: const AudiobookshelfSection(),
+                _Group(
+                  icon: Icons.download_for_offline_outlined,
+                  title: l10n.groupRequests,
+                  subtitle: l10n.groupRequestsHint,
+                  children: [
+                    _Block(
+                      title: l10n.shelfmarkTitle,
+                      child: const ShelfmarkSection(),
+                    ),
+                    _Block(
+                      title: l10n.chaptarrTitle,
+                      child: const ChaptarrSection(),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                _Section(
-                  title: l10n.chaptarrTitle,
-                  child: const ChaptarrSection(),
+                _Group(
+                  icon: Icons.upload_file_outlined,
+                  title: l10n.groupData,
+                  subtitle: l10n.groupDataHint,
+                  children: [
+                    _Block(
+                      title: l10n.importTitle,
+                      child: const ReadingListImport(),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                _Section(
-                  title: l10n.shelfmarkTitle,
-                  child: const ShelfmarkSection(),
-                ),
-                const SizedBox(height: 24),
-                _Section(
-                  title: l10n.koreaderTitle,
-                  child: const KoreaderSection(),
-                ),
-                const SizedBox(height: 24),
-                _Section(
-                  title: l10n.importTitle,
-                  child: const ReadingListImport(),
-                ),
-                if (user.admin) ...[
-                  const SizedBox(height: 24),
+                if (user.admin)
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(
@@ -140,26 +191,6 @@ class AccountPage extends ConsumerWidget {
                     ),
                     onTap: () => context.push(Routes.admin),
                   ),
-                ],
-                const SizedBox(height: 24),
-                _Section(
-                  title: l10n.publicProfile,
-                  child: const SharingSettings(),
-                ),
-                const SizedBox(height: 24),
-                _Section(title: l10n.einkTitle, child: const EinkSetting()),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l10n.language.toUpperCase(),
-                        style: BabelText.label(11, spacing: 2),
-                      ),
-                    ),
-                    const LanguagePicker(),
-                  ],
-                ),
                 const SizedBox(height: 32),
                 PillButton(
                   label: l10n.signOut,
@@ -237,27 +268,68 @@ void _snack(BuildContext context, AuthFailure? failure, [String? success]) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
 }
 
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.child});
+/// A group of settings: a card that opens to its blocks.
+class _Group extends StatelessWidget {
+  const _Group({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.children,
+    this.initiallyOpen = false,
+  });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final List<Widget> children;
+  final bool initiallyOpen;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 14),
+    child: Container(
+      decoration: BoxDecoration(
+        color: BabelColors.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: BabelColors.border),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: initiallyOpen,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+          childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          leading: Icon(icon, color: BabelColors.gold),
+          iconColor: BabelColors.textSecondary,
+          collapsedIconColor: BabelColors.textSecondary,
+          title: Text(title, style: BabelText.heading(20)),
+          subtitle: Text(subtitle, style: BabelText.body(12)),
+          children: [
+            for (var i = 0; i < children.length; i++) ...[
+              if (i > 0) const Divider(height: 36),
+              children[i],
+            ],
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// A titled block inside a group.
+class _Block extends StatelessWidget {
+  const _Block({required this.title, required this.child});
   final String title;
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(24),
-    decoration: BoxDecoration(
-      color: BabelColors.surface,
-      borderRadius: BorderRadius.circular(28),
-      border: Border.all(color: BabelColors.border),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(title.toUpperCase(), style: BabelText.label(11, spacing: 2)),
-        const SizedBox(height: 18),
-        child,
-      ],
-    ),
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Text(title.toUpperCase(), style: BabelText.label(10, spacing: 1.6)),
+      const SizedBox(height: 12),
+      child,
+    ],
   );
 }
 
