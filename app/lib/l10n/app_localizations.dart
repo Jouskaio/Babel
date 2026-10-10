@@ -4790,6 +4790,168 @@ abstract class AppLocalizations {
   /// **'{imported, plural, one{# avis importé} other{# avis importés}}, {skipped} déjà dans ta bibliothèque'**
   String pageboundImported(int imported, int skipped);
 
+  /// No description provided for @themeClassics.
+  ///
+  /// In fr, this message translates to:
+  /// **'Grands classiques'**
+  String get themeClassics;
+
+  /// No description provided for @badgeClassics.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rat de classiques'**
+  String get badgeClassics;
+
+  /// No description provided for @themeRomance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Histoires de cœur'**
+  String get themeRomance;
+
+  /// No description provided for @badgeRomance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cœur battant'**
+  String get badgeRomance;
+
+  /// No description provided for @themeScifi.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voyages dans le futur'**
+  String get themeScifi;
+
+  /// No description provided for @badgeScifi.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voyageur du futur'**
+  String get badgeScifi;
+
+  /// No description provided for @themeMystery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enquêtes et polars'**
+  String get themeMystery;
+
+  /// No description provided for @badgeMystery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fin limier'**
+  String get badgeMystery;
+
+  /// No description provided for @themeFantasy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mondes imaginaires'**
+  String get themeFantasy;
+
+  /// No description provided for @badgeFantasy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maître des sortilèges'**
+  String get badgeFantasy;
+
+  /// No description provided for @themeComics.
+  ///
+  /// In fr, this message translates to:
+  /// **'BD et mangas'**
+  String get themeComics;
+
+  /// No description provided for @badgeComics.
+  ///
+  /// In fr, this message translates to:
+  /// **'Œil de lynx'**
+  String get badgeComics;
+
+  /// No description provided for @themeYoung.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jeunesse et young adult'**
+  String get themeYoung;
+
+  /// No description provided for @badgeYoung.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jeune pousse'**
+  String get badgeYoung;
+
+  /// No description provided for @themeHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plongée dans l\'histoire'**
+  String get themeHistory;
+
+  /// No description provided for @badgeHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chroniqueur'**
+  String get badgeHistory;
+
+  /// No description provided for @themeStage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Théâtre et poésie'**
+  String get themeStage;
+
+  /// No description provided for @badgeStage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voix de la scène'**
+  String get badgeStage;
+
+  /// No description provided for @themeGothic.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lectures gothiques'**
+  String get themeGothic;
+
+  /// No description provided for @badgeGothic.
+  ///
+  /// In fr, this message translates to:
+  /// **'Âme sombre'**
+  String get badgeGothic;
+
+  /// No description provided for @themeEssays.
+  ///
+  /// In fr, this message translates to:
+  /// **'Essais et idées'**
+  String get themeEssays;
+
+  /// No description provided for @badgeEssays.
+  ///
+  /// In fr, this message translates to:
+  /// **'Esprit curieux'**
+  String get badgeEssays;
+
+  /// No description provided for @themeWinter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contes d\'hiver'**
+  String get themeWinter;
+
+  /// No description provided for @badgeWinter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Veilleur de neige'**
+  String get badgeWinter;
+
+  /// No description provided for @challengeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Défi du mois · {theme}'**
+  String challengeTitle(String theme);
+
+  /// No description provided for @challengeProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'{done} / {target} livres — badge « {badge} »'**
+  String challengeProgress(int done, int target, String badge);
+
+  /// No description provided for @challengeWon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Défi réussi — badge « {badge} » gagné'**
+  String challengeWon(String badge);
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

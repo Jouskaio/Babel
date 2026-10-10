@@ -65,6 +65,7 @@ part 'model/book_note_response.dart';
 part 'model/book_request_response.dart';
 part 'model/book_title_response.dart';
 part 'model/book_trace_response.dart';
+part 'model/challenge_response.dart';
 part 'model/change_op.dart';
 part 'model/change_password_request.dart';
 part 'model/change_response.dart';

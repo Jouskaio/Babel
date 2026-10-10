@@ -14,6 +14,7 @@ class ProgressionResponse {
   /// Returns a new [ProgressionResponse] instance.
   ProgressionResponse({
     this.badges = const [],
+    required this.challenge,
     required this.level,
     required this.levelStart,
     required this.nextLevel,
@@ -23,6 +24,8 @@ class ProgressionResponse {
   });
 
   List<BadgeResponse> badges;
+
+  ChallengeResponse challenge;
 
   int level;
 
@@ -42,6 +45,7 @@ class ProgressionResponse {
   @override
   bool operator ==(Object other) => identical(this, other) || other is ProgressionResponse &&
     _deepEquality.equals(other.badges, badges) &&
+    other.challenge == challenge &&
     other.level == level &&
     other.levelStart == levelStart &&
     other.nextLevel == nextLevel &&
@@ -53,6 +57,7 @@ class ProgressionResponse {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (badges.hashCode) +
+    (challenge.hashCode) +
     (level.hashCode) +
     (levelStart.hashCode) +
     (nextLevel.hashCode) +
@@ -61,11 +66,12 @@ class ProgressionResponse {
     (xp.hashCode);
 
   @override
-  String toString() => 'ProgressionResponse[badges=$badges, level=$level, levelStart=$levelStart, nextLevel=$nextLevel, steps=$steps, title=$title, xp=$xp]';
+  String toString() => 'ProgressionResponse[badges=$badges, challenge=$challenge, level=$level, levelStart=$levelStart, nextLevel=$nextLevel, steps=$steps, title=$title, xp=$xp]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'badges'] = this.badges;
+      json[r'challenge'] = this.challenge;
       json[r'level'] = this.level;
       json[r'level_start'] = this.levelStart;
       json[r'next_level'] = this.nextLevel;
@@ -95,6 +101,7 @@ class ProgressionResponse {
 
       return ProgressionResponse(
         badges: BadgeResponse.listFromJson(json[r'badges']),
+        challenge: ChallengeResponse.fromJson(json[r'challenge'])!,
         level: mapValueOfType<int>(json, r'level')!,
         levelStart: mapValueOfType<int>(json, r'level_start')!,
         nextLevel: mapValueOfType<int>(json, r'next_level')!,
@@ -149,6 +156,7 @@ class ProgressionResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'badges',
+    'challenge',
     'level',
     'level_start',
     'next_level',

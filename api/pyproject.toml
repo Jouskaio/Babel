@@ -21,6 +21,7 @@ dependencies = [
     "defusedxml>=0.7.1",
     "cryptography>=46",
     "beautifulsoup4>=4.13",
+    "pillow>=12.3.0",
 ]
 
 [dependency-groups]

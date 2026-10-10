@@ -6,6 +6,7 @@ import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 import '../../stats/application/stats_providers.dart';
+import '../../stats/presentation/challenge_chip.dart';
 
 /// Level, points toward the next one, the badges earned and (until done) the first steps.
 class ProgressionCard extends ConsumerWidget {
@@ -63,6 +64,8 @@ class ProgressionCard extends ConsumerWidget {
               backgroundColor: BabelColors.sunken,
             ),
           ),
+          const SizedBox(height: 16),
+          ChallengeChip(p.challenge),
           const SizedBox(height: 18),
           Wrap(
             spacing: 10,

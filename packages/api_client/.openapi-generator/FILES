@@ -26,6 +26,7 @@ doc/BookRequestResponse.md
 doc/BookTitleResponse.md
 doc/BookTraceResponse.md
 doc/CatalogApi.md
+doc/ChallengeResponse.md
 doc/ChangeOp.md
 doc/ChangePasswordRequest.md
 doc/ChangeResponse.md
@@ -204,6 +205,7 @@ lib/model/book_note_response.dart
 lib/model/book_request_response.dart
 lib/model/book_title_response.dart
 lib/model/book_trace_response.dart
+lib/model/challenge_response.dart
 lib/model/change_op.dart
 lib/model/change_password_request.dart
 lib/model/change_response.dart

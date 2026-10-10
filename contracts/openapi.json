@@ -850,6 +850,62 @@
         "title": "BookTraceResponse",
         "type": "object"
       },
+      "ChallengeResponse": {
+        "properties": {
+          "done": {
+            "title": "Done",
+            "type": "boolean"
+          },
+          "month": {
+            "description": "1 to 12: the month it is",
+            "title": "Month",
+            "type": "integer"
+          },
+          "progress": {
+            "description": "Books of the theme finished this month (up to the target)",
+            "title": "Progress",
+            "type": "integer"
+          },
+          "target": {
+            "description": "Books of the theme to finish this month",
+            "title": "Target",
+            "type": "integer"
+          },
+          "theme": {
+            "enum": [
+              "classics",
+              "romance",
+              "scifi",
+              "mystery",
+              "fantasy",
+              "comics",
+              "young",
+              "history",
+              "stage",
+              "gothic",
+              "essays",
+              "winter"
+            ],
+            "title": "Theme",
+            "type": "string"
+          },
+          "won": {
+            "description": "Months won in all, this one included",
+            "title": "Won",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "theme",
+          "month",
+          "target",
+          "progress",
+          "done",
+          "won"
+        ],
+        "title": "ChallengeResponse",
+        "type": "object"
+      },
       "ChangeOp": {
         "enum": [
           "upsert",
@@ -3184,6 +3240,10 @@
             "title": "Badges",
             "type": "array"
           },
+          "challenge": {
+            "$ref": "#/components/schemas/ChallengeResponse",
+            "description": "The challenge of the month"
+          },
           "level": {
             "title": "Level",
             "type": "integer"
@@ -3230,7 +3290,8 @@
           "next_level",
           "title",
           "badges",
-          "steps"
+          "steps",
+          "challenge"
         ],
         "title": "ProgressionResponse",
         "type": "object"
@@ -6862,7 +6923,7 @@
     },
     "/v1/catalog/covers/{cover_id}/{size}": {
       "get": {
-        "description": "Cover image, proxied and cached so clients never call third parties directly.",
+        "description": "Cover image, proxied and kept on disk so a restart of the API loses none (Open Library\ncan take many seconds to answer) and clients never call third parties directly.",
         "operationId": "getCover",
         "parameters": [
           {

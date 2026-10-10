@@ -71,7 +71,7 @@ No authorization required
 
 Get Cover
 
-Cover image, proxied and cached so clients never call third parties directly.
+Cover image, proxied and kept on disk so a restart of the API loses none (Open Library can take many seconds to answer) and clients never call third parties directly.
 
 ### Example
 ```dart

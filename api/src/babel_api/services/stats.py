@@ -6,6 +6,7 @@ from datetime import UTC, date, datetime, timedelta, timezone
 from uuid import UUID
 
 from babel_api.adapters.db.stats_repository import SqlStatsRepository
+from babel_api.domain.challenges import books_in, months_won
 from babel_api.domain.files import LibraryItem, ReadingStatus, StoredFile
 from babel_api.domain.genres import Genre, genres_of
 from babel_api.domain.progression import Activity, Progression, compute
@@ -153,7 +154,16 @@ class StatsService:
         """Level, badges and first steps, from all the reader ever did."""
         items = await self._stats.items(user_id)
         reading_days = {t.date() for t in await self._stats.reading_times(user_id)}
-        longest, _ = streaks(reading_days, datetime.now(UTC).date())
+        now = datetime.now(UTC)
+        longest, _ = streaks(reading_days, now.date())
+        done = [
+            i
+            for i in items
+            if i.state.status is ReadingStatus.FINISHED and i.state.finished_at is not None
+        ]
+        works = await self._stats.work_subjects(list({i.work_id for i in done if i.work_id}))
+        genres = await self._genres(done, works)
+        finished = [(i.state.finished_at, genres[i.id]) for i in done if i.state.finished_at]
         return compute(
             Activity(
                 finished=sum(1 for i in items if i.state.status is ReadingStatus.FINISHED),
@@ -163,6 +173,9 @@ class StatsService:
                 reading_days=len(reading_days),
                 longest_streak=longest,
                 sources=await self._stats.sources_linked(user_id),
+                challenge_books=books_in(finished, now.year, now.month),
+                challenge_month=now.month,
+                challenges_won=months_won(finished),
             )
         )
 

@@ -7,6 +7,8 @@ the same whatever the length, notes and reviews add a little.
 from dataclasses import dataclass
 from math import isqrt
 
+from babel_api.domain.challenges import BONUS_XP, TARGET, THEMES
+
 XP_FINISHED = 100
 XP_ADDED = 10
 XP_NOTE = 5
@@ -46,6 +48,9 @@ class Activity:
     reading_days: int = 0
     longest_streak: int = 0
     sources: int = 0  # personal sources (and Kavita) linked
+    challenge_books: int = 0  # books of this month's theme finished this month
+    challenge_month: int = 1  # the month it is (1 to 12)
+    challenges_won: int = 0  # months in which the challenge was met, this one included
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,6 +69,16 @@ class Step:
 
 
 @dataclass(frozen=True, slots=True)
+class Challenge:
+    theme: str
+    month: int
+    target: int
+    progress: int
+    done: bool
+    won: int  # how many months were won in all
+
+
+@dataclass(frozen=True, slots=True)
 class Progression:
     xp: int
     level: int
@@ -72,6 +87,7 @@ class Progression:
     title: str
     badges: tuple[Badge, ...]
     steps: tuple[Step, ...]
+    challenge: Challenge
 
 
 def level_of(xp: int) -> int:
@@ -91,6 +107,7 @@ def compute(activity: Activity) -> Progression:
         + min(activity.notes * XP_NOTE, NOTE_XP_CAP)
         + activity.reviews * XP_REVIEW
         + activity.reading_days * XP_READING_DAY
+        + activity.challenges_won * BONUS_XP
     )
     level = level_of(xp)
     title = next(name for floor, name in reversed(_TITLES) if level >= floor)
@@ -124,4 +141,12 @@ def compute(activity: Activity) -> Progression:
         title=title,
         badges=tuple(badges),
         steps=steps,
+        challenge=Challenge(
+            theme=THEMES[activity.challenge_month].key,
+            month=activity.challenge_month,
+            target=TARGET,
+            progress=min(activity.challenge_books, TARGET),
+            done=activity.challenge_books >= TARGET,
+            won=activity.challenges_won,
+        ),
     )

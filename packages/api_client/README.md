@@ -236,6 +236,7 @@ Class | Method | HTTP request | Description
  - [BookRequestResponse](doc//BookRequestResponse.md)
  - [BookTitleResponse](doc//BookTitleResponse.md)
  - [BookTraceResponse](doc//BookTraceResponse.md)
+ - [ChallengeResponse](doc//ChallengeResponse.md)
  - [ChangeOp](doc//ChangeOp.md)
  - [ChangePasswordRequest](doc//ChangePasswordRequest.md)
  - [ChangeResponse](doc//ChangeResponse.md)

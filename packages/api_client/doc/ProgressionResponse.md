@@ -9,6 +9,7 @@ import 'package:babel_api_client/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **badges** | [**List<BadgeResponse>**](BadgeResponse.md) |  | [default to const []]
+**challenge** | [**ChallengeResponse**](ChallengeResponse.md) |  | 
 **level** | **int** |  | 
 **levelStart** | **int** | Points at which this level began | 
 **nextLevel** | **int** | Points the next level asks for | 
