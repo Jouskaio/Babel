@@ -1907,5 +1907,8 @@
     }
   },
   "fanficOnAo3": "Voir sur AO3",
-  "fanficUnavailable": "AO3 n'a pas pu donner les détails de cette fanfiction (réservée aux membres, ou injoignable pour l'instant)."
+  "fanficUnavailable": "AO3 n'a pas pu donner les détails de cette fanfiction (réservée aux membres, ou injoignable pour l'instant).",
+  "appearanceTitle": "Thème",
+  "appearanceNight": "Nuit",
+  "appearanceDeco": "Art déco"
 }

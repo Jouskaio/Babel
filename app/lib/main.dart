@@ -7,6 +7,7 @@ import 'package:just_audio_background/just_audio_background.dart';
 import 'src/app.dart';
 import 'src/core/display/eink.dart';
 import 'src/core/telemetry/telemetry.dart';
+import 'src/core/theme/appearance.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +15,7 @@ Future<void> main() async {
   usePathUrlStrategy();
   await Telemetry.init();
   await EinkController.load();
+  await AppearanceController.load();
   if (!kIsWeb) {
     // Audiobooks: lock screen and notification controls, playback with the screen off.
     await JustAudioBackground.init(

@@ -5605,6 +5605,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'AO3 n\'a pas pu donner les détails de cette fanfiction (réservée aux membres, ou injoignable pour l\'instant).'**
   String get fanficUnavailable;
+
+  /// No description provided for @appearanceTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Thème'**
+  String get appearanceTitle;
+
+  /// No description provided for @appearanceNight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nuit'**
+  String get appearanceNight;
+
+  /// No description provided for @appearanceDeco.
+  ///
+  /// In fr, this message translates to:
+  /// **'Art déco'**
+  String get appearanceDeco;
 }
 
 class _AppLocalizationsDelegate

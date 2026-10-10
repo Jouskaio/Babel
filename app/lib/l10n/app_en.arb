@@ -1115,5 +1115,8 @@
   "fanficUpdated": "Updated {date}",
   "fanficPublished": "Published {date}",
   "fanficOnAo3": "View on AO3",
-  "fanficUnavailable": "AO3 could not give the details of this fanfiction (members only, or unreachable for now)."
+  "fanficUnavailable": "AO3 could not give the details of this fanfiction (members only, or unreachable for now).",
+  "appearanceTitle": "Theme",
+  "appearanceNight": "Night",
+  "appearanceDeco": "Art deco"
 }

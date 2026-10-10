@@ -3394,4 +3394,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get fanficUnavailable =>
       'AO3 could not give the details of this fanfiction (members only, or unreachable for now).';
+
+  @override
+  String get appearanceTitle => 'Theme';
+
+  @override
+  String get appearanceNight => 'Night';
+
+  @override
+  String get appearanceDeco => 'Art deco';
 }
