@@ -1391,7 +1391,8 @@
             "enum": [
               "hardcover",
               "openlibrary",
-              "goodreads"
+              "goodreads",
+              "pagebound"
             ],
             "title": "Source",
             "type": "string"
@@ -1432,7 +1433,10 @@
             "title": "Rating"
           },
           "source": {
-            "const": "hardcover",
+            "enum": [
+              "hardcover",
+              "pagebound"
+            ],
             "title": "Source",
             "type": "string"
           },
@@ -2691,6 +2695,22 @@
         "title": "LinkKind",
         "type": "string"
       },
+      "LinkPagebound": {
+        "properties": {
+          "username": {
+            "description": "Public username",
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username"
+        ],
+        "title": "LinkPagebound",
+        "type": "object"
+      },
       "LinkPreviewResponse": {
         "properties": {
           "authors": {
@@ -2968,6 +2988,64 @@
           "detail"
         ],
         "title": "OperationResult",
+        "type": "object"
+      },
+      "PageboundImportResponse": {
+        "properties": {
+          "imported": {
+            "title": "Imported",
+            "type": "integer"
+          },
+          "skipped": {
+            "description": "Books already in your library",
+            "title": "Skipped",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "imported",
+          "skipped"
+        ],
+        "title": "PageboundImportResponse",
+        "type": "object"
+      },
+      "PageboundResponse": {
+        "properties": {
+          "imported_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When their reviews were last brought in",
+            "title": "Imported At"
+          },
+          "linked": {
+            "title": "Linked",
+            "type": "boolean"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          }
+        },
+        "required": [
+          "linked",
+          "username",
+          "imported_at"
+        ],
+        "title": "PageboundResponse",
         "type": "object"
       },
       "PaperBookRequest": {
@@ -9874,6 +9952,123 @@
         "summary": "New Koreader Password",
         "tags": [
           "kosync"
+        ]
+      }
+    },
+    "/v1/me/pagebound": {
+      "delete": {
+        "description": "Forget your Pagebound account (the reviews already imported stay).",
+        "operationId": "unlinkPagebound",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unlink Pagebound",
+        "tags": [
+          "pagebound"
+        ]
+      },
+      "get": {
+        "description": "Whether you linked your Pagebound account.",
+        "operationId": "getPagebound",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageboundResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Pagebound",
+        "tags": [
+          "pagebound"
+        ]
+      },
+      "put": {
+        "description": "Link your Pagebound account by its public username (no password is needed).",
+        "operationId": "linkPagebound",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkPagebound"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageboundResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Link Pagebound",
+        "tags": [
+          "pagebound"
+        ]
+      }
+    },
+    "/v1/me/pagebound/import": {
+      "post": {
+        "description": "Bring your public Pagebound reviews into Babel: each book joins your library as a paper\nbook (finished) with your rating and text as a private review.",
+        "operationId": "importPagebound",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageboundImportResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Import Pagebound",
+        "tags": [
+          "pagebound"
         ]
       }
     },

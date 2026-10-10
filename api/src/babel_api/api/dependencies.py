@@ -30,6 +30,7 @@ from babel_api.adapters.external_ratings import ExternalRatings
 from babel_api.adapters.files.comics import ComicConverter
 from babel_api.adapters.hardcover import HardcoverClient
 from babel_api.adapters.kavita import KavitaClient
+from babel_api.adapters.pagebound import PageboundClient
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
 from babel_api.adapters.security.secrets import SecretBox
 from babel_api.adapters.security.tokens import AccessTokenError, AccessTokenIssuer
@@ -57,10 +58,12 @@ from babel_api.services.auth import AuthService
 from babel_api.services.catalog import CatalogService
 from babel_api.services.files import FileService
 from babel_api.services.follows import FollowService
+from babel_api.services.imports import ImportService
 from babel_api.services.kavita import KavitaProvisioner, KavitaService
 from babel_api.services.koreader import KoreaderService
 from babel_api.services.links import LinkService
 from babel_api.services.notifications import Notifier
+from babel_api.services.pagebound import PageboundService
 from babel_api.services.plugins import PluginService
 from babel_api.services.requests import RequestService
 from babel_api.services.social import SocialService
@@ -102,6 +105,7 @@ class Container:
     hardcover: HardcoverClient | None = None
     wikidata: WikidataClient | None = None
     external_ratings: ExternalRatings | None = None
+    pagebound: PageboundClient | None = None
     # Reads the text of a cover photo (Tesseract); tests replace it.
     ocr: Callable[[bytes], Awaitable[str]] | None = None
     # How a reader's own Chaptarr is reached (tests replace it); None: with the address guard.
@@ -149,6 +153,7 @@ def get_work_service(
         container.hardcover,
         container.wikidata,
         container.external_ratings,
+        container.pagebound,
     )
 
 
@@ -355,6 +360,20 @@ def get_stats_service(
 
 
 StatsServiceDep = Annotated[StatsService, Depends(get_stats_service)]
+
+
+def get_pagebound_service(
+    container: ContainerDep,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    files: FileServiceDep,
+    social: SocialServiceDep,
+) -> PageboundService:
+    return PageboundService(
+        session, container.pagebound or PageboundClient(), ImportService(files, social)
+    )
+
+
+PageboundServiceDep = Annotated[PageboundService, Depends(get_pagebound_service)]
 
 
 def get_plugin_service(

@@ -65,6 +65,18 @@ def _rating(value: str) -> int | None:
     return stars if 1 <= stars <= 5 else None  # 0 means "not rated"
 
 
+@dataclass(frozen=True, slots=True)
+class ImportRow:
+    """A book of a reading history, from any source."""
+
+    title: str
+    authors: tuple[str, ...]
+    status: ReadingStatus | None
+    finished: datetime | None
+    rating: int | None  # 1 to 5
+    review: str | None
+
+
 class ImportService:
     def __init__(self, files: FileService, social: SocialService) -> None:
         self._files = files
@@ -92,17 +104,13 @@ class ImportService:
             i = index[key]
             return row[i].strip() if i is not None and i < len(row) else ""
 
-        known = {_plain(i.title) for i in await self._files.library(user_id)}
-        imported = skipped = failed = 0
+        rows: list[ImportRow] = []
+        failed = 0
         for row in list(reader)[:MAX_ROWS]:
             title = cell(row, "title")
             if not title:
                 failed += 1
                 continue
-            if _plain(title) in known:
-                skipped += 1
-                continue
-            known.add(_plain(title))
             status = next(
                 (s for s, names in _STATUS.items() if _plain(cell(row, "status")) in names),
                 ReadingStatus.FINISHED if cell(row, "read") else None,
@@ -110,23 +118,46 @@ class ImportService:
             authors = tuple(
                 a.strip() for a in cell(row, "authors").replace(";", ",").split(",") if a.strip()
             )
-            finished = _date(cell(row, "read")) if status is ReadingStatus.FINISHED else None
+            rows.append(
+                ImportRow(
+                    title,
+                    authors,
+                    status,
+                    _date(cell(row, "read")) if status is ReadingStatus.FINISHED else None,
+                    _rating(cell(row, "rating")),
+                    cell(row, "review") or None,
+                )
+            )
+        result = await self.import_rows(user_id, rows, device_id)
+        return ImportResult(result.imported, result.skipped, failed)
+
+    async def import_rows(
+        self, user_id: UUID, rows: list[ImportRow], device_id: UUID | None = None
+    ) -> ImportResult:
+        """Adds each book as a paper book with its status, dates and (private) rating and review;
+        books whose title the library already has are skipped."""
+        known = {_plain(i.title) for i in await self._files.library(user_id)}
+        imported = skipped = 0
+        for row in rows:
+            if _plain(row.title) in known:
+                skipped += 1
+                continue
+            known.add(_plain(row.title))
             item = await self._files.add_imported(
                 user_id,
-                title,
-                authors,
+                row.title,
+                row.authors,
                 ReadingState(
-                    status=status,
+                    status=row.status,
                     client_time=datetime.now(UTC),
-                    started_at=finished,
-                    finished_at=finished,
+                    started_at=row.finished,
+                    finished_at=row.finished,
                 ),
                 device_id,
             )
-            rating, review = _rating(cell(row, "rating")), cell(row, "review") or None
-            if rating or review:
+            if row.rating or row.review:
                 await self._social.save_review(
-                    user_id, item.id, rating=rating, text=review, audience=Audience.PRIVATE
+                    user_id, item.id, rating=row.rating, text=row.review, audience=Audience.PRIVATE
                 )
             imported += 1
-        return ImportResult(imported, skipped, failed)
+        return ImportResult(imported, skipped, 0)

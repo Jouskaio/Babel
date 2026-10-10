@@ -12,6 +12,7 @@ from babel_api.api.v1.routes import (
     kosync,
     library,
     me,
+    pagebound,
     plugins,
     requests,
     social,
@@ -36,6 +37,7 @@ router.include_router(audiobooks.router)
 router.include_router(admin.router)
 router.include_router(requests.router)
 router.include_router(requests.link_router)
+router.include_router(pagebound.router)
 router.include_router(plugins.router)
 router.include_router(kosync.router)
 router.include_router(kosync.account_router)

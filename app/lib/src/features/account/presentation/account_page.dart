@@ -23,6 +23,7 @@ import '../../social/presentation/sharing_settings.dart';
 import 'chaptarr_section.dart';
 import 'devices_section.dart';
 import 'koreader_section.dart';
+import 'pagebound_section.dart';
 import 'shelfmark_section.dart';
 
 /// Profile, password, sign-out and account deletion.
@@ -144,6 +145,10 @@ class AccountPage extends ConsumerWidget {
                     _Block(
                       title: l10n.absTitle,
                       child: const AudiobookshelfSection(),
+                    ),
+                    _Block(
+                      title: l10n.pageboundTitle,
+                      child: const PageboundSection(),
                     ),
                   ],
                 ),

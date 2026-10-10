@@ -316,6 +316,8 @@ class ApiClient {
           return LinkKavitaRequest.fromJson(value);
         case 'LinkKind':
           return LinkKindTypeTransformer().decode(value);
+        case 'LinkPagebound':
+          return LinkPagebound.fromJson(value);
         case 'LinkPreviewResponse':
           return LinkPreviewResponse.fromJson(value);
         case 'LinkRequest':
@@ -334,6 +336,10 @@ class ApiClient {
           return OperationRequest.fromJson(value);
         case 'OperationResult':
           return OperationResult.fromJson(value);
+        case 'PageboundImportResponse':
+          return PageboundImportResponse.fromJson(value);
+        case 'PageboundResponse':
+          return PageboundResponse.fromJson(value);
         case 'PaperBookRequest':
           return PaperBookRequest.fromJson(value);
         case 'PaperRequest':

@@ -997,6 +997,7 @@ class _ExternalReviews extends ConsumerWidget {
       switch (s) {
         ExternalRatingResponseSource_Enum.hardcover => 'Hardcover',
         ExternalRatingResponseSource_Enum.openlibrary => 'Open Library',
+        ExternalRatingResponseSource_Enum.pagebound => 'Pagebound',
         _ => 'Goodreads',
       };
 
@@ -1092,7 +1093,8 @@ class _ExternalReviewState extends State<_ExternalReview> {
           Row(
             children: [
               Text(
-                '${r.author} · Hardcover'.toUpperCase(),
+                '${r.author} · ${r.source_ == ExternalReviewResponseSource_Enum.pagebound ? 'Pagebound' : 'Hardcover'}'
+                    .toUpperCase(),
                 style: BabelText.label(9, color: BabelColors.textSecondary),
               ),
               const Spacer(),

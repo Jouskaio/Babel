@@ -4736,6 +4736,60 @@ abstract class AppLocalizations {
   /// **'Mes sources'**
   String get mySources;
 
+  /// No description provided for @pageboundTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pagebound'**
+  String get pageboundTitle;
+
+  /// No description provided for @pageboundHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lie ton compte Pagebound avec ton nom d\'utilisateur public (pas de mot de passe) : tes avis publics peuvent être importés dans Babel, en avis privés, avec leurs notes.'**
+  String get pageboundHint;
+
+  /// No description provided for @pageboundUsername.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom d\'utilisateur Pagebound'**
+  String get pageboundUsername;
+
+  /// No description provided for @pageboundLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lier mon compte Pagebound'**
+  String get pageboundLink;
+
+  /// No description provided for @pageboundUnlink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délier'**
+  String get pageboundUnlink;
+
+  /// No description provided for @pageboundImport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer mes avis Pagebound'**
+  String get pageboundImport;
+
+  /// No description provided for @pageboundNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun lecteur de ce nom sur Pagebound.'**
+  String get pageboundNotFound;
+
+  /// No description provided for @pageboundLinked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lié : {name}'**
+  String pageboundLinked(String name);
+
+  /// No description provided for @pageboundImported.
+  ///
+  /// In fr, this message translates to:
+  /// **'{imported, plural, one{# avis importé} other{# avis importés}}, {skipped} déjà dans ta bibliothèque'**
+  String pageboundImported(int imported, int skipped);
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

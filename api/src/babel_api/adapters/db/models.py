@@ -681,3 +681,17 @@ class PluginRow(Base):
     url: Mapped[str] = mapped_column(String(2000), unique=True)
     secret: Mapped[str | None] = mapped_column(Text)  # the access token, encrypted
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class PageboundLinkRow(Base):
+    """A reader's Pagebound account (its public username), to import their reviews."""
+
+    __tablename__ = "pagebound_links"
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    username: Mapped[str] = mapped_column(String(80))
+    remote_id: Mapped[int] = mapped_column(Integer)
+    linked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    imported_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

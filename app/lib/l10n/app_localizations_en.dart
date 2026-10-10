@@ -2829,6 +2829,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mySources => 'My sources';
 
   @override
+  String get pageboundTitle => 'Pagebound';
+
+  @override
+  String get pageboundHint =>
+      'Link your Pagebound account with your public username (no password): your public reviews can be imported into Babel as private reviews, with their ratings.';
+
+  @override
+  String get pageboundUsername => 'Pagebound username';
+
+  @override
+  String get pageboundLink => 'Link my Pagebound account';
+
+  @override
+  String get pageboundUnlink => 'Unlink';
+
+  @override
+  String get pageboundImport => 'Import my Pagebound reviews';
+
+  @override
+  String get pageboundNotFound => 'No reader with that name on Pagebound.';
+
+  @override
+  String pageboundLinked(String name) {
+    return 'Linked: $name';
+  }
+
+  @override
+  String pageboundImported(int imported, int skipped) {
+    String _temp0 = intl.Intl.pluralLogic(
+      imported,
+      locale: localeName,
+      other: '# reviews imported',
+      one: '# review imported',
+    );
+    return '$_temp0, $skipped already in your library';
+  }
+
+  @override
   String get coverDefault => 'Default';
 
   @override

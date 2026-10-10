@@ -166,10 +166,12 @@ class ExternalReviewResponseSource_Enum {
   String toJson() => value;
 
   static const hardcover = ExternalReviewResponseSource_Enum._(r'hardcover');
+  static const pagebound = ExternalReviewResponseSource_Enum._(r'pagebound');
 
   /// List of all possible values in this [enum][ExternalReviewResponseSource_Enum].
   static const values = <ExternalReviewResponseSource_Enum>[
     hardcover,
+    pagebound,
   ];
 
   static ExternalReviewResponseSource_Enum? fromJson(dynamic value) => ExternalReviewResponseSource_EnumTypeTransformer().decode(value);
@@ -209,6 +211,7 @@ class ExternalReviewResponseSource_EnumTypeTransformer {
     if (data != null) {
       switch (data) {
         case r'hardcover': return ExternalReviewResponseSource_Enum.hardcover;
+        case r'pagebound': return ExternalReviewResponseSource_Enum.pagebound;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
