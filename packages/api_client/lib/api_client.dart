@@ -222,6 +222,8 @@ class ApiClient {
           return BookTitleResponse.fromJson(value);
         case 'BookTraceResponse':
           return BookTraceResponse.fromJson(value);
+        case 'ChallengeResponse':
+          return ChallengeResponse.fromJson(value);
         case 'ChangeOp':
           return ChangeOpTypeTransformer().decode(value);
         case 'ChangePasswordRequest':

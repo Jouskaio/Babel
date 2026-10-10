@@ -33,3 +33,34 @@ def test_points_badges_and_first_steps() -> None:
     assert (by_key["streak"].tier, by_key["streak"].next_target) == (1, 7)
     assert all(step.done for step in busy.steps)
     assert busy.level_start <= busy.xp < busy.next_level
+
+
+def test_the_challenge_of_the_month_counts_books_of_its_theme() -> None:
+    from datetime import UTC, datetime
+
+    from babel_api.domain.challenges import books_in, months_won
+    from babel_api.domain.genres import Genre
+
+    def at(month: int, day: int = 5) -> datetime:
+        return datetime(2026, month, day, tzinfo=UTC)
+
+    finished = [
+        (at(10, 1), (Genre.HORROR,)),
+        (at(10, 9), (Genre.HORROR, Genre.MYSTERY)),
+        (at(10, 20), (Genre.ROMANCE,)),  # not the theme of October
+        (at(9, 3), (Genre.HORROR,)),  # September's theme is the stage
+        (at(11, 2), (Genre.NONFICTION,)),
+    ]
+    assert books_in(finished, 2026, 10) == 2
+    assert books_in(finished, 2026, 9) == 0
+    assert months_won(finished) == 0
+    finished.append((at(10, 28), (Genre.HORROR,)))
+    assert months_won(finished) == 1
+
+    done = compute(Activity(challenge_books=4, challenge_month=10, challenges_won=1))
+    assert (done.challenge.theme, done.challenge.progress, done.challenge.done) == (
+        "gothic",
+        3,
+        True,
+    )
+    assert done.xp == 50  # the won month's bonus

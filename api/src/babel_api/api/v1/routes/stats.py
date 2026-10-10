@@ -133,6 +133,28 @@ class StepResponse(BaseModel):
     done: bool
 
 
+class ChallengeResponse(BaseModel):
+    theme: Literal[
+        "classics",
+        "romance",
+        "scifi",
+        "mystery",
+        "fantasy",
+        "comics",
+        "young",
+        "history",
+        "stage",
+        "gothic",
+        "essays",
+        "winter",
+    ]
+    month: int = Field(description="1 to 12: the month it is")
+    target: int = Field(description="Books of the theme to finish this month")
+    progress: int = Field(description="Books of the theme finished this month (up to the target)")
+    done: bool
+    won: int = Field(description="Months won in all, this one included")
+
+
 class ProgressionResponse(BaseModel):
     xp: int
     level: int
@@ -141,6 +163,7 @@ class ProgressionResponse(BaseModel):
     title: Literal["novice", "reader", "bookworm", "scholar", "archivist", "librarian"]
     badges: list[BadgeResponse]
     steps: list[StepResponse] = Field(description="First steps: a short guided tour")
+    challenge: ChallengeResponse = Field(description="The challenge of the month")
 
 
 @router.get("/me/progression", operation_id="getProgression")
@@ -164,4 +187,12 @@ async def get_progression(user_id: CurrentUserId, stats: StatsServiceDep) -> Pro
             for b in p.badges
         ],
         steps=[StepResponse(key=s.key, done=s.done) for s in p.steps],  # type: ignore[arg-type]
+        challenge=ChallengeResponse(
+            theme=p.challenge.theme,  # type: ignore[arg-type]
+            month=p.challenge.month,
+            target=p.challenge.target,
+            progress=p.challenge.progress,
+            done=p.challenge.done,
+            won=p.challenge.won,
+        ),
     )

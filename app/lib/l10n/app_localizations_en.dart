@@ -2867,6 +2867,93 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get themeClassics => 'Great classics';
+
+  @override
+  String get badgeClassics => 'Classics devourer';
+
+  @override
+  String get themeRomance => 'Love stories';
+
+  @override
+  String get badgeRomance => 'Heartbeat';
+
+  @override
+  String get themeScifi => 'Journeys to the future';
+
+  @override
+  String get badgeScifi => 'Time traveler';
+
+  @override
+  String get themeMystery => 'Mysteries and crime';
+
+  @override
+  String get badgeMystery => 'Sharp sleuth';
+
+  @override
+  String get themeFantasy => 'Imaginary worlds';
+
+  @override
+  String get badgeFantasy => 'Spellmaster';
+
+  @override
+  String get themeComics => 'Comics and manga';
+
+  @override
+  String get badgeComics => 'Panel hunter';
+
+  @override
+  String get themeYoung => 'Young adult reads';
+
+  @override
+  String get badgeYoung => 'Young sprout';
+
+  @override
+  String get themeHistory => 'A dive into history';
+
+  @override
+  String get badgeHistory => 'Chronicler';
+
+  @override
+  String get themeStage => 'Theatre and poetry';
+
+  @override
+  String get badgeStage => 'Voice of the stage';
+
+  @override
+  String get themeGothic => 'Gothic reads';
+
+  @override
+  String get badgeGothic => 'Dark soul';
+
+  @override
+  String get themeEssays => 'Essays and ideas';
+
+  @override
+  String get badgeEssays => 'Curious mind';
+
+  @override
+  String get themeWinter => 'Winter tales';
+
+  @override
+  String get badgeWinter => 'Snow watcher';
+
+  @override
+  String challengeTitle(String theme) {
+    return 'Challenge of the month · $theme';
+  }
+
+  @override
+  String challengeProgress(int done, int target, String badge) {
+    return '$done / $target books — badge “$badge”';
+  }
+
+  @override
+  String challengeWon(String badge) {
+    return 'Challenge won — badge “$badge” earned';
+  }
+
+  @override
   String get coverDefault => 'Default';
 
   @override

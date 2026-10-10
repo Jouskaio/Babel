@@ -2889,6 +2889,93 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get themeClassics => 'Grands classiques';
+
+  @override
+  String get badgeClassics => 'Rat de classiques';
+
+  @override
+  String get themeRomance => 'Histoires de cœur';
+
+  @override
+  String get badgeRomance => 'Cœur battant';
+
+  @override
+  String get themeScifi => 'Voyages dans le futur';
+
+  @override
+  String get badgeScifi => 'Voyageur du futur';
+
+  @override
+  String get themeMystery => 'Enquêtes et polars';
+
+  @override
+  String get badgeMystery => 'Fin limier';
+
+  @override
+  String get themeFantasy => 'Mondes imaginaires';
+
+  @override
+  String get badgeFantasy => 'Maître des sortilèges';
+
+  @override
+  String get themeComics => 'BD et mangas';
+
+  @override
+  String get badgeComics => 'Œil de lynx';
+
+  @override
+  String get themeYoung => 'Jeunesse et young adult';
+
+  @override
+  String get badgeYoung => 'Jeune pousse';
+
+  @override
+  String get themeHistory => 'Plongée dans l\'histoire';
+
+  @override
+  String get badgeHistory => 'Chroniqueur';
+
+  @override
+  String get themeStage => 'Théâtre et poésie';
+
+  @override
+  String get badgeStage => 'Voix de la scène';
+
+  @override
+  String get themeGothic => 'Lectures gothiques';
+
+  @override
+  String get badgeGothic => 'Âme sombre';
+
+  @override
+  String get themeEssays => 'Essais et idées';
+
+  @override
+  String get badgeEssays => 'Esprit curieux';
+
+  @override
+  String get themeWinter => 'Contes d\'hiver';
+
+  @override
+  String get badgeWinter => 'Veilleur de neige';
+
+  @override
+  String challengeTitle(String theme) {
+    return 'Défi du mois · $theme';
+  }
+
+  @override
+  String challengeProgress(int done, int target, String badge) {
+    return '$done / $target livres — badge « $badge »';
+  }
+
+  @override
+  String challengeWon(String badge) {
+    return 'Défi réussi — badge « $badge » gagné';
+  }
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override

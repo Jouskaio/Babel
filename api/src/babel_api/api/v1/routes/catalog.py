@@ -10,6 +10,7 @@ from fastapi import APIRouter, File, HTTPException, Path, Query, Response, Uploa
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
+from babel_api.adapters.images import shrink
 from babel_api.adapters.ocr import OcrUnavailableError, queries, read_text
 from babel_api.api.dependencies import Container, ContainerDep, CurrentUserId, WorkServiceDep
 from babel_api.domain.catalog import Edition, IdentifierKind, Work
@@ -65,10 +66,21 @@ async def get_cover(
     cover_id: Annotated[int, Path(ge=1)],
     size: Literal["S", "M", "L"],
 ) -> Response:
-    """Cover image, proxied and cached so clients never call third parties directly."""
+    """Cover image, proxied and kept on disk so a restart of the API loses none (Open Library
+    can take many seconds to answer) and clients never call third parties directly."""
+    key = hashlib.sha256(f"ol:{cover_id}:{size}".encode()).hexdigest()
+    kept = container.covers.get(key)
+    if kept:
+        path, media_type = kept
+        return Response(
+            path.read_bytes(),
+            media_type=media_type,
+            headers={"Cache-Control": "public, max-age=2592000, immutable"},
+        )
     image = await container.catalog.cover(cover_id, size)
     if image is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No such cover")
+    container.covers.put(key, Cover(image.content, image.media_type))
     return Response(
         image.content,
         media_type=image.media_type,
@@ -438,7 +450,7 @@ async def _proxied_image(container: Container, url: str) -> FileResponse:
         except httpx.HTTPError:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "No such image") from None
         media = response.headers.get("content-type", "").split(";")[0]
-        cover = Cover(response.content, media) if response.status_code == 200 else None
+        cover = Cover(*shrink(response.content, media)) if response.status_code == 200 else None
         found = container.covers.put(key, cover)
     if not found:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No such image")

@@ -19,6 +19,7 @@ import '../../library/application/shelves.dart';
 import '../../library/presentation/library_page.dart' show libraryCoverUrl;
 import '../../reader/application/reading_position.dart' show SavedPosition;
 import '../../stats/application/stats_providers.dart';
+import '../../stats/presentation/challenge_chip.dart';
 
 /// Space between two sections of the home screen.
 const _gap = 32.0;
@@ -280,18 +281,6 @@ class JourneyCard extends ConsumerWidget {
     if (p == null) return const SizedBox.shrink();
     final span = (p.nextLevel - p.levelStart).clamp(1, 1 << 30);
     final ratio = ((p.xp - p.levelStart) / span).clamp(0.0, 1.0);
-    // The badge with the largest share of its next tier already done.
-    BadgeResponse? next;
-    var best = -1.0;
-    for (final b in p.badges) {
-      final target = b.nextTarget;
-      if (target == null || target == 0) continue;
-      final share = b.value / target;
-      if (share > best) {
-        best = share;
-        next = b;
-      }
-    }
     return Padding(
       padding: const EdgeInsets.only(bottom: _gap),
       child: Column(
@@ -345,49 +334,8 @@ class JourneyCard extends ConsumerWidget {
                     backgroundColor: BabelColors.sunken,
                   ),
                 ),
-                if (next != null) ...[
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: BabelColors.sunken,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: BabelColors.gold,
-                          ),
-                          child: Icon(
-                            Icons.auto_awesome_rounded,
-                            color: BabelColors.canvas,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _badgeName(l10n, next.key),
-                                style: BabelText.heading(16),
-                              ),
-                              Text(
-                                l10n.badgeNext(next.value, next.nextTarget!),
-                                style: BabelText.body(12),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                const SizedBox(height: 16),
+                ChallengeChip(p.challenge),
               ],
             ),
           ),
@@ -406,15 +354,6 @@ String _levelTitle(AppLocalizations l10n, ProgressionResponseTitleEnum t) =>
       ProgressionResponseTitleEnum.archivist => l10n.titleArchivist,
       _ => l10n.titleLibrarian,
     };
-
-String _badgeName(AppLocalizations l10n, BadgeResponseKeyEnum k) => switch (k) {
-  BadgeResponseKeyEnum.finished => l10n.badgeFinished,
-  BadgeResponseKeyEnum.streak => l10n.badgeStreak,
-  BadgeResponseKeyEnum.readingDays => l10n.badgeReadingDays,
-  BadgeResponseKeyEnum.notes => l10n.badgeNotes,
-  BadgeResponseKeyEnum.reviews => l10n.badgeReviews,
-  _ => l10n.badgeLibrary,
-};
 
 /// "Born from your readings": what the book being read was adapted into.
 class BornFromReadings extends ConsumerWidget {
