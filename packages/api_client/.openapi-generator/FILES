@@ -66,6 +66,9 @@ doc/KavitaApi.md
 doc/KavitaLinkResponse.md
 doc/KavitaStatus.md
 doc/KnownVolumeResponse.md
+doc/KoreaderPasswordResponse.md
+doc/KoreaderResponse.md
+doc/KosyncApi.md
 doc/LibraryApi.md
 doc/LibraryItemResponse.md
 doc/LinkKavitaRequest.md
@@ -153,6 +156,7 @@ lib/api/auth_api.dart
 lib/api/catalog_api.dart
 lib/api/health_api.dart
 lib/api/kavita_api.dart
+lib/api/kosync_api.dart
 lib/api/library_api.dart
 lib/api/requests_api.dart
 lib/api/social_api.dart
@@ -225,6 +229,8 @@ lib/model/isbn_lookup_response.dart
 lib/model/kavita_link_response.dart
 lib/model/kavita_status.dart
 lib/model/known_volume_response.dart
+lib/model/koreader_password_response.dart
+lib/model/koreader_response.dart
 lib/model/library_item_response.dart
 lib/model/link_kavita_request.dart
 lib/model/link_kind.dart

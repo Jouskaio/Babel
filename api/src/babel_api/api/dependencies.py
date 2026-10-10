@@ -18,6 +18,7 @@ from babel_api.adapters.db.catalog_repository import SqlCatalogRepository
 from babel_api.adapters.db.file_repository import SqlFileRepository
 from babel_api.adapters.db.follow_repository import SqlFollowRepository
 from babel_api.adapters.db.kavita_repository import SqlKavitaRepository
+from babel_api.adapters.db.koreader_repository import SqlKoreaderRepository
 from babel_api.adapters.db.repositories import SqlUserRepository
 from babel_api.adapters.db.request_repository import SqlRequestRepository
 from babel_api.adapters.db.social_repository import SqlSocialRepository
@@ -55,6 +56,7 @@ from babel_api.services.catalog import CatalogService
 from babel_api.services.files import FileService
 from babel_api.services.follows import FollowService
 from babel_api.services.kavita import KavitaProvisioner, KavitaService
+from babel_api.services.koreader import KoreaderService
 from babel_api.services.links import LinkService
 from babel_api.services.notifications import Notifier
 from babel_api.services.requests import RequestService
@@ -343,6 +345,23 @@ def get_stats_service(
 
 
 StatsServiceDep = Annotated[StatsService, Depends(get_stats_service)]
+
+
+def get_koreader_service(
+    container: ContainerDep,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    files: FileServiceDep,
+) -> KoreaderService:
+    return KoreaderService(
+        SqlKoreaderRepository(session),
+        SqlUserRepository(session),
+        SqlFileRepository(session),
+        container.blob_store,
+        SyncService(SqlSyncRepository(session), SqlFileRepository(session), files),
+    )
+
+
+KoreaderServiceDep = Annotated[KoreaderService, Depends(get_koreader_service)]
 
 
 def get_abs_service(

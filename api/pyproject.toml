@@ -1,6 +1,6 @@
 [project]
 name = "babel-api"
-version = "0.50.0"
+version = "0.51.0"
 description = "Babel server API: library, annotated reading, sync and statistics."
 readme = "README.md"
 requires-python = ">=3.13"

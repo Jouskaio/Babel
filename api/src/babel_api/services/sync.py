@@ -156,6 +156,24 @@ class SyncService:
         await self._sync.commit()
         return results, await self._sync.latest_seq(user_id)
 
+    async def record_position(
+        self, user_id: UUID, device_id: UUID, item_id: UUID, locator: str, percent: float
+    ) -> OpOutcome:
+        """A reading position that comes from outside the app (KOReader): same path as a push."""
+        outcome = await self._save_position(
+            user_id,
+            device_id,
+            {
+                "item_id": str(item_id),
+                "locator": locator,
+                "percent": percent,
+                "client_time": datetime.now(UTC).isoformat(),
+            },
+        )
+        await self._sync.touch_device(device_id, datetime.now(UTC))
+        await self._sync.commit()
+        return outcome
+
     async def positions(self, user_id: UUID, item_id: UUID) -> list[ReadingPosition]:
         item = await self._files.get_item(item_id)
         if item is None or item.user_id != user_id:

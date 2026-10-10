@@ -9,6 +9,7 @@ from babel_api.api.v1.routes import (
     catalog,
     health,
     kavita,
+    kosync,
     library,
     me,
     requests,
@@ -34,4 +35,6 @@ router.include_router(audiobooks.router)
 router.include_router(admin.router)
 router.include_router(requests.router)
 router.include_router(requests.link_router)
+router.include_router(kosync.router)
+router.include_router(kosync.account_router)
 router.include_router(requests.shelfmark_router)

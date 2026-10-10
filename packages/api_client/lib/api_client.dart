@@ -298,6 +298,10 @@ class ApiClient {
           return KavitaStatusTypeTransformer().decode(value);
         case 'KnownVolumeResponse':
           return KnownVolumeResponse.fromJson(value);
+        case 'KoreaderPasswordResponse':
+          return KoreaderPasswordResponse.fromJson(value);
+        case 'KoreaderResponse':
+          return KoreaderResponse.fromJson(value);
         case 'LibraryItemResponse':
           return LibraryItemResponse.fromJson(value);
         case 'LinkKavitaRequest':

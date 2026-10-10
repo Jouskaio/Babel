@@ -646,3 +646,25 @@ class ShelfmarkLinkRow(Base):
     base_url: Mapped[str] = mapped_column(String(500))
     secret: Mapped[str] = mapped_column(Text)  # the API key, encrypted
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class KoreaderKeyRow(Base):
+    """What a reader's KOReader sends to sync its progress (the md5 of a password made for it)."""
+
+    __tablename__ = "koreader_keys"
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    key: Mapped[str] = mapped_column(String(32))
+
+
+class KoreaderHashRow(Base):
+    """The identifier KOReader gives a stored file (partial md5 of its bytes)."""
+
+    __tablename__ = "koreader_hashes"
+
+    sha256: Mapped[str] = mapped_column(
+        ForeignKey("stored_files.sha256", ondelete="CASCADE"), primary_key=True
+    )
+    md5: Mapped[str] = mapped_column(String(32), index=True)

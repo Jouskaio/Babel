@@ -4208,6 +4208,192 @@ abstract class AppLocalizations {
   /// **'Œuvre liée'**
   String get relatedOther;
 
+  /// No description provided for @levelLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Niveau'**
+  String get levelLabel;
+
+  /// No description provided for @titleNovice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Curieux'**
+  String get titleNovice;
+
+  /// No description provided for @titleReader.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecteur'**
+  String get titleReader;
+
+  /// No description provided for @titleBookworm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rat de bibliothèque'**
+  String get titleBookworm;
+
+  /// No description provided for @titleScholar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Érudit'**
+  String get titleScholar;
+
+  /// No description provided for @titleArchivist.
+  ///
+  /// In fr, this message translates to:
+  /// **'Archiviste'**
+  String get titleArchivist;
+
+  /// No description provided for @titleLibrarian.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bibliothécaire de Babel'**
+  String get titleLibrarian;
+
+  /// No description provided for @badgeFinished.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livres terminés'**
+  String get badgeFinished;
+
+  /// No description provided for @badgeStreak.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jours de suite'**
+  String get badgeStreak;
+
+  /// No description provided for @badgeReadingDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jours de lecture'**
+  String get badgeReadingDays;
+
+  /// No description provided for @badgeNotes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notes et surlignages'**
+  String get badgeNotes;
+
+  /// No description provided for @badgeReviews.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avis écrits'**
+  String get badgeReviews;
+
+  /// No description provided for @badgeLibrary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bibliothèque'**
+  String get badgeLibrary;
+
+  /// No description provided for @badgeComplete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les paliers atteints'**
+  String get badgeComplete;
+
+  /// No description provided for @firstSteps.
+  ///
+  /// In fr, this message translates to:
+  /// **'Premiers pas'**
+  String get firstSteps;
+
+  /// No description provided for @stepAddBook.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un premier livre'**
+  String get stepAddBook;
+
+  /// No description provided for @stepLinkSource.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lier une source (Kavita, GitHub…)'**
+  String get stepLinkSource;
+
+  /// No description provided for @stepRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lire un moment'**
+  String get stepRead;
+
+  /// No description provided for @stepNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prendre une note ou surligner'**
+  String get stepNote;
+
+  /// No description provided for @stepFinish.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminer un livre'**
+  String get stepFinish;
+
+  /// No description provided for @stepReview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donner son avis'**
+  String get stepReview;
+
+  /// No description provided for @xpOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{xp} / {next} XP'**
+  String xpOf(int xp, int next);
+
+  /// No description provided for @badgeNext.
+  ///
+  /// In fr, this message translates to:
+  /// **'{value} sur {target} pour le prochain palier'**
+  String badgeNext(int value, int target);
+
+  /// No description provided for @koreaderTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes liseuses (KOReader)'**
+  String get koreaderTitle;
+
+  /// No description provided for @koreaderHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur une liseuse avec KOReader (Boox, Kobo, Kindle…), la progression se synchronise avec Babel. Dans KOReader : Outils › Synchronisation de la progression › Serveur personnalisé, puis entre l\'adresse, l\'e-mail et le mot de passe ci-dessous.'**
+  String get koreaderHint;
+
+  /// No description provided for @koreaderServer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse du serveur'**
+  String get koreaderServer;
+
+  /// No description provided for @koreaderUser.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant (e-mail)'**
+  String get koreaderUser;
+
+  /// No description provided for @koreaderPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe KOReader'**
+  String get koreaderPassword;
+
+  /// No description provided for @koreaderShownOnce.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notez-le : il ne sera plus affiché.'**
+  String get koreaderShownOnce;
+
+  /// No description provided for @koreaderMake.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer un mot de passe pour KOReader'**
+  String get koreaderMake;
+
+  /// No description provided for @koreaderRenew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remplacer le mot de passe'**
+  String get koreaderRenew;
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

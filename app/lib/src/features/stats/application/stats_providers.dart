@@ -29,3 +29,14 @@ final yearStatsProvider = FutureProvider.autoDispose
         return cached == null ? null : YearStatsResponse.fromJson(cached);
       }
     });
+
+/// The reader's level, badges and first steps; nothing when the server does not answer.
+final progressionProvider = FutureProvider.autoDispose<ProgressionResponse?>((
+  ref,
+) async {
+  try {
+    return await ref.read(statsApiProvider).getProgression();
+  } on ApiException {
+    return null;
+  }
+});
