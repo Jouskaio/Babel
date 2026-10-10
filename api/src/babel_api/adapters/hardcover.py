@@ -49,10 +49,25 @@ class HardcoverBook:
     pages: int | None = None
 
 
+@dataclass(frozen=True, slots=True)
+class HardcoverReview:
+    """A public review of a book on Hardcover."""
+
+    author: str
+    rating: float | None
+    text: str
+    spoilers: bool
+    likes: int
+
+
 class HardcoverBusyError(ValueError):
     """Out of requests for now (our own budget, or Hardcover's 429): try later."""
 
 
+_REVIEWS = """query($id: Int!, $n: Int!) { user_books(
+  where: {book_id: {_eq: $id}, has_review: {_eq: true}, privacy_setting_id: {_eq: 1}},
+  order_by: {likes_count: desc}, limit: $n) {
+  rating review_raw review_has_spoilers likes_count user { username } } }"""
 _BOOK = """query($q: String!) { search(query: $q, query_type: "Book", per_page: 5) { results } }"""
 _BOOKS = """query($q: String!, $n: Int!) { search(query: $q, query_type: "Book", per_page: $n) {
   ids results } }"""
@@ -143,6 +158,7 @@ class HardcoverClient:
         self._cache: dict[tuple[str, str], tuple[float, list[tuple[float, str, int | None]]]] = {}
         self._described: dict[tuple[str, str], tuple[float, str | None]] = {}
         self._found: dict[tuple[str, str], tuple[float, list[HardcoverBook]]] = {}
+        self._reviewed: dict[tuple[str, str], tuple[float, list[HardcoverReview]]] = {}
         self._paused_until = 0.0
         self._day = datetime.now(UTC).date()
         self._used = 0
@@ -222,6 +238,38 @@ class HardcoverClient:
             return None  # not cached: it may work later
         self._described[key] = (time.monotonic(), text)
         return text
+
+    async def reviews(self, book_id: int, limit: int = 5) -> list[HardcoverReview]:
+        """The most liked public reviews of a book; empty when there are none or Hardcover
+        does not answer. One request, kept for a day."""
+        key = ("reviews", str(book_id))
+        cached = self._reviewed.get(key)
+        if cached is not None and time.monotonic() - cached[0] < CACHE_SECONDS:
+            return cached[1][:limit]
+        try:
+            data = await self._query(_REVIEWS, {"id": book_id, "n": limit})
+        except (httpx.HTTPError, ValueError, KeyError, TypeError) as error:
+            log.warning("Hardcover did not answer: %s", error)
+            return []
+        found: list[HardcoverReview] = []
+        for row in cast(list[dict[str, Any]], data.get("user_books") or []):
+            text = html.unescape(_TAGS.sub("", str(row.get("review_raw") or ""))).strip()
+            if len(text) < 30:
+                continue
+            user = cast(dict[str, Any], row.get("user") or {})
+            rating = row.get("rating")
+            likes = row.get("likes_count")
+            found.append(
+                HardcoverReview(
+                    author=str(user.get("username") or "?"),
+                    rating=float(rating) if isinstance(rating, int | float) else None,
+                    text=text[:1200],
+                    spoilers=bool(row.get("review_has_spoilers")),
+                    likes=likes if isinstance(likes, int) else 0,
+                )
+            )
+        self._reviewed[key] = (time.monotonic(), found)
+        return found[:limit]
 
     async def search_books(self, query: str, limit: int = 10) -> list[HardcoverBook]:
         """Books matching a search, best first; empty when Hardcover does not answer. One

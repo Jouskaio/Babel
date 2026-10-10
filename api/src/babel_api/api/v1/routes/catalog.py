@@ -208,6 +208,58 @@ async def get_related_works(
     ]
 
 
+class ExternalRatingResponse(BaseModel):
+    source: Literal["hardcover", "openlibrary", "goodreads"]
+    average: float = Field(description="Out of 5")
+    count: int = Field(description="Number of ratings; 0 when the source does not say")
+    url: str
+
+
+class ExternalReviewResponse(BaseModel):
+    source: Literal["hardcover"]
+    author: str
+    rating: float | None
+    text: str
+    spoilers: bool
+    likes: int
+
+
+class ExternalReviewsResponse(BaseModel):
+    ratings: list[ExternalRatingResponse]
+    reviews: list[ExternalReviewResponse]
+
+
+@router.get("/works/{work_id}/external-reviews", operation_id="getExternalReviews")
+async def get_external_reviews(
+    _: CurrentUserId, works: WorkServiceDep, work_id: UUID
+) -> ExternalReviewsResponse:
+    """What others think of the book elsewhere: ratings from Hardcover, Open Library and
+    Goodreads, and the most liked Hardcover reviews. Each source is best effort."""
+    ratings, reviews = await works.external_reviews(work_id)
+    return ExternalReviewsResponse(
+        ratings=[
+            ExternalRatingResponse(
+                source=r.source,  # type: ignore[arg-type]
+                average=r.average,
+                count=r.count,
+                url=r.url,
+            )
+            for r in ratings
+        ],
+        reviews=[
+            ExternalReviewResponse(
+                source="hardcover",
+                author=r.author,
+                rating=r.rating,
+                text=r.text,
+                spoilers=r.spoilers,
+                likes=r.likes,
+            )
+            for r in reviews
+        ],
+    )
+
+
 class IsbnLookupResponse(BaseModel):
     """The work an ISBN belongs to, and which of its editions it is."""
 

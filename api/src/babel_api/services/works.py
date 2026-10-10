@@ -5,9 +5,15 @@ import logging
 import re
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from urllib.parse import quote
 from uuid import UUID
 
-from babel_api.adapters.hardcover import HardcoverBook, HardcoverClient
+from babel_api.adapters.external_ratings import ExternalRating, ExternalRatings
+from babel_api.adapters.hardcover import (
+    HardcoverBook,
+    HardcoverClient,
+    HardcoverReview,
+)
 from babel_api.adapters.wikidata import Adaptation, WikidataClient
 from babel_api.domain.catalog import Edition, IdentifierKind, SourceWork, Work
 from babel_api.domain.errors import NotFoundError, SourceUnavailableError
@@ -92,6 +98,10 @@ class IsbnMatch:
     edition: Edition
 
 
+async def _nothing() -> None:
+    return None
+
+
 class WorkService:
     def __init__(
         self,
@@ -99,8 +109,10 @@ class WorkService:
         source: BookSource,
         hardcover: HardcoverClient | None = None,
         wikidata: WikidataClient | None = None,
+        external: ExternalRatings | None = None,
     ) -> None:
         self._wikidata = wikidata
+        self._external = external
         self._repo = repository
         self._source = source
         self._hardcover = hardcover
@@ -275,6 +287,56 @@ class WorkService:
             work = await self._sync(work)
         work = await self._enrich(work)
         return WorkDetail(work, await self._repo.list_editions(work.id))
+
+    async def external_reviews(
+        self, work_id: UUID
+    ) -> tuple[list[ExternalRating], list[HardcoverReview]]:
+        """What others think of a book: ratings (Hardcover, Open Library, Goodreads) and the
+        most liked Hardcover reviews. Every source is best effort."""
+        work = (await self.get(work_id)).work
+        ratings: list[ExternalRating] = []
+        if work.rating is not None:
+            query = quote(f"{work.title} {work.authors[0] if work.authors else ''}".strip())
+            ratings.append(
+                ExternalRating(
+                    "hardcover", work.rating, 0, f"https://hardcover.app/search?q={query}"
+                )
+            )
+        olid = work.open_library_id
+        asked = await asyncio.gather(
+            self._external.openlibrary(olid)
+            if self._external is not None and olid and not olid.startswith(HARDCOVER_PREFIX)
+            else _nothing(),
+            self._external.goodreads(work.title, work.authors)
+            if self._external is not None
+            else _nothing(),
+            self._hardcover_reviews(work),
+            return_exceptions=True,
+        )
+        for found in asked[:2]:
+            if isinstance(found, ExternalRating):
+                ratings.append(found)
+        reviews = asked[2] if isinstance(asked[2], list) else []
+        return ratings, reviews
+
+    async def _hardcover_reviews(self, work: Work) -> list[HardcoverReview]:
+        if self._hardcover is None:
+            return []
+        book_id: int | None = None
+        if work.open_library_id and work.open_library_id.startswith(HARDCOVER_PREFIX):
+            tail = work.open_library_id[len(HARDCOVER_PREFIX) :]
+            book_id = int(tail) if tail.isdigit() else None
+        else:
+            query = f"{work.title} {work.authors[0]}" if work.authors else work.title
+            surnames = {a.split(" ")[-1].casefold() for a in work.authors if a.strip()}
+            for hit in await self._hardcover_books(query, 5):
+                who = " ".join(hit.authors).casefold()
+                if hit.title.casefold() == work.title.casefold() and (
+                    not surnames or any(s in who for s in surnames)
+                ):
+                    book_id = hit.id
+                    break
+        return await self._hardcover.reviews(book_id) if book_id is not None else []
 
     async def related(self, work_id: UUID) -> list[Adaptation]:
         """What a book was adapted into (films, series, games, comics): Wikidata finds the work

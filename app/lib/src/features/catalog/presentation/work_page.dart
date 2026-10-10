@@ -324,6 +324,7 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
               BookTraceCard(trace: trace),
             ],
             WorkReadersSection(workId: work.id),
+            _ExternalReviews(workId: work.id),
             // Without a file to read (a paper book, or one taken out of the library) it can
             // still be asked for.
             if (trace == null ||
@@ -1065,4 +1066,140 @@ class _RelatedCard extends StatelessWidget {
     color: BabelColors.surface,
     child: Icon(_icon, color: BabelColors.textSecondary, size: 36),
   );
+}
+
+/// "Elsewhere": the ratings other sites give the book, and the most liked reviews of Hardcover.
+class _ExternalReviews extends ConsumerWidget {
+  const _ExternalReviews({required this.workId});
+  final String workId;
+
+  String _source(AppLocalizations l10n, ExternalRatingResponseSource_Enum s) =>
+      switch (s) {
+        ExternalRatingResponseSource_Enum.hardcover => 'Hardcover',
+        ExternalRatingResponseSource_Enum.openlibrary => 'Open Library',
+        _ => 'Goodreads',
+      };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final found = ref.watch(externalReviewsProvider(workId)).value;
+    if (found == null || (found.ratings.isEmpty && found.reviews.isEmpty)) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: sectionGap),
+        SectionTitle(l10n.externalTitle),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            for (final r in found.ratings)
+              InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () => launchUrl(Uri.parse(r.url)),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: BabelColors.border),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.star_rounded,
+                        color: BabelColors.gold,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        r.average.toStringAsFixed(1),
+                        style: BabelText.body(14, color: BabelColors.gold),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        [
+                          _source(l10n, r.source_),
+                          if (r.count > 0) l10n.ratingsCount(r.count),
+                        ].join(' · '),
+                        style: BabelText.body(12),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+        for (final review in found.reviews.take(3)) _ExternalReview(review),
+      ],
+    );
+  }
+}
+
+class _ExternalReview extends StatefulWidget {
+  const _ExternalReview(this.review);
+  final ExternalReviewResponse review;
+
+  @override
+  State<_ExternalReview> createState() => _ExternalReviewState();
+}
+
+class _ExternalReviewState extends State<_ExternalReview> {
+  late bool _hidden = widget.review.spoilers;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final r = widget.review;
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: BabelColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: BabelColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                '${r.author} · Hardcover'.toUpperCase(),
+                style: BabelText.label(9, color: BabelColors.textSecondary),
+              ),
+              const Spacer(),
+              if (r.rating case final rating?) ...[
+                Icon(Icons.star_rounded, color: BabelColors.gold, size: 16),
+                Text(
+                  rating.toStringAsFixed(1),
+                  style: BabelText.body(13, color: BabelColors.gold),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (_hidden)
+            TextButton(
+              onPressed: () => setState(() => _hidden = false),
+              child: Text(l10n.reviewSpoilers, style: BabelText.body(13)),
+            )
+          else
+            Text(
+              r.text,
+              maxLines: 8,
+              overflow: TextOverflow.ellipsis,
+              style: BabelText.reading(14),
+            ),
+        ],
+      ),
+    );
+  }
 }

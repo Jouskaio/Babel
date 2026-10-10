@@ -2654,6 +2654,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'This address does not answer like a Babel manifest.';
 
   @override
+  String get externalTitle => 'Elsewhere';
+
+  @override
+  String get reviewSpoilers => 'This review has spoilers · show';
+
+  @override
+  String ratingsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# ratings',
+      one: '# rating',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get coverDefault => 'Default';
 
   @override

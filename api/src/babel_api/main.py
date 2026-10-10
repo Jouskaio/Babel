@@ -18,6 +18,7 @@ from babel_api.adapters.chaptarr import ChaptarrClient
 from babel_api.adapters.db.migrations.config import upgrade_database
 from babel_api.adapters.db.repositories import SqlUserRepository
 from babel_api.adapters.db.session import create_engine, create_session_factory
+from babel_api.adapters.external_ratings import ExternalRatings
 from babel_api.adapters.files.blob_store import LocalBlobStore
 from babel_api.adapters.files.comics import ComicConverter
 from babel_api.adapters.files.covers import LocalCoverCache
@@ -235,6 +236,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         shelfmark=shelfmark,
         hardcover=hardcover,
         wikidata=wikidata,
+        external_ratings=ExternalRatings(goodreads=settings.scrape_goodreads),
     )
     if settings.cors_origins:
         app.add_middleware(

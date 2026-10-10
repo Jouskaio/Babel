@@ -40,6 +40,17 @@ final relatedWorksProvider = FutureProvider.autoDispose
       }
     });
 
+/// What others think of a book elsewhere (Hardcover, Open Library, Goodreads); nothing when no
+/// source answers.
+final externalReviewsProvider = FutureProvider.autoDispose
+    .family<ExternalReviewsResponse?, String>((ref, id) async {
+      try {
+        return await ref.watch(authedCatalogApiProvider).getExternalReviews(id);
+      } on ApiException {
+        return null;
+      }
+    });
+
 final recentSearchesProvider = NotifierProvider<RecentSearches, List<String>>(
   RecentSearches.new,
 );

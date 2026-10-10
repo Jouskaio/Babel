@@ -120,6 +120,63 @@ class CatalogApi {
     }
   }
 
+  /// Get External Reviews
+  ///
+  /// What others think of the book elsewhere: ratings from Hardcover, Open Library and Goodreads, and the most liked Hardcover reviews. Each source is best effort.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] workId (required):
+  Future<Response> getExternalReviewsWithHttpInfo(String workId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/catalog/works/{work_id}/external-reviews'
+      .replaceAll('{work_id}', workId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get External Reviews
+  ///
+  /// What others think of the book elsewhere: ratings from Hardcover, Open Library and Goodreads, and the most liked Hardcover reviews. Each source is best effort.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] workId (required):
+  Future<ExternalReviewsResponse?> getExternalReviews(String workId,) async {
+    final response = await getExternalReviewsWithHttpInfo(workId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ExternalReviewsResponse',) as ExternalReviewsResponse;
+    
+    }
+    return null;
+  }
+
   /// Get Known Volumes
   ///
   /// Volumes Hardcover lists for a saga, to name the ones the catalog lacks (may be empty).
