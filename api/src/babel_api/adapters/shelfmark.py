@@ -16,6 +16,8 @@ from babel_api.domain.errors import DomainError
 from babel_api.domain.series import guess_series
 
 BOOK_FORMATS = ("epub", "cbz", "cbr", "pdf")
+# A torrent with fewer seeders often never gets its metadata (it stalls at 0%).
+MIN_SEEDERS = 3
 MAX_VOLUME_BYTES = 400 * 1024 * 1024  # a batch of many volumes is far above this
 CJK = re.compile(r"[぀-ヿ㐀-鿿가-힯]")  # raws, not for the reader
 
@@ -126,7 +128,7 @@ def pick_release(
             or (keys and not any(key in core_text for key in keys))
             or (volume is not None and not _mentions(title, volume))
             or (isinstance(size, int) and size > MAX_VOLUME_BYTES)
-            or (torrent and not (isinstance(seeders, int) and seeders > 0))
+            or (torrent and not (isinstance(seeders, int) and seeders >= MIN_SEEDERS))
         ):
             continue
         scored.append((0 if torrent else 1, int(seeders or 0), release))
