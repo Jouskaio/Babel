@@ -162,3 +162,24 @@ def test_a_release_in_the_original_language_is_the_last_resort() -> None:
     assert pick_release([raw], 1, keys=keys) is None
     assert pick_release([raw], 1, keys=keys, original_ok=True) == raw
     assert pick_release([raw, english], 1, keys=keys) == english
+
+
+def test_the_queue_gives_each_task_its_status_and_progress() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/api/status"
+        return httpx.Response(
+            200,
+            json={
+                "queued": {},
+                "downloading": {"abc": {"progress": 41.5, "title": "x"}},
+                "complete": {"def": {"progress": 100}},
+            },
+        )
+
+    shelf = ShelfmarkClient(
+        "http://shelf", "k", httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    )
+    assert asyncio.run(shelf.queue_status()) == {
+        "abc": ("downloading", 41.5),
+        "def": ("complete", 100.0),
+    }

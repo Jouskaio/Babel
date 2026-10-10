@@ -23,6 +23,7 @@ def _to_request(row: BookRequestRow) -> BookRequest:
         chaptarr_id=row.chaptarr_id,
         language=row.language,
         alt_chaptarr_id=row.alt_chaptarr_id,
+        shelfmark_ref=row.shelfmark_ref,
     )
 
 
@@ -56,6 +57,7 @@ class SqlRequestRepository:
         chaptarr_id: int | None,
         language: str = "",
         alt_chaptarr_id: int | None = None,
+        shelfmark_ref: str | None = None,
     ) -> BookRequest:
         """Creates the request, or updates its status."""
         row = await self._session.scalar(
@@ -73,6 +75,7 @@ class SqlRequestRepository:
                 chaptarr_id=chaptarr_id,
                 language=language,
                 alt_chaptarr_id=alt_chaptarr_id,
+                shelfmark_ref=shelfmark_ref,
                 created_at=datetime.now(UTC),
             )
             self._session.add(row)
@@ -80,6 +83,7 @@ class SqlRequestRepository:
             row.status = status.value
             row.chaptarr_id = chaptarr_id if chaptarr_id is not None else row.chaptarr_id
             row.alt_chaptarr_id = alt_chaptarr_id or row.alt_chaptarr_id
+            row.shelfmark_ref = shelfmark_ref or row.shelfmark_ref
         await self._session.flush()
         return _to_request(row)
 
