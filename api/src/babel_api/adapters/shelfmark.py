@@ -244,36 +244,55 @@ class ShelfmarkClient:
                 )
         return found
 
+    async def _releases(self, book: dict[str, Any], manual: str | None) -> list[dict[str, Any]]:
+        """The releases Shelfmark finds for a book, with its own query or ours; none when the
+        source fails (a source with no result may answer 404)."""
+        params = {
+            "provider": str(book["provider"]),
+            "book_id": str(book["provider_id"]),
+            "content_type": "ebook",
+        }
+        if manual:
+            params["manual_query"] = manual
+        try:
+            listing = await self._call("GET", "releases", params=params)
+        except ShelfmarkError as error:
+            log.info("Shelfmark: releases failed (query %r): %s", manual, error.reason)
+            return []
+        return cast(list[dict[str, Any]], cast(dict[str, Any], listing or {}).get("releases") or [])
+
     async def fetch(self, title: str, authors: tuple[str, ...]) -> str | None:
         """Queues the best release of the book and gives its task id (to follow it); None
         when Shelfmark knows none."""
         book = await self.find(title, authors)
         if book is None:
             return None
-        listing = await self._call(
-            "GET",
-            "releases",
-            params={
-                "provider": str(book["provider"]),
-                "book_id": str(book["provider_id"]),
-                "content_type": "ebook",
-            },
-        )
-        releases = cast(
-            list[dict[str, Any]], cast(dict[str, Any], listing or {}).get("releases") or []
-        )
         guess = guess_series(title)
-        keys = title_keys(title, str(book.get("title", "")))
         volume = guess.number if guess else None
-        chosen = pick_release(releases, volume, keys=keys)
-        if chosen is None:
-            # Nothing in English or French: a release in the original language beats none.
-            chosen = pick_release(releases, volume, keys=keys, original_ok=True)
-        if chosen is None:
-            sample = [(r.get("title"), r.get("format"), r.get("seeders")) for r in releases[:6]]
+        keys = title_keys(title, str(book.get("title", "")))
+        chosen: dict[str, Any] | None = None
+        # The provider's own query is often too specific (a long title with editions, "T.1",
+        # "(English and French Edition)": Anna's Archive answers 404, "no result"). So, the
+        # series name with the author's surname, then the series name alone.
+        base = re.sub(r"[\s,:\-–]*\d{1,3}\s*$", "", title).strip()
+        surname = authors[0].split(" ")[-1] if authors else ""
+        for manual in dict.fromkeys((None, f"{base} {surname}".strip(), base)):
+            releases = await self._releases(book, manual)
+            chosen = pick_release(releases, volume, keys=keys)
+            if chosen is None:
+                # Nothing in English or French: a release in the original language beats none.
+                chosen = pick_release(releases, volume, keys=keys, original_ok=True)
+            if chosen is not None:
+                break
+            sample = [(r.get("title"), r.get("format"), r.get("seeders")) for r in releases[:5]]
             log.info(
-                "Shelfmark: %d releases for %r, none suitable: %s", len(releases), title, sample
+                "Shelfmark: %d releases for %r (query %r), none suitable: %s",
+                len(releases),
+                title,
+                manual,
+                sample,
             )
+        if chosen is None:
             return None
         log.info("Shelfmark: queueing %r for %r", chosen.get("title"), title)
         await self._call("POST", "releases/download", json=chosen)

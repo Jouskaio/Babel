@@ -183,3 +183,47 @@ def test_the_queue_gives_each_task_its_status_and_progress() -> None:
         "abc": ("downloading", 41.5),
         "def": ("complete", 100.0),
     }
+
+
+def test_a_query_that_finds_nothing_is_retried_with_the_series_name() -> None:
+    queries: list[str | None] = []
+    queued: list[object] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        path = request.url.path
+        if path == "/api/metadata/search":
+            return httpx.Response(
+                200,
+                json={
+                    "books": [
+                        {
+                            "provider": "ol",
+                            "provider_id": "7",
+                            "title": "L'assassin royal, tome 1",
+                            "authors": ["Robin Hobb"],
+                        }
+                    ]
+                },
+            )
+        if path == "/api/releases":
+            manual = request.url.params.get("manual_query")
+            queries.append(manual)
+            if manual is None:  # Anna's Archive: 404 for a query too specific
+                return httpx.Response(500, json={"error": "404 Not Found"})
+            release = {
+                "title": "L'Assassin royal (Tome 1) - L'apprenti assassin",
+                "source": "direct_download",
+                "source_id": "md5",
+                "format": "epub",
+                "language": "fr",
+            }
+            return httpx.Response(200, json={"releases": [release]})
+        queued.append(json.loads(request.content))
+        return httpx.Response(200, json={})
+
+    shelf = ShelfmarkClient(
+        "http://shelf", "k", httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    )
+    assert asyncio.run(shelf.fetch("L'assassin royal 1", ("Robin Hobb",))) == "md5"
+    assert queries == [None, "L'assassin royal Hobb"]
+    assert queued[0]["source_id"] == "md5"  # type: ignore[index]
