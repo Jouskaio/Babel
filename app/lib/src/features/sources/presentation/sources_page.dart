@@ -30,6 +30,8 @@ class SourcesPage extends ConsumerWidget {
           children: [
             Text(l10n.sourcesIntro, style: BabelText.body(15)),
             const SizedBox(height: 24),
+            Text(l10n.mySources.toUpperCase(), style: BabelText.label(10)),
+            const SizedBox(height: 10),
             ...switch (sources) {
               AsyncData(:final value) when value.isEmpty => [
                 Text(l10n.sourcesEmpty, style: BabelText.body(14)),
@@ -56,7 +58,6 @@ class SourcesPage extends ConsumerWidget {
                 ),
               ],
             },
-            const PluginsList(),
             const SizedBox(height: 16),
             PillButton(
               label: '+ ${l10n.addSource}',
@@ -71,6 +72,7 @@ class SourcesPage extends ConsumerWidget {
                 }
               },
             ),
+            const PluginsList(),
             const SizedBox(height: 28),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -77,6 +77,7 @@ doc/LibraryApi.md
 doc/LibraryItemResponse.md
 doc/LinkKavitaRequest.md
 doc/LinkKind.md
+doc/LinkPagebound.md
 doc/LinkPreviewResponse.md
 doc/LinkRequest.md
 doc/LoginRequest.md
@@ -86,6 +87,9 @@ doc/OpOutcome.md
 doc/OpdsConfig.md
 doc/OperationRequest.md
 doc/OperationResult.md
+doc/PageboundApi.md
+doc/PageboundImportResponse.md
+doc/PageboundResponse.md
 doc/PaperBookRequest.md
 doc/PaperRequest.md
 doc/PlaybackResponse.md
@@ -165,6 +169,7 @@ lib/api/health_api.dart
 lib/api/kavita_api.dart
 lib/api/kosync_api.dart
 lib/api/library_api.dart
+lib/api/pagebound_api.dart
 lib/api/plugins_api.dart
 lib/api/requests_api.dart
 lib/api/social_api.dart
@@ -246,6 +251,7 @@ lib/model/koreader_response.dart
 lib/model/library_item_response.dart
 lib/model/link_kavita_request.dart
 lib/model/link_kind.dart
+lib/model/link_pagebound.dart
 lib/model/link_preview_response.dart
 lib/model/link_request.dart
 lib/model/login_request.dart
@@ -255,6 +261,8 @@ lib/model/op_outcome.dart
 lib/model/opds_config.dart
 lib/model/operation_request.dart
 lib/model/operation_result.dart
+lib/model/pagebound_import_response.dart
+lib/model/pagebound_response.dart
 lib/model/paper_book_request.dart
 lib/model/paper_request.dart
 lib/model/playback_response.dart

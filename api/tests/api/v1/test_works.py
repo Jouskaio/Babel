@@ -1171,3 +1171,42 @@ def test_a_cover_photo_finds_the_book_by_its_words(
         "/v1/catalog/recognize", files={"file": ("c.jpg", b"x", "image/jpeg")}, headers=auth
     )
     assert refused.status_code == 503
+
+
+def test_a_reader_links_pagebound_and_brings_their_reviews_in(
+    app: FastAPI, client: TestClient, auth: dict[str, str]
+) -> None:
+    from babel_api.adapters.pagebound import PageboundUserReview
+
+    class FakePagebound:
+        async def user_id(self, username: str) -> int | None:
+            return 7 if username == "jen" else None
+
+        async def user_reviews(self, user_id: int) -> list[PageboundUserReview]:
+            assert user_id == 7
+            return [
+                PageboundUserReview(
+                    "Ready Player One",
+                    ("Ernest Cline",),
+                    4.5,
+                    "Fun, fast and clever.",
+                    "Dec 05, 2025",
+                ),
+                PageboundUserReview("Dune", ("Frank Herbert",), 3.0, None, None),
+            ]
+
+    app.state.container = replace(app.state.container, pagebound=FakePagebound())
+    assert client.get("/v1/me/pagebound", headers=auth).json()["linked"] is False
+    nobody = client.put("/v1/me/pagebound", json={"username": "ghost"}, headers=auth)
+    assert nobody.status_code == 404
+    linked = client.put("/v1/me/pagebound", json={"username": "@jen"}, headers=auth).json()
+    assert (linked["linked"], linked["username"]) == (True, "jen")
+
+    done = client.post("/v1/me/pagebound/import", headers=auth).json()
+    assert done == {"imported": 2, "skipped": 0}
+    again = client.post("/v1/me/pagebound/import", headers=auth).json()
+    assert again == {"imported": 0, "skipped": 2}
+    titles = {i["title"] for i in client.get("/v1/library", headers=auth).json()}
+    assert {"Ready Player One", "Dune"} <= titles
+    assert client.delete("/v1/me/pagebound", headers=auth).status_code == 204
+    assert client.get("/v1/me/pagebound", headers=auth).json()["linked"] is False

@@ -14,6 +14,7 @@ from babel_api.adapters.hardcover import (
     HardcoverClient,
     HardcoverReview,
 )
+from babel_api.adapters.pagebound import PageboundClient, PageboundReview
 from babel_api.adapters.wikidata import Adaptation, WikidataClient
 from babel_api.domain.catalog import Edition, IdentifierKind, SourceWork, Work
 from babel_api.domain.errors import NotFoundError, SourceUnavailableError
@@ -110,7 +111,9 @@ class WorkService:
         hardcover: HardcoverClient | None = None,
         wikidata: WikidataClient | None = None,
         external: ExternalRatings | None = None,
+        pagebound: PageboundClient | None = None,
     ) -> None:
+        self._pagebound = pagebound
         self._wikidata = wikidata
         self._external = external
         self._repo = repository
@@ -288,9 +291,26 @@ class WorkService:
         work = await self._enrich(work)
         return WorkDetail(work, await self._repo.list_editions(work.id))
 
+    async def _pagebound_all(
+        self, work: Work
+    ) -> tuple[ExternalRating | None, list[PageboundReview]]:
+        """Pagebound's rating of the book and its best reviews (one search, kept a day)."""
+        if self._pagebound is None:
+            return None, []
+        uuid = await self._pagebound.find(work.title, work.authors)
+        if uuid is None:
+            return None, []
+        rating = await self._pagebound.rating(uuid)
+        reviews = await self._pagebound.reviews(uuid)
+        return (
+            ExternalRating("pagebound", rating.average, rating.count, rating.url)
+            if rating
+            else None
+        ), reviews
+
     async def external_reviews(
         self, work_id: UUID
-    ) -> tuple[list[ExternalRating], list[HardcoverReview]]:
+    ) -> tuple[list[ExternalRating], list[HardcoverReview], list[PageboundReview]]:
         """What others think of a book: ratings (Hardcover, Open Library, Goodreads) and the
         most liked Hardcover reviews. Every source is best effort."""
         work = (await self.get(work_id)).work
@@ -311,13 +331,18 @@ class WorkService:
             if self._external is not None
             else _nothing(),
             self._hardcover_reviews(work),
+            self._pagebound_all(work),
             return_exceptions=True,
         )
         for found in asked[:2]:
             if isinstance(found, ExternalRating):
                 ratings.append(found)
         reviews = asked[2] if isinstance(asked[2], list) else []
-        return ratings, reviews
+        empty: tuple[ExternalRating | None, list[PageboundReview]] = (None, [])
+        pagebound = asked[3] if isinstance(asked[3], tuple) else empty
+        if pagebound[0] is not None:
+            ratings.append(pagebound[0])
+        return ratings, reviews, pagebound[1]
 
     async def _hardcover_reviews(self, work: Work) -> list[HardcoverReview]:
         if self._hardcover is None:

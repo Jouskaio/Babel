@@ -26,6 +26,7 @@ from babel_api.adapters.files.metadata import EbookMetadataReader
 from babel_api.adapters.hardcover import HardcoverClient
 from babel_api.adapters.kavita import KavitaClient
 from babel_api.adapters.mail.mailers import BackgroundMailer, LogMailer, SmtpMailer
+from babel_api.adapters.pagebound import PageboundClient
 from babel_api.adapters.push.fcm import FcmPusher, LogPusher
 from babel_api.adapters.security.identity import apple_verifier, google_verifier
 from babel_api.adapters.security.passwords import Argon2PasswordHasher
@@ -237,6 +238,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         hardcover=hardcover,
         wikidata=wikidata,
         external_ratings=ExternalRatings(goodreads=settings.scrape_goodreads),
+        pagebound=PageboundClient(),
     )
     if settings.cors_origins:
         app.add_middleware(

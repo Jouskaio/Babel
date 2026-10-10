@@ -149,12 +149,14 @@ class ExternalRatingResponseSource_Enum {
   static const hardcover = ExternalRatingResponseSource_Enum._(r'hardcover');
   static const openlibrary = ExternalRatingResponseSource_Enum._(r'openlibrary');
   static const goodreads = ExternalRatingResponseSource_Enum._(r'goodreads');
+  static const pagebound = ExternalRatingResponseSource_Enum._(r'pagebound');
 
   /// List of all possible values in this [enum][ExternalRatingResponseSource_Enum].
   static const values = <ExternalRatingResponseSource_Enum>[
     hardcover,
     openlibrary,
     goodreads,
+    pagebound,
   ];
 
   static ExternalRatingResponseSource_Enum? fromJson(dynamic value) => ExternalRatingResponseSource_EnumTypeTransformer().decode(value);
@@ -196,6 +198,7 @@ class ExternalRatingResponseSource_EnumTypeTransformer {
         case r'hardcover': return ExternalRatingResponseSource_Enum.hardcover;
         case r'openlibrary': return ExternalRatingResponseSource_Enum.openlibrary;
         case r'goodreads': return ExternalRatingResponseSource_Enum.goodreads;
+        case r'pagebound': return ExternalRatingResponseSource_Enum.pagebound;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

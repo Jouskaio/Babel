@@ -4622,6 +4622,174 @@ abstract class AppLocalizations {
   /// **'La lecture de couverture n\'est pas disponible sur ce serveur.'**
   String get scanPhotoUnavailable;
 
+  /// No description provided for @groupAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte'**
+  String get groupAccount;
+
+  /// No description provided for @groupAccountHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil, mot de passe, profil public'**
+  String get groupAccountHint;
+
+  /// No description provided for @groupDisplay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Affichage & appareils'**
+  String get groupDisplay;
+
+  /// No description provided for @groupDisplayHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Langue, mode liseuse, appareils, KOReader'**
+  String get groupDisplayHint;
+
+  /// No description provided for @groupConnections.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sources & connexions'**
+  String get groupConnections;
+
+  /// No description provided for @groupConnectionsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes sources et plugins, Kavita, Audiobookshelf'**
+  String get groupConnectionsHint;
+
+  /// No description provided for @groupRequests.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandes de livres'**
+  String get groupRequests;
+
+  /// No description provided for @groupRequestsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Shelfmark et Chaptarr, pour télécharger les livres'**
+  String get groupRequestsHint;
+
+  /// No description provided for @groupData.
+  ///
+  /// In fr, this message translates to:
+  /// **'Import'**
+  String get groupData;
+
+  /// No description provided for @groupDataHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer une liste de lecture'**
+  String get groupDataHint;
+
+  /// No description provided for @devicesHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les appareils qui se synchronisent avec ton compte.'**
+  String get devicesHint;
+
+  /// No description provided for @devicesEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun appareil pour l\'instant.'**
+  String get devicesEmpty;
+
+  /// No description provided for @deviceThis.
+  ///
+  /// In fr, this message translates to:
+  /// **'cet appareil'**
+  String get deviceThis;
+
+  /// No description provided for @deviceForget.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oublier'**
+  String get deviceForget;
+
+  /// No description provided for @deviceForgetBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cet appareil ne sera plus synchronisé tant que tu ne t\'y reconnectes pas. Tes livres et ta progression restent.'**
+  String get deviceForgetBody;
+
+  /// No description provided for @groupSources.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sources'**
+  String get groupSources;
+
+  /// No description provided for @deviceForgetTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oublier {name} ?'**
+  String deviceForgetTitle(String name);
+
+  /// No description provided for @deviceLastSeen.
+  ///
+  /// In fr, this message translates to:
+  /// **'vu {when}'**
+  String deviceLastSeen(String when);
+
+  /// No description provided for @mySources.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes sources'**
+  String get mySources;
+
+  /// No description provided for @pageboundTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pagebound'**
+  String get pageboundTitle;
+
+  /// No description provided for @pageboundHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lie ton compte Pagebound avec ton nom d\'utilisateur public (pas de mot de passe) : tes avis publics peuvent être importés dans Babel, en avis privés, avec leurs notes.'**
+  String get pageboundHint;
+
+  /// No description provided for @pageboundUsername.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom d\'utilisateur Pagebound'**
+  String get pageboundUsername;
+
+  /// No description provided for @pageboundLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lier mon compte Pagebound'**
+  String get pageboundLink;
+
+  /// No description provided for @pageboundUnlink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délier'**
+  String get pageboundUnlink;
+
+  /// No description provided for @pageboundImport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer mes avis Pagebound'**
+  String get pageboundImport;
+
+  /// No description provided for @pageboundNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun lecteur de ce nom sur Pagebound.'**
+  String get pageboundNotFound;
+
+  /// No description provided for @pageboundLinked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lié : {name}'**
+  String pageboundLinked(String name);
+
+  /// No description provided for @pageboundImported.
+  ///
+  /// In fr, this message translates to:
+  /// **'{imported, plural, one{# avis importé} other{# avis importés}}, {skipped} déjà dans ta bibliothèque'**
+  String pageboundImported(int imported, int skipped);
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

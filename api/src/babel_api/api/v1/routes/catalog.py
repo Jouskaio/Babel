@@ -210,14 +210,14 @@ async def get_related_works(
 
 
 class ExternalRatingResponse(BaseModel):
-    source: Literal["hardcover", "openlibrary", "goodreads"]
+    source: Literal["hardcover", "openlibrary", "goodreads", "pagebound"]
     average: float = Field(description="Out of 5")
     count: int = Field(description="Number of ratings; 0 when the source does not say")
     url: str
 
 
 class ExternalReviewResponse(BaseModel):
-    source: Literal["hardcover"]
+    source: Literal["hardcover", "pagebound"]
     author: str
     rating: float | None
     text: str
@@ -236,7 +236,7 @@ async def get_external_reviews(
 ) -> ExternalReviewsResponse:
     """What others think of the book elsewhere: ratings from Hardcover, Open Library and
     Goodreads, and the most liked Hardcover reviews. Each source is best effort."""
-    ratings, reviews = await works.external_reviews(work_id)
+    ratings, reviews, pagebound = await works.external_reviews(work_id)
     return ExternalReviewsResponse(
         ratings=[
             ExternalRatingResponse(
@@ -257,6 +257,17 @@ async def get_external_reviews(
                 likes=r.likes,
             )
             for r in reviews
+        ]
+        + [
+            ExternalReviewResponse(
+                source="pagebound",
+                author=r.author,
+                rating=r.rating,
+                text=r.text,
+                spoilers=r.spoiler,
+                likes=r.likes,
+            )
+            for r in pagebound
         ],
     )
 
