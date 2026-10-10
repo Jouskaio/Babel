@@ -117,6 +117,8 @@ Class | Method | HTTP request | Description
 *KavitaApi* | [**retryKavita**](doc//KavitaApi.md#retrykavita) | **POST** /v1/me/kavita/retry | Retry Kavita
 *KavitaApi* | [**setPremium**](doc//KavitaApi.md#setpremium) | **PUT** /v1/admin/users/{member_id}/premium | Set Premium
 *KavitaApi* | [**unlinkKavita**](doc//KavitaApi.md#unlinkkavita) | **DELETE** /v1/me/kavita | Unlink Kavita
+*KosyncApi* | [**getKoreader**](doc//KosyncApi.md#getkoreader) | **GET** /v1/me/koreader | Get Koreader
+*KosyncApi* | [**newKoreaderPassword**](doc//KosyncApi.md#newkoreaderpassword) | **POST** /v1/me/koreader/password | New Koreader Password
 *LibraryApi* | [**addPaperBook**](doc//LibraryApi.md#addpaperbook) | **POST** /v1/library/paper | Add Paper Book
 *LibraryApi* | [**addStoredFile**](doc//LibraryApi.md#addstoredfile) | **POST** /v1/library/files/{sha256} | Add Stored File
 *LibraryApi* | [**attachFile**](doc//LibraryApi.md#attachfile) | **POST** /v1/library/{item_id}/file | Attach File
@@ -261,6 +263,8 @@ Class | Method | HTTP request | Description
  - [KavitaLinkResponse](doc//KavitaLinkResponse.md)
  - [KavitaStatus](doc//KavitaStatus.md)
  - [KnownVolumeResponse](doc//KnownVolumeResponse.md)
+ - [KoreaderPasswordResponse](doc//KoreaderPasswordResponse.md)
+ - [KoreaderResponse](doc//KoreaderResponse.md)
  - [LibraryItemResponse](doc//LibraryItemResponse.md)
  - [LinkKavitaRequest](doc//LinkKavitaRequest.md)
  - [LinkKind](doc//LinkKind.md)

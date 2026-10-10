@@ -4346,6 +4346,54 @@ abstract class AppLocalizations {
   /// **'{value} sur {target} pour le prochain palier'**
   String badgeNext(int value, int target);
 
+  /// No description provided for @koreaderTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes liseuses (KOReader)'**
+  String get koreaderTitle;
+
+  /// No description provided for @koreaderHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur une liseuse avec KOReader (Boox, Kobo, Kindle…), la progression se synchronise avec Babel. Dans KOReader : Outils › Synchronisation de la progression › Serveur personnalisé, puis entre l\'adresse, l\'e-mail et le mot de passe ci-dessous.'**
+  String get koreaderHint;
+
+  /// No description provided for @koreaderServer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse du serveur'**
+  String get koreaderServer;
+
+  /// No description provided for @koreaderUser.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant (e-mail)'**
+  String get koreaderUser;
+
+  /// No description provided for @koreaderPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe KOReader'**
+  String get koreaderPassword;
+
+  /// No description provided for @koreaderShownOnce.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notez-le : il ne sera plus affiché.'**
+  String get koreaderShownOnce;
+
+  /// No description provided for @koreaderMake.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer un mot de passe pour KOReader'**
+  String get koreaderMake;
+
+  /// No description provided for @koreaderRenew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remplacer le mot de passe'**
+  String get koreaderRenew;
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

@@ -2596,6 +2596,31 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get koreaderTitle => 'My e-readers (KOReader)';
+
+  @override
+  String get koreaderHint =>
+      'On an e-reader running KOReader (Boox, Kobo, Kindle…), reading progress syncs with Babel. In KOReader: Tools › Progress sync › Custom sync server, then enter the address, e-mail and password below.';
+
+  @override
+  String get koreaderServer => 'Server address';
+
+  @override
+  String get koreaderUser => 'Username (e-mail)';
+
+  @override
+  String get koreaderPassword => 'KOReader password';
+
+  @override
+  String get koreaderShownOnce => 'Write it down: it will not be shown again.';
+
+  @override
+  String get koreaderMake => 'Make a password for KOReader';
+
+  @override
+  String get koreaderRenew => 'Replace the password';
+
+  @override
   String get coverDefault => 'Default';
 
   @override

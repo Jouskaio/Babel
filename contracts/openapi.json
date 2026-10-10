@@ -2190,6 +2190,62 @@
         "title": "KnownVolumeResponse",
         "type": "object"
       },
+      "KoreaderPasswordResponse": {
+        "properties": {
+          "has_password": {
+            "title": "Has Password",
+            "type": "boolean"
+          },
+          "password": {
+            "description": "Shown once: KOReader's password",
+            "title": "Password",
+            "type": "string"
+          },
+          "server": {
+            "description": "The address to give KOReader as its sync server",
+            "title": "Server",
+            "type": "string"
+          },
+          "username": {
+            "description": "Your e-mail: what KOReader asks for as the username",
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "server",
+          "has_password",
+          "password"
+        ],
+        "title": "KoreaderPasswordResponse",
+        "type": "object"
+      },
+      "KoreaderResponse": {
+        "properties": {
+          "has_password": {
+            "title": "Has Password",
+            "type": "boolean"
+          },
+          "server": {
+            "description": "The address to give KOReader as its sync server",
+            "title": "Server",
+            "type": "string"
+          },
+          "username": {
+            "description": "Your e-mail: what KOReader asks for as the username",
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "server",
+          "has_password"
+        ],
+        "title": "KoreaderResponse",
+        "type": "object"
+      },
       "LibraryItemResponse": {
         "properties": {
           "added_at": {
@@ -9319,6 +9375,60 @@
         "summary": "Retry Kavita",
         "tags": [
           "kavita"
+        ]
+      }
+    },
+    "/v1/me/koreader": {
+      "get": {
+        "description": "What to type in KOReader to sync your reading with Babel.",
+        "operationId": "getKoreader",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Koreader",
+        "tags": [
+          "kosync"
+        ]
+      }
+    },
+    "/v1/me/koreader/password": {
+      "post": {
+        "description": "Make (or replace) your KOReader password; it is shown only now.",
+        "operationId": "newKoreaderPassword",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderPasswordResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "New Koreader Password",
+        "tags": [
+          "kosync"
         ]
       }
     },

@@ -21,6 +21,7 @@ import '../../kavita/presentation/kavita_section.dart';
 import '../../library/presentation/reading_list_import.dart';
 import '../../social/presentation/sharing_settings.dart';
 import 'chaptarr_section.dart';
+import 'koreader_section.dart';
 import 'shelfmark_section.dart';
 
 /// Profile, password, sign-out and account deletion.
@@ -109,6 +110,11 @@ class AccountPage extends ConsumerWidget {
                 _Section(
                   title: l10n.shelfmarkTitle,
                   child: const ShelfmarkSection(),
+                ),
+                const SizedBox(height: 24),
+                _Section(
+                  title: l10n.koreaderTitle,
+                  child: const KoreaderSection(),
                 ),
                 const SizedBox(height: 24),
                 _Section(
