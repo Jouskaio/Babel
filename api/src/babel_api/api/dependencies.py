@@ -34,6 +34,7 @@ from babel_api.adapters.shelfmark import ShelfmarkClient
 from babel_api.adapters.sources.ao3 import Ao3Connector
 from babel_api.adapters.sources.http import guarded_client
 from babel_api.adapters.sources.links import LinkFetcher
+from babel_api.adapters.wikidata import WikidataClient
 from babel_api.core.config import Settings
 from babel_api.domain.files import LibraryItem
 from babel_api.domain.ports import (
@@ -94,6 +95,7 @@ class Container:
     # How a reader's own Shelfmark is reached (tests replace it); None: with the address guard.
     shelfmark_for_reader: Callable[[str, str], ShelfmarkClient] | None = None
     hardcover: HardcoverClient | None = None
+    wikidata: WikidataClient | None = None
     # How a reader's own Chaptarr is reached (tests replace it); None: with the address guard.
     chaptarr_for_reader: Callable[[str, str], ChaptarrClient] | None = None
     # Sources being scanned in the background (a slow connector such as AO3).
@@ -133,7 +135,9 @@ AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 def get_work_service(
     container: ContainerDep, session: Annotated[AsyncSession, Depends(get_session)]
 ) -> WorkService:
-    return WorkService(SqlCatalogRepository(session), container.books, container.hardcover)
+    return WorkService(
+        SqlCatalogRepository(session), container.books, container.hardcover, container.wikidata
+    )
 
 
 WorkServiceDep = Annotated[WorkService, Depends(get_work_service)]

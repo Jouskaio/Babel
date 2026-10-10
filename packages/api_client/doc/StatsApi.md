@@ -9,9 +9,55 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**getProgression**](StatsApi.md#getprogression) | **GET** /v1/me/progression | Get Progression
 [**getYearStats**](StatsApi.md#getyearstats) | **GET** /v1/me/stats | Get Year Stats
 [**setReadingGoal**](StatsApi.md#setreadinggoal) | **PUT** /v1/me/goal | Set Goal
 
+
+# **getProgression**
+> ProgressionResponse getProgression()
+
+Get Progression
+
+Your level, badges and first steps, computed from what you did.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = StatsApi();
+
+try {
+    final result = api_instance.getProgression();
+    print(result);
+} catch (e) {
+    print('Exception when calling StatsApi->getProgression: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**ProgressionResponse**](ProgressionResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getYearStats**
 > YearStatsResponse getYearStats(year, tzOffset)

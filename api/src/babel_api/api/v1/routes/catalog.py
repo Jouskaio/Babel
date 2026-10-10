@@ -2,7 +2,7 @@
 
 import hashlib
 from typing import Annotated, Literal
-from urllib.parse import urlsplit
+from urllib.parse import urlencode, urlsplit
 from uuid import UUID
 
 import httpx
@@ -10,7 +10,7 @@ from fastapi import APIRouter, HTTPException, Path, Query, Response, status
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
-from babel_api.api.dependencies import ContainerDep, CurrentUserId, WorkServiceDep
+from babel_api.api.dependencies import Container, ContainerDep, CurrentUserId, WorkServiceDep
 from babel_api.domain.catalog import Edition, IdentifierKind, Work
 from babel_api.domain.files import Cover
 from babel_api.domain.series import guess_series
@@ -181,6 +181,33 @@ class WorkResponse(WorkSummaryResponse):
         )
 
 
+class RelatedWorkResponse(BaseModel):
+    title: str
+    kind: Literal["film", "series", "game", "comic", "stage", "audio", "other"]
+    year: int | None
+    url: str = Field(description="Its page on Wikidata")
+    poster_path: str | None = Field(default=None, description="TMDB's poster, through Babel")
+    overview: str | None = None
+
+
+@router.get("/works/{work_id}/related", operation_id="getRelatedWorks")
+async def get_related_works(
+    _: CurrentUserId, works: WorkServiceDep, work_id: UUID
+) -> list[RelatedWorkResponse]:
+    """What the book was adapted into: films, series, games, comics (Wikidata, TMDB)."""
+    return [
+        RelatedWorkResponse(
+            title=a.title,
+            kind=a.kind,  # type: ignore[arg-type]
+            year=a.year,
+            url=a.url,
+            poster_path=f"/v1/catalog/images?{urlencode({'url': a.poster})}" if a.poster else None,
+            overview=a.overview,
+        )
+        for a in await works.related(work_id)
+    ]
+
+
 class IsbnLookupResponse(BaseModel):
     """The work an ISBN belongs to, and which of its editions it is."""
 
@@ -278,7 +305,7 @@ async def lookup_isbn(
     )
 
 
-_COVER_HOSTS = ("hardcover.app",)
+_COVER_HOSTS = ("hardcover.app", "image.tmdb.org")
 
 
 @router.get(
@@ -292,22 +319,41 @@ async def get_work_cover(
 ) -> FileResponse:
     """The cover of a work found at Hardcover, kept by Babel (public, like other covers)."""
     url = await works.cover_url(work_id)
-    host = (urlsplit(url).hostname or "") if url else ""
-    if not url or not any(host == h or host.endswith(f".{h}") for h in _COVER_HOSTS):
+    if not url:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No such cover")
+    return await _proxied_image(container, url)
+
+
+async def _proxied_image(container: Container, url: str) -> FileResponse:
+    """An image of a known host, fetched once and kept (never redirects, never other hosts)."""
+    host = urlsplit(url).hostname or ""
+    if not any(host == h or host.endswith(f".{h}") for h in _COVER_HOSTS):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No such image")
     key = hashlib.sha256(url.encode()).hexdigest()
     found = container.covers.get(key)
     if found is None:
         try:
             async with httpx.AsyncClient(timeout=15, follow_redirects=False) as client:
                 response = await client.get(url)
-            media = response.headers.get("content-type", "").split(";")[0]
-            cover = Cover(response.content, media) if response.status_code == 200 else None
         except httpx.HTTPError:
-            cover = None  # not cached: it may work later
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "No such cover") from None
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "No such image") from None
+        media = response.headers.get("content-type", "").split(";")[0]
+        cover = Cover(response.content, media) if response.status_code == 200 else None
         found = container.covers.put(key, cover)
     if not found:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "No such cover")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No such image")
     path, media_type = found
     return FileResponse(path, media_type=media_type, headers={"Cache-Control": "max-age=86400"})
+
+
+@router.get(
+    "/images",
+    operation_id="getCatalogImage",
+    response_class=FileResponse,
+    responses={200: {"content": {"image/*": {}}}, 404: {"description": "No such image"}},
+)
+async def get_catalog_image(
+    container: ContainerDep, url: Annotated[str, Query(min_length=10, max_length=500)]
+) -> FileResponse:
+    """A poster or cover from a known image host (TMDB, Hardcover), kept by Babel."""
+    return await _proxied_image(container, url)

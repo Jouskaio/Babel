@@ -17,6 +17,7 @@ doc/AudiobooksApi.md
 doc/AuthApi.md
 doc/AuthorCountResponse.md
 doc/AuthorResponse.md
+doc/BadgeResponse.md
 doc/BatchImportResponse.md
 doc/BookDetailsRequest.md
 doc/BookFormat.md
@@ -82,6 +83,7 @@ doc/PaperBookRequest.md
 doc/PaperRequest.md
 doc/PlaybackResponse.md
 doc/PremiumRequest.md
+doc/ProgressionResponse.md
 doc/ProviderLoginRequest.md
 doc/ProvidersResponse.md
 doc/PullResponse.md
@@ -99,6 +101,7 @@ doc/RecommendationResponse.md
 doc/RefreshRequest.md
 doc/RegisterDeviceRequest.md
 doc/RegisterRequest.md
+doc/RelatedWorkResponse.md
 doc/RelationResponse.md
 doc/RemotePositionResponse.md
 doc/ReportReason.md
@@ -125,6 +128,7 @@ doc/SourceMatchResponse.md
 doc/SourceResponse.md
 doc/SourcesApi.md
 doc/StatsApi.md
+doc/StepResponse.md
 doc/SyncApi.md
 doc/TokenResponse.md
 doc/TrendingWorkResponse.md
@@ -175,6 +179,7 @@ lib/model/audio_progress_request.dart
 lib/model/audio_track_response.dart
 lib/model/author_count_response.dart
 lib/model/author_response.dart
+lib/model/badge_response.dart
 lib/model/batch_import_response.dart
 lib/model/book_details_request.dart
 lib/model/book_format.dart
@@ -236,6 +241,7 @@ lib/model/paper_book_request.dart
 lib/model/paper_request.dart
 lib/model/playback_response.dart
 lib/model/premium_request.dart
+lib/model/progression_response.dart
 lib/model/provider_login_request.dart
 lib/model/providers_response.dart
 lib/model/pull_response.dart
@@ -253,6 +259,7 @@ lib/model/recommendation_response.dart
 lib/model/refresh_request.dart
 lib/model/register_device_request.dart
 lib/model/register_request.dart
+lib/model/related_work_response.dart
 lib/model/relation_response.dart
 lib/model/remote_position_response.dart
 lib/model/report_reason.dart
@@ -275,6 +282,7 @@ lib/model/source_health.dart
 lib/model/source_kind.dart
 lib/model/source_match_response.dart
 lib/model/source_response.dart
+lib/model/step_response.dart
 lib/model/token_response.dart
 lib/model/trending_work_response.dart
 lib/model/update_profile_request.dart

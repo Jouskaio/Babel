@@ -90,6 +90,11 @@ class Settings(BaseSettings):
     shelfmark_url: str = ""
     shelfmark_api_key: SecretStr = SecretStr("")
 
+    # TMDB (free key or read token, themoviedb.org > Settings > API): posters and blurbs for the
+    # films and series a book was adapted into (Wikidata finds them without a key). Empty: no
+    # posters.
+    tmdb_api_key: SecretStr = SecretStr("")
+
     # Hardcover (free API key, hardcover.app > Settings > Hardcover API): names the volumes of
     # a saga the catalog lacks. Public book data only. Empty: not used.
     hardcover_api_key: SecretStr = SecretStr("")

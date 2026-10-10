@@ -4160,6 +4160,54 @@ abstract class AppLocalizations {
   /// **'Envoyé à Shelfmark. Le livre arrivera dans « Dans mes sources » dès qu\'il sera téléchargé.'**
   String get requestShelfmarkSent;
 
+  /// No description provided for @relatedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adaptations & œuvres liées'**
+  String get relatedTitle;
+
+  /// No description provided for @relatedFilm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Film'**
+  String get relatedFilm;
+
+  /// No description provided for @relatedSeries.
+  ///
+  /// In fr, this message translates to:
+  /// **'Série'**
+  String get relatedSeries;
+
+  /// No description provided for @relatedGame.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jeu vidéo'**
+  String get relatedGame;
+
+  /// No description provided for @relatedComic.
+  ///
+  /// In fr, this message translates to:
+  /// **'BD / manga'**
+  String get relatedComic;
+
+  /// No description provided for @relatedStage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scène'**
+  String get relatedStage;
+
+  /// No description provided for @relatedAudio.
+  ///
+  /// In fr, this message translates to:
+  /// **'Audio'**
+  String get relatedAudio;
+
+  /// No description provided for @relatedOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Œuvre liée'**
+  String get relatedOther;
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

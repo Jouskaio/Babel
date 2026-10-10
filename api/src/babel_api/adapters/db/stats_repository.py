@@ -4,15 +4,17 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.file_repository import _to_item  # pyright: ignore[reportPrivateUsage]
 from babel_api.adapters.db.models import (
     AnnotationRow,
     ChangeRow,
+    KavitaLinkRow,
     LibraryItemRow,
     ReviewRow,
+    SourceRow,
     UserRow,
     WorkRow,
 )
@@ -42,6 +44,16 @@ class SqlStatsRepository:
             select(WorkRow.id, WorkRow.subjects).where(WorkRow.id.in_(list(work_ids)))
         )
         return {work: tuple(subjects or ()) for work, subjects in rows.all()}
+
+    async def sources_linked(self, user_id: UUID) -> int:
+        """Personal sources, plus the reader's Kavita when linked."""
+        sources = await self._session.scalar(
+            select(func.count()).select_from(SourceRow).where(SourceRow.user_id == user_id)
+        )
+        kavita = await self._session.scalar(
+            select(func.count()).select_from(KavitaLinkRow).where(KavitaLinkRow.user_id == user_id)
+        )
+        return int(sources or 0) + int(kavita or 0)
 
     async def goal(self, user_id: UUID) -> int | None:
         return await self._session.scalar(select(UserRow.reading_goal).where(UserRow.id == user_id))

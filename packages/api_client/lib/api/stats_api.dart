@@ -16,6 +16,54 @@ class StatsApi {
 
   final ApiClient apiClient;
 
+  /// Get Progression
+  ///
+  /// Your level, badges and first steps, computed from what you did.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> getProgressionWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/me/progression';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Progression
+  ///
+  /// Your level, badges and first steps, computed from what you did.
+  Future<ProgressionResponse?> getProgression() async {
+    final response = await getProgressionWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ProgressionResponse',) as ProgressionResponse;
+    
+    }
+    return null;
+  }
+
   /// Get Year Stats
   ///
   /// What you read in a year: books finished, reading days, streaks, notes, authors.

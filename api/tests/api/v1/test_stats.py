@@ -6,7 +6,7 @@ from datetime import date
 import pytest
 from fastapi.testclient import TestClient
 
-from babel_api.services.stats import _streaks  # pyright: ignore[reportPrivateUsage]
+from babel_api.services.stats import streaks
 from tests.api.v1.test_library import account, upload
 from tests.api.v1.test_shelves import state
 from tests.api.v1.test_social import book
@@ -21,10 +21,10 @@ def ada(client: TestClient) -> dict[str, str]:
 
 def test_streaks_count_consecutive_days() -> None:
     days = {date(2026, 3, d) for d in (1, 2, 3, 5, 6)} | {date(2026, 10, 5), date(2026, 10, 6)}
-    assert _streaks(days, date(2026, 10, 6)) == (3, 2)
-    assert _streaks(days, date(2026, 10, 7)) == (3, 2)  # yesterday still counts
-    assert _streaks(days, date(2026, 10, 9)) == (3, 0)
-    assert _streaks(set(), date(2026, 10, 9)) == (0, 0)
+    assert streaks(days, date(2026, 10, 6)) == (3, 2)
+    assert streaks(days, date(2026, 10, 7)) == (3, 2)  # yesterday still counts
+    assert streaks(days, date(2026, 10, 9)) == (3, 0)
+    assert streaks(set(), date(2026, 10, 9)) == (0, 0)
 
 
 def test_a_year_of_reading(client: TestClient, ada: dict[str, str]) -> None:
@@ -111,3 +111,18 @@ def test_genres_of_the_year_and_the_year_before(client: TestClient, ada: dict[st
     ]
     assert stats["previous_genres"] == [{"genre": "poetry", "books": 1}]
     assert stats["finished"][0]["genres"] == ["science_fiction"]
+
+
+def test_progression_starts_at_level_one_and_rewards_a_first_book(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    first = client.get("/v1/me/progression", headers=ada).json()
+    assert (first["level"], first["xp"], first["title"]) == (1, 0, "novice")
+    assert [s["done"] for s in first["steps"]] == [False] * 6
+
+    upload(client, ada, epub(title="Jane Eyre", isbn=None))
+    after = client.get("/v1/me/progression", headers=ada).json()
+    assert after["xp"] == 10  # one book added
+    steps = {s["key"]: s["done"] for s in after["steps"]}
+    assert steps["add_book"] is True
+    assert steps["finish"] is False

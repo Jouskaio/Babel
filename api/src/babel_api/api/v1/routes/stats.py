@@ -1,7 +1,7 @@
 """A reader's statistics and yearly wrap-up."""
 
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Query
@@ -118,3 +118,50 @@ class GoalRequest(BaseModel):
 async def set_goal(user_id: CurrentUserId, stats: StatsServiceDep, body: GoalRequest) -> None:
     """Set (or remove) your yearly reading goal."""
     await stats.set_goal(user_id, body.books)
+
+
+class BadgeResponse(BaseModel):
+    key: Literal["finished", "streak", "reading_days", "notes", "reviews", "library"]
+    tier: int = Field(description="Tiers earned, 0 when none yet")
+    tiers: int = Field(description="Tiers there are")
+    value: int = Field(description="Your count")
+    next_target: int | None = Field(description="What the next tier asks for; null at the top")
+
+
+class StepResponse(BaseModel):
+    key: Literal["add_book", "link_source", "read", "note", "finish", "review"]
+    done: bool
+
+
+class ProgressionResponse(BaseModel):
+    xp: int
+    level: int
+    level_start: int = Field(description="Points at which this level began")
+    next_level: int = Field(description="Points the next level asks for")
+    title: Literal["novice", "reader", "bookworm", "scholar", "archivist", "librarian"]
+    badges: list[BadgeResponse]
+    steps: list[StepResponse] = Field(description="First steps: a short guided tour")
+
+
+@router.get("/me/progression", operation_id="getProgression")
+async def get_progression(user_id: CurrentUserId, stats: StatsServiceDep) -> ProgressionResponse:
+    """Your level, badges and first steps, computed from what you did."""
+    p = await stats.progression(user_id)
+    return ProgressionResponse(
+        xp=p.xp,
+        level=p.level,
+        level_start=p.level_start,
+        next_level=p.next_level,
+        title=p.title,  # type: ignore[arg-type]
+        badges=[
+            BadgeResponse(
+                key=b.key,  # type: ignore[arg-type]
+                tier=b.tier,
+                tiers=b.tiers,
+                value=b.value,
+                next_target=b.next_target,
+            )
+            for b in p.badges
+        ],
+        steps=[StepResponse(key=s.key, done=s.done) for s in p.steps],  # type: ignore[arg-type]
+    )
