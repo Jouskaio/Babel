@@ -13,11 +13,14 @@ import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../catalog/application/catalog_providers.dart';
 import '../../catalog/presentation/related_row.dart';
+import '../../discover/application/discover_providers.dart';
+import '../../discover/presentation/playlists.dart';
 import '../../landing/application/trending_provider.dart';
 import '../../library/application/library_controller.dart';
 import '../../library/application/shelves.dart';
 import '../../library/presentation/library_page.dart' show libraryCoverUrl;
 import '../../reader/application/reading_position.dart' show SavedPosition;
+import '../../stats/application/genres.dart';
 import '../../stats/application/stats_providers.dart';
 import '../../stats/presentation/challenge_chip.dart';
 
@@ -141,13 +144,49 @@ class ContinueCard extends ConsumerWidget {
   }
 }
 
-/// "For you": what readers are into this week, as a row of covers.
+/// "For you": books like the ones the reader finishes (their genres, their authors), each group
+/// with its reason; the week's trending books when there is nothing to go on yet.
 class ForYouRow extends ConsumerWidget {
   const ForYouRow({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final suggestions = ref.watch(suggestionsProvider).value ?? const [];
+    if (suggestions.isNotEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final s in suggestions)
+            Padding(
+              padding: const EdgeInsets.only(bottom: _gap),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _Head(
+                    title: s.kind == SuggestionResponseKindEnum.genre
+                        ? l10n.suggestionGenre(
+                            genreName(l10n, s.genre!).toLowerCase(),
+                          )
+                        : l10n.suggestionAuthor(s.author ?? ''),
+                    action: s.playlist == null ? null : l10n.homeSeeAll,
+                    onAction: s.playlist == null
+                        ? null
+                        : () =>
+                              context.push(Routes.playlist(s.playlist!.value)),
+                  ),
+                  _CoverRow(
+                    works: [
+                      for (final w in s.works)
+                        (id: w.id, title: w.title, cover: w.coverPath),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+        ],
+      );
+    }
     final works = ref.watch(trendingWorksProvider).value;
     if (works == null || works.isEmpty) return const SizedBox.shrink();
     return Padding(
@@ -160,21 +199,93 @@ class ForYouRow extends ConsumerWidget {
             action: l10n.homeSeeAll,
             onAction: () => context.go(Routes.search),
           ),
+          _CoverRow(
+            works: [
+              for (final w in works.take(10))
+                (id: w.workId, title: w.title, cover: w.coverPath),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A row of covers that open the book's page.
+class _CoverRow extends StatelessWidget {
+  const _CoverRow({required this.works});
+  final List<({String id, String title, String? cover})> works;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: 210,
+    child: ListView.separated(
+      scrollDirection: Axis.horizontal,
+      itemCount: works.length,
+      separatorBuilder: (_, _) => const SizedBox(width: 14),
+      itemBuilder: (context, i) {
+        final work = works[i];
+        return InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () => context.push(Routes.work(work.id)),
+          child: BookCover(
+            width: 130,
+            url: work.cover == null ? null : apiUrl(work.cover!),
+            title: work.title,
+          ),
+        );
+      },
+    ),
+  );
+}
+
+/// "Playlists": themes of books to browse, each opening a list of popular works.
+class PlaylistsRow extends StatelessWidget {
+  const PlaylistsRow({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: _gap),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _Head(title: l10n.homePlaylists),
           SizedBox(
-            height: 210,
+            height: 112,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              itemCount: works.length.clamp(0, 10),
-              separatorBuilder: (_, _) => const SizedBox(width: 14),
+              itemCount: playlistKeys.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
               itemBuilder: (context, i) {
-                final work = works[i];
+                final key = playlistKeys[i];
                 return InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  onTap: () => context.push(Routes.work(work.workId)),
-                  child: BookCover(
-                    width: 130,
-                    url: apiUrl(work.coverPath),
-                    title: work.title,
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => context.push(Routes.playlist(key)),
+                  child: Container(
+                    width: 132,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: i.isEven
+                          ? BabelColors.velvet
+                          : BabelColors.surface,
+                      border: Border.all(color: BabelColors.border),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Icon(playlistIcon(key), color: BabelColors.gold),
+                        Text(
+                          playlistName(l10n, key),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: BabelText.heading(16),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -393,15 +504,16 @@ class MoodChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    // A mood with a playlist opens it; the others start a search.
     final moods = [
-      l10n.moodDarkAcademia,
-      l10n.moodGothic,
-      l10n.moodTragicRomance,
-      l10n.moodBottle,
-      l10n.moodClassics,
-      l10n.moodEnemies,
-      l10n.moodFantasy,
-      l10n.moodFanfiction,
+      (l10n.moodDarkAcademia, 'dark_academia'),
+      (l10n.moodGothic, 'gothic'),
+      (l10n.moodTragicRomance, 'tragic_romance'),
+      (l10n.moodBottle, 'bottle'),
+      (l10n.moodClassics, 'classics'),
+      (l10n.moodEnemies, 'enemies'),
+      (l10n.moodFantasy, 'fantasy'),
+      (l10n.moodFanfiction, null),
     ];
     return Padding(
       padding: const EdgeInsets.only(bottom: _gap),
@@ -413,10 +525,12 @@ class MoodChips extends StatelessWidget {
             spacing: 10,
             runSpacing: 10,
             children: [
-              for (final mood in moods)
+              for (final (mood, playlist) in moods)
                 InkWell(
                   borderRadius: BorderRadius.circular(999),
-                  onTap: () => context.go(Routes.searchFor(mood)),
+                  onTap: () => playlist == null
+                      ? context.go(Routes.searchFor(mood))
+                      : context.push(Routes.playlist(playlist)),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,

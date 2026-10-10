@@ -46,6 +46,11 @@ class FakeBooks:
             return [replace(JANE, localized_title="Jane Eyre (FR)", localized_cover_id=123)]
         return [JANE]
 
+    async def subject(self, slug: str, limit: int) -> list[SourceWork]:
+        self._call("subject")
+        self.queries.append(f"subject:{slug}")
+        return [JANE, replace(JANE, open_library_id="OL9W", title="Emma", cover_id=9)]
+
     async def work(self, open_library_id: str) -> SourceWork | None:
         self._call("work")
         return replace(JANE, description="A governess.") if open_library_id == "OL1W" else None
@@ -1210,3 +1215,32 @@ def test_a_reader_links_pagebound_and_brings_their_reviews_in(
     assert {"Ready Player One", "Dune"} <= titles
     assert client.delete("/v1/me/pagebound", headers=auth).status_code == 204
     assert client.get("/v1/me/pagebound", headers=auth).json()["linked"] is False
+
+
+def test_playlists_and_suggestions_come_from_open_library_subjects(
+    client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    from tests.api.v1.test_library import upload
+    from tests.api.v1.test_shelves import state
+    from tests.api.v1.test_sync import device, push
+    from tests.books import epub
+
+    keys = client.get("/v1/catalog/playlists", headers=auth).json()
+    assert "gothic" in keys
+    gothic = client.get("/v1/catalog/playlists/gothic", headers=auth).json()
+    assert [w["title"] for w in gothic] == ["Jane Eyre", "Emma"]
+    assert "subject:gothic_fiction" in books.queries
+    assert client.get("/v1/catalog/playlists/nothing", headers=auth).status_code == 422
+
+    # No taste yet, no suggestions; once a gothic book is finished, more of them (but not it).
+    assert client.get("/v1/me/for-you", headers=auth).json() == []
+    item = upload(
+        client, auth, epub(title="Dracula", isbn=None, subjects=("Vampires", "Gothic fiction"))
+    ).json()["item"]
+    phone = device(client, auth, "Pixel")
+    push(client, auth, phone, state("op-fin0001", item["id"], "2026-10-01T10:00:00+00:00", "finished"))
+    suggested = client.get("/v1/me/for-you", headers=auth).json()
+    assert suggested[0]["kind"] == "genre"
+    assert suggested[0]["genre"] == "horror"
+    assert suggested[0]["playlist"] == "gothic"
+    assert {w["title"] for w in suggested[0]["works"]} == {"Jane Eyre", "Emma"}

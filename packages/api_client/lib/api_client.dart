@@ -438,6 +438,8 @@ class ApiClient {
           return SourceResponse.fromJson(value);
         case 'StepResponse':
           return StepResponse.fromJson(value);
+        case 'SuggestionResponse':
+          return SuggestionResponse.fromJson(value);
         case 'TokenResponse':
           return TokenResponse.fromJson(value);
         case 'TrendingWorkResponse':

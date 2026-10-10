@@ -4836,6 +4836,80 @@
         "title": "StepResponse",
         "type": "object"
       },
+      "SuggestionResponse": {
+        "properties": {
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "An author the reader finishes a lot",
+            "title": "Author"
+          },
+          "genre": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Genre"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The genre the reader finishes a lot"
+          },
+          "kind": {
+            "enum": [
+              "genre",
+              "author"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "playlist": {
+            "anyOf": [
+              {
+                "enum": [
+                  "dark_academia",
+                  "gothic",
+                  "tragic_romance",
+                  "bottle",
+                  "classics",
+                  "enemies",
+                  "dystopia",
+                  "mystery",
+                  "horror",
+                  "historical",
+                  "coming_of_age",
+                  "fantasy"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A playlist of that genre",
+            "title": "Playlist"
+          },
+          "works": {
+            "items": {
+              "$ref": "#/components/schemas/WorkSummaryResponse"
+            },
+            "title": "Works",
+            "type": "array"
+          }
+        },
+        "required": [
+          "kind",
+          "works"
+        ],
+        "title": "SuggestionResponse",
+        "type": "object"
+      },
       "TokenResponse": {
         "description": "Tokens of a new session. ``refresh_token`` is omitted for the web app (cookie).",
         "properties": {
@@ -5739,7 +5813,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.56.0"
+    "version": "0.57.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -7092,6 +7166,117 @@
         "summary": "Lookup Isbn",
         "tags": [
           "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/playlists": {
+      "get": {
+        "description": "The playlists of books there are (their names are the app's).",
+        "operationId": "listPlaylists",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "enum": [
+                      "dark_academia",
+                      "gothic",
+                      "tragic_romance",
+                      "bottle",
+                      "classics",
+                      "enemies",
+                      "dystopia",
+                      "mystery",
+                      "horror",
+                      "historical",
+                      "coming_of_age",
+                      "fantasy"
+                    ],
+                    "type": "string"
+                  },
+                  "title": "Response Listplaylists",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Playlists",
+        "tags": [
+          "discover"
+        ]
+      }
+    },
+    "/v1/catalog/playlists/{key}": {
+      "get": {
+        "description": "The popular works of a playlist.",
+        "operationId": "getPlaylist",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "enum": [
+                "dark_academia",
+                "gothic",
+                "tragic_romance",
+                "bottle",
+                "classics",
+                "enemies",
+                "dystopia",
+                "mystery",
+                "horror",
+                "historical",
+                "coming_of_age",
+                "fantasy"
+              ],
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WorkSummaryResponse"
+                  },
+                  "title": "Response Getplaylist",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Playlist",
+        "tags": [
+          "discover"
         ]
       }
     },
@@ -9801,6 +9986,37 @@
         "summary": "Resend Verification",
         "tags": [
           "account"
+        ]
+      }
+    },
+    "/v1/me/for-you": {
+      "get": {
+        "description": "Books you may like: more of the genres and authors you finish most, without those you\nalready have.",
+        "operationId": "getSuggestions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SuggestionResponse"
+                  },
+                  "title": "Response Getsuggestions",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Suggestions",
+        "tags": [
+          "discover"
         ]
       }
     },

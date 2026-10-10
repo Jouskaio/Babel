@@ -150,6 +150,29 @@ class StatsService:
             goal=await self._stats.goal(user_id),
         )
 
+    async def taste(self, user_id: UUID) -> tuple[list[Genre], list[str], set[str]]:
+        """What the reader likes, to suggest books: the genres they finish most, the authors they
+        finish most (a book rated 4 or more counts twice), and the titles they already have."""
+        items = await self._stats.items(user_id)
+        ratings = await self._stats.ratings(user_id)
+        done = [i for i in items if i.state.status is ReadingStatus.FINISHED]
+        works = await self._stats.work_subjects(list({i.work_id for i in done if i.work_id}))
+        genres = await self._genres(done, works)
+        weight = {i.id: 2 if ratings.get(i.id, 0) >= 4 else 1 for i in done}
+        by_genre = Counter[Genre]()
+        by_author = Counter[str]()
+        for item in done:
+            for genre in genres[item.id]:
+                by_genre[genre] += weight[item.id]
+            for author in item.authors[:1]:
+                by_author[author] += weight[item.id]
+        owned = {" ".join(i.title.casefold().split()) for i in items}
+        return (
+            [g for g, _ in by_genre.most_common(2)],
+            [a for a, _ in by_author.most_common(2)],
+            owned,
+        )
+
     async def progression(self, user_id: UUID) -> Progression:
         """Level, badges and first steps, from all the reader ever did."""
         items = await self._stats.items(user_id)

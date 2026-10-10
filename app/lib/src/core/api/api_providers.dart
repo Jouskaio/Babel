@@ -90,6 +90,9 @@ final pluginsApiProvider = Provider<PluginsApi>(
 final pageboundApiProvider = Provider<PageboundApi>(
   (ref) => PageboundApi(ref.watch(apiClientProvider)),
 );
+final discoverApiProvider = Provider<DiscoverApi>(
+  (ref) => DiscoverApi(ref.watch(apiClientProvider)),
+);
 final adminApiProvider = Provider<AdminApi>(
   (ref) => AdminApi(ref.watch(apiClientProvider)),
 );

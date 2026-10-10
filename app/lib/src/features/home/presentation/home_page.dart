@@ -85,6 +85,7 @@ class HomePage extends ConsumerWidget {
                 const ContinueCard(),
                 const KavitaProgressCard(),
                 const ForYouRow(),
+                const PlaylistsRow(),
                 const ToReadList(),
                 const JourneyCard(),
                 const FeedSection(),
