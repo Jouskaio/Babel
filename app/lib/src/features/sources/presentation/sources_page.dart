@@ -9,6 +9,7 @@ import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../application/sources_providers.dart';
+import 'plugins_section.dart';
 import 'source_badge.dart';
 
 /// The account's sources (design: Penpot "sources / liste").
@@ -55,6 +56,7 @@ class SourcesPage extends ConsumerWidget {
                 ),
               ],
             },
+            const PluginsList(),
             const SizedBox(height: 16),
             PillButton(
               label: '+ ${l10n.addSource}',

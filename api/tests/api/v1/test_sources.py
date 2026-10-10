@@ -631,3 +631,39 @@ def test_a_background_scan_tells_the_readers_devices_how_it_went(
     fake.list_entries = FakeAo3Source.list_entries.__get__(fake)  # type: ignore[method-assign]
     client.post(f"/v1/sources/{source_id}/scan", headers=ada)
     assert pushes.sent[-1][1] == "Source injoignable"
+
+
+def test_plugins_are_installed_by_the_admin_and_switched_on_by_readers(
+    app: FastAPI, client: TestClient, bob: dict[str, str]
+) -> None:
+    app.state.container = replace(
+        app.state.container,
+        connectors={SourceKind.GENERIC: FakeCatalog()},
+        secrets=SecretBox(Fernet.generate_key().decode()),
+    )
+    admin = account(client, "admin@example.com")
+    body = {
+        "name": "My NAS shelf",
+        "url": "https://plugins.example.com/manifest.json",
+        "token": "secret-token",
+    }
+    assert client.post("/v1/admin/plugins", json=body, headers=bob).status_code == 403
+    installed = client.post("/v1/admin/plugins", json=body, headers=admin)
+    assert installed.status_code == 201
+    plugin_id = installed.json()["id"]
+
+    listed = client.get("/v1/plugins", headers=bob).json()
+    assert [(p["name"], p["active"]) for p in listed] == [("My NAS shelf", False)]
+
+    assert client.put(f"/v1/plugins/{plugin_id}/active", headers=bob).status_code == 204
+    assert client.get("/v1/plugins", headers=bob).json()[0]["active"] is True
+    sources = client.get("/v1/sources", headers=bob).json()
+    assert [(s["kind"], s["name"]) for s in sources] == [("generic", "My NAS shelf")]
+    # Switching it on twice makes no second source.
+    client.put(f"/v1/plugins/{plugin_id}/active", headers=bob)
+    assert len(client.get("/v1/sources", headers=bob).json()) == 1
+
+    assert client.delete(f"/v1/plugins/{plugin_id}/active", headers=bob).status_code == 204
+    assert client.get("/v1/sources", headers=bob).json() == []
+    assert client.delete(f"/v1/admin/plugins/{plugin_id}", headers=admin).status_code == 204
+    assert client.get("/v1/plugins", headers=bob).json() == []

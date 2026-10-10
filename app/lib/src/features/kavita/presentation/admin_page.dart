@@ -8,6 +8,7 @@ import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 import '../../social/presentation/safety.dart';
+import '../../sources/presentation/plugins_section.dart';
 import '../../sources/presentation/source_badge.dart';
 import '../application/kavita_providers.dart';
 
@@ -31,6 +32,8 @@ class AdminPage extends ConsumerWidget {
               const ReportsSection(),
               const SizedBox(height: 24),
               const _Controls(),
+              const SizedBox(height: 24),
+              const AdminPlugins(),
               const SizedBox(height: 24),
               Text(l10n.adminPremiumHint, style: BabelText.body(13)),
               const SizedBox(height: 12),

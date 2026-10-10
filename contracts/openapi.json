@@ -2071,6 +2071,53 @@
         "title": "ImportResponse",
         "type": "object"
       },
+      "InstallPlugin": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "token": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Token"
+          },
+          "url": {
+            "description": "The manifest address",
+            "maxLength": 2000,
+            "minLength": 8,
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url"
+        ],
+        "title": "InstallPlugin",
+        "type": "object"
+      },
       "IsbnLookupResponse": {
         "description": "The work an ISBN belongs to, and which of its editions it is.",
         "properties": {
@@ -2866,6 +2913,43 @@
           "remote_position"
         ],
         "title": "PlaybackResponse",
+        "type": "object"
+      },
+      "PluginResponse": {
+        "properties": {
+          "active": {
+            "description": "You switched it on: it is one of your sources",
+            "title": "Active",
+            "type": "boolean"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "active"
+        ],
+        "title": "PluginResponse",
         "type": "object"
       },
       "PremiumRequest": {
@@ -5493,6 +5577,95 @@
         "summary": "Overview",
         "tags": [
           "admin"
+        ]
+      }
+    },
+    "/v1/admin/plugins": {
+      "post": {
+        "description": "Install a plugin from a manifest address (checked first); readers can then switch it on.",
+        "operationId": "installPlugin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstallPlugin"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Install Plugin",
+        "tags": [
+          "plugins"
+        ]
+      }
+    },
+    "/v1/admin/plugins/{plugin_id}": {
+      "delete": {
+        "description": "Remove a plugin (the sources readers made from it stay as they are).",
+        "operationId": "uninstallPlugin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plugin_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Plugin Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Uninstall Plugin",
+        "tags": [
+          "plugins"
         ]
       }
     },
@@ -9731,6 +9904,119 @@
         "summary": "Get Year Stats",
         "tags": [
           "stats"
+        ]
+      }
+    },
+    "/v1/plugins": {
+      "get": {
+        "description": "The plugins your administrator installed, and which ones you have on.",
+        "operationId": "listPlugins",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PluginResponse"
+                  },
+                  "title": "Response Listplugins",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Plugins",
+        "tags": [
+          "plugins"
+        ]
+      }
+    },
+    "/v1/plugins/{plugin_id}/active": {
+      "delete": {
+        "description": "Switch a plugin off: its source goes (the books you imported stay).",
+        "operationId": "deactivatePlugin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plugin_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Plugin Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Deactivate Plugin",
+        "tags": [
+          "plugins"
+        ]
+      },
+      "put": {
+        "description": "Switch a plugin on: it becomes one of your sources.",
+        "operationId": "activatePlugin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plugin_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Plugin Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Activate Plugin",
+        "tags": [
+          "plugins"
         ]
       }
     },

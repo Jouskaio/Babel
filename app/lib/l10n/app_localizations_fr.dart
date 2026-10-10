@@ -2641,6 +2641,39 @@ class AppLocalizationsFr extends AppLocalizations {
   String get koreaderRenew => 'Remplacer le mot de passe';
 
   @override
+  String get pluginsTitle => 'Plugins';
+
+  @override
+  String get pluginsHint =>
+      'Des sources installées par l\'administrateur : active celles que tu veux, elles s\'ajoutent à tes sources.';
+
+  @override
+  String get pluginsAdminTitle => 'Plugins de sources';
+
+  @override
+  String get pluginsAdminHint =>
+      'Installe une source à partir de l\'adresse de son manifeste : chaque lecteur pourra l\'activer (ou non).';
+
+  @override
+  String get pluginsName => 'Nom du plugin';
+
+  @override
+  String get pluginsUrl => 'Adresse du manifeste';
+
+  @override
+  String get pluginsToken => 'Jeton d\'accès (facultatif)';
+
+  @override
+  String get pluginsInstall => 'Installer le plugin';
+
+  @override
+  String get pluginsRemove => 'Retirer le plugin';
+
+  @override
+  String get pluginsInstallFailed =>
+      'Cette adresse ne répond pas comme un manifeste Babel.';
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override
