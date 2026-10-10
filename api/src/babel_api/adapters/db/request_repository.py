@@ -96,6 +96,18 @@ class SqlRequestRepository:
             )
         )
 
+    async def users_waiting(self) -> list[UUID]:
+        """The readers with a request still waiting on a download (Chaptarr or Shelfmark)."""
+        rows = await self._session.scalars(
+            select(BookRequestRow.user_id)
+            .where(
+                BookRequestRow.status == RequestStatus.REQUESTED.value,
+                BookRequestRow.chaptarr_id.is_not(None),
+            )
+            .distinct()
+        )
+        return list(rows)
+
     async def link(self, user_id: UUID, kind: str = "chaptarr") -> ChaptarrLink | None:
         """The reader's own Chaptarr (or Shelfmark, by [kind])."""
         row = await self._session.get(_LINKS[kind], user_id)

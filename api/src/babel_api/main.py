@@ -37,7 +37,12 @@ from babel_api.adapters.sources.links import LinkFetcher
 from babel_api.adapters.sources.manifest import ManifestConnector
 from babel_api.adapters.sources.opds import OpdsConnector
 from babel_api.adapters.sources.webdav import WebDavConnector
-from babel_api.api.dependencies import Container, make_follow_service, make_kavita_service
+from babel_api.api.dependencies import (
+    Container,
+    make_follow_service,
+    make_kavita_service,
+    make_request_service,
+)
 from babel_api.api.errors import install_error_handlers
 from babel_api.api.v1.router import router as v1_router
 from babel_api.core.config import Settings, get_settings
@@ -47,6 +52,8 @@ from babel_api.services.catalog import CatalogService
 from babel_api.services.follow_loop import follow_forever
 from babel_api.services.follows import FollowService
 from babel_api.services.kavita import KavitaProvisioner, KavitaService
+from babel_api.services.request_watch import watch_forever
+from babel_api.services.requests import RequestService
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -154,8 +161,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             # A database not migrated yet (or down) must not stop the server from starting.
             logging.getLogger(__name__).warning("Roles not synchronized", exc_info=True)
         follow_task: asyncio.Task[None] | None = None
+        container: Container = app.state.container
         if settings.follow_interval_hours > 0:
-            container: Container = app.state.container
 
             @asynccontextmanager
             async def services() -> AsyncGenerator[FollowService]:
@@ -165,7 +172,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             follow_task = asyncio.create_task(
                 follow_forever(services, timedelta(hours=settings.follow_interval_hours))
             )
+        watch_task: asyncio.Task[None] | None = None
+        if container.shelfmark is not None or container.chaptarr is not None:
+
+            @asynccontextmanager
+            async def request_services() -> AsyncGenerator[RequestService]:
+                async with container.sessions() as session:
+                    yield make_request_service(container, session)
+
+            watch_task = asyncio.create_task(watch_forever(request_services))
         yield
+        if watch_task is not None:
+            watch_task.cancel()
         kavita.cancel()
         if follow_task is not None:
             follow_task.cancel()
