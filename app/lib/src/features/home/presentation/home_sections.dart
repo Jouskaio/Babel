@@ -447,6 +447,10 @@ class JourneyCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 ChallengeChip(p.challenge),
+                for (final e in p.extras) ...[
+                  const SizedBox(height: 8),
+                  ExtraChallengeChip(e),
+                ],
               ],
             ),
           ),

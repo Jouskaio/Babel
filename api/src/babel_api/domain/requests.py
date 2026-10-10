@@ -24,6 +24,7 @@ class BookRequest:
     # The same volume under its original-language title, added too so indexers find it.
     alt_chaptarr_id: int | None = None
     shelfmark_ref: str | None = None
+    imported_at: datetime | None = None
     # How far the download is (0 to 100) while it runs; None when it has not started.
     progress: float | None = None
 

@@ -12,12 +12,15 @@ from typing import Any, cast
 
 import httpx
 
+from babel_api.domain.challenges import norm
+
 log = logging.getLogger(__name__)
 
 SPARQL = "https://query.wikidata.org/sparql"
 TMDB = "https://api.themoviedb.org/3"
 TMDB_IMAGE = "https://image.tmdb.org/t/p/w342"
 CACHE_SECONDS = 24 * 3600
+LONG_CACHE_SECONDS = 7 * 24 * 3600
 USER_AGENT = "Babel/1.0 (https://babel.jouskaio.me; reading app)"
 
 _KINDS = (
@@ -120,6 +123,77 @@ class WikidataClient:
         self._tmdb_key = tmdb_key.strip()
         self._client = client or httpx.AsyncClient(timeout=20, headers={"User-Agent": USER_AGENT})
         self._cache: dict[tuple[str, str], tuple[float, list[Adaptation]]] = {}
+        self._laureates: dict[str, tuple[float, frozenset[str]]] = {}
+        self._countries: dict[str, tuple[float, frozenset[str]]] = {}
+
+    async def _select(self, query: str) -> list[dict[str, Any]]:
+        response = await self._client.get(
+            SPARQL,
+            params={"query": query, "format": "json"},
+            headers={"Accept": "application/sparql-results+json"},
+        )
+        response.raise_for_status()
+        data = cast(dict[str, Any], response.json())
+        return cast(
+            list[dict[str, Any]],
+            cast(dict[str, Any], data.get("results") or {}).get("bindings") or [],
+        )
+
+    async def laureates(self, prize: str) -> frozenset[str]:
+        """The names and titles (normalized) that received a prize, Wikidata item [prize].
+
+        Wikidata records some prizes on the author, some on the book: both are returned.
+        Empty when Wikidata does not answer (and then not remembered)."""
+        cached = self._laureates.get(prize)
+        if cached is not None and time.monotonic() - cached[0] < LONG_CACHE_SECONDS:
+            return cached[1]
+        query = f"""SELECT DISTINCT ?l WHERE {{
+  ?w wdt:P166 wd:{prize} . ?w rdfs:label ?l .
+  FILTER(LANG(?l) IN ("en", "fr"))
+}} LIMIT 6000"""
+        try:
+            rows = await self._select(query)
+        except (httpx.HTTPError, ValueError) as error:
+            log.warning("Wikidata laureates of %s: %s", prize, error)
+            return frozenset()
+        names = frozenset(
+            norm(str(cast(dict[str, Any], r.get("l") or {}).get("value", ""))) for r in rows
+        ) - {""}
+        self._laureates[prize] = (time.monotonic(), names)
+        return names
+
+    async def author_countries(self, names: list[str]) -> dict[str, frozenset[str]]:
+        """The countries of citizenship of writers, by normalized name (unknown ones: none)."""
+        out: dict[str, frozenset[str]] = {}
+        todo: list[str] = []
+        for name in dict.fromkeys(names):
+            cached = self._countries.get(norm(name))
+            if cached is not None and time.monotonic() - cached[0] < LONG_CACHE_SECONDS:
+                out[norm(name)] = cached[1]
+            elif norm(name):
+                todo.append(name)
+        for start in range(0, len(todo), 20):
+            chunk = todo[start : start + 20]
+            values = " ".join(f'"{_escape(n)}"@en' for n in chunk)
+            query = f"""SELECT ?n ?c WHERE {{
+  VALUES ?n {{ {values} }}
+  ?p rdfs:label ?n ; wdt:P106 wd:Q36180 ; wdt:P27 ?c .
+}}"""
+            try:
+                rows = await self._select(query)
+            except (httpx.HTTPError, ValueError) as error:
+                log.warning("Wikidata countries: %s", error)
+                continue
+            found: dict[str, set[str]] = {}
+            for r in rows:
+                name = norm(str(cast(dict[str, Any], r.get("n") or {}).get("value", "")))
+                country = str(cast(dict[str, Any], r.get("c") or {}).get("value", ""))
+                found.setdefault(name, set()).add(country.rsplit("/", 1)[-1])
+            for n in chunk:
+                countries = frozenset(found.get(norm(n), ()))
+                self._countries[norm(n)] = (time.monotonic(), countries)
+                out[norm(n)] = countries
+        return out
 
     async def adaptations(self, titles: list[str], surname: str) -> list[Adaptation]:
         """The works based on a book called any of [titles] by an author named [surname]."""

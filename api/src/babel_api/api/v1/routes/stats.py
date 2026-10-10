@@ -8,6 +8,7 @@ from fastapi import APIRouter, Query
 from pydantic import BaseModel, Field
 
 from babel_api.api.dependencies import CurrentUserId, StatsServiceDep
+from babel_api.api.v1.routes.discover import PlaylistKey
 from babel_api.domain.genres import Genre
 
 router = APIRouter(tags=["stats"])
@@ -155,6 +156,17 @@ class ChallengeResponse(BaseModel):
     won: int = Field(description="Months won in all, this one included")
 
 
+class ExtraChallengeResponse(BaseModel):
+    kind: Literal["prize", "subject", "authors", "countries"]
+    key: str = Field(description="Which prize or subject (a playlist key for a subject)")
+    target: int
+    progress: int = Field(description="Done this month, up to the target")
+    done: bool
+    playlist: PlaylistKey | None = Field(
+        description="Books to read for it (subject challenges)", default=None
+    )
+
+
 class ProgressionResponse(BaseModel):
     xp: int
     level: int
@@ -164,6 +176,9 @@ class ProgressionResponse(BaseModel):
     badges: list[BadgeResponse]
     steps: list[StepResponse] = Field(description="First steps: a short guided tour")
     challenge: ChallengeResponse = Field(description="The challenge of the month")
+    extras: list[ExtraChallengeResponse] = Field(
+        description="Two more challenges this month: a prize, a subject, authors or countries"
+    )
 
 
 @router.get("/me/progression", operation_id="getProgression")
@@ -195,4 +210,15 @@ async def get_progression(user_id: CurrentUserId, stats: StatsServiceDep) -> Pro
             done=p.challenge.done,
             won=p.challenge.won,
         ),
+        extras=[
+            ExtraChallengeResponse(
+                kind=e.kind,  # type: ignore[arg-type]
+                key=e.key,
+                target=e.target,
+                progress=e.progress,
+                done=e.done,
+                playlist=e.key if e.kind == "subject" else None,  # type: ignore[arg-type]
+            )
+            for e in p.extras
+        ],
     )

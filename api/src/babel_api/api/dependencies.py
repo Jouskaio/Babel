@@ -51,7 +51,7 @@ from babel_api.domain.ports import (
     Pusher,
     SourceConnector,
 )
-from babel_api.domain.sources import SourceEntry, SourceKind
+from babel_api.domain.sources import EntryStatus, SourceEntry, SourceKind
 from babel_api.domain.users import IdentityProvider
 from babel_api.services.audiobooks import AbsService
 from babel_api.services.auth import AuthService
@@ -356,7 +356,7 @@ def get_stats_service(
     container: ContainerDep, session: Annotated[AsyncSession, Depends(get_session)]
 ) -> StatsService:
     files = make_file_service(container, session)
-    return StatsService(SqlStatsRepository(session), files.file_subjects)
+    return StatsService(SqlStatsRepository(session), files.file_subjects, container.wikidata)
 
 
 StatsServiceDep = Annotated[StatsService, Depends(get_stats_service)]
@@ -435,6 +435,21 @@ def make_request_service(container: Container, session: AsyncSession) -> Request
         finally:
             await client.aclose()
 
+    async def add_to_library(user_id: UUID, titles: list[str]) -> bool:
+        """Looks again at the reader's sources (Kavita has just scanned) and imports the book."""
+        sources = make_source_service(container, session)
+        for source in await sources.list_sources(user_id):
+            if source.kind is SourceKind.OPDS:  # Kavita is one: it has just scanned
+                await sources.scan(user_id, source.id)
+        for title in titles:
+            for source, entry in await sources.search(user_id, title):
+                if entry.status is EntryStatus.IN_LIBRARY:
+                    return True
+                if entry.status in (EntryStatus.NEW, EntryStatus.ON_BABEL):
+                    await sources.import_entry(user_id, source.id, entry.id)
+                    return True
+        return False
+
     allowed = tuple(settings.source_allowed_hosts)
 
     def reader_chaptarr(url: str, key: str) -> ChaptarrClient:
@@ -455,6 +470,7 @@ def make_request_service(container: Container, session: AsyncSession) -> Request
         scan_library,
         container.shelfmark,
         container.shelfmark_for_reader or reader_shelfmark,
+        add_to_library,
     )
 
 

@@ -3403,4 +3403,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appearanceDeco => 'Art deco';
+
+  @override
+  String get playlistSpace => 'Space';
+
+  @override
+  String get playlistSea => 'The sea';
+
+  @override
+  String get playlistWar => 'War';
+
+  @override
+  String get playlistMagic => 'Magic';
+
+  @override
+  String get playlistTravel => 'Travel';
+
+  @override
+  String get playlistFriendship => 'Friendship';
+
+  @override
+  String extraPrize(String prize) {
+    return 'Challenge · $prize laureates';
+  }
+
+  @override
+  String extraSubject(String subject) {
+    return 'Challenge · read about $subject';
+  }
+
+  @override
+  String get extraAuthors => 'Challenge · three different authors';
+
+  @override
+  String get extraCountries => 'Challenge · three different countries';
+
+  @override
+  String extraProgress(int done, int target) {
+    return '$done / $target books';
+  }
+
+  @override
+  String get extraWon => 'Challenge won, well done!';
 }

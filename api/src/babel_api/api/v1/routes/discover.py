@@ -26,6 +26,12 @@ PlaylistKey = Literal[
     "historical",
     "coming_of_age",
     "fantasy",
+    "space",
+    "sea",
+    "war",
+    "magic",
+    "travel",
+    "friendship",
 ]
 
 

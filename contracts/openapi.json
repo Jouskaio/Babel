@@ -1540,6 +1540,79 @@
         "title": "ExternalReviewsResponse",
         "type": "object"
       },
+      "ExtraChallengeResponse": {
+        "properties": {
+          "done": {
+            "title": "Done",
+            "type": "boolean"
+          },
+          "key": {
+            "description": "Which prize or subject (a playlist key for a subject)",
+            "title": "Key",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "prize",
+              "subject",
+              "authors",
+              "countries"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "playlist": {
+            "anyOf": [
+              {
+                "enum": [
+                  "dark_academia",
+                  "gothic",
+                  "tragic_romance",
+                  "bottle",
+                  "classics",
+                  "enemies",
+                  "dystopia",
+                  "mystery",
+                  "horror",
+                  "historical",
+                  "coming_of_age",
+                  "fantasy",
+                  "space",
+                  "sea",
+                  "war",
+                  "magic",
+                  "travel",
+                  "friendship"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Books to read for it (subject challenges)",
+            "title": "Playlist"
+          },
+          "progress": {
+            "description": "Done this month, up to the target",
+            "title": "Progress",
+            "type": "integer"
+          },
+          "target": {
+            "title": "Target",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "key",
+          "target",
+          "progress",
+          "done"
+        ],
+        "title": "ExtraChallengeResponse",
+        "type": "object"
+      },
       "FanficDetailsResponse": {
         "description": "What AO3 says about a fanfiction.",
         "properties": {
@@ -3244,6 +3317,14 @@
             "$ref": "#/components/schemas/ChallengeResponse",
             "description": "The challenge of the month"
           },
+          "extras": {
+            "description": "Two more challenges this month: a prize, a subject, authors or countries",
+            "items": {
+              "$ref": "#/components/schemas/ExtraChallengeResponse"
+            },
+            "title": "Extras",
+            "type": "array"
+          },
           "level": {
             "title": "Level",
             "type": "integer"
@@ -3291,7 +3372,8 @@
           "title",
           "badges",
           "steps",
-          "challenge"
+          "challenge",
+          "extras"
         ],
         "title": "ProgressionResponse",
         "type": "object"
@@ -4884,7 +4966,13 @@
                   "horror",
                   "historical",
                   "coming_of_age",
-                  "fantasy"
+                  "fantasy",
+                  "space",
+                  "sea",
+                  "war",
+                  "magic",
+                  "travel",
+                  "friendship"
                 ],
                 "type": "string"
               },
@@ -7191,7 +7279,13 @@
                       "horror",
                       "historical",
                       "coming_of_age",
-                      "fantasy"
+                      "fantasy",
+                      "space",
+                      "sea",
+                      "war",
+                      "magic",
+                      "travel",
+                      "friendship"
                     ],
                     "type": "string"
                   },
@@ -7236,7 +7330,13 @@
                 "horror",
                 "historical",
                 "coming_of_age",
-                "fantasy"
+                "fantasy",
+                "space",
+                "sea",
+                "war",
+                "magic",
+                "travel",
+                "friendship"
               ],
               "title": "Key",
               "type": "string"

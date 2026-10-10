@@ -79,6 +79,15 @@ class Challenge:
 
 
 @dataclass(frozen=True, slots=True)
+class ExtraChallenge:
+    kind: str  # prize, subject, authors or countries
+    key: str
+    target: int
+    progress: int
+    done: bool
+
+
+@dataclass(frozen=True, slots=True)
 class Progression:
     xp: int
     level: int
@@ -88,6 +97,7 @@ class Progression:
     badges: tuple[Badge, ...]
     steps: tuple[Step, ...]
     challenge: Challenge
+    extras: tuple[ExtraChallenge, ...] = ()
 
 
 def level_of(xp: int) -> int:
@@ -100,7 +110,7 @@ def level_of(xp: int) -> int:
     return max(n, 1)
 
 
-def compute(activity: Activity) -> Progression:
+def compute(activity: Activity, extras: tuple[ExtraChallenge, ...] = ()) -> Progression:
     xp = (
         activity.finished * XP_FINISHED
         + activity.library * XP_ADDED
@@ -149,4 +159,5 @@ def compute(activity: Activity) -> Progression:
             done=activity.challenge_books >= TARGET,
             won=activity.challenges_won,
         ),
+        extras=extras,
     )

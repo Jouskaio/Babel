@@ -1118,5 +1118,20 @@
   "fanficUnavailable": "AO3 could not give the details of this fanfiction (members only, or unreachable for now).",
   "appearanceTitle": "Theme",
   "appearanceNight": "Night",
-  "appearanceDeco": "Art deco"
+  "appearanceDeco": "Art deco",
+  "playlistSpace": "Space",
+  "playlistSea": "The sea",
+  "playlistWar": "War",
+  "playlistMagic": "Magic",
+  "playlistTravel": "Travel",
+  "playlistFriendship": "Friendship",
+  "extraPrize": "Challenge · {prize} laureates",
+  "@extraPrize": {"placeholders": {"prize": {"type": "String"}}},
+  "extraSubject": "Challenge · read about {subject}",
+  "@extraSubject": {"placeholders": {"subject": {"type": "String"}}},
+  "extraAuthors": "Challenge · three different authors",
+  "extraCountries": "Challenge · three different countries",
+  "extraProgress": "{done} / {target} books",
+  "@extraProgress": {"placeholders": {"done": {"type": "int"}, "target": {"type": "int"}}},
+  "extraWon": "Challenge won, well done!"
 }

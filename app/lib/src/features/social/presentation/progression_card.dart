@@ -68,6 +68,10 @@ class ProgressionCard extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           ChallengeChip(p.challenge),
+          for (final e in p.extras) ...[
+            const SizedBox(height: 8),
+            ExtraChallengeChip(e),
+          ],
           const SizedBox(height: 18),
           Wrap(
             spacing: 10,

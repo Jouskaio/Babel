@@ -1910,5 +1910,20 @@
   "fanficUnavailable": "AO3 n'a pas pu donner les détails de cette fanfiction (réservée aux membres, ou injoignable pour l'instant).",
   "appearanceTitle": "Thème",
   "appearanceNight": "Nuit",
-  "appearanceDeco": "Art déco"
+  "appearanceDeco": "Art déco",
+  "playlistSpace": "L'espace",
+  "playlistSea": "La mer",
+  "playlistWar": "La guerre",
+  "playlistMagic": "La magie",
+  "playlistTravel": "Les voyages",
+  "playlistFriendship": "L'amitié",
+  "extraPrize": "Défi · lauréats du {prize}",
+  "@extraPrize": {"placeholders": {"prize": {"type": "String"}}},
+  "extraSubject": "Défi · lire sur {subject}",
+  "@extraSubject": {"placeholders": {"subject": {"type": "String"}}},
+  "extraAuthors": "Défi · trois auteurs différents",
+  "extraCountries": "Défi · trois pays différents",
+  "extraProgress": "{done} / {target} livres",
+  "@extraProgress": {"placeholders": {"done": {"type": "int"}, "target": {"type": "int"}}},
+  "extraWon": "Défi réussi, bravo !"
 }

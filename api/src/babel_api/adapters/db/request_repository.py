@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from uuid import UUID
 
-from sqlalchemy import delete, select
+from sqlalchemy import and_, delete, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.models import BookRequestRow, ChaptarrLinkRow, ShelfmarkLinkRow
@@ -24,6 +24,7 @@ def _to_request(row: BookRequestRow) -> BookRequest:
         language=row.language,
         alt_chaptarr_id=row.alt_chaptarr_id,
         shelfmark_ref=row.shelfmark_ref,
+        imported_at=row.imported_at,
     )
 
 
@@ -96,17 +97,38 @@ class SqlRequestRepository:
             )
         )
 
-    async def users_waiting(self) -> list[UUID]:
-        """The readers with a request still waiting on a download (Chaptarr or Shelfmark)."""
+    async def users_waiting(self, since: datetime) -> list[UUID]:
+        """The readers with a request waiting on a download (Chaptarr or Shelfmark), or
+        arrived since [since] and not yet added to their library."""
         rows = await self._session.scalars(
             select(BookRequestRow.user_id)
             .where(
-                BookRequestRow.status == RequestStatus.REQUESTED.value,
-                BookRequestRow.chaptarr_id.is_not(None),
+                or_(
+                    and_(
+                        BookRequestRow.status == RequestStatus.REQUESTED.value,
+                        BookRequestRow.chaptarr_id.is_not(None),
+                    ),
+                    and_(
+                        BookRequestRow.status == RequestStatus.AVAILABLE.value,
+                        BookRequestRow.imported_at.is_(None),
+                        BookRequestRow.created_at > since,
+                    ),
+                )
             )
             .distinct()
         )
         return list(rows)
+
+    async def mark_imported(self, user_id: UUID, work_id: UUID, language: str) -> None:
+        await self._session.execute(
+            update(BookRequestRow)
+            .where(
+                BookRequestRow.user_id == user_id,
+                BookRequestRow.work_id == work_id,
+                BookRequestRow.language == language,
+            )
+            .values(imported_at=datetime.now(UTC))
+        )
 
     async def link(self, user_id: UUID, kind: str = "chaptarr") -> ChaptarrLink | None:
         """The reader's own Chaptarr (or Shelfmark, by [kind])."""

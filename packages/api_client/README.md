@@ -260,6 +260,7 @@ Class | Method | HTTP request | Description
  - [ExternalRatingResponse](doc//ExternalRatingResponse.md)
  - [ExternalReviewResponse](doc//ExternalReviewResponse.md)
  - [ExternalReviewsResponse](doc//ExternalReviewsResponse.md)
+ - [ExtraChallengeResponse](doc//ExtraChallengeResponse.md)
  - [FanficDetailsResponse](doc//FanficDetailsResponse.md)
  - [FeedEntryResponse](doc//FeedEntryResponse.md)
  - [FeedKind](doc//FeedKind.md)

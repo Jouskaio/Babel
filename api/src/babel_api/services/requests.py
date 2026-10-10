@@ -9,7 +9,7 @@ import logging
 import re
 from collections.abc import Awaitable, Callable
 from dataclasses import replace
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any, cast
 from urllib.parse import urlsplit
 from uuid import UUID
@@ -47,6 +47,12 @@ def volume_title(title: str) -> str:
     return f"{base} {guess.number:g}"
 
 
+IMPORT_WINDOW = timedelta(days=2)
+
+# Adds the first of these titles Kavita (or another source) has to the reader's library.
+LibraryAdder = Callable[[UUID, list[str]], Awaitable[bool]]
+
+
 class RequestService:
     def __init__(
         self,
@@ -59,7 +65,9 @@ class RequestService:
         scan_library: Callable[[], Awaitable[None]],
         shelfmark: Callable[[], ShelfmarkClient] | None = None,
         reader_shelfmark: ShelfmarkFactory | None = None,
+        add_to_library: LibraryAdder | None = None,
     ) -> None:
+        self._add_to_library = add_to_library
         self._shelfmark = shelfmark
         self._reader_shelfmark = reader_shelfmark
         self._requests = requests
@@ -320,7 +328,31 @@ class RequestService:
         return None if same else book
 
     async def users_waiting(self) -> list[UUID]:
-        return await self._requests.users_waiting()
+        return await self._requests.users_waiting(datetime.now(UTC) - IMPORT_WINDOW)
+
+    async def _import_arrived(self, user_id: UUID, items: list[BookRequest]) -> list[BookRequest]:
+        """Books that arrived are added to the reader's library, once Kavita (asked to scan)
+        shows them: tried again at every check for two days."""
+        if self._add_to_library is None:
+            return items
+        since = datetime.now(UTC) - IMPORT_WINDOW
+        done = False
+        for r in items:
+            if r.status is not RequestStatus.AVAILABLE or r.imported_at or r.created_at < since:
+                continue
+            try:
+                detail = await self._works.get(r.work_id)
+                names = [volume_title(detail.localized(r.language or None)[0])]
+                names += [volume_title(detail.localized("en")[0]), detail.work.title]
+                if await self._add_to_library(user_id, list(dict.fromkeys(names))):
+                    await self._requests.mark_imported(user_id, r.work_id, r.language)
+                    done = True
+            except Exception:  # best effort: the book stays importable by hand
+                log.warning("Could not add an arrived book to the library", exc_info=True)
+        if done:
+            await self._requests.commit()
+            return await self._requests.list_for(user_id)
+        return items
 
     @staticmethod
     def _with_progress(
@@ -399,6 +431,7 @@ class RequestService:
         client = await self._client_for(user_id) if waiting else None
         if client is None:
             await self._scan_if(shelf_arrived)
+            items = await self._import_arrived(user_id, items)
             return self._with_progress(items, shelf_progress)
         arrived = shelf_arrived
         progress: dict[int, float] = {}
@@ -423,6 +456,7 @@ class RequestService:
             await self._requests.commit()
             await self._scan_if(True)
             items = await self._requests.list_for(user_id)
+        items = await self._import_arrived(user_id, items)
         return self._with_progress(
             [
                 replace(

@@ -16,6 +16,12 @@ const playlistKeys = [
   'historical',
   'coming_of_age',
   'fantasy',
+  'space',
+  'sea',
+  'war',
+  'magic',
+  'travel',
+  'friendship',
 ];
 
 String playlistName(AppLocalizations l10n, String key) => switch (key) {
@@ -30,6 +36,12 @@ String playlistName(AppLocalizations l10n, String key) => switch (key) {
   'horror' => l10n.playlistHorror,
   'historical' => l10n.playlistHistorical,
   'coming_of_age' => l10n.playlistComingOfAge,
+  'space' => l10n.playlistSpace,
+  'sea' => l10n.playlistSea,
+  'war' => l10n.playlistWar,
+  'magic' => l10n.playlistMagic,
+  'travel' => l10n.playlistTravel,
+  'friendship' => l10n.playlistFriendship,
   _ => l10n.moodFantasy,
 };
 
@@ -45,5 +57,11 @@ IconData playlistIcon(String key) => switch (key) {
   'horror' => Icons.dark_mode_outlined,
   'historical' => Icons.hourglass_empty_rounded,
   'coming_of_age' => Icons.park_outlined,
+  'space' => Icons.rocket_launch_outlined,
+  'sea' => Icons.sailing_outlined,
+  'war' => Icons.shield_outlined,
+  'magic' => Icons.auto_awesome_outlined,
+  'travel' => Icons.explore_outlined,
+  'friendship' => Icons.diversity_1_outlined,
   _ => Icons.auto_fix_high_rounded,
 };
