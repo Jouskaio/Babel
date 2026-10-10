@@ -147,6 +147,26 @@ class OpenLibrarySource:
                 break
         return works
 
+    async def subject(self, slug: str, limit: int) -> list[SourceWork]:
+        response = await self._client.get(f"{_BASE}/subjects/{slug}.json", params={"limit": limit})
+        response.raise_for_status()
+        works: list[SourceWork] = []
+        for doc in _dicts(response.json().get("works")):
+            if not doc.get("title") or not str(doc.get("key", "")).startswith("/works/"):
+                continue
+            authors = _dicts(doc.get("authors"))
+            works.append(
+                SourceWork(
+                    open_library_id=_key(doc["key"], "/works/"),
+                    title=str(doc["title"]),
+                    authors=tuple(str(a["name"]) for a in authors[:3] if a.get("name")),
+                    first_publish_year=doc.get("first_publish_year"),
+                    cover_id=doc.get("cover_id"),
+                    edition_count=doc.get("edition_count"),
+                )
+            )
+        return works
+
     async def search(self, query: str, limit: int, language: str | None = None) -> list[SourceWork]:
         fields = "key,title,author_name,first_publish_year,cover_i,edition_count,subject"
         params: dict[str, str | int] = {"q": query, "limit": limit, "fields": fields}

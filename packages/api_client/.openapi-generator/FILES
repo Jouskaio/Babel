@@ -41,6 +41,7 @@ doc/CreateSourceRequest.md
 doc/CsvImportResponse.md
 doc/DeviceKind.md
 doc/DeviceResponse.md
+doc/DiscoverApi.md
 doc/EditionResponse.md
 doc/EntityKind.md
 doc/EntryStatus.md
@@ -144,6 +145,7 @@ doc/SourceResponse.md
 doc/SourcesApi.md
 doc/StatsApi.md
 doc/StepResponse.md
+doc/SuggestionResponse.md
 doc/SyncApi.md
 doc/TokenResponse.md
 doc/TrendingWorkResponse.md
@@ -166,6 +168,7 @@ lib/api/admin_api.dart
 lib/api/audiobooks_api.dart
 lib/api/auth_api.dart
 lib/api/catalog_api.dart
+lib/api/discover_api.dart
 lib/api/health_api.dart
 lib/api/kavita_api.dart
 lib/api/kosync_api.dart
@@ -313,6 +316,7 @@ lib/model/source_kind.dart
 lib/model/source_match_response.dart
 lib/model/source_response.dart
 lib/model/step_response.dart
+lib/model/suggestion_response.dart
 lib/model/token_response.dart
 lib/model/trending_work_response.dart
 lib/model/update_profile_request.dart

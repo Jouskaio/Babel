@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import re
+import time
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from urllib.parse import quote
@@ -19,6 +20,7 @@ from babel_api.adapters.wikidata import Adaptation, WikidataClient
 from babel_api.domain.catalog import Edition, IdentifierKind, SourceWork, Work
 from babel_api.domain.errors import NotFoundError, SourceUnavailableError
 from babel_api.domain.isbn import normalize_isbn
+from babel_api.domain.playlists import PLAYLISTS
 from babel_api.domain.ports import BookSource, CatalogRepository
 from babel_api.domain.series import guess_series, series_key, volume_number
 
@@ -99,6 +101,9 @@ class IsbnMatch:
     edition: Edition
 
 
+PLAYLIST_SECONDS = 12 * 3600
+
+
 async def _nothing() -> None:
     return None
 
@@ -114,6 +119,7 @@ class WorkService:
         pagebound: PageboundClient | None = None,
     ) -> None:
         self._pagebound = pagebound
+        self._playlists: dict[str, tuple[float, list[SearchHit]]] = {}
         self._wikidata = wikidata
         self._external = external
         self._repo = repository
@@ -387,6 +393,40 @@ class WorkService:
             if work is not None:
                 found[work_id] = (work.title, work.authors)
         return found
+
+    async def playlist(self, key: str, limit: int = 24) -> list[SearchHit]:
+        """The works of a playlist, with covers; the answer is kept for half a day."""
+        slug = PLAYLISTS.get(key)
+        if slug is None:
+            raise NotFoundError
+        cached = self._playlists.get(key)
+        if cached is not None and time.monotonic() - cached[0] < PLAYLIST_SECONDS:
+            return cached[1][:limit]
+        try:
+            found = await self._source.subject(slug, 40)
+        except Exception as error:
+            raise SourceUnavailableError from error
+        hits = [
+            SearchHit(work, work.title, work.cover_id)
+            for work in [await self._repo.upsert_work(s) for s in found if s.cover_id]
+        ]
+        await self._repo.commit()
+        self._playlists[key] = (time.monotonic(), hits)
+        return hits[:limit]
+
+    async def by_author(self, author: str, limit: int = 8) -> list[SearchHit]:
+        """Books by an author the reader likes (empty when the catalog does not answer)."""
+        try:
+            found = await self._source.search(f'author:"{author}"', limit * 2, None)
+        except Exception:
+            logger.info("Open Library search for %s failed", author)
+            return []
+        hits = [
+            SearchHit(work, work.title, work.cover_id)
+            for work in [await self._repo.upsert_work(s) for s in found if s.cover_id]
+        ]
+        await self._repo.commit()
+        return hits[:limit]
 
     async def cover_url(self, work_id: UUID) -> str | None:
         work = await self._repo.get_work(work_id)

@@ -15,6 +15,7 @@ import '../features/auth/presentation/verify_email_page.dart';
 import '../features/catalog/presentation/scan_page.dart';
 import '../features/catalog/presentation/search_page.dart';
 import '../features/catalog/presentation/work_page.dart';
+import '../features/discover/presentation/playlist_page.dart';
 import '../features/home/presentation/home_page.dart';
 import '../features/kavita/presentation/admin_page.dart';
 import '../features/kavita/presentation/kavita_setup_page.dart';
@@ -53,6 +54,7 @@ abstract final class Routes {
   static const library = '/library';
   static const scan = '/scan';
   static String work(String id) => '/works/$id';
+  static String playlist(String key) => '/playlist/$key';
   static String read(String itemId) => '/read/$itemId';
   static const importLink = '/import-link';
   static const stats = '/stats';
@@ -147,6 +149,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.account, builder: (_, _) => const AccountPage()),
       GoRoute(path: Routes.friends, builder: (_, _) => const FriendsPage()),
       GoRoute(path: Routes.stats, builder: (_, _) => const StatsPage()),
+      GoRoute(
+        path: '/playlist/:key',
+        builder: (_, state) =>
+            PlaylistPage(keyName: state.pathParameters['key'] ?? ''),
+      ),
       GoRoute(
         path: '/saga',
         builder: (_, state) => SagaPage(

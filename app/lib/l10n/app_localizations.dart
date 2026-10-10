@@ -4952,6 +4952,60 @@ abstract class AppLocalizations {
   /// **'Défi réussi — badge « {badge} » gagné'**
   String challengeWon(String badge);
 
+  /// No description provided for @playlistDystopia.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dystopies'**
+  String get playlistDystopia;
+
+  /// No description provided for @playlistMystery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enquêtes & polars'**
+  String get playlistMystery;
+
+  /// No description provided for @playlistHorror.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frissons'**
+  String get playlistHorror;
+
+  /// No description provided for @playlistHistorical.
+  ///
+  /// In fr, this message translates to:
+  /// **'Romans historiques'**
+  String get playlistHistorical;
+
+  /// No description provided for @playlistComingOfAge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passage à l’âge adulte'**
+  String get playlistComingOfAge;
+
+  /// No description provided for @playlistHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les livres les plus lus de ce thème, d’après Open Library.'**
+  String get playlistHint;
+
+  /// No description provided for @homePlaylists.
+  ///
+  /// In fr, this message translates to:
+  /// **'Playlists'**
+  String get homePlaylists;
+
+  /// No description provided for @suggestionGenre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parce que vous lisez du {genre}'**
+  String suggestionGenre(String genre);
+
+  /// No description provided for @suggestionAuthor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus de {author}'**
+  String suggestionAuthor(String author);
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

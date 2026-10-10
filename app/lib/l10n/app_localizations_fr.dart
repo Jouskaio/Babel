@@ -2976,6 +2976,38 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get playlistDystopia => 'Dystopies';
+
+  @override
+  String get playlistMystery => 'Enquêtes & polars';
+
+  @override
+  String get playlistHorror => 'Frissons';
+
+  @override
+  String get playlistHistorical => 'Romans historiques';
+
+  @override
+  String get playlistComingOfAge => 'Passage à l’âge adulte';
+
+  @override
+  String get playlistHint =>
+      'Les livres les plus lus de ce thème, d’après Open Library.';
+
+  @override
+  String get homePlaylists => 'Playlists';
+
+  @override
+  String suggestionGenre(String genre) {
+    return 'Parce que vous lisez du $genre';
+  }
+
+  @override
+  String suggestionAuthor(String author) {
+    return 'Plus de $author';
+  }
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override

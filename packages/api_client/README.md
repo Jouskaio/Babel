@@ -112,6 +112,9 @@ Class | Method | HTTP request | Description
 *CatalogApi* | [**openHardcoverWork**](doc//CatalogApi.md#openhardcoverwork) | **POST** /v1/catalog/works/hardcover | Open Hardcover Work
 *CatalogApi* | [**recognizeCover**](doc//CatalogApi.md#recognizecover) | **POST** /v1/catalog/recognize | Recognize Cover
 *CatalogApi* | [**searchWorks**](doc//CatalogApi.md#searchworks) | **GET** /v1/catalog/search | Search Works
+*DiscoverApi* | [**getPlaylist**](doc//DiscoverApi.md#getplaylist) | **GET** /v1/catalog/playlists/{key} | Get Playlist
+*DiscoverApi* | [**getSuggestions**](doc//DiscoverApi.md#getsuggestions) | **GET** /v1/me/for-you | Get Suggestions
+*DiscoverApi* | [**listPlaylists**](doc//DiscoverApi.md#listplaylists) | **GET** /v1/catalog/playlists | List Playlists
 *HealthApi* | [**getHealth**](doc//HealthApi.md#gethealth) | **GET** /v1/health | Get Health
 *KavitaApi* | [**getKavita**](doc//KavitaApi.md#getkavita) | **GET** /v1/me/kavita | Get Kavita
 *KavitaApi* | [**linkKavita**](doc//KavitaApi.md#linkkavita) | **POST** /v1/me/kavita | Link Kavita
@@ -344,6 +347,7 @@ Class | Method | HTTP request | Description
  - [SourceMatchResponse](doc//SourceMatchResponse.md)
  - [SourceResponse](doc//SourceResponse.md)
  - [StepResponse](doc//StepResponse.md)
+ - [SuggestionResponse](doc//SuggestionResponse.md)
  - [TokenResponse](doc//TokenResponse.md)
  - [TrendingWorkResponse](doc//TrendingWorkResponse.md)
  - [UpdateProfileRequest](doc//UpdateProfileRequest.md)
