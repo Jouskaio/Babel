@@ -2775,6 +2775,17 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get scanPhoto => 'Photographier la couverture (expérimental)';
+
+  @override
+  String get scanPhotoNone =>
+      'Aucun livre reconnu sur cette photo. Essaie avec un code-barres, ou cherche par titre.';
+
+  @override
+  String get scanPhotoUnavailable =>
+      'La lecture de couverture n\'est pas disponible sur ce serveur.';
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override

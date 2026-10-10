@@ -20,6 +20,7 @@ Method | HTTP request | Description
 [**getWorkCover**](CatalogApi.md#getworkcover) | **GET** /v1/catalog/work-covers/{work_id} | Get Work Cover
 [**lookupIsbn**](CatalogApi.md#lookupisbn) | **GET** /v1/catalog/isbn/{isbn} | Lookup Isbn
 [**openHardcoverWork**](CatalogApi.md#openhardcoverwork) | **POST** /v1/catalog/works/hardcover | Open Hardcover Work
+[**recognizeCover**](CatalogApi.md#recognizecover) | **POST** /v1/catalog/recognize | Recognize Cover
 [**searchWorks**](CatalogApi.md#searchworks) | **GET** /v1/catalog/search | Search Works
 
 
@@ -541,6 +542,57 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **recognizeCover**
+> RecognizedResponse recognizeCover(file, lang)
+
+Recognize Cover
+
+Experimental: read the words of a cover photo and search the catalog with them.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = CatalogApi();
+final file = BINARY_DATA_HERE; // MultipartFile | 
+final lang = lang_example; // String | 
+
+try {
+    final result = api_instance.recognizeCover(file, lang);
+    print(result);
+} catch (e) {
+    print('Exception when calling CatalogApi->recognizeCover: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **file** | **MultipartFile**|  | 
+ **lang** | **String**|  | [optional] 
+
+### Return type
+
+[**RecognizedResponse**](RecognizedResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: multipart/form-data
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

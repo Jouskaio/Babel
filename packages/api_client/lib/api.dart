@@ -138,6 +138,7 @@ part 'model/reader_response.dart';
 part 'model/reading_position_response.dart';
 part 'model/reading_response.dart';
 part 'model/reading_status.dart';
+part 'model/recognized_response.dart';
 part 'model/recommend_request.dart';
 part 'model/recommendation_response.dart';
 part 'model/refresh_request.dart';

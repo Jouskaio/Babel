@@ -473,6 +473,20 @@
         "title": "Body_importReadingList",
         "type": "object"
       },
+      "Body_recognizeCover": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_recognizeCover",
+        "type": "object"
+      },
       "Body_uploadBookCover": {
         "properties": {
           "file": {
@@ -3507,6 +3521,28 @@
         ],
         "title": "ReadingStatus",
         "type": "string"
+      },
+      "RecognizedResponse": {
+        "properties": {
+          "text": {
+            "description": "What was read on the cover",
+            "title": "Text",
+            "type": "string"
+          },
+          "works": {
+            "items": {
+              "$ref": "#/components/schemas/WorkSummaryResponse"
+            },
+            "title": "Works",
+            "type": "array"
+          }
+        },
+        "required": [
+          "text",
+          "works"
+        ],
+        "title": "RecognizedResponse",
+        "type": "object"
       },
       "RecommendRequest": {
         "properties": {
@@ -6915,6 +6951,75 @@
           }
         ],
         "summary": "Lookup Isbn",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/recognize": {
+      "post": {
+        "description": "Experimental: read the words of a cover photo and search the catalog with them.",
+        "operationId": "recognizeCover",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "lang",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "fr",
+                    "en"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Lang"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_recognizeCover"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecognizedResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Recognize Cover",
         "tags": [
           "catalog"
         ]

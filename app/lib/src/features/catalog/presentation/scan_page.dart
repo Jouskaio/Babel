@@ -1,8 +1,10 @@
 import 'package:babel_api_client/api.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' show MultipartFile;
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/api/api_providers.dart';
@@ -15,12 +17,15 @@ import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../library/application/library_controller.dart';
+import 'search_page.dart' show WorkRow;
 
-/// Barcode scanning on phones and tablets; manual ISBN entry everywhere.
+/// Barcode scanning with the camera (phones, tablets, Mac, and the webcam of a computer in the
+/// browser); manual ISBN entry and cover photos everywhere.
 bool get _cameraSupported =>
-    !kIsWeb &&
-    (defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.iOS);
+    kIsWeb ||
+    defaultTargetPlatform == TargetPlatform.android ||
+    defaultTargetPlatform == TargetPlatform.iOS ||
+    defaultTargetPlatform == TargetPlatform.macOS;
 
 /// Scan a book (design: Penpot "screen / scan").
 class ScanPage extends ConsumerStatefulWidget {
@@ -40,6 +45,8 @@ class _ScanPageState extends ConsumerState<ScanPage> {
   IsbnLookupResponse? _found;
   String? _error;
   bool _burst = false;
+  bool _photoBusy = false;
+  List<WorkSummaryResponse>? _candidates; // from a cover photo
   final _added = <String>[];
 
   @override
@@ -97,6 +104,41 @@ class _ScanPageState extends ConsumerState<ScanPage> {
       }
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  /// Experimental: a photo of the cover; its words search the catalog.
+  Future<void> _photo() async {
+    final l10n = context.l10n;
+    final lang = Localizations.localeOf(context).languageCode;
+    final picked = await FilePicker.pickFiles(type: FileType.image);
+    if (picked.isEmpty || !mounted) return;
+    final file = picked.first;
+    setState(() {
+      _photoBusy = true;
+      _error = null;
+      _found = null;
+    });
+    try {
+      final bytes = await file.xFile.readAsBytes();
+      final found = await ref
+          .read(authedCatalogApiProvider)
+          .recognizeCover(
+            MultipartFile.fromBytes('file', bytes, filename: file.name),
+            lang: lang,
+          );
+      if (mounted) setState(() => _candidates = found?.works ?? const []);
+    } on ApiException catch (error) {
+      if (mounted) {
+        setState(() {
+          _candidates = null;
+          _error = error.code == 503
+              ? l10n.scanPhotoUnavailable
+              : l10n.errorGeneric;
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _photoBusy = false);
     }
   }
 
@@ -194,6 +236,9 @@ class _ScanPageState extends ConsumerState<ScanPage> {
             error: _error,
             added: _added,
             onLookup: () => _lookup(_isbn.text),
+            candidates: _candidates,
+            photoBusy: _photoBusy,
+            onPhoto: _photo,
           ),
         ],
       ),
@@ -209,6 +254,9 @@ class _ResultSheet extends StatelessWidget {
     required this.error,
     required this.added,
     required this.onLookup,
+    required this.candidates,
+    required this.photoBusy,
+    required this.onPhoto,
   });
 
   final TextEditingController isbn;
@@ -217,6 +265,9 @@ class _ResultSheet extends StatelessWidget {
   final String? error;
   final List<String> added;
   final VoidCallback onLookup;
+  final List<WorkSummaryResponse>? candidates;
+  final bool photoBusy;
+  final VoidCallback onPhoto;
 
   @override
   Widget build(BuildContext context) {
@@ -331,6 +382,25 @@ class _ResultSheet extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 10),
+            PillButton(
+              label: l10n.scanPhoto,
+              kind: PillButtonKind.secondary,
+              expand: true,
+              loading: photoBusy,
+              onPressed: onPhoto,
+            ),
+            if (candidates case final found?) ...[
+              const SizedBox(height: 10),
+              if (found.isEmpty)
+                Text(l10n.scanPhotoNone, style: BabelText.body(13))
+              else
+                for (final work in found.take(4))
+                  WorkRow(
+                    work: work,
+                    onTap: () => context.push(Routes.work(work.id)),
+                  ),
+            ],
           ],
         ),
       ),

@@ -105,6 +105,7 @@ doc/ReaderResponse.md
 doc/ReadingPositionResponse.md
 doc/ReadingResponse.md
 doc/ReadingStatus.md
+doc/RecognizedResponse.md
 doc/RecommendRequest.md
 doc/RecommendationResponse.md
 doc/RefreshRequest.md
@@ -272,6 +273,7 @@ lib/model/reader_response.dart
 lib/model/reading_position_response.dart
 lib/model/reading_response.dart
 lib/model/reading_status.dart
+lib/model/recognized_response.dart
 lib/model/recommend_request.dart
 lib/model/recommendation_response.dart
 lib/model/refresh_request.dart

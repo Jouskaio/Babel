@@ -4604,6 +4604,24 @@ abstract class AppLocalizations {
   /// **'{count, plural, one{# livre terminé} other{# livres terminés}} ce mois-ci'**
   String homeMonthBooks(int count);
 
+  /// No description provided for @scanPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photographier la couverture (expérimental)'**
+  String get scanPhoto;
+
+  /// No description provided for @scanPhotoNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun livre reconnu sur cette photo. Essaie avec un code-barres, ou cherche par titre.'**
+  String get scanPhotoNone;
+
+  /// No description provided for @scanPhotoUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'La lecture de couverture n\'est pas disponible sur ce serveur.'**
+  String get scanPhotoUnavailable;
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:
