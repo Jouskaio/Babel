@@ -473,6 +473,20 @@
         "title": "Body_importReadingList",
         "type": "object"
       },
+      "Body_recognizeCover": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_recognizeCover",
+        "type": "object"
+      },
       "Body_uploadBookCover": {
         "properties": {
           "file": {
@@ -692,6 +706,13 @@
       },
       "BookRequestResponse": {
         "properties": {
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -717,6 +738,12 @@
           },
           "status": {
             "$ref": "#/components/schemas/RequestStatus"
+          },
+          "title": {
+            "default": "",
+            "description": "The book's title",
+            "title": "Title",
+            "type": "string"
           },
           "via": {
             "default": "chaptarr",
@@ -3495,6 +3522,28 @@
         "title": "ReadingStatus",
         "type": "string"
       },
+      "RecognizedResponse": {
+        "properties": {
+          "text": {
+            "description": "What was read on the cover",
+            "title": "Text",
+            "type": "string"
+          },
+          "works": {
+            "items": {
+              "$ref": "#/components/schemas/WorkSummaryResponse"
+            },
+            "title": "Works",
+            "type": "array"
+          }
+        },
+        "required": [
+          "text",
+          "works"
+        ],
+        "title": "RecognizedResponse",
+        "type": "object"
+      },
       "RecommendRequest": {
         "properties": {
           "authors": {
@@ -5551,7 +5600,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.53.0"
+    "version": "0.54.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -6902,6 +6951,75 @@
           }
         ],
         "summary": "Lookup Isbn",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/recognize": {
+      "post": {
+        "description": "Experimental: read the words of a cover photo and search the catalog with them.",
+        "operationId": "recognizeCover",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "lang",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "fr",
+                    "en"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Lang"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_recognizeCover"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecognizedResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Recognize Cover",
         "tags": [
           "catalog"
         ]

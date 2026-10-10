@@ -15,9 +15,11 @@ RUN uv sync --frozen --no-dev
 
 # ---------------------------------------------------------------- runtime
 FROM python:3.13-slim-bookworm AS runtime
-# bsdtar (libarchive) opens CBR comics, which are converted to CBZ for the readers.
+# bsdtar (libarchive) opens CBR comics, which are converted to CBZ for the readers;
+# Tesseract reads the words of a cover photo (French and English).
 RUN apt-get update \
- && apt-get install -y --no-install-recommends libarchive-tools \
+ && apt-get install -y --no-install-recommends \
+    libarchive-tools tesseract-ocr tesseract-ocr-fra tesseract-ocr-eng \
  && rm -rf /var/lib/apt/lists/*
 RUN useradd --system --uid 10001 --no-create-home babel
 WORKDIR /app

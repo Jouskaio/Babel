@@ -370,6 +370,8 @@ class ApiClient {
           return ReadingResponse.fromJson(value);
         case 'ReadingStatus':
           return ReadingStatusTypeTransformer().decode(value);
+        case 'RecognizedResponse':
+          return RecognizedResponse.fromJson(value);
         case 'RecommendRequest':
           return RecommendRequest.fromJson(value);
         case 'RecommendationResponse':

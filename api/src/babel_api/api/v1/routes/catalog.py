@@ -6,10 +6,11 @@ from urllib.parse import urlencode, urlsplit
 from uuid import UUID
 
 import httpx
-from fastapi import APIRouter, HTTPException, Path, Query, Response, status
+from fastapi import APIRouter, File, HTTPException, Path, Query, Response, UploadFile, status
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
+from babel_api.adapters.ocr import OcrUnavailableError, queries, read_text
 from babel_api.api.dependencies import Container, ContainerDep, CurrentUserId, WorkServiceDep
 from babel_api.domain.catalog import Edition, IdentifierKind, Work
 from babel_api.domain.files import Cover
@@ -258,6 +259,42 @@ async def get_external_reviews(
             for r in reviews
         ],
     )
+
+
+class RecognizedResponse(BaseModel):
+    text: str = Field(description="What was read on the cover")
+    works: list[WorkSummaryResponse]
+
+
+_PHOTO_MAX = 8 * 1024 * 1024
+
+
+@router.post("/recognize", operation_id="recognizeCover")
+async def recognize_cover(
+    _: CurrentUserId,
+    container: ContainerDep,
+    works: WorkServiceDep,
+    file: Annotated[UploadFile, File()],
+    lang: Language | None = None,
+) -> RecognizedResponse:
+    """Experimental: read the words of a cover photo and search the catalog with them."""
+    image = await file.read(_PHOTO_MAX + 1)
+    if len(image) > _PHOTO_MAX:
+        raise HTTPException(status.HTTP_413_CONTENT_TOO_LARGE, "Photo too large")
+    read = container.ocr or read_text
+    try:
+        text = await read(image)
+    except OcrUnavailableError:
+        raise HTTPException(
+            status.HTTP_503_SERVICE_UNAVAILABLE, "Cover reading is not available"
+        ) from None
+    for query in queries(text):
+        hits = await works.search(query, 8, lang)
+        if hits:
+            return RecognizedResponse(
+                text=text.strip()[:500], works=[WorkSummaryResponse.of_hit(h) for h in hits]
+            )
+    return RecognizedResponse(text=text.strip()[:500], works=[])
 
 
 class IsbnLookupResponse(BaseModel):

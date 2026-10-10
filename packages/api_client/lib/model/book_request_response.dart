@@ -13,13 +13,17 @@ part of babel_api_client;
 class BookRequestResponse {
   /// Returns a new [BookRequestResponse] instance.
   BookRequestResponse({
+    this.authors = const [],
     required this.createdAt,
     this.language = '',
     this.progress,
     required this.status,
+    this.title = '',
     this.via = 'chaptarr',
     required this.workId,
   });
+
+  List<String> authors;
 
   DateTime createdAt;
 
@@ -31,6 +35,9 @@ class BookRequestResponse {
 
   RequestStatus status;
 
+  /// The book's title
+  String title;
+
   /// Where it was sent: chaptarr or shelfmark
   String via;
 
@@ -38,28 +45,33 @@ class BookRequestResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is BookRequestResponse &&
+    _deepEquality.equals(other.authors, authors) &&
     other.createdAt == createdAt &&
     other.language == language &&
     other.progress == progress &&
     other.status == status &&
+    other.title == title &&
     other.via == via &&
     other.workId == workId;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (authors.hashCode) +
     (createdAt.hashCode) +
     (language.hashCode) +
     (progress == null ? 0 : progress!.hashCode) +
     (status.hashCode) +
+    (title.hashCode) +
     (via.hashCode) +
     (workId.hashCode);
 
   @override
-  String toString() => 'BookRequestResponse[createdAt=$createdAt, language=$language, progress=$progress, status=$status, via=$via, workId=$workId]';
+  String toString() => 'BookRequestResponse[authors=$authors, createdAt=$createdAt, language=$language, progress=$progress, status=$status, title=$title, via=$via, workId=$workId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'authors'] = this.authors;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'language'] = this.language;
     if (this.progress != null) {
@@ -68,6 +80,7 @@ class BookRequestResponse {
       json[r'progress'] = null;
     }
       json[r'status'] = this.status;
+      json[r'title'] = this.title;
       json[r'via'] = this.via;
       json[r'work_id'] = this.workId;
     return json;
@@ -92,12 +105,16 @@ class BookRequestResponse {
       }());
 
       return BookRequestResponse(
+        authors: json[r'authors'] is Iterable
+            ? (json[r'authors'] as Iterable).cast<String>().toList(growable: false)
+            : const [],
         createdAt: mapDateTime(json, r'created_at', r'')!,
         language: mapValueOfType<String>(json, r'language') ?? '',
         progress: json[r'progress'] == null
             ? null
             : num.parse('${json[r'progress']}'),
         status: RequestStatus.fromJson(json[r'status'])!,
+        title: mapValueOfType<String>(json, r'title') ?? '',
         via: mapValueOfType<String>(json, r'via') ?? 'chaptarr',
         workId: mapValueOfType<String>(json, r'work_id')!,
       );

@@ -1137,3 +1137,37 @@ def test_a_book_shows_what_others_think_of_it(
     assert {r["source"] for r in out["ratings"]} == {"hardcover", "openlibrary", "goodreads"}
     assert out["reviews"][0]["author"] == "reader"
     assert out["reviews"][0]["likes"] == 12
+
+
+def test_a_cover_photo_finds_the_book_by_its_words(
+    app: FastAPI, client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    from babel_api.adapters.ocr import OcrUnavailableError, queries
+
+    assert queries("JANE\n\neyre\n!!\nCharlotte  Brontë\nx") == [
+        "JANE eyre Charlotte Brontë",
+        "Charlotte Brontë",
+    ]
+    assert queries("..\n a \n") == []
+
+    async def read(image: bytes) -> str:
+        assert image == b"photo"
+        return "JANE EYRE\nCharlotte Brontë"
+
+    app.state.container = replace(app.state.container, ocr=read)
+    out = client.post(
+        "/v1/catalog/recognize",
+        files={"file": ("cover.jpg", b"photo", "image/jpeg")},
+        headers=auth,
+    ).json()
+    assert "JANE EYRE" in out["text"]
+    assert [w["title"] for w in out["works"]][:1] == ["Jane Eyre"]
+
+    async def broken(image: bytes) -> str:
+        raise OcrUnavailableError
+
+    app.state.container = replace(app.state.container, ocr=broken)
+    refused = client.post(
+        "/v1/catalog/recognize", files={"file": ("c.jpg", b"x", "image/jpeg")}, headers=auth
+    )
+    assert refused.status_code == 503

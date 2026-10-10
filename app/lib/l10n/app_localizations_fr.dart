@@ -2691,6 +2691,101 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get homeReading => 'En cours';
+
+  @override
+  String get homeResume => 'Reprendre';
+
+  @override
+  String get homeForYou => 'Pour vous';
+
+  @override
+  String get homeSeeAll => 'Tout voir';
+
+  @override
+  String get homePile => 'Pile à lire';
+
+  @override
+  String get homeJourney => 'Votre parcours';
+
+  @override
+  String get homeBadges => 'Badges';
+
+  @override
+  String get homeBorn => 'Né de vos lectures';
+
+  @override
+  String get homeMoods => 'Explorer par ambiance';
+
+  @override
+  String get homeDownloads => 'Téléchargements';
+
+  @override
+  String get homeWrapInvite => 'Découvrez votre Wrap';
+
+  @override
+  String get moodDarkAcademia => 'Dark academia';
+
+  @override
+  String get moodGothic => 'Gothique';
+
+  @override
+  String get moodTragicRomance => 'Romance tragique';
+
+  @override
+  String get moodBottle => 'Huis clos';
+
+  @override
+  String get moodClassics => 'Classiques';
+
+  @override
+  String get moodEnemies => 'Enemies to lovers';
+
+  @override
+  String get moodFantasy => 'Fantastique';
+
+  @override
+  String get moodFanfiction => 'Fanfictions';
+
+  @override
+  String homeBooksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# livres',
+      one: '# livre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeYourMonth(String month) {
+    return 'Votre $month';
+  }
+
+  @override
+  String homeMonthBooks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# livres terminés',
+      one: '# livre terminé',
+    );
+    return '$_temp0 ce mois-ci';
+  }
+
+  @override
+  String get scanPhoto => 'Photographier la couverture (expérimental)';
+
+  @override
+  String get scanPhotoNone =>
+      'Aucun livre reconnu sur cette photo. Essaie avec un code-barres, ou cherche par titre.';
+
+  @override
+  String get scanPhotoUnavailable =>
+      'La lecture de couverture n\'est pas disponible sur ce serveur.';
+
+  @override
   String get coverDefault => 'Par défaut';
 
   @override

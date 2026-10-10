@@ -671,6 +671,80 @@ class CatalogApi {
     return null;
   }
 
+  /// Recognize Cover
+  ///
+  /// Experimental: read the words of a cover photo and search the catalog with them.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [MultipartFile] file (required):
+  ///
+  /// * [String] lang:
+  Future<Response> recognizeCoverWithHttpInfo(MultipartFile file, { String? lang, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/catalog/recognize';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (lang != null) {
+      queryParams.addAll(_queryParams('', 'lang', lang));
+    }
+
+    const contentTypes = <String>['multipart/form-data'];
+
+    bool hasFields = false;
+    final mp = MultipartRequest('POST', Uri.parse(path));
+    if (file != null) {
+      hasFields = true;
+      mp.fields[r'file'] = file.field;
+      mp.files.add(file);
+    }
+    if (hasFields) {
+      postBody = mp;
+    }
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Recognize Cover
+  ///
+  /// Experimental: read the words of a cover photo and search the catalog with them.
+  ///
+  /// Parameters:
+  ///
+  /// * [MultipartFile] file (required):
+  ///
+  /// * [String] lang:
+  Future<RecognizedResponse?> recognizeCover(MultipartFile file, { String? lang, }) async {
+    final response = await recognizeCoverWithHttpInfo(file,  lang: lang, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'RecognizedResponse',) as RecognizedResponse;
+    
+    }
+    return null;
+  }
+
   /// Search Works
   ///
   /// Search works by title, author or keywords, titled in ``lang`` when possible.

@@ -2671,6 +2671,101 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get homeReading => 'Reading';
+
+  @override
+  String get homeResume => 'Resume';
+
+  @override
+  String get homeForYou => 'For you';
+
+  @override
+  String get homeSeeAll => 'See all';
+
+  @override
+  String get homePile => 'Reading pile';
+
+  @override
+  String get homeJourney => 'Your path';
+
+  @override
+  String get homeBadges => 'Badges';
+
+  @override
+  String get homeBorn => 'Born from your readings';
+
+  @override
+  String get homeMoods => 'Browse by mood';
+
+  @override
+  String get homeDownloads => 'Downloads';
+
+  @override
+  String get homeWrapInvite => 'See your Wrap';
+
+  @override
+  String get moodDarkAcademia => 'Dark academia';
+
+  @override
+  String get moodGothic => 'Gothic';
+
+  @override
+  String get moodTragicRomance => 'Tragic romance';
+
+  @override
+  String get moodBottle => 'Bottle episode';
+
+  @override
+  String get moodClassics => 'Classics';
+
+  @override
+  String get moodEnemies => 'Enemies to lovers';
+
+  @override
+  String get moodFantasy => 'Fantasy';
+
+  @override
+  String get moodFanfiction => 'Fanfiction';
+
+  @override
+  String homeBooksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# books',
+      one: '# book',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeYourMonth(String month) {
+    return 'Your $month';
+  }
+
+  @override
+  String homeMonthBooks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# books finished',
+      one: '# book finished',
+    );
+    return '$_temp0 this month';
+  }
+
+  @override
+  String get scanPhoto => 'Photograph the cover (experimental)';
+
+  @override
+  String get scanPhotoNone =>
+      'No book recognized in this photo. Try the barcode, or search by title.';
+
+  @override
+  String get scanPhotoUnavailable =>
+      'Cover reading is not available on this server.';
+
+  @override
   String get coverDefault => 'Default';
 
   @override

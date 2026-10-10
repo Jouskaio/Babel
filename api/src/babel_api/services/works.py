@@ -354,6 +354,15 @@ class WorkService:
             list(dict.fromkeys(t for t in titles if t)), surname
         )
 
+    async def titles(self, work_ids: list[UUID]) -> dict[UUID, tuple[str, tuple[str, ...]]]:
+        """Title and authors of works, for lists that show them (no refresh, no request out)."""
+        found: dict[UUID, tuple[str, tuple[str, ...]]] = {}
+        for work_id in dict.fromkeys(work_ids):
+            work = await self._repo.get_work(work_id)
+            if work is not None:
+                found[work_id] = (work.title, work.authors)
+        return found
+
     async def cover_url(self, work_id: UUID) -> str | None:
         work = await self._repo.get_work(work_id)
         return work.cover_url if work else None

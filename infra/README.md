@@ -177,6 +177,11 @@ the Latin titles it finds to Chaptarr when the Shelfmark download does not apply
 Shelfmark's downloads cannot be followed from Babel: the book shows up in "In my sources" once Kavita
 has scanned it. Requests still need Chaptarr to be set (or a reader's own link).
 
+## Cover photos (Tesseract)
+
+The scan screen can read the words of a cover photo (French and English) to find the book. The API
+image carries Tesseract for it; nothing to configure. Without it the endpoint answers 503.
+
 ## Hardcover (saga volumes)
 
 Hardcover names the volumes of a saga that the catalog lacks, so the saga page shows their titles

@@ -1,7 +1,7 @@
 """Request-scoped dependencies: database session, services and the current user."""
 
 import logging
-from collections.abc import AsyncIterator, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import timedelta
 from typing import Annotated
@@ -102,6 +102,8 @@ class Container:
     hardcover: HardcoverClient | None = None
     wikidata: WikidataClient | None = None
     external_ratings: ExternalRatings | None = None
+    # Reads the text of a cover photo (Tesseract); tests replace it.
+    ocr: Callable[[bytes], Awaitable[str]] | None = None
     # How a reader's own Chaptarr is reached (tests replace it); None: with the address guard.
     chaptarr_for_reader: Callable[[str, str], ChaptarrClient] | None = None
     # Sources being scanned in the background (a slow connector such as AO3).
