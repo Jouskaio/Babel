@@ -290,6 +290,8 @@ class ApiClient {
           return IdentityProviderTypeTransformer().decode(value);
         case 'ImportResponse':
           return ImportResponse.fromJson(value);
+        case 'InstallPlugin':
+          return InstallPlugin.fromJson(value);
         case 'IsbnLookupResponse':
           return IsbnLookupResponse.fromJson(value);
         case 'KavitaLinkResponse':
@@ -332,6 +334,8 @@ class ApiClient {
           return PaperRequest.fromJson(value);
         case 'PlaybackResponse':
           return PlaybackResponse.fromJson(value);
+        case 'PluginResponse':
+          return PluginResponse.fromJson(value);
         case 'PremiumRequest':
           return PremiumRequest.fromJson(value);
         case 'ProgressionResponse':

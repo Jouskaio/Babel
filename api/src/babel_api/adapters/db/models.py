@@ -668,3 +668,16 @@ class KoreaderHashRow(Base):
         ForeignKey("stored_files.sha256", ondelete="CASCADE"), primary_key=True
     )
     md5: Mapped[str] = mapped_column(String(32), index=True)
+
+
+class PluginRow(Base):
+    """A source plugin installed by an administrator: a manifest address readers can switch on."""
+
+    __tablename__ = "plugins"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    name: Mapped[str] = mapped_column(String(120))
+    description: Mapped[str | None] = mapped_column(String(500))
+    url: Mapped[str] = mapped_column(String(2000), unique=True)
+    secret: Mapped[str | None] = mapped_column(Text)  # the access token, encrypted
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)

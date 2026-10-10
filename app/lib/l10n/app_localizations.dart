@@ -4394,6 +4394,66 @@ abstract class AppLocalizations {
   /// **'Remplacer le mot de passe'**
   String get koreaderRenew;
 
+  /// No description provided for @pluginsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plugins'**
+  String get pluginsTitle;
+
+  /// No description provided for @pluginsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Des sources installées par l\'administrateur : active celles que tu veux, elles s\'ajoutent à tes sources.'**
+  String get pluginsHint;
+
+  /// No description provided for @pluginsAdminTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plugins de sources'**
+  String get pluginsAdminTitle;
+
+  /// No description provided for @pluginsAdminHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Installe une source à partir de l\'adresse de son manifeste : chaque lecteur pourra l\'activer (ou non).'**
+  String get pluginsAdminHint;
+
+  /// No description provided for @pluginsName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du plugin'**
+  String get pluginsName;
+
+  /// No description provided for @pluginsUrl.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse du manifeste'**
+  String get pluginsUrl;
+
+  /// No description provided for @pluginsToken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jeton d\'accès (facultatif)'**
+  String get pluginsToken;
+
+  /// No description provided for @pluginsInstall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Installer le plugin'**
+  String get pluginsInstall;
+
+  /// No description provided for @pluginsRemove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer le plugin'**
+  String get pluginsRemove;
+
+  /// No description provided for @pluginsInstallFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette adresse ne répond pas comme un manifeste Babel.'**
+  String get pluginsInstallFailed;
+
   /// No description provided for @coverDefault.
   ///
   /// In fr, this message translates to:

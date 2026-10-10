@@ -61,6 +61,7 @@ doc/HealthApi.md
 doc/HealthResponse.md
 doc/IdentityProvider.md
 doc/ImportResponse.md
+doc/InstallPlugin.md
 doc/IsbnLookupResponse.md
 doc/KavitaApi.md
 doc/KavitaLinkResponse.md
@@ -85,6 +86,8 @@ doc/OperationResult.md
 doc/PaperBookRequest.md
 doc/PaperRequest.md
 doc/PlaybackResponse.md
+doc/PluginResponse.md
+doc/PluginsApi.md
 doc/PremiumRequest.md
 doc/ProgressionResponse.md
 doc/ProviderLoginRequest.md
@@ -158,6 +161,7 @@ lib/api/health_api.dart
 lib/api/kavita_api.dart
 lib/api/kosync_api.dart
 lib/api/library_api.dart
+lib/api/plugins_api.dart
 lib/api/requests_api.dart
 lib/api/social_api.dart
 lib/api/sources_api.dart
@@ -225,6 +229,7 @@ lib/model/hardcover_work_request.dart
 lib/model/health_response.dart
 lib/model/identity_provider.dart
 lib/model/import_response.dart
+lib/model/install_plugin.dart
 lib/model/isbn_lookup_response.dart
 lib/model/kavita_link_response.dart
 lib/model/kavita_status.dart
@@ -246,6 +251,7 @@ lib/model/operation_result.dart
 lib/model/paper_book_request.dart
 lib/model/paper_request.dart
 lib/model/playback_response.dart
+lib/model/plugin_response.dart
 lib/model/premium_request.dart
 lib/model/progression_response.dart
 lib/model/provider_login_request.dart

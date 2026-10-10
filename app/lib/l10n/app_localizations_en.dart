@@ -2621,6 +2621,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get koreaderRenew => 'Replace the password';
 
   @override
+  String get pluginsTitle => 'Plugins';
+
+  @override
+  String get pluginsHint =>
+      'Sources installed by the administrator: switch on the ones you want, they join your sources.';
+
+  @override
+  String get pluginsAdminTitle => 'Source plugins';
+
+  @override
+  String get pluginsAdminHint =>
+      'Install a source from its manifest address: each reader can switch it on (or not).';
+
+  @override
+  String get pluginsName => 'Plugin name';
+
+  @override
+  String get pluginsUrl => 'Manifest address';
+
+  @override
+  String get pluginsToken => 'Access token (optional)';
+
+  @override
+  String get pluginsInstall => 'Install the plugin';
+
+  @override
+  String get pluginsRemove => 'Remove the plugin';
+
+  @override
+  String get pluginsInstallFailed =>
+      'This address does not answer like a Babel manifest.';
+
+  @override
   String get coverDefault => 'Default';
 
   @override
