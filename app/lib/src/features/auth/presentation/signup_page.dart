@@ -82,7 +82,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 controller: _email,
                 validator: Validators.email(context),
                 keyboardType: TextInputType.emailAddress,
-                autofillHints: const [AutofillHints.email],
+                autofillHints: const [
+                  AutofillHints.username,
+                  AutofillHints.email,
+                ],
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 14),

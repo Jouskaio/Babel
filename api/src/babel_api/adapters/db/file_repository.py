@@ -76,6 +76,7 @@ def _to_item(row: LibraryItemRow) -> LibraryItem:
         work_id=row.work_id,
         paper=row.paper,
         work_cover_id=row.work.cover_id if row.work else None,
+        work_cover_url=row.work.cover_url if row.work else None,
         audio=AudioRef(row.audio_id, row.audio_duration or 0, row.audio_cover)
         if row.audio_id
         else None,

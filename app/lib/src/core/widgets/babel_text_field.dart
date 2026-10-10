@@ -66,50 +66,54 @@ class _BabelTextFieldState extends State<BabelTextField> {
           ),
         ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: widget.controller,
-          validator: widget.validator,
-          obscureText: _hidden,
-          keyboardType: widget.keyboardType,
-          autofillHints: widget.autofillHints,
-          textInputAction: widget.textInputAction,
-          onFieldSubmitted: widget.onSubmitted,
-          onChanged: widget.onChanged,
-          style: BabelText.body(15, color: BabelColors.textPrimary),
-          cursorColor: BabelColors.gold,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: BabelColors.surface,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 18,
-              vertical: 16,
+        // The page's SelectionArea must not take the field's taps and menu: pasting (and
+        // password managers) keep working.
+        SelectionContainer.disabled(
+          child: TextFormField(
+            controller: widget.controller,
+            validator: widget.validator,
+            obscureText: _hidden,
+            keyboardType: widget.keyboardType,
+            autofillHints: widget.autofillHints,
+            textInputAction: widget.textInputAction,
+            onFieldSubmitted: widget.onSubmitted,
+            onChanged: widget.onChanged,
+            style: BabelText.body(15, color: BabelColors.textPrimary),
+            cursorColor: BabelColors.gold,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: BabelColors.surface,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 18,
+                vertical: 16,
+              ),
+              enabledBorder: _border(BabelColors.border),
+              focusedBorder: _border(BabelColors.gold),
+              errorBorder: _border(BabelColors.dustyRose),
+              focusedErrorBorder: _border(BabelColors.dustyRose),
+              errorStyle: BabelText.body(12, color: BabelColors.dustyRose),
+              helperText: widget.help,
+              helperStyle: BabelText.body(12),
+              helperMaxLines: 4,
+              hintText: widget.hint,
+              hintStyle: BabelText.body(15),
+              suffixIcon: widget.suffix != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: widget.suffix,
+                    )
+                  : widget.obscure
+                  ? TextButton(
+                      onPressed: () => setState(() => _hidden = !_hidden),
+                      child: Text(
+                        (_hidden ? widget.showLabel : widget.hideLabel)
+                                ?.toUpperCase() ??
+                            '',
+                        style: BabelText.label(10, spacing: 1.2),
+                      ),
+                    )
+                  : null,
             ),
-            enabledBorder: _border(BabelColors.border),
-            focusedBorder: _border(BabelColors.gold),
-            errorBorder: _border(BabelColors.dustyRose),
-            focusedErrorBorder: _border(BabelColors.dustyRose),
-            errorStyle: BabelText.body(12, color: BabelColors.dustyRose),
-            helperText: widget.help,
-            helperStyle: BabelText.body(12),
-            helperMaxLines: 4,
-            hintText: widget.hint,
-            hintStyle: BabelText.body(15),
-            suffixIcon: widget.suffix != null
-                ? Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: widget.suffix,
-                  )
-                : widget.obscure
-                ? TextButton(
-                    onPressed: () => setState(() => _hidden = !_hidden),
-                    child: Text(
-                      (_hidden ? widget.showLabel : widget.hideLabel)
-                              ?.toUpperCase() ??
-                          '',
-                      style: BabelText.label(10, spacing: 1.2),
-                    ),
-                  )
-                : null,
           ),
         ),
       ],

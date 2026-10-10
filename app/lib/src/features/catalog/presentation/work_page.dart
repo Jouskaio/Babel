@@ -270,16 +270,20 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
                 runSpacing: 6,
                 children: [
                   for (final genre in work.subjects.take(8))
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
+                    InkWell(
+                      borderRadius: BorderRadius.circular(999),
+                      onTap: () => context.go(Routes.searchFor(genre)),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: BabelColors.border),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(genre, style: BabelText.body(12)),
                       ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: BabelColors.border),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(genre, style: BabelText.body(12)),
                     ),
                 ],
               ),

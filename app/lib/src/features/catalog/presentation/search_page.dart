@@ -21,7 +21,10 @@ import '../application/catalog_providers.dart';
 
 /// Search (design: Penpot "screen / recherche").
 class SearchPage extends ConsumerStatefulWidget {
-  const SearchPage({super.key});
+  const SearchPage({this.initialQuery, super.key});
+
+  /// A search to run on arrival (a genre tapped on a book's page).
+  final String? initialQuery;
 
   @override
   ConsumerState<SearchPage> createState() => _SearchPageState();
@@ -31,6 +34,26 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   final _controller = TextEditingController();
   Timer? _debounce;
   String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    final first = widget.initialQuery?.trim();
+    if (first != null && first.isNotEmpty) {
+      _controller.text = first;
+      _query = first;
+    }
+  }
+
+  @override
+  void didUpdateWidget(SearchPage old) {
+    super.didUpdateWidget(old);
+    final next = widget.initialQuery?.trim();
+    if (next != null && next.isNotEmpty && next != old.initialQuery?.trim()) {
+      _controller.text = next;
+      setState(() => _query = next);
+    }
+  }
 
   @override
   void dispose() {
@@ -71,48 +94,76 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         Row(
           children: [
             Expanded(
-              child: TextField(
-                controller: _controller,
-                onChanged: _onChanged,
-                onSubmitted: _search,
-                textInputAction: TextInputAction.search,
-                style: BabelText.body(15, color: BabelColors.textPrimary),
-                cursorColor: BabelColors.gold,
-                decoration: InputDecoration(
-                  hintText: l10n.searchHint,
-                  hintStyle: BabelText.reading(
-                    15,
-                    color: BabelColors.textSecondary,
-                    italic: true,
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: BabelColors.textSecondary,
-                  ),
-                  // A cross to start over, as soon as there is something to erase.
-                  suffixIcon: ValueListenableBuilder<TextEditingValue>(
-                    valueListenable: _controller,
-                    builder: (context, value, _) => value.text.isEmpty
-                        ? const SizedBox.shrink()
-                        : IconButton(
-                            tooltip: l10n.searchClear,
-                            onPressed: _clear,
-                            icon: Icon(
-                              Icons.close,
-                              color: BabelColors.textSecondary,
+              child: SelectionContainer.disabled(
+                child: TextField(
+                  controller: _controller,
+                  onChanged: _onChanged,
+                  onSubmitted: _search,
+                  textInputAction: TextInputAction.search,
+                  style: BabelText.body(16, color: BabelColors.textPrimary),
+                  cursorColor: BabelColors.gold,
+                  decoration: InputDecoration(
+                    hintText: l10n.searchHint,
+                    hintStyle: BabelText.reading(
+                      16,
+                      color: BabelColors.textSecondary,
+                      italic: true,
+                    ),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Icon(
+                        Icons.search_rounded,
+                        color: BabelColors.gold,
+                        size: 22,
+                      ),
+                    ),
+                    // A small round cross, inset from the edge, once there is something to
+                    // erase.
+                    suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                      valueListenable: _controller,
+                      builder: (context, value, _) => value.text.isEmpty
+                          ? const SizedBox.shrink()
+                          : Padding(
+                              padding: const EdgeInsets.only(right: 12),
+                              child: IconButton(
+                                tooltip: l10n.searchClear,
+                                onPressed: _clear,
+                                visualDensity: VisualDensity.compact,
+                                style: IconButton.styleFrom(
+                                  backgroundColor: BabelColors.sunken,
+                                  fixedSize: const Size(28, 28),
+                                  minimumSize: const Size(28, 28),
+                                  padding: EdgeInsets.zero,
+                                ),
+                                icon: Icon(
+                                  Icons.close_rounded,
+                                  size: 16,
+                                  color: BabelColors.textSecondary,
+                                ),
+                              ),
                             ),
-                          ),
-                  ),
-                  filled: true,
-                  fillColor: BabelColors.surface,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: const BorderRadius.all(Radius.circular(999)),
-                    borderSide: BorderSide(color: BabelColors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: const BorderRadius.all(Radius.circular(999)),
-                    borderSide: BorderSide(color: BabelColors.gold),
+                    ),
+                    filled: true,
+                    fillColor: BabelColors.surface,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 18,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(999),
+                      ),
+                      borderSide: BorderSide(color: BabelColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(999),
+                      ),
+                      borderSide: BorderSide(
+                        color: BabelColors.gold,
+                        width: 1.5,
+                      ),
+                    ),
                   ),
                 ),
               ),

@@ -98,7 +98,8 @@ class WorkSummaryResponse(BaseModel):
             original_title=work.title,
             authors=list(work.authors),
             first_publish_year=work.first_publish_year,
-            cover_path=_cover_path(cover_id),
+            cover_path=_cover_path(cover_id)
+            or (f"/v1/catalog/work-covers/{work.id}" if work.cover_url else None),
             edition_count=work.edition_count,
         )
 

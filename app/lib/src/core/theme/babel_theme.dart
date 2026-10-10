@@ -23,6 +23,12 @@ abstract final class BabelTheme {
               },
             )
           : null,
+      // Selected text must show: gold, see-through, on the dark pages as on paper.
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: BabelColors.gold,
+        selectionColor: BabelColors.gold.withValues(alpha: 0.4),
+        selectionHandleColor: BabelColors.gold,
+      ),
       colorScheme: scheme(
         surface: BabelColors.surface,
         primary: BabelColors.textPrimary,
