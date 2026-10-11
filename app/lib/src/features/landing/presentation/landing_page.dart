@@ -8,6 +8,7 @@ import '../../../core/locale/language_picker.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_logo.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
@@ -72,7 +73,7 @@ class _Nav extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(l10n.brand, style: BabelText.label(13, spacing: 6)),
+          BabelBrand(style: BabelText.label(13, spacing: 6), mark: 30),
           const Spacer(),
           if (wide)
             TextButton.icon(
@@ -619,7 +620,7 @@ class _Footer extends StatelessWidget {
         spacing: 32,
         runSpacing: 16,
         children: [
-          Text(l10n.brand, style: BabelText.label(12, spacing: 6)),
+          BabelBrand(style: BabelText.label(12, spacing: 6), mark: 26),
           Wrap(
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 8,

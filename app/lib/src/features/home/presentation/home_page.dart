@@ -6,6 +6,7 @@ import '../../../core/auth/auth_controller.dart';
 import '../../../core/locale/greeting.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_logo.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../kavita/presentation/kavita_progress_card.dart';
@@ -47,9 +48,11 @@ class HomePage extends ConsumerWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            l10n.brand,
-                            style: BabelText.label(12, spacing: 5),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: BabelBrand(
+                              style: BabelText.label(12, spacing: 5),
+                            ),
                           ),
                         ),
                         Tooltip(

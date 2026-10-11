@@ -7,6 +7,7 @@ import '../../../core/auth/auth_failure.dart';
 import '../../../core/locale/language_picker.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_logo.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
@@ -56,10 +57,10 @@ class AuthLayout extends StatelessWidget {
                             ),
                           ),
                           Expanded(
-                            child: Text(
-                              context.l10n.brand,
-                              textAlign: TextAlign.center,
-                              style: BabelText.label(12, spacing: 5),
+                            child: Center(
+                              child: BabelBrand(
+                                style: BabelText.label(12, spacing: 5),
+                              ),
                             ),
                           ),
                           const LanguagePicker(),
@@ -123,7 +124,7 @@ class _Visual extends ConsumerWidget {
         children: [
           InkWell(
             onTap: () => context.go(Routes.landing),
-            child: Text(l10n.brand, style: BabelText.label(13, spacing: 6)),
+            child: BabelBrand(style: BabelText.label(13, spacing: 6), mark: 30),
           ),
           Expanded(
             child: Stack(
