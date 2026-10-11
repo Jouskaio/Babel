@@ -394,12 +394,12 @@ class WorkService:
                 found[work_id] = (work.title, work.authors)
         return found
 
-    async def playlist(self, key: str, limit: int = 24) -> list[SearchHit]:
+    async def playlist(self, key: str, limit: int = 24, refresh: bool = False) -> list[SearchHit]:
         """The works of a playlist, with covers; the answer is kept for half a day."""
         slug = PLAYLISTS.get(key)
         if slug is None:
             raise NotFoundError
-        cached = self._playlists.get(key)
+        cached = None if refresh else self._playlists.get(key)
         if cached is not None and time.monotonic() - cached[0] < PLAYLIST_SECONDS:
             return cached[1][:limit]
         try:

@@ -1249,6 +1249,32 @@ def test_a_reader_links_pagebound_and_brings_their_reviews_in(
     assert client.get("/v1/me/pagebound", headers=auth).json()["linked"] is False
 
 
+def test_the_daily_refresh_brings_in_new_pagebound_reviews(
+    app: FastAPI, client: TestClient, auth: dict[str, str]
+) -> None:
+    from babel_api.adapters.pagebound import PageboundUserReview
+    from babel_api.services.refresh import refresh_pagebound
+
+    reviews = [PageboundUserReview("Dune", ("Frank Herbert",), 3.0, None, None)]
+
+    class FakePagebound:
+        async def user_id(self, username: str) -> int | None:
+            return 7
+
+        async def user_reviews(self, user_id: int) -> list[PageboundUserReview]:
+            return list(reviews)
+
+    app.state.container = replace(app.state.container, pagebound=FakePagebound())
+    client.put("/v1/me/pagebound", json={"username": "jen"}, headers=auth)
+    client.post("/v1/me/pagebound/import", headers=auth)
+    reviews.append(PageboundUserReview("Emma", ("Jane Austen",), 4.0, None, None))
+
+    assert client.portal is not None
+    assert client.portal.call(refresh_pagebound, app.state.container) == 1
+    titles = {i["title"] for i in client.get("/v1/library", headers=auth).json()}
+    assert {"Dune", "Emma"} <= titles
+
+
 def test_playlists_and_suggestions_come_from_open_library_subjects(
     client: TestClient, books: FakeBooks, auth: dict[str, str]
 ) -> None:

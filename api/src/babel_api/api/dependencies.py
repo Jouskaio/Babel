@@ -365,15 +365,29 @@ def get_stats_service(
 StatsServiceDep = Annotated[StatsService, Depends(get_stats_service)]
 
 
-def get_pagebound_service(
-    container: ContainerDep,
-    session: Annotated[AsyncSession, Depends(get_session)],
-    files: FileServiceDep,
-    social: SocialServiceDep,
-) -> PageboundService:
-    return PageboundService(
-        session, container.pagebound or PageboundClient(), ImportService(files, social)
+def make_social_service(container: Container, session: AsyncSession) -> SocialService:
+    return SocialService(
+        SqlSocialRepository(session),
+        SqlFileRepository(session),
+        Notifier(SqlSyncRepository(session), SqlUserRepository(session), container.pusher),
     )
+
+
+def make_pagebound_service(container: Container, session: AsyncSession) -> PageboundService:
+    """Also used by the daily refresh."""
+    return PageboundService(
+        session,
+        container.pagebound or PageboundClient(),
+        ImportService(
+            make_file_service(container, session), make_social_service(container, session)
+        ),
+    )
+
+
+def get_pagebound_service(
+    container: ContainerDep, session: Annotated[AsyncSession, Depends(get_session)]
+) -> PageboundService:
+    return make_pagebound_service(container, session)
 
 
 PageboundServiceDep = Annotated[PageboundService, Depends(get_pagebound_service)]

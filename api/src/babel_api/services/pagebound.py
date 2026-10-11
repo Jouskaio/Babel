@@ -69,6 +69,9 @@ class PageboundService:
         )
         return PageboundLink(row.username, row.linked_at, row.imported_at) if row else None
 
+    async def linked_readers(self) -> list[UUID]:
+        return list(await self._session.scalars(select(PageboundLinkRow.user_id)))
+
     async def unlink(self, user_id: UUID) -> None:
         await self._session.execute(
             delete(PageboundLinkRow).where(PageboundLinkRow.user_id == user_id)

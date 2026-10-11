@@ -15,6 +15,7 @@ from babel_api import __version__
 from babel_api.adapters.audiobookshelf import AbsClient
 from babel_api.adapters.catalog.open_library import OpenLibrarySource
 from babel_api.adapters.chaptarr import ChaptarrClient
+from babel_api.adapters.db.catalog_repository import SqlCatalogRepository
 from babel_api.adapters.db.migrations.config import upgrade_database
 from babel_api.adapters.db.repositories import SqlUserRepository
 from babel_api.adapters.db.session import create_engine, create_session_factory
@@ -55,8 +56,10 @@ from babel_api.services.catalog import CatalogService
 from babel_api.services.follow_loop import follow_forever
 from babel_api.services.follows import FollowService
 from babel_api.services.kavita import KavitaProvisioner, KavitaService
+from babel_api.services.refresh import refresh_forever
 from babel_api.services.request_watch import watch_forever
 from babel_api.services.requests import RequestService
+from babel_api.services.works import WorkService
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -185,7 +188,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                     yield make_request_service(container, session)
 
             watch_task = asyncio.create_task(watch_forever(request_services))
+        refresh_task = asyncio.create_task(
+            refresh_forever(
+                container,
+                lambda session: WorkService(
+                    SqlCatalogRepository(session), container.books, container.hardcover
+                ),
+            )
+        )
         yield
+        refresh_task.cancel()
         if watch_task is not None:
             watch_task.cancel()
         kavita.cancel()
