@@ -139,12 +139,12 @@ class WikidataClient:
             cast(dict[str, Any], data.get("results") or {}).get("bindings") or [],
         )
 
-    async def laureates(self, prize: str) -> frozenset[str]:
+    async def laureates(self, prize: str, refresh: bool = False) -> frozenset[str]:
         """The names and titles (normalized) that received a prize, Wikidata item [prize].
 
         Wikidata records some prizes on the author, some on the book: both are returned.
         Empty when Wikidata does not answer (and then not remembered)."""
-        cached = self._laureates.get(prize)
+        cached = None if refresh else self._laureates.get(prize)
         if cached is not None and time.monotonic() - cached[0] < LONG_CACHE_SECONDS:
             return cached[1]
         query = f"""SELECT DISTINCT ?l WHERE {{
