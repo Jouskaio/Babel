@@ -1,0 +1,1 @@
+Applications Android et Mac : connexion à Babel corrigée (l'app visait un serveur local au lieu de babel.jouskaio.me)

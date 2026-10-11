@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Android 13+: new chapter notifications are asked for after sign-in. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <!-- Audiobooks keep playing with the screen off (just_audio_background). -->
