@@ -3512,7 +3512,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get downloadMacHint =>
-      'Zip file. On first launch: right-click the app, then Open (it is not signed by Apple yet).';
+      'Zip file, to drag into Applications. On first launch macOS refuses the app (not signed by Apple yet): click Done, then System Settings › Privacy & Security › Open Anyway.';
 
   @override
   String get downloadMac => 'Download';

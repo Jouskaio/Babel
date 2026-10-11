@@ -1948,7 +1948,7 @@
   "@downloadLatest": {"placeholders": {"version": {"type": "String"}, "date": {"type": "String"}}},
   "downloadAndroidHint": "Fichier APK. Si Android le demande, autorise l'installation depuis ce site.",
   "downloadApk": "Télécharger",
-  "downloadMacHint": "Fichier .zip. Au premier lancement : clic droit sur l'application, puis Ouvrir (elle n'est pas encore signée par Apple).",
+  "downloadMacHint": "Fichier .zip, à glisser dans Applications. Au premier lancement, macOS refuse l'app (pas encore signée par Apple) : clique sur Terminé, puis Réglages Système › Confidentialité et sécurité › Ouvrir quand même.",
   "downloadMac": "Télécharger",
   "downloadIosSoon": "Bientôt sur l'App Store. En attendant, ouvre Babel dans Safari, puis Partager › Sur l'écran d'accueil.",
   "downloadWebName": "Navigateur",
