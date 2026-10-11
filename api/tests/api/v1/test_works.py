@@ -1249,6 +1249,14 @@ def test_a_reader_links_pagebound_and_brings_their_reviews_in(
     assert client.get("/v1/me/pagebound", headers=auth).json()["linked"] is False
 
 
+def test_a_built_playlist_is_kept_for_the_next_requests(
+    client: TestClient, books: FakeBooks, auth: dict[str, str]
+) -> None:
+    client.get("/v1/catalog/playlists/gothic", headers=auth)
+    client.get("/v1/catalog/playlists/gothic", headers=auth)
+    assert books.queries.count("subject:gothic_fiction") == 1  # asked once, not per request
+
+
 def test_the_daily_refresh_brings_in_new_pagebound_reviews(
     app: FastAPI, client: TestClient, auth: dict[str, str]
 ) -> None:

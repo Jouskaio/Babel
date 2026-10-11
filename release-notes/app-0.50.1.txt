@@ -6,3 +6,6 @@ Couvertures retrouvées pour les livres importés depuis une liste (Goodreads, P
 Thème Art déco et choix des thèmes d'affichage dans Compte
 Accueil et Compte sur deux colonnes sur grand écran
 Caméra du scan coupée en quittant la page
+Les applications se téléchargent depuis la page d'accueil du site, l'accueil de Babel et les réglages
+Playlists et recommandations classées d'après les étagères les plus populaires de Goodreads
+Les nouveaux avis et livres lus de Pagebound arrivent chaque jour sans rien faire

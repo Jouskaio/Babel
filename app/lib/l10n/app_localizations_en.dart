@@ -3540,4 +3540,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get footerDownload => 'Download';
+
+  @override
+  String get downloadTheApps => 'Download the apps';
+
+  @override
+  String get homeDownloadTitle => 'Babel as an app';
+
+  @override
+  String get homeDownloadHint => 'Android and Mac, with update prompts.';
+
+  @override
+  String get close => 'Close';
 }

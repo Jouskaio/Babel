@@ -41,3 +41,18 @@ def test_ratings_come_from_open_library_and_goodreads() -> None:
     assert gr is not None
     assert gr.average == 3.99
     assert asyncio.run(ExternalRatings(goodreads=False).goodreads("x", ())) is None
+
+
+def test_a_goodreads_shelf_lists_its_books_without_edition_or_series() -> None:
+    from babel_api.adapters.external_ratings import ShelfBook, parse_shelf
+
+    page = """
+    <div class="elementList"><a class="bookTitle" href="/book/show/1">The Secret History (Paperback)</a>
+    <div class='authorName__container'><a class="authorName" href="/a/1"><span itemprop="name">Donna Tartt</span></a></div></div>
+    <div class="elementList"><a class="bookTitle" href="/book/show/2">Ninth House (Ninth House Trilogy, #1)</a>
+    <div class='authorName__container'><a class="authorName" href="/a/2"><span itemprop="name">Leigh Bardugo</span></a></div></div>
+    """
+    assert parse_shelf(page) == [
+        ShelfBook("The Secret History", "Donna Tartt"),
+        ShelfBook("Ninth House", "Leigh Bardugo"),
+    ]

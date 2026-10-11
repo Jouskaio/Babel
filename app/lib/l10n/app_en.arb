@@ -1164,5 +1164,9 @@
   "downloadOpenWeb": "Open",
   "downloadSoon": "Soon",
   "downloadUpdates": "Updates: the app offers each new version with what's new. Google Play and the App Store will come later.",
-  "footerDownload": "Download"
+  "footerDownload": "Download",
+  "downloadTheApps": "Download the apps",
+  "homeDownloadTitle": "Babel as an app",
+  "homeDownloadHint": "Android and Mac, with update prompts.",
+  "close": "Close"
 }

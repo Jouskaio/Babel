@@ -192,7 +192,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             refresh_forever(
                 container,
                 lambda session: WorkService(
-                    SqlCatalogRepository(session), container.books, container.hardcover
+                    SqlCatalogRepository(session),
+                    container.books,
+                    container.hardcover,
+                    external=container.external_ratings,
+                    playlist_cache=container.playlists,
                 ),
             )
         )

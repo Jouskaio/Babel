@@ -1,8 +1,10 @@
 import 'package:babel_api_client/api.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
@@ -691,6 +693,81 @@ class MonthCard extends ConsumerWidget {
               style: BabelText.body(14, color: BabelColors.textPrimary),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// On the web app only: a reminder that Babel also exists as an app, with a way to close it.
+class DownloadAppCard extends StatefulWidget {
+  const DownloadAppCard({super.key});
+
+  @override
+  State<DownloadAppCard> createState() => _DownloadAppCardState();
+}
+
+class _DownloadAppCardState extends State<DownloadAppCard> {
+  static const _key = 'babel.home.download.closed';
+  bool _closed = true; // hidden until we know it was not closed before
+
+  @override
+  void initState() {
+    super.initState();
+    if (!kIsWeb) return;
+    SharedPreferencesAsync()
+        .getBool(_key)
+        .then((closed) {
+          if (mounted) setState(() => _closed = closed ?? false);
+        })
+        .catchError((Object _) {
+          if (mounted) setState(() => _closed = false);
+        });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!kIsWeb || _closed) return const SizedBox.shrink();
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: _gap),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: () => context.push(Routes.download),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(18, 14, 8, 14),
+          decoration: BoxDecoration(
+            color: BabelColors.surface,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: BabelColors.border),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.download_rounded, color: BabelColors.gold),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.homeDownloadTitle, style: BabelText.heading(17)),
+                    Text(l10n.homeDownloadHint, style: BabelText.body(12)),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: l10n.close,
+                icon: Icon(
+                  Icons.close,
+                  size: 18,
+                  color: BabelColors.textSecondary,
+                ),
+                onPressed: () {
+                  setState(() => _closed = true);
+                  SharedPreferencesAsync().setBool(_key, true);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

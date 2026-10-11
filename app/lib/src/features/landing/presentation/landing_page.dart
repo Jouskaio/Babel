@@ -73,6 +73,12 @@ class _Nav extends StatelessWidget {
         children: [
           Text(l10n.brand, style: BabelText.label(13, spacing: 6)),
           const Spacer(),
+          if (wide)
+            TextButton.icon(
+              onPressed: () => context.go(Routes.download),
+              icon: const Icon(Icons.download_rounded, size: 18),
+              label: Text(l10n.downloadTheApps),
+            ),
           const LanguagePicker(),
           const SizedBox(width: 12),
           PillButton(
@@ -149,7 +155,13 @@ class _Hero extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 12),
+        TextButton.icon(
+          onPressed: () => context.go(Routes.download),
+          icon: const Icon(Icons.download_rounded, size: 18),
+          label: Text(l10n.downloadTheApps),
+        ),
+        const SizedBox(height: 8),
         Text(
           l10n.heroNote,
           style: BabelText.body(

@@ -18,9 +18,10 @@ from babel_api.adapters.hardcover import (
 from babel_api.adapters.pagebound import PageboundClient, PageboundReview
 from babel_api.adapters.wikidata import Adaptation, WikidataClient
 from babel_api.domain.catalog import Edition, IdentifierKind, SourceWork, Work
+from babel_api.domain.challenges import norm
 from babel_api.domain.errors import NotFoundError, SourceUnavailableError
 from babel_api.domain.isbn import normalize_isbn
-from babel_api.domain.playlists import PLAYLISTS
+from babel_api.domain.playlists import GOODREADS_SHELVES, PLAYLISTS
 from babel_api.domain.ports import BookSource, CatalogRepository
 from babel_api.domain.series import guess_series, series_key, volume_number
 
@@ -101,7 +102,8 @@ class IsbnMatch:
     edition: Edition
 
 
-PLAYLIST_SECONDS = 12 * 3600
+# Longer than the daily refresh: a playlist is never rebuilt, slowly, under a reader's request.
+PLAYLIST_SECONDS = 30 * 3600
 
 
 async def _nothing() -> None:
@@ -117,9 +119,11 @@ class WorkService:
         wikidata: WikidataClient | None = None,
         external: ExternalRatings | None = None,
         pagebound: PageboundClient | None = None,
+        playlist_cache: dict[str, tuple[float, list[SearchHit]]] | None = None,
     ) -> None:
         self._pagebound = pagebound
-        self._playlists: dict[str, tuple[float, list[SearchHit]]] = {}
+        # Shared by every request (the container's): a service lives for one request only.
+        self._playlists = playlist_cache if playlist_cache is not None else {}
         self._wikidata = wikidata
         self._external = external
         self._repo = repository
@@ -395,7 +399,9 @@ class WorkService:
         return found
 
     async def playlist(self, key: str, limit: int = 24, refresh: bool = False) -> list[SearchHit]:
-        """The works of a playlist, with covers; the answer is kept for half a day."""
+        """The works of a playlist, with covers. On a refresh, Goodreads' most shelved books of
+        the theme come first (each found in the catalog), then the catalog's own subject; the
+        answer is kept until the next refresh."""
         slug = PLAYLISTS.get(key)
         if slug is None:
             raise NotFoundError
@@ -410,9 +416,40 @@ class WorkService:
             SearchHit(work, work.title, work.cover_id)
             for work in [await self._repo.upsert_work(s) for s in found if s.cover_id]
         ]
+        if refresh:
+            ranked = await self._goodreads_hits(key)
+            seen = {h.work.id for h in ranked}
+            hits = ranked + [h for h in hits if h.work.id not in seen]
         await self._repo.commit()
         self._playlists[key] = (time.monotonic(), hits)
         return hits[:limit]
+
+    async def _goodreads_hits(self, key: str, count: int = 14) -> list[SearchHit]:
+        """The first books of the Goodreads shelf of a playlist, found in the catalog (the ones it
+        does not know, or without a cover, are left out)."""
+        shelf = GOODREADS_SHELVES.get(key)
+        if shelf is None or self._external is None:
+            return []
+        out: list[SearchHit] = []
+        for book in (await self._external.shelf(shelf))[:count]:
+            try:
+                hits = await self.search(f"{book.title} {book.author}", 4)
+            except Exception:
+                logger.info("Catalog search for %r failed", book.title)
+                continue
+            wanted = norm(book.title)
+            match = next(
+                (
+                    h
+                    for h in hits
+                    if (h.cover_id or h.work.cover_url)
+                    and wanted in {norm(h.title), norm(h.work.title)}
+                ),
+                None,
+            )
+            if match is not None and match.work.id not in {h.work.id for h in out}:
+                out.append(match)
+        return out
 
     async def by_author(self, author: str, limit: int = 8) -> list[SearchHit]:
         """Books by an author the reader likes (empty when the catalog does not answer)."""
