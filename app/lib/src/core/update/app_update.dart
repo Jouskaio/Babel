@@ -24,6 +24,7 @@ class AppRelease {
     required this.build,
     required this.released,
     required this.notes,
+    this.notesEn = const [],
     this.android,
     this.macos,
   });
@@ -40,15 +41,21 @@ class AppRelease {
       build: (json['build'] as num).toInt(),
       released: DateTime.tryParse('${json['released']}'),
       notes: [for (final n in json['notes'] as List? ?? const []) '$n'],
+      notesEn: [for (final n in json['notes_en'] as List? ?? const []) '$n'],
       android: file(json['android']),
       macos: file(json['macos']),
     );
   }
 
+  /// What changed, in English for an English app (when it was written), else in French.
+  List<String> notesFor(String language) =>
+      language == 'en' && notesEn.isNotEmpty ? notesEn : notes;
+
   final String version;
   final int build;
   final DateTime? released;
   final List<String> notes;
+  final List<String> notesEn;
   final ReleaseFile? android;
   final ReleaseFile? macos;
 }

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/back_leading.dart';
 import '../../../core/widgets/pill_button.dart';
@@ -229,7 +230,7 @@ class _BookRow extends StatelessWidget {
             height: 52,
             decoration: BoxDecoration(
               color: BabelColors.surface,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BabelShape.radius(10),
               border: Border.all(color: BabelColors.border),
             ),
             child: Icon(Icons.headphones, color: BabelColors.gold),

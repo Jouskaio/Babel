@@ -19,6 +19,7 @@ from babel_api.domain.series import series_key
 log = logging.getLogger(__name__)
 
 CACHE_SECONDS = 24 * 3600
+SHELF_SECONDS = 30 * 3600
 USER_AGENT = "Mozilla/5.0 (compatible; Babel/1.0; +https://babel.jouskaio.me)"
 _ROW = re.compile(r'itemtype="http://schema.org/Book"(.*?)</tr>', re.S)
 _TITLE = re.compile(
@@ -61,6 +62,32 @@ def parse_goodreads(page: str, title: str, authors: tuple[str, ...]) -> External
     return None
 
 
+@dataclass(frozen=True, slots=True)
+class ShelfBook:
+    """A book of a Goodreads shelf, most shelved first."""
+
+    title: str
+    author: str
+
+
+_SHELF_TITLE = re.compile(r'class="bookTitle"[^>]*>(.*?)</a>', re.S)
+_SHELF_AUTHOR = re.compile(r'class="authorName"[^>]*>\s*<span itemprop="name">(.*?)</span>', re.S)
+
+
+def parse_shelf(page: str) -> list[ShelfBook]:
+    """The books of a shelf page, titles cleaned of the edition and series in parentheses."""
+    books: list[ShelfBook] = []
+    for chunk in page.split('class="elementList"')[1:]:
+        title = _SHELF_TITLE.search(chunk)
+        who = _SHELF_AUTHOR.search(chunk)
+        if title is None or who is None:
+            continue
+        name = re.sub(r"\s*\(.*?\)", "", html.unescape(title.group(1))).strip()
+        if name:
+            books.append(ShelfBook(name, html.unescape(who.group(1)).strip()))
+    return books
+
+
 class ExternalRatings:
     def __init__(self, client: httpx.AsyncClient | None = None, goodreads: bool = True) -> None:
         self._client = client or httpx.AsyncClient(
@@ -68,12 +95,32 @@ class ExternalRatings:
         )
         self._goodreads = goodreads
         self._cache: dict[str, tuple[float, ExternalRating | None]] = {}
+        self._shelves: dict[str, tuple[float, list[ShelfBook]]] = {}
 
     def _cached(self, key: str) -> tuple[bool, ExternalRating | None]:
         found = self._cache.get(key)
         if found is not None and time.monotonic() - found[0] < CACHE_SECONDS:
             return True, found[1]
         return False, None
+
+    async def shelf(self, slug: str) -> list[ShelfBook]:
+        """The books readers shelve most under [slug] on Goodreads (empty when scraping is off or
+        the page cannot be read). Kept for 30 hours: the refresh runs once a day."""
+        if not self._goodreads:
+            return []
+        found = self._shelves.get(slug)
+        if found is not None and time.monotonic() - found[0] < SHELF_SECONDS:
+            return found[1]
+        try:
+            response = await self._client.get(f"https://www.goodreads.com/shelf/show/{slug}")
+            response.raise_for_status()
+        except httpx.HTTPError as error:
+            log.info("Goodreads shelf %s unavailable: %s", slug, error)
+            return []
+        books = parse_shelf(response.text)
+        if books:
+            self._shelves[slug] = (time.monotonic(), books)
+        return books
 
     async def openlibrary(self, work_id: str) -> ExternalRating | None:
         key = f"ol:{work_id}"

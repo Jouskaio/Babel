@@ -40,3 +40,27 @@ GENRE_PLAYLISTS: dict[Genre, str] = {
     Genre.LITERARY: "classics",
     Genre.PHILOSOPHY: "bottle",
 }
+
+
+# playlist key -> Goodreads shelf (https://www.goodreads.com/shelf/show/<slug>): what readers
+# shelve most under that name, which ranks the playlist better than a catalog subject does.
+GOODREADS_SHELVES: dict[str, str] = {
+    "dark_academia": "dark-academia",
+    "gothic": "gothic",
+    "tragic_romance": "tragic-romance",
+    "bottle": "psychological-thriller",
+    "classics": "classics",
+    "enemies": "enemies-to-lovers",
+    "dystopia": "dystopian",
+    "mystery": "mystery",
+    "horror": "horror",
+    "historical": "historical-fiction",
+    "coming_of_age": "coming-of-age",
+    "fantasy": "fantasy",
+    "space": "space",
+    "sea": "sea",
+    "war": "war",
+    "magic": "magic",
+    "travel": "travel",
+    "friendship": "friendship",
+}

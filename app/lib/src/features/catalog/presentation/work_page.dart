@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/back_leading.dart';
 import '../../../core/widgets/book_cover.dart';
@@ -191,11 +192,11 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
                             message: cover.label,
                             child: InkWell(
                               onTap: () => setState(() => _cover = cover.path),
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius: BabelShape.radius(6),
                               child: Container(
                                 padding: const EdgeInsets.all(2),
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BabelShape.radius(8),
                                   border: Border.all(
                                     color:
                                         (_cover ?? work.coverPath) == cover.path
@@ -205,7 +206,7 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
                                   ),
                                 ),
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(5),
+                                  borderRadius: BabelShape.radius(5),
                                   child: Image.network(
                                     apiUrl(cover.path),
                                     width: 56,
@@ -273,7 +274,7 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
                 children: [
                   for (final genre in work.subjects.take(8))
                     InkWell(
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BabelShape.radius(999),
                       onTap: () => context.go(Routes.searchFor(genre)),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -282,7 +283,7 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
                         ),
                         decoration: BoxDecoration(
                           border: Border.all(color: BabelColors.border),
-                          borderRadius: BorderRadius.circular(999),
+                          borderRadius: BabelShape.radius(999),
                         ),
                         child: Text(genre, style: BabelText.body(12)),
                       ),
@@ -345,7 +346,7 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: BabelColors.surface,
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius: BabelShape.radius(22),
                   border: Border.all(color: BabelColors.border),
                 ),
                 child: Column(
@@ -465,7 +466,7 @@ class _EditionRowState extends State<_EditionRow> {
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: BabelColors.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BabelShape.radius(18),
         border: Border.all(color: BabelColors.border),
       ),
       clipBehavior: Clip.antiAlias,
@@ -577,9 +578,9 @@ class _Thumb extends StatelessWidget {
   @override
   Widget build(BuildContext context) => InkWell(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(5),
+    borderRadius: BabelShape.radius(5),
     child: ClipRRect(
-      borderRadius: BorderRadius.circular(5),
+      borderRadius: BabelShape.radius(5),
       child: path == null
           ? Container(
               width: width,
@@ -901,7 +902,7 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: BabelColors.surface,
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BabelShape.radius(18),
                   border: Border.all(color: BabelColors.border),
                 ),
                 child: Row(
@@ -1020,7 +1021,7 @@ class _ExternalReviews extends ConsumerWidget {
           children: [
             for (final r in found.ratings)
               InkWell(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BabelShape.radius(14),
                 onTap: () => launchUrl(Uri.parse(r.url)),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -1029,7 +1030,7 @@ class _ExternalReviews extends ConsumerWidget {
                   ),
                   decoration: BoxDecoration(
                     border: Border.all(color: BabelColors.border),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BabelShape.radius(14),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -1084,7 +1085,7 @@ class _ExternalReviewState extends State<_ExternalReview> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: BabelColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BabelShape.radius(16),
         border: Border.all(color: BabelColors.border),
       ),
       child: Column(

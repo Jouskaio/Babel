@@ -5857,6 +5857,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Télécharger'**
   String get footerDownload;
+
+  /// No description provided for @downloadTheApps.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger les applications'**
+  String get downloadTheApps;
+
+  /// No description provided for @homeDownloadTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel en application'**
+  String get homeDownloadTitle;
+
+  /// No description provided for @homeDownloadHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Android et Mac, avec mises à jour automatiques.'**
+  String get homeDownloadHint;
+
+  /// No description provided for @close.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get close;
+
+  /// No description provided for @appearanceNouveau.
+  ///
+  /// In fr, this message translates to:
+  /// **'Art nouveau'**
+  String get appearanceNouveau;
 }
 
 class _AppLocalizationsDelegate

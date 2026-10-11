@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'babel_colors.dart';
+import 'babel_look.dart';
+import 'babel_text.dart';
 
 /// App themes, built from the current palette (midnight, or paper on e-ink screens).
 /// Fonts: Cormorant Garamond (headings), Inter (UI), Literata (reading), DM Mono (labels).
@@ -13,7 +15,10 @@ abstract final class BabelTheme {
     final base = ThemeData(
       useMaterial3: true,
       brightness: dark ? Brightness.dark : Brightness.light,
-      scaffoldBackgroundColor: BabelColors.canvas,
+      // Art deco and nouveau paint their own backdrop (a frame, vines) behind the pages.
+      scaffoldBackgroundColor: BabelShape.plain
+          ? BabelColors.canvas
+          : Colors.transparent,
       splashFactory: eink ? NoSplash.splashFactory : null,
       pageTransitionsTheme: eink
           ? PageTransitionsTheme(
@@ -40,31 +45,29 @@ abstract final class BabelTheme {
         outline: BabelColors.border,
       ),
     );
-    final ui = GoogleFonts.interTextTheme(base.textTheme).apply(
+    final ui = _body(base.textTheme).apply(
       bodyColor: BabelColors.textPrimary,
       displayColor: BabelColors.textPrimary,
     );
     return base.copyWith(
       textTheme: ui.copyWith(
-        displayLarge: GoogleFonts.cormorantGaramond(
-          fontSize: 52,
-          fontWeight: FontWeight.w600,
-          height: 1,
-          color: BabelColors.textPrimary,
-        ),
-        headlineMedium: GoogleFonts.cormorantGaramond(
-          fontSize: 30,
-          fontWeight: FontWeight.w600,
-          color: BabelColors.textPrimary,
-        ),
-        labelSmall: GoogleFonts.dmMono(
-          fontSize: 10,
-          letterSpacing: 0.8,
+        displayLarge: BabelText.title(52)
+            .copyWith(fontWeight: FontWeight.w600, height: 1),
+        headlineMedium: BabelText.heading(30),
+        labelSmall: BabelText.label(
+          10,
+          spacing: 0.8,
           color: BabelColors.textSecondary,
         ),
       ),
     );
   }
+
+  static TextTheme _body(TextTheme base) => switch (BabelShape.look) {
+    BabelLook.deco => GoogleFonts.jostTextTheme(base),
+    BabelLook.nouveau => GoogleFonts.loraTextTheme(base),
+    BabelLook.standard => GoogleFonts.interTextTheme(base),
+  };
 
   /// Text style of book content in the reader.
   static TextStyle reading({double size = 18}) => GoogleFonts.literata(

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/locale/relative_time.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/loading_bar.dart';
@@ -178,7 +179,7 @@ class _RecommendationCard extends ConsumerWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: BabelColors.surface,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BabelShape.radius(24),
         border: Border.all(color: BabelColors.gold.withValues(alpha: 0.6)),
       ),
       child: Column(

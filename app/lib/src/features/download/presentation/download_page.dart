@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/update/app_update.dart';
 import '../../../core/update/update_dialog.dart';
@@ -124,7 +125,7 @@ class _Platform extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: BabelColors.surface,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BabelShape.radius(22),
         border: Border.all(color: BabelColors.border),
       ),
       child: Row(

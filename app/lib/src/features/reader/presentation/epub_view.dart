@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/display/eink.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 import '../application/annotations.dart';
@@ -330,7 +331,7 @@ class _EpubViewState extends ConsumerState<EpubView>
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             decoration: BoxDecoration(
               color: BabelColors.surface,
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BabelShape.radius(999),
               border: Border.all(color: BabelColors.border),
             ),
             child: Row(
@@ -617,11 +618,11 @@ class _MarginButton extends StatelessWidget {
         child: Material(
           color: BabelColors.surface,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BabelShape.radius(18),
             side: BorderSide(color: BabelColors.border),
           ),
           child: InkWell(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BabelShape.radius(18),
             onTap: onTap,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

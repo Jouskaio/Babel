@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
@@ -114,7 +115,7 @@ class ProgressEditor extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
         ClipRRect(
-          borderRadius: BorderRadius.circular(2),
+          borderRadius: BabelShape.radius(2),
           child: LinearProgressIndicator(
             value: (shown / 100).clamp(0, 1).toDouble(),
             minHeight: 4,

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/display/eink.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../l10n.dart';
@@ -237,7 +238,7 @@ class _WrapPageState extends ConsumerState<WrapPage> {
                           color: i <= _page
                               ? BabelColors.gold
                               : BabelColors.border,
-                          borderRadius: BorderRadius.circular(2),
+                          borderRadius: BabelShape.radius(2),
                         ),
                       ),
                     ),

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/babel_text_field.dart';
 import '../../../core/widgets/pill_button.dart';
@@ -63,7 +64,7 @@ class _HandleCardState extends ConsumerState<HandleCard> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: BabelColors.surface,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BabelShape.radius(22),
         border: Border.all(color: BabelColors.gold),
       ),
       child: Column(

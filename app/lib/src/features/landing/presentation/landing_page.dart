@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/locale/language_picker.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
@@ -73,6 +74,12 @@ class _Nav extends StatelessWidget {
         children: [
           Text(l10n.brand, style: BabelText.label(13, spacing: 6)),
           const Spacer(),
+          if (wide)
+            TextButton.icon(
+              onPressed: () => context.go(Routes.download),
+              icon: const Icon(Icons.download_rounded, size: 18),
+              label: Text(l10n.downloadTheApps),
+            ),
           const LanguagePicker(),
           const SizedBox(width: 12),
           PillButton(
@@ -149,7 +156,13 @@ class _Hero extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 12),
+        TextButton.icon(
+          onPressed: () => context.go(Routes.download),
+          icon: const Icon(Icons.download_rounded, size: 18),
+          label: Text(l10n.downloadTheApps),
+        ),
+        const SizedBox(height: 8),
         Text(
           l10n.heroNote,
           style: BabelText.body(
@@ -260,7 +273,7 @@ class _TrendingCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(22, 18, 22, 22),
       decoration: BoxDecoration(
         color: BabelColors.surface,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BabelShape.radius(22),
         border: Border.all(color: BabelColors.border),
         boxShadow: const [
           BoxShadow(
@@ -346,7 +359,7 @@ class _Features extends StatelessWidget {
           : const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: BabelColors.surface,
-        borderRadius: BorderRadius.circular(wide ? 28 : 22),
+        borderRadius: BabelShape.radius(wide ? 28 : 22),
         border: Border.all(color: BabelColors.border),
       ),
       child: Flex(
@@ -470,7 +483,7 @@ class _Devices extends StatelessWidget {
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: const Color(0xFFE9E4DA),
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BabelShape.radius(26),
         border: Border.all(color: const Color(0xFF2B2B2B)),
       ),
       child: Column(
@@ -560,7 +573,7 @@ class _CallToAction extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: wide ? 72 : 40),
         decoration: BoxDecoration(
           color: BabelColors.velvet,
-          borderRadius: BorderRadius.circular(wide ? 36 : 28),
+          borderRadius: BabelShape.radius(wide ? 36 : 28),
         ),
         child: Column(
           children: [

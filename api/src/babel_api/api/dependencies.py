@@ -73,7 +73,7 @@ from babel_api.services.social import SocialService
 from babel_api.services.sources import SourceService
 from babel_api.services.stats import StatsService
 from babel_api.services.sync import SyncService
-from babel_api.services.works import WorkService
+from babel_api.services.works import SearchHit, WorkService
 
 
 @dataclass(frozen=True, slots=True)
@@ -115,6 +115,10 @@ class Container:
     chaptarr_for_reader: Callable[[str, str], ChaptarrClient] | None = None
     # Sources being scanned in the background (a slow connector such as AO3).
     scanning: set[UUID] = field(default_factory=set[UUID])
+    # Playlists already built (see WorkService.playlist), shared by every request.
+    playlists: dict[str, tuple[float, list[SearchHit]]] = field(
+        default_factory=dict[str, tuple[float, list[SearchHit]]]
+    )
 
 
 def get_container(request: Request) -> Container:
@@ -157,6 +161,7 @@ def get_work_service(
         container.wikidata,
         container.external_ratings,
         container.pagebound,
+        container.playlists,
     )
 
 
@@ -480,7 +485,12 @@ def make_request_service(container: Container, session: AsyncSession) -> Request
     return RequestService(
         SqlRequestRepository(session),
         SqlUserRepository(session),
-        WorkService(SqlCatalogRepository(session), container.books, container.hardcover),
+        WorkService(
+            SqlCatalogRepository(session),
+            container.books,
+            container.hardcover,
+            playlist_cache=container.playlists,
+        ),
         container.chaptarr,
         container.chaptarr_for_reader or reader_chaptarr,
         container.secrets,

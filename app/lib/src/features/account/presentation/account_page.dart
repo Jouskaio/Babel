@@ -10,6 +10,7 @@ import '../../../core/display/eink_setting.dart';
 import '../../../core/locale/language_picker.dart';
 import '../../../core/push/push_notifications.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/babel_text_field.dart';
 import '../../../core/widgets/pill_button.dart';
@@ -306,7 +307,7 @@ class _Group extends StatelessWidget {
     child: Container(
       decoration: BoxDecoration(
         color: BabelColors.surface,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BabelShape.radius(24),
         border: Border.all(color: BabelColors.border),
       ),
       clipBehavior: Clip.antiAlias,

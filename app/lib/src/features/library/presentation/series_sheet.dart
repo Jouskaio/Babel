@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
@@ -77,7 +78,7 @@ class _SeriesSheet extends ConsumerWidget {
             const SizedBox(height: 10),
             for (final item in volumes)
               InkWell(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BabelShape.radius(14),
                 onTap: () {
                   Navigator.of(context).pop();
                   showBookActions(context, item);
@@ -153,7 +154,7 @@ class _Progress extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BabelShape.radius(2),
               child: LinearProgressIndicator(
                 value: (percent! / 100).clamp(0, 1).toDouble(),
                 minHeight: 3,

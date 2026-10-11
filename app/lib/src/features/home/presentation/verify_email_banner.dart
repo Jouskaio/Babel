@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/auth/auth_controller.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 
@@ -39,7 +40,7 @@ class _VerifyEmailBannerState extends ConsumerState<VerifyEmailBanner> {
       padding: const EdgeInsets.fromLTRB(18, 12, 8, 12),
       decoration: BoxDecoration(
         color: BabelColors.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BabelShape.radius(18),
         border: Border.all(color: BabelColors.gold.withValues(alpha: 0.5)),
       ),
       child: Row(

@@ -202,7 +202,8 @@ to `/opt/babel/downloads/` on the server together with `latest.json` (version, b
 changed, files). The web container serves that folder at `https://<site>/downloads/`; the site's
 "Télécharger" page and the update prompt inside the apps read `latest.json`.
 
-- What changed: write one line per change in `release-notes/app-<version>.txt` (French) before
+- What changed: write one line per change in `release-notes/app-<version>.txt` (French) and
+  `release-notes/app-<version>.en.txt` (English) before
   releasing; without that file the notes are the `feat`/`fix` commit subjects since the last tag.
 - Android updates install over the previous version only when the APK is signed with the same
   key every time. Create the key once and add four repository secrets:

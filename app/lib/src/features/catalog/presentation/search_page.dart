@@ -9,6 +9,7 @@ import '../../../core/api/api_providers.dart';
 import '../../../core/storage/local_database.dart';
 import '../../../core/sync/lookups.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../l10n.dart';
@@ -274,7 +275,7 @@ class _Trending extends ConsumerWidget {
         const SizedBox(height: 16),
         for (final (i, work) in works.indexed)
           InkWell(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BabelShape.radius(16),
             onTap: () => context.push(Routes.work(work.workId)),
             child: Padding(
               padding: const EdgeInsets.only(bottom: 16),
@@ -521,7 +522,7 @@ class _SagaRowState extends State<_SagaRow> {
       children: [
         InkWell(
           onTap: () => setState(() => _open = !_open),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BabelShape.radius(16),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Row(
@@ -584,7 +585,7 @@ class _TraceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => InkWell(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(16),
+    borderRadius: BabelShape.radius(16),
     child: Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
@@ -639,7 +640,7 @@ class WorkRow extends ConsumerWidget {
     ].join(' · ');
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BabelShape.radius(16),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
         child: Row(

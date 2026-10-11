@@ -1,8 +1,8 @@
 """Writes downloads/latest.json for an app release: version, what changed, and the files.
 
 Usage: release-manifest.py <tag> <directory with the built apps>
-The notes are release-notes/app-<version>.txt when it exists, else the feature and fix commits
-since the previous app tag.
+The notes are release-notes/app-<version>.txt (French) and .en.txt (English) when they exist,
+else the feature and fix commits since the previous app tag.
 """
 
 import hashlib
@@ -25,10 +25,18 @@ def git(*args: str) -> str:
 previous = git("describe", "--tags", "--abbrev=0", "--match", "app-v*", f"{tag}^")
 log = git("log", f"{previous}..{tag}" if previous else tag, "--no-merges", "--pretty=%s")
 notes: list[str] = []
-# Hand-written notes (one line per change, in the language of the app) win over commit subjects.
-written = Path(f"release-notes/app-{version}.txt")
-if written.exists():
-    notes = [line.strip("-• \t") for line in written.read_text().splitlines() if line.strip()]
+
+
+def lines(path: Path) -> list[str]:
+    if not path.exists():
+        return []
+    return [line.strip("-• \t") for line in path.read_text().splitlines() if line.strip()]
+
+
+# Hand-written notes (one line per change) win over commit subjects: French in
+# app-<version>.txt, English in app-<version>.en.txt.
+notes = lines(Path(f"release-notes/app-{version}.txt"))
+notes_en = lines(Path(f"release-notes/app-{version}.en.txt"))
 for subject in [] if notes else log.splitlines():
     found = re.match(r"(feat|fix|perf)(?:\([^)]*\))?!?:\s*(.+)", subject)
     if found and found.group(2) not in notes:
@@ -51,6 +59,7 @@ manifest = {
     "build": int(build),
     "released": date.today().isoformat(),
     "notes": notes,
+    "notes_en": notes_en,
     "android": entry("*.apk"),
     "macos": entry("*.zip"),
 }

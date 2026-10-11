@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/locale/relative_time.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../core/widgets/section_title.dart';
@@ -101,7 +102,7 @@ class _BookTraceCardState extends ConsumerState<BookTraceCard> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: BabelColors.surface,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BabelShape.radius(22),
         border: Border.all(color: BabelColors.gold.withValues(alpha: 0.6)),
       ),
       child: Column(
@@ -246,7 +247,7 @@ class _Entry extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: BabelColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BabelShape.radius(16),
         border: Border.all(color: BabelColors.border),
       ),
       child: Column(

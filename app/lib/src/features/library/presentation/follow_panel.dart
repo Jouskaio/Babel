@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/sync/sync_engine.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 import '../../reader/application/reading_position.dart';
@@ -87,7 +88,7 @@ class _FollowPanelState extends ConsumerState<FollowPanel> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: BabelColors.canvas,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BabelShape.radius(16),
         border: Border.all(color: BabelColors.border),
       ),
       child: Column(

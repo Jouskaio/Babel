@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/babel_look.dart';
 import '../theme/babel_colors.dart';
 import '../theme/babel_text.dart';
 
@@ -48,7 +49,7 @@ class _BabelTextFieldState extends State<BabelTextField> {
   late bool _hidden = widget.obscure;
 
   OutlineInputBorder _border(Color color) => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(14),
+    borderRadius: BabelShape.radius(14),
     borderSide: BorderSide(color: color),
   );
 

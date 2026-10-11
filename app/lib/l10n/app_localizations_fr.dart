@@ -3566,4 +3566,20 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get footerDownload => 'Télécharger';
+
+  @override
+  String get downloadTheApps => 'Télécharger les applications';
+
+  @override
+  String get homeDownloadTitle => 'Babel en application';
+
+  @override
+  String get homeDownloadHint =>
+      'Android et Mac, avec mises à jour automatiques.';
+
+  @override
+  String get close => 'Fermer';
+
+  @override
+  String get appearanceNouveau => 'Art nouveau';
 }

@@ -13,6 +13,7 @@ import '../../../core/api/api_providers.dart';
 import '../../../core/storage/local_database.dart';
 import '../../../core/sync/lookups.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
@@ -219,7 +220,7 @@ class _ScanPageState extends ConsumerState<ScanPage> {
                               color: BabelColors.gold,
                               width: 2,
                             ),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BabelShape.radius(12),
                           ),
                         ),
                         Positioned(

@@ -6,14 +6,16 @@ void main() {
     'version': '0.50.0',
     'build': 78,
     'released': '2026-10-11',
-    'notes': ['One', 'Two'],
+    'notes': ['Un', 'Deux'],
+    'notes_en': ['One', 'Two'],
     'android': {'url': '/downloads/Babel-0.50.0.apk', 'size': 1048576},
     'macos': null,
   });
 
   test('reads what the release workflow writes', () {
     expect(release.version, '0.50.0');
-    expect(release.notes, ['One', 'Two']);
+    expect(release.notesFor('fr'), ['Un', 'Deux']);
+    expect(release.notesFor('en'), ['One', 'Two']);
     expect(release.android?.url, '/downloads/Babel-0.50.0.apk');
     expect(release.macos, isNull);
   });

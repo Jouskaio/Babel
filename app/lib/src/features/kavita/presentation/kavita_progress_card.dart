@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
@@ -21,13 +22,13 @@ class KavitaProgressCard extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 32),
       child: InkWell(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BabelShape.radius(22),
         onTap: () => context.push(Routes.kavita),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: BabelColors.surface,
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BabelShape.radius(22),
             border: Border.all(color: BabelColors.gold),
           ),
           child: Row(

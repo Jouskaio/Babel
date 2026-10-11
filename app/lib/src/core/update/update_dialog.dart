@@ -94,16 +94,19 @@ class UpdateNotes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final notes = release.notesFor(
+      Localizations.localeOf(context).languageCode,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(l10n.updateWhatsNew.toUpperCase(), style: BabelText.label(10)),
         const SizedBox(height: 8),
-        if (release.notes.isEmpty)
+        if (notes.isEmpty)
           Text(l10n.updateNoNotes, style: BabelText.body(14))
         else
-          for (final note in release.notes)
+          for (final note in notes)
             Padding(
               padding: const EdgeInsets.only(bottom: 6),
               child: Row(

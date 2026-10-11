@@ -4,14 +4,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../display/eink.dart';
 import 'babel_colors.dart';
+import 'babel_look.dart';
 
 /// The reader's color theme. E-ink mode, when active, overrides it with paper.
 enum Appearance {
-  night(BabelPalette.midnight),
-  deco(BabelPalette.deco);
+  night(BabelPalette.midnight, BabelLook.standard),
+  deco(BabelPalette.deco, BabelLook.deco),
+  nouveau(BabelPalette.nouveau, BabelLook.nouveau);
 
-  const Appearance(this.palette);
+  const Appearance(this.palette, this.look);
   final BabelPalette palette;
+  final BabelLook look;
 }
 
 final appearanceProvider = NotifierProvider<AppearanceController, Appearance>(
@@ -31,9 +34,9 @@ class AppearanceController extends Notifier<Appearance> {
     } on Object catch (error) {
       debugPrint('Appearance skipped: $error');
     }
-    BabelColors.use(
-      EinkController.startup.active ? BabelPalette.paper : startup.palette,
-    );
+    final eink = EinkController.startup.active;
+    BabelColors.use(eink ? BabelPalette.paper : startup.palette);
+    BabelShape.use(eink ? BabelLook.standard : startup.look);
   }
 
   @override

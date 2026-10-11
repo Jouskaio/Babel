@@ -1956,5 +1956,10 @@
   "downloadOpenWeb": "Ouvrir",
   "downloadSoon": "Bientôt",
   "downloadUpdates": "Mises à jour : l'application te propose chaque nouvelle version avec ses nouveautés. Google Play et l'App Store viendront plus tard.",
-  "footerDownload": "Télécharger"
+  "footerDownload": "Télécharger",
+  "downloadTheApps": "Télécharger les applications",
+  "homeDownloadTitle": "Babel en application",
+  "homeDownloadHint": "Android et Mac, avec mises à jour automatiques.",
+  "close": "Fermer",
+  "appearanceNouveau": "Art nouveau"
 }

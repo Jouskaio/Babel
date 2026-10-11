@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/babel_look.dart';
 import '../theme/babel_colors.dart';
 import '../theme/babel_text.dart';
 
@@ -60,26 +61,51 @@ class BookCover extends StatelessWidget {
         width: width,
         height: height,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6),
-          boxShadow: const [
+          borderRadius: BabelShape.cover(width),
+          // Deep shadows suit dark pages; on parchment a light one.
+          boxShadow: [
             BoxShadow(
-              color: Color(0x8C000000),
-              blurRadius: 48,
-              offset: Offset(0, 24),
+              color: BabelColors.palette.dark
+                  ? const Color(0x8C000000)
+                  : const Color(0x30000000),
+              blurRadius: BabelColors.palette.dark ? 48 : 20,
+              offset: Offset(0, BabelColors.palette.dark ? 24 : 10),
             ),
           ],
         ),
         clipBehavior: Clip.antiAlias,
-        child: url == null
-            ? placeholder
-            : Image.network(
-                url!,
-                fit: BoxFit.cover,
-                semanticLabel: title,
-                errorBuilder: (_, _, _) => placeholder,
-                loadingBuilder: (_, child, progress) =>
-                    progress == null ? child : placeholder,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            url == null
+                ? placeholder
+                : Image.network(
+                    url!,
+                    fit: BoxFit.cover,
+                    semanticLabel: title,
+                    errorBuilder: (_, _, _) => placeholder,
+                    loadingBuilder: (_, child, progress) =>
+                        progress == null ? child : placeholder,
+                  ),
+            // Art deco and nouveau covers wear a fine gilt frame.
+            if (!BabelShape.plain)
+              IgnorePointer(
+                child: Container(
+                  margin: EdgeInsets.all(width / 28 + 2),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: BabelColors.gold.withValues(alpha: 0.85),
+                    ),
+                    borderRadius: BabelShape.look == BabelLook.nouveau
+                        ? BorderRadius.vertical(
+                            top: Radius.circular(width / 2 - width / 28),
+                          )
+                        : BorderRadius.zero,
+                  ),
+                ),
               ),
+          ],
+        ),
       ),
     );
   }
