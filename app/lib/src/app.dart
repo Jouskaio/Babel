@@ -13,6 +13,8 @@ import 'core/theme/appearance.dart';
 import 'core/theme/babel_colors.dart';
 import 'core/theme/babel_theme.dart';
 import 'core/theme/palette_scope.dart';
+import 'core/update/app_update.dart';
+import 'core/update/update_dialog.dart';
 import 'features/shell/app_shell.dart';
 import 'l10n.dart';
 import 'routing/router.dart';
@@ -29,6 +31,8 @@ class _BabelAppState extends ConsumerState<BabelApp>
     with WidgetsBindingObserver {
   StreamSubscription<Shared>? _shares;
   StreamSubscription<Map<String, String>>? _notifications;
+  Timer? _updates;
+  int _offered = 0; // the build the update was last offered for, this session
 
   @override
   void initState() {
@@ -36,11 +40,39 @@ class _BabelAppState extends ConsumerState<BabelApp>
     WidgetsBinding.instance.addObserver(this);
     _listenToNotifications();
     _listenToShares();
+    _watchUpdates();
+  }
+
+  /// A new release is offered when the app starts, then every few hours and when it comes
+  /// back to the front; the reader who said "later" is not asked again for that version.
+  void _watchUpdates() {
+    ref.listenManual(availableUpdateProvider, (_, update) async {
+      final release = update.value;
+      if (release == null || !canUpdate(release) || release.build <= _offered) {
+        return;
+      }
+      if (release.build <= await dismissedBuild() || !mounted) return;
+      final context = ref
+          .read(routerProvider)
+          .routerDelegate
+          .navigatorKey
+          .currentContext;
+      if (context == null || !context.mounted) return;
+      _offered = release.build;
+      await showUpdateDialog(context, release);
+    }, fireImmediately: true);
+    _updates = Timer.periodic(
+      const Duration(hours: 6),
+      (_) => ref.invalidate(latestReleaseProvider),
+    );
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // Back to the app (or to its tab): learn what the other devices did meanwhile.
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(latestReleaseProvider);
+    }
     if (state == AppLifecycleState.resumed &&
         ref.read(authControllerProvider) is SignedIn) {
       unawaited(ref.read(syncEngineProvider.notifier).sync());
@@ -96,6 +128,7 @@ class _BabelAppState extends ConsumerState<BabelApp>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _updates?.cancel();
     unawaited(_shares?.cancel());
     unawaited(_notifications?.cancel());
     super.dispose();

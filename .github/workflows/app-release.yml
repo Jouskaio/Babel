@@ -30,7 +30,21 @@ jobs:
           distribution: temurin
           java-version: "25"
       - run: flutter pub get
+      # Signed with the release key kept in the repository secrets (same key every time, so
+      # an update installs over the previous version).
+      - name: Release key
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE" ]; then
+            echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/babel.jks"
+            echo "BABEL_KEYSTORE_FILE=$RUNNER_TEMP/babel.jks" >> "$GITHUB_ENV"
+          fi
       - run: flutter build apk --release --dart-define=BABEL_API_URL=${{ vars.BABEL_API_URL }}
+        env:
+          BABEL_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          BABEL_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          BABEL_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
       - uses: actions/upload-artifact@v7
         with:
           name: babel-android-${{ github.ref_name }}
@@ -136,6 +150,7 @@ jobs:
           printf '%s' "$REGISTRY_TOKEN" | ssh -o StrictHostKeyChecking=accept-new "deploy@${DEPLOY_HOST}" \
             "docker login ghcr.io -u ${{ github.actor }} --password-stdin >/dev/null \
              && cd /opt/babel \
+             && mkdir -p /opt/babel/downloads \
              && docker image prune -af >/dev/null \
              && BABEL_WEB_TAG=${VERSION} docker compose pull web; \
              status=\$?; docker logout ghcr.io >/dev/null; [ \$status -eq 0 ] \
@@ -150,3 +165,37 @@ jobs:
           done
           echo "::error::The web app did not become healthy after deployment"
           exit 1
+
+  downloads:
+    name: Publish the apps to download
+    runs-on: ubuntu-latest
+    needs: [android, macos, deploy]
+    environment: production
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v7
+        with:
+          path: built
+      - name: Name the files and write the manifest
+        run: |
+          VERSION="${GITHUB_REF_NAME#app-v}"
+          mkdir -p dl
+          cp built/babel-android-*/app-release.apk "dl/Babel-${VERSION}.apk"
+          cp built/babel-macos-*/Babel-macOS.zip "dl/Babel-${VERSION}-macOS.zip"
+          python3 scripts/release-manifest.py "$GITHUB_REF_NAME" dl
+      - uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+      # The manifest goes last: the apps it points to are already there.
+      - name: Upload
+        run: |
+          scp -o StrictHostKeyChecking=accept-new dl/*.apk dl/*.zip "deploy@${DEPLOY_HOST}:/opt/babel/downloads/"
+          scp dl/latest.json "deploy@${DEPLOY_HOST}:/opt/babel/downloads/latest.json"
+          # Keep the two latest versions of each app.
+          ssh "deploy@${DEPLOY_HOST}" 'cd /opt/babel/downloads && ls -t *.apk | tail -n +3 | xargs -r rm -f; ls -t *.zip | tail -n +3 | xargs -r rm -f'

@@ -3451,4 +3451,93 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appearanceReading => 'Reading';
+
+  @override
+  String updateTitle(String version) {
+    return 'Babel $version is available';
+  }
+
+  @override
+  String get updateLater => 'Later';
+
+  @override
+  String get updateNow => 'Update';
+
+  @override
+  String get updateReload => 'Reload';
+
+  @override
+  String get updateWhatsNew => 'What\'s new';
+
+  @override
+  String get updateNoNotes => 'Improvements and fixes.';
+
+  @override
+  String get updateSection => 'Updates';
+
+  @override
+  String updateInstalled(String version) {
+    return 'Installed version: $version';
+  }
+
+  @override
+  String get updateUpToDate => 'Babel is up to date.';
+
+  @override
+  String updateAvailable(String version) {
+    return 'Version $version is available.';
+  }
+
+  @override
+  String get updateGetApps => 'Download the apps';
+
+  @override
+  String get downloadTitle => 'Download Babel';
+
+  @override
+  String get downloadIntro =>
+      'Babel runs in the browser, on Android and on Mac. The apps offer each new version themselves, with what changes.';
+
+  @override
+  String downloadLatest(String version, String date) {
+    return 'Latest version: $version · $date';
+  }
+
+  @override
+  String get downloadAndroidHint =>
+      'APK file. If Android asks, allow installing from this site.';
+
+  @override
+  String get downloadApk => 'Download';
+
+  @override
+  String get downloadMacHint =>
+      'Zip file. On first launch: right-click the app, then Open (it is not signed by Apple yet).';
+
+  @override
+  String get downloadMac => 'Download';
+
+  @override
+  String get downloadIosSoon =>
+      'Coming to the App Store. Meanwhile, open Babel in Safari, then Share › Add to Home Screen.';
+
+  @override
+  String get downloadWebName => 'Browser';
+
+  @override
+  String get downloadWebHint =>
+      'Nothing to install: open Babel and add it to your home screen.';
+
+  @override
+  String get downloadOpenWeb => 'Open';
+
+  @override
+  String get downloadSoon => 'Soon';
+
+  @override
+  String get downloadUpdates =>
+      'Updates: the app offers each new version with what\'s new. Google Play and the App Store will come later.';
+
+  @override
+  String get footerDownload => 'Download';
 }

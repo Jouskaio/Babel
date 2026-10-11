@@ -194,3 +194,25 @@ echo "BABEL_HARDCOVER_API_KEY=<the key>" >> /opt/babel/.env
 cd /opt/babel && docker compose up -d api
 ```
 
+
+## Apps to download and updates
+
+The app release workflow (`app-v*` tag) builds the Android APK and the macOS zip, then copies them
+to `/opt/babel/downloads/` on the server together with `latest.json` (version, build number, what
+changed, files). The web container serves that folder at `https://<site>/downloads/`; the site's
+"Télécharger" page and the update prompt inside the apps read `latest.json`.
+
+- What changed: write one line per change in `release-notes/app-<version>.txt` (French) before
+  releasing; without that file the notes are the `feat`/`fix` commit subjects since the last tag.
+- Android updates install over the previous version only when the APK is signed with the same
+  key every time. Create the key once and add four repository secrets:
+
+  ```bash
+  keytool -genkeypair -v -keystore babel.jks -alias babel -keyalg RSA -keysize 2048 -validity 36500
+  base64 -i babel.jks | pbcopy   # secret ANDROID_KEYSTORE_BASE64
+  ```
+
+  The other secrets are `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` (`babel`) and
+  `ANDROID_KEY_PASSWORD`. Keep `babel.jks` somewhere safe: losing it means a new key, so
+  uninstalling the app before installing the next one. Until the secrets exist, the APK is
+  signed with a debug key that changes at every build.

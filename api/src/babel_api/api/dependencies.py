@@ -1,6 +1,7 @@
 """Request-scoped dependencies: database session, services and the current user."""
 
 import logging
+import re
 import time
 from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass, field
@@ -505,6 +506,11 @@ def covers_due(user_id: UUID) -> bool:
     return last is None or time.monotonic() - last > COVER_RECHECK_SECONDS
 
 
+def _base_title(title: str) -> str:
+    """ "Le Guerrier (Le Prince Captif, #2)" is "Le Guerrier": series notes are dropped."""
+    return re.sub(r"\s*[(\[].*?[)\]]", "", title).strip() or title
+
+
 async def link_covers(container: Container, user_id: UUID) -> None:
     """Background task: books imported from a reading list (Goodreads CSV, Pagebound…) are paper
     books without a catalog work, so without a cover. Each is searched in the catalog and linked
@@ -526,13 +532,13 @@ async def link_covers(container: Container, user_id: UUID) -> None:
                 except Exception:
                     logger.info("Cover search for %r failed", item.title)
                     continue
-                wanted = norm(item.title)
+                wanted = {norm(item.title), norm(_base_title(item.title))}
                 found = next(
                     (
                         h
                         for h in hits
                         if (h.cover_id or h.work.cover_url)
-                        and (norm(h.title) == wanted or norm(h.work.title) == wanted)
+                        and wanted & {norm(h.title), norm(h.work.title), norm(_base_title(h.title))}
                     ),
                     None,
                 )
@@ -540,6 +546,10 @@ async def link_covers(container: Container, user_id: UUID) -> None:
                     await files.link_work(user_id, item.id, found.work.id)
     except Exception:
         logger.exception("Linking covers of %s failed", user_id)
+        return
+    if len(todo) == COVER_BATCH:
+        # More books wait: look again soon rather than in six hours.
+        _covers_checked[user_id] = time.monotonic() - COVER_RECHECK_SECONDS + 300
 
 
 async def run_source_scan(container: Container, user_id: UUID, source_id: UUID) -> None:

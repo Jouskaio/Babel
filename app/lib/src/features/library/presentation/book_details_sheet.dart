@@ -13,6 +13,7 @@ import '../../../l10n.dart';
 import '../../catalog/application/catalog_providers.dart';
 import '../application/library_controller.dart';
 import '../application/series.dart';
+import 'link_work_sheet.dart';
 
 /// The id in a catalog cover path: "/v1/catalog/covers/123/M" is 123.
 int? coverIdOf(String path) {
@@ -208,9 +209,24 @@ class _BookDetailsSheetState extends ConsumerState<_BookDetailsSheet> {
               const SizedBox(height: 20),
               Text(l10n.detailsCover.toUpperCase(), style: BabelText.label(10)),
               const SizedBox(height: 10),
-              if (workId == null)
-                Text(l10n.coverLinkFirst, style: BabelText.body(13))
-              else
+              if (workId == null) ...[
+                Text(l10n.coverLinkFirst, style: BabelText.body(13)),
+                TextButton.icon(
+                  onPressed: _saving
+                      ? null
+                      : () {
+                          final item = widget.item;
+                          final root = Navigator.of(
+                            context,
+                            rootNavigator: true,
+                          ).context;
+                          Navigator.of(context).pop();
+                          showLinkWorkSheet(root, item);
+                        },
+                  icon: const Icon(Icons.link, size: 18),
+                  label: Text(l10n.linkWork, style: BabelText.body(14)),
+                ),
+              ] else
                 SizedBox(
                   height: 100,
                   child: ListView(
