@@ -8,6 +8,7 @@ import '../../core/sync/sync_engine.dart';
 import '../../core/theme/babel_colors.dart';
 import '../../core/theme/babel_look.dart';
 import '../../core/theme/babel_text.dart';
+import '../../core/widgets/babel_logo.dart';
 import '../../l10n.dart';
 import '../../routing/router.dart';
 import '../audiobooks/presentation/audio_player_view.dart';
@@ -256,10 +257,7 @@ class _Sidebar extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(left: 8, bottom: 32),
-            child: Text(
-              context.l10n.brand,
-              style: BabelText.label(13, spacing: 6),
-            ),
+            child: BabelBrand(style: BabelText.label(13, spacing: 6), mark: 30),
           ),
           for (final d in destinations)
             Padding(
