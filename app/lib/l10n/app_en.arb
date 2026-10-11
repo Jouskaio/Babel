@@ -1169,5 +1169,9 @@
   "homeDownloadTitle": "Babel as an app",
   "homeDownloadHint": "Android and Mac, with update prompts.",
   "close": "Close",
-  "appearanceNouveau": "Art nouveau"
+  "appearanceNouveau": "Art nouveau",
+  "readersTitle": "Readers",
+  "readersDirectory": "All readers",
+  "readersCount": "{count} readers",
+  "@readersCount": {"placeholders": {"count": {"type": "int"}}}
 }

@@ -1,0 +1,2 @@
+Nouvelle page « Lecteurs » : tous les lecteurs avec un pseudo, une recherche, et l'accès à leur profil
+Thème Art déco repensé : bordeaux, laiton et ivoire, à la place du vert

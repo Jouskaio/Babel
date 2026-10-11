@@ -28,6 +28,7 @@ import '../features/saga/saga_page.dart';
 import '../features/social/presentation/friends_page.dart';
 import '../features/social/presentation/profile_page.dart';
 import '../features/social/presentation/reader_profile_page.dart';
+import '../features/social/presentation/readers_page.dart';
 import '../features/sources/presentation/new_source_page.dart';
 import '../features/sources/presentation/source_detail_page.dart';
 import '../features/sources/presentation/source_form_page.dart';
@@ -46,6 +47,7 @@ abstract final class Routes {
   static const account = '/account';
   static const profile = '/profile';
   static const friends = '/friends';
+  static const readers = '/readers';
   static String reader(String handle) => '/readers/$handle';
   static const kavita = '/kavita';
   static const admin = '/admin';
@@ -150,6 +152,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: Routes.account, builder: (_, _) => const AccountPage()),
       GoRoute(path: Routes.friends, builder: (_, _) => const FriendsPage()),
+      GoRoute(path: Routes.readers, builder: (_, _) => const ReadersPage()),
       GoRoute(path: Routes.stats, builder: (_, _) => const StatsPage()),
       GoRoute(
         path: '/playlist/:key',

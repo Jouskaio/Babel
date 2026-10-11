@@ -3582,4 +3582,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get appearanceNouveau => 'Art nouveau';
+
+  @override
+  String get readersTitle => 'Lecteurs';
+
+  @override
+  String get readersDirectory => 'Tous les lecteurs';
+
+  @override
+  String readersCount(int count) {
+    return '$count lecteurs';
+  }
 }

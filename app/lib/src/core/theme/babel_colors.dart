@@ -43,19 +43,19 @@ class BabelPalette {
     forest: Color(0xFF26362D), // color.success
   );
 
-  /// Art deco: black-green lacquer, brass and emerald, ivory ink.
+  /// Art deco: wine lacquer, brass and ivory, leather red; Charleston green only as a touch.
   static const deco = BabelPalette(
     dark: true,
-    canvas: Color(0xFF0B1512),
-    surface: Color(0xFF11201B),
-    sunken: Color(0xFF18302A),
-    border: Color(0xFF5C4D26),
-    textPrimary: Color(0xFFF3E9CF),
-    textSecondary: Color(0xFFA9B8A8),
-    gold: Color(0xFFD4AF37),
-    velvet: Color(0xFF0F7A64),
+    canvas: Color(0xFF1B0509),
+    surface: Color(0xFF270B12),
+    sunken: Color(0xFF3B0014),
+    border: Color(0xFF7A5A2E),
+    textPrimary: Color(0xFFF2E9E0),
+    textSecondary: Color(0xFFBBA58F),
+    gold: Color(0xFFCFA64A),
+    velvet: Color(0xFF954130),
     dustyRose: Color(0xFFD39A7A),
-    forest: Color(0xFF1E3B33),
+    forest: Color(0xFF00291C),
   );
 
   /// Art nouveau: parchment, antique gold, sage and poppy orange, brown ink.

@@ -46,12 +46,16 @@ def test_ratings_come_from_open_library_and_goodreads() -> None:
 def test_a_goodreads_shelf_lists_its_books_without_edition_or_series() -> None:
     from babel_api.adapters.external_ratings import ShelfBook, parse_shelf
 
-    page = """
-    <div class="elementList"><a class="bookTitle" href="/book/show/1">The Secret History (Paperback)</a>
-    <div class='authorName__container'><a class="authorName" href="/a/1"><span itemprop="name">Donna Tartt</span></a></div></div>
-    <div class="elementList"><a class="bookTitle" href="/book/show/2">Ninth House (Ninth House Trilogy, #1)</a>
-    <div class='authorName__container'><a class="authorName" href="/a/2"><span itemprop="name">Leigh Bardugo</span></a></div></div>
-    """
+    def row(title: str, author: str) -> str:
+        return (
+            f'<div class="elementList"><a class="bookTitle" href="/b">{title}</a>'
+            '<div class="authorName__container"><a class="authorName" href="/a">'
+            f'<span itemprop="name">{author}</span></a></div></div>'
+        )
+
+    page = row("The Secret History (Paperback)", "Donna Tartt") + row(
+        "Ninth House (Ninth House Trilogy, #1)", "Leigh Bardugo"
+    )
     assert parse_shelf(page) == [
         ShelfBook("The Secret History", "Donna Tartt"),
         ShelfBook("Ninth House", "Leigh Bardugo"),

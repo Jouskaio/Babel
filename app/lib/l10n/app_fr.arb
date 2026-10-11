@@ -1961,5 +1961,9 @@
   "homeDownloadTitle": "Babel en application",
   "homeDownloadHint": "Android et Mac, avec mises à jour automatiques.",
   "close": "Fermer",
-  "appearanceNouveau": "Art nouveau"
+  "appearanceNouveau": "Art nouveau",
+  "readersTitle": "Lecteurs",
+  "readersDirectory": "Tous les lecteurs",
+  "readersCount": "{count} lecteurs",
+  "@readersCount": {"placeholders": {"count": {"type": "int"}}}
 }

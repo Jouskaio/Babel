@@ -239,10 +239,12 @@ async def update_profile(
 async def search_readers(
     user_id: CurrentUserId,
     social: SocialServiceDep,
-    q: Annotated[str, Query(min_length=2, max_length=40)],
+    q: Annotated[str, Query(max_length=40)] = "",
+    limit: Annotated[int, Query(ge=1, le=200)] = 20,
 ) -> list[ReaderResponse]:
-    """Readers whose handle starts with ``q``."""
-    return [ReaderResponse.of(r) for r in await social.search(user_id, q)]
+    """Readers whose handle starts with ``q`` (at least two characters), or, without ``q``, every
+    reader who chose a handle (the directory), by handle."""
+    return [ReaderResponse.of(r) for r in await social.search(user_id, q, limit)]
 
 
 @router.get("/social/readers/{handle}", operation_id="getReader")

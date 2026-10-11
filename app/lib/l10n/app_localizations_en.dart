@@ -3555,4 +3555,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appearanceNouveau => 'Art nouveau';
+
+  @override
+  String get readersTitle => 'Readers';
+
+  @override
+  String get readersDirectory => 'All readers';
+
+  @override
+  String readersCount(int count) {
+    return '$count readers';
+  }
 }
