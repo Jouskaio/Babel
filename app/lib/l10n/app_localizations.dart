@@ -5881,6 +5881,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Fermer'**
   String get close;
+
+  /// No description provided for @appearanceNouveau.
+  ///
+  /// In fr, this message translates to:
+  /// **'Art nouveau'**
+  String get appearanceNouveau;
 }
 
 class _AppLocalizationsDelegate

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
@@ -41,9 +42,9 @@ class _Tile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
     color: BabelColors.sunken,
-    borderRadius: BorderRadius.circular(16),
+    borderRadius: BabelShape.radius(16),
     child: InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BabelShape.radius(16),
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.all(12),

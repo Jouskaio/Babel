@@ -14,6 +14,7 @@ import '../../../core/files/save_file.dart';
 import '../../../core/locale/file_size.dart';
 import '../../../core/share/share_intake.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
@@ -456,7 +457,7 @@ class _SeriesTile extends ConsumerWidget {
         .where((i) => i.status == ReadingStatus.finished)
         .length;
     return InkWell(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BabelShape.radius(8),
       onTap: () => showSeriesSheet(context, group),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -473,7 +474,7 @@ class _SeriesTile extends ConsumerWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       color: BabelColors.surface,
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BabelShape.radius(6),
                       border: Border.all(color: BabelColors.border),
                     ),
                   ),
@@ -495,7 +496,7 @@ class _SeriesTile extends ConsumerWidget {
                   ),
                   decoration: BoxDecoration(
                     color: BabelColors.canvas.withValues(alpha: 0.85),
-                    borderRadius: BorderRadius.circular(3),
+                    borderRadius: BabelShape.radius(3),
                   ),
                   child: Text(
                     '×${group.items.length}',
@@ -547,7 +548,7 @@ class _BookTile extends ConsumerWidget {
       ref.watch(positionPercentsProvider).value ?? const {},
     );
     return InkWell(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BabelShape.radius(8),
       onTap: () => showModalBottomSheet<void>(
         context: context,
         // Above the floating navigation bar of the tabs.
@@ -578,7 +579,7 @@ class _BookTile extends ConsumerWidget {
                     ),
                     decoration: BoxDecoration(
                       color: BabelColors.gold,
-                      borderRadius: BorderRadius.circular(3),
+                      borderRadius: BabelShape.radius(3),
                     ),
                     child: Text(
                       context.l10n.libraryNewChapters.toUpperCase(),
@@ -597,7 +598,7 @@ class _BookTile extends ConsumerWidget {
               item.status != ReadingStatus.finished) ...[
             const SizedBox(height: 6),
             ClipRRect(
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BabelShape.radius(2),
               child: LinearProgressIndicator(
                 value: progress / 100,
                 minHeight: 3,
@@ -1193,7 +1194,7 @@ class _AddOwnBooks extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BabelShape.radius(28),
         border: Border.all(color: BabelColors.gold.withValues(alpha: 0.6)),
       ),
       child: Column(

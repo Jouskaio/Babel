@@ -9,3 +9,4 @@ Scan camera switched off when you leave the page
 The apps can be downloaded from the website's home page, Babel's home and the settings
 Playlists and recommendations ranked by the most popular Goodreads shelves
 New Pagebound reviews and finished books arrive every day without doing anything
+Two new themes with their own design: Art deco (gilt frames with stepped corners, sunburst, squared shapes) and Art nouveau (parchment, vines and poppies, arched covers)

@@ -8,7 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/theme/backdrop.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
@@ -39,15 +41,24 @@ class _Head extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 14),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: Text(title, style: BabelText.title(28))),
-        if (action != null)
-          TextButton(
-            onPressed: onAction,
-            child: Text('$action →'.toUpperCase(), style: BabelText.label(10)),
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(child: Text(title, style: BabelText.title(28))),
+            if (action != null)
+              TextButton(
+                onPressed: onAction,
+                child: Text(
+                  '$action →'.toUpperCase(),
+                  style: BabelText.label(10),
+                ),
+              ),
+          ],
+        ),
+        const OrnamentDivider(),
       ],
     ),
   );
@@ -92,7 +103,7 @@ class ContinueCard extends ConsumerWidget {
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: BabelColors.surface,
-          borderRadius: BorderRadius.circular(26),
+          borderRadius: BabelShape.radius(26),
           border: Border.all(color: BabelColors.border),
         ),
         child: Row(
@@ -116,7 +127,7 @@ class ContinueCard extends ConsumerWidget {
                   Text('${percent.round()}%', style: BabelText.figure(46)),
                   const SizedBox(height: 6),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BabelShape.radius(2),
                     child: LinearProgressIndicator(
                       value: (percent / 100).clamp(0, 1).toDouble(),
                       minHeight: 3,
@@ -228,7 +239,7 @@ class _CoverRow extends StatelessWidget {
       itemBuilder: (context, i) {
         final work = works[i];
         return InkWell(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BabelShape.radius(8),
           onTap: () => context.push(Routes.work(work.id)),
           child: BookCover(
             width: 130,
@@ -263,13 +274,13 @@ class PlaylistsRow extends StatelessWidget {
               itemBuilder: (context, i) {
                 final key = playlistKeys[i];
                 return InkWell(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BabelShape.radius(20),
                   onTap: () => context.push(Routes.playlist(key)),
                   child: Container(
                     width: 132,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BabelShape.radius(20),
                       color: i.isEven
                           ? BabelColors.velvet
                           : BabelColors.surface,
@@ -325,7 +336,7 @@ class ToReadList extends ConsumerWidget {
           ),
           for (final item in items.take(3))
             InkWell(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BabelShape.radius(16),
               onTap: () => context.push(Routes.read(item.id)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
@@ -408,7 +419,7 @@ class JourneyCard extends ConsumerWidget {
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               color: BabelColors.surface,
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BabelShape.radius(22),
               border: Border.all(color: BabelColors.border),
             ),
             child: Column(
@@ -439,7 +450,7 @@ class JourneyCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: 10),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
+                  borderRadius: BabelShape.radius(3),
                   child: LinearProgressIndicator(
                     value: ratio,
                     minHeight: 5,
@@ -533,7 +544,7 @@ class MoodChips extends StatelessWidget {
             children: [
               for (final (mood, playlist) in moods)
                 InkWell(
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BabelShape.radius(999),
                   onTap: () => playlist == null
                       ? context.go(Routes.searchFor(mood))
                       : context.push(Routes.playlist(playlist)),
@@ -543,7 +554,7 @@ class MoodChips extends StatelessWidget {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BabelShape.radius(999),
                       border: Border.all(color: BabelColors.border),
                     ),
                     child: Text(
@@ -589,11 +600,11 @@ class DownloadsSection extends ConsumerWidget {
               child: Material(
                 color: BabelColors.surface,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BabelShape.radius(20),
                   side: BorderSide(color: BabelColors.border),
                 ),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BabelShape.radius(20),
                   onTap: () => context.push(Routes.work(r.workId)),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -632,7 +643,7 @@ class DownloadsSection extends ConsumerWidget {
                         ),
                         const SizedBox(height: 10),
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(2),
+                          borderRadius: BabelShape.radius(2),
                           child: LinearProgressIndicator(
                             value: r.progress == null
                                 ? null
@@ -670,13 +681,13 @@ class MonthCard extends ConsumerWidget {
     final month = DateFormat.MMMM(Localizations.localeOf(context).toString())
         .format(now);
     return InkWell(
-      borderRadius: BorderRadius.circular(26),
+      borderRadius: BabelShape.radius(26),
       onTap: () => context.push(Routes.monthWrap(now.year, now.month)),
       child: Container(
         padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
           color: BabelColors.velvet,
-          borderRadius: BorderRadius.circular(26),
+          borderRadius: BabelShape.radius(26),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -732,13 +743,13 @@ class _DownloadAppCardState extends State<DownloadAppCard> {
     return Padding(
       padding: const EdgeInsets.only(bottom: _gap),
       child: InkWell(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BabelShape.radius(22),
         onTap: () => context.push(Routes.download),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 14, 8, 14),
           decoration: BoxDecoration(
             color: BabelColors.surface,
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BabelShape.radius(22),
             border: Border.all(color: BabelColors.border),
           ),
           child: Row(

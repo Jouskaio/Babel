@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/api/api_providers.dart';
 import '../../core/theme/babel_colors.dart';
+import '../../core/theme/babel_look.dart';
 import '../../core/theme/babel_text.dart';
 import '../../core/widgets/back_leading.dart';
 import '../../core/widgets/book_cover.dart';
@@ -197,7 +198,7 @@ class _VolumeRow extends StatelessWidget {
     final work = volume.work;
     final status = item?.status;
     return InkWell(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BabelShape.radius(14),
       onTap: () => context.push(Routes.work(work.id)),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
@@ -266,7 +267,7 @@ class _GapRow extends StatelessWidget {
               width: 52,
               height: 78,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BabelShape.radius(6),
                 border: Border.all(color: BabelColors.border),
               ),
               alignment: Alignment.center,

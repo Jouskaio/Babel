@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/babel_look.dart';
 import '../theme/babel_colors.dart';
 
 /// A loading bar under a title or inside a card: slim, rounded and with room around it,
@@ -15,7 +16,7 @@ class LoadingBar extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: EdgeInsets.only(top: top, bottom: bottom),
     child: ClipRRect(
-      borderRadius: BorderRadius.circular(2),
+      borderRadius: BabelShape.radius(2),
       child: LinearProgressIndicator(
         minHeight: 3,
         color: BabelColors.gold,

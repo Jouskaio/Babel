@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/back_leading.dart';
 
@@ -20,7 +21,7 @@ class SourceBadge extends StatelessWidget {
     alignment: Alignment.center,
     decoration: BoxDecoration(
       color: color,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BabelShape.radius(12),
     ),
     child: Text(
       label,
@@ -46,7 +47,7 @@ class SourceCard extends StatelessWidget {
   Widget build(BuildContext context) => Material(
     color: BabelColors.surface,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BabelShape.radius(20),
       side: BorderSide(
         color: highlighted ? BabelColors.gold : BabelColors.border,
       ),

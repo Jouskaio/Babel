@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_controller.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/loading_bar.dart';
 import '../../../l10n.dart';
@@ -200,11 +201,11 @@ class _FriendsSectionState extends ConsumerState<_FriendsSection> {
             filled: true,
             fillColor: BabelColors.surface,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BabelShape.radius(28),
               borderSide: BorderSide(color: BabelColors.border),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BabelShape.radius(28),
               borderSide: BorderSide(color: BabelColors.border),
             ),
           ),
@@ -244,7 +245,7 @@ class _FriendsSectionState extends ConsumerState<_FriendsSection> {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: BabelColors.surface,
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BabelShape.radius(22),
               border: Border.all(color: BabelColors.gold),
             ),
             child: Column(
@@ -309,11 +310,11 @@ class _YearCard extends ConsumerWidget {
     return Material(
       color: BabelColors.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BabelShape.radius(22),
         side: BorderSide(color: BabelColors.gold.withValues(alpha: 0.6)),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BabelShape.radius(22),
         onTap: () => context.push(Routes.stats),
         child: Padding(
           padding: const EdgeInsets.all(18),

@@ -58,6 +58,21 @@ class BabelPalette {
     forest: Color(0xFF1E3B33),
   );
 
+  /// Art nouveau: parchment, antique gold, sage and poppy orange, brown ink.
+  static const nouveau = BabelPalette(
+    dark: false,
+    canvas: Color(0xFFF3E8CC),
+    surface: Color(0xFFFAF2DC),
+    sunken: Color(0xFFE8DAB4),
+    border: Color(0xFFBFA264),
+    textPrimary: Color(0xFF3A2A1D),
+    textSecondary: Color(0xFF6B573D),
+    gold: Color(0xFF9A5A1B),
+    velvet: Color(0xFFEBC77E),
+    dustyRose: Color(0xFFA35F78),
+    forest: Color(0xFFD5DFBA),
+  );
+
   /// Electronic ink: black on white, accents in black, no mid-tone backgrounds that
   /// e-ink screens render as noise.
   static const paper = BabelPalette(

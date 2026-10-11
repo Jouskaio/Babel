@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/loading_bar.dart';
@@ -197,7 +198,7 @@ class _Tag extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
     decoration: BoxDecoration(
       border: Border.all(color: color ?? BabelColors.border),
-      borderRadius: BorderRadius.circular(999),
+      borderRadius: BabelShape.radius(999),
     ),
     child: Text(
       text,

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
@@ -27,7 +28,7 @@ class ProgressionCard extends ConsumerWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: BabelColors.surface,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BabelShape.radius(22),
         border: Border.all(color: BabelColors.border),
       ),
       child: Column(
@@ -58,7 +59,7 @@ class ProgressionCard extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           ClipRRect(
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BabelShape.radius(3),
             child: LinearProgressIndicator(
               value: ratio,
               minHeight: 6,
@@ -142,14 +143,14 @@ class _BadgeTile extends StatelessWidget {
           ? l10n.badgeComplete
           : l10n.badgeNext(badge.value, badge.nextTarget!),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BabelShape.radius(14),
         onTap: () => context.go(_route),
         child: Container(
           width: 104,
           height: 112,
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BabelShape.radius(14),
             border: Border.all(
               color: earned ? BabelColors.gold : BabelColors.border,
             ),
@@ -218,7 +219,7 @@ class _StepRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InkWell(
-    borderRadius: BorderRadius.circular(8),
+    borderRadius: BabelShape.radius(8),
     onTap: step.done ? null : () => context.go(_route),
     child: Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),

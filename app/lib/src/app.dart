@@ -11,7 +11,9 @@ import 'core/share/share_intake.dart';
 import 'core/sync/sync_engine.dart';
 import 'core/theme/appearance.dart';
 import 'core/theme/babel_colors.dart';
+import 'core/theme/babel_look.dart';
 import 'core/theme/babel_theme.dart';
+import 'core/theme/backdrop.dart';
 import 'core/theme/palette_scope.dart';
 import 'core/update/app_update.dart';
 import 'core/update/update_dialog.dart';
@@ -154,11 +156,14 @@ class _BabelAppState extends ConsumerState<BabelApp>
   @override
   Widget build(BuildContext context) {
     final eink = ref.watch(einkDisplayProvider.select((d) => d.active));
-    final palette =
-        ref.watch(readingPaletteProvider) ??
-        (eink ? BabelPalette.paper : ref.watch(appearanceProvider).palette);
-    if (palette != BabelColors.palette) {
+    final appearance = ref.watch(appearanceProvider);
+    final reading = ref.watch(readingPaletteProvider);
+    final palette = reading ?? (eink ? BabelPalette.paper : appearance.palette);
+    // A book's own palette and e-ink keep Babel's plain look.
+    final look = reading != null || eink ? BabelLook.standard : appearance.look;
+    if (palette != BabelColors.palette || look != BabelShape.look) {
       BabelColors.use(palette);
+      BabelShape.use(look);
       // Pages read their colors when built: rebuild them all, keeping their state.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) rebuildAll(context);
@@ -182,12 +187,13 @@ class _BabelAppState extends ConsumerState<BabelApp>
             ),
           ],
         );
+        final framed = AppBackdrop(look: look, child: pages);
         return eink
             ? MediaQuery(
                 data: MediaQuery.of(context).copyWith(disableAnimations: true),
-                child: pages,
+                child: framed,
               )
-            : pages;
+            : framed;
       },
       locale: ref.watch(localeControllerProvider),
       localeListResolutionCallback: LocaleController.resolve,

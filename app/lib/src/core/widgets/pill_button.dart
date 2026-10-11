@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/babel_colors.dart';
+import '../theme/babel_look.dart';
 import '../theme/babel_text.dart';
 
 enum PillButtonKind { primary, secondary, light, accent }
@@ -94,11 +95,17 @@ class PillButton extends StatelessWidget {
             horizontal: large ? 30 : 22,
             vertical: large ? 20 : 15,
           ),
-          shape: StadiumBorder(
-            side: kind == PillButtonKind.secondary
-                ? BorderSide(color: BabelColors.border)
-                : BorderSide.none,
-          ),
+          shape: BabelShape.look == BabelLook.deco
+              // Art deco buttons are squared and outlined in gilt.
+              ? RoundedRectangleBorder(
+                  borderRadius: BabelShape.radius(2),
+                  side: BorderSide(color: BabelColors.gold),
+                )
+              : StadiumBorder(
+                  side: kind == PillButtonKind.secondary
+                      ? BorderSide(color: BabelColors.border)
+                      : BorderSide.none,
+                ),
         ),
         child: content,
       ),

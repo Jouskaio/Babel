@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
 
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../l10n.dart';
@@ -415,11 +416,11 @@ class MiniPlayer extends ConsumerWidget {
       child: Material(
         color: BabelColors.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BabelShape.radius(20),
           side: BorderSide(color: BabelColors.gold.withValues(alpha: 0.6)),
         ),
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BabelShape.radius(20),
           onTap: () => context.push(Routes.read(now.item.id)),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 6, 6, 6),

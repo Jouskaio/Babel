@@ -6,6 +6,7 @@ import 'package:http/http.dart' show MultipartFile;
 
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/babel_text_field.dart';
 import '../../../core/widgets/pill_button.dart';
@@ -295,18 +296,18 @@ class _CoverChoice extends StatelessWidget {
     padding: const EdgeInsets.only(right: 10),
     child: InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BabelShape.radius(8),
       child: Container(
         width: 66,
         padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BabelShape.radius(8),
           border: Border.all(
             color: selected ? BabelColors.gold : BabelColors.border,
             width: 2,
           ),
         ),
-        child: ClipRRect(borderRadius: BorderRadius.circular(5), child: child),
+        child: ClipRRect(borderRadius: BabelShape.radius(5), child: child),
       ),
     ),
   );

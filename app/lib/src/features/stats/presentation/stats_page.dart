@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/back_leading.dart';
 import '../../../core/widgets/book_cover.dart';
@@ -255,7 +256,7 @@ class _Goal extends ConsumerWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: BabelColors.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BabelShape.radius(20),
         border: Border.all(color: BabelColors.border),
       ),
       child: Column(
@@ -280,7 +281,7 @@ class _Goal extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
           ClipRRect(
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BabelShape.radius(3),
             child: LinearProgressIndicator(
               value: (done / goal).clamp(0, 1).toDouble(),
               minHeight: 6,
@@ -357,7 +358,7 @@ class _Figure extends StatelessWidget {
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
       color: BabelColors.surface,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BabelShape.radius(20),
       border: Border.all(color: BabelColors.border),
     ),
     child: Column(
@@ -406,7 +407,7 @@ class GenreBars extends StatelessWidget {
                           color: i == 0
                               ? BabelColors.gold
                               : BabelColors.textSecondary,
-                          borderRadius: BorderRadius.circular(5),
+                          borderRadius: BabelShape.radius(5),
                         ),
                       ),
                     ),
@@ -462,7 +463,7 @@ class MonthBars extends StatelessWidget {
                           : (byMonth[m] > 0
                                 ? BabelColors.textSecondary
                                 : BabelColors.border),
-                      borderRadius: BorderRadius.circular(3),
+                      borderRadius: BabelShape.radius(3),
                     ),
                   ),
                   const SizedBox(height: 6),

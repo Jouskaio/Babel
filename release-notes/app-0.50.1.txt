@@ -9,3 +9,4 @@ Caméra du scan coupée en quittant la page
 Les applications se téléchargent depuis la page d'accueil du site, l'accueil de Babel et les réglages
 Playlists et recommandations classées d'après les étagères les plus populaires de Goodreads
 Les nouveaux avis et livres lus de Pagebound arrivent chaque jour sans rien faire
+Deux nouveaux thèmes avec leur propre design : Art déco (cadres dorés à angles en gradins, rayons, formes carrées) et Art nouveau (parchemin, lianes et coquelicots, couvertures en arche)

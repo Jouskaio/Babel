@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/auth/auth_controller.dart';
 import '../../core/sync/sync_engine.dart';
 import '../../core/theme/babel_colors.dart';
+import '../../core/theme/babel_look.dart';
 import '../../core/theme/babel_text.dart';
 import '../../l10n.dart';
 import '../../routing/router.dart';
@@ -193,7 +194,7 @@ class _BottomBar extends StatelessWidget {
       height: 64,
       decoration: BoxDecoration(
         color: BabelColors.surface.withValues(alpha: 0.96),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BabelShape.radius(999),
         border: Border.all(color: BabelColors.border),
         boxShadow: const [
           BoxShadow(
@@ -267,9 +268,9 @@ class _Sidebar extends StatelessWidget {
                 color: d.branch == current
                     ? BabelColors.sunken
                     : Colors.transparent,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BabelShape.radius(14),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BabelShape.radius(14),
                   onTap: () => onOpen(d),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(

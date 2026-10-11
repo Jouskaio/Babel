@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
@@ -234,7 +235,7 @@ Future<void> showMarginPanel(
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BabelShape.radius(16),
                   onTap: () {
                     Navigator.pop(context);
                     onOpenChapter(annotation.chapter);
@@ -244,7 +245,7 @@ Future<void> showMarginPanel(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: BabelColors.canvas,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BabelShape.radius(16),
                       border: Border(
                         left: BorderSide(
                           color: annotation.color == HighlightColor.none
@@ -368,12 +369,12 @@ class _OtherNoteTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BabelShape.radius(16),
         onTap: place?.chapter != null || place?.percent != null ? onTap : null,
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BabelShape.radius(16),
             border: Border.all(color: BabelColors.border),
           ),
           child: Column(

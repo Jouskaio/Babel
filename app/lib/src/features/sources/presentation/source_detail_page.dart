@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/locale/file_size.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
@@ -435,7 +436,7 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
                       ),
                       decoration: BoxDecoration(
                         color: BabelColors.forest,
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: BabelShape.radius(999),
                       ),
                       child: Text(
                         l10n.onBabelBadge,

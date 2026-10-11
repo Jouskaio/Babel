@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
+import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
 
@@ -58,7 +59,7 @@ class _RelatedCard extends StatelessWidget {
     final l10n = context.l10n;
     final poster = item.posterPath;
     return InkWell(
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BabelShape.radius(10),
       onTap: () => launchUrl(Uri.parse(item.url)),
       child: SizedBox(
         width: 130,
@@ -66,7 +67,7 @@ class _RelatedCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BabelShape.radius(8),
               child: SizedBox(
                 width: 130,
                 height: 170,
