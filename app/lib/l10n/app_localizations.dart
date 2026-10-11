@@ -5807,7 +5807,7 @@ abstract class AppLocalizations {
   /// No description provided for @downloadMacHint.
   ///
   /// In fr, this message translates to:
-  /// **'Fichier .zip. Au premier lancement : clic droit sur l\'application, puis Ouvrir (elle n\'est pas encore signée par Apple).'**
+  /// **'Fichier .zip, à glisser dans Applications. Au premier lancement, macOS refuse l\'app (pas encore signée par Apple) : clique sur Terminé, puis Réglages Système › Confidentialité et sécurité › Ouvrir quand même.'**
   String get downloadMacHint;
 
   /// No description provided for @downloadMac.

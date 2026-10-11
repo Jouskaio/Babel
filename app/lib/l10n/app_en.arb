@@ -1156,7 +1156,7 @@
   "@downloadLatest": {"placeholders": {"version": {"type": "String"}, "date": {"type": "String"}}},
   "downloadAndroidHint": "APK file. If Android asks, allow installing from this site.",
   "downloadApk": "Download",
-  "downloadMacHint": "Zip file. On first launch: right-click the app, then Open (it is not signed by Apple yet).",
+  "downloadMacHint": "Zip file, to drag into Applications. On first launch macOS refuses the app (not signed by Apple yet): click Done, then System Settings › Privacy & Security › Open Anyway.",
   "downloadMac": "Download",
   "downloadIosSoon": "Coming to the App Store. Meanwhile, open Babel in Safari, then Share › Add to Home Screen.",
   "downloadWebName": "Browser",
