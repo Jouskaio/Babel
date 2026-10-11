@@ -1221,14 +1221,16 @@ class SocialApi {
 
   /// Search Readers
   ///
-  /// Readers whose handle starts with ``q``.
+  /// Readers whose handle starts with ``q`` (at least two characters), or, without ``q``, every reader who chose a handle (the directory), by handle.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
-  /// * [String] q (required):
-  Future<Response> searchReadersWithHttpInfo(String q,) async {
+  /// * [String] q:
+  ///
+  /// * [int] limit:
+  Future<Response> searchReadersWithHttpInfo({ String? q, int? limit, }) async {
     // ignore: prefer_const_declarations
     final path = r'/v1/social/readers';
 
@@ -1239,7 +1241,12 @@ class SocialApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
+    if (q != null) {
       queryParams.addAll(_queryParams('', 'q', q));
+    }
+    if (limit != null) {
+      queryParams.addAll(_queryParams('', 'limit', limit));
+    }
 
     const contentTypes = <String>[];
 
@@ -1257,13 +1264,15 @@ class SocialApi {
 
   /// Search Readers
   ///
-  /// Readers whose handle starts with ``q``.
+  /// Readers whose handle starts with ``q`` (at least two characters), or, without ``q``, every reader who chose a handle (the directory), by handle.
   ///
   /// Parameters:
   ///
-  /// * [String] q (required):
-  Future<List<ReaderResponse>?> searchReaders(String q,) async {
-    final response = await searchReadersWithHttpInfo(q,);
+  /// * [String] q:
+  ///
+  /// * [int] limit:
+  Future<List<ReaderResponse>?> searchReaders({ String? q, int? limit, }) async {
+    final response = await searchReadersWithHttpInfo( q: q, limit: limit, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

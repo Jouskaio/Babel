@@ -36,7 +36,9 @@ final readerPageProvider = FutureProvider.autoDispose
 final readerSearchProvider = FutureProvider.autoDispose
     .family<List<ReaderResponse>, String>((ref, query) async {
       if (query.trim().replaceFirst('@', '').length < 2) return const [];
-      return await ref.watch(socialApiProvider).searchReaders(query.trim()) ??
+      return await ref
+              .watch(socialApiProvider)
+              .searchReaders(q: query.trim()) ??
           const [];
     });
 
@@ -61,3 +63,15 @@ void refreshSocial(Ref ref) {
     ..invalidate(feedProvider)
     ..invalidate(socialProfileProvider);
 }
+
+/// The readers directory: every reader with a handle, or those whose handle starts with the
+/// query (two characters at least).
+final readersDirectoryProvider = FutureProvider.autoDispose
+    .family<List<ReaderResponse>, String>((ref, query) async {
+      final q = query.trim().replaceFirst('@', '');
+      if (q.isNotEmpty && q.length < 2) return const [];
+      return await ref
+              .watch(socialApiProvider)
+              .searchReaders(q: q, limit: 100) ??
+          const [];
+    });

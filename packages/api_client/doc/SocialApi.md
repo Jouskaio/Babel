@@ -1130,11 +1130,11 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **searchReaders**
-> List<ReaderResponse> searchReaders(q)
+> List<ReaderResponse> searchReaders(q, limit)
 
 Search Readers
 
-Readers whose handle starts with ``q``.
+Readers whose handle starts with ``q`` (at least two characters), or, without ``q``, every reader who chose a handle (the directory), by handle.
 
 ### Example
 ```dart
@@ -1148,9 +1148,10 @@ import 'package:babel_api_client/api.dart';
 
 final api_instance = SocialApi();
 final q = q_example; // String | 
+final limit = 56; // int | 
 
 try {
-    final result = api_instance.searchReaders(q);
+    final result = api_instance.searchReaders(q, limit);
     print(result);
 } catch (e) {
     print('Exception when calling SocialApi->searchReaders: $e\n');
@@ -1161,7 +1162,8 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **q** | **String**|  | 
+ **q** | **String**|  | [optional] [default to '']
+ **limit** | **int**|  | [optional] [default to 20]
 
 ### Return type
 

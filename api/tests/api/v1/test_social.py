@@ -416,3 +416,21 @@ def test_reports_reach_the_administrators(
         client.post(f"/v1/admin/reports/{report['id']}/resolve", headers=admin).status_code == 204
     )
     assert client.get("/v1/admin/reports", headers=admin).json()[0]["resolved"] is True
+
+
+def test_the_directory_lists_every_reader_with_a_handle(client: TestClient) -> None:
+    from tests.api.v1.test_library import account
+
+    ada = account(client, "ada@example.com")
+    bob = account(client, "bob@example.com")
+    account(client, "cy@example.com")  # no handle: not listed
+    client.patch("/v1/me/profile", json={"handle": "ada"}, headers=ada)
+    client.patch("/v1/me/profile", json={"handle": "bob"}, headers=bob)
+
+    listed = client.get("/v1/social/readers", headers=ada).json()
+    assert [r["handle"] for r in listed] == ["bob"]  # not yourself
+    assert client.get("/v1/social/readers", params={"q": "b"}, headers=ada).json() == []
+    assert [
+        r["handle"]
+        for r in client.get("/v1/social/readers", params={"q": "bo"}, headers=ada).json()
+    ] == ["bob"]

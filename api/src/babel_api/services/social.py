@@ -163,8 +163,9 @@ class SocialService:
         return profile
 
     async def search(self, viewer: UUID, query: str, limit: int = 20) -> list[Reader]:
+        """Readers by handle prefix; an empty query lists them all (those with a handle)."""
         prefix = query.strip().removeprefix("@").lower()
-        if len(prefix) < 2:
+        if prefix and len(prefix) < 2:
             return []
         hidden = await self._social.hidden(viewer)
         return [

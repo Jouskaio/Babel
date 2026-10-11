@@ -5887,6 +5887,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Art nouveau'**
   String get appearanceNouveau;
+
+  /// No description provided for @readersTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecteurs'**
+  String get readersTitle;
+
+  /// No description provided for @readersDirectory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les lecteurs'**
+  String get readersDirectory;
+
+  /// No description provided for @readersCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} lecteurs'**
+  String readersCount(int count);
 }
 
 class _AppLocalizationsDelegate

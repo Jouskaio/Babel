@@ -11346,18 +11346,30 @@
     },
     "/v1/social/readers": {
       "get": {
-        "description": "Readers whose handle starts with ``q``.",
+        "description": "Readers whose handle starts with ``q`` (at least two characters), or, without ``q``, every\nreader who chose a handle (the directory), by handle.",
         "operationId": "searchReaders",
         "parameters": [
           {
             "in": "query",
             "name": "q",
-            "required": true,
+            "required": false,
             "schema": {
+              "default": "",
               "maxLength": 40,
-              "minLength": 2,
               "title": "Q",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
             }
           }
         ],
