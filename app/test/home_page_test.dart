@@ -51,4 +51,20 @@ void main() {
 
     expect(find.text('GOTHIQUE'), findsOneWidget);
   });
+
+  testWidgets('uses two columns on a wide screen', (tester) async {
+    tester.view.physicalSize = const Size(1500, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      wrap(
+        const HomePage(),
+        overrides: [authControllerProvider.overrideWith(_SignedInAs.new)],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Ada.'), findsOneWidget);
+  });
 }

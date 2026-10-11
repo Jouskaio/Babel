@@ -1,6 +1,7 @@
 """Request-scoped dependencies: database session, services and the current user."""
 
 import logging
+import time
 from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import timedelta
@@ -40,6 +41,7 @@ from babel_api.adapters.sources.http import guarded_client
 from babel_api.adapters.sources.links import LinkFetcher
 from babel_api.adapters.wikidata import WikidataClient
 from babel_api.core.config import Settings
+from babel_api.domain.challenges import norm
 from babel_api.domain.files import LibraryItem
 from babel_api.domain.ports import (
     BlobStore,
@@ -489,6 +491,55 @@ async def fulfill_request(
     """Background task: asks Chaptarr, with its own database session."""
     async with container.sessions() as session:
         await make_request_service(container, session).fulfill(user_id, work_id, language)
+
+
+# Readers whose imported books were last looked at for covers (monotonic seconds).
+_covers_checked: dict[UUID, float] = {}
+COVER_RECHECK_SECONDS = 6 * 3600
+COVER_BATCH = 40
+
+
+def covers_due(user_id: UUID) -> bool:
+    """Whether to look for the covers of a reader's imported books now (not too often)."""
+    last = _covers_checked.get(user_id)
+    return last is None or time.monotonic() - last > COVER_RECHECK_SECONDS
+
+
+async def link_covers(container: Container, user_id: UUID) -> None:
+    """Background task: books imported from a reading list (Goodreads CSV, Pagebound…) are paper
+    books without a catalog work, so without a cover. Each is searched in the catalog and linked
+    to the work with the same title, a few at a time."""
+    _covers_checked[user_id] = time.monotonic()
+    logger = logging.getLogger(__name__)
+    try:
+        async with container.sessions() as session:
+            files = make_file_service(container, session)
+            works = WorkService(SqlCatalogRepository(session), container.books, container.hardcover)
+            todo = [
+                i for i in await files.library(user_id) if i.work_id is None and i.file is None
+            ][:COVER_BATCH]
+            for item in todo:
+                try:
+                    hits = await works.search(
+                        f"{item.title} {' '.join(item.authors[:1])}".strip(), 6
+                    )
+                except Exception:
+                    logger.info("Cover search for %r failed", item.title)
+                    continue
+                wanted = norm(item.title)
+                found = next(
+                    (
+                        h
+                        for h in hits
+                        if (h.cover_id or h.work.cover_url)
+                        and (norm(h.title) == wanted or norm(h.work.title) == wanted)
+                    ),
+                    None,
+                )
+                if found is not None:
+                    await files.link_work(user_id, item.id, found.work.id)
+    except Exception:
+        logger.exception("Linking covers of %s failed", user_id)
 
 
 async def run_source_scan(container: Container, user_id: UUID, source_id: UUID) -> None:
