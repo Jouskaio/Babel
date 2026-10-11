@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **source_** | **String** |  | 
 **spoilers** | **bool** |  | 
 **text** | **String** |  | 
+**url** | **String** | The review on its own site | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

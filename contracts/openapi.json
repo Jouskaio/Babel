@@ -1491,7 +1491,8 @@
           "source": {
             "enum": [
               "hardcover",
-              "pagebound"
+              "pagebound",
+              "goodreads"
             ],
             "title": "Source",
             "type": "string"
@@ -1503,6 +1504,18 @@
           "text": {
             "title": "Text",
             "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The review on its own site",
+            "title": "Url"
           }
         },
         "required": [
@@ -4043,7 +4056,7 @@
                 "type": "null"
               }
             ],
-            "description": "TMDB's poster, through Babel",
+            "description": "Its poster (TMDB, or Wikimedia Commons), through Babel",
             "title": "Poster Path"
           },
           "title": {
@@ -4051,7 +4064,7 @@
             "type": "string"
           },
           "url": {
-            "description": "Its page on Wikidata",
+            "description": "Where to read about it: IMDb, Wikipedia or Wikidata",
             "title": "Url",
             "type": "string"
           },
@@ -7888,7 +7901,7 @@
     },
     "/v1/catalog/works/{work_id}/external-reviews": {
       "get": {
-        "description": "What others think of the book elsewhere: ratings from Hardcover, Open Library and\nGoodreads, and the most liked Hardcover reviews. Each source is best effort.",
+        "description": "What others think of the book elsewhere: ratings from Hardcover, Open Library and\nGoodreads, and the most liked reviews of Hardcover, Pagebound and Goodreads. Each source is\nbest effort.",
         "operationId": "getExternalReviews",
         "parameters": [
           {

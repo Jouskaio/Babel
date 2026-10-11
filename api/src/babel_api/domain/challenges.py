@@ -129,6 +129,8 @@ def extras_of(year: int, month: int) -> tuple[Extra, Extra]:
 
 def norm(text: str) -> str:
     """A title or a name without case, accents or punctuation."""
+    # A typographic apostrophe and a plain one must read the same (curly or straight).
+    text = text.translate(str.maketrans({"\u2019": "'", "\u2018": "'", "\u02bc": "'", "`": "'"}))
     plain = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
     return " ".join(re.sub(r"[^a-z0-9]+", " ", plain.casefold()).split())
 

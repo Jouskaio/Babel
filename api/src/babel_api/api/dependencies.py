@@ -557,14 +557,15 @@ async def link_covers(container: Container, user_id: UUID) -> None:
                     logger.info("Cover search for %r failed", item.title)
                     continue
                 wanted = {norm(item.title), norm(_base_title(item.title))}
-                found = next(
-                    (
-                        h
-                        for h in hits
-                        if (h.cover_id or h.work.cover_url)
-                        and wanted & {norm(h.title), norm(h.work.title), norm(_base_title(h.title))}
-                    ),
-                    None,
+                same = [
+                    h
+                    for h in hits
+                    if wanted & {norm(h.title), norm(h.work.title), norm(_base_title(h.title))}
+                ]
+                # The same title, a cover if any hit has one; the book page matters more than
+                # its picture.
+                found = next((h for h in same if h.cover_id or h.work.cover_url), None) or (
+                    same[0] if same else None
                 )
                 if found is not None:
                     await files.link_work(user_id, item.id, found.work.id)

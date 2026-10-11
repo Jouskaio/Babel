@@ -308,7 +308,7 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
               SectionTitle(l10n.workSummary),
               _Description(text: description),
             ],
-            _Related(workId: work.id),
+            _Related(workId: work.id, bookCover: work.coverPath),
             if (work.editions.isNotEmpty) ...[
               const SizedBox(height: sectionGap),
               SectionTitle(
@@ -969,8 +969,11 @@ class _SourceMatchesState extends ConsumerState<_SourceMatches> {
 /// "Adaptations & related works": films, series, games and comics based on the book, as a
 /// row of posters. Nothing at all when none is known.
 class _Related extends ConsumerWidget {
-  const _Related({required this.workId});
+  const _Related({required this.workId, this.bookCover});
   final String workId;
+
+  /// The book's own cover, shown on adaptations that have no poster.
+  final String? bookCover;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -983,7 +986,7 @@ class _Related extends ConsumerWidget {
         const SizedBox(height: sectionGap),
         SectionTitle(l10n.relatedTitle),
         const SizedBox(height: 12),
-        RelatedRow(items: items),
+        RelatedRow(items: items, bookCover: bookCover),
       ],
     );
   }
@@ -1094,7 +1097,11 @@ class _ExternalReviewState extends State<_ExternalReview> {
           Row(
             children: [
               Text(
-                '${r.author} · ${r.source_ == ExternalReviewResponseSource_Enum.pagebound ? 'Pagebound' : 'Hardcover'}'
+                '${r.author} · ${switch (r.source_) {
+                      ExternalReviewResponseSource_Enum.pagebound => 'Pagebound',
+                      ExternalReviewResponseSource_Enum.goodreads => 'Goodreads',
+                      _ => 'Hardcover',
+                    }}'
                     .toUpperCase(),
                 style: BabelText.label(9, color: BabelColors.textSecondary),
               ),
@@ -1120,6 +1127,17 @@ class _ExternalReviewState extends State<_ExternalReview> {
               maxLines: 8,
               overflow: TextOverflow.ellipsis,
               style: BabelText.reading(14),
+            ),
+          if (r.url case final url? when !_hidden)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () => launchUrl(Uri.parse(url)),
+                child: Text(
+                  l10n.readOriginalReview,
+                  style: BabelText.label(10),
+                ),
+              ),
             ),
         ],
       ),

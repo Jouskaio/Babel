@@ -115,7 +115,7 @@ No authorization required
 
 Get External Reviews
 
-What others think of the book elsewhere: ratings from Hardcover, Open Library and Goodreads, and the most liked Hardcover reviews. Each source is best effort.
+What others think of the book elsewhere: ratings from Hardcover, Open Library and Goodreads, and the most liked reviews of Hardcover, Pagebound and Goodreads. Each source is best effort.
 
 ### Example
 ```dart

@@ -25,12 +25,12 @@ class RelatedWorkResponse {
 
   String? overview;
 
-  /// TMDB's poster, through Babel
+  /// Its poster (TMDB, or Wikimedia Commons), through Babel
   String? posterPath;
 
   String title;
 
-  /// Its page on Wikidata
+  /// Where to read about it: IMDb, Wikipedia or Wikidata
   String url;
 
   int? year;

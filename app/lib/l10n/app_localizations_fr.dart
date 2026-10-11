@@ -3593,4 +3593,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String readersCount(int count) {
     return '$count lecteurs';
   }
+
+  @override
+  String get readOriginalReview => 'Lire l\'avis complet →';
 }

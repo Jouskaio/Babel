@@ -1,0 +1,5 @@
+Goodreads reviews on book pages: the most liked ones, with a link to the full review
+Adaptations: direct links to the work (IMDb, Wikipedia) instead of the Wikidata table, and posters when they exist, else the book's cover
+Books imported with a typographic apostrophe (Ender’s Game, The Handmaid’s Tale): page and cover found again
+Goodreads rating available again (their search page is now blocked to bots)
+A button to link a book to a page from "Edit details"

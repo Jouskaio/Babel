@@ -5905,6 +5905,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count} lecteurs'**
   String readersCount(int count);
+
+  /// No description provided for @readOriginalReview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lire l\'avis complet →'**
+  String get readOriginalReview;
 }
 
 class _AppLocalizationsDelegate

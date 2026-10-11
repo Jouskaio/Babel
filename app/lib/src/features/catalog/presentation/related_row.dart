@@ -10,8 +10,11 @@ import '../../../l10n.dart';
 
 /// A row of posters: what a book was adapted into (films, series, games, comics…).
 class RelatedRow extends StatelessWidget {
-  const RelatedRow({required this.items, super.key});
+  const RelatedRow({required this.items, this.bookCover, super.key});
   final List<RelatedWorkResponse> items;
+
+  /// The book's own cover, used when an adaptation has no poster.
+  final String? bookCover;
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -20,14 +23,16 @@ class RelatedRow extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       itemCount: items.length,
       separatorBuilder: (_, _) => const SizedBox(width: 14),
-      itemBuilder: (context, i) => _RelatedCard(item: items[i]),
+      itemBuilder: (context, i) =>
+          _RelatedCard(item: items[i], bookCover: bookCover),
     ),
   );
 }
 
 class _RelatedCard extends StatelessWidget {
-  const _RelatedCard({required this.item});
+  const _RelatedCard({required this.item, this.bookCover});
   final RelatedWorkResponse item;
+  final String? bookCover;
 
   IconData get _icon => switch (item.kind) {
     RelatedWorkResponseKindEnum.film => Icons.movie_outlined,
@@ -49,9 +54,32 @@ class _RelatedCard extends StatelessWidget {
     _ => l10n.relatedOther,
   };
 
+  /// No poster: the book's own cover, dimmed, with the kind of work on it.
   Widget _placeholder() => Container(
     color: BabelColors.surface,
-    child: Icon(_icon, color: BabelColors.textSecondary, size: 36),
+    child: Stack(
+      fit: StackFit.expand,
+      children: [
+        if (bookCover != null)
+          Opacity(
+            opacity: 0.55,
+            child: Image.network(
+              apiUrl(bookCover!),
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => const SizedBox.shrink(),
+            ),
+          ),
+        Center(
+          child: Icon(
+            _icon,
+            color: bookCover != null
+                ? BabelColors.textPrimary
+                : BabelColors.textSecondary,
+            size: 36,
+          ),
+        ),
+      ],
+    ),
   );
 
   @override

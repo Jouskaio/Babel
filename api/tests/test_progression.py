@@ -64,3 +64,9 @@ def test_the_challenge_of_the_month_counts_books_of_its_theme() -> None:
         True,
     )
     assert done.xp == 50  # the won month's bonus
+
+
+def test_typographic_and_plain_apostrophes_read_the_same() -> None:
+    from babel_api.domain.challenges import norm
+
+    assert norm("Ender’s Game") == norm("Ender's Game") == "ender s game"
