@@ -1298,3 +1298,20 @@ def test_imported_paper_books_get_the_cover_of_their_catalog_work(
     assert sent.json()["imported"] == 1
     (item,) = client.get("/v1/library", headers=auth).json()
     assert item["work_id"] is not None  # linked in the background after the import
+
+
+def test_covers_of_imported_books_are_looked_up_when_the_app_syncs(
+    client: TestClient, books: FakeBooks
+) -> None:
+    from tests.api.v1.test_library import account
+
+    auth = account(client, "bea@example.com")
+    csv = 'Title,Author,Exclusive Shelf\n"Jane Eyre (Classics, #2)",Charlotte Brontë,read\n'
+    client.post(
+        "/v1/library/import-csv",
+        files={"file": ("export.csv", csv.encode(), "text/csv")},
+        headers=auth,
+    )
+    changes = client.get("/v1/sync", headers=auth).json()["changes"]
+    linked = [c for c in changes if c["data"].get("work_id")]
+    assert linked  # the link came back as a change the app applies

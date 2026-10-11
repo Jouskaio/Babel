@@ -3477,4 +3477,93 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get appearanceReading => 'Lecture';
+
+  @override
+  String updateTitle(String version) {
+    return 'Babel $version est disponible';
+  }
+
+  @override
+  String get updateLater => 'Plus tard';
+
+  @override
+  String get updateNow => 'Mettre à jour';
+
+  @override
+  String get updateReload => 'Recharger';
+
+  @override
+  String get updateWhatsNew => 'Au programme';
+
+  @override
+  String get updateNoNotes => 'Améliorations et corrections.';
+
+  @override
+  String get updateSection => 'Mises à jour';
+
+  @override
+  String updateInstalled(String version) {
+    return 'Version installée : $version';
+  }
+
+  @override
+  String get updateUpToDate => 'Babel est à jour.';
+
+  @override
+  String updateAvailable(String version) {
+    return 'La version $version est disponible.';
+  }
+
+  @override
+  String get updateGetApps => 'Télécharger les applications';
+
+  @override
+  String get downloadTitle => 'Télécharger Babel';
+
+  @override
+  String get downloadIntro =>
+      'Babel tourne dans le navigateur, sur Android et sur Mac. Les applications te proposent elles-mêmes chaque nouvelle version, avec la liste de ce qui change.';
+
+  @override
+  String downloadLatest(String version, String date) {
+    return 'Dernière version : $version · $date';
+  }
+
+  @override
+  String get downloadAndroidHint =>
+      'Fichier APK. Si Android le demande, autorise l\'installation depuis ce site.';
+
+  @override
+  String get downloadApk => 'Télécharger';
+
+  @override
+  String get downloadMacHint =>
+      'Fichier .zip. Au premier lancement : clic droit sur l\'application, puis Ouvrir (elle n\'est pas encore signée par Apple).';
+
+  @override
+  String get downloadMac => 'Télécharger';
+
+  @override
+  String get downloadIosSoon =>
+      'Bientôt sur l\'App Store. En attendant, ouvre Babel dans Safari, puis Partager › Sur l\'écran d\'accueil.';
+
+  @override
+  String get downloadWebName => 'Navigateur';
+
+  @override
+  String get downloadWebHint =>
+      'Rien à installer : ouvre Babel et ajoute-le à ton écran d\'accueil.';
+
+  @override
+  String get downloadOpenWeb => 'Ouvrir';
+
+  @override
+  String get downloadSoon => 'Bientôt';
+
+  @override
+  String get downloadUpdates =>
+      'Mises à jour : l\'application te propose chaque nouvelle version avec ses nouveautés. Google Play et l\'App Store viendront plus tard.';
+
+  @override
+  String get footerDownload => 'Télécharger';
 }

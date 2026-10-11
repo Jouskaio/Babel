@@ -16,6 +16,7 @@ import '../features/catalog/presentation/scan_page.dart';
 import '../features/catalog/presentation/search_page.dart';
 import '../features/catalog/presentation/work_page.dart';
 import '../features/discover/presentation/playlist_page.dart';
+import '../features/download/presentation/download_page.dart';
 import '../features/home/presentation/home_page.dart';
 import '../features/kavita/presentation/admin_page.dart';
 import '../features/kavita/presentation/kavita_setup_page.dart';
@@ -53,6 +54,7 @@ abstract final class Routes {
       Uri(path: search, queryParameters: {'q': query}).toString();
   static const library = '/library';
   static const scan = '/scan';
+  static const download = '/download';
   static String work(String id) => '/works/$id';
   static String playlist(String key) => '/playlist/$key';
   static String read(String itemId) => '/read/$itemId';
@@ -76,7 +78,7 @@ abstract final class Routes {
   static const public = {landing, login, signup};
 
   /// Reachable whether signed in or not (e.g. links opened from an email).
-  static const open = {forgotPassword, resetPassword, verifyEmail};
+  static const open = {forgotPassword, resetPassword, verifyEmail, download};
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -190,6 +192,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             ReaderProfilePage(handle: state.pathParameters['handle']!),
       ),
       GoRoute(path: Routes.scan, builder: (_, _) => const ScanPage()),
+      GoRoute(path: Routes.download, builder: (_, _) => const DownloadPage()),
       GoRoute(
         path: '/read/:id',
         builder: (_, state) => ReaderPage(itemId: state.pathParameters['id']!),

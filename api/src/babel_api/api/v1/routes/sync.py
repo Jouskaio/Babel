@@ -4,10 +4,17 @@ from datetime import datetime
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, BackgroundTasks, Query, status
 from pydantic import BaseModel, Field
 
-from babel_api.api.dependencies import CurrentUserId, DeviceHeader, SyncServiceDep
+from babel_api.api.dependencies import (
+    ContainerDep,
+    CurrentUserId,
+    DeviceHeader,
+    SyncServiceDep,
+    covers_due,
+    link_covers,
+)
 from babel_api.domain.sync import ChangeOp, Device, DeviceKind, EntityKind
 from babel_api.services.sync import Operation, OpOutcome
 
@@ -121,11 +128,17 @@ async def set_push_token(
 async def pull_changes(
     user_id: CurrentUserId,
     sync: SyncServiceDep,
+    container: ContainerDep,
+    background: BackgroundTasks,
     since: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=1000)] = 500,
     device_id: DeviceHeader = None,
 ) -> PullResponse:
     """Changes of the account after ``since``, oldest first."""
+    if covers_due(user_id):
+        # The app reads its library from here: books imported from a list get their covers
+        # in the background, and the links come back as changes.
+        background.add_task(link_covers, container, user_id)
     pull = await sync.pull(user_id, since, limit, device_id)
     return PullResponse(
         changes=[

@@ -5707,6 +5707,156 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Lecture'**
   String get appearanceReading;
+
+  /// No description provided for @updateTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel {version} est disponible'**
+  String updateTitle(String version);
+
+  /// No description provided for @updateLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus tard'**
+  String get updateLater;
+
+  /// No description provided for @updateNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre à jour'**
+  String get updateNow;
+
+  /// No description provided for @updateReload.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recharger'**
+  String get updateReload;
+
+  /// No description provided for @updateWhatsNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au programme'**
+  String get updateWhatsNew;
+
+  /// No description provided for @updateNoNotes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Améliorations et corrections.'**
+  String get updateNoNotes;
+
+  /// No description provided for @updateSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mises à jour'**
+  String get updateSection;
+
+  /// No description provided for @updateInstalled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version installée : {version}'**
+  String updateInstalled(String version);
+
+  /// No description provided for @updateUpToDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel est à jour.'**
+  String get updateUpToDate;
+
+  /// No description provided for @updateAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'La version {version} est disponible.'**
+  String updateAvailable(String version);
+
+  /// No description provided for @updateGetApps.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger les applications'**
+  String get updateGetApps;
+
+  /// No description provided for @downloadTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger Babel'**
+  String get downloadTitle;
+
+  /// No description provided for @downloadIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Babel tourne dans le navigateur, sur Android et sur Mac. Les applications te proposent elles-mêmes chaque nouvelle version, avec la liste de ce qui change.'**
+  String get downloadIntro;
+
+  /// No description provided for @downloadLatest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière version : {version} · {date}'**
+  String downloadLatest(String version, String date);
+
+  /// No description provided for @downloadAndroidHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier APK. Si Android le demande, autorise l\'installation depuis ce site.'**
+  String get downloadAndroidHint;
+
+  /// No description provided for @downloadApk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger'**
+  String get downloadApk;
+
+  /// No description provided for @downloadMacHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier .zip. Au premier lancement : clic droit sur l\'application, puis Ouvrir (elle n\'est pas encore signée par Apple).'**
+  String get downloadMacHint;
+
+  /// No description provided for @downloadMac.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger'**
+  String get downloadMac;
+
+  /// No description provided for @downloadIosSoon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bientôt sur l\'App Store. En attendant, ouvre Babel dans Safari, puis Partager › Sur l\'écran d\'accueil.'**
+  String get downloadIosSoon;
+
+  /// No description provided for @downloadWebName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Navigateur'**
+  String get downloadWebName;
+
+  /// No description provided for @downloadWebHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien à installer : ouvre Babel et ajoute-le à ton écran d\'accueil.'**
+  String get downloadWebHint;
+
+  /// No description provided for @downloadOpenWeb.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir'**
+  String get downloadOpenWeb;
+
+  /// No description provided for @downloadSoon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bientôt'**
+  String get downloadSoon;
+
+  /// No description provided for @downloadUpdates.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mises à jour : l\'application te propose chaque nouvelle version avec ses nouveautés. Google Play et l\'App Store viendront plus tard.'**
+  String get downloadUpdates;
+
+  /// No description provided for @footerDownload.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger'**
+  String get footerDownload;
 }
 
 class _AppLocalizationsDelegate

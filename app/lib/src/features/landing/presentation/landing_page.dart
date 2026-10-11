@@ -607,9 +607,19 @@ class _Footer extends StatelessWidget {
         runSpacing: 16,
         children: [
           Text(l10n.brand, style: BabelText.label(12, spacing: 6)),
-          Text(
-            '${l10n.footerPrivacy} · ${l10n.footerTerms} · ${l10n.footerContact}',
-            style: BabelText.body(13),
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            children: [
+              TextButton(
+                onPressed: () => context.go(Routes.download),
+                child: Text(l10n.footerDownload),
+              ),
+              Text(
+                '· ${l10n.footerPrivacy} · ${l10n.footerTerms} · ${l10n.footerContact}',
+                style: BabelText.body(13),
+              ),
+            ],
           ),
           Text('© ${DateTime.now().year} Babel', style: BabelText.body(13)),
         ],
