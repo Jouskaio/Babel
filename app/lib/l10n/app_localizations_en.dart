@@ -3566,4 +3566,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String readersCount(int count) {
     return '$count readers';
   }
+
+  @override
+  String get readOriginalReview => 'Read the full review →';
 }

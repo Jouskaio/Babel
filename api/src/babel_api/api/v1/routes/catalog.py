@@ -198,8 +198,10 @@ class RelatedWorkResponse(BaseModel):
     title: str
     kind: Literal["film", "series", "game", "comic", "stage", "audio", "other"]
     year: int | None
-    url: str = Field(description="Its page on Wikidata")
-    poster_path: str | None = Field(default=None, description="TMDB's poster, through Babel")
+    url: str = Field(description="Where to read about it: IMDb, Wikipedia or Wikidata")
+    poster_path: str | None = Field(
+        default=None, description="Its poster (TMDB, or Wikimedia Commons), through Babel"
+    )
     overview: str | None = None
 
 
@@ -229,12 +231,13 @@ class ExternalRatingResponse(BaseModel):
 
 
 class ExternalReviewResponse(BaseModel):
-    source: Literal["hardcover", "pagebound"]
+    source: Literal["hardcover", "pagebound", "goodreads"]
     author: str
     rating: float | None
     text: str
     spoilers: bool
     likes: int
+    url: str | None = Field(default=None, description="The review on its own site")
 
 
 class ExternalReviewsResponse(BaseModel):
@@ -247,8 +250,9 @@ async def get_external_reviews(
     _: CurrentUserId, works: WorkServiceDep, work_id: UUID
 ) -> ExternalReviewsResponse:
     """What others think of the book elsewhere: ratings from Hardcover, Open Library and
-    Goodreads, and the most liked Hardcover reviews. Each source is best effort."""
-    ratings, reviews, pagebound = await works.external_reviews(work_id)
+    Goodreads, and the most liked reviews of Hardcover, Pagebound and Goodreads. Each source is
+    best effort."""
+    ratings, reviews, pagebound, goodreads = await works.external_reviews(work_id)
     return ExternalReviewsResponse(
         ratings=[
             ExternalRatingResponse(
@@ -280,6 +284,18 @@ async def get_external_reviews(
                 likes=r.likes,
             )
             for r in pagebound
+        ]
+        + [
+            ExternalReviewResponse(
+                source="goodreads",
+                author=r.author,
+                rating=r.rating,
+                text=r.text,
+                spoilers=r.spoilers,
+                likes=r.likes,
+                url=r.url,
+            )
+            for r in goodreads
         ],
     )
 
@@ -417,7 +433,7 @@ async def lookup_isbn(
     )
 
 
-_COVER_HOSTS = ("hardcover.app", "image.tmdb.org")
+_COVER_HOSTS = ("hardcover.app", "image.tmdb.org", "wikimedia.org")
 
 
 @router.get(
@@ -445,7 +461,11 @@ async def _proxied_image(container: Container, url: str) -> FileResponse:
     found = container.covers.get(key)
     if found is None:
         try:
-            async with httpx.AsyncClient(timeout=15, follow_redirects=False) as client:
+            async with httpx.AsyncClient(
+                timeout=15,
+                follow_redirects=False,
+                headers={"User-Agent": "Babel/1.0 (https://babel.jouskaio.me; reading app)"},
+            ) as client:
                 response = await client.get(url)
         except httpx.HTTPError:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "No such image") from None

@@ -1965,5 +1965,6 @@
   "readersTitle": "Lecteurs",
   "readersDirectory": "Tous les lecteurs",
   "readersCount": "{count} lecteurs",
-  "@readersCount": {"placeholders": {"count": {"type": "int"}}}
+  "@readersCount": {"placeholders": {"count": {"type": "int"}}},
+  "readOriginalReview": "Lire l'avis complet →"
 }

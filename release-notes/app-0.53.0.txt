@@ -1,0 +1,5 @@
+Avis Goodreads sur les fiches de livres : les plus appréciés, avec le lien vers l'avis complet
+Adaptations : liens directs vers l'œuvre (IMDb, Wikipédia) au lieu du tableau Wikidata, et affiches quand elles existent, sinon la couverture du livre
+Livres importés avec une apostrophe typographique (Ender’s Game, The Handmaid’s Tale) : fiche et couverture retrouvées
+Note Goodreads de nouveau disponible (leur page de recherche est désormais bloquée aux robots)
+Un bouton pour associer un livre à une fiche depuis « Modifier les informations »

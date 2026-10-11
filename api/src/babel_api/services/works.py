@@ -9,7 +9,11 @@ from datetime import UTC, datetime, timedelta
 from urllib.parse import quote
 from uuid import UUID
 
-from babel_api.adapters.external_ratings import ExternalRating, ExternalRatings
+from babel_api.adapters.external_ratings import (
+    ExternalRating,
+    ExternalRatings,
+    GoodreadsReview,
+)
 from babel_api.adapters.hardcover import (
     HardcoverBook,
     HardcoverClient,
@@ -320,7 +324,9 @@ class WorkService:
 
     async def external_reviews(
         self, work_id: UUID
-    ) -> tuple[list[ExternalRating], list[HardcoverReview], list[PageboundReview]]:
+    ) -> tuple[
+        list[ExternalRating], list[HardcoverReview], list[PageboundReview], list[GoodreadsReview]
+    ]:
         """What others think of a book: ratings (Hardcover, Open Library, Goodreads) and the
         most liked Hardcover reviews. Every source is best effort."""
         work = (await self.get(work_id)).work
@@ -342,6 +348,9 @@ class WorkService:
             else _nothing(),
             self._hardcover_reviews(work),
             self._pagebound_all(work),
+            self._external.goodreads_reviews(work.title, work.authors)
+            if self._external is not None
+            else _nothing(),
             return_exceptions=True,
         )
         for found in asked[:2]:
@@ -352,7 +361,8 @@ class WorkService:
         pagebound = asked[3] if isinstance(asked[3], tuple) else empty
         if pagebound[0] is not None:
             ratings.append(pagebound[0])
-        return ratings, reviews, pagebound[1]
+        goodreads = asked[4] if isinstance(asked[4], list) else []
+        return ratings, reviews, pagebound[1], goodreads
 
     async def _hardcover_reviews(self, work: Work) -> list[HardcoverReview]:
         if self._hardcover is None:

@@ -10,9 +10,9 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **kind** | **String** |  | 
 **overview** | **String** |  | [optional] 
-**posterPath** | **String** | TMDB's poster, through Babel | [optional] 
+**posterPath** | **String** | Its poster (TMDB, or Wikimedia Commons), through Babel | [optional] 
 **title** | **String** |  | 
-**url** | **String** | Its page on Wikidata | 
+**url** | **String** | Where to read about it: IMDb, Wikipedia or Wikidata | 
 **year** | **int** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

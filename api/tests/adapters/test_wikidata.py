@@ -64,3 +64,23 @@ def test_wikidata_then_tmdb_poster() -> None:
     (item,) = asyncio.run(client.adaptations(["Dune"], "Herbert"))
     assert (item.title, item.year, item.overview) == ("Dune", 2021, "Arrakis.")
     assert item.poster == "https://image.tmdb.org/t/p/w342/new.jpg"
+
+
+def test_commons_pictures_and_links_point_at_the_work() -> None:
+    from babel_api.adapters.wikidata import commons_thumb
+
+    thumb = commons_thumb("http://commons.wikimedia.org/wiki/Special:FilePath/Dune%20poster.jpg")
+    assert thumb is not None
+    assert thumb.startswith("https://upload.wikimedia.org/wikipedia/commons/thumb/")
+    assert thumb.endswith("/Dune_poster.jpg/342px-Dune_poster.jpg")
+    assert commons_thumb("http://commons.wikimedia.org/wiki/Special:FilePath/x.pdf") is None
+
+    row = _row("Q9", "Dune", "film", "2021")
+    row["imdb"] = {"value": "tt1160419"}
+    row["wpfr"] = {"value": "https://fr.wikipedia.org/wiki/Dune_(film,_2021)"}
+    film = parse_adaptations({"results": {"bindings": [row]}})[0]
+    assert film.url == "https://www.imdb.com/title/tt1160419/"
+    assert film.wiki == "https://fr.wikipedia.org/wiki/Dune_(film,_2021)"
+    game = _row("Q8", "Dune game", "video game", None)
+    game["wpen"] = {"value": "https://en.wikipedia.org/wiki/Dune_(game)"}
+    assert parse_adaptations({"results": {"bindings": [game]}})[0].url.endswith("Dune_(game)")

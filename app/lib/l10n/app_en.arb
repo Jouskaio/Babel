@@ -1173,5 +1173,6 @@
   "readersTitle": "Readers",
   "readersDirectory": "All readers",
   "readersCount": "{count} readers",
-  "@readersCount": {"placeholders": {"count": {"type": "int"}}}
+  "@readersCount": {"placeholders": {"count": {"type": "int"}}},
+  "readOriginalReview": "Read the full review →"
 }

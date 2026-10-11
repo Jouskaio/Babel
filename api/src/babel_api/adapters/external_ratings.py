@@ -63,6 +63,101 @@ def parse_goodreads(page: str, title: str, authors: tuple[str, ...]) -> External
 
 
 @dataclass(frozen=True, slots=True)
+class GoodreadsBook:
+    """A book as Goodreads' own suggestion box knows it."""
+
+    id: str
+    title: str
+    average: float
+    count: int
+
+
+@dataclass(frozen=True, slots=True)
+class GoodreadsReview:
+    author: str
+    rating: float | None  # out of 5
+    text: str
+    spoilers: bool
+    likes: int
+    url: str
+
+
+def match_goodreads(
+    found: list[dict[str, Any]], title: str, authors: tuple[str, ...]
+) -> GoodreadsBook | None:
+    """The first suggestion with this title (subtitle and series ignored) by an author sharing
+    a surname with ours; Goodreads lists the most rated first."""
+    wanted = series_key(re.split(r"[:(]", title)[0])
+    surnames = {series_key(a).split(" ")[-1] for a in authors if series_key(a)}
+    for entry in found:
+        name = series_key(re.split(r"[:(]", str(entry.get("bookTitleBare") or ""))[0])
+        author = series_key(str(cast(dict[str, Any], entry.get("author") or {}).get("name", "")))
+        try:
+            average, count = float(entry["avgRating"]), int(entry["ratingsCount"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if name != wanted or (surnames and not any(s in author for s in surnames)):
+            continue
+        return GoodreadsBook(
+            str(entry.get("bookId", "")), str(entry.get("title", "")), average, count
+        )
+    return None
+
+
+_JS_ESCAPES = {"n": "\n", "t": "\t", "r": "\r"}
+_REVIEWS_PAYLOAD = re.compile(r'Element\.update\("reviews",\s*"((?:[^"\\]|\\.)*)"\)')
+_REVIEW_TEXT = re.compile(r'<span id="freeText\d+"[^>]*>(.*?)</span>', re.S)
+_REVIEW_TEXT_SHORT = re.compile(r'<span id="freeTextContainer\d+"[^>]*>(.*?)</span>', re.S)
+
+
+def _unescape_js(raw: str) -> str:
+    def replace(match: re.Match[str]) -> str:
+        code = match.group(1)
+        if code.startswith("u") and len(code) == 5:
+            return chr(int(code[1:], 16))
+        return _JS_ESCAPES.get(code, code)
+
+    return re.sub(r"\\(u[0-9a-fA-F]{4}|.)", replace, raw)
+
+
+def _plain_text(markup: str) -> str:
+    text = re.sub(r"<br\s*/?>", "\n", markup)
+    text = html.unescape(re.sub(r"<[^>]+>", "", text))
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
+
+
+def parse_goodreads_reviews(payload: str, limit: int = 5) -> list[GoodreadsReview]:
+    """The most liked reviews with some text, from Goodreads' reviews list (an AJAX answer
+    holding HTML inside a script call)."""
+    found = _REVIEWS_PAYLOAD.match(payload.strip())
+    if found is None:
+        return []
+    reviews: list[GoodreadsReview] = []
+    for block in _unescape_js(found.group(1)).split('<div id="review_')[1:]:
+        who = re.search(r'class="user"[^>]*>(.*?)</a>', block, re.S)
+        body = _REVIEW_TEXT.search(block) or _REVIEW_TEXT_SHORT.search(block)
+        link = re.search(r'href="(/review/show/\d+)', block)
+        if who is None or body is None or link is None:
+            continue
+        text = _plain_text(body.group(1))
+        if len(text) < 40:
+            continue
+        stars = block.count('class="staticStar p10"')
+        likes = re.search(r'class="likesCount">([\d,]+) like', block)
+        reviews.append(
+            GoodreadsReview(
+                author=_plain_text(who.group(1)),
+                rating=float(stars) if stars else None,
+                text=text[:1500],
+                spoilers="view spoiler" in block.lower(),
+                likes=int(likes.group(1).replace(",", "")) if likes else 0,
+                url=f"https://www.goodreads.com{link.group(1)}",
+            )
+        )
+    return sorted(reviews, key=lambda r: -r.likes)[:limit]
+
+
+@dataclass(frozen=True, slots=True)
 class ShelfBook:
     """A book of a Goodreads shelf, most shelved first."""
 
@@ -96,6 +191,8 @@ class ExternalRatings:
         self._goodreads = goodreads
         self._cache: dict[str, tuple[float, ExternalRating | None]] = {}
         self._shelves: dict[str, tuple[float, list[ShelfBook]]] = {}
+        self._books: dict[str, tuple[float, GoodreadsBook | None]] = {}
+        self._reviews: dict[str, tuple[float, list[GoodreadsReview]]] = {}
 
     def _cached(self, key: str) -> tuple[bool, ExternalRating | None]:
         found = self._cache.get(key)
@@ -150,26 +247,66 @@ class ExternalRatings:
         self._cache[key] = (time.monotonic(), rating)
         return rating
 
+    async def _goodreads_book(self, title: str, authors: tuple[str, ...]) -> GoodreadsBook | None:
+        """The Goodreads book of a title, from its suggestion box (the search page is behind a
+        bot check now); kept for a day."""
+        query = f"{title} {authors[0]}" if authors else title
+        key = f"grb:{series_key(query)}"
+        cached = self._books.get(key)
+        if cached is not None and time.monotonic() - cached[0] < CACHE_SECONDS:
+            return cached[1]
+        book: GoodreadsBook | None = None
+        # The title alone first: with an author added, study guides about the book come first.
+        for asked in dict.fromkeys([title, query]):
+            try:
+                response = await self._client.get(
+                    "https://www.goodreads.com/book/auto_complete",
+                    params={"format": "json", "q": asked},
+                )
+                response.raise_for_status()
+                data = response.json()
+            except (httpx.HTTPError, ValueError) as error:
+                log.info("Goodreads suggestions unavailable: %s", error)
+                return None
+            book = match_goodreads(cast(list[dict[str, Any]], data), title, authors)
+            if book is not None:
+                break
+        self._books[key] = (time.monotonic(), book)
+        return book
+
     async def goodreads(self, title: str, authors: tuple[str, ...]) -> ExternalRating | None:
         if not self._goodreads:
             return None
-        query = f"{title} {authors[0]}" if authors else title
-        key = f"gr:{series_key(query)}"
-        hit, value = self._cached(key)
-        if hit:
-            return value
-        rating: ExternalRating | None = None
-        try:
-            response = await self._client.get(
-                "https://www.goodreads.com/search", params={"q": query}
-            )
-            response.raise_for_status()
-            rating = parse_goodreads(response.text, title, authors)
-        except httpx.HTTPError as error:
-            log.info("Goodreads search unavailable: %s", error)
+        book = await self._goodreads_book(title, authors)
+        if book is None:
             return None
-        self._cache[key] = (time.monotonic(), rating)
-        return rating
+        return ExternalRating(
+            "goodreads", book.average, book.count, f"https://www.goodreads.com/book/show/{book.id}"
+        )
+
+    async def goodreads_reviews(
+        self, title: str, authors: tuple[str, ...], limit: int = 5
+    ) -> list[GoodreadsReview]:
+        """The most liked written reviews of the book on Goodreads (empty when it cannot be
+        read: the list is an undocumented page and may change)."""
+        if not self._goodreads:
+            return []
+        book = await self._goodreads_book(title, authors)
+        if book is None:
+            return []
+        cached = self._reviews.get(book.id)
+        if cached is not None and time.monotonic() - cached[0] < CACHE_SECONDS:
+            return cached[1][:limit]
+        try:
+            response = await self._client.get(f"https://www.goodreads.com/book/reviews/{book.id}")
+            response.raise_for_status()
+        except httpx.HTTPError as error:
+            log.info("Goodreads reviews unavailable: %s", error)
+            return []
+        reviews = parse_goodreads_reviews(response.text, limit=10)
+        if reviews:
+            self._reviews[book.id] = (time.monotonic(), reviews)
+        return reviews[:limit]
 
     async def aclose(self) -> None:
         await self._client.aclose()

@@ -5,10 +5,13 @@ works "based on" it. TMDB (free key, optional) adds a poster and a blurb to film
 Anything that goes wrong reads as "nothing known": the page of a book works without it.
 """
 
+import asyncio
+import hashlib
 import logging
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, cast
+from urllib.parse import quote, unquote, urlsplit
 
 import httpx
 
@@ -44,6 +47,7 @@ class Adaptation:
     url: str
     poster: str | None = None
     overview: str | None = None
+    wiki: str | None = None  # its Wikipedia article, when it has one
 
 
 def kind_of(type_labels: list[str]) -> str:
@@ -64,7 +68,7 @@ def _query(title: str, surname: str, language: str, strict: bool = True) -> str:
     author = (
         f'FILTER(LANG(?an) IN ("en", "fr") && CONTAINS(LCASE(?an), "{name}"))' if strict else ""
     )
-    return f"""SELECT ?d ?dLabel ?typeLabel ?year WHERE {{
+    return f"""SELECT ?d ?dLabel ?typeLabel ?year ?poster ?image ?imdb ?wpfr ?wpen WHERE {{
   SERVICE wikibase:mwapi {{
     bd:serviceParam wikibase:api "EntitySearch" .
     bd:serviceParam wikibase:endpoint "www.wikidata.org" .
@@ -78,8 +82,42 @@ def _query(title: str, surname: str, language: str, strict: bool = True) -> str:
   ?d wdt:P144 ?book .
   OPTIONAL {{ ?d wdt:P31 ?type . }}
   OPTIONAL {{ ?d wdt:P577 ?date . BIND(YEAR(?date) AS ?year) }}
+  OPTIONAL {{ ?d wdt:P3383 ?poster . }}
+  OPTIONAL {{ ?d wdt:P18 ?image . }}
+  OPTIONAL {{ ?d wdt:P345 ?imdb . }}
+  OPTIONAL {{ ?wpfr schema:about ?d ; schema:isPartOf <https://fr.wikipedia.org/> . }}
+  OPTIONAL {{ ?wpen schema:about ?d ; schema:isPartOf <https://en.wikipedia.org/> . }}
   SERVICE wikibase:label {{ bd:serviceParam wikibase:language "fr,en". }}
-}} LIMIT 60"""
+}} LIMIT 200"""
+
+
+def commons_thumb(file_url: str, width: int = 342) -> str | None:
+    """The picture of a Commons file (Wikidata gives ``…/Special:FilePath/Name.jpg``) as a
+    thumbnail on upload.wikimedia.org, whose address is made from the file name's MD5."""
+    name = unquote(file_url.rsplit("/", 1)[-1]).replace(" ", "_")
+    extension = name.rsplit(".", 1)[-1].lower() if "." in name else ""
+    if extension not in ("jpg", "jpeg", "png", "gif", "webp", "svg"):
+        return None
+    digest = hashlib.md5(name.encode()).hexdigest()  # noqa: S324 (an address, not security)
+    quoted = quote(name)
+    suffix = ".png" if extension == "svg" else ""
+    return (
+        f"https://upload.wikimedia.org/wikipedia/commons/thumb/{digest[0]}/{digest[:2]}/"
+        f"{quoted}/{width}px-{quoted}{suffix}"
+    )
+
+
+def _value(row: dict[str, Any], key: str) -> str | None:
+    found = cast(dict[str, Any], row.get(key) or {}).get("value")
+    return found if isinstance(found, str) and found else None
+
+
+def _page(qid: str, kind: str, pages: dict[str, str]) -> str:
+    """Where to read about the work: IMDb for a film or a series, else its Wikipedia article (in
+    French, then English), else its Wikidata item."""
+    if kind in ("film", "series") and "imdb" in pages:
+        return f"https://www.imdb.com/title/{pages['imdb']}/"
+    return pages.get("wpfr") or pages.get("wpen") or f"https://www.wikidata.org/wiki/{qid}"
 
 
 def parse_adaptations(data: dict[str, Any]) -> list[Adaptation]:
@@ -94,7 +132,15 @@ def parse_adaptations(data: dict[str, Any]) -> list[Adaptation]:
         qid = uri.rsplit("/", 1)[-1]
         if not qid.startswith("Q") or not label or label == qid:
             continue  # no label in fr or en: nothing to show
-        entry = items.setdefault(qid, {"title": label, "types": [], "year": None})
+        entry = items.setdefault(
+            qid, {"title": label, "types": [], "year": None, "picture": None, "pages": {}}
+        )
+        picture = _value(row, "poster") or _value(row, "image")
+        if entry["picture"] is None and picture is not None:
+            entry["picture"] = commons_thumb(picture)
+        for key in ("imdb", "wpfr", "wpen"):
+            if (found_value := _value(row, key)) is not None:
+                entry["pages"].setdefault(key, found_value)
         type_label = cast(dict[str, Any], row.get("typeLabel") or {}).get("value")
         if isinstance(type_label, str):
             entry["types"].append(type_label)
@@ -107,7 +153,10 @@ def parse_adaptations(data: dict[str, Any]) -> list[Adaptation]:
             title=str(e["title"]),
             kind=kind_of(cast(list[str], e["types"])),
             year=cast("int | None", e["year"]),
-            url=f"https://www.wikidata.org/wiki/{qid}",
+            url=_page(qid, kind_of(cast(list[str], e["types"])), cast(dict[str, str], e["pages"])),
+            poster=cast("str | None", e["picture"]),
+            wiki=cast(dict[str, str], e["pages"]).get("wpfr")
+            or cast(dict[str, str], e["pages"]).get("wpen"),
         )
         for qid, e in items.items()
     ]
@@ -225,6 +274,8 @@ class WikidataClient:
                 if found:
                     break
             items = list(found.values())
+            head = await asyncio.gather(*(self._with_wikipedia(i) for i in items[:12]))
+            items = list(head) + items[12:]
             if self._tmdb_key:
                 items = [await self._with_poster(i) for i in items[:12]] + items[12:]
         except (httpx.HTTPError, ValueError) as error:
@@ -232,6 +283,29 @@ class WikidataClient:
             return []
         self._cache[key] = (time.monotonic(), items)
         return items
+
+    async def _with_wikipedia(self, item: Adaptation) -> Adaptation:
+        """The lead picture of the work's Wikipedia article (the poster, for a film) and its first
+        lines, when the work has an article. Best effort."""
+        if item.wiki is None:
+            return item
+        parts = urlsplit(item.wiki)
+        title = parts.path.rsplit("/", 1)[-1]
+        try:
+            response = await self._client.get(
+                f"https://{parts.hostname}/api/rest_v1/page/summary/{title}"
+            )
+            response.raise_for_status()
+            data = cast(dict[str, Any], response.json())
+        except (httpx.HTTPError, ValueError):
+            return item
+        image = cast(dict[str, Any], data.get("thumbnail") or {}).get("source")
+        extract = data.get("extract")
+        return replace(
+            item,
+            poster=image if isinstance(image, str) else item.poster,
+            overview=item.overview or (extract if isinstance(extract, str) and extract else None),
+        )
 
     async def _with_poster(self, item: Adaptation) -> Adaptation:
         """A film or series gets TMDB's poster and blurb (the first result of its year)."""

@@ -1146,7 +1146,7 @@ def test_a_book_lists_what_it_was_adapted_into(
 def test_a_book_shows_what_others_think_of_it(
     app: FastAPI, client: TestClient, books: FakeBooks, auth: dict[str, str]
 ) -> None:
-    from babel_api.adapters.external_ratings import ExternalRating
+    from babel_api.adapters.external_ratings import ExternalRating, GoodreadsReview
     from babel_api.adapters.hardcover import HardcoverReview
 
     class FakeRatings:
@@ -1157,6 +1157,20 @@ def test_a_book_shows_what_others_think_of_it(
 
         async def goodreads(self, title: str, authors: tuple[str, ...]) -> ExternalRating | None:
             return ExternalRating("goodreads", 3.9, 1000, "https://www.goodreads.com/book/show/2")
+
+        async def goodreads_reviews(
+            self, title: str, authors: tuple[str, ...], limit: int = 5
+        ) -> list[GoodreadsReview]:
+            return [
+                GoodreadsReview(
+                    "gr_reader",
+                    5.0,
+                    "Loved it, a long review.",
+                    False,
+                    300,
+                    "https://www.goodreads.com/review/show/9",
+                )
+            ]
 
     class FakeHardcoverReviews(FakeHardcoverSearch):
         async def reviews(self, book_id: int, limit: int = 5) -> list[HardcoverReview]:
@@ -1174,6 +1188,10 @@ def test_a_book_shows_what_others_think_of_it(
     assert {r["source"] for r in out["ratings"]} == {"hardcover", "openlibrary", "goodreads"}
     assert out["reviews"][0]["author"] == "reader"
     assert out["reviews"][0]["likes"] == 12
+    goodreads = [r for r in out["reviews"] if r["source"] == "goodreads"]
+    assert [(r["author"], r["url"]) for r in goodreads] == [
+        ("gr_reader", "https://www.goodreads.com/review/show/9")
+    ]
 
 
 def test_a_cover_photo_finds_the_book_by_its_words(

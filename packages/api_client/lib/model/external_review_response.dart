@@ -19,6 +19,7 @@ class ExternalReviewResponse {
     required this.source_,
     required this.spoilers,
     required this.text,
+    this.url,
   });
 
   String author;
@@ -33,6 +34,9 @@ class ExternalReviewResponse {
 
   String text;
 
+  /// The review on its own site
+  String? url;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is ExternalReviewResponse &&
     other.author == author &&
@@ -40,7 +44,8 @@ class ExternalReviewResponse {
     other.rating == rating &&
     other.source_ == source_ &&
     other.spoilers == spoilers &&
-    other.text == text;
+    other.text == text &&
+    other.url == url;
 
   @override
   int get hashCode =>
@@ -50,10 +55,11 @@ class ExternalReviewResponse {
     (rating == null ? 0 : rating!.hashCode) +
     (source_.hashCode) +
     (spoilers.hashCode) +
-    (text.hashCode);
+    (text.hashCode) +
+    (url == null ? 0 : url!.hashCode);
 
   @override
-  String toString() => 'ExternalReviewResponse[author=$author, likes=$likes, rating=$rating, source_=$source_, spoilers=$spoilers, text=$text]';
+  String toString() => 'ExternalReviewResponse[author=$author, likes=$likes, rating=$rating, source_=$source_, spoilers=$spoilers, text=$text, url=$url]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -67,6 +73,11 @@ class ExternalReviewResponse {
       json[r'source'] = this.source_;
       json[r'spoilers'] = this.spoilers;
       json[r'text'] = this.text;
+    if (this.url != null) {
+      json[r'url'] = this.url;
+    } else {
+      json[r'url'] = null;
+    }
     return json;
   }
 
@@ -97,6 +108,7 @@ class ExternalReviewResponse {
         source_: ExternalReviewResponseSource_Enum.fromJson(json[r'source'])!,
         spoilers: mapValueOfType<bool>(json, r'spoilers')!,
         text: mapValueOfType<String>(json, r'text')!,
+        url: mapValueOfType<String>(json, r'url'),
       );
     }
     return null;
@@ -167,11 +179,13 @@ class ExternalReviewResponseSource_Enum {
 
   static const hardcover = ExternalReviewResponseSource_Enum._(r'hardcover');
   static const pagebound = ExternalReviewResponseSource_Enum._(r'pagebound');
+  static const goodreads = ExternalReviewResponseSource_Enum._(r'goodreads');
 
   /// List of all possible values in this [enum][ExternalReviewResponseSource_Enum].
   static const values = <ExternalReviewResponseSource_Enum>[
     hardcover,
     pagebound,
+    goodreads,
   ];
 
   static ExternalReviewResponseSource_Enum? fromJson(dynamic value) => ExternalReviewResponseSource_EnumTypeTransformer().decode(value);
@@ -212,6 +226,7 @@ class ExternalReviewResponseSource_EnumTypeTransformer {
       switch (data) {
         case r'hardcover': return ExternalReviewResponseSource_Enum.hardcover;
         case r'pagebound': return ExternalReviewResponseSource_Enum.pagebound;
+        case r'goodreads': return ExternalReviewResponseSource_Enum.goodreads;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
