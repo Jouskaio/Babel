@@ -1281,3 +1281,20 @@ def test_playlists_and_suggestions_come_from_open_library_subjects(
     assert suggested[0]["genre"] == "horror"
     assert suggested[0]["playlist"] == "gothic"
     assert {w["title"] for w in suggested[0]["works"]} == {"Jane Eyre", "Emma"}
+
+
+def test_imported_paper_books_get_the_cover_of_their_catalog_work(
+    client: TestClient, books: FakeBooks
+) -> None:
+    from tests.api.v1.test_library import account
+
+    auth = account(client, "ada@example.com")
+    csv = "Title,Author,Exclusive Shelf\nJane Eyre,Charlotte Brontë,read\n"
+    sent = client.post(
+        "/v1/library/import-csv",
+        files={"file": ("export.csv", csv.encode(), "text/csv")},
+        headers=auth,
+    )
+    assert sent.json()["imported"] == 1
+    (item,) = client.get("/v1/library", headers=auth).json()
+    assert item["work_id"] is not None  # linked in the background after the import

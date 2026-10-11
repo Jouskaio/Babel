@@ -5609,7 +5609,7 @@ abstract class AppLocalizations {
   /// No description provided for @appearanceTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Thème'**
+  /// **'Thèmes d\'affichage'**
   String get appearanceTitle;
 
   /// No description provided for @appearanceNight.
@@ -5695,6 +5695,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Défi réussi, bravo !'**
   String get extraWon;
+
+  /// No description provided for @appearanceApp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Application'**
+  String get appearanceApp;
+
+  /// No description provided for @appearanceReading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture'**
+  String get appearanceReading;
 }
 
 class _AppLocalizationsDelegate

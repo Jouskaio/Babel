@@ -3396,7 +3396,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'AO3 could not give the details of this fanfiction (members only, or unreachable for now).';
 
   @override
-  String get appearanceTitle => 'Theme';
+  String get appearanceTitle => 'Display themes';
 
   @override
   String get appearanceNight => 'Night';
@@ -3445,4 +3445,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get extraWon => 'Challenge won, well done!';
+
+  @override
+  String get appearanceApp => 'App';
+
+  @override
+  String get appearanceReading => 'Reading';
 }

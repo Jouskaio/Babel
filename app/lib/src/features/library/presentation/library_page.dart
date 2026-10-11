@@ -983,39 +983,43 @@ class _Filters extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
+            margin: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
               border: Border(bottom: BorderSide(color: BabelColors.border)),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        for (final (label, value) in [
-                          (l10n.filterAll, null),
-                          (l10n.tabReading, ReadingStatus.reading),
-                          (l10n.tabToRead, ReadingStatus.toRead),
-                          (l10n.tabFinished, ReadingStatus.finished),
-                          (l10n.tabAbandoned, ReadingStatus.abandoned),
-                        ])
-                          _Tab(
-                            label: label,
-                            selected: filter == value,
-                            onTap: () => onFilter(value),
-                          ),
-                      ],
+            // Tabs wrap onto a second line on a narrow screen; "Shelves" stays on the right
+            // when there is room.
+            child: LayoutBuilder(
+              builder: (context, box) {
+                final tabs = [
+                  for (final (label, value) in [
+                    (l10n.filterAll, null),
+                    (l10n.tabReading, ReadingStatus.reading),
+                    (l10n.tabToRead, ReadingStatus.toRead),
+                    (l10n.tabFinished, ReadingStatus.finished),
+                    (l10n.tabAbandoned, ReadingStatus.abandoned),
+                  ])
+                    _Tab(
+                      label: label,
+                      selected: filter == value,
+                      onTap: () => onFilter(value),
                     ),
-                  ),
-                ),
-                _Tab(
+                ];
+                final shelves = _Tab(
                   label: '${l10n.shelvesTitle} ▾',
                   selected: shelf != null,
                   onTap: () => _showShelves(context),
-                ),
-              ],
+                );
+                if (box.maxWidth < 560) {
+                  return Wrap(children: [...tabs, shelves]);
+                }
+                return Row(
+                  children: [
+                    Expanded(child: Wrap(children: tabs)),
+                    shelves,
+                  ],
+                );
+              },
             ),
           ),
           if (shelf != null)
@@ -1159,8 +1163,7 @@ class _Tab extends StatelessWidget {
   Widget build(BuildContext context) => InkWell(
     onTap: onTap,
     child: Container(
-      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-      margin: const EdgeInsets.only(right: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(

@@ -1116,7 +1116,7 @@
   "fanficPublished": "Published {date}",
   "fanficOnAo3": "View on AO3",
   "fanficUnavailable": "AO3 could not give the details of this fanfiction (members only, or unreachable for now).",
-  "appearanceTitle": "Theme",
+  "appearanceTitle": "Display themes",
   "appearanceNight": "Night",
   "appearanceDeco": "Art deco",
   "playlistSpace": "Space",
@@ -1133,5 +1133,7 @@
   "extraCountries": "Challenge · three different countries",
   "extraProgress": "{done} / {target} books",
   "@extraProgress": {"placeholders": {"done": {"type": "int"}, "target": {"type": "int"}}},
-  "extraWon": "Challenge won, well done!"
+  "extraWon": "Challenge won, well done!",
+  "appearanceApp": "App",
+  "appearanceReading": "Reading"
 }

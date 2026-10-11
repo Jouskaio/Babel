@@ -4,11 +4,12 @@ from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, File, Path, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, File, Path, UploadFile, status
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from babel_api.api.dependencies import (
+    ContainerDep,
     CurrentAdminId,
     CurrentUserId,
     DeviceHeader,
@@ -17,6 +18,8 @@ from babel_api.api.dependencies import (
     LinkServiceDep,
     SocialServiceDep,
     SyncServiceDep,
+    covers_due,
+    link_covers,
 )
 from babel_api.domain.errors import FileTooLargeError
 from babel_api.domain.files import BookFormat, LibraryItem, ReadingStatus
@@ -109,9 +112,17 @@ class WithdrawRequest(BaseModel):
 
 
 @router.get("/library", operation_id="getLibrary")
-async def get_library(user_id: CurrentUserId, files: FileServiceDep) -> list[LibraryItemResponse]:
+async def get_library(
+    user_id: CurrentUserId,
+    files: FileServiceDep,
+    container: ContainerDep,
+    background: BackgroundTasks,
+) -> list[LibraryItemResponse]:
     """The books of the signed-in reader, most recent first."""
-    return [LibraryItemResponse.of(item) for item in await files.library(user_id)]
+    items = await files.library(user_id)
+    if covers_due(user_id) and any(i.work_id is None and i.file is None for i in items):
+        background.add_task(link_covers, container, user_id)
+    return [LibraryItemResponse.of(item) for item in items]
 
 
 @router.post("/library/files", operation_id="importFile", status_code=status.HTTP_201_CREATED)
@@ -208,6 +219,8 @@ async def import_reading_list(
     user_id: CurrentUserId,
     files: FileServiceDep,
     social: SocialServiceDep,
+    container: ContainerDep,
+    background: BackgroundTasks,
     file: Annotated[UploadFile, File()],
     device_id: DeviceHeader = None,
 ) -> CsvImportResponse:
@@ -217,6 +230,7 @@ async def import_reading_list(
     if len(content) > _CSV_MAX:
         raise FileTooLargeError
     result = await ImportService(files, social).import_csv(user_id, content, device_id)
+    background.add_task(link_covers, container, user_id)
     return CsvImportResponse(imported=result.imported, skipped=result.skipped, failed=result.failed)
 
 

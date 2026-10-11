@@ -47,6 +47,7 @@ class _ScanPageState extends ConsumerState<ScanPage> {
   IsbnLookupResponse? _found;
   String? _error;
   bool _burst = false;
+  bool _noCamera = false; // the browser or device gave no camera
   bool _photoBusy = false;
   List<WorkSummaryResponse>? _candidates; // from a cover photo
   final _added = <String>[];
@@ -191,47 +192,63 @@ class _ScanPageState extends ConsumerState<ScanPage> {
                       MobileScanner(
                         controller: _scanner,
                         onDetect: _onDetect,
-                        errorBuilder: (_, _) => Center(
-                          child: Text(
-                            l10n.cameraUnavailable,
-                            style: BabelText.body(15),
+                        errorBuilder: (_, _) {
+                          if (!_noCamera) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) setState(() => _noCamera = true);
+                            });
+                          }
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(32),
+                              child: Text(
+                                l10n.cameraUnavailable,
+                                textAlign: TextAlign.center,
+                                style: BabelText.body(15),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      if (!_noCamera) ...[
+                        Container(
+                          width: 270,
+                          height: 150,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: BabelColors.gold,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                      ),
-                      Container(
-                        width: 270,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: BabelColors.gold, width: 2),
-                          borderRadius: BorderRadius.circular(12),
+                        Positioned(
+                          top: 8,
+                          left: 16,
+                          right: 16,
+                          child: SwitchListTile(
+                            value: _burst,
+                            onChanged: (v) => setState(() => _burst = v),
+                            title: Text(
+                              l10n.scanBurst,
+                              style: BabelText.body(
+                                13,
+                                color: BabelColors.textPrimary,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                      Positioned(
-                        top: 8,
-                        left: 16,
-                        right: 16,
-                        child: SwitchListTile(
-                          value: _burst,
-                          onChanged: (v) => setState(() => _burst = v),
-                          title: Text(
-                            l10n.scanBurst,
+                        Positioned(
+                          bottom: 24,
+                          child: Text(
+                            l10n.scanHint,
                             style: BabelText.body(
-                              13,
+                              14,
                               color: BabelColors.textPrimary,
                             ),
                           ),
                         ),
-                      ),
-                      Positioned(
-                        bottom: 24,
-                        child: Text(
-                          l10n.scanHint,
-                          style: BabelText.body(
-                            14,
-                            color: BabelColors.textPrimary,
-                          ),
-                        ),
-                      ),
+                      ],
                     ],
                   ),
           ),

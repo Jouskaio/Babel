@@ -9,7 +9,6 @@ import '../../../core/auth/auth_failure.dart';
 import '../../../core/display/eink_setting.dart';
 import '../../../core/locale/language_picker.dart';
 import '../../../core/push/push_notifications.dart';
-import '../../../core/theme/appearance_setting.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/babel_text_field.dart';
@@ -26,6 +25,7 @@ import 'devices_section.dart';
 import 'koreader_section.dart';
 import 'pagebound_section.dart';
 import 'shelfmark_section.dart';
+import 'themes_section.dart';
 
 /// Profile, password, sign-out and account deletion.
 class AccountPage extends ConsumerWidget {
@@ -52,7 +52,7 @@ class AccountPage extends ConsumerWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
+            constraints: const BoxConstraints(maxWidth: 1040),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -71,115 +71,122 @@ class AccountPage extends ConsumerWidget {
                   ),
                 const SizedBox(height: 24),
                 // Four groups, closed until opened: the page reads as a table of contents.
-                _Group(
-                  icon: Icons.person_outline_rounded,
-                  title: l10n.groupAccount,
-                  subtitle: l10n.groupAccountHint,
-                  initiallyOpen: true,
+                _TwoColumns(
                   children: [
-                    _Block(
-                      title: l10n.accountProfile,
-                      child: _ProfileForm(user: user),
+                    _Group(
+                      icon: Icons.person_outline_rounded,
+                      title: l10n.groupAccount,
+                      subtitle: l10n.groupAccountHint,
+                      initiallyOpen: true,
+                      children: [
+                        _Block(
+                          title: l10n.accountProfile,
+                          child: _ProfileForm(user: user),
+                        ),
+                        _Block(
+                          title: l10n.accountSecurity,
+                          child: _PasswordForm(user: user),
+                        ),
+                        _Block(
+                          title: l10n.publicProfile,
+                          child: const SharingSettings(),
+                        ),
+                      ],
                     ),
-                    _Block(
-                      title: l10n.accountSecurity,
-                      child: _PasswordForm(user: user),
+                    _Group(
+                      icon: Icons.devices_rounded,
+                      title: l10n.groupDisplay,
+                      subtitle: l10n.groupDisplayHint,
+                      children: [
+                        _Block(
+                          title: l10n.language,
+                          child: const Align(
+                            alignment: Alignment.centerLeft,
+                            child: LanguagePicker(),
+                          ),
+                        ),
+                        _Block(
+                          title: l10n.appearanceTitle,
+                          child: const ThemesSection(),
+                        ),
+                        _Block(
+                          title: l10n.einkTitle,
+                          child: const EinkSetting(),
+                        ),
+                        _Block(
+                          title: l10n.devicesTitle,
+                          child: const DevicesSection(),
+                        ),
+                        _Block(
+                          title: l10n.koreaderTitle,
+                          child: const KoreaderSection(),
+                        ),
+                      ],
                     ),
-                    _Block(
-                      title: l10n.publicProfile,
-                      child: const SharingSettings(),
+                    _Group(
+                      icon: Icons.hub_outlined,
+                      title: l10n.groupConnections,
+                      subtitle: l10n.groupConnectionsHint,
+                      children: [
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(
+                            Icons.cloud_sync_outlined,
+                            color: BabelColors.gold,
+                          ),
+                          title: Text(
+                            l10n.sourcesTitle,
+                            style: BabelText.heading(18),
+                          ),
+                          subtitle: Text(
+                            l10n.accountSourcesHint,
+                            style: BabelText.body(13),
+                          ),
+                          trailing: Icon(
+                            Icons.chevron_right,
+                            color: BabelColors.textSecondary,
+                          ),
+                          onTap: () => context.push(Routes.sources),
+                        ),
+                        _Block(
+                          title: l10n.kavitaTitle,
+                          child: const KavitaSection(),
+                        ),
+                        _Block(
+                          title: l10n.absTitle,
+                          child: const AudiobookshelfSection(),
+                        ),
+                        _Block(
+                          title: l10n.pageboundTitle,
+                          child: const PageboundSection(),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                _Group(
-                  icon: Icons.devices_rounded,
-                  title: l10n.groupDisplay,
-                  subtitle: l10n.groupDisplayHint,
-                  children: [
-                    _Block(
-                      title: l10n.language,
-                      child: const Align(
-                        alignment: Alignment.centerLeft,
-                        child: LanguagePicker(),
-                      ),
+                    _Group(
+                      icon: Icons.download_for_offline_outlined,
+                      title: l10n.groupRequests,
+                      subtitle: l10n.groupRequestsHint,
+                      children: [
+                        _Block(
+                          title: l10n.shelfmarkTitle,
+                          child: const ShelfmarkSection(),
+                        ),
+                        _Block(
+                          title: l10n.chaptarrTitle,
+                          child: const ChaptarrSection(),
+                        ),
+                      ],
                     ),
-                    _Block(
-                      title: l10n.appearanceTitle,
-                      child: const AppearanceSetting(),
-                    ),
-                    _Block(title: l10n.einkTitle, child: const EinkSetting()),
-                    _Block(
-                      title: l10n.devicesTitle,
-                      child: const DevicesSection(),
-                    ),
-                    _Block(
-                      title: l10n.koreaderTitle,
-                      child: const KoreaderSection(),
-                    ),
-                  ],
-                ),
-                _Group(
-                  icon: Icons.hub_outlined,
-                  title: l10n.groupConnections,
-                  subtitle: l10n.groupConnectionsHint,
-                  children: [
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(
-                        Icons.cloud_sync_outlined,
-                        color: BabelColors.gold,
-                      ),
-                      title: Text(
-                        l10n.sourcesTitle,
-                        style: BabelText.heading(18),
-                      ),
-                      subtitle: Text(
-                        l10n.accountSourcesHint,
-                        style: BabelText.body(13),
-                      ),
-                      trailing: Icon(
-                        Icons.chevron_right,
-                        color: BabelColors.textSecondary,
-                      ),
-                      onTap: () => context.push(Routes.sources),
-                    ),
-                    _Block(
-                      title: l10n.kavitaTitle,
-                      child: const KavitaSection(),
-                    ),
-                    _Block(
-                      title: l10n.absTitle,
-                      child: const AudiobookshelfSection(),
-                    ),
-                    _Block(
-                      title: l10n.pageboundTitle,
-                      child: const PageboundSection(),
-                    ),
-                  ],
-                ),
-                _Group(
-                  icon: Icons.download_for_offline_outlined,
-                  title: l10n.groupRequests,
-                  subtitle: l10n.groupRequestsHint,
-                  children: [
-                    _Block(
-                      title: l10n.shelfmarkTitle,
-                      child: const ShelfmarkSection(),
-                    ),
-                    _Block(
-                      title: l10n.chaptarrTitle,
-                      child: const ChaptarrSection(),
-                    ),
-                  ],
-                ),
-                _Group(
-                  icon: Icons.upload_file_outlined,
-                  title: l10n.groupData,
-                  subtitle: l10n.groupDataHint,
-                  children: [
-                    _Block(
-                      title: l10n.importTitle,
-                      child: const ReadingListImport(),
+                    _Group(
+                      icon: Icons.upload_file_outlined,
+                      title: l10n.groupData,
+                      subtitle: l10n.groupDataHint,
+                      children: [
+                        _Block(
+                          title: l10n.importTitle,
+                          child: const ReadingListImport(),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -323,6 +330,42 @@ class _Group extends StatelessWidget {
         ),
       ),
     ),
+  );
+}
+
+/// Groups side by side on a wide screen (each column keeps its own height), one under the
+/// other on a narrow one, and then not wider than a phone-sized column.
+class _TwoColumns extends StatelessWidget {
+  const _TwoColumns({required this.children});
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, box) {
+      if (box.maxWidth < 820) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: Column(children: children),
+          ),
+        );
+      }
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final column in [0, 1]) ...[
+            if (column == 1) const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                children: [
+                  for (var i = column; i < children.length; i += 2) children[i],
+                ],
+              ),
+            ),
+          ],
+        ],
+      );
+    },
   );
 }
 
