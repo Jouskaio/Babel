@@ -1,6 +1,7 @@
 """Format detection from magic bytes and EPUB metadata, safe for untrusted uploads."""
 
 import posixpath
+import re
 import zipfile
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -141,6 +142,19 @@ def _comic_info(path: Path) -> BookMetadata:
     )
 
 
+_AO3_WORK = re.compile(r"archiveofourown\.org/(?:collections/[^/\s]+/)?works/(\d+)", re.I)
+
+
+def _ao3_work(texts: list[str]) -> str | None:
+    """The Archive of Our Own work a file says it is (FanFicFare and AO3's own downloads
+    carry the work's address)."""
+    for text in texts:
+        found = _AO3_WORK.search(text)
+        if found:
+            return found.group(1)
+    return None
+
+
 class EbookMetadataReader:
     def detect(self, path: Path) -> BookFormat | None:
         with path.open("rb") as file:
@@ -196,6 +210,15 @@ class EbookMetadataReader:
         )
         titles = texts("title")
         languages = texts("language")
+        ao3 = _ao3_work(
+            [
+                *texts("source"),
+                *texts("identifier"),
+                *texts("relation"),
+                *texts("publisher"),
+                *texts("description"),
+            ]
+        )
         series, series_index = _epub_series(package)
         return BookMetadata(
             title=titles[0] if titles else None,
@@ -205,6 +228,7 @@ class EbookMetadataReader:
             subjects=tuple(dict.fromkeys(texts("subject")))[:40],
             series=series,
             series_index=series_index,
+            ao3_work=ao3,
         )
 
     def cover(self, path: Path, file_format: BookFormat) -> Cover | None:

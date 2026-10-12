@@ -202,6 +202,8 @@ class LibraryItemRow(Base):
     cover_id: Mapped[int | None] = mapped_column(Integer)
     # A picture the reader uploaded (key in the cover cache).
     custom_cover: Mapped[str | None] = mapped_column(String(64))
+    # Where the book comes from when that matters to how it looks: "ao3" for a fanfiction.
+    origin: Mapped[str | None] = mapped_column(String(16))
     # An audiobook of the reader's Audiobookshelf (domain AudioRef).
     audio_id: Mapped[str | None] = mapped_column(String(64), index=True)
     audio_duration: Mapped[float | None] = mapped_column(Float)
@@ -659,6 +661,9 @@ class KoreaderKeyRow(Base):
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
     key: Mapped[str] = mapped_column(String(32))
+    # The last call from KOReader, and the last time it asked for a book Babel did not know.
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_unmatched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class KoreaderHashRow(Base):

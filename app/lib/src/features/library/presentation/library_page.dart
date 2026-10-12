@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:babel_api_client/api.dart';
 import 'package:cross_file/cross_file.dart';
+import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -169,7 +170,114 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       allowedExtensions: bookExtensions,
     );
     if (picked.isEmpty || !mounted) return;
-    await _importFile(picked.first.xFile);
+    if (picked.length == 1) {
+      await _importFile(picked.first.xFile);
+    } else {
+      await _importMany([for (final f in picked) f.xFile]);
+    }
+  }
+
+  /// Several files at once (a whole e-reader): the ones Babel already has are skipped, the ones
+  /// it holds for someone else are added without uploading, the others are uploaded.
+  Future<void> _importMany(List<XFile> files) async {
+    final l10n = context.l10n;
+    final api = ref.read(libraryApiProvider);
+    final controller = ref.read(libraryControllerProvider.notifier);
+    var added = 0, existing = 0, fanfics = 0;
+    final failed = <String>[];
+    setState(() {
+      _importing = l10n.bulkChecking(files.length);
+      _progress = 0;
+    });
+    try {
+      final hashes = <XFile, String>{};
+      for (final file in files) {
+        final digest = await sha256.bind(file.openRead()).first;
+        hashes[file] = digest.toString();
+      }
+      final known = <String>{};
+      final onBabel = <String>{};
+      final all = hashes.values.toSet().toList();
+      for (var i = 0; i < all.length; i += 200) {
+        final checked = await api.checkFiles(
+          FilesCheckRequest(
+            sha256: all.sublist(i, (i + 200).clamp(0, all.length)),
+          ),
+        );
+        known.addAll(checked?.inLibrary ?? const []);
+        onBabel.addAll(checked?.onBabel ?? const []);
+      }
+      var done = 0;
+      for (final file in files) {
+        if (!mounted) return;
+        setState(() {
+          _importing = l10n.bulkProgress(done + 1, files.length);
+          _progress = done / files.length;
+        });
+        final sha = hashes[file]!;
+        try {
+          if (known.contains(sha)) {
+            existing++;
+          } else if (onBabel.contains(sha)) {
+            final item = await api.addStoredFile(sha);
+            if (item != null) {
+              await controller.keep(item);
+              added++;
+              if (item.origin == 'ao3') fanfics++;
+            }
+            known.add(sha);
+          } else {
+            final result = await controller.import(file);
+            added++;
+            if (result.item.origin == 'ao3') fanfics++;
+            known.add(sha);
+          }
+        } on ApiException {
+          failed.add(file.name);
+        }
+        done++;
+      }
+    } finally {
+      if (mounted) setState(() => _importing = null);
+    }
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: BabelColors.surface,
+        title: Text(l10n.bulkDone, style: BabelText.heading(22)),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.bulkAdded(added),
+                style: BabelText.body(15, color: BabelColors.textPrimary),
+              ),
+              Text(l10n.bulkAlreadyThere(existing), style: BabelText.body(15)),
+              if (fanfics > 0)
+                Text(l10n.bulkFanfics(fanfics), style: BabelText.body(15)),
+              if (failed.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Text(
+                  l10n.bulkFailed(failed.length),
+                  style: BabelText.body(15, color: BabelColors.dustyRose),
+                ),
+                for (final name in failed.take(10))
+                  Text(name, style: BabelText.body(12)),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.ok),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _importFile(XFile file) async {
@@ -484,6 +592,9 @@ class _SeriesTile extends ConsumerWidget {
                   width: c.maxWidth - 8,
                   url: libraryCoverUrl(group.first),
                   title: group.name,
+                  style: group.first.origin == 'ao3'
+                      ? BookCoverStyle.fanfiction
+                      : BookCoverStyle.standard,
                 ),
               ),
               Positioned(
@@ -566,6 +677,9 @@ class _BookTile extends ConsumerWidget {
                   width: c.maxWidth,
                   url: libraryCoverUrl(item),
                   title: item.title,
+                  style: item.origin == 'ao3'
+                      ? BookCoverStyle.fanfiction
+                      : BookCoverStyle.standard,
                 ),
               ),
               if (fresh)

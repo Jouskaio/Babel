@@ -52,6 +52,8 @@ doc/ExtraChallengeResponse.md
 doc/FanficDetailsResponse.md
 doc/FeedEntryResponse.md
 doc/FeedKind.md
+doc/FilesCheckRequest.md
+doc/FilesCheckResponse.md
 doc/FinishedBookResponse.md
 doc/FollowResponse.md
 doc/ForgotPasswordRequest.md
@@ -73,8 +75,11 @@ doc/KavitaApi.md
 doc/KavitaLinkResponse.md
 doc/KavitaStatus.md
 doc/KnownVolumeResponse.md
+doc/KoreaderBookResponse.md
+doc/KoreaderDeviceResponse.md
 doc/KoreaderPasswordResponse.md
 doc/KoreaderResponse.md
+doc/KoreaderStatusResponse.md
 doc/KosyncApi.md
 doc/KudosResponse.md
 doc/LibraryApi.md
@@ -239,6 +244,8 @@ lib/model/extra_challenge_response.dart
 lib/model/fanfic_details_response.dart
 lib/model/feed_entry_response.dart
 lib/model/feed_kind.dart
+lib/model/files_check_request.dart
+lib/model/files_check_response.dart
 lib/model/finished_book_response.dart
 lib/model/follow_response.dart
 lib/model/forgot_password_request.dart
@@ -258,8 +265,11 @@ lib/model/isbn_lookup_response.dart
 lib/model/kavita_link_response.dart
 lib/model/kavita_status.dart
 lib/model/known_volume_response.dart
+lib/model/koreader_book_response.dart
+lib/model/koreader_device_response.dart
 lib/model/koreader_password_response.dart
 lib/model/koreader_response.dart
+lib/model/koreader_status_response.dart
 lib/model/kudos_response.dart
 lib/model/library_item_response.dart
 lib/model/link_kavita_request.dart

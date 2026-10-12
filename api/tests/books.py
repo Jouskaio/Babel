@@ -24,6 +24,7 @@ def epub(
     cover_style: str = "epub3",
     subjects: tuple[str, ...] = (),
     series: tuple[str, str] | None = None,
+    source: str | None = None,
 ) -> bytes:
     """A minimal EPUB; ``cover`` adds a JPEG cover declared the EPUB 3 or EPUB 2 way."""
     identifier = f"<dc:identifier>urn:isbn:{isbn}</dc:identifier>" if isbn else ""
@@ -44,6 +45,7 @@ def epub(
             f"<dc:title>{title}</dc:title><dc:creator>{author}</dc:creator>"
             f"{identifier}<dc:language>fr-FR</dc:language>{_cover_meta(cover, cover_style)}"
             + "".join(f"<dc:subject>{s}</dc:subject>" for s in subjects)
+            + (f"<dc:source>{source}</dc:source>" if source else "")
             + (
                 f'<meta name="calibre:series" content="{series[0]}"/>'
                 f'<meta name="calibre:series_index" content="{series[1]}"/>'

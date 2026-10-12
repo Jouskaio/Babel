@@ -73,6 +73,9 @@ class LibraryItemResponse(BaseModel):
     cover_id: int | None = Field(
         default=None, description="The catalog cover the reader chose, if any"
     )
+    origin: str | None = Field(
+        default=None, description='Where it comes from: "ao3" for a fanfiction of AO3'
+    )
 
     @classmethod
     def of(cls, item: LibraryItem) -> "LibraryItemResponse":
@@ -98,6 +101,7 @@ class LibraryItemResponse(BaseModel):
             series=item.series,
             series_index=item.series_index,
             cover_id=item.cover_id,
+            origin=item.origin,
         )
 
 
@@ -142,6 +146,27 @@ async def import_file(
     return ImportResponse(
         item=LibraryItemResponse.of(result.item), deduplicated=result.deduplicated
     )
+
+
+class FilesCheckRequest(BaseModel):
+    sha256: Annotated[list[str], Field(max_length=500, description="SHA-256 of local files")]
+
+
+class FilesCheckResponse(BaseModel):
+    in_library: list[str] = Field(description="Already in your library: nothing to do")
+    on_babel: list[str] = Field(
+        description="Already on Babel but not in your library: add them without uploading"
+    )
+
+
+@router.post("/library/files/check", operation_id="checkFiles")
+async def check_files(
+    user_id: CurrentUserId, files: FileServiceDep, body: FilesCheckRequest
+) -> FilesCheckResponse:
+    """Which of these files (by SHA-256) Babel already has: bring a whole e-reader without
+    uploading what is there."""
+    in_library, on_babel = await files.check_hashes(user_id, [h.lower() for h in body.sha256])
+    return FilesCheckResponse(in_library=in_library, on_babel=on_babel)
 
 
 @router.post(

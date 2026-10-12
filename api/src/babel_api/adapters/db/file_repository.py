@@ -84,6 +84,7 @@ def _to_item(row: LibraryItemRow) -> LibraryItem:
         series_index=row.series_index,
         cover_id=row.cover_id,
         custom_cover=row.custom_cover,
+        origin=row.origin,
     )
 
 
@@ -150,10 +151,12 @@ class SqlFileRepository:
         paper: bool = False,
         series: str | None = None,
         series_index: float | None = None,
+        origin: str | None = None,
     ) -> LibraryItem:
         row = LibraryItemRow(
             user_id=user_id,
             file_sha256=sha256,
+            origin=origin,
             title=title[:500],
             authors=list(authors),
             work_id=work_id,
@@ -232,6 +235,12 @@ class SqlFileRepository:
         row = await self._session.get_one(LibraryItemRow, item_id)
         row.file_sha256 = None
         await self._session.flush()
+
+    async def set_origin(self, item_id: UUID, origin: str | None) -> LibraryItem:
+        row = await self._session.get_one(LibraryItemRow, item_id)
+        row.origin = origin
+        await self._session.flush()
+        return _to_item(row)
 
     async def set_paper(self, item_id: UUID, paper: bool) -> LibraryItem:
         row = await self._session.get_one(LibraryItemRow, item_id)

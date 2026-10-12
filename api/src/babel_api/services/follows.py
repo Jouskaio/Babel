@@ -91,6 +91,36 @@ class FollowService:
         await self._follows.commit()
         return saved
 
+    async def follow_ao3_work(self, item: LibraryItem, work_id: str) -> Follow | None:
+        """Follows a fanfiction found in a file (an e-reader's, an upload) unless it is finished.
+        The version is left empty: the next check brings the file up to date."""
+        try:
+            entry = await self._ao3.work(work_id)
+        except (SourceRateLimitedError, SourceConnectionError):
+            return None
+        chapters = ao3_chapters(entry)
+        if is_complete(chapters):
+            return None
+        if any(f.item_id == item.id for f in await self._follows.list_follows(item.user_id)):
+            return None
+        saved = await self._follows.save(
+            Follow(
+                id=uuid4(),
+                user_id=item.user_id,
+                item_id=item.id,
+                kind="ao3",
+                ref=work_id,
+                url=f"https://archiveofourown.org/works/{work_id}",
+                version="",
+                chapters=chapters,
+                complete=False,
+                created_at=datetime.now(UTC),
+                last_checked_at=datetime.now(UTC),
+            )
+        )
+        await self._follows.commit()
+        return saved
+
     async def list_follows(self, user_id: UUID) -> list[Follow]:
         return await self._follows.list_follows(user_id)
 

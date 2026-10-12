@@ -18,6 +18,7 @@ Name | Type | Description | Notes
 **format** | [**BookFormat**](BookFormat.md) |  | [optional] 
 **hidden** | **bool** | Out of sight in the library, never shared | [optional] [default to false]
 **id** | **String** |  | 
+**origin** | **String** | Where it comes from: \"ao3\" for a fanfiction of AO3 | [optional] 
 **paper** | **bool** | Owned on paper (it may have a file too) | [optional] [default to false]
 **progress** | **num** | Progress declared by hand, in percent (not a device position) | [optional] 
 **series** | **String** | The series it belongs to | [optional] 

@@ -36,6 +36,8 @@ class BookMetadata:
     # The series the file says it belongs to, and its volume number.
     series: str | None = None
     series_index: float | None = None
+    # The Archive of Our Own work this file says it is (a fanfiction downloaded from AO3).
+    ao3_work: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -145,6 +147,8 @@ class LibraryItem:
     cover_id: int | None = None
     # A picture the reader uploaded as the cover (key of the image kept by Babel).
     custom_cover: str | None = None
+    # "ao3" for a fanfiction of Archive of Our Own (it gets the fanfiction cover and follow-up).
+    origin: str | None = None
 
     @property
     def sha256(self) -> str | None:

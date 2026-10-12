@@ -35,6 +35,12 @@ def test_progress_goes_both_ways_with_koreader(
     path.write_bytes(content)
     document = partial_md5(path)
 
+    status = client.get("/v1/me/koreader/status", headers=ada).json()
+    assert (status["last_seen_at"], status["last_unmatched_at"], status["recent"]) == (
+        None,
+        None,
+        [],
+    )
     info = client.get("/v1/me/koreader", headers=ada).json()
     assert info["has_password"] is False
     assert info["username"] == "ada@example.com"
@@ -68,3 +74,12 @@ def test_progress_goes_both_ways_with_koreader(
     # A book that is not in the library is refused.
     unknown = {**body, "document": "f" * 32}
     assert client.put("/v1/kosync/syncs/progress", json=unknown, headers=key).status_code == 404
+
+    # The reader can check it works: KOReader called, its books, and a book Babel did not know.
+    status = client.get("/v1/me/koreader/status", headers=ada).json()
+    assert status["last_seen_at"] is not None
+    assert status["last_unmatched_at"] is not None
+    assert [d["name"] for d in status["devices"]] == ["Boox Go"]
+    (recent,) = status["recent"]
+    assert (recent["title"], recent["device"]) == ("Jane Eyre", "KOReader · Boox Go")
+    assert recent["percent"] == pytest.approx(42.0)

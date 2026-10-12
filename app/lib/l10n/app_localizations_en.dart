@@ -3615,4 +3615,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sourceNoMatch => 'No book matches.';
+
+  @override
+  String get koreaderStatus => 'Sync status';
+
+  @override
+  String get koreaderRefresh => 'Refresh';
+
+  @override
+  String get koreaderStatusUnknown => 'Status unavailable right now.';
+
+  @override
+  String get koreaderNeverCalled => 'KOReader has not contacted Babel yet';
+
+  @override
+  String koreaderLastCall(String when) {
+    return 'Last contact: $when';
+  }
+
+  @override
+  String get koreaderNoBook =>
+      'KOReader has contacted Babel but no book was synced yet. Open a book of your Babel library on the e-reader and turn a few pages.';
+
+  @override
+  String koreaderUnmatched(String when) {
+    return 'KOReader asked for a book Babel does not have ($when). Only the books of your library, with exactly the same file, are synced.';
+  }
+
+  @override
+  String get koreaderTipsTitle => 'Tips';
+
+  @override
+  String get koreaderTips =>
+      '• In KOReader: Tools › Progress sync › \"Push progress from this device now\" to force a send, \"Pull\" to resume.\n• Pick the automatic mode so progress goes by itself when you turn pages or close the book.\n• Keep the document matching method on \"Binary\" (the default): Babel recognises the book by its content.\n• If you convert or edit the file on the e-reader, Babel will not recognise it: use the file from your Babel library.\n• Books read on the e-reader become \"reading\" in Babel, with the e-reader\'s name.';
+
+  @override
+  String importChecking(int count) {
+    return 'Checking $count files…';
+  }
+
+  @override
+  String importProgress(int done, int total) {
+    return 'Importing $done/$total…';
+  }
+
+  @override
+  String importAdded(int count) {
+    return 'Added to your library: $count';
+  }
+
+  @override
+  String importAlreadyThere(int count) {
+    return 'Already in your library: $count';
+  }
+
+  @override
+  String importFanfics(int count) {
+    return 'AO3 fanfictions recognised: $count';
+  }
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String bulkChecking(int count) {
+    return 'Checking $count files…';
+  }
+
+  @override
+  String bulkProgress(int done, int total) {
+    return 'Importing $done/$total…';
+  }
+
+  @override
+  String get bulkDone => 'Import finished';
+
+  @override
+  String bulkAdded(int count) {
+    return 'Added to your library: $count';
+  }
+
+  @override
+  String bulkAlreadyThere(int count) {
+    return 'Already in your library: $count';
+  }
+
+  @override
+  String bulkFanfics(int count) {
+    return 'AO3 fanfictions recognised: $count';
+  }
+
+  @override
+  String bulkFailed(int count) {
+    return 'Failed: $count';
+  }
 }
