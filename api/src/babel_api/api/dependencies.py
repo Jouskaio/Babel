@@ -180,7 +180,13 @@ def get_file_service(
 def make_file_service(container: Container, session: AsyncSession) -> FileService:
     """Also used outside requests (the daily follow-up of works)."""
     settings = container.settings
-    return FileService(
+    made: list[FileService] = []
+
+    async def fanfic_found(item: LibraryItem, work_id: str) -> None:
+        # A fanfiction of AO3 in a file: followed for new chapters, like one imported by link.
+        await make_follow_service(container, session, made[0]).follow_ao3_work(item, work_id)
+
+    service = FileService(
         SqlFileRepository(session),
         SqlCatalogRepository(session),
         SqlSyncRepository(session),
@@ -190,7 +196,10 @@ def make_file_service(container: Container, session: AsyncSession) -> FileServic
         access=settings.file_access,
         max_bytes=settings.max_upload_mb * 1024 * 1024,
         comics=container.comics,
+        fanfic_found=fanfic_found,
     )
+    made.append(service)
+    return service
 
 
 FileServiceDep = Annotated[FileService, Depends(get_file_service)]
@@ -321,6 +330,8 @@ def make_source_service(
     follows = make_follow_service(container, session, library)
 
     async def follow(kind: SourceKind, item: LibraryItem, entry: SourceEntry) -> None:
+        if kind is SourceKind.AO3:
+            await library.mark_origin(item.id, "ao3")
         # An AO3 work still being written is followed: its new chapters come by themselves.
         if kind is SourceKind.AO3 and entry.path.startswith("/works/"):
             await follows.follow_ao3(

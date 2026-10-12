@@ -1,11 +1,43 @@
 """KOReader sync data in the database."""
 
+from dataclasses import dataclass
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from babel_api.adapters.db.models import KoreaderHashRow, KoreaderKeyRow
+from babel_api.adapters.db.models import (
+    DeviceRow,
+    KoreaderHashRow,
+    KoreaderKeyRow,
+    LibraryItemRow,
+    ReadingPositionRow,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class KoreaderContact:
+    """When KOReader last called, and when it last asked for a book Babel does not have."""
+
+    last_seen_at: datetime | None
+    last_unmatched_at: datetime | None
+
+
+@dataclass(frozen=True, slots=True)
+class RecentSync:
+    """A book KOReader reported a position for."""
+
+    item_id: UUID
+    title: str
+    authors: tuple[str, ...]
+    percent: float
+    at: datetime
+    device: str
+
+
+def _aware(moment: datetime | None) -> datetime | None:
+    return moment.replace(tzinfo=UTC) if moment is not None and moment.tzinfo is None else moment
 
 
 class SqlKoreaderRepository:
@@ -24,6 +56,50 @@ class SqlKoreaderRepository:
         else:
             row.key = key
         await self._session.flush()
+
+    async def mark(self, user_id: UUID, *, unmatched: bool = False) -> None:
+        """KOReader called (or asked for a book Babel did not know)."""
+        row = await self._session.get(KoreaderKeyRow, user_id)
+        if row is None:
+            return
+        now = datetime.now(UTC)
+        if unmatched:
+            row.last_unmatched_at = now
+        else:
+            row.last_seen_at = now
+        await self._session.flush()
+
+    async def contact(self, user_id: UUID) -> KoreaderContact:
+        row = await self._session.get(KoreaderKeyRow, user_id)
+        if row is None:
+            return KoreaderContact(None, None)
+        return KoreaderContact(_aware(row.last_seen_at), _aware(row.last_unmatched_at))
+
+    async def recent(self, user_id: UUID, limit: int = 8) -> list[RecentSync]:
+        """The latest positions KOReader sent, newest first."""
+        rows = await self._session.execute(
+            select(ReadingPositionRow, LibraryItemRow, DeviceRow.name)
+            .join(LibraryItemRow, LibraryItemRow.id == ReadingPositionRow.item_id)
+            .join(DeviceRow, DeviceRow.id == ReadingPositionRow.device_id)
+            .where(
+                ReadingPositionRow.user_id == user_id,
+                ReadingPositionRow.locator.like("koreader:%"),
+                LibraryItemRow.removed_at.is_(None),
+            )
+            .order_by(ReadingPositionRow.client_time.desc())
+            .limit(limit)
+        )
+        return [
+            RecentSync(
+                item.id,
+                item.title,
+                tuple(item.authors or ()),
+                position.percent,
+                _aware(position.client_time) or datetime.now(UTC),
+                device,
+            )
+            for position, item, device in rows.all()
+        ]
 
     async def hashes(self, shas: list[str]) -> dict[str, str]:
         """md5 -> sha256 for the files whose identifier is known."""

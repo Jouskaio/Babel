@@ -1,7 +1,8 @@
 """Importing, downloading and withdrawing book files (ADR 0010)."""
 
 import hashlib
-from collections.abc import AsyncIterator
+import logging
+from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path, PurePath
@@ -69,6 +70,7 @@ def item_data(item: LibraryItem) -> dict[str, Any]:
         "finished_at": _iso(item.state.finished_at),
         "hidden": item.state.hidden,
         "work_id": str(item.work_id) if item.work_id else None,
+        "origin": item.origin,
     }
 
 
@@ -96,6 +98,12 @@ class Download:
     path: Path
 
 
+logger = logging.getLogger(__name__)
+
+# Called with a library book and the AO3 work it says it is: may follow it for new chapters.
+FanficHook = Callable[[LibraryItem, str], Awaitable[None]]
+
+
 class FileService:
     def __init__(
         self,
@@ -109,7 +117,9 @@ class FileService:
         access: FileAccess,
         max_bytes: int,
         comics: ComicConverter | None = None,
+        fanfic_found: FanficHook | None = None,
     ) -> None:
+        self._fanfic_found = fanfic_found
         self._files = files
         self._catalog = catalog
         self._changes = changes
@@ -487,11 +497,13 @@ class FileService:
         device_id: UUID | None,
     ) -> LibraryItem:
         removed = await self._files.find_item(user_id, file.sha256, removed=True)
+        ao3_work: str | None = None
         if removed is not None:
             # Back in the library with everything it had.
             item = await self._files.restore_item(removed.id, datetime.now(UTC))
         else:
             metadata = self._reader.metadata(path, file.format)
+            ao3_work = metadata.ao3_work
             title = metadata.title or PurePath(filename).stem or file.original_name
             work = await self._files.guess_work(file.edition_id, title, metadata.authors)
             series, number = metadata.series, metadata.series_index
@@ -505,6 +517,7 @@ class FileService:
                 work,
                 series=series,
                 series_index=number,
+                origin="ao3" if metadata.ao3_work else None,
             )
         await self._changes.record(
             user_id,
@@ -513,6 +526,46 @@ class FileService:
             ChangeOp.UPSERT,
             item_data(item),
             device_id,
+        )
+        await self._files.commit()
+        if ao3_work is not None:
+            await self._on_fanfic(item, ao3_work)
+        return item
+
+    async def _on_fanfic(self, item: LibraryItem, work_id: str) -> None:
+        """A fanfiction of Archive of Our Own was just added: it may be followed for new
+        chapters. Best effort."""
+        if self._fanfic_found is None:
+            return
+        try:
+            await self._fanfic_found(item, work_id)
+        except Exception:
+            logger.info("Could not follow AO3 work %s", work_id, exc_info=True)
+
+    async def check_hashes(self, user_id: UUID, hashes: list[str]) -> tuple[list[str], list[str]]:
+        """Of these file hashes: the ones already in the reader's library, and the ones Babel
+        holds (available) that the reader could add without uploading."""
+        in_library: list[str] = []
+        on_babel: list[str] = []
+        for sha in dict.fromkeys(hashes):
+            if await self._files.find_item(user_id, sha) is not None:
+                in_library.append(sha)
+                continue
+            stored = await self._files.get_file(sha)
+            if stored is not None and stored.available and not await self._files.is_blocked(sha):
+                on_babel.append(sha)
+        return in_library, on_babel
+
+    async def mark_origin(self, item_id: UUID, origin: str | None) -> LibraryItem:
+        """Says where a book comes from ("ao3" for a fanfiction), and tells the devices."""
+        item = await self._files.set_origin(item_id, origin)
+        await self._changes.record(
+            item.user_id,
+            EntityKind.LIBRARY_ITEM,
+            str(item.id),
+            ChangeOp.UPSERT,
+            item_data(item),
+            None,
         )
         await self._files.commit()
         return item

@@ -123,10 +123,12 @@ Class | Method | HTTP request | Description
 *KavitaApi* | [**setPremium**](doc//KavitaApi.md#setpremium) | **PUT** /v1/admin/users/{member_id}/premium | Set Premium
 *KavitaApi* | [**unlinkKavita**](doc//KavitaApi.md#unlinkkavita) | **DELETE** /v1/me/kavita | Unlink Kavita
 *KosyncApi* | [**getKoreader**](doc//KosyncApi.md#getkoreader) | **GET** /v1/me/koreader | Get Koreader
+*KosyncApi* | [**getKoreaderStatus**](doc//KosyncApi.md#getkoreaderstatus) | **GET** /v1/me/koreader/status | Get Koreader Status
 *KosyncApi* | [**newKoreaderPassword**](doc//KosyncApi.md#newkoreaderpassword) | **POST** /v1/me/koreader/password | New Koreader Password
 *LibraryApi* | [**addPaperBook**](doc//LibraryApi.md#addpaperbook) | **POST** /v1/library/paper | Add Paper Book
 *LibraryApi* | [**addStoredFile**](doc//LibraryApi.md#addstoredfile) | **POST** /v1/library/files/{sha256} | Add Stored File
 *LibraryApi* | [**attachFile**](doc//LibraryApi.md#attachfile) | **POST** /v1/library/{item_id}/file | Attach File
+*LibraryApi* | [**checkFiles**](doc//LibraryApi.md#checkfiles) | **POST** /v1/library/files/check | Check Files
 *LibraryApi* | [**checkFollow**](doc//LibraryApi.md#checkfollow) | **POST** /v1/library/follows/{follow_id}/check | Check Follow
 *LibraryApi* | [**deleteReview**](doc//LibraryApi.md#deletereview) | **DELETE** /v1/library/{item_id}/review | Delete Review
 *LibraryApi* | [**downloadFile**](doc//LibraryApi.md#downloadfile) | **GET** /v1/files/{sha256} | Download File
@@ -266,6 +268,8 @@ Class | Method | HTTP request | Description
  - [FanficDetailsResponse](doc//FanficDetailsResponse.md)
  - [FeedEntryResponse](doc//FeedEntryResponse.md)
  - [FeedKind](doc//FeedKind.md)
+ - [FilesCheckRequest](doc//FilesCheckRequest.md)
+ - [FilesCheckResponse](doc//FilesCheckResponse.md)
  - [FinishedBookResponse](doc//FinishedBookResponse.md)
  - [FollowResponse](doc//FollowResponse.md)
  - [ForgotPasswordRequest](doc//ForgotPasswordRequest.md)
@@ -285,8 +289,11 @@ Class | Method | HTTP request | Description
  - [KavitaLinkResponse](doc//KavitaLinkResponse.md)
  - [KavitaStatus](doc//KavitaStatus.md)
  - [KnownVolumeResponse](doc//KnownVolumeResponse.md)
+ - [KoreaderBookResponse](doc//KoreaderBookResponse.md)
+ - [KoreaderDeviceResponse](doc//KoreaderDeviceResponse.md)
  - [KoreaderPasswordResponse](doc//KoreaderPasswordResponse.md)
  - [KoreaderResponse](doc//KoreaderResponse.md)
+ - [KoreaderStatusResponse](doc//KoreaderStatusResponse.md)
  - [KudosResponse](doc//KudosResponse.md)
  - [LibraryItemResponse](doc//LibraryItemResponse.md)
  - [LinkKavitaRequest](doc//LinkKavitaRequest.md)

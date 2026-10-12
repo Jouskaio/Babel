@@ -5995,6 +5995,138 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Aucun livre ne correspond.'**
   String get sourceNoMatch;
+
+  /// No description provided for @koreaderStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'État de la synchronisation'**
+  String get koreaderStatus;
+
+  /// No description provided for @koreaderRefresh.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actualiser'**
+  String get koreaderRefresh;
+
+  /// No description provided for @koreaderStatusUnknown.
+  ///
+  /// In fr, this message translates to:
+  /// **'État indisponible pour l\'instant.'**
+  String get koreaderStatusUnknown;
+
+  /// No description provided for @koreaderNeverCalled.
+  ///
+  /// In fr, this message translates to:
+  /// **'KOReader n\'a pas encore contacté Babel'**
+  String get koreaderNeverCalled;
+
+  /// No description provided for @koreaderLastCall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernier contact : {when}'**
+  String koreaderLastCall(String when);
+
+  /// No description provided for @koreaderNoBook.
+  ///
+  /// In fr, this message translates to:
+  /// **'KOReader a contacté Babel mais aucun livre n\'a encore été synchronisé. Ouvre un livre de ta bibliothèque Babel sur la liseuse et tourne quelques pages.'**
+  String get koreaderNoBook;
+
+  /// No description provided for @koreaderUnmatched.
+  ///
+  /// In fr, this message translates to:
+  /// **'KOReader a demandé un livre que Babel n\'a pas ({when}). Seuls les livres de ta bibliothèque, avec exactement le même fichier, se synchronisent.'**
+  String koreaderUnmatched(String when);
+
+  /// No description provided for @koreaderTipsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Astuces'**
+  String get koreaderTipsTitle;
+
+  /// No description provided for @koreaderTips.
+  ///
+  /// In fr, this message translates to:
+  /// **'• Dans KOReader : Outils › Synchronisation de la progression › « Pousser la progression maintenant » pour forcer un envoi, « Récupérer » pour reprendre.\n• Choisis le mode automatique pour que la progression parte toute seule en tournant les pages ou en fermant le livre.\n• Garde la méthode de reconnaissance « Binaire » (par défaut) : Babel reconnaît le livre à son contenu.\n• Si tu convertis ou modifies le fichier sur la liseuse, Babel ne le reconnaîtra plus : utilise le fichier de ta bibliothèque Babel.\n• Les livres lus sur la liseuse passent en « en cours » dans Babel, avec le nom de la liseuse.'**
+  String get koreaderTips;
+
+  /// No description provided for @importChecking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification de {count} fichiers…'**
+  String importChecking(int count);
+
+  /// No description provided for @importProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Import {done}/{total}…'**
+  String importProgress(int done, int total);
+
+  /// No description provided for @importAdded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutés à ta bibliothèque : {count}'**
+  String importAdded(int count);
+
+  /// No description provided for @importAlreadyThere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà dans ta bibliothèque : {count}'**
+  String importAlreadyThere(int count);
+
+  /// No description provided for @importFanfics.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fanfictions AO3 reconnues : {count}'**
+  String importFanfics(int count);
+
+  /// No description provided for @ok.
+  ///
+  /// In fr, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @bulkChecking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification de {count} fichiers…'**
+  String bulkChecking(int count);
+
+  /// No description provided for @bulkProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Import {done}/{total}…'**
+  String bulkProgress(int done, int total);
+
+  /// No description provided for @bulkDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Import terminé'**
+  String get bulkDone;
+
+  /// No description provided for @bulkAdded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutés à ta bibliothèque : {count}'**
+  String bulkAdded(int count);
+
+  /// No description provided for @bulkAlreadyThere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà dans ta bibliothèque : {count}'**
+  String bulkAlreadyThere(int count);
+
+  /// No description provided for @bulkFanfics.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fanfictions AO3 reconnues : {count}'**
+  String bulkFanfics(int count);
+
+  /// No description provided for @bulkFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échecs : {count}'**
+  String bulkFailed(int count);
 }
 
 class _AppLocalizationsDelegate

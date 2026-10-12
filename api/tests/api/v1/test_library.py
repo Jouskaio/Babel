@@ -252,3 +252,41 @@ def test_comics_are_served_as_cbz(
     assert client.get(f"/v1/files/{zipped['sha256']}/cbz", headers=ada).content == cbz()
     assert client.get(f"/v1/files/{book['sha256']}/cbz", headers=ada).status_code == 415
     assert converter.calls == 1
+
+
+def test_a_fanfiction_file_is_recognised_and_known_files_are_skipped(
+    app: FastAPI, client: TestClient
+) -> None:
+    import hashlib
+    from dataclasses import replace
+
+    from babel_api.domain.sources import RemoteEntry
+    from tests.books import epub
+
+    class FakeAo3:
+        async def work(self, work_id: str) -> RemoteEntry:
+            return RemoteEntry(path=f"/works/{work_id}", size=0, remote_id=f"{work_id}:2/5|2026")
+
+    app.state.container = replace(app.state.container, ao3=FakeAo3())
+    ada = account(client, "ada@example.com")
+    bob = account(client, "bob@example.com")
+    fic = epub(title="A Work", source="https://archiveofourown.org/works/123456", isbn=None)
+    plain = epub(title="Jane Eyre", isbn=None)
+
+    item = upload(client, ada, fic).json()["item"]
+    assert item["origin"] == "ao3"  # the file says where it comes from
+    follows = client.get("/v1/library/follows", headers=ada).json()
+    assert [f["item_id"] for f in follows] == [item["id"]]  # unfinished: followed for chapters
+    assert upload(client, ada, plain).json()["item"]["origin"] is None
+
+    def sha(content: bytes) -> str:
+        return hashlib.sha256(content).hexdigest()
+
+    upload(client, bob, epub(title="Emma", author="Jane Austen", isbn=None))
+    emma = sha(epub(title="Emma", author="Jane Austen", isbn=None))
+    unknown = sha(b"not on babel")
+    body = {"sha256": [sha(fic), emma, unknown, sha(fic)]}
+    checked = client.post("/v1/library/files/check", json=body, headers=ada).json()
+    assert checked["in_library"] == [sha(fic)]  # already there, listed once
+    assert checked["on_babel"] == [emma]  # Bob's: add it without uploading
+    assert unknown not in checked["in_library"] + checked["on_babel"]

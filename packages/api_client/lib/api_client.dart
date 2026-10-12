@@ -272,6 +272,10 @@ class ApiClient {
           return FeedEntryResponse.fromJson(value);
         case 'FeedKind':
           return FeedKindTypeTransformer().decode(value);
+        case 'FilesCheckRequest':
+          return FilesCheckRequest.fromJson(value);
+        case 'FilesCheckResponse':
+          return FilesCheckResponse.fromJson(value);
         case 'FinishedBookResponse':
           return FinishedBookResponse.fromJson(value);
         case 'FollowResponse':
@@ -310,10 +314,16 @@ class ApiClient {
           return KavitaStatusTypeTransformer().decode(value);
         case 'KnownVolumeResponse':
           return KnownVolumeResponse.fromJson(value);
+        case 'KoreaderBookResponse':
+          return KoreaderBookResponse.fromJson(value);
+        case 'KoreaderDeviceResponse':
+          return KoreaderDeviceResponse.fromJson(value);
         case 'KoreaderPasswordResponse':
           return KoreaderPasswordResponse.fromJson(value);
         case 'KoreaderResponse':
           return KoreaderResponse.fromJson(value);
+        case 'KoreaderStatusResponse':
+          return KoreaderStatusResponse.fromJson(value);
         case 'KudosResponse':
           return KudosResponse.fromJson(value);
         case 'LibraryItemResponse':

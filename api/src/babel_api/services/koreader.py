@@ -10,14 +10,28 @@ apps: KOReader's own position (an XPointer) is kept to give back to KOReader its
 import asyncio
 import hashlib
 import secrets
+from dataclasses import dataclass
+from datetime import datetime
 from uuid import UUID
 
-from babel_api.adapters.db.koreader_repository import SqlKoreaderRepository
+from babel_api.adapters.db.koreader_repository import (
+    KoreaderContact,
+    RecentSync,
+    SqlKoreaderRepository,
+)
 from babel_api.domain.errors import NotFoundError
 from babel_api.domain.koreader import partial_md5
 from babel_api.domain.ports import BlobStore, FileRepository, UserRepository
 from babel_api.domain.sync import DeviceKind, ReadingPosition
 from babel_api.services.sync import SyncService
+
+
+@dataclass(frozen=True, slots=True)
+class KoreaderStatus:
+    contact: KoreaderContact
+    devices: list[tuple[str, datetime]]
+    recent: list[RecentSync]
+
 
 PREFIX = "koreader:"
 DEVICE_PREFIX = "KOReader · "
@@ -67,6 +81,8 @@ class KoreaderService:
             or not secrets.compare_digest(stored, key.strip().lower())
         ):
             return None
+        await self._repo.mark(user.id)
+        await self._repo.commit()
         return user.id
 
     # ------------------------------------------------------------ progress
@@ -78,7 +94,7 @@ class KoreaderService:
         percentage: float,
         device: str,
     ) -> None:
-        item_id = await self._item_of(user_id, document)
+        item_id = await self._item_of_marked(user_id, document)
         devices = await self._sync.devices(user_id)
         name = f"{DEVICE_PREFIX}{device.strip() or 'e-reader'}"[:80]
         found = next((d for d in devices if d.name == name), None)
@@ -98,7 +114,7 @@ class KoreaderService:
     async def get(self, user_id: UUID, document: str) -> tuple[ReadingPosition, str, str] | None:
         """The latest position of the book on any device, with KOReader's own position string
         (empty when it did not come from KOReader) and the device's name."""
-        item_id = await self._item_of(user_id, document)
+        item_id = await self._item_of_marked(user_id, document)
         positions = await self._sync.positions(user_id, item_id)
         if not positions:
             return None
@@ -106,6 +122,25 @@ class KoreaderService:
         names = {d.id: d.name for d in await self._sync.devices(user_id)}
         progress = latest.locator[len(PREFIX) :] if latest.locator.startswith(PREFIX) else ""
         return latest, progress, names.get(latest.device_id, "")
+
+    # ------------------------------------------------------------ what the reader can check
+    async def status(self, user_id: UUID) -> "KoreaderStatus":
+        """Whether KOReader has called, which books it synced last, and its devices."""
+        devices = [d for d in await self._sync.devices(user_id) if d.name.startswith(DEVICE_PREFIX)]
+        return KoreaderStatus(
+            contact=await self._repo.contact(user_id),
+            devices=[(d.name[len(DEVICE_PREFIX) :], d.last_seen_at) for d in devices],
+            recent=await self._repo.recent(user_id),
+        )
+
+    async def _item_of_marked(self, user_id: UUID, document: str) -> UUID:
+        try:
+            return await self._item_of(user_id, document)
+        except NotFoundError:
+            # KOReader asked for a book Babel does not have: remembered, so the reader can be told.
+            await self._repo.mark(user_id, unmatched=True)
+            await self._repo.commit()
+            raise
 
     # ------------------------------------------------------------ KOReader's identifier of a file
     async def _item_of(self, user_id: UUID, document: str) -> UUID:

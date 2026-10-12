@@ -3643,4 +3643,98 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sourceNoMatch => 'Aucun livre ne correspond.';
+
+  @override
+  String get koreaderStatus => 'État de la synchronisation';
+
+  @override
+  String get koreaderRefresh => 'Actualiser';
+
+  @override
+  String get koreaderStatusUnknown => 'État indisponible pour l\'instant.';
+
+  @override
+  String get koreaderNeverCalled => 'KOReader n\'a pas encore contacté Babel';
+
+  @override
+  String koreaderLastCall(String when) {
+    return 'Dernier contact : $when';
+  }
+
+  @override
+  String get koreaderNoBook =>
+      'KOReader a contacté Babel mais aucun livre n\'a encore été synchronisé. Ouvre un livre de ta bibliothèque Babel sur la liseuse et tourne quelques pages.';
+
+  @override
+  String koreaderUnmatched(String when) {
+    return 'KOReader a demandé un livre que Babel n\'a pas ($when). Seuls les livres de ta bibliothèque, avec exactement le même fichier, se synchronisent.';
+  }
+
+  @override
+  String get koreaderTipsTitle => 'Astuces';
+
+  @override
+  String get koreaderTips =>
+      '• Dans KOReader : Outils › Synchronisation de la progression › « Pousser la progression maintenant » pour forcer un envoi, « Récupérer » pour reprendre.\n• Choisis le mode automatique pour que la progression parte toute seule en tournant les pages ou en fermant le livre.\n• Garde la méthode de reconnaissance « Binaire » (par défaut) : Babel reconnaît le livre à son contenu.\n• Si tu convertis ou modifies le fichier sur la liseuse, Babel ne le reconnaîtra plus : utilise le fichier de ta bibliothèque Babel.\n• Les livres lus sur la liseuse passent en « en cours » dans Babel, avec le nom de la liseuse.';
+
+  @override
+  String importChecking(int count) {
+    return 'Vérification de $count fichiers…';
+  }
+
+  @override
+  String importProgress(int done, int total) {
+    return 'Import $done/$total…';
+  }
+
+  @override
+  String importAdded(int count) {
+    return 'Ajoutés à ta bibliothèque : $count';
+  }
+
+  @override
+  String importAlreadyThere(int count) {
+    return 'Déjà dans ta bibliothèque : $count';
+  }
+
+  @override
+  String importFanfics(int count) {
+    return 'Fanfictions AO3 reconnues : $count';
+  }
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String bulkChecking(int count) {
+    return 'Vérification de $count fichiers…';
+  }
+
+  @override
+  String bulkProgress(int done, int total) {
+    return 'Import $done/$total…';
+  }
+
+  @override
+  String get bulkDone => 'Import terminé';
+
+  @override
+  String bulkAdded(int count) {
+    return 'Ajoutés à ta bibliothèque : $count';
+  }
+
+  @override
+  String bulkAlreadyThere(int count) {
+    return 'Déjà dans ta bibliothèque : $count';
+  }
+
+  @override
+  String bulkFanfics(int count) {
+    return 'Fanfictions AO3 reconnues : $count';
+  }
+
+  @override
+  String bulkFailed(int count) {
+    return 'Échecs : $count';
+  }
 }

@@ -23,6 +23,7 @@ class LibraryItemResponse {
     this.format,
     this.hidden = false,
     required this.id,
+    this.origin,
     this.paper = false,
     this.progress,
     this.series,
@@ -65,6 +66,9 @@ class LibraryItemResponse {
   bool hidden;
 
   String id;
+
+  /// Where it comes from: \"ao3\" for a fanfiction of AO3
+  String? origin;
 
   /// Owned on paper (it may have a file too)
   bool paper;
@@ -113,6 +117,7 @@ class LibraryItemResponse {
     other.format == format &&
     other.hidden == hidden &&
     other.id == id &&
+    other.origin == origin &&
     other.paper == paper &&
     other.progress == progress &&
     other.series == series &&
@@ -138,6 +143,7 @@ class LibraryItemResponse {
     (format == null ? 0 : format!.hashCode) +
     (hidden.hashCode) +
     (id.hashCode) +
+    (origin == null ? 0 : origin!.hashCode) +
     (paper.hashCode) +
     (progress == null ? 0 : progress!.hashCode) +
     (series == null ? 0 : series!.hashCode) +
@@ -151,7 +157,7 @@ class LibraryItemResponse {
     (workId == null ? 0 : workId!.hashCode);
 
   @override
-  String toString() => 'LibraryItemResponse[addedAt=$addedAt, audioDuration=$audioDuration, authors=$authors, coverId=$coverId, coverPath=$coverPath, editionId=$editionId, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, paper=$paper, progress=$progress, series=$series, seriesIndex=$seriesIndex, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title, workId=$workId]';
+  String toString() => 'LibraryItemResponse[addedAt=$addedAt, audioDuration=$audioDuration, authors=$authors, coverId=$coverId, coverPath=$coverPath, editionId=$editionId, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, origin=$origin, paper=$paper, progress=$progress, series=$series, seriesIndex=$seriesIndex, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title, workId=$workId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -189,6 +195,11 @@ class LibraryItemResponse {
     }
       json[r'hidden'] = this.hidden;
       json[r'id'] = this.id;
+    if (this.origin != null) {
+      json[r'origin'] = this.origin;
+    } else {
+      json[r'origin'] = null;
+    }
       json[r'paper'] = this.paper;
     if (this.progress != null) {
       json[r'progress'] = this.progress;
@@ -272,6 +283,7 @@ class LibraryItemResponse {
         format: BookFormat.fromJson(json[r'format']),
         hidden: mapValueOfType<bool>(json, r'hidden') ?? false,
         id: mapValueOfType<String>(json, r'id')!,
+        origin: mapValueOfType<String>(json, r'origin'),
         paper: mapValueOfType<bool>(json, r'paper') ?? false,
         progress: json[r'progress'] == null
             ? null

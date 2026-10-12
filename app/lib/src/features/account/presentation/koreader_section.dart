@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_providers.dart';
+import '../../../core/locale/relative_time.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/pill_button.dart';
@@ -13,6 +14,12 @@ import '../../../l10n.dart';
 final koreaderProvider = FutureProvider.autoDispose<KoreaderResponse?>(
   (ref) => ref.watch(kosyncApiProvider).getKoreader(),
 );
+
+/// Whether KOReader is syncing: its last call, its books and a book Babel did not know.
+final koreaderStatusProvider =
+    FutureProvider.autoDispose<KoreaderStatusResponse?>(
+      (ref) => ref.watch(kosyncApiProvider).getKoreaderStatus(),
+    );
 
 /// "My e-readers": the address, the e-mail and a password made for KOReader (shown once).
 class KoreaderSection extends ConsumerStatefulWidget {
@@ -74,9 +81,146 @@ class _KoreaderSectionState extends ConsumerState<KoreaderSection> {
           loading: _busy,
           onPressed: _make,
         ),
+        if (info.hasPassword || _password != null) ...[
+          const SizedBox(height: 22),
+          const _SyncStatus(),
+        ],
       ],
     );
   }
+}
+
+/// Is it working? The last call from KOReader, the books it synced and the usual snags.
+class _SyncStatus extends ConsumerWidget {
+  const _SyncStatus();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final status = ref.watch(koreaderStatusProvider);
+    final value = status.value;
+    final seen = value?.lastSeenAt;
+    final fresh = seen != null && DateTime.now().difference(seen).inHours < 24;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.koreaderStatus.toUpperCase(),
+                style: BabelText.label(10),
+              ),
+            ),
+            IconButton(
+              tooltip: l10n.koreaderRefresh,
+              onPressed: () => ref.invalidate(koreaderStatusProvider),
+              icon: Icon(
+                Icons.refresh_rounded,
+                size: 20,
+                color: BabelColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        if (value == null)
+          Text(l10n.koreaderStatusUnknown, style: BabelText.body(13))
+        else ...[
+          Row(
+            children: [
+              Icon(
+                Icons.circle,
+                size: 10,
+                color: seen == null
+                    ? BabelColors.dustyRose
+                    : fresh
+                    ? const Color(0xFF5BA55B)
+                    : BabelColors.gold,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  seen == null
+                      ? l10n.koreaderNeverCalled
+                      : l10n.koreaderLastCall(timeAgo(context, seen)),
+                  style: BabelText.body(14, color: BabelColors.textPrimary),
+                ),
+              ),
+            ],
+          ),
+          if (value.devices.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                value.devices.map((d) => d.name).join(' · '),
+                style: BabelText.body(12),
+              ),
+            ),
+          if (value.recent.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            for (final book in value.recent) _SyncedBook(book: book),
+          ] else if (seen != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Text(l10n.koreaderNoBook, style: BabelText.body(13)),
+            ),
+          if (value.lastUnmatchedAt case final unmatched?)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Text(
+                l10n.koreaderUnmatched(timeAgo(context, unmatched)),
+                style: BabelText.body(13, color: BabelColors.gold),
+              ),
+            ),
+        ],
+        const SizedBox(height: 14),
+        Text(l10n.koreaderTipsTitle.toUpperCase(), style: BabelText.label(10)),
+        const SizedBox(height: 6),
+        Text(l10n.koreaderTips, style: BabelText.body(13)),
+      ],
+    );
+  }
+}
+
+class _SyncedBook extends StatelessWidget {
+  const _SyncedBook({required this.book});
+  final KoreaderBookResponse book;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                book.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: BabelText.body(14, color: BabelColors.textPrimary),
+              ),
+            ),
+            Text(
+              '${book.percent.round()} % · ${timeAgo(context, book.at)}',
+              style: BabelText.body(12),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(2),
+          child: LinearProgressIndicator(
+            value: (book.percent / 100).clamp(0.0, 1.0),
+            minHeight: 4,
+            color: BabelColors.gold,
+            backgroundColor: BabelColors.sunken,
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _Line extends StatelessWidget {

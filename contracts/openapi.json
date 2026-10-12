@@ -1932,6 +1932,50 @@
         "title": "FeedKind",
         "type": "string"
       },
+      "FilesCheckRequest": {
+        "properties": {
+          "sha256": {
+            "description": "SHA-256 of local files",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 500,
+            "title": "Sha256",
+            "type": "array"
+          }
+        },
+        "required": [
+          "sha256"
+        ],
+        "title": "FilesCheckRequest",
+        "type": "object"
+      },
+      "FilesCheckResponse": {
+        "properties": {
+          "in_library": {
+            "description": "Already in your library: nothing to do",
+            "items": {
+              "type": "string"
+            },
+            "title": "In Library",
+            "type": "array"
+          },
+          "on_babel": {
+            "description": "Already on Babel but not in your library: add them without uploading",
+            "items": {
+              "type": "string"
+            },
+            "title": "On Babel",
+            "type": "array"
+          }
+        },
+        "required": [
+          "in_library",
+          "on_babel"
+        ],
+        "title": "FilesCheckResponse",
+        "type": "object"
+      },
       "FinishedBookResponse": {
         "properties": {
           "authors": {
@@ -2537,6 +2581,69 @@
         "title": "KnownVolumeResponse",
         "type": "object"
       },
+      "KoreaderBookResponse": {
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
+          "device": {
+            "title": "Device",
+            "type": "string"
+          },
+          "item_id": {
+            "format": "uuid",
+            "title": "Item Id",
+            "type": "string"
+          },
+          "percent": {
+            "description": "How far KOReader says you are, 0 to 100",
+            "title": "Percent",
+            "type": "number"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_id",
+          "title",
+          "authors",
+          "percent",
+          "at",
+          "device"
+        ],
+        "title": "KoreaderBookResponse",
+        "type": "object"
+      },
+      "KoreaderDeviceResponse": {
+        "properties": {
+          "last_seen_at": {
+            "format": "date-time",
+            "title": "Last Seen At",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "last_seen_at"
+        ],
+        "title": "KoreaderDeviceResponse",
+        "type": "object"
+      },
       "KoreaderPasswordResponse": {
         "properties": {
           "has_password": {
@@ -2591,6 +2698,59 @@
           "has_password"
         ],
         "title": "KoreaderResponse",
+        "type": "object"
+      },
+      "KoreaderStatusResponse": {
+        "properties": {
+          "devices": {
+            "items": {
+              "$ref": "#/components/schemas/KoreaderDeviceResponse"
+            },
+            "title": "Devices",
+            "type": "array"
+          },
+          "last_seen_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The last time KOReader called Babel; null if it never did",
+            "title": "Last Seen At"
+          },
+          "last_unmatched_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The last time KOReader asked for a book that is not in your library",
+            "title": "Last Unmatched At"
+          },
+          "recent": {
+            "description": "The books it synced last",
+            "items": {
+              "$ref": "#/components/schemas/KoreaderBookResponse"
+            },
+            "title": "Recent",
+            "type": "array"
+          }
+        },
+        "required": [
+          "last_seen_at",
+          "last_unmatched_at",
+          "devices",
+          "recent"
+        ],
+        "title": "KoreaderStatusResponse",
         "type": "object"
       },
       "KudosResponse": {
@@ -2702,6 +2862,18 @@
             "format": "uuid",
             "title": "Id",
             "type": "string"
+          },
+          "origin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Where it comes from: \"ao3\" for a fanfiction of AO3",
+            "title": "Origin"
           },
           "paper": {
             "default": false,
@@ -8546,6 +8718,53 @@
         ]
       }
     },
+    "/v1/library/files/check": {
+      "post": {
+        "description": "Which of these files (by SHA-256) Babel already has: bring a whole e-reader without\nuploading what is there.",
+        "operationId": "checkFiles",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilesCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilesCheckResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Check Files",
+        "tags": [
+          "library"
+        ]
+      }
+    },
     "/v1/library/files/{sha256}": {
       "post": {
         "description": "Add a file already on Babel to the library, without uploading it again.",
@@ -10411,6 +10630,33 @@
           }
         ],
         "summary": "New Koreader Password",
+        "tags": [
+          "kosync"
+        ]
+      }
+    },
+    "/v1/me/koreader/status": {
+      "get": {
+        "description": "Whether KOReader is syncing: when it last called, with which e-readers, and the books.",
+        "operationId": "getKoreaderStatus",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderStatusResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Koreader Status",
         "tags": [
           "kosync"
         ]

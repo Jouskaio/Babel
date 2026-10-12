@@ -1,0 +1,3 @@
+My e-readers: KOReader sync status (last contact, e-readers, synced books with their progress) and tips
+Import several books at once (a whole e-reader): Babel skips the ones it already has, adds those it knows without uploading again, and sums up what was done
+AO3 fanfictions are recognised in imported files: their own cover, and new chapters followed when they are not finished

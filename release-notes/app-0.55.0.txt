@@ -1,0 +1,3 @@
+Mes liseuses : l'état de la synchronisation KOReader (dernier contact, liseuses, livres synchronisés avec leur progression) et des astuces
+Importer plusieurs livres d'un coup (toute une liseuse) : Babel saute ceux qu'il a déjà, ajoute sans renvoyer ceux qu'il connaît, et résume ce qui a été fait
+Les fanfictions AO3 sont reconnues dans les fichiers importés : couverture dédiée, et suivi des nouveaux chapitres quand elles ne sont pas terminées

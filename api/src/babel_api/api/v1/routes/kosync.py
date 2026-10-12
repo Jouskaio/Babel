@@ -101,6 +101,31 @@ class KoreaderResponse(BaseModel):
     has_password: bool
 
 
+class KoreaderBookResponse(BaseModel):
+    item_id: UUID
+    title: str
+    authors: list[str]
+    percent: float = Field(description="How far KOReader says you are, 0 to 100")
+    at: datetime
+    device: str
+
+
+class KoreaderDeviceResponse(BaseModel):
+    name: str
+    last_seen_at: datetime
+
+
+class KoreaderStatusResponse(BaseModel):
+    last_seen_at: datetime | None = Field(
+        description="The last time KOReader called Babel; null if it never did"
+    )
+    last_unmatched_at: datetime | None = Field(
+        description="The last time KOReader asked for a book that is not in your library"
+    )
+    devices: list[KoreaderDeviceResponse]
+    recent: list[KoreaderBookResponse] = Field(description="The books it synced last")
+
+
 class KoreaderPasswordResponse(KoreaderResponse):
     password: str = Field(description="Shown once: KOReader's password")
 
@@ -118,6 +143,30 @@ async def get_koreader(
         username=await koreader.username(user_id),
         server=_server(request),
         has_password=await koreader.has_password(user_id),
+    )
+
+
+@account_router.get("/status", operation_id="getKoreaderStatus")
+async def get_koreader_status(
+    user_id: CurrentUserId, koreader: KoreaderServiceDep
+) -> KoreaderStatusResponse:
+    """Whether KOReader is syncing: when it last called, with which e-readers, and the books."""
+    status = await koreader.status(user_id)
+    return KoreaderStatusResponse(
+        last_seen_at=status.contact.last_seen_at,
+        last_unmatched_at=status.contact.last_unmatched_at,
+        devices=[KoreaderDeviceResponse(name=n, last_seen_at=t) for n, t in status.devices],
+        recent=[
+            KoreaderBookResponse(
+                item_id=r.item_id,
+                title=r.title,
+                authors=list(r.authors),
+                percent=r.percent,
+                at=r.at,
+                device=r.device,
+            )
+            for r in status.recent
+        ],
     )
 
 

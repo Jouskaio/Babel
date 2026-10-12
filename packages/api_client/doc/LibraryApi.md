@@ -12,6 +12,7 @@ Method | HTTP request | Description
 [**addPaperBook**](LibraryApi.md#addpaperbook) | **POST** /v1/library/paper | Add Paper Book
 [**addStoredFile**](LibraryApi.md#addstoredfile) | **POST** /v1/library/files/{sha256} | Add Stored File
 [**attachFile**](LibraryApi.md#attachfile) | **POST** /v1/library/{item_id}/file | Attach File
+[**checkFiles**](LibraryApi.md#checkfiles) | **POST** /v1/library/files/check | Check Files
 [**checkFollow**](LibraryApi.md#checkfollow) | **POST** /v1/library/follows/{follow_id}/check | Check Follow
 [**deleteReview**](LibraryApi.md#deletereview) | **DELETE** /v1/library/{item_id}/review | Delete Review
 [**downloadFile**](LibraryApi.md#downloadfile) | **GET** /v1/files/{sha256} | Download File
@@ -188,6 +189,55 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: multipart/form-data
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **checkFiles**
+> FilesCheckResponse checkFiles(filesCheckRequest)
+
+Check Files
+
+Which of these files (by SHA-256) Babel already has: bring a whole e-reader without uploading what is there.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = LibraryApi();
+final filesCheckRequest = FilesCheckRequest(); // FilesCheckRequest | 
+
+try {
+    final result = api_instance.checkFiles(filesCheckRequest);
+    print(result);
+} catch (e) {
+    print('Exception when calling LibraryApi->checkFiles: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **filesCheckRequest** | [**FilesCheckRequest**](FilesCheckRequest.md)|  | 
+
+### Return type
+
+[**FilesCheckResponse**](FilesCheckResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
