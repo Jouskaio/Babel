@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
@@ -32,7 +33,7 @@ Future<void> showFanficSheet(
   ),
 );
 
-class _FanficSheet extends ConsumerWidget {
+class _FanficSheet extends ConsumerStatefulWidget {
   const _FanficSheet({
     required this.sourceId,
     required this.entry,
@@ -45,7 +46,65 @@ class _FanficSheet extends ConsumerWidget {
   final Widget action;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_FanficSheet> createState() => _FanficSheetState();
+}
+
+class _FanficSheetState extends ConsumerState<_FanficSheet> {
+  String? _kudos; // what happened when kudos were left: 'given' or 'already'
+  bool _kudosBusy = false;
+  String? _translation; // the summary in the reader's language, once asked for
+  bool _translating = false;
+  bool _showOriginal = false;
+
+  String get sourceId => widget.sourceId;
+  SourceEntryResponse get entry => widget.entry;
+  String get title => widget.title;
+  Widget get action => widget.action;
+
+  Future<void> _leaveKudos() async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _kudosBusy = true);
+    try {
+      final result = await ref
+          .read(sourcesApiProvider)
+          .leaveKudos(sourceId, entry.id);
+      if (mounted) {
+        setState(() => _kudos = result?.given == false ? 'already' : 'given');
+      }
+    } on ApiException {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.fanficKudosFailed)));
+    } finally {
+      if (mounted) setState(() => _kudosBusy = false);
+    }
+  }
+
+  Future<void> _translate(String summary) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final language = Localizations.localeOf(context).languageCode;
+    setState(() => _translating = true);
+    try {
+      final result = await ref
+          .read(translateApiProvider)
+          .translateText(TranslateRequest(text: summary, target: language));
+      if (mounted && result != null) {
+        setState(() {
+          _translation = result.text;
+          _showOriginal = false;
+        });
+      }
+    } on ApiException {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.fanficTranslateFailed)),
+      );
+    } finally {
+      if (mounted) setState(() => _translating = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final details = ref.watch(
       fanficDetailsProvider((sourceId: sourceId, entryId: entry.id)),
@@ -56,6 +115,8 @@ class _FanficSheet extends ConsumerWidget {
       if (d?.words case final words?) l10n.fanficWords(words),
       if (d?.kudos case final kudos?) l10n.fanficKudos(kudos),
       if (d?.hits case final hits?) l10n.fanficHits(hits),
+      if (d?.comments case final comments?) l10n.fanficComments(comments),
+      if (d?.bookmarks case final bookmarks?) l10n.fanficBookmarks(bookmarks),
     ].join(' · ');
     return SafeArea(
       child: ConstrainedBox(
@@ -109,6 +170,8 @@ class _FanficSheet extends ConsumerWidget {
             else if (d == null)
               Text(l10n.fanficUnavailable, style: BabelText.body(14))
             else ...[
+              _Icons(details: d),
+              const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -126,7 +189,49 @@ class _FanficSheet extends ConsumerWidget {
                   style: BabelText.label(10),
                 ),
                 const SizedBox(height: 6),
-                Text(summary, style: BabelText.reading(15)),
+                Text(
+                  _translation != null && !_showOriginal
+                      ? _translation!
+                      : summary,
+                  style: BabelText.reading(15),
+                ),
+                const SizedBox(height: 6),
+                if (_translation != null)
+                  Row(
+                    children: [
+                      Text(
+                        l10n.fanficTranslated,
+                        style: BabelText.body(
+                          12,
+                          color: BabelColors.textSecondary,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () =>
+                            setState(() => _showOriginal = !_showOriginal),
+                        child: Text(
+                          _showOriginal
+                              ? l10n.fanficTranslate
+                              : l10n.fanficOriginal,
+                          style: BabelText.body(13),
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: _translating
+                          ? null
+                          : () => _translate(summary),
+                      icon: const Icon(Icons.translate, size: 18),
+                      label: Text(
+                        l10n.fanficTranslate,
+                        style: BabelText.body(13),
+                      ),
+                    ),
+                  ),
               ],
               _Group(l10n.fanficFandoms, d.fandoms),
               _Group(l10n.fanficRelationships, d.relationships),
@@ -143,7 +248,10 @@ class _FanficSheet extends ConsumerWidget {
               ),
             ],
             const SizedBox(height: 20),
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 TextButton(
                   onPressed: () => launchUrl(
@@ -151,7 +259,19 @@ class _FanficSheet extends ConsumerWidget {
                   ),
                   child: Text(l10n.fanficOnAo3, style: BabelText.body(14)),
                 ),
-                const Spacer(),
+                OutlinedButton.icon(
+                  onPressed: _kudos != null || _kudosBusy ? null : _leaveKudos,
+                  icon: Icon(
+                    _kudos == null ? Icons.favorite_border : Icons.favorite,
+                    size: 18,
+                    color: BabelColors.dustyRose,
+                  ),
+                  label: Text(switch (_kudos) {
+                    'given' => l10n.fanficKudosGiven,
+                    'already' => l10n.fanficKudosAlready,
+                    _ => l10n.fanficKudosAction,
+                  }, style: BabelText.body(13, color: BabelColors.textPrimary)),
+                ),
                 action,
               ],
             ),
@@ -203,6 +323,100 @@ class _Tag extends StatelessWidget {
     child: Text(
       text,
       style: BabelText.body(12, color: color ?? BabelColors.textPrimary),
+    ),
+  );
+}
+
+/// AO3's four little squares: rating, warnings, category, and whether the work is finished.
+class _Icons extends StatelessWidget {
+  const _Icons({required this.details});
+  final FanficDetailsResponse details;
+
+  static const _specific = [
+    'Graphic Depictions Of Violence',
+    'Major Character Death',
+    'Rape/Non-Con',
+    'Underage',
+  ];
+
+  (String, Color) get _rating => switch (details.rating) {
+    'General Audiences' => ('G', const Color(0xFF5BA55B)),
+    'Teen And Up Audiences' => ('T', const Color(0xFFD9B93A)),
+    'Mature' => ('M', const Color(0xFFE08A2B)),
+    'Explicit' => ('E', const Color(0xFFC0392B)),
+    _ => ('?', const Color(0xFF8A8A8A)),
+  };
+
+  (String, Color) get _warnings {
+    if (details.warnings.any(_specific.contains)) {
+      return ('!', const Color(0xFFC0392B));
+    }
+    if (details.warnings.any((w) => w.startsWith('Creator Chose'))) {
+      return ('?', const Color(0xFFE08A2B));
+    }
+    return ('✓', const Color(0xFF5BA55B));
+  }
+
+  String get _category => switch (details.categories.length) {
+    0 => '·',
+    1 => details.categories.first,
+    _ => 'Multi',
+  };
+
+  bool? get _complete {
+    final parts = details.chapters?.split('/');
+    if (parts == null || parts.length != 2) return null;
+    return parts[0] == parts[1];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final (rating, ratingColor) = _rating;
+    final (warning, warningColor) = _warnings;
+    final complete = _complete;
+    return Row(
+      children: [
+        _Square(rating, ratingColor),
+        const SizedBox(width: 6),
+        _Square(warning, warningColor),
+        const SizedBox(width: 6),
+        _Square(_category, BabelColors.gold),
+        const SizedBox(width: 6),
+        _Square(
+          complete == null ? '·' : (complete ? '✓' : '…'),
+          complete == true ? const Color(0xFF5BA55B) : const Color(0xFF8A8A8A),
+        ),
+        if (complete != null) ...[
+          const SizedBox(width: 10),
+          Text(
+            complete ? l10n.fanficComplete : l10n.fanficInProgress,
+            style: BabelText.body(12, color: BabelColors.textSecondary),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _Square extends StatelessWidget {
+  const _Square(this.label, this.color);
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 38,
+    height: 38,
+    alignment: Alignment.center,
+    decoration: BoxDecoration(color: color, borderRadius: BabelShape.radius(4)),
+    child: Text(
+      label,
+      style: const TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.w700,
+        fontSize: 13,
+      ),
     ),
   );
 }

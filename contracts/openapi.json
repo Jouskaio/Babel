@@ -1636,6 +1636,17 @@
             "title": "Authors",
             "type": "array"
           },
+          "bookmarks": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bookmarks"
+          },
           "categories": {
             "items": {
               "type": "string"
@@ -1661,6 +1672,17 @@
             },
             "title": "Characters",
             "type": "array"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments"
           },
           "fandoms": {
             "items": {
@@ -2569,6 +2591,20 @@
           "has_password"
         ],
         "title": "KoreaderResponse",
+        "type": "object"
+      },
+      "KudosResponse": {
+        "properties": {
+          "given": {
+            "description": "False when you had already left kudos on this work",
+            "title": "Given",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "given"
+        ],
+        "title": "KudosResponse",
         "type": "object"
       },
       "LibraryItemResponse": {
@@ -5052,6 +5088,41 @@
         "title": "TokenResponse",
         "type": "object"
       },
+      "TranslateRequest": {
+        "properties": {
+          "target": {
+            "description": "Two-letter language code",
+            "pattern": "^[a-z]{2}$",
+            "title": "Target",
+            "type": "string"
+          },
+          "text": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "target"
+        ],
+        "title": "TranslateRequest",
+        "type": "object"
+      },
+      "TranslateResponse": {
+        "properties": {
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "TranslateResponse",
+        "type": "object"
+      },
       "TrendingWorkResponse": {
         "description": "A popular work. ``cover_path`` is relative to the API base URL.",
         "properties": {
@@ -5914,7 +5985,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.61.1"
+    "version": "0.62.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -12296,6 +12367,65 @@
         ]
       }
     },
+    "/v1/sources/{source_id}/entries/{entry_id}/kudos": {
+      "post": {
+        "description": "Leave kudos on a fanfiction of an AO3 source (as you when your AO3 password is saved).",
+        "operationId": "leaveKudos",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entry_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entry Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KudosResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Leave Kudos",
+        "tags": [
+          "sources"
+        ]
+      }
+    },
     "/v1/sources/{source_id}/import": {
       "post": {
         "description": "Import books not yet in the library, a batch per call (smaller for slow sources).",
@@ -12546,6 +12676,53 @@
         "summary": "Push Operations",
         "tags": [
           "sync"
+        ]
+      }
+    },
+    "/v1/translate": {
+      "post": {
+        "description": "The text in another language (free machine translation, a few paragraphs at most). A text\nalready in that language comes back as it is; 503 when the service cannot translate now.",
+        "operationId": "translateText",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranslateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranslateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Translate Text",
+        "tags": [
+          "translate"
         ]
       }
     }

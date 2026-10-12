@@ -87,6 +87,9 @@ final kosyncApiProvider = Provider<KosyncApi>(
 final pluginsApiProvider = Provider<PluginsApi>(
   (ref) => PluginsApi(ref.watch(apiClientProvider)),
 );
+final translateApiProvider = Provider<TranslateApi>(
+  (ref) => TranslateApi(ref.watch(apiClientProvider)),
+);
 final pageboundApiProvider = Provider<PageboundApi>(
   (ref) => PageboundApi(ref.watch(apiClientProvider)),
 );

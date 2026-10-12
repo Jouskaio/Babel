@@ -299,10 +299,52 @@ class Ao3Connector:
             updated=_text(page.select_one("dl.stats dd.status")) or None,
             kudos=number("kudos"),
             hits=number("hits"),
+            comments=number("comments"),
+            bookmarks=number("bookmarks"),
             series=_text(series) or None,
         )
         self._details[work_id] = (time.monotonic(), details)
         return details
+
+    async def kudos(self, config: dict[str, Any], token: str | None, work_id: str) -> bool:
+        """Leaves kudos on a work, as the reader when a password is known (else as a guest).
+        True when they were given now, False when this reader had already given them."""
+        username = str(config.get("username", "")).strip()
+        client = await self._session(username, token) if username else self._client()
+        page = await self._get(client, f"/works/{work_id}", view_adult="true")
+        if page.status_code >= 400:
+            raise SourceConnectionError("unreachable")
+        soup = _soup(page)
+        meta = soup.find("meta", attrs={"name": "csrf-token"})
+        field = soup.select_one("form#new_kudo input[name=authenticity_token]")
+        csrf = str((meta or field or {}).get("content" if meta else "value") or "")  # type: ignore[union-attr]
+        if not csrf:
+            raise SourceConnectionError("restricted")
+        await self._requests.wait()
+        try:
+            response = await client.post(
+                "/kudos.js",
+                data={
+                    "authenticity_token": csrf,
+                    "kudo[commentable_id]": work_id,
+                    "kudo[commentable_type]": "Work",
+                },
+                headers={
+                    "X-CSRF-Token": csrf,
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json, text/javascript, */*; q=0.01",
+                    "Referer": f"{BASE}/works/{work_id}",
+                },
+            )
+        except httpx.HTTPError as error:
+            raise SourceConnectionError("unreachable") from error
+        if response.status_code == 429:
+            self._limited(response)
+        if response.status_code in (200, 201):
+            return True
+        if response.status_code == 422:
+            return False  # "You have already left kudos here"
+        raise SourceConnectionError("unreachable")
 
     async def list_entries(self, config: dict[str, Any], token: str | None) -> list[RemoteEntry]:
         username = str(config["username"])

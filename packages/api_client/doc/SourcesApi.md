@@ -17,6 +17,7 @@ Method | HTTP request | Description
 [**getSources**](SourcesApi.md#getsources) | **GET** /v1/sources | Get Sources
 [**importSource**](SourcesApi.md#importsource) | **POST** /v1/sources/{source_id}/import | Import All
 [**importSourceEntry**](SourcesApi.md#importsourceentry) | **POST** /v1/sources/{source_id}/entries/{entry_id}/import | Import Entry
+[**leaveKudos**](SourcesApi.md#leavekudos) | **POST** /v1/sources/{source_id}/entries/{entry_id}/kudos | Leave Kudos
 [**scanSource**](SourcesApi.md#scansource) | **POST** /v1/sources/{source_id}/scan | Scan Source
 [**searchSources**](SourcesApi.md#searchsources) | **GET** /v1/sources/search | Search Sources
 
@@ -406,6 +407,57 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**LibraryItemResponse**](LibraryItemResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **leaveKudos**
+> KudosResponse leaveKudos(sourceId, entryId)
+
+Leave Kudos
+
+Leave kudos on a fanfiction of an AO3 source (as you when your AO3 password is saved).
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = SourcesApi();
+final sourceId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final entryId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.leaveKudos(sourceId, entryId);
+    print(result);
+} catch (e) {
+    print('Exception when calling SourcesApi->leaveKudos: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **sourceId** | **String**|  | 
+ **entryId** | **String**|  | 
+
+### Return type
+
+[**KudosResponse**](KudosResponse.md)
 
 ### Authorization
 

@@ -76,6 +76,7 @@ doc/KnownVolumeResponse.md
 doc/KoreaderPasswordResponse.md
 doc/KoreaderResponse.md
 doc/KosyncApi.md
+doc/KudosResponse.md
 doc/LibraryApi.md
 doc/LibraryItemResponse.md
 doc/LinkKavitaRequest.md
@@ -149,6 +150,9 @@ doc/StepResponse.md
 doc/SuggestionResponse.md
 doc/SyncApi.md
 doc/TokenResponse.md
+doc/TranslateApi.md
+doc/TranslateRequest.md
+doc/TranslateResponse.md
 doc/TrendingWorkResponse.md
 doc/UpdateProfileRequest.md
 doc/UpdateSocialProfileRequest.md
@@ -181,6 +185,7 @@ lib/api/social_api.dart
 lib/api/sources_api.dart
 lib/api/stats_api.dart
 lib/api/sync_api.dart
+lib/api/translate_api.dart
 lib/api_client.dart
 lib/api_exception.dart
 lib/api_helper.dart
@@ -255,6 +260,7 @@ lib/model/kavita_status.dart
 lib/model/known_volume_response.dart
 lib/model/koreader_password_response.dart
 lib/model/koreader_response.dart
+lib/model/kudos_response.dart
 lib/model/library_item_response.dart
 lib/model/link_kavita_request.dart
 lib/model/link_kind.dart
@@ -320,6 +326,8 @@ lib/model/source_response.dart
 lib/model/step_response.dart
 lib/model/suggestion_response.dart
 lib/model/token_response.dart
+lib/model/translate_request.dart
+lib/model/translate_response.dart
 lib/model/trending_work_response.dart
 lib/model/update_profile_request.dart
 lib/model/update_social_profile_request.dart

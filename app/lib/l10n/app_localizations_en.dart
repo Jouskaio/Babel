@@ -3569,4 +3569,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get readOriginalReview => 'Read the full review →';
+
+  @override
+  String get fanficKudosAction => 'Leave kudos';
+
+  @override
+  String get fanficKudosGiven => 'Kudos sent';
+
+  @override
+  String get fanficKudosAlready => 'Kudos already given';
+
+  @override
+  String get fanficKudosFailed => 'AO3 did not answer, try again later.';
+
+  @override
+  String get fanficTranslate => 'Translate the summary';
+
+  @override
+  String get fanficOriginal => 'Show the original';
+
+  @override
+  String get fanficTranslated => 'Machine translation';
+
+  @override
+  String get fanficTranslateFailed => 'Translation unavailable right now.';
+
+  @override
+  String fanficComments(int count) {
+    return '$count comments';
+  }
+
+  @override
+  String fanficBookmarks(int count) {
+    return '$count bookmarks';
+  }
+
+  @override
+  String get fanficComplete => 'Complete';
+
+  @override
+  String get fanficInProgress => 'Work in progress';
+
+  @override
+  String get sourceSearchHint => 'Search a title or an author…';
+
+  @override
+  String get sourceNoMatch => 'No book matches.';
 }

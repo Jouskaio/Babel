@@ -494,6 +494,68 @@ class SourcesApi {
     return null;
   }
 
+  /// Leave Kudos
+  ///
+  /// Leave kudos on a fanfiction of an AO3 source (as you when your AO3 password is saved).
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] sourceId (required):
+  ///
+  /// * [String] entryId (required):
+  Future<Response> leaveKudosWithHttpInfo(String sourceId, String entryId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/sources/{source_id}/entries/{entry_id}/kudos'
+      .replaceAll('{source_id}', sourceId)
+      .replaceAll('{entry_id}', entryId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Leave Kudos
+  ///
+  /// Leave kudos on a fanfiction of an AO3 source (as you when your AO3 password is saved).
+  ///
+  /// Parameters:
+  ///
+  /// * [String] sourceId (required):
+  ///
+  /// * [String] entryId (required):
+  Future<KudosResponse?> leaveKudos(String sourceId, String entryId,) async {
+    final response = await leaveKudosWithHttpInfo(sourceId, entryId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'KudosResponse',) as KudosResponse;
+    
+    }
+    return null;
+  }
+
   /// Scan Source
   ///
   /// Look for new books in the source (in the background for a slow one: see ``scanning``).

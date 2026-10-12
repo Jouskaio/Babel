@@ -314,6 +314,8 @@ class ApiClient {
           return KoreaderPasswordResponse.fromJson(value);
         case 'KoreaderResponse':
           return KoreaderResponse.fromJson(value);
+        case 'KudosResponse':
+          return KudosResponse.fromJson(value);
         case 'LibraryItemResponse':
           return LibraryItemResponse.fromJson(value);
         case 'LinkKavitaRequest':
@@ -444,6 +446,10 @@ class ApiClient {
           return SuggestionResponse.fromJson(value);
         case 'TokenResponse':
           return TokenResponse.fromJson(value);
+        case 'TranslateRequest':
+          return TranslateRequest.fromJson(value);
+        case 'TranslateResponse':
+          return TranslateResponse.fromJson(value);
         case 'TrendingWorkResponse':
           return TrendingWorkResponse.fromJson(value);
         case 'UpdateProfileRequest':

@@ -9,9 +9,11 @@ import 'package:babel_api_client/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **authors** | **List<String>** |  | [default to const []]
+**bookmarks** | **int** |  | [optional] 
 **categories** | **List<String>** |  | [default to const []]
 **chapters** | **String** | Posted so far, \"4/?\" or \"4/10\" | [optional] 
 **characters** | **List<String>** |  | [default to const []]
+**comments** | **int** |  | [optional] 
 **fandoms** | **List<String>** |  | [default to const []]
 **hits** | **int** |  | [optional] 
 **kudos** | **int** |  | [optional] 

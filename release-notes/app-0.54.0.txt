@@ -1,0 +1,3 @@
+Fanfictions AO3 : recherche dans la liste, fiche enrichie (icônes de classement et d'avertissements, commentaires, favoris, état d'écriture), kudos en un bouton, résumé traduisible
+Importer une liste (Goodreads, Pagebound) ne crée plus de doublons quand le livre est déjà là sous un titre avec la série entre parenthèses
+Page des amis : le bouton « Tous les lecteurs » est mieux espacé

@@ -1966,5 +1966,21 @@
   "readersDirectory": "Tous les lecteurs",
   "readersCount": "{count} lecteurs",
   "@readersCount": {"placeholders": {"count": {"type": "int"}}},
-  "readOriginalReview": "Lire l'avis complet →"
+  "readOriginalReview": "Lire l'avis complet →",
+  "fanficKudosAction": "Laisser un kudos",
+  "fanficKudosGiven": "Kudos envoyé",
+  "fanficKudosAlready": "Kudos déjà donné",
+  "fanficKudosFailed": "AO3 n'a pas répondu, réessaie plus tard.",
+  "fanficTranslate": "Traduire le résumé",
+  "fanficOriginal": "Voir l'original",
+  "fanficTranslated": "Traduction automatique",
+  "fanficTranslateFailed": "Traduction indisponible pour l'instant.",
+  "fanficComments": "{count} commentaires",
+  "@fanficComments": {"placeholders": {"count": {"type": "int"}}},
+  "fanficBookmarks": "{count} favoris",
+  "@fanficBookmarks": {"placeholders": {"count": {"type": "int"}}},
+  "fanficComplete": "Terminée",
+  "fanficInProgress": "En cours d'écriture",
+  "sourceSearchHint": "Chercher un titre ou un auteur…",
+  "sourceNoMatch": "Aucun livre ne correspond."
 }

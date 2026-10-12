@@ -59,6 +59,8 @@ class BatchImport:
 
 
 class Ao3Details(Protocol):
+    async def kudos(self, config: dict[str, Any], token: str | None, work_id: str) -> bool: ...
+
     async def details(
         self, config: dict[str, Any], token: str | None, work_id: str
     ) -> FanficDetails: ...
@@ -277,6 +279,17 @@ class SourceService:
             raise NotFoundError
         connector = cast(Ao3Details, self._connectors[source.kind])
         return await connector.details(
+            source.config, await self._token(source), entry.path.rsplit("/", 1)[-1]
+        )
+
+    async def fanfic_kudos(self, user_id: UUID, source_id: UUID, entry_id: UUID) -> bool:
+        """Leaves kudos on a fanfiction of an AO3 source (False: already given)."""
+        source = await self._own(user_id, source_id)
+        entry = await self._sources.get_entry(entry_id)
+        if entry is None or entry.source_id != source_id or source.kind is not SourceKind.AO3:
+            raise NotFoundError
+        connector = cast(Ao3Details, self._connectors[source.kind])
+        return await connector.kudos(
             source.config, await self._token(source), entry.path.rsplit("/", 1)[-1]
         )
 
