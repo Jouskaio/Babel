@@ -14,9 +14,11 @@ class FanficDetailsResponse {
   /// Returns a new [FanficDetailsResponse] instance.
   FanficDetailsResponse({
     this.authors = const [],
+    this.bookmarks,
     this.categories = const [],
     this.chapters,
     this.characters = const [],
+    this.comments,
     this.fandoms = const [],
     this.hits,
     this.kudos,
@@ -35,12 +37,16 @@ class FanficDetailsResponse {
 
   List<String> authors;
 
+  int? bookmarks;
+
   List<String> categories;
 
   /// Posted so far, \"4/?\" or \"4/10\"
   String? chapters;
 
   List<String> characters;
+
+  int? comments;
 
   List<String> fandoms;
 
@@ -73,9 +79,11 @@ class FanficDetailsResponse {
   @override
   bool operator ==(Object other) => identical(this, other) || other is FanficDetailsResponse &&
     _deepEquality.equals(other.authors, authors) &&
+    other.bookmarks == bookmarks &&
     _deepEquality.equals(other.categories, categories) &&
     other.chapters == chapters &&
     _deepEquality.equals(other.characters, characters) &&
+    other.comments == comments &&
     _deepEquality.equals(other.fandoms, fandoms) &&
     other.hits == hits &&
     other.kudos == kudos &&
@@ -95,9 +103,11 @@ class FanficDetailsResponse {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (authors.hashCode) +
+    (bookmarks == null ? 0 : bookmarks!.hashCode) +
     (categories.hashCode) +
     (chapters == null ? 0 : chapters!.hashCode) +
     (characters.hashCode) +
+    (comments == null ? 0 : comments!.hashCode) +
     (fandoms.hashCode) +
     (hits == null ? 0 : hits!.hashCode) +
     (kudos == null ? 0 : kudos!.hashCode) +
@@ -114,11 +124,16 @@ class FanficDetailsResponse {
     (words == null ? 0 : words!.hashCode);
 
   @override
-  String toString() => 'FanficDetailsResponse[authors=$authors, categories=$categories, chapters=$chapters, characters=$characters, fandoms=$fandoms, hits=$hits, kudos=$kudos, language=$language, published=$published, rating=$rating, relationships=$relationships, series=$series, summary=$summary, tags=$tags, title=$title, updated=$updated, warnings=$warnings, words=$words]';
+  String toString() => 'FanficDetailsResponse[authors=$authors, bookmarks=$bookmarks, categories=$categories, chapters=$chapters, characters=$characters, comments=$comments, fandoms=$fandoms, hits=$hits, kudos=$kudos, language=$language, published=$published, rating=$rating, relationships=$relationships, series=$series, summary=$summary, tags=$tags, title=$title, updated=$updated, warnings=$warnings, words=$words]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'authors'] = this.authors;
+    if (this.bookmarks != null) {
+      json[r'bookmarks'] = this.bookmarks;
+    } else {
+      json[r'bookmarks'] = null;
+    }
       json[r'categories'] = this.categories;
     if (this.chapters != null) {
       json[r'chapters'] = this.chapters;
@@ -126,6 +141,11 @@ class FanficDetailsResponse {
       json[r'chapters'] = null;
     }
       json[r'characters'] = this.characters;
+    if (this.comments != null) {
+      json[r'comments'] = this.comments;
+    } else {
+      json[r'comments'] = null;
+    }
       json[r'fandoms'] = this.fandoms;
     if (this.hits != null) {
       json[r'hits'] = this.hits;
@@ -201,6 +221,7 @@ class FanficDetailsResponse {
         authors: json[r'authors'] is Iterable
             ? (json[r'authors'] as Iterable).cast<String>().toList(growable: false)
             : const [],
+        bookmarks: mapValueOfType<int>(json, r'bookmarks'),
         categories: json[r'categories'] is Iterable
             ? (json[r'categories'] as Iterable).cast<String>().toList(growable: false)
             : const [],
@@ -208,6 +229,7 @@ class FanficDetailsResponse {
         characters: json[r'characters'] is Iterable
             ? (json[r'characters'] as Iterable).cast<String>().toList(growable: false)
             : const [],
+        comments: mapValueOfType<int>(json, r'comments'),
         fandoms: json[r'fandoms'] is Iterable
             ? (json[r'fandoms'] as Iterable).cast<String>().toList(growable: false)
             : const [],

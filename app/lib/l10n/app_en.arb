@@ -1174,5 +1174,21 @@
   "readersDirectory": "All readers",
   "readersCount": "{count} readers",
   "@readersCount": {"placeholders": {"count": {"type": "int"}}},
-  "readOriginalReview": "Read the full review →"
+  "readOriginalReview": "Read the full review →",
+  "fanficKudosAction": "Leave kudos",
+  "fanficKudosGiven": "Kudos sent",
+  "fanficKudosAlready": "Kudos already given",
+  "fanficKudosFailed": "AO3 did not answer, try again later.",
+  "fanficTranslate": "Translate the summary",
+  "fanficOriginal": "Show the original",
+  "fanficTranslated": "Machine translation",
+  "fanficTranslateFailed": "Translation unavailable right now.",
+  "fanficComments": "{count} comments",
+  "@fanficComments": {"placeholders": {"count": {"type": "int"}}},
+  "fanficBookmarks": "{count} bookmarks",
+  "@fanficBookmarks": {"placeholders": {"count": {"type": "int"}}},
+  "fanficComplete": "Complete",
+  "fanficInProgress": "Work in progress",
+  "sourceSearchHint": "Search a title or an author…",
+  "sourceNoMatch": "No book matches."
 }

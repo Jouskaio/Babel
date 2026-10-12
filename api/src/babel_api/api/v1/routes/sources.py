@@ -179,6 +179,8 @@ class FanficDetailsResponse(BaseModel):
     updated: str | None
     kudos: int | None
     hits: int | None
+    comments: int | None = None
+    bookmarks: int | None = None
     series: str | None
 
     @classmethod
@@ -201,6 +203,8 @@ class FanficDetailsResponse(BaseModel):
             updated=d.updated,
             kudos=d.kudos,
             hits=d.hits,
+            comments=d.comments,
+            bookmarks=d.bookmarks,
             series=d.series,
         )
 
@@ -349,6 +353,18 @@ async def get_fanfic_details(
 ) -> FanficDetailsResponse:
     """The summary, tags and numbers AO3 gives for a fanfiction of an AO3 source."""
     return FanficDetailsResponse.of(await sources.fanfic_details(user_id, source_id, entry_id))
+
+
+class KudosResponse(BaseModel):
+    given: bool = Field(description="False when you had already left kudos on this work")
+
+
+@router.post("/{source_id}/entries/{entry_id}/kudos", operation_id="leaveKudos")
+async def leave_kudos(
+    user_id: CurrentUserId, sources: SourceServiceDep, source_id: UUID, entry_id: UUID
+) -> KudosResponse:
+    """Leave kudos on a fanfiction of an AO3 source (as you when your AO3 password is saved)."""
+    return KudosResponse(given=await sources.fanfic_kudos(user_id, source_id, entry_id))
 
 
 @router.post(

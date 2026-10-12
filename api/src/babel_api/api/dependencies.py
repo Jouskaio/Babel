@@ -40,6 +40,7 @@ from babel_api.adapters.shelfmark import ShelfmarkClient
 from babel_api.adapters.sources.ao3 import Ao3Connector
 from babel_api.adapters.sources.http import guarded_client
 from babel_api.adapters.sources.links import LinkFetcher
+from babel_api.adapters.translate import Translator
 from babel_api.adapters.wikidata import WikidataClient
 from babel_api.core.config import Settings
 from babel_api.domain.challenges import norm
@@ -109,6 +110,8 @@ class Container:
     wikidata: WikidataClient | None = None
     external_ratings: ExternalRatings | None = None
     pagebound: PageboundClient | None = None
+    # Free machine translation of summaries; tests replace it.
+    translator: Translator | None = None
     # Reads the text of a cover photo (Tesseract); tests replace it.
     ocr: Callable[[bytes], Awaitable[str]] | None = None
     # How a reader's own Chaptarr is reached (tests replace it); None: with the address guard.

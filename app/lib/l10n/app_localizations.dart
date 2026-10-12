@@ -5911,6 +5911,90 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Lire l\'avis complet →'**
   String get readOriginalReview;
+
+  /// No description provided for @fanficKudosAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Laisser un kudos'**
+  String get fanficKudosAction;
+
+  /// No description provided for @fanficKudosGiven.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kudos envoyé'**
+  String get fanficKudosGiven;
+
+  /// No description provided for @fanficKudosAlready.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kudos déjà donné'**
+  String get fanficKudosAlready;
+
+  /// No description provided for @fanficKudosFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'AO3 n\'a pas répondu, réessaie plus tard.'**
+  String get fanficKudosFailed;
+
+  /// No description provided for @fanficTranslate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Traduire le résumé'**
+  String get fanficTranslate;
+
+  /// No description provided for @fanficOriginal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir l\'original'**
+  String get fanficOriginal;
+
+  /// No description provided for @fanficTranslated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Traduction automatique'**
+  String get fanficTranslated;
+
+  /// No description provided for @fanficTranslateFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Traduction indisponible pour l\'instant.'**
+  String get fanficTranslateFailed;
+
+  /// No description provided for @fanficComments.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} commentaires'**
+  String fanficComments(int count);
+
+  /// No description provided for @fanficBookmarks.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} favoris'**
+  String fanficBookmarks(int count);
+
+  /// No description provided for @fanficComplete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminée'**
+  String get fanficComplete;
+
+  /// No description provided for @fanficInProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours d\'écriture'**
+  String get fanficInProgress;
+
+  /// No description provided for @sourceSearchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chercher un titre ou un auteur…'**
+  String get sourceSearchHint;
+
+  /// No description provided for @sourceNoMatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun livre ne correspond.'**
+  String get sourceNoMatch;
 }
 
 class _AppLocalizationsDelegate

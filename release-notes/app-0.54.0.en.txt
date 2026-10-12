@@ -1,0 +1,3 @@
+AO3 fanfictions: search in the list, richer page (rating and warning icons, comments, bookmarks, writing status), kudos in one button, translatable summary
+Importing a list (Goodreads, Pagebound) no longer makes duplicates when the book is already there under a title with its series in parentheses
+Friends page: the "All readers" button is better spaced

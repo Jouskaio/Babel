@@ -528,6 +528,40 @@ class FakeAo3Source:
         ]  # fmt: skip
 
 
+def test_a_reader_leaves_kudos_on_a_fanfiction_of_an_ao3_source(
+    app: FastAPI, client: TestClient, ada: dict[str, str]
+) -> None:
+    class Kudos(FakeAo3Source):
+        given: list[str]
+
+        def __init__(self) -> None:
+            super().__init__()
+            self.given = []
+
+        async def kudos(self, config: dict[str, Any], token: str | None, work_id: str) -> bool:
+            if work_id in self.given:
+                return False
+            self.given.append(work_id)
+            return True
+
+    fake = Kudos()
+    app.state.container = replace(
+        app.state.container,
+        connectors={SourceKind.AO3: fake},
+        secrets=SecretBox(Fernet.generate_key().decode()),
+    )
+    body = {"kind": "ao3", "name": "AO3 · ada", "ao3": {"username": "ada"}}
+    source_id = client.post("/v1/sources", json=body, headers=ada).json()["source"]["id"]
+    entries = client.get(f"/v1/sources/{source_id}", headers=ada).json()["entries"]
+    entry_id = entries[0]["id"]
+
+    first = client.post(f"/v1/sources/{source_id}/entries/{entry_id}/kudos", headers=ada)
+    assert first.json() == {"given": True}
+    again = client.post(f"/v1/sources/{source_id}/entries/{entry_id}/kudos", headers=ada)
+    assert again.json() == {"given": False}
+    assert fake.given == ["1"]
+
+
 def test_a_slow_source_is_scanned_in_the_background(
     app: FastAPI, client: TestClient, ada: dict[str, str]
 ) -> None:
@@ -667,3 +701,18 @@ def test_plugins_are_installed_by_the_admin_and_switched_on_by_readers(
     assert client.get("/v1/sources", headers=bob).json() == []
     assert client.delete(f"/v1/admin/plugins/{plugin_id}", headers=admin).status_code == 204
     assert client.get("/v1/plugins", headers=bob).json() == []
+
+
+def test_a_text_can_be_translated_when_the_service_answers(
+    app: FastAPI, client: TestClient, ada: dict[str, str]
+) -> None:
+    class Fake:
+        async def translate(self, text: str, target: str) -> str | None:
+            return None if target == "xx" else f"[{target}] {text}"
+
+    app.state.container = replace(app.state.container, translator=Fake())
+    ok = client.post("/v1/translate", json={"text": "Hello", "target": "fr"}, headers=ada)
+    assert ok.json() == {"text": "[fr] Hello"}
+    down = client.post("/v1/translate", json={"text": "Hello", "target": "xx"}, headers=ada)
+    assert down.status_code == 503
+    assert client.post("/v1/translate", json={"text": "Hello", "target": "fr"}).status_code == 401

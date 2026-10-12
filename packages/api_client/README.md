@@ -204,6 +204,7 @@ Class | Method | HTTP request | Description
 *SourcesApi* | [**getSources**](doc//SourcesApi.md#getsources) | **GET** /v1/sources | Get Sources
 *SourcesApi* | [**importSource**](doc//SourcesApi.md#importsource) | **POST** /v1/sources/{source_id}/import | Import All
 *SourcesApi* | [**importSourceEntry**](doc//SourcesApi.md#importsourceentry) | **POST** /v1/sources/{source_id}/entries/{entry_id}/import | Import Entry
+*SourcesApi* | [**leaveKudos**](doc//SourcesApi.md#leavekudos) | **POST** /v1/sources/{source_id}/entries/{entry_id}/kudos | Leave Kudos
 *SourcesApi* | [**scanSource**](doc//SourcesApi.md#scansource) | **POST** /v1/sources/{source_id}/scan | Scan Source
 *SourcesApi* | [**searchSources**](doc//SourcesApi.md#searchsources) | **GET** /v1/sources/search | Search Sources
 *StatsApi* | [**getProgression**](doc//StatsApi.md#getprogression) | **GET** /v1/me/progression | Get Progression
@@ -215,6 +216,7 @@ Class | Method | HTTP request | Description
 *SyncApi* | [**registerDevice**](doc//SyncApi.md#registerdevice) | **POST** /v1/devices | Register Device
 *SyncApi* | [**removeDevice**](doc//SyncApi.md#removedevice) | **DELETE** /v1/devices/{device_id} | Remove Device
 *SyncApi* | [**setPushToken**](doc//SyncApi.md#setpushtoken) | **PUT** /v1/devices/{device_id}/push-token | Set Push Token
+*TranslateApi* | [**translateText**](doc//TranslateApi.md#translatetext) | **POST** /v1/translate | Translate Text
 
 
 ## Documentation For Models
@@ -285,6 +287,7 @@ Class | Method | HTTP request | Description
  - [KnownVolumeResponse](doc//KnownVolumeResponse.md)
  - [KoreaderPasswordResponse](doc//KoreaderPasswordResponse.md)
  - [KoreaderResponse](doc//KoreaderResponse.md)
+ - [KudosResponse](doc//KudosResponse.md)
  - [LibraryItemResponse](doc//LibraryItemResponse.md)
  - [LinkKavitaRequest](doc//LinkKavitaRequest.md)
  - [LinkKind](doc//LinkKind.md)
@@ -350,6 +353,8 @@ Class | Method | HTTP request | Description
  - [StepResponse](doc//StepResponse.md)
  - [SuggestionResponse](doc//SuggestionResponse.md)
  - [TokenResponse](doc//TokenResponse.md)
+ - [TranslateRequest](doc//TranslateRequest.md)
+ - [TranslateResponse](doc//TranslateResponse.md)
  - [TrendingWorkResponse](doc//TrendingWorkResponse.md)
  - [UpdateProfileRequest](doc//UpdateProfileRequest.md)
  - [UpdateSocialProfileRequest](doc//UpdateSocialProfileRequest.md)

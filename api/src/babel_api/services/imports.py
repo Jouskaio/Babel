@@ -6,6 +6,7 @@ with its status, dates and rating, or is skipped when the library already has th
 
 import csv
 import io
+import re
 import unicodedata
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -46,6 +47,12 @@ class ImportResult:
 def _plain(text: str) -> str:
     decomposed = unicodedata.normalize("NFKD", text.strip().lower())
     return "".join(c for c in decomposed if not unicodedata.combining(c))
+
+
+def _base(title: str) -> str:
+    """A title without the series in parentheses: "Le Guerrier (Le Prince Captif, #2)" and
+    "Le Guerrier" are the same book."""
+    return _plain(re.sub(r"\s*[(\[].*?[)\]]", "", title)) or _plain(title)
 
 
 def _date(value: str) -> datetime | None:
@@ -136,13 +143,13 @@ class ImportService:
     ) -> ImportResult:
         """Adds each book as a paper book with its status, dates and (private) rating and review;
         books whose title the library already has are skipped."""
-        known = {_plain(i.title) for i in await self._files.library(user_id)}
+        known = {_base(i.title) for i in await self._files.library(user_id)}
         imported = skipped = 0
         for row in rows:
-            if _plain(row.title) in known:
+            if _base(row.title) in known:
                 skipped += 1
                 continue
-            known.add(_plain(row.title))
+            known.add(_base(row.title))
             item = await self._files.add_imported(
                 user_id,
                 row.title,

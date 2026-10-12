@@ -123,4 +123,6 @@ class FanficDetails:
     updated: str | None = None
     kudos: int | None = None
     hits: int | None = None
+    comments: int | None = None
+    bookmarks: int | None = None
     series: str | None = None

@@ -3596,4 +3596,51 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get readOriginalReview => 'Lire l\'avis complet →';
+
+  @override
+  String get fanficKudosAction => 'Laisser un kudos';
+
+  @override
+  String get fanficKudosGiven => 'Kudos envoyé';
+
+  @override
+  String get fanficKudosAlready => 'Kudos déjà donné';
+
+  @override
+  String get fanficKudosFailed => 'AO3 n\'a pas répondu, réessaie plus tard.';
+
+  @override
+  String get fanficTranslate => 'Traduire le résumé';
+
+  @override
+  String get fanficOriginal => 'Voir l\'original';
+
+  @override
+  String get fanficTranslated => 'Traduction automatique';
+
+  @override
+  String get fanficTranslateFailed =>
+      'Traduction indisponible pour l\'instant.';
+
+  @override
+  String fanficComments(int count) {
+    return '$count commentaires';
+  }
+
+  @override
+  String fanficBookmarks(int count) {
+    return '$count favoris';
+  }
+
+  @override
+  String get fanficComplete => 'Terminée';
+
+  @override
+  String get fanficInProgress => 'En cours d\'écriture';
+
+  @override
+  String get sourceSearchHint => 'Chercher un titre ou un auteur…';
+
+  @override
+  String get sourceNoMatch => 'Aucun livre ne correspond.';
 }

@@ -210,6 +210,7 @@ class _FriendsSectionState extends ConsumerState<_FriendsSection> {
             ),
           ),
         ),
+        const SizedBox(height: 10),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton.icon(

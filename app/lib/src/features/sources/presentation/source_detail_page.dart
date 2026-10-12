@@ -30,6 +30,7 @@ class SourceDetailPage extends ConsumerStatefulWidget {
 class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
   bool _scanning = false;
   bool _importingAll = false;
+  String _filter = '';
   // While the server scans in the background, ask again every few seconds.
   Timer? _poll;
 
@@ -252,6 +253,17 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
       for (final e in detail.entries)
         if (e.status == EntryStatus.inLibrary) e,
     ];
+    // The search narrows what is listed (title or author), not what "import all" imports.
+    final query = _filter.trim().toLowerCase();
+    bool matches(SourceEntryResponse e) =>
+        query.isEmpty ||
+        [
+          e.title ?? titleAndFormat(e.name).$1,
+          ...e.authors,
+        ].any((text) => text.toLowerCase().contains(query));
+    final shownPending = pending.where(matches).toList();
+    final shownInLibrary = inLibrary.where(matches).toList();
+    final shownUnreadable = unreadable.where(matches).toList();
     final failed = source.lastError != null;
     final busy = _scanning || _importingAll || source.scanning;
     return RefreshIndicator(
@@ -329,22 +341,54 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
                 ),
             ],
           ),
-          if (pending.isNotEmpty) ...[
+          if (detail.entries.length > 8) ...[
+            const SizedBox(height: 18),
+            TextField(
+              onChanged: (value) => setState(() => _filter = value),
+              style: BabelText.body(15, color: BabelColors.textPrimary),
+              decoration: InputDecoration(
+                hintText: l10n.sourceSearchHint,
+                hintStyle: BabelText.body(15),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: BabelColors.textSecondary,
+                ),
+                filled: true,
+                fillColor: BabelColors.surface,
+                border: OutlineInputBorder(
+                  borderRadius: BabelShape.radius(28),
+                  borderSide: BorderSide(color: BabelColors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BabelShape.radius(28),
+                  borderSide: BorderSide(color: BabelColors.border),
+                ),
+              ),
+            ),
+            if (query.isNotEmpty &&
+                shownPending.isEmpty &&
+                shownInLibrary.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 18),
+                child: Text(l10n.sourceNoMatch, style: BabelText.body(14)),
+              ),
+          ],
+          if (shownPending.isNotEmpty) ...[
             const SizedBox(height: 28),
             Text(l10n.sectionNew.toUpperCase(), style: BabelText.label(10)),
             const SizedBox(height: 12),
-            for (final entry in pending) _row(entry),
+            for (final entry in shownPending) _row(entry),
           ],
-          if (inLibrary.isNotEmpty) ...[
+          if (shownInLibrary.isNotEmpty) ...[
             const SizedBox(height: 28),
             Text(
               l10n.sectionInLibrary.toUpperCase(),
               style: BabelText.label(10),
             ),
             const SizedBox(height: 12),
-            for (final entry in inLibrary) _row(entry),
+            for (final entry in shownInLibrary) _row(entry),
           ],
-          if (unreadable.isNotEmpty) ...[
+          if (shownUnreadable.isNotEmpty) ...[
             const SizedBox(height: 28),
             Text(
               l10n.sectionUnreadable.toUpperCase(),
@@ -353,7 +397,7 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
             const SizedBox(height: 6),
             Text(l10n.unreadableHint, style: BabelText.body(12)),
             const SizedBox(height: 12),
-            for (final entry in unreadable) _row(entry),
+            for (final entry in shownUnreadable) _row(entry),
           ],
           const SizedBox(height: 32),
           TextButton(

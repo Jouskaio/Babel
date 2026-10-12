@@ -40,6 +40,7 @@ from babel_api.adapters.sources.links import LinkFetcher
 from babel_api.adapters.sources.manifest import ManifestConnector
 from babel_api.adapters.sources.opds import OpdsConnector
 from babel_api.adapters.sources.webdav import WebDavConnector
+from babel_api.adapters.translate import Translator
 from babel_api.adapters.wikidata import WikidataClient
 from babel_api.api.dependencies import (
     Container,
@@ -253,6 +254,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         shelfmark=shelfmark,
         hardcover=hardcover,
         wikidata=wikidata,
+        translator=Translator(),
         external_ratings=ExternalRatings(goodreads=settings.scrape_goodreads),
         pagebound=PageboundClient(),
     )
