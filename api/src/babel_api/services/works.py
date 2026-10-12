@@ -25,6 +25,7 @@ from babel_api.domain.catalog import Edition, IdentifierKind, SourceWork, Work
 from babel_api.domain.challenges import norm
 from babel_api.domain.errors import NotFoundError, SourceUnavailableError
 from babel_api.domain.isbn import normalize_isbn
+from babel_api.domain.language import guess_language
 from babel_api.domain.playlists import GOODREADS_SHELVES, PLAYLISTS
 from babel_api.domain.ports import BookSource, CatalogRepository
 from babel_api.domain.series import guess_series, series_key, volume_number
@@ -70,19 +71,24 @@ class WorkDetail:
     editions: list[Edition]
 
     def described(self, language: str | None) -> str | None:
-        """The fullest description: an edition's in the reader's language when it has one
-        (a translated blurb), else the longest of the work's and its editions'."""
+        """The description to show: a full one in the reader's language (an edition's, or the
+        work's when it reads as that language), else a full English one (a language most
+        readers get by in), else the fullest there is. A blurb of one line does not count."""
+        texts = [self.work.description, *(e.description for e in self.editions)]
+        found = [t for t in texts if t]
         if language:
             local = [
                 e.description for e in self.editions if e.language == language and e.description
             ]
-            if local:
-                best = max(local, key=len)
-                # A translated blurb is only worth it if it is not just a line.
-                if len(best) >= 120:
-                    return best
-        candidates = [self.work.description, *(e.description for e in self.editions)]
-        return max((c for c in candidates if c), key=len, default=None)
+            if local and len(max(local, key=len)) >= 120:
+                return max(local, key=len)
+            same = [t for t in found if guess_language(t) == language and len(t) >= 120]
+            if same:
+                return max(same, key=len)
+        english = [t for t in found if guess_language(t) == "en" and len(t) >= 120]
+        if english and language != "en":
+            return max(english, key=len)
+        return max(found, key=len, default=None)
 
     def localized(self, language: str | None) -> tuple[str, int | None]:
         """Title and cover of the first edition in ``language``, else the work's own."""

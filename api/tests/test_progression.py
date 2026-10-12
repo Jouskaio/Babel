@@ -70,3 +70,48 @@ def test_typographic_and_plain_apostrophes_read_the_same() -> None:
     from babel_api.domain.challenges import norm
 
     assert norm("Ender’s Game") == norm("Ender's Game") == "ender s game"
+
+
+def test_the_language_of_a_blurb_is_guessed_from_its_words() -> None:
+    from babel_api.domain.language import guess_language
+
+    fr = "Quinze ans après les événements de La Servante écarlate, le régime est toujours là, mais "
+    fr += "ses rouages commencent à se gripper et la vie de trois femmes va changer."
+    pt = "O conto da aia, a obra-prima distópica de Margaret Atwood, tornou-se um clássico de "
+    pt += "nossos tempos e os testamentos dessas duas jovens são entrelaçados por uma terceira voz."
+    en = "The Handmaid's Tale is the story of a woman in a regime that is crumbling, and of the "
+    en += "secrets that bring three women together with her."
+    assert (guess_language(fr), guess_language(pt), guess_language(en)) == ("fr", "pt", "en")
+    assert guess_language("Dune") is None
+
+
+def test_a_description_in_another_language_is_not_chosen_for_being_longest() -> None:
+    from types import SimpleNamespace
+    from typing import Any, cast
+
+    from babel_api.services.works import WorkDetail
+
+    pt = (
+        "O conto da aia, a obra-prima distópica de Margaret Atwood, tornou-se um clássico de "
+        "nossos tempos e os testamentos dessas duas jovens são entrelaçados por uma terceira voz "
+        "que revela segredos há muito enterrados, capazes de unir essas três mulheres."
+    )
+    en = (
+        "Fifteen years after the events of the handmaid's tale, the regime is still in power, but "
+        "its gears are starting to wear, and the lives of three women are about to converge in "
+        "ways that could shake the whole structure."
+    )
+    fr = (
+        "Quinze ans après les événements de la servante écarlate, le régime est toujours en place, "
+        "mais ses rouages commencent à se gripper et la vie de trois femmes va changer, avec des "
+        "conséquences qui pourraient ébranler tout l'édifice."
+    )
+
+    def detail(*texts: str) -> WorkDetail:
+        editions = [SimpleNamespace(language=None, description=t) for t in texts[1:]]
+        work = SimpleNamespace(description=texts[0])
+        return WorkDetail(cast(Any, work), cast(Any, editions))
+
+    assert detail(pt, en).described("fr") == en  # English before Portuguese
+    assert detail(pt, en, fr).described("fr") == fr  # then the reader's own language
+    assert detail(pt).described("fr") == pt  # nothing else to show
