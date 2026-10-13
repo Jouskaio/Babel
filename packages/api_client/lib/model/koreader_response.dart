@@ -16,6 +16,7 @@ class KoreaderResponse {
     required this.hasPassword,
     required this.server,
     required this.username,
+    required this.webdav,
   });
 
   bool hasPassword;
@@ -26,27 +27,33 @@ class KoreaderResponse {
   /// Your e-mail: what KOReader asks for as the username
   String username;
 
+  /// The address of the library for KOReader's cloud storage
+  String webdav;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is KoreaderResponse &&
     other.hasPassword == hasPassword &&
     other.server == server &&
-    other.username == username;
+    other.username == username &&
+    other.webdav == webdav;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (hasPassword.hashCode) +
     (server.hashCode) +
-    (username.hashCode);
+    (username.hashCode) +
+    (webdav.hashCode);
 
   @override
-  String toString() => 'KoreaderResponse[hasPassword=$hasPassword, server=$server, username=$username]';
+  String toString() => 'KoreaderResponse[hasPassword=$hasPassword, server=$server, username=$username, webdav=$webdav]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'has_password'] = this.hasPassword;
       json[r'server'] = this.server;
       json[r'username'] = this.username;
+      json[r'webdav'] = this.webdav;
     return json;
   }
 
@@ -72,6 +79,7 @@ class KoreaderResponse {
         hasPassword: mapValueOfType<bool>(json, r'has_password')!,
         server: mapValueOfType<String>(json, r'server')!,
         username: mapValueOfType<String>(json, r'username')!,
+        webdav: mapValueOfType<String>(json, r'webdav')!,
       );
     }
     return null;
@@ -122,6 +130,7 @@ class KoreaderResponse {
     'has_password',
     'server',
     'username',
+    'webdav',
   };
 }
 

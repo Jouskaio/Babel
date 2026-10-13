@@ -3760,4 +3760,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String koreaderUnknownBooks(int count) {
     return 'KOReader sent the progress of $count book(s) your Babel library does not have: to sync them, add them to Babel (Import a file, picking the same file as on the e-reader).';
   }
+
+  @override
+  String get koreaderWebdav => 'WebDAV address (send and get books)';
+
+  @override
+  String get koreaderFilesTitle => 'Send or get books from KOReader';
+
+  @override
+  String get koreaderFiles =>
+      '• In KOReader: Cloud storage (left menu or Tools) › + › WebDAV. Address: the WebDAV address above, username: your e-mail, password: the KOReader one.\n• The folder lists the books of your Babel library: long-press a book to download it to the e-reader.\n• To send a book from the e-reader to Babel: open the folder, menu › Upload file, then pick the book. Babel adds it to your library, skips the ones it already has and recognises AO3 fanfictions.\n• KOReader sends one file at a time; to send everything at once, select the books in Babel (Import a file).';
 }

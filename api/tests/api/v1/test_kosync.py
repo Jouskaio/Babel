@@ -46,6 +46,7 @@ def test_progress_goes_both_ways_with_koreader(
     assert info["username"] == "ada@example.com"
     # The public address, which KOReader can reach directly (not the proxy's http one).
     assert info["server"] == "http://localhost:8080/v1/kosync"
+    assert info["webdav"] == "http://localhost:8080/v1/webdav"
     password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
     key = {
         "x-auth-user": "ada@example.com",
@@ -114,3 +115,42 @@ def test_koreader_can_also_name_a_book_by_its_file_name(
         "device_id": "1",
     }
     assert client.put("/v1/kosync/syncs/progress", json=body, headers=key).status_code == 200
+
+
+def test_koreader_cloud_storage_lists_downloads_and_receives_books(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    import base64
+
+    content = epub(title="Jane Eyre", isbn=None)
+    upload(client, ada, content, name="Jane Eyre.epub")
+    password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
+    login = base64.b64encode(f"ada@example.com:{password}".encode()).decode()
+    auth = {"authorization": f"Basic {login}"}
+
+    assert client.request("OPTIONS", "/v1/webdav").headers["dav"] == "1"
+    assert client.request("PROPFIND", "/v1/webdav/").status_code == 401  # not signed in
+    bad = base64.b64encode(b"ada@example.com:wrong").decode()
+    refused = client.request("PROPFIND", "/v1/webdav/", headers={"authorization": f"Basic {bad}"})
+    assert refused.status_code == 401
+
+    listing = client.request("PROPFIND", "/v1/webdav/", headers={**auth, "depth": "1"})
+    assert listing.status_code == 207
+    assert "<D:collection/>" in listing.text
+    assert "Jane%20Eyre.epub" in listing.text
+    assert f"<D:getcontentlength>{len(content)}</D:getcontentlength>" in listing.text
+
+    assert client.get("/v1/webdav/Jane%20Eyre.epub", headers=auth).content == content
+    assert client.get("/v1/webdav/missing.epub", headers=auth).status_code == 404
+
+    # Sending a file from the e-reader puts it in the library (a fanfiction is recognised).
+    fic = epub(
+        title="A Work", isbn=None, source="https://archiveofourown.org/works/9", author="Someone"
+    )
+    sent = client.put("/v1/webdav/A%20Work.epub", content=fic, headers=auth)
+    assert sent.status_code == 201
+    library = client.get("/v1/library", headers=ada).json()
+    assert {i["title"]: i["origin"] for i in library} == {"Jane Eyre": None, "A Work": "ao3"}
+    again = client.put("/v1/webdav/A%20Work.epub", content=fic, headers=auth)
+    assert again.status_code == 201
+    assert len(client.get("/v1/library", headers=ada).json()) == 2  # not twice

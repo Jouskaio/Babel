@@ -1,0 +1,1 @@
+Send and get books from KOReader: WebDAV cloud storage on your Babel account (download the books of your library, send those of the e-reader, with duplicates skipped and AO3 fanfictions recognised)
