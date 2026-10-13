@@ -6217,6 +6217,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'KOReader a envoyé la progression de {count} livre(s) que ta bibliothèque Babel n\'a pas : pour qu\'ils se synchronisent, ajoute-les à Babel (Importer un fichier, en choisissant le même fichier que sur la liseuse).'**
   String koreaderUnknownBooks(int count);
+
+  /// No description provided for @koreaderWebdav.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse WebDAV (envoyer et récupérer des livres)'**
+  String get koreaderWebdav;
+
+  /// No description provided for @koreaderFilesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer ou récupérer des livres depuis KOReader'**
+  String get koreaderFilesTitle;
+
+  /// No description provided for @koreaderFiles.
+  ///
+  /// In fr, this message translates to:
+  /// **'• Dans KOReader : Stockage cloud (menu de gauche ou Outils) › + › WebDAV. Adresse : l\'adresse WebDAV ci-dessus, identifiant : ton e-mail, mot de passe : celui de KOReader.\n• Le dossier liste les livres de ta bibliothèque Babel : appuie longtemps sur un livre pour le télécharger sur la liseuse.\n• Pour envoyer un livre de la liseuse vers Babel : ouvre le dossier, menu › Envoyer un fichier, puis choisis le livre. Babel l\'ajoute à ta bibliothèque, saute ceux qu\'il a déjà et reconnaît les fanfictions AO3.\n• Les envois se font un fichier à la fois dans KOReader ; pour tout envoyer d\'un coup, sélectionne les livres dans Babel (Importer un fichier).'**
+  String get koreaderFiles;
 }
 
 class _AppLocalizationsDelegate

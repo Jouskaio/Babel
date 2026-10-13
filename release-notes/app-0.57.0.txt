@@ -1,0 +1,1 @@
+Envoyer et récupérer des livres depuis KOReader : stockage cloud WebDAV sur ton compte Babel (télécharger les livres de ta bibliothèque, envoyer ceux de la liseuse, avec doublons évités et fanfictions AO3 reconnues)

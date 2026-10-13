@@ -21,6 +21,7 @@ from babel_api.api.v1.routes import (
     stats,
     sync,
     translate,
+    webdav,
 )
 
 router = APIRouter()
@@ -43,6 +44,7 @@ router.include_router(requests.link_router)
 router.include_router(pagebound.router)
 router.include_router(plugins.router)
 router.include_router(translate.router)
+router.include_router(webdav.router)
 router.include_router(kosync.router)
 router.include_router(kosync.account_router)
 router.include_router(requests.shelfmark_router)

@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **hasPassword** | **bool** |  | 
 **server** | **String** | The address to give KOReader as its sync server | 
 **username** | **String** | Your e-mail: what KOReader asks for as the username | 
+**webdav** | **String** | The address of the library for KOReader's cloud storage | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

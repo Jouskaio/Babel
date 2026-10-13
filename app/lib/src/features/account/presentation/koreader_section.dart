@@ -61,6 +61,7 @@ class _KoreaderSectionState extends ConsumerState<KoreaderSection> {
         const SizedBox(height: 14),
         _Line(label: l10n.koreaderServer, value: info.server),
         _Line(label: l10n.koreaderUser, value: info.username),
+        _Line(label: l10n.koreaderWebdav, value: info.webdav),
         if (_password case final password?)
           _Line(label: l10n.koreaderPassword, value: password, strong: true),
         if (_password != null)
@@ -185,6 +186,10 @@ class _SyncStatus extends ConsumerWidget {
         Text(l10n.koreaderTipsTitle.toUpperCase(), style: BabelText.label(10)),
         const SizedBox(height: 6),
         Text(l10n.koreaderTips, style: BabelText.body(13)),
+        const SizedBox(height: 14),
+        Text(l10n.koreaderFilesTitle.toUpperCase(), style: BabelText.label(10)),
+        const SizedBox(height: 6),
+        Text(l10n.koreaderFiles, style: BabelText.body(13)),
       ],
     );
   }

@@ -106,6 +106,7 @@ async def get_progress(
 class KoreaderResponse(BaseModel):
     username: str = Field(description="Your e-mail: what KOReader asks for as the username")
     server: str = Field(description="The address to give KOReader as its sync server")
+    webdav: str = Field(description="The address of the library for KOReader's cloud storage")
     has_password: bool
 
 
@@ -141,6 +142,10 @@ class KoreaderPasswordResponse(KoreaderResponse):
     password: str = Field(description="Shown once: KOReader's password")
 
 
+def _webdav(request: Request, public_url: str) -> str:
+    return _server(request, public_url).removesuffix("/kosync") + "/webdav"
+
+
 def _server(request: Request, public_url: str) -> str:
     """The address for KOReader: the site's public address (https), not the one the proxy
     forwards to (http): KOReader does not follow the http to https redirect."""
@@ -159,6 +164,7 @@ async def get_koreader(
     return KoreaderResponse(
         username=await koreader.username(user_id),
         server=_server(request, container.settings.public_url),
+        webdav=_webdav(request, container.settings.public_url),
         has_password=await koreader.has_password(user_id),
     )
 
@@ -200,6 +206,7 @@ async def new_koreader_password(
     return KoreaderPasswordResponse(
         username=await koreader.username(user_id),
         server=_server(request, container.settings.public_url),
+        webdav=_webdav(request, container.settings.public_url),
         has_password=True,
         password=password,
     )

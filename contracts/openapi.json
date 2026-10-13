@@ -2749,11 +2749,17 @@
             "description": "Your e-mail: what KOReader asks for as the username",
             "title": "Username",
             "type": "string"
+          },
+          "webdav": {
+            "description": "The address of the library for KOReader's cloud storage",
+            "title": "Webdav",
+            "type": "string"
           }
         },
         "required": [
           "username",
           "server",
+          "webdav",
           "has_password",
           "password"
         ],
@@ -2775,11 +2781,17 @@
             "description": "Your e-mail: what KOReader asks for as the username",
             "title": "Username",
             "type": "string"
+          },
+          "webdav": {
+            "description": "The address of the library for KOReader's cloud storage",
+            "title": "Webdav",
+            "type": "string"
           }
         },
         "required": [
           "username",
           "server",
+          "webdav",
           "has_password"
         ],
         "title": "KoreaderResponse",
@@ -6288,7 +6300,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.64.2"
+    "version": "0.65.0"
   },
   "openapi": "3.1.0",
   "paths": {
