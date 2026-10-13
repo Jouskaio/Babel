@@ -67,10 +67,8 @@ class ProgressBody(BaseModel):
 async def put_progress(
     user_id: Reader, koreader: KoreaderServiceDep, body: ProgressBody
 ) -> dict[str, Any]:
-    try:
-        await koreader.put(user_id, body.document, body.progress, body.percentage, body.device)
-    except NotFoundError:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Document not in your library") from None
+    # A book Babel does not have is kept aside, not refused: KOReader would show an error.
+    await koreader.put(user_id, body.document, body.progress, body.percentage, body.device)
     return {"document": body.document, "timestamp": int(datetime.now(UTC).timestamp())}
 
 
@@ -82,8 +80,18 @@ async def get_progress(
         found = await koreader.get(user_id, document)
     except NotFoundError:
         found = None
+        if kept := await koreader.orphan(user_id, document):
+            return {
+                "document": document,
+                "progress": kept.progress,
+                "percentage": kept.percentage,
+                "device": kept.device,
+                "device_id": kept.device_id,
+                "timestamp": int(kept.at.timestamp()),
+            }
     if found is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "No progress")
+        # KOReader reads a body without a position as "nothing synced yet": no error.
+        return {"document": document, "message": "No progress yet"}
     position, progress, device = found
     return {
         "document": document,
@@ -124,6 +132,9 @@ class KoreaderStatusResponse(BaseModel):
     )
     devices: list[KoreaderDeviceResponse]
     recent: list[KoreaderBookResponse] = Field(description="The books it synced last")
+    unknown_books: int = Field(
+        description="Books KOReader sent a position for that are not in your library"
+    )
 
 
 class KoreaderPasswordResponse(KoreaderResponse):
@@ -162,6 +173,7 @@ async def get_koreader_status(
         last_seen_at=status.contact.last_seen_at,
         last_unmatched_at=status.contact.last_unmatched_at,
         devices=[KoreaderDeviceResponse(name=n, last_seen_at=t) for n, t in status.devices],
+        unknown_books=status.unknown_books,
         recent=[
             KoreaderBookResponse(
                 item_id=r.item_id,

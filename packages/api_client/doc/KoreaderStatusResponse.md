@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **lastSeenAt** | [**DateTime**](DateTime.md) | The last time KOReader called Babel; null if it never did | [optional] 
 **lastUnmatchedAt** | [**DateTime**](DateTime.md) | The last time KOReader asked for a book that is not in your library | [optional] 
 **recent** | [**List<KoreaderBookResponse>**](KoreaderBookResponse.md) | The books it synced last | [default to const []]
+**unknownBooks** | **int** | Books KOReader sent a position for that are not in your library | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

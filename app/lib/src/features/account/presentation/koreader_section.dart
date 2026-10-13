@@ -164,7 +164,15 @@ class _SyncStatus extends ConsumerWidget {
               padding: const EdgeInsets.only(top: 10),
               child: Text(l10n.koreaderNoBook, style: BabelText.body(13)),
             ),
-          if (value.lastUnmatchedAt case final unmatched?)
+          if (value.unknownBooks > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Text(
+                l10n.koreaderUnknownBooks(value.unknownBooks),
+                style: BabelText.body(13, color: BabelColors.gold),
+              ),
+            )
+          else if (value.lastUnmatchedAt case final unmatched?)
             Padding(
               padding: const EdgeInsets.only(top: 12),
               child: Text(

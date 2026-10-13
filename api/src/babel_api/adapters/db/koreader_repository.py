@@ -4,13 +4,14 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.models import (
     DeviceRow,
     KoreaderHashRow,
     KoreaderKeyRow,
+    KoreaderProgressRow,
     LibraryItemRow,
     ReadingPositionRow,
 )
@@ -34,6 +35,17 @@ class RecentSync:
     percent: float
     at: datetime
     device: str
+
+
+@dataclass(frozen=True, slots=True)
+class OrphanProgress:
+    """A position KOReader sent for a book that is not in the reader's library."""
+
+    progress: str
+    percentage: float
+    device: str
+    device_id: str
+    at: datetime
 
 
 def _aware(moment: datetime | None) -> datetime | None:
@@ -100,6 +112,48 @@ class SqlKoreaderRepository:
             )
             for position, item, device in rows.all()
         ]
+
+    async def put_orphan(
+        self,
+        user_id: UUID,
+        document: str,
+        progress: str,
+        percentage: float,
+        device: str,
+        device_id: str,
+    ) -> None:
+        row = await self._session.get(KoreaderProgressRow, (user_id, document))
+        if row is None:
+            row = KoreaderProgressRow(user_id=user_id, document=document)
+            self._session.add(row)
+        row.progress = progress[:1000]
+        row.percentage = percentage
+        row.device = device[:80]
+        row.device_id = device_id[:80]
+        row.updated_at = datetime.now(UTC)
+        await self._session.flush()
+
+    async def get_orphan(self, user_id: UUID, document: str) -> OrphanProgress | None:
+        row = await self._session.get(KoreaderProgressRow, (user_id, document))
+        if row is None:
+            return None
+        return OrphanProgress(
+            row.progress,
+            row.percentage,
+            row.device,
+            row.device_id,
+            _aware(row.updated_at) or datetime.now(UTC),
+        )
+
+    async def orphan_count(self, user_id: UUID) -> int:
+        return int(
+            await self._session.scalar(
+                select(func.count())
+                .select_from(KoreaderProgressRow)
+                .where(KoreaderProgressRow.user_id == user_id)
+            )
+            or 0
+        )
 
     async def hashes(self, shas: list[str]) -> dict[str, str]:
         """md5 -> sha256 for the files whose identifier is known."""

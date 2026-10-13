@@ -17,6 +17,7 @@ from uuid import UUID
 
 from babel_api.adapters.db.koreader_repository import (
     KoreaderContact,
+    OrphanProgress,
     RecentSync,
     SqlKoreaderRepository,
 )
@@ -32,6 +33,7 @@ class KoreaderStatus:
     contact: KoreaderContact
     devices: list[tuple[str, datetime]]
     recent: list[RecentSync]
+    unknown_books: int = 0
 
 
 PREFIX = "koreader:"
@@ -95,7 +97,14 @@ class KoreaderService:
         percentage: float,
         device: str,
     ) -> None:
-        item_id = await self._item_of_marked(user_id, document)
+        try:
+            item_id = await self._item_of_marked(user_id, document)
+        except NotFoundError:
+            # Not a book of this library (yet): kept anyway, so KOReader sees no error and a
+            # second e-reader can get the position back.
+            await self._repo.put_orphan(user_id, document, progress, percentage, device, "")
+            await self._repo.commit()
+            return
         devices = await self._sync.devices(user_id)
         name = f"{DEVICE_PREFIX}{device.strip() or 'e-reader'}"[:80]
         found = next((d for d in devices if d.name == name), None)
@@ -124,6 +133,10 @@ class KoreaderService:
         progress = latest.locator[len(PREFIX) :] if latest.locator.startswith(PREFIX) else ""
         return latest, progress, names.get(latest.device_id, "")
 
+    async def orphan(self, user_id: UUID, document: str) -> OrphanProgress | None:
+        """What KOReader last sent for a book Babel does not have."""
+        return await self._repo.get_orphan(user_id, document)
+
     # ------------------------------------------------------------ what the reader can check
     async def status(self, user_id: UUID) -> "KoreaderStatus":
         """Whether KOReader has called, which books it synced last, and its devices."""
@@ -132,6 +145,7 @@ class KoreaderService:
             contact=await self._repo.contact(user_id),
             devices=[(d.name[len(DEVICE_PREFIX) :], d.last_seen_at) for d in devices],
             recent=await self._repo.recent(user_id),
+            unknown_books=await self._repo.orphan_count(user_id),
         )
 
     async def _item_of_marked(self, user_id: UUID, document: str) -> UUID:

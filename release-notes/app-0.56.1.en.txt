@@ -1,0 +1,2 @@
+KOReader: "Push" and "Pull" no longer fail for a book Babel does not have; the progress is kept and Account says how many books are missing
+KOReader can also recognise a book by its file name

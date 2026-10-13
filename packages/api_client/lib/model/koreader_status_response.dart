@@ -17,6 +17,7 @@ class KoreaderStatusResponse {
     this.lastSeenAt,
     this.lastUnmatchedAt,
     this.recent = const [],
+    required this.unknownBooks,
   });
 
   List<KoreaderDeviceResponse> devices;
@@ -30,12 +31,16 @@ class KoreaderStatusResponse {
   /// The books it synced last
   List<KoreaderBookResponse> recent;
 
+  /// Books KOReader sent a position for that are not in your library
+  int unknownBooks;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is KoreaderStatusResponse &&
     _deepEquality.equals(other.devices, devices) &&
     other.lastSeenAt == lastSeenAt &&
     other.lastUnmatchedAt == lastUnmatchedAt &&
-    _deepEquality.equals(other.recent, recent);
+    _deepEquality.equals(other.recent, recent) &&
+    other.unknownBooks == unknownBooks;
 
   @override
   int get hashCode =>
@@ -43,10 +48,11 @@ class KoreaderStatusResponse {
     (devices.hashCode) +
     (lastSeenAt == null ? 0 : lastSeenAt!.hashCode) +
     (lastUnmatchedAt == null ? 0 : lastUnmatchedAt!.hashCode) +
-    (recent.hashCode);
+    (recent.hashCode) +
+    (unknownBooks.hashCode);
 
   @override
-  String toString() => 'KoreaderStatusResponse[devices=$devices, lastSeenAt=$lastSeenAt, lastUnmatchedAt=$lastUnmatchedAt, recent=$recent]';
+  String toString() => 'KoreaderStatusResponse[devices=$devices, lastSeenAt=$lastSeenAt, lastUnmatchedAt=$lastUnmatchedAt, recent=$recent, unknownBooks=$unknownBooks]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -62,6 +68,7 @@ class KoreaderStatusResponse {
       json[r'last_unmatched_at'] = null;
     }
       json[r'recent'] = this.recent;
+      json[r'unknown_books'] = this.unknownBooks;
     return json;
   }
 
@@ -88,6 +95,7 @@ class KoreaderStatusResponse {
         lastSeenAt: mapDateTime(json, r'last_seen_at', r''),
         lastUnmatchedAt: mapDateTime(json, r'last_unmatched_at', r''),
         recent: KoreaderBookResponse.listFromJson(json[r'recent']),
+        unknownBooks: mapValueOfType<int>(json, r'unknown_books')!,
       );
     }
     return null;
@@ -137,6 +145,7 @@ class KoreaderStatusResponse {
   static const requiredKeys = <String>{
     'devices',
     'recent',
+    'unknown_books',
   };
 }
 

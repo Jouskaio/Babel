@@ -3784,4 +3784,9 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get translateEpubOnly =>
       'Seuls les livres EPUB peuvent être traduits.';
+
+  @override
+  String koreaderUnknownBooks(int count) {
+    return 'KOReader a envoyé la progression de $count livre(s) que ta bibliothèque Babel n\'a pas : pour qu\'ils se synchronisent, ajoute-les à Babel (Importer un fichier, en choisissant le même fichier que sur la liseuse).';
+  }
 }

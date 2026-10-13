@@ -2827,13 +2827,19 @@
             },
             "title": "Recent",
             "type": "array"
+          },
+          "unknown_books": {
+            "description": "Books KOReader sent a position for that are not in your library",
+            "title": "Unknown Books",
+            "type": "integer"
           }
         },
         "required": [
           "last_seen_at",
           "last_unmatched_at",
           "devices",
-          "recent"
+          "recent",
+          "unknown_books"
         ],
         "title": "KoreaderStatusResponse",
         "type": "object"

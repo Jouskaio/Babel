@@ -1240,5 +1240,7 @@
   "translateDone": "Translation finished",
   "translateFailed": "The translation failed.",
   "translateOpen": "Open the translation",
-  "translateEpubOnly": "Only EPUB books can be translated."
+  "translateEpubOnly": "Only EPUB books can be translated.",
+  "koreaderUnknownBooks": "KOReader sent the progress of {count} book(s) your Babel library does not have: to sync them, add them to Babel (Import a file, picking the same file as on the e-reader).",
+  "@koreaderUnknownBooks": {"placeholders": {"count": {"type": "int"}}}
 }
