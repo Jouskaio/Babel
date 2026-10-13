@@ -3737,4 +3737,51 @@ class AppLocalizationsFr extends AppLocalizations {
   String bulkFailed(int count) {
     return 'Échecs : $count';
   }
+
+  @override
+  String get translateAction => 'Traduire';
+
+  @override
+  String get translateTo => 'Traduire vers';
+
+  @override
+  String get translateOriginal => 'Texte d\'origine';
+
+  @override
+  String get translateUnavailable => 'Traduction indisponible pour l\'instant.';
+
+  @override
+  String get translateBook => 'Traduire le livre';
+
+  @override
+  String get translateBookHint =>
+      'Une copie traduite est ajoutée à ta bibliothèque, à lire, télécharger ou emporter sur ta liseuse. L\'original n\'est pas modifié. Selon la taille du livre, cela prend de quelques minutes à plusieurs heures : tu peux fermer cette fenêtre.';
+
+  @override
+  String get translateBookStart => 'Lancer la traduction';
+
+  @override
+  String get translateNoServer =>
+      'La traduction de livres entiers n\'est pas activée sur ce serveur.';
+
+  @override
+  String translateRunning(int percent) {
+    return 'Traduction en cours · $percent %';
+  }
+
+  @override
+  String get translateQueued => 'En attente…';
+
+  @override
+  String get translateDone => 'Traduction terminée';
+
+  @override
+  String get translateFailed => 'La traduction a échoué.';
+
+  @override
+  String get translateOpen => 'Ouvrir la traduction';
+
+  @override
+  String get translateEpubOnly =>
+      'Seuls les livres EPUB peuvent être traduits.';
 }

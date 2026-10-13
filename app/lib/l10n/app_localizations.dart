@@ -6127,6 +6127,90 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Échecs : {count}'**
   String bulkFailed(int count);
+
+  /// No description provided for @translateAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Traduire'**
+  String get translateAction;
+
+  /// No description provided for @translateTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Traduire vers'**
+  String get translateTo;
+
+  /// No description provided for @translateOriginal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Texte d\'origine'**
+  String get translateOriginal;
+
+  /// No description provided for @translateUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Traduction indisponible pour l\'instant.'**
+  String get translateUnavailable;
+
+  /// No description provided for @translateBook.
+  ///
+  /// In fr, this message translates to:
+  /// **'Traduire le livre'**
+  String get translateBook;
+
+  /// No description provided for @translateBookHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une copie traduite est ajoutée à ta bibliothèque, à lire, télécharger ou emporter sur ta liseuse. L\'original n\'est pas modifié. Selon la taille du livre, cela prend de quelques minutes à plusieurs heures : tu peux fermer cette fenêtre.'**
+  String get translateBookHint;
+
+  /// No description provided for @translateBookStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lancer la traduction'**
+  String get translateBookStart;
+
+  /// No description provided for @translateNoServer.
+  ///
+  /// In fr, this message translates to:
+  /// **'La traduction de livres entiers n\'est pas activée sur ce serveur.'**
+  String get translateNoServer;
+
+  /// No description provided for @translateRunning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Traduction en cours · {percent} %'**
+  String translateRunning(int percent);
+
+  /// No description provided for @translateQueued.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente…'**
+  String get translateQueued;
+
+  /// No description provided for @translateDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Traduction terminée'**
+  String get translateDone;
+
+  /// No description provided for @translateFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La traduction a échoué.'**
+  String get translateFailed;
+
+  /// No description provided for @translateOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir la traduction'**
+  String get translateOpen;
+
+  /// No description provided for @translateEpubOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuls les livres EPUB peuvent être traduits.'**
+  String get translateEpubOnly;
 }
 
 class _AppLocalizationsDelegate

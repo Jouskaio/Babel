@@ -1,0 +1,3 @@
+Translate while reading: select a passage, "Translate", and pick the language
+Translate a whole book: a translated copy (EPUB) joins your library, to read, download or take to your e-reader; progress is followed and you can close the window
+KOReader: the server address shown in Account is now https (with http, KOReader could not connect)

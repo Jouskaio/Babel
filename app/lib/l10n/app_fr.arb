@@ -2017,5 +2017,20 @@
   "bulkFanfics": "Fanfictions AO3 reconnues : {count}",
   "@bulkFanfics": {"placeholders": {"count": {"type": "int"}}},
   "bulkFailed": "Échecs : {count}",
-  "@bulkFailed": {"placeholders": {"count": {"type": "int"}}}
+  "@bulkFailed": {"placeholders": {"count": {"type": "int"}}},
+  "translateAction": "Traduire",
+  "translateTo": "Traduire vers",
+  "translateOriginal": "Texte d'origine",
+  "translateUnavailable": "Traduction indisponible pour l'instant.",
+  "translateBook": "Traduire le livre",
+  "translateBookHint": "Une copie traduite est ajoutée à ta bibliothèque, à lire, télécharger ou emporter sur ta liseuse. L'original n'est pas modifié. Selon la taille du livre, cela prend de quelques minutes à plusieurs heures : tu peux fermer cette fenêtre.",
+  "translateBookStart": "Lancer la traduction",
+  "translateNoServer": "La traduction de livres entiers n'est pas activée sur ce serveur.",
+  "translateRunning": "Traduction en cours · {percent} %",
+  "@translateRunning": {"placeholders": {"percent": {"type": "int"}}},
+  "translateQueued": "En attente…",
+  "translateDone": "Traduction terminée",
+  "translateFailed": "La traduction a échoué.",
+  "translateOpen": "Ouvrir la traduction",
+  "translateEpubOnly": "Seuls les livres EPUB peuvent être traduits."
 }

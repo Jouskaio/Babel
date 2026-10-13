@@ -22,6 +22,7 @@ import '../data/highlights.dart';
 import 'annotation_sheets.dart';
 import 'reader_chrome.dart';
 import 'reader_settings_sheet.dart';
+import 'translate_sheet.dart';
 
 /// Reads an EPUB one chapter at a time, as continuous text (design: "screen / lecture").
 class EpubView extends ConsumerStatefulWidget {
@@ -350,6 +351,21 @@ class _EpubViewState extends ConsumerState<EpubView>
                   ),
                 ),
                 IconButton(
+                  tooltip: context.l10n.translateAction,
+                  onPressed: () {
+                    final text = _selection;
+                    region.hideToolbar();
+                    if (text != null && text.trim().isNotEmpty) {
+                      unawaited(showTranslateSheet(context, text.trim()));
+                    }
+                  },
+                  icon: Icon(
+                    Icons.translate,
+                    size: 18,
+                    color: BabelColors.textPrimary,
+                  ),
+                ),
+                IconButton(
                   tooltip: context.l10n.copy,
                   onPressed: () {
                     final text = _selection;
@@ -533,17 +549,43 @@ class _EpubViewState extends ConsumerState<EpubView>
                     title: widget.title,
                     subtitle: chapterLabel,
                     onBack: widget.onBack,
-                    action: IconButton(
-                      tooltip: l10n.readerSettings,
-                      onPressed: () => showReaderSettings(context),
-                      style: IconButton.styleFrom(
-                        fixedSize: const Size(44, 44),
-                        backgroundColor: BabelColors.textPrimary,
-                      ),
-                      icon: Text(
-                        'Aa',
-                        style: BabelText.heading(17, color: BabelColors.canvas),
-                      ),
+                    actionWidth: 92,
+                    action: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          tooltip: l10n.translateBook,
+                          onPressed: () => showTranslateBookSheet(
+                            context,
+                            itemId: widget.itemId,
+                            title: widget.title,
+                          ),
+                          style: IconButton.styleFrom(
+                            fixedSize: const Size(44, 44),
+                            side: BorderSide(color: BabelColors.border),
+                          ),
+                          icon: Icon(
+                            Icons.translate,
+                            size: 20,
+                            color: BabelColors.textPrimary,
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: l10n.readerSettings,
+                          onPressed: () => showReaderSettings(context),
+                          style: IconButton.styleFrom(
+                            fixedSize: const Size(44, 44),
+                            backgroundColor: BabelColors.textPrimary,
+                          ),
+                          icon: Text(
+                            'Aa',
+                            style: BabelText.heading(
+                              17,
+                              color: BabelColors.canvas,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   )
                 : const SafeArea(bottom: false, child: SizedBox(height: 8)),

@@ -22,6 +22,7 @@ import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../audiobooks/application/audiobooks_providers.dart';
+import '../../reader/presentation/translate_sheet.dart';
 import '../../social/presentation/book_social_sheets.dart';
 import '../application/library_controller.dart';
 import '../application/series.dart';
@@ -1017,6 +1018,19 @@ class _BookActionsState extends ConsumerState<_BookActions> {
                     style: BabelText.body(14, color: BabelColors.textPrimary),
                   ),
                 ),
+                if (item.format == BookFormat.epub)
+                  TextButton.icon(
+                    onPressed: () => showTranslateBookSheet(
+                      context,
+                      itemId: item.id,
+                      title: item.title,
+                    ),
+                    icon: Icon(Icons.translate, color: BabelColors.gold),
+                    label: Text(
+                      l10n.translateBook,
+                      style: BabelText.body(14, color: BabelColors.textPrimary),
+                    ),
+                  ),
                 TextButton.icon(
                   onPressed: () => showReviewSheet(context, item),
                   icon: Icon(Icons.star_border, color: BabelColors.gold),

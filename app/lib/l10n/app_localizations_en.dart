@@ -3709,4 +3709,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String bulkFailed(int count) {
     return 'Failed: $count';
   }
+
+  @override
+  String get translateAction => 'Translate';
+
+  @override
+  String get translateTo => 'Translate into';
+
+  @override
+  String get translateOriginal => 'Original text';
+
+  @override
+  String get translateUnavailable => 'Translation unavailable right now.';
+
+  @override
+  String get translateBook => 'Translate the book';
+
+  @override
+  String get translateBookHint =>
+      'A translated copy is added to your library, to read, download or take to your e-reader. The original is not changed. Depending on the book\'s size it takes from a few minutes to several hours: you can close this window.';
+
+  @override
+  String get translateBookStart => 'Start the translation';
+
+  @override
+  String get translateNoServer =>
+      'Translating whole books is not enabled on this server.';
+
+  @override
+  String translateRunning(int percent) {
+    return 'Translating · $percent %';
+  }
+
+  @override
+  String get translateQueued => 'Waiting…';
+
+  @override
+  String get translateDone => 'Translation finished';
+
+  @override
+  String get translateFailed => 'The translation failed.';
+
+  @override
+  String get translateOpen => 'Open the translation';
+
+  @override
+  String get translateEpubOnly => 'Only EPUB books can be translated.';
 }

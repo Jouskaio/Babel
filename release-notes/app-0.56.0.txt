@@ -1,0 +1,3 @@
+Traduire pendant la lecture : sélectionne un passage, « Traduire », et choisis la langue
+Traduire un livre entier : une copie traduite (EPUB) arrive dans ta bibliothèque, à lire, télécharger ou emporter sur ta liseuse ; la progression est suivie et tu peux fermer la fenêtre
+KOReader : l'adresse du serveur affichée dans Compte est maintenant en https (en http, KOReader ne pouvait pas se connecter)
