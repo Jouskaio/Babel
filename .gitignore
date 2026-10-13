@@ -76,3 +76,4 @@ GEMINI.md
 # Local SQLite database
 api/*.db
 api/.local/
+*.jks

@@ -222,6 +222,10 @@ class ApiClient {
           return BookTitleResponse.fromJson(value);
         case 'BookTraceResponse':
           return BookTraceResponse.fromJson(value);
+        case 'BookTranslationRequest':
+          return BookTranslationRequest.fromJson(value);
+        case 'BookTranslationResponse':
+          return BookTranslationResponse.fromJson(value);
         case 'ChallengeResponse':
           return ChallengeResponse.fromJson(value);
         case 'ChangeOp':
@@ -326,6 +330,10 @@ class ApiClient {
           return KoreaderStatusResponse.fromJson(value);
         case 'KudosResponse':
           return KudosResponse.fromJson(value);
+        case 'LanguageResponse':
+          return LanguageResponse.fromJson(value);
+        case 'LanguagesResponse':
+          return LanguagesResponse.fromJson(value);
         case 'LibraryItemResponse':
           return LibraryItemResponse.fromJson(value);
         case 'LinkKavitaRequest':

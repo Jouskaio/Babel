@@ -716,3 +716,59 @@ def test_a_text_can_be_translated_when_the_service_answers(
     down = client.post("/v1/translate", json={"text": "Hello", "target": "xx"}, headers=ada)
     assert down.status_code == 503
     assert client.post("/v1/translate", json={"text": "Hello", "target": "fr"}).status_code == 401
+
+
+def test_a_book_is_translated_in_the_background_into_a_new_book(
+    app: FastAPI, client: TestClient, ada: dict[str, str]
+) -> None:
+    import io
+    import zipfile
+
+    from tests.books import epub
+
+    class Fake:
+        books = True
+
+        async def translate_blocks(
+            self, blocks: list[str], target: str, source: str | None = None, html: bool = True
+        ) -> list[str]:
+            return [f"[{target}] {b}" for b in blocks]
+
+        async def languages(self) -> list[dict[str, str]]:
+            return [{"code": "fr", "name": "French"}]
+
+        async def translate(self, text: str, target: str) -> str | None:
+            return None
+
+    app.state.container = replace(app.state.container, translator=Fake())
+    languages = client.get("/v1/translate/languages", headers=ada).json()
+    assert languages == {"books": True, "languages": [{"code": "fr", "name": "French"}]}
+
+    item = upload(client, ada, epub(title="Jane Eyre", isbn=None)).json()["item"]
+    started = client.post(
+        f"/v1/library/{item['id']}/translations", json={"target": "fr"}, headers=ada
+    )
+    assert started.status_code == 202
+
+    (job,) = client.get("/v1/library/translations", headers=ada).json()
+    assert (job["status"], job["progress"], job["target"]) == ("done", 100.0, "fr")
+    library = client.get("/v1/library", headers=ada).json()
+    assert len(library) == 2
+    translated = next(i for i in library if i["id"] == job["result_item_id"])
+    assert translated["title"] == "Jane Eyre (fr)"
+    stored = client.get(f"/v1/files/{translated['sha256']}", headers=ada).content
+    with zipfile.ZipFile(io.BytesIO(stored)) as book:
+        assert "[fr] Reader, I married him." in book.read("OEBPS/chapter1.xhtml").decode()
+
+
+def test_translating_a_book_needs_a_translation_server(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    from tests.books import epub
+
+    item = upload(client, ada, epub(title="Jane Eyre", isbn=None)).json()["item"]
+    response = client.post(
+        f"/v1/library/{item['id']}/translations", json={"target": "fr"}, headers=ada
+    )
+    assert response.status_code == 503
+    assert client.get("/v1/translate/languages", headers=ada).json()["books"] is False

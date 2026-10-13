@@ -19,6 +19,7 @@ from babel_api.adapters.db.catalog_repository import SqlCatalogRepository
 from babel_api.adapters.db.migrations.config import upgrade_database
 from babel_api.adapters.db.repositories import SqlUserRepository
 from babel_api.adapters.db.session import create_engine, create_session_factory
+from babel_api.adapters.db.translation_repository import SqlTranslationRepository
 from babel_api.adapters.external_ratings import ExternalRatings
 from babel_api.adapters.files.blob_store import LocalBlobStore
 from babel_api.adapters.files.comics import ComicConverter
@@ -168,6 +169,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         except SQLAlchemyError:
             # A database not migrated yet (or down) must not stop the server from starting.
             logging.getLogger(__name__).warning("Roles not synchronized", exc_info=True)
+        try:
+            async with create_session_factory(engine)() as session:
+                await SqlTranslationRepository(session).interrupted()
+                await session.commit()
+        except SQLAlchemyError:
+            logging.getLogger(__name__).warning("Translations not reset", exc_info=True)
         follow_task: asyncio.Task[None] | None = None
         container: Container = app.state.container
         if settings.follow_interval_hours > 0:
@@ -254,7 +261,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         shelfmark=shelfmark,
         hardcover=hardcover,
         wikidata=wikidata,
-        translator=Translator(),
+        translator=Translator(
+            libre_url=settings.translate_url,
+            libre_key=settings.translate_api_key.get_secret_value(),
+        ),
         external_ratings=ExternalRatings(goodreads=settings.scrape_goodreads),
         pagebound=PageboundClient(),
     )

@@ -28,6 +28,7 @@ from babel_api.adapters.db.social_repository import SqlSocialRepository
 from babel_api.adapters.db.source_repository import SqlSourceRepository
 from babel_api.adapters.db.stats_repository import SqlStatsRepository
 from babel_api.adapters.db.sync_repository import SqlSyncRepository
+from babel_api.adapters.db.translation_repository import SqlTranslationRepository
 from babel_api.adapters.external_ratings import ExternalRatings
 from babel_api.adapters.files.comics import ComicConverter
 from babel_api.adapters.hardcover import HardcoverClient
@@ -74,6 +75,7 @@ from babel_api.services.social import SocialService
 from babel_api.services.sources import SourceService
 from babel_api.services.stats import StatsService
 from babel_api.services.sync import SyncService
+from babel_api.services.translation import TranslationService
 from babel_api.services.works import SearchHit, WorkService
 
 
@@ -308,6 +310,31 @@ def get_follow_service(
 
 
 FollowServiceDep = Annotated[FollowService, Depends(get_follow_service)]
+
+
+def make_translation_service(container: Container, session: AsyncSession) -> TranslationService:
+    return TranslationService(
+        SqlTranslationRepository(session),
+        SqlFileRepository(session),
+        make_file_service(container, session),
+        container.blob_store,
+        container.translator,
+    )
+
+
+def get_translation_service(
+    container: ContainerDep, session: Annotated[AsyncSession, Depends(get_session)]
+) -> TranslationService:
+    return make_translation_service(container, session)
+
+
+TranslationServiceDep = Annotated[TranslationService, Depends(get_translation_service)]
+
+
+async def run_translation(container: Container, job_id: UUID) -> None:
+    """Background task: translates a book, with its own database session."""
+    async with container.sessions() as session:
+        await make_translation_service(container, session).run(job_id)
 
 
 def get_social_service(
