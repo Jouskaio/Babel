@@ -12,6 +12,7 @@ import hashlib
 import secrets
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import PurePosixPath
 from uuid import UUID
 
 from babel_api.adapters.db.koreader_repository import (
@@ -160,5 +161,13 @@ class KoreaderService:
             await self._repo.commit()
         sha = known.get(document)
         if sha is None or sha not in by_sha:
+            # KOReader can also name a book by the md5 of its file name ("Filename" matching).
+            for item in items:
+                name = PurePosixPath(item.file.original_name).name if item.file else ""
+                if (
+                    name
+                    and hashlib.md5(name.encode(), usedforsecurity=False).hexdigest() == document
+                ):
+                    return item.id
             raise NotFoundError
         return by_sha[sha].id

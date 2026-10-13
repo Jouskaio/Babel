@@ -85,3 +85,24 @@ def test_progress_goes_both_ways_with_koreader(
     (recent,) = status["recent"]
     assert (recent["title"], recent["device"]) == ("Jane Eyre", "KOReader · Boox Go")
     assert recent["percent"] == pytest.approx(42.0)
+
+
+def test_koreader_can_also_name_a_book_by_its_file_name(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    content = epub(title="Jane Eyre", isbn=None)
+    upload(client, ada, content, name="Jane Eyre.epub")
+    password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
+    key = {
+        "x-auth-user": "ada@example.com",
+        "x-auth-key": hashlib.md5(password.encode(), usedforsecurity=False).hexdigest(),
+    }
+    by_name = hashlib.md5(b"Jane Eyre.epub", usedforsecurity=False).hexdigest()
+    body = {
+        "document": by_name,
+        "progress": "x",
+        "percentage": 0.5,
+        "device": "Boox",
+        "device_id": "1",
+    }
+    assert client.put("/v1/kosync/syncs/progress", json=body, headers=key).status_code == 200
