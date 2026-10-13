@@ -10,6 +10,7 @@ class ReaderTopBar extends StatelessWidget {
     required this.subtitle,
     required this.onBack,
     this.action,
+    this.actionWidth = 44,
     super.key,
   });
 
@@ -17,6 +18,9 @@ class ReaderTopBar extends StatelessWidget {
   final String? subtitle;
   final VoidCallback onBack;
   final Widget? action;
+
+  /// Room the action takes on the right; the left side keeps the same so the title stays centered.
+  final double actionWidth;
 
   @override
   Widget build(BuildContext context) => SafeArea(
@@ -26,6 +30,7 @@ class ReaderTopBar extends StatelessWidget {
       child: Row(
         children: [
           _RoundButton(icon: Icons.arrow_back, onPressed: onBack),
+          SizedBox(width: actionWidth - 44),
           Expanded(
             child: Column(
               children: [

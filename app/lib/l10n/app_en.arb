@@ -1225,5 +1225,20 @@
   "bulkFanfics": "AO3 fanfictions recognised: {count}",
   "@bulkFanfics": {"placeholders": {"count": {"type": "int"}}},
   "bulkFailed": "Failed: {count}",
-  "@bulkFailed": {"placeholders": {"count": {"type": "int"}}}
+  "@bulkFailed": {"placeholders": {"count": {"type": "int"}}},
+  "translateAction": "Translate",
+  "translateTo": "Translate into",
+  "translateOriginal": "Original text",
+  "translateUnavailable": "Translation unavailable right now.",
+  "translateBook": "Translate the book",
+  "translateBookHint": "A translated copy is added to your library, to read, download or take to your e-reader. The original is not changed. Depending on the book's size it takes from a few minutes to several hours: you can close this window.",
+  "translateBookStart": "Start the translation",
+  "translateNoServer": "Translating whole books is not enabled on this server.",
+  "translateRunning": "Translating · {percent} %",
+  "@translateRunning": {"placeholders": {"percent": {"type": "int"}}},
+  "translateQueued": "Waiting…",
+  "translateDone": "Translation finished",
+  "translateFailed": "The translation failed.",
+  "translateOpen": "Open the translation",
+  "translateEpubOnly": "Only EPUB books can be translated."
 }
