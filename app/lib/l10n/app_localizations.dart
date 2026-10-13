@@ -6211,6 +6211,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Seuls les livres EPUB peuvent être traduits.'**
   String get translateEpubOnly;
+
+  /// No description provided for @koreaderUnknownBooks.
+  ///
+  /// In fr, this message translates to:
+  /// **'KOReader a envoyé la progression de {count} livre(s) que ta bibliothèque Babel n\'a pas : pour qu\'ils se synchronisent, ajoute-les à Babel (Importer un fichier, en choisissant le même fichier que sur la liseuse).'**
+  String koreaderUnknownBooks(int count);
 }
 
 class _AppLocalizationsDelegate

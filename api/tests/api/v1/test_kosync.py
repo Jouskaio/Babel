@@ -55,7 +55,9 @@ def test_progress_goes_both_ways_with_koreader(
     assert client.get("/v1/kosync/users/auth", headers=key).json() == {"authorized": "OK"}
     wrong = {**key, "x-auth-key": "0" * 32}
     assert client.get("/v1/kosync/users/auth", headers=wrong).status_code == 401
-    assert client.get("/v1/kosync/syncs/progress/" + document, headers=key).status_code == 404
+    assert (
+        "percentage" not in client.get("/v1/kosync/syncs/progress/" + document, headers=key).json()
+    )
 
     body = {
         "document": document,
@@ -73,9 +75,14 @@ def test_progress_goes_both_ways_with_koreader(
     # It is a reading position like any other: the book is now "reading", on an e-reader.
     positions = client.get(f"/v1/library/{item['id']}/positions", headers=ada).json()
     assert positions[0]["percent"] == pytest.approx(42.0)
-    # A book that is not in the library is refused.
-    unknown = {**body, "document": "f" * 32}
-    assert client.put("/v1/kosync/syncs/progress", json=unknown, headers=key).status_code == 404
+    # A book that is not in the library does not make KOReader fail: its position is kept aside.
+    unknown = {**body, "document": "f" * 32, "percentage": 0.1}
+    assert client.put("/v1/kosync/syncs/progress", json=unknown, headers=key).status_code == 200
+    kept = client.get("/v1/kosync/syncs/progress/" + "f" * 32, headers=key).json()
+    assert kept["percentage"] == pytest.approx(0.1)
+    nothing = client.get("/v1/kosync/syncs/progress/" + "e" * 32, headers=key)
+    assert nothing.status_code == 200
+    assert "percentage" not in nothing.json()  # "no progress yet", not an error
 
     # The reader can check it works: KOReader called, its books, and a book Babel did not know.
     status = client.get("/v1/me/koreader/status", headers=ada).json()
@@ -85,6 +92,7 @@ def test_progress_goes_both_ways_with_koreader(
     (recent,) = status["recent"]
     assert (recent["title"], recent["device"]) == ("Jane Eyre", "KOReader · Boox Go")
     assert recent["percent"] == pytest.approx(42.0)
+    assert status["unknown_books"] == 1
 
 
 def test_koreader_can_also_name_a_book_by_its_file_name(

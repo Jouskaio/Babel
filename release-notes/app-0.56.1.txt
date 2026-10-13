@@ -1,0 +1,2 @@
+KOReader : « Pousser » et « Récupérer » ne donnent plus d'erreur pour un livre que Babel n'a pas ; la progression est gardée et le compte rendu dans Compte indique combien de livres manquent
+KOReader peut aussi reconnaître un livre par son nom de fichier

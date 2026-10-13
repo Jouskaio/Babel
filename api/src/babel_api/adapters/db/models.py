@@ -720,3 +720,20 @@ class TranslationRow(Base):
     error: Mapped[str | None] = mapped_column(String(200))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class KoreaderProgressRow(Base):
+    """The progress KOReader sent for a book Babel does not have (yet): KOReader must not see an
+    error, and a second device can still get it back."""
+
+    __tablename__ = "koreader_progress"
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    document: Mapped[str] = mapped_column(String(64), primary_key=True)
+    progress: Mapped[str] = mapped_column(String(1000), default="")
+    percentage: Mapped[float] = mapped_column(Float, default=0.0)
+    device: Mapped[str] = mapped_column(String(80), default="")
+    device_id: Mapped[str] = mapped_column(String(80), default="")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)

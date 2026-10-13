@@ -2827,13 +2827,19 @@
             },
             "title": "Recent",
             "type": "array"
+          },
+          "unknown_books": {
+            "description": "Books KOReader sent a position for that are not in your library",
+            "title": "Unknown Books",
+            "type": "integer"
           }
         },
         "required": [
           "last_seen_at",
           "last_unmatched_at",
           "devices",
-          "recent"
+          "recent",
+          "unknown_books"
         ],
         "title": "KoreaderStatusResponse",
         "type": "object"
@@ -6282,7 +6288,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.64.1"
+    "version": "0.64.2"
   },
   "openapi": "3.1.0",
   "paths": {
