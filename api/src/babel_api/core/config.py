@@ -99,6 +99,12 @@ class Settings(BaseSettings):
     # posters.
     tmdb_api_key: SecretStr = SecretStr("")
 
+    # LibreTranslate (self-hosted, see infra/docker-compose.yml): translates whole books and long
+    # passages. Address (and an API key if you set one). Empty: only the small free MyMemory
+    # service is used, for short excerpts.
+    translate_url: str = ""
+    translate_api_key: SecretStr = SecretStr("")
+
     # Hardcover (free API key, hardcover.app > Settings > Hardcover API): names the volumes of
     # a saga the catalog lacks. Public book data only. Empty: not used.
     hardcover_api_key: SecretStr = SecretStr("")

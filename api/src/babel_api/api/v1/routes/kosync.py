@@ -13,7 +13,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from babel_api.api.dependencies import CurrentUserId, KoreaderServiceDep
+from babel_api.api.dependencies import ContainerDep, CurrentUserId, KoreaderServiceDep
 from babel_api.domain.errors import NotFoundError
 
 router = APIRouter(prefix="/kosync", tags=["kosync"])
@@ -130,18 +130,24 @@ class KoreaderPasswordResponse(KoreaderResponse):
     password: str = Field(description="Shown once: KOReader's password")
 
 
-def _server(request: Request) -> str:
-    return str(request.base_url).rstrip("/") + "/v1/kosync"
+def _server(request: Request, public_url: str) -> str:
+    """The address for KOReader: the site's public address (https), not the one the proxy
+    forwards to (http): KOReader does not follow the http to https redirect."""
+    root = str(request.scope.get("root_path") or "").rstrip("/")
+    return f"{public_url.rstrip('/')}{root}/v1/kosync"
 
 
 @account_router.get("", operation_id="getKoreader")
 async def get_koreader(
-    user_id: CurrentUserId, koreader: KoreaderServiceDep, request: Request
+    user_id: CurrentUserId,
+    koreader: KoreaderServiceDep,
+    request: Request,
+    container: ContainerDep,
 ) -> KoreaderResponse:
     """What to type in KOReader to sync your reading with Babel."""
     return KoreaderResponse(
         username=await koreader.username(user_id),
-        server=_server(request),
+        server=_server(request, container.settings.public_url),
         has_password=await koreader.has_password(user_id),
     )
 
@@ -172,13 +178,16 @@ async def get_koreader_status(
 
 @account_router.post("/password", operation_id="newKoreaderPassword")
 async def new_koreader_password(
-    user_id: CurrentUserId, koreader: KoreaderServiceDep, request: Request
+    user_id: CurrentUserId,
+    koreader: KoreaderServiceDep,
+    request: Request,
+    container: ContainerDep,
 ) -> KoreaderPasswordResponse:
     """Make (or replace) your KOReader password; it is shown only now."""
     password = await koreader.new_password(user_id)
     return KoreaderPasswordResponse(
         username=await koreader.username(user_id),
-        server=_server(request),
+        server=_server(request, container.settings.public_url),
         has_password=True,
         password=password,
     )

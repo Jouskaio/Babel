@@ -850,6 +850,91 @@
         "title": "BookTraceResponse",
         "type": "object"
       },
+      "BookTranslationRequest": {
+        "properties": {
+          "target": {
+            "description": "Two-letter language code",
+            "pattern": "^[a-z]{2}$",
+            "title": "Target",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "title": "BookTranslationRequest",
+        "type": "object"
+      },
+      "BookTranslationResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "item_id": {
+            "description": "The book being translated",
+            "format": "uuid",
+            "title": "Item Id",
+            "type": "string"
+          },
+          "progress": {
+            "description": "0 to 100",
+            "title": "Progress",
+            "type": "number"
+          },
+          "result_item_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The translated book, once done",
+            "title": "Result Item Id"
+          },
+          "status": {
+            "description": "queued, running, done or failed",
+            "title": "Status",
+            "type": "string"
+          },
+          "target": {
+            "title": "Target",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "item_id",
+          "target",
+          "status",
+          "progress",
+          "result_item_id",
+          "error",
+          "created_at"
+        ],
+        "title": "BookTranslationResponse",
+        "type": "object"
+      },
       "ChallengeResponse": {
         "properties": {
           "done": {
@@ -2765,6 +2850,46 @@
           "given"
         ],
         "title": "KudosResponse",
+        "type": "object"
+      },
+      "LanguageResponse": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ],
+        "title": "LanguageResponse",
+        "type": "object"
+      },
+      "LanguagesResponse": {
+        "properties": {
+          "books": {
+            "description": "Whole books can be translated (a translation server is set)",
+            "title": "Books",
+            "type": "boolean"
+          },
+          "languages": {
+            "items": {
+              "$ref": "#/components/schemas/LanguageResponse"
+            },
+            "title": "Languages",
+            "type": "array"
+          }
+        },
+        "required": [
+          "books",
+          "languages"
+        ],
+        "title": "LanguagesResponse",
         "type": "object"
       },
       "LibraryItemResponse": {
@@ -5269,7 +5394,7 @@
             "type": "string"
           },
           "text": {
-            "maxLength": 4000,
+            "maxLength": 20000,
             "minLength": 1,
             "title": "Text",
             "type": "string"
@@ -6157,7 +6282,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.63.0"
+    "version": "0.64.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -9229,6 +9354,37 @@
         ]
       }
     },
+    "/v1/library/translations": {
+      "get": {
+        "description": "Your book translations, newest first, with their progress.",
+        "operationId": "listBookTranslations",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BookTranslationResponse"
+                  },
+                  "title": "Response Listbooktranslations",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Translations",
+        "tags": [
+          "translate"
+        ]
+      }
+    },
     "/v1/library/{item_id}": {
       "delete": {
         "description": "Take a book out of the library. Its status, review, notes and positions are kept and\ncome back if the same file is added again.",
@@ -10021,6 +10177,65 @@
         "tags": [
           "social",
           "library"
+        ]
+      }
+    },
+    "/v1/library/{item_id}/translations": {
+      "post": {
+        "description": "Translate an EPUB of your library: the translation is made in the background and joins\nyour library as a book of its own. 503 without a translation server.",
+        "operationId": "translateBook",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookTranslationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookTranslationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Translate Book",
+        "tags": [
+          "translate"
         ]
       }
     },
@@ -12927,7 +13142,7 @@
     },
     "/v1/translate": {
       "post": {
-        "description": "The text in another language (free machine translation, a few paragraphs at most). A text\nalready in that language comes back as it is; 503 when the service cannot translate now.",
+        "description": "The text in another language (a few paragraphs). A text already in that language comes\nback as it is; 503 when the service cannot translate now.",
         "operationId": "translateText",
         "requestBody": {
           "content": {
@@ -12967,6 +13182,33 @@
           }
         ],
         "summary": "Translate Text",
+        "tags": [
+          "translate"
+        ]
+      }
+    },
+    "/v1/translate/languages": {
+      "get": {
+        "description": "What can be translated, and into which languages.",
+        "operationId": "getTranslationLanguages",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LanguagesResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Languages",
         "tags": [
           "translate"
         ]

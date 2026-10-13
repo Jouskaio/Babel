@@ -702,3 +702,21 @@ class PageboundLinkRow(Base):
     remote_id: Mapped[int] = mapped_column(Integer)
     linked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     imported_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class TranslationRow(Base):
+    """A book being translated (or translated) for a reader: the result is a new library book."""
+
+    __tablename__ = "translations"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    item_id: Mapped[UUID] = mapped_column(ForeignKey("library_items.id", ondelete="CASCADE"))
+    target: Mapped[str] = mapped_column(String(8))
+    # queued, running, done or failed.
+    status: Mapped[str] = mapped_column(String(12), default="queued")
+    progress: Mapped[float] = mapped_column(Float, default=0.0)
+    result_item_id: Mapped[UUID | None] = mapped_column()
+    error: Mapped[str | None] = mapped_column(String(200))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

@@ -21,6 +21,8 @@ services:
       BABEL_MAIL_FROM: Babel <contact@jouskaio.me>
       # Book files (ADR 0010), on the NAS share mounted at /srv/babel-files.
       BABEL_FILES_DIR: /data/files
+      # Translation of books and long passages (the LibreTranslate below, on the internal network).
+      BABEL_TRANSLATE_URL: http://translate:5000
     ports:
       - "8000:8000"
     volumes:
@@ -53,6 +55,21 @@ services:
     mem_limit: 256m
     logging: *logging
 
+  # Machine translation, only reachable by the API. The language models are downloaded the first
+  # time it starts (a few hundred MB per pair): the first start takes a while.
+  translate:
+    image: libretranslate/libretranslate:latest
+    container_name: babel-translate
+    environment:
+      LT_LOAD_ONLY: en,fr,es,de,it,pt,ja
+      LT_DISABLE_WEB_UI: "true"
+      LT_THREADS: "2"
+    volumes:
+      - translate-models:/home/libretranslate/.local
+    restart: unless-stopped
+    mem_limit: 2g
+    logging: *logging
+
   web:
     image: ghcr.io/jouskaio/babel-web:${BABEL_WEB_TAG:-latest}
     container_name: babel-web
@@ -67,3 +84,4 @@ services:
 
 volumes:
   db-data:
+  translate-models:

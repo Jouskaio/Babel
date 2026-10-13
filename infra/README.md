@@ -217,3 +217,22 @@ changed, files). The web container serves that folder at `https://<site>/downloa
   `ANDROID_KEY_PASSWORD`. Keep `babel.jks` somewhere safe: losing it means a new key, so
   uninstalling the app before installing the next one. Until the secrets exist, the APK is
   signed with a debug key that changes at every build.
+
+## Translation (books and long passages)
+
+The `translate` service of the compose file is a [LibreTranslate](https://libretranslate.com):
+free, open source, no key, and nothing leaves your server. The API reaches it at
+`BABEL_TRANSLATE_URL` (set in the compose file). It gives:
+
+- translating a passage while reading (select text, Translate), without the daily limit of the
+  small public service used when no server is set;
+- translating a whole EPUB: the reader asks from the book's menu, the translation runs in the
+  background (one book at a time on the server) and the translated book joins their library as
+  a book of its own, to read, download or take to an e-reader.
+
+It needs about 2 GB of memory (`mem_limit` in the compose file). The languages are those of
+`LT_LOAD_ONLY` (`en,fr,es,de,it,pt,ja` by default); add codes there, restart the service, and the
+app offers them. A model is a few hundred MB, downloaded at first start. Quality is that of
+open models: good for reading, not DeepL; a long novel takes from tens of minutes to a few hours
+on a NAS processor. Remove the service (and the `BABEL_TRANSLATE_URL` line) to turn it off: the
+app then only translates short passages.

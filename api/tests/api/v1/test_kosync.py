@@ -44,6 +44,8 @@ def test_progress_goes_both_ways_with_koreader(
     info = client.get("/v1/me/koreader", headers=ada).json()
     assert info["has_password"] is False
     assert info["username"] == "ada@example.com"
+    # The public address, which KOReader can reach directly (not the proxy's http one).
+    assert info["server"] == "http://localhost:8080/v1/kosync"
     password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
     key = {
         "x-auth-user": "ada@example.com",

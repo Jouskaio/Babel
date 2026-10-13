@@ -25,6 +25,8 @@ doc/BookNoteResponse.md
 doc/BookRequestResponse.md
 doc/BookTitleResponse.md
 doc/BookTraceResponse.md
+doc/BookTranslationRequest.md
+doc/BookTranslationResponse.md
 doc/CatalogApi.md
 doc/ChallengeResponse.md
 doc/ChangeOp.md
@@ -82,6 +84,8 @@ doc/KoreaderResponse.md
 doc/KoreaderStatusResponse.md
 doc/KosyncApi.md
 doc/KudosResponse.md
+doc/LanguageResponse.md
+doc/LanguagesResponse.md
 doc/LibraryApi.md
 doc/LibraryItemResponse.md
 doc/LinkKavitaRequest.md
@@ -219,6 +223,8 @@ lib/model/book_note_response.dart
 lib/model/book_request_response.dart
 lib/model/book_title_response.dart
 lib/model/book_trace_response.dart
+lib/model/book_translation_request.dart
+lib/model/book_translation_response.dart
 lib/model/challenge_response.dart
 lib/model/change_op.dart
 lib/model/change_password_request.dart
@@ -271,6 +277,8 @@ lib/model/koreader_password_response.dart
 lib/model/koreader_response.dart
 lib/model/koreader_status_response.dart
 lib/model/kudos_response.dart
+lib/model/language_response.dart
+lib/model/languages_response.dart
 lib/model/library_item_response.dart
 lib/model/link_kavita_request.dart
 lib/model/link_kind.dart
