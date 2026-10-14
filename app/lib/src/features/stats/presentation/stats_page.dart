@@ -131,6 +131,18 @@ class _Body extends StatelessWidget {
                 _Figure(stats.readingDays, l10n.statsReadingDays),
                 _Figure(stats.longestStreak, l10n.statsLongestStreak),
                 _Figure(stats.notes, l10n.statsNotes),
+                if (stats.readingSeconds >= 3600)
+                  _Figure(
+                    (stats.readingSeconds / 3600).round(),
+                    l10n.statsReadingHours,
+                  )
+                else if (stats.readingSeconds > 0)
+                  _Figure(
+                    (stats.readingSeconds / 60).round(),
+                    l10n.statsReadingMinutes,
+                  ),
+                if (stats.pagesRead > 0)
+                  _Figure(stats.pagesRead, l10n.statsPagesRead),
               ],
             ),
             const SizedBox(height: 12),

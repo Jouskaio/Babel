@@ -5,13 +5,13 @@ https://<babel>/api/v1/kosync, then Register/Login with your e-mail and the pass
 Babel (Account). The routes below follow the protocol, not Babel's own conventions.
 """
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from babel_api.api.dependencies import ContainerDep, CurrentUserId, KoreaderServiceDep
 from babel_api.domain.errors import NotFoundError
@@ -103,6 +103,47 @@ async def get_progress(
     }
 
 
+class StatsBook(BaseModel):
+    md5: Annotated[str, Field(min_length=32, max_length=32)]
+    title: str = ""
+    authors: str = ""
+    pages: int = 0
+    total_read_time: int = 0
+    total_read_pages: int = 0
+    last_open: int | None = None
+
+
+class StatsDay(BaseModel):
+    md5: Annotated[str, Field(min_length=32, max_length=32)]
+    day: date
+    seconds: Annotated[int, Field(ge=0, le=86400)]
+    pages: Annotated[int, Field(ge=0, le=100000)] = 0
+
+
+class StatsBody(BaseModel):
+    books: list[StatsBook] = Field(default_factory=list[StatsBook], max_length=3000)
+    days: list[StatsDay] = Field(default_factory=list[StatsDay], max_length=30000)
+
+    @field_validator("books", "days", mode="before")
+    @classmethod
+    def _empty_object(cls, value: Any) -> Any:
+        """An empty Lua table is sent as {} rather than []."""
+        return [] if value == {} else value
+
+
+@router.put("/syncs/stats", include_in_schema=False)
+async def put_stats(
+    user_id: Reader, koreader: KoreaderServiceDep, body: StatsBody
+) -> dict[str, int]:
+    """Reading statistics from KOReader's Babel plugin: books, and the time read each day."""
+    await koreader.put_stats(
+        user_id,
+        [b.model_dump() for b in body.books],
+        [(d.md5, d.day, d.seconds, d.pages) for d in body.days],
+    )
+    return {"books": len(body.books), "days": len(body.days)}
+
+
 class KoreaderResponse(BaseModel):
     username: str = Field(description="Your e-mail: what KOReader asks for as the username")
     server: str = Field(description="The address to give KOReader as its sync server")
@@ -136,6 +177,9 @@ class KoreaderStatusResponse(BaseModel):
     unknown_books: int = Field(
         description="Books KOReader sent a position for that are not in your library"
     )
+    stats_at: datetime | None = Field(description="When KOReader's statistics last came")
+    stats_books: int = Field(description="Books they cover")
+    stats_seconds: int = Field(description="Reading time they add up to")
 
 
 class KoreaderPasswordResponse(KoreaderResponse):
@@ -180,6 +224,9 @@ async def get_koreader_status(
         last_unmatched_at=status.contact.last_unmatched_at,
         devices=[KoreaderDeviceResponse(name=n, last_seen_at=t) for n, t in status.devices],
         unknown_books=status.unknown_books,
+        stats_at=status.stats_at,
+        stats_books=status.stats_books,
+        stats_seconds=status.stats_seconds,
         recent=[
             KoreaderBookResponse(
                 item_id=r.item_id,

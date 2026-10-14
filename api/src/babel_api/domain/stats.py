@@ -22,6 +22,15 @@ class FinishedBook:
 
 
 @dataclass(frozen=True, slots=True)
+class DayStat:
+    """Time and pages read on one day, as measured by an e-reader (KOReader)."""
+
+    day: date
+    seconds: int
+    pages: int
+
+
+@dataclass(frozen=True, slots=True)
 class YearStats:
     year: int
     finished: list[FinishedBook]
@@ -42,6 +51,9 @@ class YearStats:
     # The year before, to tell what changed.
     previous_genres: list[tuple[Genre, int]] = field(default_factory=list[tuple[Genre, int]])
     goal: int | None = None  # books to finish each year, the reader's own target
+    # Measured by KOReader's statistics: time and pages read in the year (0 without them).
+    reading_seconds: int = 0
+    pages_read: int = 0
 
     @property
     def best_month(self) -> int | None:

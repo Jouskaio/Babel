@@ -4,6 +4,7 @@ import hashlib
 from pathlib import Path
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from babel_api.domain.koreader import partial_md5
@@ -118,9 +119,18 @@ def test_koreader_can_also_name_a_book_by_its_file_name(
 
 
 def test_koreader_cloud_storage_lists_downloads_and_receives_books(
-    client: TestClient, ada: dict[str, str]
+    app: FastAPI, client: TestClient, ada: dict[str, str]
 ) -> None:
     import base64
+    from dataclasses import replace
+
+    from babel_api.domain.sources import RemoteEntry
+
+    class FakeAo3:
+        async def work(self, work_id: str) -> RemoteEntry:
+            return RemoteEntry(path=f"/works/{work_id}", size=0, remote_id=f"{work_id}:3/3|2026")
+
+    app.state.container = replace(app.state.container, ao3=FakeAo3())
 
     content = epub(title="Jane Eyre", isbn=None)
     upload(client, ada, content, name="Jane Eyre.epub")
@@ -154,3 +164,44 @@ def test_koreader_cloud_storage_lists_downloads_and_receives_books(
     again = client.put("/v1/webdav/A%20Work.epub", content=fic, headers=auth)
     assert again.status_code == 201
     assert len(client.get("/v1/library", headers=ada).json()) == 2  # not twice
+
+
+def test_koreader_reading_statistics_join_the_readers_own(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    from datetime import date
+
+    password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
+    key = {
+        "x-auth-user": "ada@example.com",
+        "x-auth-key": hashlib.md5(password.encode(), usedforsecurity=False).hexdigest(),
+    }
+    year = date.today().year
+    md5 = "a" * 32
+    body = {
+        "books": [
+            {"md5": md5, "title": "Jane Eyre", "authors": "Brontë", "pages": 400,
+             "total_read_time": 5400, "total_read_pages": 180}
+        ],
+        "days": [
+            {"md5": md5, "day": f"{year}-03-01", "seconds": 3600, "pages": 100},
+            {"md5": md5, "day": f"{year}-03-02", "seconds": 1800, "pages": 80},
+        ],
+    }  # fmt: skip
+    sent = client.put("/v1/kosync/syncs/stats", json=body, headers=key)
+    assert sent.json() == {"books": 1, "days": 2}
+    # Sent again with a day corrected: replaced, not added.
+    body["days"][1]["seconds"] = 600
+    client.put("/v1/kosync/syncs/stats", json=body, headers=key)
+    empty = client.put("/v1/kosync/syncs/stats", json={"books": {}, "days": {}}, headers=key)
+    assert empty.status_code == 200  # an empty Lua table arrives as {}
+
+    stats = client.get("/v1/me/stats", params={"year": year}, headers=ada).json()
+    assert stats["reading_seconds"] == 4200
+    assert stats["pages_read"] == 180
+    assert stats["reading_days"] == 2  # days measured on the e-reader count
+    status = client.get("/v1/me/koreader/status", headers=ada).json()
+    assert (status["stats_books"], status["stats_seconds"]) == (1, 4200)
+    assert status["stats_at"] is not None
+    other = client.get("/v1/me/stats", params={"year": year - 1}, headers=ada).json()
+    assert other["reading_seconds"] == 0

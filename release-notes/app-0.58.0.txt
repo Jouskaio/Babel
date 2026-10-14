@@ -1,0 +1,3 @@
+Statistiques de lecture de KOReader dans Babel : plugin à installer sur la liseuse (page Télécharger), qui envoie ton temps de lecture, tes pages lues et tes jours de lecture
+Mes statistiques : heures de lecture et pages lues de l'année ; les jours lus sur la liseuse comptent dans tes séries et tes badges
+Compte › Mes liseuses : dernière réception des statistiques et lien vers le plugin

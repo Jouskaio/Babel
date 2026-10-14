@@ -27,6 +27,7 @@ class AppRelease {
     this.notesEn = const [],
     this.android,
     this.macos,
+    this.koreader,
   });
 
   factory AppRelease.fromJson(Map<String, Object?> json) {
@@ -44,6 +45,7 @@ class AppRelease {
       notesEn: [for (final n in json['notes_en'] as List? ?? const []) '$n'],
       android: file(json['android']),
       macos: file(json['macos']),
+      koreader: file(json['koreader']),
     );
   }
 
@@ -58,6 +60,9 @@ class AppRelease {
   final List<String> notesEn;
   final ReleaseFile? android;
   final ReleaseFile? macos;
+
+  /// The Babel plugin for KOReader (a zip to unzip into KOReader's plugins folder).
+  final ReleaseFile? koreader;
 }
 
 /// Where Babel's site (and its downloads) is: the web app's own origin, or the API's.

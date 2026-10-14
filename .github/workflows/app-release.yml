@@ -188,6 +188,7 @@ jobs:
           mkdir -p dl
           cp built/babel-android-*/app-release.apk "dl/Babel-${VERSION}.apk"
           cp built/babel-macos-*/Babel-macOS.zip "dl/Babel-${VERSION}-macOS.zip"
+          (cd koreader && zip -qr ../dl/babel.koplugin.zip babel.koplugin)
           python3 scripts/release-manifest.py "$GITHUB_REF_NAME" dl
       - uses: tailscale/github-action@v4
         with:
@@ -200,4 +201,4 @@ jobs:
           scp -o StrictHostKeyChecking=accept-new dl/*.apk dl/*.zip "deploy@${DEPLOY_HOST}:/opt/babel/downloads/"
           scp dl/latest.json "deploy@${DEPLOY_HOST}:/opt/babel/downloads/latest.json"
           # Keep the two latest versions of each app.
-          ssh "deploy@${DEPLOY_HOST}" 'cd /opt/babel/downloads && ls -t *.apk | tail -n +3 | xargs -r rm -f; ls -t *.zip | tail -n +3 | xargs -r rm -f'
+          ssh "deploy@${DEPLOY_HOST}" 'cd /opt/babel/downloads && ls -t *.apk | tail -n +3 | xargs -r rm -f; ls -t *-macOS.zip | tail -n +3 | xargs -r rm -f'

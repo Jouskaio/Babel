@@ -1,7 +1,7 @@
 """KOReader sync data in the database."""
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from uuid import UUID
 
 from sqlalchemy import func, select
@@ -9,6 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.models import (
     DeviceRow,
+    KoreaderBookStatRow,
+    KoreaderDayStatRow,
     KoreaderHashRow,
     KoreaderKeyRow,
     KoreaderProgressRow,
@@ -154,6 +156,59 @@ class SqlKoreaderRepository:
             )
             or 0
         )
+
+    async def save_stats(
+        self,
+        user_id: UUID,
+        books: list[dict[str, object]],
+        days: list[tuple[str, date, int, int]],
+    ) -> None:
+        """Keeps what KOReader's statistics say: books (replaced) and days (replaced, per book)."""
+        now = datetime.now(UTC)
+        for book in books:
+            md5 = str(book["md5"])
+            row = await self._session.get(KoreaderBookStatRow, (user_id, md5))
+            if row is None:
+                row = KoreaderBookStatRow(user_id=user_id, md5=md5)
+                self._session.add(row)
+            row.title = str(book.get("title") or "")[:500]
+            row.authors = str(book.get("authors") or "")[:500]
+            row.pages = int(str(book.get("pages") or 0))
+            row.total_read_time = int(str(book.get("total_read_time") or 0))
+            row.total_read_pages = int(str(book.get("total_read_pages") or 0))
+            opened = book.get("last_open")
+            row.last_open = (
+                datetime.fromtimestamp(int(str(opened)), UTC)
+                if opened not in (None, "", 0)
+                else None
+            )
+            row.updated_at = now
+        for md5, day, seconds, pages in days:
+            stat = await self._session.get(KoreaderDayStatRow, (user_id, md5, day))
+            if stat is None:
+                stat = KoreaderDayStatRow(user_id=user_id, md5=md5, day=day)
+                self._session.add(stat)
+            stat.seconds, stat.pages = seconds, pages
+        await self._session.flush()
+
+    async def stats_overview(self, user_id: UUID) -> tuple[datetime | None, int, int]:
+        """When statistics last came, for how many books, and the time they add up to."""
+        latest = await self._session.scalar(
+            select(func.max(KoreaderBookStatRow.updated_at)).where(
+                KoreaderBookStatRow.user_id == user_id
+            )
+        )
+        books = await self._session.scalar(
+            select(func.count())
+            .select_from(KoreaderBookStatRow)
+            .where(KoreaderBookStatRow.user_id == user_id)
+        )
+        seconds = await self._session.scalar(
+            select(func.coalesce(func.sum(KoreaderDayStatRow.seconds), 0)).where(
+                KoreaderDayStatRow.user_id == user_id
+            )
+        )
+        return _aware(latest), int(books or 0), int(seconds or 0)
 
     async def hashes(self, shas: list[str]) -> dict[str, str]:
         """md5 -> sha256 for the files whose identifier is known."""
