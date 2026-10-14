@@ -1,11 +1,12 @@
 """SQLAlchemy tables. Portable types only, so tests can run on SQLite."""
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
     JSON,
     BigInteger,
+    Date,
     DateTime,
     Float,
     ForeignKey,
@@ -737,3 +738,35 @@ class KoreaderProgressRow(Base):
     device: Mapped[str] = mapped_column(String(80), default="")
     device_id: Mapped[str] = mapped_column(String(80), default="")
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class KoreaderBookStatRow(Base):
+    """What KOReader's reading statistics say about a book (its partial md5 names the book)."""
+
+    __tablename__ = "koreader_book_stats"
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    md5: Mapped[str] = mapped_column(String(32), primary_key=True)
+    title: Mapped[str] = mapped_column(String(500), default="")
+    authors: Mapped[str] = mapped_column(String(500), default="")
+    pages: Mapped[int] = mapped_column(Integer, default=0)
+    total_read_time: Mapped[int] = mapped_column(Integer, default=0)
+    total_read_pages: Mapped[int] = mapped_column(Integer, default=0)
+    last_open: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class KoreaderDayStatRow(Base):
+    """Time and pages read of one book on one day (the reader's own day), from KOReader."""
+
+    __tablename__ = "koreader_day_stats"
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    md5: Mapped[str] = mapped_column(String(32), primary_key=True)
+    day: Mapped[date] = mapped_column(Date, primary_key=True)
+    seconds: Mapped[int] = mapped_column(Integer, default=0)
+    pages: Mapped[int] = mapped_column(Integer, default=0)

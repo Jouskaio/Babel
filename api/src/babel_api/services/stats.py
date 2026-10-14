@@ -171,6 +171,9 @@ class StatsService:
             by_month[book.finished_at.month - 1] += 1
         days = {t.date() for t in reading if t.year == year}
         per_day = Counter(t.date() for t in reading if t.year == year)
+        # KOReader's own statistics add the days (and the time) read on the e-reader.
+        measured = [d for d in await self._stats.koreader_days(user_id) if d.day.year == year]
+        days |= {d.day for d in measured}
         longest, current = streaks(days, now.date())
         rated = [b.rating for b in finished if b.rating]
         authors = Counter(a for b in finished for a in b.authors[:1])
@@ -206,6 +209,8 @@ class StatsService:
             genres=tally(year),
             previous_genres=tally(year - 1),
             goal=await self._stats.goal(user_id),
+            reading_seconds=sum(d.seconds for d in measured),
+            pages_read=sum(d.pages for d in measured),
         )
 
     async def taste(self, user_id: UUID) -> tuple[list[Genre], list[str], set[str]]:
@@ -235,6 +240,7 @@ class StatsService:
         """Level, badges and first steps, from all the reader ever did."""
         items = await self._stats.items(user_id)
         reading_days = {t.date() for t in await self._stats.reading_times(user_id)}
+        reading_days |= {d.day for d in await self._stats.koreader_days(user_id)}
         now = datetime.now(UTC)
         longest, _ = streaks(reading_days, now.date())
         done = [

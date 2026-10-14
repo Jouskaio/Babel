@@ -1,0 +1,3 @@
+KOReader reading statistics in Babel: a plugin to install on the e-reader (Download page) that sends your reading time, pages read and reading days
+My statistics: hours read and pages read this year; days read on the e-reader count toward your streaks and badges
+Account › My e-readers: when statistics last came, and a link to the plugin

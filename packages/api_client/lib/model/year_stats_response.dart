@@ -25,8 +25,10 @@ class YearStatsResponse {
     this.goal,
     required this.longestStreak,
     required this.notes,
+    required this.pagesRead,
     this.previousGenres = const [],
     required this.readingDays,
+    required this.readingSeconds,
     required this.reviews,
     required this.started,
     this.topAuthors = const [],
@@ -66,11 +68,17 @@ class YearStatsResponse {
   /// Highlights and notes made this year
   int notes;
 
+  /// Pages read this year, from KOReader's statistics
+  int pagesRead;
+
   /// The same, the year before
   List<GenreCountResponse> previousGenres;
 
   /// Days with some reading
   int readingDays;
+
+  /// Time read this year, from KOReader's statistics
+  int readingSeconds;
 
   int reviews;
 
@@ -97,8 +105,10 @@ class YearStatsResponse {
     other.goal == goal &&
     other.longestStreak == longestStreak &&
     other.notes == notes &&
+    other.pagesRead == pagesRead &&
     _deepEquality.equals(other.previousGenres, previousGenres) &&
     other.readingDays == readingDays &&
+    other.readingSeconds == readingSeconds &&
     other.reviews == reviews &&
     other.started == started &&
     _deepEquality.equals(other.topAuthors, topAuthors) &&
@@ -120,8 +130,10 @@ class YearStatsResponse {
     (goal == null ? 0 : goal!.hashCode) +
     (longestStreak.hashCode) +
     (notes.hashCode) +
+    (pagesRead.hashCode) +
     (previousGenres.hashCode) +
     (readingDays.hashCode) +
+    (readingSeconds.hashCode) +
     (reviews.hashCode) +
     (started.hashCode) +
     (topAuthors.hashCode) +
@@ -129,7 +141,7 @@ class YearStatsResponse {
     (years.hashCode);
 
   @override
-  String toString() => 'YearStatsResponse[abandoned=$abandoned, averageRating=$averageRating, bestMonth=$bestMonth, busiestDay=$busiestDay, byMonth=$byMonth, currentStreak=$currentStreak, finished=$finished, formats=$formats, genres=$genres, goal=$goal, longestStreak=$longestStreak, notes=$notes, previousGenres=$previousGenres, readingDays=$readingDays, reviews=$reviews, started=$started, topAuthors=$topAuthors, year=$year, years=$years]';
+  String toString() => 'YearStatsResponse[abandoned=$abandoned, averageRating=$averageRating, bestMonth=$bestMonth, busiestDay=$busiestDay, byMonth=$byMonth, currentStreak=$currentStreak, finished=$finished, formats=$formats, genres=$genres, goal=$goal, longestStreak=$longestStreak, notes=$notes, pagesRead=$pagesRead, previousGenres=$previousGenres, readingDays=$readingDays, readingSeconds=$readingSeconds, reviews=$reviews, started=$started, topAuthors=$topAuthors, year=$year, years=$years]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -161,8 +173,10 @@ class YearStatsResponse {
     }
       json[r'longest_streak'] = this.longestStreak;
       json[r'notes'] = this.notes;
+      json[r'pages_read'] = this.pagesRead;
       json[r'previous_genres'] = this.previousGenres;
       json[r'reading_days'] = this.readingDays;
+      json[r'reading_seconds'] = this.readingSeconds;
       json[r'reviews'] = this.reviews;
       json[r'started'] = this.started;
       json[r'top_authors'] = this.topAuthors;
@@ -206,8 +220,10 @@ class YearStatsResponse {
         goal: mapValueOfType<int>(json, r'goal'),
         longestStreak: mapValueOfType<int>(json, r'longest_streak')!,
         notes: mapValueOfType<int>(json, r'notes')!,
+        pagesRead: mapValueOfType<int>(json, r'pages_read')!,
         previousGenres: GenreCountResponse.listFromJson(json[r'previous_genres']),
         readingDays: mapValueOfType<int>(json, r'reading_days')!,
+        readingSeconds: mapValueOfType<int>(json, r'reading_seconds')!,
         reviews: mapValueOfType<int>(json, r'reviews')!,
         started: mapValueOfType<int>(json, r'started')!,
         topAuthors: AuthorCountResponse.listFromJson(json[r'top_authors']),
@@ -270,8 +286,10 @@ class YearStatsResponse {
     'genres',
     'longest_streak',
     'notes',
+    'pages_read',
     'previous_genres',
     'reading_days',
+    'reading_seconds',
     'reviews',
     'started',
     'top_authors',

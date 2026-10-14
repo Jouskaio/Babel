@@ -19,7 +19,9 @@ version, build = re.search(r"^version:\s*([\d.]+)\+(\d+)", pubspec, re.M).groups
 
 
 def git(*args: str) -> str:
-    return subprocess.run(["git", *args], capture_output=True, text=True, check=False).stdout.strip()
+    return subprocess.run(
+        ["git", *args], capture_output=True, text=True, check=False
+    ).stdout.strip()
 
 
 previous = git("describe", "--tags", "--abbrev=0", "--match", "app-v*", f"{tag}^")
@@ -61,7 +63,8 @@ manifest = {
     "notes": notes,
     "notes_en": notes_en,
     "android": entry("*.apk"),
-    "macos": entry("*.zip"),
+    "macos": entry("*-macOS.zip"),
+    "koreader": entry("babel.koplugin.zip"),
 }
 (folder / "latest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False))
 print(json.dumps(manifest, indent=2, ensure_ascii=False))

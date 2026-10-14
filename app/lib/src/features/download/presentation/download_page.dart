@@ -73,6 +73,13 @@ class DownloadPage extends ConsumerWidget {
                   label: l10n.downloadMac,
                 ),
                 _Platform(
+                  icon: Icons.menu_book_outlined,
+                  name: 'KOReader',
+                  hint: l10n.downloadKoreaderHint,
+                  file: release?.koreader,
+                  label: l10n.downloadPlugin,
+                ),
+                _Platform(
                   icon: Icons.phone_iphone,
                   name: 'iPhone · iPad',
                   hint: l10n.downloadIosSoon,

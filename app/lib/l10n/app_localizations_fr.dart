@@ -3801,4 +3801,35 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get koreaderFiles =>
       '• Dans KOReader : Stockage cloud (menu de gauche ou Outils) › + › WebDAV. Adresse : l\'adresse WebDAV ci-dessus, identifiant : ton e-mail, mot de passe : celui de KOReader.\n• Le dossier liste les livres de ta bibliothèque Babel : appuie longtemps sur un livre pour le télécharger sur la liseuse.\n• Pour envoyer un livre de la liseuse vers Babel : ouvre le dossier, menu › Envoyer un fichier, puis choisis le livre. Babel l\'ajoute à ta bibliothèque, saute ceux qu\'il a déjà et reconnaît les fanfictions AO3.\n• Les envois se font un fichier à la fois dans KOReader ; pour tout envoyer d\'un coup, sélectionne les livres dans Babel (Importer un fichier).';
+
+  @override
+  String get statsReadingHours => 'Heures de lecture';
+
+  @override
+  String get statsReadingMinutes => 'Minutes de lecture';
+
+  @override
+  String get statsPagesRead => 'Pages lues';
+
+  @override
+  String get downloadKoreaderHint =>
+      'Plugin pour KOReader : envoie ton temps de lecture à Babel. Dézippe-le dans le dossier plugins de KOReader, puis Outils › Babel.';
+
+  @override
+  String get downloadPlugin => 'Télécharger le plugin';
+
+  @override
+  String get koreaderStatsTitle => 'Statistiques de lecture';
+
+  @override
+  String get koreaderStatsNone =>
+      'Aucune statistique reçue. Le plugin Babel pour KOReader envoie ton temps de lecture et tes jours de lecture (installation sur la page Télécharger).';
+
+  @override
+  String koreaderStatsReceived(String when, int books, int hours) {
+    return 'Reçues $when : $books livres, $hours h de lecture au total.';
+  }
+
+  @override
+  String get koreaderStatsPlugin => 'Télécharger le plugin KOReader';
 }

@@ -17,6 +17,9 @@ class KoreaderStatusResponse {
     this.lastSeenAt,
     this.lastUnmatchedAt,
     this.recent = const [],
+    this.statsAt,
+    required this.statsBooks,
+    required this.statsSeconds,
     required this.unknownBooks,
   });
 
@@ -31,6 +34,15 @@ class KoreaderStatusResponse {
   /// The books it synced last
   List<KoreaderBookResponse> recent;
 
+  /// When KOReader's statistics last came
+  DateTime? statsAt;
+
+  /// Books they cover
+  int statsBooks;
+
+  /// Reading time they add up to
+  int statsSeconds;
+
   /// Books KOReader sent a position for that are not in your library
   int unknownBooks;
 
@@ -40,6 +52,9 @@ class KoreaderStatusResponse {
     other.lastSeenAt == lastSeenAt &&
     other.lastUnmatchedAt == lastUnmatchedAt &&
     _deepEquality.equals(other.recent, recent) &&
+    other.statsAt == statsAt &&
+    other.statsBooks == statsBooks &&
+    other.statsSeconds == statsSeconds &&
     other.unknownBooks == unknownBooks;
 
   @override
@@ -49,10 +64,13 @@ class KoreaderStatusResponse {
     (lastSeenAt == null ? 0 : lastSeenAt!.hashCode) +
     (lastUnmatchedAt == null ? 0 : lastUnmatchedAt!.hashCode) +
     (recent.hashCode) +
+    (statsAt == null ? 0 : statsAt!.hashCode) +
+    (statsBooks.hashCode) +
+    (statsSeconds.hashCode) +
     (unknownBooks.hashCode);
 
   @override
-  String toString() => 'KoreaderStatusResponse[devices=$devices, lastSeenAt=$lastSeenAt, lastUnmatchedAt=$lastUnmatchedAt, recent=$recent, unknownBooks=$unknownBooks]';
+  String toString() => 'KoreaderStatusResponse[devices=$devices, lastSeenAt=$lastSeenAt, lastUnmatchedAt=$lastUnmatchedAt, recent=$recent, statsAt=$statsAt, statsBooks=$statsBooks, statsSeconds=$statsSeconds, unknownBooks=$unknownBooks]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -68,6 +86,13 @@ class KoreaderStatusResponse {
       json[r'last_unmatched_at'] = null;
     }
       json[r'recent'] = this.recent;
+    if (this.statsAt != null) {
+      json[r'stats_at'] = this.statsAt!.toUtc().toIso8601String();
+    } else {
+      json[r'stats_at'] = null;
+    }
+      json[r'stats_books'] = this.statsBooks;
+      json[r'stats_seconds'] = this.statsSeconds;
       json[r'unknown_books'] = this.unknownBooks;
     return json;
   }
@@ -95,6 +120,9 @@ class KoreaderStatusResponse {
         lastSeenAt: mapDateTime(json, r'last_seen_at', r''),
         lastUnmatchedAt: mapDateTime(json, r'last_unmatched_at', r''),
         recent: KoreaderBookResponse.listFromJson(json[r'recent']),
+        statsAt: mapDateTime(json, r'stats_at', r''),
+        statsBooks: mapValueOfType<int>(json, r'stats_books')!,
+        statsSeconds: mapValueOfType<int>(json, r'stats_seconds')!,
         unknownBooks: mapValueOfType<int>(json, r'unknown_books')!,
       );
     }
@@ -145,6 +173,8 @@ class KoreaderStatusResponse {
   static const requiredKeys = <String>{
     'devices',
     'recent',
+    'stats_books',
+    'stats_seconds',
     'unknown_books',
   };
 }

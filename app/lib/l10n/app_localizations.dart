@@ -6235,6 +6235,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'• Dans KOReader : Stockage cloud (menu de gauche ou Outils) › + › WebDAV. Adresse : l\'adresse WebDAV ci-dessus, identifiant : ton e-mail, mot de passe : celui de KOReader.\n• Le dossier liste les livres de ta bibliothèque Babel : appuie longtemps sur un livre pour le télécharger sur la liseuse.\n• Pour envoyer un livre de la liseuse vers Babel : ouvre le dossier, menu › Envoyer un fichier, puis choisis le livre. Babel l\'ajoute à ta bibliothèque, saute ceux qu\'il a déjà et reconnaît les fanfictions AO3.\n• Les envois se font un fichier à la fois dans KOReader ; pour tout envoyer d\'un coup, sélectionne les livres dans Babel (Importer un fichier).'**
   String get koreaderFiles;
+
+  /// No description provided for @statsReadingHours.
+  ///
+  /// In fr, this message translates to:
+  /// **'Heures de lecture'**
+  String get statsReadingHours;
+
+  /// No description provided for @statsReadingMinutes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Minutes de lecture'**
+  String get statsReadingMinutes;
+
+  /// No description provided for @statsPagesRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pages lues'**
+  String get statsPagesRead;
+
+  /// No description provided for @downloadKoreaderHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plugin pour KOReader : envoie ton temps de lecture à Babel. Dézippe-le dans le dossier plugins de KOReader, puis Outils › Babel.'**
+  String get downloadKoreaderHint;
+
+  /// No description provided for @downloadPlugin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger le plugin'**
+  String get downloadPlugin;
+
+  /// No description provided for @koreaderStatsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statistiques de lecture'**
+  String get koreaderStatsTitle;
+
+  /// No description provided for @koreaderStatsNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune statistique reçue. Le plugin Babel pour KOReader envoie ton temps de lecture et tes jours de lecture (installation sur la page Télécharger).'**
+  String get koreaderStatsNone;
+
+  /// No description provided for @koreaderStatsReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reçues {when} : {books} livres, {hours} h de lecture au total.'**
+  String koreaderStatsReceived(String when, int books, int hours);
+
+  /// No description provided for @koreaderStatsPlugin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger le plugin KOReader'**
+  String get koreaderStatsPlugin;
 }
 
 class _AppLocalizationsDelegate

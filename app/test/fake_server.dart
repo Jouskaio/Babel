@@ -636,6 +636,8 @@ class FakeServer {
           {'genre': 'mystery', 'books': 3},
         ],
         'goal': statsGoal,
+        'reading_seconds': 0,
+        'pages_read': 0,
       });
     }
     if (path.startsWith('/v1/sync/') && request.method == 'POST') {

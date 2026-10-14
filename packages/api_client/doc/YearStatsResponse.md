@@ -20,8 +20,10 @@ Name | Type | Description | Notes
 **goal** | **int** | Books you mean to finish each year | [optional] 
 **longestStreak** | **int** | Longest run of consecutive reading days | 
 **notes** | **int** | Highlights and notes made this year | 
+**pagesRead** | **int** | Pages read this year, from KOReader's statistics | 
 **previousGenres** | [**List<GenreCountResponse>**](GenreCountResponse.md) | The same, the year before | [default to const []]
 **readingDays** | **int** | Days with some reading | 
+**readingSeconds** | **int** | Time read this year, from KOReader's statistics | 
 **reviews** | **int** |  | 
 **started** | **int** |  | 
 **topAuthors** | [**List<AuthorCountResponse>**](AuthorCountResponse.md) |  | [default to const []]

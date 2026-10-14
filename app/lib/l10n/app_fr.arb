@@ -2037,5 +2037,15 @@
   "@koreaderUnknownBooks": {"placeholders": {"count": {"type": "int"}}},
   "koreaderWebdav": "Adresse WebDAV (envoyer et récupérer des livres)",
   "koreaderFilesTitle": "Envoyer ou récupérer des livres depuis KOReader",
-  "koreaderFiles": "• Dans KOReader : Stockage cloud (menu de gauche ou Outils) › + › WebDAV. Adresse : l'adresse WebDAV ci-dessus, identifiant : ton e-mail, mot de passe : celui de KOReader.\n• Le dossier liste les livres de ta bibliothèque Babel : appuie longtemps sur un livre pour le télécharger sur la liseuse.\n• Pour envoyer un livre de la liseuse vers Babel : ouvre le dossier, menu › Envoyer un fichier, puis choisis le livre. Babel l'ajoute à ta bibliothèque, saute ceux qu'il a déjà et reconnaît les fanfictions AO3.\n• Les envois se font un fichier à la fois dans KOReader ; pour tout envoyer d'un coup, sélectionne les livres dans Babel (Importer un fichier)."
+  "koreaderFiles": "• Dans KOReader : Stockage cloud (menu de gauche ou Outils) › + › WebDAV. Adresse : l'adresse WebDAV ci-dessus, identifiant : ton e-mail, mot de passe : celui de KOReader.\n• Le dossier liste les livres de ta bibliothèque Babel : appuie longtemps sur un livre pour le télécharger sur la liseuse.\n• Pour envoyer un livre de la liseuse vers Babel : ouvre le dossier, menu › Envoyer un fichier, puis choisis le livre. Babel l'ajoute à ta bibliothèque, saute ceux qu'il a déjà et reconnaît les fanfictions AO3.\n• Les envois se font un fichier à la fois dans KOReader ; pour tout envoyer d'un coup, sélectionne les livres dans Babel (Importer un fichier).",
+  "statsReadingHours": "Heures de lecture",
+  "statsReadingMinutes": "Minutes de lecture",
+  "statsPagesRead": "Pages lues",
+  "downloadKoreaderHint": "Plugin pour KOReader : envoie ton temps de lecture à Babel. Dézippe-le dans le dossier plugins de KOReader, puis Outils › Babel.",
+  "downloadPlugin": "Télécharger le plugin",
+  "koreaderStatsTitle": "Statistiques de lecture",
+  "koreaderStatsNone": "Aucune statistique reçue. Le plugin Babel pour KOReader envoie ton temps de lecture et tes jours de lecture (installation sur la page Télécharger).",
+  "koreaderStatsReceived": "Reçues {when} : {books} livres, {hours} h de lecture au total.",
+  "@koreaderStatsReceived": {"placeholders": {"when": {"type": "String"}, "books": {"type": "int"}, "hours": {"type": "int"}}},
+  "koreaderStatsPlugin": "Télécharger le plugin KOReader"
 }

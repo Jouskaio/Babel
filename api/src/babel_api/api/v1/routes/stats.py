@@ -59,6 +59,8 @@ class YearStatsResponse(BaseModel):
     )
     previous_genres: list[GenreCountResponse] = Field(description="The same, the year before")
     goal: int | None = Field(description="Books you mean to finish each year")
+    reading_seconds: int = Field(description="Time read this year, from KOReader's statistics")
+    pages_read: int = Field(description="Pages read this year, from KOReader's statistics")
 
 
 @router.get("/me/stats", operation_id="getYearStats")
@@ -106,6 +108,8 @@ async def get_year_stats(
         genres=[GenreCountResponse(genre=g, books=n) for g, n in found.genres],
         previous_genres=[GenreCountResponse(genre=g, books=n) for g, n in found.previous_genres],
         goal=found.goal,
+        reading_seconds=found.reading_seconds,
+        pages_read=found.pages_read,
     )
 
 

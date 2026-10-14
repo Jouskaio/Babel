@@ -11,7 +11,7 @@ import asyncio
 import hashlib
 import secrets
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import PurePosixPath
 from uuid import UUID
 
@@ -34,6 +34,9 @@ class KoreaderStatus:
     devices: list[tuple[str, datetime]]
     recent: list[RecentSync]
     unknown_books: int = 0
+    stats_at: datetime | None = None
+    stats_books: int = 0
+    stats_seconds: int = 0
 
 
 PREFIX = "koreader:"
@@ -133,6 +136,14 @@ class KoreaderService:
         progress = latest.locator[len(PREFIX) :] if latest.locator.startswith(PREFIX) else ""
         return latest, progress, names.get(latest.device_id, "")
 
+    async def put_stats(
+        self, user_id: UUID, books: list[dict[str, object]], days: list[tuple[str, date, int, int]]
+    ) -> None:
+        """Reading statistics sent by KOReader's Babel plugin."""
+        await self._repo.save_stats(user_id, books, days)
+        await self._repo.mark(user_id)
+        await self._repo.commit()
+
     async def orphan(self, user_id: UUID, document: str) -> OrphanProgress | None:
         """What KOReader last sent for a book Babel does not have."""
         return await self._repo.get_orphan(user_id, document)
@@ -141,7 +152,11 @@ class KoreaderService:
     async def status(self, user_id: UUID) -> "KoreaderStatus":
         """Whether KOReader has called, which books it synced last, and its devices."""
         devices = [d for d in await self._sync.devices(user_id) if d.name.startswith(DEVICE_PREFIX)]
+        stats_at, stats_books, stats_seconds = await self._repo.stats_overview(user_id)
         return KoreaderStatus(
+            stats_at=stats_at,
+            stats_books=stats_books,
+            stats_seconds=stats_seconds,
             contact=await self._repo.contact(user_id),
             devices=[(d.name[len(DEVICE_PREFIX) :], d.last_seen_at) for d in devices],
             recent=await self._repo.recent(user_id),

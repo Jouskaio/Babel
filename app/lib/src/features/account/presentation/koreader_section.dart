@@ -2,6 +2,7 @@ import 'package:babel_api_client/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_providers.dart';
 import '../../../core/locale/relative_time.dart';
@@ -9,6 +10,7 @@ import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
+import '../../../routing/router.dart';
 
 /// What to type in KOReader to sync reading with Babel.
 final koreaderProvider = FutureProvider.autoDispose<KoreaderResponse?>(
@@ -183,6 +185,24 @@ class _SyncStatus extends ConsumerWidget {
             ),
         ],
         const SizedBox(height: 14),
+        Text(l10n.koreaderStatsTitle.toUpperCase(), style: BabelText.label(10)),
+        const SizedBox(height: 6),
+        if (value?.statsAt case final at?)
+          Text(
+            l10n.koreaderStatsReceived(
+              timeAgo(context, at),
+              value!.statsBooks,
+              (value.statsSeconds / 3600).round(),
+            ),
+            style: BabelText.body(13, color: BabelColors.textPrimary),
+          )
+        else
+          Text(l10n.koreaderStatsNone, style: BabelText.body(13)),
+        TextButton(
+          onPressed: () => context.push(Routes.download),
+          child: Text(l10n.koreaderStatsPlugin),
+        ),
+        const SizedBox(height: 10),
         Text(l10n.koreaderTipsTitle.toUpperCase(), style: BabelText.label(10)),
         const SizedBox(height: 6),
         Text(l10n.koreaderTips, style: BabelText.body(13)),

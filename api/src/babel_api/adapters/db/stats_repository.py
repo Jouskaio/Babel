@@ -12,6 +12,7 @@ from babel_api.adapters.db.models import (
     AnnotationRow,
     ChangeRow,
     KavitaLinkRow,
+    KoreaderDayStatRow,
     LibraryItemRow,
     ReviewRow,
     SourceRow,
@@ -19,6 +20,7 @@ from babel_api.adapters.db.models import (
     WorkRow,
 )
 from babel_api.domain.files import LibraryItem
+from babel_api.domain.stats import DayStat
 from babel_api.domain.sync import EntityKind
 
 
@@ -83,6 +85,19 @@ class SqlStatsRepository:
             select(AnnotationRow.client_time).where(AnnotationRow.user_id == user_id)
         )
         return [_aware(at) for at in rows]
+
+    async def koreader_days(self, user_id: UUID) -> list[DayStat]:
+        """Days of reading measured by KOReader (all books together)."""
+        rows = await self._session.execute(
+            select(
+                KoreaderDayStatRow.day,
+                func.sum(KoreaderDayStatRow.seconds),
+                func.sum(KoreaderDayStatRow.pages),
+            )
+            .where(KoreaderDayStatRow.user_id == user_id)
+            .group_by(KoreaderDayStatRow.day)
+        )
+        return [DayStat(day, int(seconds or 0), int(pages or 0)) for day, seconds, pages in rows]
 
     async def reading_times(self, user_id: UUID) -> Sequence[datetime]:
         """When the reader's devices recorded reading positions (device clock when known)."""
