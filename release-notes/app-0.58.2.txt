@@ -1,0 +1,1 @@
+Plugin KOReader mis à jour (il retrouve maintenant la connexion de la synchro) et installable sans décompresser, depuis le WebDAV de Babel
