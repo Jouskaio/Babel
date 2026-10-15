@@ -1,0 +1,1 @@
+A book can be both on paper and on your e-reader ("On my e-reader" switch), shelves can be kept offline, a "No connection" screen with Retry, and network errors no longer crash the app
