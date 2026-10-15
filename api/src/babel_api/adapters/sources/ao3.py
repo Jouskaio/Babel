@@ -33,7 +33,7 @@ _WORK = re.compile(r"^/works/(\d+)$")
 MAX_PAGES = 150
 SESSION_SECONDS = 30 * 60
 SEARCH_SECONDS = 10 * 60
-SEARCH_RETRIES = 3
+SEARCH_RETRIES = 2
 SEARCH_CACHE = 100
 _SORT = {
     "best": "_score",

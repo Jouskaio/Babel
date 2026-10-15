@@ -292,7 +292,7 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
                 return ErrorRetry(
                   message: switch (error) {
                     ApiException(code: 429) => l10n.ao3Limited,
-                    ApiException(code: 502) => l10n.ao3Down,
+                    ApiException(code: >= 500) => l10n.ao3Down,
                     _ => l10n.errorNetwork,
                   },
                   onRetry: () => _search(page: _page),

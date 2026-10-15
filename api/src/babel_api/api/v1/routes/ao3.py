@@ -1,5 +1,6 @@
 """Search Archive of Our Own from Babel, like its own search form."""
 
+import asyncio
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, HTTPException, Query, status
@@ -10,6 +11,7 @@ from babel_api.domain.errors import SourceConnectionError
 from babel_api.domain.sources import Ao3Hit, Ao3Query
 
 router = APIRouter(prefix="/ao3", tags=["ao3"])
+SEARCH_BUDGET = 25.0  # seconds
 
 
 class Ao3HitResponse(BaseModel):
@@ -105,8 +107,10 @@ async def search_ao3(
         page=page,
     )
     try:
-        result = await container.ao3.search(query)
-    except SourceConnectionError:
+        # Bounded: the proxy in front gives up after a minute, with an unhelpful error.
+        async with asyncio.timeout(SEARCH_BUDGET):
+            result = await container.ao3.search(query)
+    except (SourceConnectionError, TimeoutError):
         # AO3 is often overloaded: a clear answer, not the generic "source unreachable".
         raise HTTPException(
             status.HTTP_502_BAD_GATEWAY, "Archive of Our Own did not answer"
