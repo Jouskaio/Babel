@@ -156,9 +156,9 @@ def test_koreader_cloud_storage_lists_downloads_and_receives_books(
     # The Babel plugin is offered as a folder, to install it without unzipping anything.
     assert "babel.koplugin" in listing.text
     folder = client.request("PROPFIND", "/v1/webdav/babel.koplugin/", headers=auth)
-    assert "main.lua" in folder.text
-    assert "_meta.lua" in folder.text
-    assert "Babel" in client.get("/v1/webdav/babel.koplugin/_meta.lua", headers=auth).text
+    assert "main.lua.txt" in folder.text
+    assert "_meta.lua.txt" in folder.text
+    assert "Babel" in client.get("/v1/webdav/babel.koplugin/_meta.lua.txt", headers=auth).text
     assert client.get("/v1/webdav/babel.koplugin/x.lua", headers=auth).status_code == 404
 
     # Sending a file from the e-reader puts it in the library (a fanfiction is recognised).
