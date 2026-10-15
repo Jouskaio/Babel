@@ -3974,4 +3974,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ao3Limited => 'AO3 asks for a pause: try again in a few minutes.';
+
+  @override
+  String get ao3Down =>
+      'AO3 is not answering right now (it is often overloaded). Try again in a moment.';
 }

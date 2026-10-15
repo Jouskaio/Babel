@@ -2105,5 +2105,6 @@
   "ao3None": "Aucun résultat.",
   "ao3Previous": "Page précédente",
   "ao3Next": "Page suivante",
-  "ao3Limited": "AO3 demande une pause : réessaie dans quelques minutes."
+  "ao3Limited": "AO3 demande une pause : réessaie dans quelques minutes.",
+  "ao3Down": "AO3 ne répond pas pour l'instant (il est souvent surchargé). Réessaie dans un moment."
 }

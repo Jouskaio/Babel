@@ -260,9 +260,11 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
               final error = snapshot.error;
               if (error != null || snapshot.data == null) {
                 return ErrorRetry(
-                  message: error is ApiException && error.code == 429
-                      ? l10n.ao3Limited
-                      : l10n.errorNetwork,
+                  message: switch (error) {
+                    ApiException(code: 429) => l10n.ao3Limited,
+                    ApiException(code: 502) => l10n.ao3Down,
+                    _ => l10n.errorNetwork,
+                  },
                   onRetry: () => _search(page: _page),
                 );
               }

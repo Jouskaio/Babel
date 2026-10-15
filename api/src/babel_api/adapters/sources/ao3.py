@@ -33,6 +33,7 @@ _WORK = re.compile(r"^/works/(\d+)$")
 MAX_PAGES = 150
 SESSION_SECONDS = 30 * 60
 SEARCH_SECONDS = 10 * 60
+SEARCH_RETRIES = 3
 SEARCH_CACHE = 100
 _SORT = {
     "best": "_score",
@@ -400,7 +401,10 @@ class Ao3Connector:
         if cached is not None and time.monotonic() - cached[0] < SEARCH_SECONDS:
             return cached[1]
         params: dict[str, Any] = dict(self.search_params(query))
-        response = await self._get(self._client(), "/works/search", **params)
+        # AO3's front often answers 525 for a moment: a search is retried a few times.
+        response = await self._get(
+            self._client(), "/works/search", retries=SEARCH_RETRIES, **params
+        )
         if response.status_code >= 400:
             raise SourceConnectionError(str(response.status_code))
         soup = _soup(response)
