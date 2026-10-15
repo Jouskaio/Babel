@@ -19,6 +19,7 @@ import '../../library/application/history.dart';
 import '../../library/application/series.dart';
 import '../../library/presentation/book_trace.dart';
 import '../application/catalog_providers.dart';
+import 'ao3_search.dart';
 
 /// Search (design: Penpot "screen / recherche").
 class SearchPage extends ConsumerStatefulWidget {
@@ -35,6 +36,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   final _controller = TextEditingController();
   Timer? _debounce;
   String _query = '';
+  var _ao3 = false;
 
   @override
   void initState() {
@@ -182,7 +184,29 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             ),
           ],
         ),
+        const SizedBox(height: 14),
+        Wrap(
+          spacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text(l10n.searchSources.toUpperCase(), style: BabelText.label(10)),
+            FilterChip(
+              label: Text(l10n.sourceCatalog),
+              selected: true,
+              onSelected: null,
+            ),
+            FilterChip(
+              label: const Text('AO3'),
+              selected: _ao3,
+              onSelected: (v) => setState(() => _ao3 = v),
+            ),
+          ],
+        ),
         const SizedBox(height: 28),
+        if (_ao3) ...[
+          Ao3SearchPanel(text: _controller.text),
+          const SizedBox(height: 32),
+        ],
         if (_query.length >= 2)
           _Results(
             query: _query,

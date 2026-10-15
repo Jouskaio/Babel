@@ -126,3 +126,55 @@ class FanficDetails:
     comments: int | None = None
     bookmarks: int | None = None
     series: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class Ao3Query:
+    """A search of Archive of Our Own, as its own search form asks it."""
+
+    tags: tuple[str, ...] = ()
+    any_tag: bool = False  # one of the tags is enough (otherwise all of them)
+    text: str = ""
+    fandom: str = ""
+    language: str = ""  # AO3's language code, "en", "fr"…
+    complete: bool | None = None  # True: finished works only, False: works in progress only
+    min_words: int | None = None
+    min_kudos: int | None = None
+    min_hits: int | None = None
+    updated_within: str = ""  # "1 week", "6 months"…
+    sort: str = "best"  # best, kudos, hits, date, words, bookmarks, comments, created
+    descending: bool = True
+    page: int = 1
+
+
+@dataclass(frozen=True, slots=True)
+class Ao3Hit:
+    """A fanfiction found by a search: what its card says."""
+
+    work_id: str
+    title: str
+    authors: tuple[str, ...] = ()
+    fandoms: tuple[str, ...] = ()
+    rating: str | None = None
+    warnings: tuple[str, ...] = ()
+    relationships: tuple[str, ...] = ()
+    characters: tuple[str, ...] = ()
+    tags: tuple[str, ...] = ()
+    summary: str | None = None
+    language: str | None = None
+    words: int | None = None
+    chapters: str | None = None
+    updated: str | None = None
+    complete: bool | None = None
+    kudos: int | None = None
+    hits: int | None = None
+    comments: int | None = None
+    bookmarks: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class Ao3Page:
+    hits: tuple[Ao3Hit, ...]
+    page: int
+    has_next: bool
+    total: int | None = None

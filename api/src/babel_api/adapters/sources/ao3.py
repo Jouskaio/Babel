@@ -22,7 +22,7 @@ from bs4 import BeautifulSoup, Tag
 from babel_api.adapters.sources.http import TIMEOUT, USER_AGENT, Throttle, retry_after
 from babel_api.adapters.sources.stdlib_transport import StdlibTransport
 from babel_api.domain.errors import SourceConnectionError, SourceRateLimitedError
-from babel_api.domain.sources import FanficDetails, RemoteEntry
+from babel_api.domain.sources import Ao3Hit, Ao3Page, Ao3Query, FanficDetails, RemoteEntry
 
 log = logging.getLogger(__name__)
 
@@ -32,6 +32,19 @@ _WORK = re.compile(r"^/works/(\d+)$")
 # A big account is scanned in the background, one page every few seconds: 150 pages is 3000 works.
 MAX_PAGES = 150
 SESSION_SECONDS = 30 * 60
+SEARCH_SECONDS = 10 * 60
+SEARCH_CACHE = 100
+_SORT = {
+    "best": "_score",
+    "kudos": "kudos_count",
+    "hits": "hits",
+    "date": "revised_at",
+    "created": "created_at",
+    "words": "word_count",
+    "bookmarks": "bookmarks_count",
+    "comments": "comments_count",
+}
+_FOUND = re.compile(r"(?:of\s+)?([\d,]+)\s+(?:Works?\s+)?(?:Found|found)", re.IGNORECASE)
 DETAILS_SECONDS = 6 * 3600
 RETRIES = 2
 # A big account's bookmarks page is slow to build: AO3's front gives up (502/525) at the first
@@ -69,6 +82,7 @@ class Ao3Connector:
         # Signed-in sessions, per reader: username -> (cookies, expiry).
         self._sessions: dict[str, tuple[httpx.Cookies, float]] = {}
         self._details: dict[str, tuple[float, FanficDetails]] = {}
+        self._searches: dict[Ao3Query, tuple[float, Ao3Page]] = {}
 
     def _client(self, cookies: httpx.Cookies | None = None) -> httpx.AsyncClient:
         # One client per operation: cookies never leak from one reader to another.
@@ -305,6 +319,105 @@ class Ao3Connector:
         )
         self._details[work_id] = (time.monotonic(), details)
         return details
+
+    @staticmethod
+    def search_params(q: Ao3Query) -> dict[str, str]:
+        text = q.text.strip()
+        tags = [t.strip() for t in q.tags if t.strip()]
+        params = {"commit": "Search"}
+        if tags and not q.any_tag:
+            # Every tag is required: AO3's own tag fields work that way.
+            params["work_search[freeform_names]"] = ",".join(tags)
+        elif tags:
+            either = " OR ".join(f'"{t}"' for t in tags)
+            text = f"({either}) {text}".strip() if text else f"({either})"
+        if text:
+            params["work_search[query]"] = text
+        if q.fandom.strip():
+            params["work_search[fandom_names]"] = q.fandom.strip()
+        if q.language:
+            params["work_search[language_id]"] = q.language
+        if q.complete is not None:
+            params["work_search[complete]"] = "T" if q.complete else "F"
+        for field, value in (
+            ("word_count", q.min_words),
+            ("kudos_count", q.min_kudos),
+            ("hits", q.min_hits),
+        ):
+            if value:
+                params[f"work_search[{field}]"] = f">{value}"
+        if q.updated_within.strip():
+            params["work_search[revised_at]"] = f"<{q.updated_within.strip()} ago"
+        params["work_search[sort_column]"] = _SORT.get(q.sort, "_score")
+        params["work_search[sort_direction]"] = "desc" if q.descending else "asc"
+        if q.page > 1:
+            params["page"] = str(q.page)
+        return params
+
+    @staticmethod
+    def _hit(blurb: Tag) -> Ao3Hit | None:
+        link = blurb.select_one("h4.heading a[href^='/works/']")
+        match = _WORK.fullmatch(str(link.get("href") or "")) if link else None
+        if link is None or match is None:
+            return None  # a series or an external work
+
+        def tags(css: str) -> tuple[str, ...]:
+            return tuple(_text(a) for a in blurb.select(f"ul.tags li.{css} a.tag"))
+
+        def number(css: str) -> int | None:
+            digits = _text(blurb.select_one(f"dl.stats dd.{css}")).replace(",", "")
+            return int(digits) if digits.isdigit() else None
+
+        status = blurb.select_one("span.iswip")
+        title = str(status.get("title") or "").lower() if status else ""
+        summary = blurb.select_one("blockquote.summary")
+        rating = blurb.select_one("span.rating")
+        return Ao3Hit(
+            work_id=match.group(1),
+            title=_text(link),
+            authors=tuple(_text(a) for a in blurb.select("a[rel=author]"))[:5],
+            fandoms=tuple(_text(a) for a in blurb.select("h5.fandoms a.tag"))[:5],
+            rating=_text(rating.select_one(".text")) or _text(rating) if rating else None,
+            warnings=tags("warnings"),
+            relationships=tags("relationships")[:6],
+            characters=tags("characters")[:6],
+            tags=tags("freeforms")[:12],
+            summary=_text(summary) or None,
+            language=_text(blurb.select_one("dl.stats dd.language")) or None,
+            words=number("words"),
+            chapters=_text(blurb.select_one("dl.stats dd.chapters")) or None,
+            updated=_text(blurb.select_one("p.datetime")) or None,
+            complete=("complete" in title) if title else None,
+            kudos=number("kudos"),
+            hits=number("hits"),
+            comments=number("comments"),
+            bookmarks=number("bookmarks"),
+        )
+
+    async def search(self, query: Ao3Query) -> Ao3Page:
+        """A page of AO3's work search (kept ten minutes: the same page is often asked again)."""
+        cached = self._searches.get(query)
+        if cached is not None and time.monotonic() - cached[0] < SEARCH_SECONDS:
+            return cached[1]
+        params: dict[str, Any] = dict(self.search_params(query))
+        response = await self._get(self._client(), "/works/search", **params)
+        if response.status_code >= 400:
+            raise SourceConnectionError(str(response.status_code))
+        soup = _soup(response)
+        hits = tuple(
+            hit for blurb in soup.select("li.work.blurb") if (hit := self._hit(blurb)) is not None
+        )
+        found = _FOUND.search(_text(soup.select_one("h3.heading")))
+        page = Ao3Page(
+            hits=hits,
+            page=max(1, query.page),
+            has_next=soup.select_one("ol.pagination li.next a[rel=next]") is not None,
+            total=int(found.group(1).replace(",", "")) if found else None,
+        )
+        if len(self._searches) >= SEARCH_CACHE:
+            self._searches.pop(next(iter(self._searches)))
+        self._searches[query] = (time.monotonic(), page)
+        return page
 
     async def kudos(self, config: dict[str, Any], token: str | None, work_id: str) -> bool:
         """Leaves kudos on a work, as the reader when a password is known (else as a guest).
