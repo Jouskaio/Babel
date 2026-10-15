@@ -38,10 +38,17 @@ end
 
 -- The server and the login of the Progress sync plugin.
 function Babel:login()
-    local sync = LuaSettings:open(DataStorage:getSettingsDir() .. "/kosync.lua")
-    local server = sync:readSetting("custom_server")
-    local user = sync:readSetting("username")
-    local key = sync:readSetting("userkey")
+    -- Recent KOReader keeps it in the global settings ("kosync"), older ones in kosync.lua.
+    local conf = G_reader_settings and G_reader_settings:readSetting("kosync")
+    if type(conf) ~= "table" or not conf.custom_server then
+        local sync = LuaSettings:open(DataStorage:getSettingsDir() .. "/kosync.lua")
+        conf = {
+            custom_server = sync:readSetting("custom_server"),
+            username = sync:readSetting("username"),
+            userkey = sync:readSetting("userkey"),
+        }
+    end
+    local server, user, key = conf.custom_server, conf.username, conf.userkey
     if not server or server == "" or not user or not key then
         return nil
     end
