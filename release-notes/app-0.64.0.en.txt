@@ -1,0 +1,1 @@
+Faster AO3 search: the app asks AO3 straight from your device (with quick retries) and only uses the server if needed; on the web the server is still used

@@ -1,8 +1,10 @@
 import 'package:babel_api_client/api.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/ao3/ao3_direct.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_look.dart';
@@ -61,27 +63,55 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
 
   int? _number(TextEditingController c) => int.tryParse(c.text.trim());
 
+  /// From this device first (quick, its own address), through the server where that is not
+  /// possible (a browser) or fails.
+  Future<Ao3SearchResponse?> _fetch(Ao3Params q) async {
+    if (!kIsWeb) {
+      try {
+        return await ref.read(ao3DirectProvider).search(q);
+      } on ApiException catch (error) {
+        if (error.code == 429) rethrow;
+      }
+    }
+    return ref
+        .read(ao3ApiProvider)
+        .searchAo3(
+          tags: q.tags,
+          anyTag: q.anyTag,
+          text: q.text,
+          fandom: q.fandom,
+          language: q.language,
+          complete: q.complete,
+          minWords: q.minWords,
+          minKudos: q.minKudos,
+          minHits: q.minHits,
+          updatedWithin: q.updatedWithin,
+          sort: q.sort,
+          descending: q.descending,
+          page: q.page,
+        );
+  }
+
   void _search({int page = 1}) {
     if (_tag.text.trim().isNotEmpty) _addTag(_tag.text);
+    final params = Ao3Params(
+      tags: List.of(_tags),
+      anyTag: _any,
+      text: widget.text.trim(),
+      fandom: _fandom.text.trim(),
+      language: _language,
+      complete: _complete,
+      minWords: _number(_words),
+      minKudos: _number(_kudos),
+      minHits: _number(_hits),
+      updatedWithin: _updated,
+      sort: _sort,
+      descending: _descending,
+      page: page,
+    );
     setState(() {
       _page = page;
-      _results = ref
-          .read(ao3ApiProvider)
-          .searchAo3(
-            tags: _tags,
-            anyTag: _any,
-            text: widget.text.trim(),
-            fandom: _fandom.text.trim(),
-            language: _language,
-            complete: _complete,
-            minWords: _number(_words),
-            minKudos: _number(_kudos),
-            minHits: _number(_hits),
-            updatedWithin: _updated,
-            sort: _sort,
-            descending: _descending,
-            page: page,
-          );
+      _results = _fetch(params);
     });
   }
 

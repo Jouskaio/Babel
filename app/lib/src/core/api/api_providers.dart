@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
+import '../ao3/ao3_direct.dart';
 import '../auth/auth_controller.dart';
 import '../auth/auth_http_client.dart';
 import '../config/app_config.dart';
@@ -81,6 +82,9 @@ final kavitaApiProvider = Provider<KavitaApi>(
 final requestsApiProvider = Provider<RequestsApi>(
   (ref) => RequestsApi(ref.watch(apiClientProvider)),
 );
+
+/// Asks AO3 straight from the device.
+final ao3DirectProvider = Provider<Ao3Direct>((ref) => Ao3Direct());
 final ao3ApiProvider = Provider<Ao3Api>(
   (ref) => Ao3Api(ref.watch(apiClientProvider)),
 );
