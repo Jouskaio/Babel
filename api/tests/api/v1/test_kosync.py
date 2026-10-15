@@ -213,3 +213,31 @@ def test_koreader_reading_statistics_join_the_readers_own(
     assert status["stats_at"] is not None
     other = client.get("/v1/me/stats", params={"year": year - 1}, headers=ada).json()
     assert other["reading_seconds"] == 0
+
+
+def test_a_koreader_book_can_be_tied_by_hand_to_a_library_book(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    item = upload(client, ada, epub(title="Jane Eyre", isbn=None)).json()["item"]
+    password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
+    key = {
+        "x-auth-user": "ada@example.com",
+        "x-auth-key": hashlib.md5(password.encode(), usedforsecurity=False).hexdigest(),
+    }
+    document = "a" * 32  # a file converted on the e-reader: another md5 than the library's
+    body = {"document": document, "progress": "x", "percentage": 0.3, "device": "Boox"}
+    assert client.put("/v1/kosync/syncs/progress", json=body, headers=key).status_code == 200
+
+    (unknown,) = client.get("/v1/me/koreader/unknown", headers=ada).json()
+    assert unknown["md5"] == document
+    assert unknown["percent"] == pytest.approx(30.0)
+
+    tie = {"md5": document, "item_id": item["id"]}
+    assert client.post("/v1/me/koreader/link", json=tie, headers=ada).status_code == 204
+    assert client.get("/v1/me/koreader/unknown", headers=ada).json() == []
+    positions = client.get(f"/v1/library/{item['id']}/positions", headers=ada).json()
+    assert positions[0]["percent"] == pytest.approx(30.0)
+    back = client.get("/v1/kosync/syncs/progress/" + document, headers=key).json()
+    assert back["percentage"] == pytest.approx(0.3)
+    nobody = {"md5": document, "item_id": "00000000-0000-0000-0000-000000000000"}
+    assert client.post("/v1/me/koreader/link", json=nobody, headers=ada).status_code == 404

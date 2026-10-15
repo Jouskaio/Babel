@@ -322,12 +322,16 @@ class ApiClient {
           return KoreaderBookResponse.fromJson(value);
         case 'KoreaderDeviceResponse':
           return KoreaderDeviceResponse.fromJson(value);
+        case 'KoreaderLinkBody':
+          return KoreaderLinkBody.fromJson(value);
         case 'KoreaderPasswordResponse':
           return KoreaderPasswordResponse.fromJson(value);
         case 'KoreaderResponse':
           return KoreaderResponse.fromJson(value);
         case 'KoreaderStatusResponse':
           return KoreaderStatusResponse.fromJson(value);
+        case 'KoreaderUnknownBookResponse':
+          return KoreaderUnknownBookResponse.fromJson(value);
         case 'KudosResponse':
           return KudosResponse.fromJson(value);
         case 'LanguageResponse':

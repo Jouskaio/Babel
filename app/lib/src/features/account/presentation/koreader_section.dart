@@ -11,6 +11,13 @@ import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
+import '../../library/application/library_controller.dart';
+
+final koreaderUnknownProvider =
+    FutureProvider.autoDispose<List<KoreaderUnknownBookResponse>>(
+      (ref) async =>
+          await ref.watch(kosyncApiProvider).listKoreaderUnknownBooks() ?? [],
+    );
 
 /// What to type in KOReader to sync reading with Babel.
 final koreaderProvider = FutureProvider.autoDispose<KoreaderResponse?>(
@@ -184,6 +191,10 @@ class _SyncStatus extends ConsumerWidget {
               ),
             ),
         ],
+        for (final book
+            in ref.watch(koreaderUnknownProvider).value ??
+                const <KoreaderUnknownBookResponse>[])
+          _UnknownBook(book: book),
         const SizedBox(height: 14),
         Text(l10n.koreaderStatsTitle.toUpperCase(), style: BabelText.label(10)),
         const SizedBox(height: 6),
@@ -295,4 +306,113 @@ class _Line extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// A book of the e-reader Babel could not match: tie it to one of the library.
+class _UnknownBook extends ConsumerWidget {
+  const _UnknownBook({required this.book});
+  final KoreaderUnknownBookResponse book;
+
+  Future<void> _pick(BuildContext context, WidgetRef ref) async {
+    final item = await showModalBottomSheet<LibraryItemResponse>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => const _LibraryPicker(),
+    );
+    if (item == null) return;
+    await ref
+        .read(kosyncApiProvider)
+        .linkKoreaderBook(KoreaderLinkBody(md5: book.md5, itemId: item.id));
+    ref
+      ..invalidate(koreaderUnknownProvider)
+      ..invalidate(koreaderStatusProvider);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(context.l10n.koreaderLinked)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              book.title.isEmpty ? l10n.koreaderUntitled : book.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: BabelText.body(14, color: BabelColors.textPrimary),
+            ),
+          ),
+          if (book.percent != null)
+            Text('${book.percent!.round()} %', style: BabelText.body(12)),
+          TextButton(
+            onPressed: () => _pick(context, ref),
+            child: Text(l10n.koreaderLink),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LibraryPicker extends ConsumerStatefulWidget {
+  const _LibraryPicker();
+
+  @override
+  ConsumerState<_LibraryPicker> createState() => _LibraryPickerState();
+}
+
+class _LibraryPickerState extends ConsumerState<_LibraryPicker> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final q = _query.trim().toLowerCase();
+    final items = (ref.watch(libraryControllerProvider).value ?? const [])
+        .where(
+          (i) =>
+              q.isEmpty ||
+              i.title.toLowerCase().contains(q) ||
+              i.authors.any((a) => a.toLowerCase().contains(q)),
+        )
+        .toList();
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.7,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: TextField(
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: l10n.koreaderLinkTitle,
+                  hintText: l10n.koreaderLinkSearch,
+                ),
+                onChanged: (v) => setState(() => _query = v),
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: items.length,
+                itemBuilder: (_, i) => ListTile(
+                  title: Text(items[i].title),
+                  subtitle: Text(items[i].authors.join(', ')),
+                  onTap: () => Navigator.of(context).pop(items[i]),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

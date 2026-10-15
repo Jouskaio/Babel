@@ -6289,6 +6289,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Télécharger le plugin KOReader'**
   String get koreaderStatsPlugin;
+
+  /// No description provided for @koreaderLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Associer'**
+  String get koreaderLink;
+
+  /// No description provided for @koreaderLinkTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Associer à un livre de ta bibliothèque'**
+  String get koreaderLinkTitle;
+
+  /// No description provided for @koreaderLinkSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chercher un livre'**
+  String get koreaderLinkSearch;
+
+  /// No description provided for @koreaderLinked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livre associé'**
+  String get koreaderLinked;
+
+  /// No description provided for @koreaderUntitled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livre sans titre'**
+  String get koreaderUntitled;
 }
 
 class _AppLocalizationsDelegate

@@ -20,6 +20,7 @@ from babel_api.adapters.db.koreader_repository import (
     OrphanProgress,
     RecentSync,
     SqlKoreaderRepository,
+    UnknownBook,
 )
 from babel_api.domain.errors import NotFoundError
 from babel_api.domain.koreader import partial_md5
@@ -163,6 +164,42 @@ class KoreaderService:
             unknown_books=await self._repo.orphan_count(user_id),
         )
 
+    async def unknown(self, user_id: UUID) -> list[UnknownBook]:
+        """The books KOReader reported (position or statistics) that match no library book."""
+        found: dict[str, UnknownBook] = {}
+        for stat in await self._repo.stat_books(user_id):
+            found[stat.md5] = UnknownBook(stat.md5, stat.title, stat.authors, None, "", None)
+        for row in await self._repo.orphans(user_id):
+            before = found.get(row.document)
+            found[row.document] = UnknownBook(
+                row.document,
+                before.title if before else "",
+                before.authors if before else "",
+                row.percentage,
+                row.device,
+                row.updated_at,
+            )
+        missing: list[UnknownBook] = []
+        for book in found.values():
+            try:
+                await self._item_of(user_id, book.md5)
+            except NotFoundError:
+                missing.append(book)
+        return sorted(missing, key=lambda b: (b.title or "~", b.md5))
+
+    async def link(self, user_id: UUID, document: str, item_id: UUID) -> None:
+        """Ties a KOReader book to a library book; a position already sent is carried over."""
+        if not any(
+            i.id == item_id and i.removed_at is None for i in await self._files.list_items(user_id)
+        ):
+            raise NotFoundError
+        await self._repo.link(user_id, document, item_id)
+        orphan = await self._repo.get_orphan(user_id, document)
+        await self._repo.drop_orphan(user_id, document)
+        await self._repo.commit()
+        if orphan is not None:
+            await self.put(user_id, document, orphan.progress, orphan.percentage, orphan.device)
+
     async def _item_of_marked(self, user_id: UUID, document: str) -> UUID:
         try:
             return await self._item_of(user_id, document)
@@ -174,6 +211,8 @@ class KoreaderService:
 
     # ------------------------------------------------------------ KOReader's identifier of a file
     async def _item_of(self, user_id: UUID, document: str) -> UUID:
+        if (tied := await self._repo.linked(user_id, document)) is not None:
+            return tied
         items = [
             i for i in await self._files.list_items(user_id) if i.sha256 and i.removed_at is None
         ]

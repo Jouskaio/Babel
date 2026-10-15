@@ -79,9 +79,11 @@ doc/KavitaStatus.md
 doc/KnownVolumeResponse.md
 doc/KoreaderBookResponse.md
 doc/KoreaderDeviceResponse.md
+doc/KoreaderLinkBody.md
 doc/KoreaderPasswordResponse.md
 doc/KoreaderResponse.md
 doc/KoreaderStatusResponse.md
+doc/KoreaderUnknownBookResponse.md
 doc/KosyncApi.md
 doc/KudosResponse.md
 doc/LanguageResponse.md
@@ -273,9 +275,11 @@ lib/model/kavita_status.dart
 lib/model/known_volume_response.dart
 lib/model/koreader_book_response.dart
 lib/model/koreader_device_response.dart
+lib/model/koreader_link_body.dart
 lib/model/koreader_password_response.dart
 lib/model/koreader_response.dart
 lib/model/koreader_status_response.dart
+lib/model/koreader_unknown_book_response.dart
 lib/model/kudos_response.dart
 lib/model/language_response.dart
 lib/model/languages_response.dart

@@ -11,6 +11,8 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**getKoreader**](KosyncApi.md#getkoreader) | **GET** /v1/me/koreader | Get Koreader
 [**getKoreaderStatus**](KosyncApi.md#getkoreaderstatus) | **GET** /v1/me/koreader/status | Get Koreader Status
+[**linkKoreaderBook**](KosyncApi.md#linkkoreaderbook) | **POST** /v1/me/koreader/link | Link Koreader Book
+[**listKoreaderUnknownBooks**](KosyncApi.md#listkoreaderunknownbooks) | **GET** /v1/me/koreader/unknown | List Koreader Unknown
 [**newKoreaderPassword**](KosyncApi.md#newkoreaderpassword) | **POST** /v1/me/koreader/password | New Koreader Password
 
 
@@ -92,6 +94,99 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**KoreaderStatusResponse**](KoreaderStatusResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **linkKoreaderBook**
+> linkKoreaderBook(koreaderLinkBody)
+
+Link Koreader Book
+
+Tie a book of your e-reader to a book of your library (its progress comes along).
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = KosyncApi();
+final koreaderLinkBody = KoreaderLinkBody(); // KoreaderLinkBody | 
+
+try {
+    api_instance.linkKoreaderBook(koreaderLinkBody);
+} catch (e) {
+    print('Exception when calling KosyncApi->linkKoreaderBook: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **koreaderLinkBody** | [**KoreaderLinkBody**](KoreaderLinkBody.md)|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **listKoreaderUnknownBooks**
+> List<KoreaderUnknownBookResponse> listKoreaderUnknownBooks()
+
+List Koreader Unknown
+
+The books of your e-reader that Babel could not match to your library.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = KosyncApi();
+
+try {
+    final result = api_instance.listKoreaderUnknownBooks();
+    print(result);
+} catch (e) {
+    print('Exception when calling KosyncApi->listKoreaderUnknownBooks: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**List<KoreaderUnknownBookResponse>**](KoreaderUnknownBookResponse.md)
 
 ### Authorization
 

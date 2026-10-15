@@ -1,0 +1,1 @@
+Compte › KOReader : les livres de la liseuse que Babel ne reconnaît pas sont listés, et tu peux les associer à un livre de ta bibliothèque (la progression suit)
