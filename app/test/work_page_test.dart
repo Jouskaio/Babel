@@ -46,6 +46,28 @@ void main() {
     expect(find.text('Le résumé complet de cette édition.'), findsOneWidget);
   });
 
+  testWidgets('on a wide screen the cover and the story sit side by side', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      wrap(const WorkPage(workId: 'w1'), overrides: FakeServer().overrides),
+    );
+    await settle(tester);
+
+    expect(find.text('COUVERTURES · 3 COUVERTURES'), findsOneWidget);
+    expect(find.text('Une orpheline devient gouvernante.'), findsOneWidget);
+    // The summary is to the right of the covers' column.
+    expect(
+      tester.getTopLeft(find.text('Une orpheline devient gouvernante.')).dx,
+      greaterThan(
+        tester.getTopRight(find.text('COUVERTURES · 3 COUVERTURES')).dx,
+      ),
+    );
+  });
+
   testWidgets('a short description has no "read more"', (tester) async {
     await open(tester, FakeServer());
 
