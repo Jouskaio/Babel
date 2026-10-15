@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import AsyncIterator
 from dataclasses import replace
 from datetime import timedelta
@@ -775,7 +776,7 @@ def test_translating_a_book_needs_a_translation_server(
 
 
 def test_a_reader_searches_ao3_only_when_asking(
-    app: FastAPI, client: TestClient, ada: dict[str, str]
+    app: FastAPI, client: TestClient, ada: dict[str, str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     asked: list[Ao3Query] = []
 
@@ -807,3 +808,12 @@ def test_a_reader_searches_ao3_only_when_asking(
     app.state.container = replace(app.state.container, ao3=Down())
     down = client.get("/v1/ao3/search", headers=ada)
     assert down.status_code == 502
+
+    class Stuck:
+        async def search(self, query: Ao3Query) -> Ao3Page:
+            await asyncio.sleep(10)
+            raise AssertionError
+
+    monkeypatch.setattr("babel_api.api.v1.routes.ao3.SEARCH_BUDGET", 0.05)
+    app.state.container = replace(app.state.container, ao3=Stuck())
+    assert client.get("/v1/ao3/search", headers=ada).status_code == 502
