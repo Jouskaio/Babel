@@ -122,6 +122,7 @@ Class | Method | HTTP request | Description
 *KavitaApi* | [**retryKavita**](doc//KavitaApi.md#retrykavita) | **POST** /v1/me/kavita/retry | Retry Kavita
 *KavitaApi* | [**setPremium**](doc//KavitaApi.md#setpremium) | **PUT** /v1/admin/users/{member_id}/premium | Set Premium
 *KavitaApi* | [**unlinkKavita**](doc//KavitaApi.md#unlinkkavita) | **DELETE** /v1/me/kavita | Unlink Kavita
+*KosyncApi* | [**forgetKoreaderBook**](doc//KosyncApi.md#forgetkoreaderbook) | **DELETE** /v1/me/koreader/unknown/{md5} | Forget Koreader Book
 *KosyncApi* | [**getKoreader**](doc//KosyncApi.md#getkoreader) | **GET** /v1/me/koreader | Get Koreader
 *KosyncApi* | [**getKoreaderStatus**](doc//KosyncApi.md#getkoreaderstatus) | **GET** /v1/me/koreader/status | Get Koreader Status
 *KosyncApi* | [**linkKoreaderBook**](doc//KosyncApi.md#linkkoreaderbook) | **POST** /v1/me/koreader/link | Link Koreader Book

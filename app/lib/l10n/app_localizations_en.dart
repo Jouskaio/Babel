@@ -3828,4 +3828,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shelfOfflineDone => 'The shelf\'s books are available offline';
+
+  @override
+  String get koreaderForget => 'Delete';
+
+  @override
+  String get koreaderForgetTitle => 'Delete this reading?';
+
+  @override
+  String get koreaderForgetBody =>
+      'Its progress and the statistics your e-reader sent will be erased from Babel, and the book will be ignored from now on. The file on your e-reader is not touched.';
 }

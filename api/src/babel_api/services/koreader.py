@@ -187,6 +187,12 @@ class KoreaderService:
                 missing.append(book)
         return sorted(missing, key=lambda b: (b.title or "~", b.md5))
 
+    async def forget(self, user_id: UUID, document: str) -> None:
+        """Drops a book of the e-reader Babel could not match: its position and statistics go,
+        and what KOReader sends of it later is ignored."""
+        await self._repo.ignore(user_id, document)
+        await self._repo.commit()
+
     async def link(self, user_id: UUID, document: str, item_id: UUID) -> None:
         """Ties a KOReader book to a library book; a position already sent is carried over."""
         if not any(

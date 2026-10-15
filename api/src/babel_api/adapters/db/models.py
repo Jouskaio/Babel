@@ -753,6 +753,17 @@ class KoreaderLinkRow(Base):
     item_id: Mapped[UUID] = mapped_column(ForeignKey("library_items.id", ondelete="CASCADE"))
 
 
+class KoreaderIgnoredRow(Base):
+    """A book of KOReader the reader does not want in Babel: nothing of it is kept."""
+
+    __tablename__ = "koreader_ignored"
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    md5: Mapped[str] = mapped_column(String(64), primary_key=True)
+
+
 class KoreaderBookStatRow(Base):
     """What KOReader's reading statistics say about a book (its partial md5 names the book)."""
 

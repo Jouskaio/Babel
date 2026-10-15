@@ -12,6 +12,7 @@ from babel_api.adapters.db.models import (
     KoreaderBookStatRow,
     KoreaderDayStatRow,
     KoreaderHashRow,
+    KoreaderIgnoredRow,
     KoreaderKeyRow,
     KoreaderLinkRow,
     KoreaderProgressRow,
@@ -137,6 +138,8 @@ class SqlKoreaderRepository:
         device: str,
         device_id: str,
     ) -> None:
+        if document in await self.ignored(user_id):
+            return
         row = await self._session.get(KoreaderProgressRow, (user_id, document))
         if row is None:
             row = KoreaderProgressRow(user_id=user_id, document=document)
@@ -187,6 +190,23 @@ class SqlKoreaderRepository:
             row.item_id = item_id
         await self._session.flush()
 
+    async def ignored(self, user_id: UUID) -> set[str]:
+        rows = await self._session.scalars(
+            select(KoreaderIgnoredRow.md5).where(KoreaderIgnoredRow.user_id == user_id)
+        )
+        return set(rows)
+
+    async def ignore(self, user_id: UUID, md5: str) -> None:
+        """Forgets a book of KOReader (its position and statistics) and keeps it out."""
+        if await self._session.get(KoreaderIgnoredRow, (user_id, md5)) is None:
+            self._session.add(KoreaderIgnoredRow(user_id=user_id, md5=md5))
+        await self.drop_orphan(user_id, md5)
+        for table in (KoreaderBookStatRow, KoreaderDayStatRow):
+            await self._session.execute(
+                delete(table).where(table.user_id == user_id, table.md5 == md5)
+            )
+        await self._session.flush()
+
     async def drop_orphan(self, user_id: UUID, document: str) -> None:
         await self._session.execute(
             delete(KoreaderProgressRow).where(
@@ -212,6 +232,9 @@ class SqlKoreaderRepository:
     ) -> None:
         """Keeps what KOReader's statistics say: books (replaced) and days (replaced, per book)."""
         now = datetime.now(UTC)
+        ignored = await self.ignored(user_id)
+        books = [b for b in books if str(b["md5"]) not in ignored]
+        days = [d for d in days if d[0] not in ignored]
         for book in books:
             md5 = str(book["md5"])
             row = await self._session.get(KoreaderBookStatRow, (user_id, md5))
