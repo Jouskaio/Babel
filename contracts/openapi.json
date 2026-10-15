@@ -1516,6 +1516,19 @@
         "title": "EntryStatus",
         "type": "string"
       },
+      "EreaderRequest": {
+        "properties": {
+          "ereader": {
+            "title": "Ereader",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ereader"
+        ],
+        "title": "EreaderRequest",
+        "type": "object"
+      },
       "ExternalRatingResponse": {
         "properties": {
           "average": {
@@ -3075,6 +3088,12 @@
               }
             ],
             "title": "Edition Id"
+          },
+          "ereader": {
+            "default": false,
+            "description": "Kept on an e-reader to read there",
+            "title": "Ereader",
+            "type": "boolean"
           },
           "finished_at": {
             "anyOf": [
@@ -9900,6 +9919,82 @@
           }
         ],
         "summary": "Upload Cover",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/v1/library/{item_id}/ereader": {
+      "put": {
+        "description": "Whether you keep the book on an e-reader to read there (it can also be on paper).",
+        "operationId": "setEreader",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EreaderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Set Ereader",
         "tags": [
           "library"
         ]

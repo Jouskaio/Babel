@@ -1260,5 +1260,9 @@
   "koreaderLinkTitle": "Link to a book of your library",
   "koreaderLinkSearch": "Search a book",
   "koreaderLinked": "Book linked",
-  "koreaderUntitled": "Untitled book"
+  "koreaderUntitled": "Untitled book",
+  "ereaderOwned": "On my e-reader (to read there)",
+  "ereaderShort": "E-reader",
+  "shelfKeepOffline": "Keep offline",
+  "shelfOfflineDone": "The shelf's books are available offline"
 }

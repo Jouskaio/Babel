@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/back_leading.dart';
+import '../../../core/widgets/error_retry.dart';
 import '../../../core/widgets/loading_bar.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
@@ -31,9 +32,9 @@ class PlaylistPage extends ConsumerWidget {
       body: books.when(
         loading: () =>
             const Padding(padding: EdgeInsets.all(24), child: LoadingBar()),
-        error: (_, _) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(l10n.searchFailed, style: BabelText.body(15)),
+        error: (_, _) => ErrorRetry(
+          message: l10n.searchFailed,
+          onRetry: () => ref.invalidate(playlistProvider(keyName)),
         ),
         data: (works) => ListView(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 48),

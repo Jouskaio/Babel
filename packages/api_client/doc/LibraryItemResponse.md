@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **coverId** | **int** | The catalog cover the reader chose, if any | [optional] 
 **coverPath** | **String** | Cover found in the file, relative to the API base URL (may answer 404) | [optional] 
 **editionId** | **String** |  | [optional] 
+**ereader** | **bool** | Kept on an e-reader to read there | [optional] [default to false]
 **finishedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **format** | [**BookFormat**](BookFormat.md) |  | [optional] 
 **hidden** | **bool** | Out of sight in the library, never shared | [optional] [default to false]

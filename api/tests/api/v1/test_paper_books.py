@@ -143,3 +143,19 @@ def test_paper_books_count_in_the_year(client: TestClient, ada: dict[str, str]) 
 
     assert stats["formats"] == {"paper": 1}
     assert stats["finished"][0]["cover_path"] == "/v1/catalog/covers/8235363/M"
+
+
+def test_a_book_can_be_kept_on_an_ereader_next_to_paper_and_a_file(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    item = upload(client, ada, epub(title="Jane Eyre", isbn=None)).json()["item"]
+    assert item["ereader"] is False
+    on = client.put(f"/v1/library/{item['id']}/ereader", json={"ereader": True}, headers=ada)
+    assert on.json()["ereader"] is True
+    client.put(f"/v1/library/{item['id']}/paper", json={"paper": True}, headers=ada)
+    (listed,) = client.get("/v1/library", headers=ada).json()
+    assert (listed["paper"], listed["ereader"]) == (True, True)
+    off = client.put(f"/v1/library/{item['id']}/ereader", json={"ereader": False}, headers=ada)
+    assert off.json()["ereader"] is False
+    missing = client.put(f"/v1/library/{uuid.uuid4()}/ereader", json={"ereader": True}, headers=ada)
+    assert missing.status_code == 404

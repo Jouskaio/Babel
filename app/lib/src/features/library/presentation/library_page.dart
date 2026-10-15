@@ -810,6 +810,21 @@ class _BookActionsState extends ConsumerState<_BookActions> {
     }
   }
 
+  Future<void> _setEreader(LibraryItemResponse item, bool value) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    try {
+      final updated = await ref
+          .read(libraryApiProvider)
+          .setEreader(item.id, EreaderRequest(ereader: value));
+      if (updated != null) {
+        await ref.read(libraryControllerProvider.notifier).keep(updated);
+      }
+    } on ApiException {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.errorNetwork)));
+    }
+  }
+
   Future<void> _download() async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
@@ -883,6 +898,7 @@ class _BookActionsState extends ConsumerState<_BookActions> {
                 if ((item.format, item.size) case (final format?, final size?))
                   '${format.value.toUpperCase()} · ${fileSize(context, size)}',
                 if (item.paper) l10n.paperBook.toUpperCase(),
+                if (item.ereader) l10n.ereaderShort.toUpperCase(),
               ].join(' · '),
               style: BabelText.label(10, color: BabelColors.textSecondary),
             ),
@@ -980,6 +996,16 @@ class _BookActionsState extends ConsumerState<_BookActions> {
                 style: BabelText.body(15, color: BabelColors.textPrimary),
               ),
               onChanged: (paper) => _setPaper(item, paper),
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: item.ereader,
+              activeThumbColor: BabelColors.gold,
+              title: Text(
+                l10n.ereaderOwned,
+                style: BabelText.body(15, color: BabelColors.textPrimary),
+              ),
+              onChanged: (value) => _setEreader(item, value),
             ),
             const SizedBox(height: 8),
             StatusPicker(item: item),
@@ -1163,6 +1189,7 @@ class _Filters extends StatelessWidget {
                       style: BabelText.heading(18),
                     ),
                   ),
+                  if (!kIsWeb) _KeepShelfOffline(shelf: shelf),
                   TextButton(
                     onPressed: () => showShelfEditor(context, shelf),
                     child: Text(
@@ -1360,4 +1387,60 @@ String? libraryCoverUrl(LibraryItemResponse item) {
           ? '/v1/files/${item.sha256}/cover'
           : null);
   return path == null ? null : apiUrl(path);
+}
+
+/// Keeps every book of a shelf on this device, to read the shelf without a network.
+class _KeepShelfOffline extends ConsumerStatefulWidget {
+  const _KeepShelfOffline({required this.shelf});
+  final Shelf shelf;
+
+  @override
+  ConsumerState<_KeepShelfOffline> createState() => _KeepShelfOfflineState();
+}
+
+class _KeepShelfOfflineState extends ConsumerState<_KeepShelfOffline> {
+  (int, int)? _progress;
+
+  Future<void> _keep() async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final ids = widget.shelf.itemIds.toSet();
+    final items = [
+      for (final i
+          in ref.read(libraryControllerProvider).value ??
+              const <LibraryItemResponse>[])
+        if (ids.contains(i.id)) i,
+    ];
+    setState(() => _progress = (0, items.length));
+    try {
+      await ref
+          .read(fileTransferProvider)
+          .keepOffline(
+            items,
+            onProgress: (done, total) =>
+                mounted ? setState(() => _progress = (done, total)) : null,
+          );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.shelfOfflineDone)));
+    } on ApiException {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.errorNetwork)));
+    } finally {
+      if (mounted) setState(() => _progress = null);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = _progress;
+    if (progress != null) {
+      return Text(
+        '${progress.$1} / ${progress.$2}',
+        style: BabelText.body(13, color: BabelColors.gold),
+      );
+    }
+    return IconButton(
+      tooltip: context.l10n.shelfKeepOffline,
+      onPressed: _keep,
+      icon: Icon(Icons.download_for_offline_outlined, color: BabelColors.gold),
+    );
+  }
 }

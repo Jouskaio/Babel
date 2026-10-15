@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +15,17 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Clean web URLs (/reset-password instead of /#/reset-password), as emailed links use them.
   usePathUrlStrategy();
+  // Whatever escapes (a lost connection in a background call, say) is logged, never fatal;
+  // crash reporting, when available, takes these over.
+  PlatformDispatcher.instance.onError = (error, stack) {
+    debugPrint('Unhandled: $error');
+    return true;
+  };
+  if (kReleaseMode) {
+    ErrorWidget.builder = (details) => const Center(
+      child: Icon(Icons.cloud_off_outlined, color: Color(0xFFC9A66B)),
+    );
+  }
   await Telemetry.init();
   await EinkController.load();
   await AppearanceController.load();

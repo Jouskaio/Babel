@@ -2052,5 +2052,9 @@
   "koreaderLinkTitle": "Associer à un livre de ta bibliothèque",
   "koreaderLinkSearch": "Chercher un livre",
   "koreaderLinked": "Livre associé",
-  "koreaderUntitled": "Livre sans titre"
+  "koreaderUntitled": "Livre sans titre",
+  "ereaderOwned": "Sur ma liseuse (à lire dessus)",
+  "ereaderShort": "Liseuse",
+  "shelfKeepOffline": "Hors ligne",
+  "shelfOfflineDone": "Les livres de l'étagère sont disponibles hors ligne"
 }

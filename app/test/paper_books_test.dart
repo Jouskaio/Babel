@@ -51,7 +51,7 @@ void main() {
     expect(find.text('AJOUTER LE FICHIER'), findsOneWidget);
     expect(find.text('LIRE'), findsNothing);
     expect(
-      tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value,
+      tester.widget<SwitchListTile>(find.byType(SwitchListTile).first).value,
       isTrue,
     );
   });

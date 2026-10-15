@@ -58,6 +58,7 @@ def item_data(item: LibraryItem) -> dict[str, Any]:
         "edition_id": str(item.file.edition_id) if item.file and item.file.edition_id else None,
         "cover_path": item.cover_path,
         "paper": item.paper,
+        "ereader": item.ereader,
         "series": item.series,
         "series_index": item.series_index,
         "cover_id": item.cover_id,
@@ -293,6 +294,15 @@ class FileService:
             await self.remove_from_library(user_id, item_id, device_id)
             return item
         item = await self._files.set_paper(item_id, paper)
+        await self._record(item, device_id)
+        return item
+
+    async def set_ereader(
+        self, user_id: UUID, item_id: UUID, ereader: bool, device_id: UUID | None = None
+    ) -> LibraryItem:
+        """Whether the reader keeps the book on an e-reader (next to paper, or a file)."""
+        await self._own(user_id, item_id)
+        item = await self._files.set_ereader(item_id, ereader)
         await self._record(item, device_id)
         return item
 
