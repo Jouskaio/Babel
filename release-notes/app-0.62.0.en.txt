@@ -1,0 +1,1 @@
+Account › KOReader: you can delete (with confirmation) an e-reader reading you do not want in Babel; it is ignored afterwards

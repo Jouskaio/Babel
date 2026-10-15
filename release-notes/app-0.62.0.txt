@@ -1,0 +1,1 @@
+Compte › KOReader : tu peux supprimer (avec confirmation) une lecture de la liseuse que tu ne veux pas dans Babel ; elle est ensuite ignorée
