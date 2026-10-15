@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 
 from babel_api.adapters.security.secrets import SecretBox
 from babel_api.domain.errors import SourceConnectionError, SourceRateLimitedError
-from babel_api.domain.sources import RemoteEntry, SourceKind
+from babel_api.domain.sources import Ao3Hit, Ao3Page, Ao3Query, RemoteEntry, SourceKind
 from tests.api.v1.test_library import account, upload
 from tests.books import JPEG, NOT_A_BOOK, epub
 
@@ -772,3 +772,30 @@ def test_translating_a_book_needs_a_translation_server(
     )
     assert response.status_code == 503
     assert client.get("/v1/translate/languages", headers=ada).json()["books"] is False
+
+
+def test_a_reader_searches_ao3_only_when_asking(
+    app: FastAPI, client: TestClient, ada: dict[str, str]
+) -> None:
+    asked: list[Ao3Query] = []
+
+    class FakeSearch:
+        async def search(self, query: Ao3Query) -> Ao3Page:
+            asked.append(query)
+            return Ao3Page(
+                hits=(Ao3Hit(work_id="7", title="A Long Night", authors=("ada",), kudos=10),),
+                page=query.page,
+                has_next=True,
+                total=41,
+            )
+
+    app.state.container = replace(app.state.container, ao3=FakeSearch())
+    params = {"tags": ["Angst", "Fluff"], "any_tag": "true", "min_kudos": 100, "page": 2}
+    found = client.get("/v1/ao3/search", params=params, headers=ada)
+    assert found.status_code == 200
+    body = found.json()
+    assert (body["page"], body["has_next"], body["total"]) == (2, True, 41)
+    assert body["hits"][0]["url"] == "https://archiveofourown.org/works/7"
+    assert asked[0].tags == ("Angst", "Fluff")
+    assert (asked[0].any_tag, asked[0].min_kudos) == (True, 100)
+    assert client.get("/v1/ao3/search").status_code == 401

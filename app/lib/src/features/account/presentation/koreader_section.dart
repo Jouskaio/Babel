@@ -382,11 +382,7 @@ class _UnknownBook extends ConsumerWidget {
           IconButton(
             tooltip: l10n.koreaderForget,
             onPressed: () => _forget(context, ref),
-            icon: Icon(
-              Icons.delete_outline,
-              color: BabelColors.textSecondary,
-              size: 20,
-            ),
+            icon: Icon(Icons.close, color: BabelColors.textSecondary, size: 20),
           ),
         ],
       ),

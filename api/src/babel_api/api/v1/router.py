@@ -4,6 +4,7 @@ from fastapi import APIRouter
 
 from babel_api.api.v1.routes import (
     admin,
+    ao3,
     audiobooks,
     auth,
     catalog,
@@ -28,6 +29,7 @@ router = APIRouter()
 router.include_router(health.router)
 router.include_router(auth.router)
 router.include_router(me.router)
+router.include_router(ao3.router)
 router.include_router(catalog.router)
 router.include_router(discover.router)
 router.include_router(library.router)

@@ -1559,7 +1559,7 @@ abstract class AppLocalizations {
   /// No description provided for @ao3Title.
   ///
   /// In fr, this message translates to:
-  /// **'Fanfictions AO3'**
+  /// **'Chercher sur AO3'**
   String get ao3Title;
 
   /// No description provided for @ao3Subtitle.
@@ -6361,6 +6361,276 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Sa progression et ses statistiques envoyées par la liseuse seront effacées de Babel, et ce livre sera ignoré ensuite. Ton fichier sur la liseuse n\'est pas touché.'**
   String get koreaderForgetBody;
+
+  /// No description provided for @searchSources.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sources'**
+  String get searchSources;
+
+  /// No description provided for @sourceCatalog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catalogue'**
+  String get sourceCatalog;
+
+  /// No description provided for @ao3Hint.
+  ///
+  /// In fr, this message translates to:
+  /// **'AO3 n\'est interrogé que lorsque tu appuies sur Chercher. Le texte saisi plus haut est ajouté à la recherche.'**
+  String get ao3Hint;
+
+  /// No description provided for @ao3TagHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un tag (Entrée)'**
+  String get ao3TagHint;
+
+  /// No description provided for @ao3TagAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter ce tag'**
+  String get ao3TagAdd;
+
+  /// No description provided for @ao3All.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les tags (ET)'**
+  String get ao3All;
+
+  /// No description provided for @ao3Any.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au moins un (OU)'**
+  String get ao3Any;
+
+  /// No description provided for @ao3Fandom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fandom'**
+  String get ao3Fandom;
+
+  /// No description provided for @ao3MinKudos.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kudos min.'**
+  String get ao3MinKudos;
+
+  /// No description provided for @ao3MinHits.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vues min.'**
+  String get ao3MinHits;
+
+  /// No description provided for @ao3MinWords.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mots min.'**
+  String get ao3MinWords;
+
+  /// No description provided for @ao3Language.
+  ///
+  /// In fr, this message translates to:
+  /// **'Langue'**
+  String get ao3Language;
+
+  /// No description provided for @ao3Any2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes'**
+  String get ao3Any2;
+
+  /// No description provided for @ao3Status.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut'**
+  String get ao3Status;
+
+  /// No description provided for @ao3Complete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminée'**
+  String get ao3Complete;
+
+  /// No description provided for @ao3Wip.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours'**
+  String get ao3Wip;
+
+  /// No description provided for @ao3Updated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mise à jour depuis'**
+  String get ao3Updated;
+
+  /// No description provided for @ao3Week.
+  ///
+  /// In fr, this message translates to:
+  /// **'semaine'**
+  String get ao3Week;
+
+  /// No description provided for @ao3Month.
+  ///
+  /// In fr, this message translates to:
+  /// **'mois'**
+  String get ao3Month;
+
+  /// No description provided for @ao3Months.
+  ///
+  /// In fr, this message translates to:
+  /// **'mois'**
+  String get ao3Months;
+
+  /// No description provided for @ao3Year.
+  ///
+  /// In fr, this message translates to:
+  /// **'an'**
+  String get ao3Year;
+
+  /// No description provided for @ao3Sort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trier par'**
+  String get ao3Sort;
+
+  /// No description provided for @sortBest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pertinence'**
+  String get sortBest;
+
+  /// No description provided for @sortKudos.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kudos'**
+  String get sortKudos;
+
+  /// No description provided for @sortHits.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vues'**
+  String get sortHits;
+
+  /// No description provided for @sortDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière mise à jour'**
+  String get sortDate;
+
+  /// No description provided for @sortCreated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Publication'**
+  String get sortCreated;
+
+  /// No description provided for @sortWords.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mots'**
+  String get sortWords;
+
+  /// No description provided for @sortBookmarks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Favoris'**
+  String get sortBookmarks;
+
+  /// No description provided for @sortComments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commentaires'**
+  String get sortComments;
+
+  /// No description provided for @sortDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Décroissant'**
+  String get sortDesc;
+
+  /// No description provided for @sortAsc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Croissant'**
+  String get sortAsc;
+
+  /// No description provided for @ao3Search.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chercher'**
+  String get ao3Search;
+
+  /// No description provided for @ao3Added.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouté à ta bibliothèque'**
+  String get ao3Added;
+
+  /// No description provided for @ao3AddedShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutée'**
+  String get ao3AddedShort;
+
+  /// No description provided for @ao3Add.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get ao3Add;
+
+  /// No description provided for @ao3Open.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir sur AO3'**
+  String get ao3Open;
+
+  /// No description provided for @ao3More.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus'**
+  String get ao3More;
+
+  /// No description provided for @ao3Less.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moins'**
+  String get ao3Less;
+
+  /// No description provided for @ao3Words.
+  ///
+  /// In fr, this message translates to:
+  /// **'mots'**
+  String get ao3Words;
+
+  /// No description provided for @ao3Found.
+  ///
+  /// In fr, this message translates to:
+  /// **'fanfictions trouvées'**
+  String get ao3Found;
+
+  /// No description provided for @ao3None.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun résultat.'**
+  String get ao3None;
+
+  /// No description provided for @ao3Previous.
+  ///
+  /// In fr, this message translates to:
+  /// **'Page précédente'**
+  String get ao3Previous;
+
+  /// No description provided for @ao3Next.
+  ///
+  /// In fr, this message translates to:
+  /// **'Page suivante'**
+  String get ao3Next;
+
+  /// No description provided for @ao3Limited.
+  ///
+  /// In fr, this message translates to:
+  /// **'AO3 demande une pause : réessaie dans quelques minutes.'**
+  String get ao3Limited;
 }
 
 class _AppLocalizationsDelegate

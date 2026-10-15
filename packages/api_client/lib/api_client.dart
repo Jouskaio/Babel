@@ -194,6 +194,10 @@ class ApiClient {
           return AdminOverview.fromJson(value);
         case 'Ao3Config':
           return Ao3Config.fromJson(value);
+        case 'Ao3HitResponse':
+          return Ao3HitResponse.fromJson(value);
+        case 'Ao3SearchResponse':
+          return Ao3SearchResponse.fromJson(value);
         case 'Audience':
           return AudienceTypeTransformer().decode(value);
         case 'AudioChapterResponse':

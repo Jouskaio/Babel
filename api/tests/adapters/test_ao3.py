@@ -5,6 +5,7 @@ import pytest
 
 from babel_api.adapters.sources.ao3 import Ao3Connector
 from babel_api.domain.errors import SourceConnectionError, SourceRateLimitedError
+from babel_api.domain.sources import Ao3Query
 
 
 def blurb(work_id: int, title: str, author: str, chapters: str, date: str) -> str:
@@ -262,3 +263,65 @@ def test_a_fanfictions_page_gives_its_summary_tags_and_numbers() -> None:
     assert details.language == "English"
     asyncio.run(ao3.details({}, None, "9"))
     assert getattr(fake, "pages_read", 0) == 1  # the second reading came from the cache
+
+
+def hit_blurb() -> str:
+    return (
+        '<li id="work_7" class="work blurb group" role="article"><div class="header module">'
+        '<h4 class="heading"><a href="/works/7">A Long Night</a> by '
+        '<a rel="author" href="/users/ada/pseuds/ada">ada</a></h4>'
+        '<h5 class="fandoms heading"><a class="tag" href="/tags/x">Sherlock</a></h5>'
+        '<ul class="required-tags"><li><span class="rating"><span class="text">Teen</span>'
+        '</span></li><li><span class="iswip" title="Complete Work"></span></li></ul>'
+        '<p class="datetime">12 Mar 2024</p></div>'
+        '<ul class="tags commas"><li class="warnings"><a class="tag">No Archive Warnings</a></li>'
+        '<li class="relationships"><a class="tag">A/B</a></li>'
+        '<li class="freeforms"><a class="tag">Angst</a></li></ul>'
+        '<blockquote class="userstuff summary"><p>It was dark.</p></blockquote>'
+        '<dl class="stats"><dd class="language">English</dd><dd class="words">1,200</dd>'
+        '<dd class="chapters">3/3</dd><dd class="kudos">4,321</dd><dd class="hits">99,000</dd>'
+        "</dl></li>"
+    )
+
+
+def test_a_search_asks_ao3_like_its_form_and_reads_the_cards() -> None:
+    seen: list[httpx.Request] = []
+
+    def answer(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        body = (
+            '<html><body><h3 class="heading">1 - 20 of 1,234 Works found</h3>'
+            f'<ol class="work index group">{hit_blurb()}</ol>'
+            '<ol class="pagination actions"><li class="next"><a rel="next" href="?page=2">'
+            "Next</a></li></ol></body></html>"
+        )
+        return httpx.Response(200, text=body)
+
+    connector = Ao3Connector(httpx.MockTransport(answer), pause=0)
+    query = Ao3Query(
+        tags=("Angst", "Hurt/Comfort"), min_kudos=1000, sort="kudos", complete=True, page=2
+    )
+    result = asyncio.run(connector.search(query))
+
+    params = dict(seen[0].url.params)
+    assert params["work_search[freeform_names]"] == "Angst,Hurt/Comfort"
+    assert params["work_search[kudos_count]"] == ">1000"
+    assert params["work_search[sort_column]"] == "kudos_count"
+    assert params["work_search[complete]"] == "T"
+    assert params["page"] == "2"
+    (hit,) = result.hits
+    assert (hit.work_id, hit.title, hit.authors) == ("7", "A Long Night", ("ada",))
+    assert (hit.words, hit.kudos, hit.hits, hit.complete) == (1200, 4321, 99000, True)
+    assert hit.tags == ("Angst",)
+    assert (result.total, result.has_next, result.page) == (1234, True, 2)
+    # Asked again: answered from memory, AO3 is not called twice.
+    asyncio.run(connector.search(query))
+    assert len(seen) == 1
+
+
+def test_any_tag_goes_in_the_text_query_as_an_or() -> None:
+    params = Ao3Connector.search_params(
+        Ao3Query(tags=("Angst", "Fluff"), any_tag=True, text="rain")
+    )
+    assert params["work_search[query]"] == '("Angst" OR "Fluff") rain'
+    assert "work_search[freeform_names]" not in params

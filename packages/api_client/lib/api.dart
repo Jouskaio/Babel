@@ -30,6 +30,7 @@ part 'auth/http_bearer_auth.dart';
 
 part 'api/account_api.dart';
 part 'api/admin_api.dart';
+part 'api/ao3_api.dart';
 part 'api/audiobooks_api.dart';
 part 'api/auth_api.dart';
 part 'api/catalog_api.dart';
@@ -53,6 +54,8 @@ part 'model/abs_link_request.dart';
 part 'model/abs_link_response.dart';
 part 'model/admin_overview.dart';
 part 'model/ao3_config.dart';
+part 'model/ao3_hit_response.dart';
+part 'model/ao3_search_response.dart';
 part 'model/audience.dart';
 part 'model/audio_chapter_response.dart';
 part 'model/audio_progress_request.dart';

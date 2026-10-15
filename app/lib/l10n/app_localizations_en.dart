@@ -917,7 +917,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create a dedicated app password (Nextcloud: Settings → Security) rather than using your main password.';
 
   @override
-  String get ao3Title => 'AO3 fanfiction';
+  String get ao3Title => 'Search AO3';
 
   @override
   String get ao3Subtitle => 'Archive of Our Own · your bookmarks';
@@ -3838,4 +3838,140 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get koreaderForgetBody =>
       'Its progress and the statistics your e-reader sent will be erased from Babel, and the book will be ignored from now on. The file on your e-reader is not touched.';
+
+  @override
+  String get searchSources => 'Sources';
+
+  @override
+  String get sourceCatalog => 'Catalog';
+
+  @override
+  String get ao3Hint =>
+      'AO3 is only asked when you press Search. The text typed above is added to the search.';
+
+  @override
+  String get ao3TagHint => 'Add a tag (Enter)';
+
+  @override
+  String get ao3TagAdd => 'Add this tag';
+
+  @override
+  String get ao3All => 'All tags (AND)';
+
+  @override
+  String get ao3Any => 'Any tag (OR)';
+
+  @override
+  String get ao3Fandom => 'Fandom';
+
+  @override
+  String get ao3MinKudos => 'Min. kudos';
+
+  @override
+  String get ao3MinHits => 'Min. hits';
+
+  @override
+  String get ao3MinWords => 'Min. words';
+
+  @override
+  String get ao3Language => 'Language';
+
+  @override
+  String get ao3Any2 => 'Any';
+
+  @override
+  String get ao3Status => 'Status';
+
+  @override
+  String get ao3Complete => 'Complete';
+
+  @override
+  String get ao3Wip => 'In progress';
+
+  @override
+  String get ao3Updated => 'Updated within';
+
+  @override
+  String get ao3Week => 'week';
+
+  @override
+  String get ao3Month => 'month';
+
+  @override
+  String get ao3Months => 'months';
+
+  @override
+  String get ao3Year => 'year';
+
+  @override
+  String get ao3Sort => 'Sort by';
+
+  @override
+  String get sortBest => 'Best match';
+
+  @override
+  String get sortKudos => 'Kudos';
+
+  @override
+  String get sortHits => 'Hits';
+
+  @override
+  String get sortDate => 'Date updated';
+
+  @override
+  String get sortCreated => 'Date posted';
+
+  @override
+  String get sortWords => 'Words';
+
+  @override
+  String get sortBookmarks => 'Bookmarks';
+
+  @override
+  String get sortComments => 'Comments';
+
+  @override
+  String get sortDesc => 'Descending';
+
+  @override
+  String get sortAsc => 'Ascending';
+
+  @override
+  String get ao3Search => 'Search';
+
+  @override
+  String get ao3Added => 'Added to your library';
+
+  @override
+  String get ao3AddedShort => 'Added';
+
+  @override
+  String get ao3Add => 'Add';
+
+  @override
+  String get ao3Open => 'Open on AO3';
+
+  @override
+  String get ao3More => 'More';
+
+  @override
+  String get ao3Less => 'Less';
+
+  @override
+  String get ao3Words => 'words';
+
+  @override
+  String get ao3Found => 'fanfictions found';
+
+  @override
+  String get ao3None => 'No results.';
+
+  @override
+  String get ao3Previous => 'Previous page';
+
+  @override
+  String get ao3Next => 'Next page';
+
+  @override
+  String get ao3Limited => 'AO3 asks for a pause: try again in a few minutes.';
 }

@@ -81,6 +81,9 @@ final kavitaApiProvider = Provider<KavitaApi>(
 final requestsApiProvider = Provider<RequestsApi>(
   (ref) => RequestsApi(ref.watch(apiClientProvider)),
 );
+final ao3ApiProvider = Provider<Ao3Api>(
+  (ref) => Ao3Api(ref.watch(apiClientProvider)),
+);
 final kosyncApiProvider = Provider<KosyncApi>(
   (ref) => KosyncApi(ref.watch(apiClientProvider)),
 );
