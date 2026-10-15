@@ -6631,6 +6631,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'AO3 demande une pause : réessaie dans quelques minutes.'**
   String get ao3Limited;
+
+  /// No description provided for @ao3Down.
+  ///
+  /// In fr, this message translates to:
+  /// **'AO3 ne répond pas pour l\'instant (il est souvent surchargé). Réessaie dans un moment.'**
+  String get ao3Down;
 }
 
 class _AppLocalizationsDelegate

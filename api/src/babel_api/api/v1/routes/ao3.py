@@ -2,10 +2,11 @@
 
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
 
 from babel_api.api.dependencies import ContainerDep, CurrentUserId
+from babel_api.domain.errors import SourceConnectionError
 from babel_api.domain.sources import Ao3Hit, Ao3Query
 
 router = APIRouter(prefix="/ao3", tags=["ao3"])
@@ -88,23 +89,28 @@ async def search_ao3(
 ) -> Ao3SearchResponse:
     """Works of AO3 matching tags (all of them, or any), text, fandom and numbers, with
     AO3's own sorting and pages. AO3 is only asked when you search."""
-    result = await container.ao3.search(
-        Ao3Query(
-            tags=tuple(tags),
-            any_tag=any_tag,
-            text=text,
-            fandom=fandom,
-            language=language,
-            complete=complete,
-            min_words=min_words,
-            min_kudos=min_kudos,
-            min_hits=min_hits,
-            updated_within=updated_within,
-            sort=sort,
-            descending=descending,
-            page=page,
-        )
+    query = Ao3Query(
+        tags=tuple(tags),
+        any_tag=any_tag,
+        text=text,
+        fandom=fandom,
+        language=language,
+        complete=complete,
+        min_words=min_words,
+        min_kudos=min_kudos,
+        min_hits=min_hits,
+        updated_within=updated_within,
+        sort=sort,
+        descending=descending,
+        page=page,
     )
+    try:
+        result = await container.ao3.search(query)
+    except SourceConnectionError:
+        # AO3 is often overloaded: a clear answer, not the generic "source unreachable".
+        raise HTTPException(
+            status.HTTP_502_BAD_GATEWAY, "Archive of Our Own did not answer"
+        ) from None
     return Ao3SearchResponse(
         hits=[Ao3HitResponse.of(h) for h in result.hits],
         page=result.page,

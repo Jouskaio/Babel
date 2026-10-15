@@ -799,3 +799,11 @@ def test_a_reader_searches_ao3_only_when_asking(
     assert asked[0].tags == ("Angst", "Fluff")
     assert (asked[0].any_tag, asked[0].min_kudos) == (True, 100)
     assert client.get("/v1/ao3/search").status_code == 401
+
+    class Down:
+        async def search(self, query: Ao3Query) -> Ao3Page:
+            raise SourceConnectionError("525")
+
+    app.state.container = replace(app.state.container, ao3=Down())
+    down = client.get("/v1/ao3/search", headers=ada)
+    assert down.status_code == 502

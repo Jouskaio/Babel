@@ -319,6 +319,21 @@ def test_a_search_asks_ao3_like_its_form_and_reads_the_cards() -> None:
     assert len(seen) == 1
 
 
+def test_a_search_is_retried_when_ao3_front_fails_for_a_moment() -> None:
+    calls = {"n": 0}
+
+    def answer(request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        if calls["n"] < 3:
+            return httpx.Response(525)
+        return httpx.Response(200, text=f'<ol class="work index group">{hit_blurb()}</ol>')
+
+    connector = Ao3Connector(httpx.MockTransport(answer), pause=0)
+    result = asyncio.run(connector.search(Ao3Query(tags=("Angst",))))
+    assert calls["n"] == 3
+    assert [h.work_id for h in result.hits] == ["7"]
+
+
 def test_any_tag_goes_in_the_text_query_as_an_or() -> None:
     params = Ao3Connector.search_params(
         Ao3Query(tags=("Angst", "Fluff"), any_tag=True, text="rain")
