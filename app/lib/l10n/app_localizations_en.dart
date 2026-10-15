@@ -3782,7 +3782,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get downloadKoreaderHint =>
-      'Plugin for KOReader: sends your reading time to Babel. A zip file, which KOReader cannot open: unzip it with the e-reader\'s file manager (on a Boox: long-press the zip › Extract), then move the babel.koplugin folder into koreader/plugins. Restart KOReader: Tools › Babel.';
+      'Plugin for KOReader: sends your reading time to Babel. With no unzip tool, install it from KOReader: Cloud storage › Babel WebDAV › babel.koplugin folder, download main.lua.txt and _meta.lua.txt into koreader/plugins/babel.koplugin, then rename them to drop the .txt. Otherwise unzip the file and put the babel.koplugin folder in koreader/plugins. Restart KOReader: Tools › Babel. It uses the Progress sync login.';
 
   @override
   String get downloadPlugin => 'Download the plugin';

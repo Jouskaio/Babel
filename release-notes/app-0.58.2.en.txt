@@ -1,0 +1,1 @@
+KOReader plugin updated (it now finds the sync login) and installable without unzipping, from Babel's WebDAV
