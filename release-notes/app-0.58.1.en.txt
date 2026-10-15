@@ -1,0 +1,1 @@
+Download page: layout fixed on phones, file sizes shown in KB for small ones (the KOReader plugin), and steps to unzip the plugin on a Boox

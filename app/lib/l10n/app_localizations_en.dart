@@ -3782,7 +3782,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get downloadKoreaderHint =>
-      'Plugin for KOReader: sends your reading time to Babel. Unzip it into KOReader\'s plugins folder, then Tools › Babel.';
+      'Plugin for KOReader: sends your reading time to Babel. A zip file, which KOReader cannot open: unzip it with the e-reader\'s file manager (on a Boox: long-press the zip › Extract), then move the babel.koplugin folder into koreader/plugins. Restart KOReader: Tools › Babel.';
 
   @override
   String get downloadPlugin => 'Download the plugin';

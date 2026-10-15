@@ -6257,7 +6257,7 @@ abstract class AppLocalizations {
   /// No description provided for @downloadKoreaderHint.
   ///
   /// In fr, this message translates to:
-  /// **'Plugin pour KOReader : envoie ton temps de lecture à Babel. Dézippe-le dans le dossier plugins de KOReader, puis Outils › Babel.'**
+  /// **'Plugin pour KOReader : envoie ton temps de lecture à Babel. Un fichier zip, que KOReader ne sait pas ouvrir : décompresse-le avec le gestionnaire de fichiers de la liseuse (sur une Boox : appui long sur le zip › Extraire), puis déplace le dossier babel.koplugin dans koreader/plugins. Relance KOReader : Outils › Babel.'**
   String get downloadKoreaderHint;
 
   /// No description provided for @downloadPlugin.

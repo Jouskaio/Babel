@@ -1249,7 +1249,7 @@
   "statsReadingHours": "Hours read",
   "statsReadingMinutes": "Minutes read",
   "statsPagesRead": "Pages read",
-  "downloadKoreaderHint": "Plugin for KOReader: sends your reading time to Babel. Unzip it into KOReader's plugins folder, then Tools › Babel.",
+  "downloadKoreaderHint": "Plugin for KOReader: sends your reading time to Babel. A zip file, which KOReader cannot open: unzip it with the e-reader's file manager (on a Boox: long-press the zip › Extract), then move the babel.koplugin folder into koreader/plugins. Restart KOReader: Tools › Babel.",
   "downloadPlugin": "Download the plugin",
   "koreaderStatsTitle": "Reading statistics",
   "koreaderStatsNone": "No statistics received. The Babel plugin for KOReader sends your reading time and reading days (install it from the Download page).",
