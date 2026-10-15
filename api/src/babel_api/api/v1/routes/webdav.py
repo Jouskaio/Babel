@@ -60,7 +60,10 @@ async def _reader(request: Request, koreader: KoreaderServiceDep) -> UUID:
 def _plugin_files() -> dict[str, Path]:
     if not _PLUGIN_DIR.is_dir():
         return {}
-    return {p.name: p for p in sorted(_PLUGIN_DIR.iterdir()) if p.suffix == ".lua"}
+    # Listed as .txt (KOReader's cloud browser hides file types it cannot open, such as .lua);
+    # the real names are served too.
+    found = {p.name + ".txt": p for p in sorted(_PLUGIN_DIR.iterdir()) if p.suffix == ".lua"}
+    return found | {path.name: path for path in found.values()}
 
 
 def _plugin_entry(base: str, name: str | None) -> str:
@@ -146,7 +149,7 @@ async def webdav(
                 raise HTTPException(status.HTTP_404_NOT_FOUND, "No such folder")
             body = _plugin_entry(base, None)
             if request.headers.get("depth", "1") != "0":
-                body += "".join(_plugin_entry(base, n) for n in files_in)
+                body += "".join(_plugin_entry(base, n) for n in files_in if n.endswith(".txt"))
             return _multistatus(body)
         found = files_in.get(parts[1]) if len(parts) == 2 else None
         if found is None:
