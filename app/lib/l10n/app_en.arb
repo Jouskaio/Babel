@@ -1264,5 +1264,8 @@
   "ereaderOwned": "On my e-reader (to read there)",
   "ereaderShort": "E-reader",
   "shelfKeepOffline": "Keep offline",
-  "shelfOfflineDone": "The shelf's books are available offline"
+  "shelfOfflineDone": "The shelf's books are available offline",
+  "koreaderForget": "Delete",
+  "koreaderForgetTitle": "Delete this reading?",
+  "koreaderForgetBody": "Its progress and the statistics your e-reader sent will be erased from Babel, and the book will be ignored from now on. The file on your e-reader is not touched."
 }

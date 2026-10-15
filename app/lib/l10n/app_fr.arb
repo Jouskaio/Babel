@@ -2056,5 +2056,8 @@
   "ereaderOwned": "Sur ma liseuse (à lire dessus)",
   "ereaderShort": "Liseuse",
   "shelfKeepOffline": "Hors ligne",
-  "shelfOfflineDone": "Les livres de l'étagère sont disponibles hors ligne"
+  "shelfOfflineDone": "Les livres de l'étagère sont disponibles hors ligne",
+  "koreaderForget": "Supprimer",
+  "koreaderForgetTitle": "Supprimer cette lecture ?",
+  "koreaderForgetBody": "Sa progression et ses statistiques envoyées par la liseuse seront effacées de Babel, et ce livre sera ignoré ensuite. Ton fichier sur la liseuse n'est pas touché."
 }

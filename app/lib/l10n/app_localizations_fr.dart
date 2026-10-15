@@ -3860,4 +3860,14 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get shelfOfflineDone =>
       'Les livres de l\'étagère sont disponibles hors ligne';
+
+  @override
+  String get koreaderForget => 'Supprimer';
+
+  @override
+  String get koreaderForgetTitle => 'Supprimer cette lecture ?';
+
+  @override
+  String get koreaderForgetBody =>
+      'Sa progression et ses statistiques envoyées par la liseuse seront effacées de Babel, et ce livre sera ignoré ensuite. Ton fichier sur la liseuse n\'est pas touché.';
 }

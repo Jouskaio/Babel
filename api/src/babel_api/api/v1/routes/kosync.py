@@ -273,6 +273,15 @@ async def list_koreader_unknown(
     ]
 
 
+@account_router.delete("/unknown/{md5}", operation_id="forgetKoreaderBook", status_code=204)
+async def forget_koreader_book(
+    md5: str, user_id: CurrentUserId, koreader: KoreaderServiceDep
+) -> None:
+    """Forget a book of your e-reader that Babel does not have: its position and reading
+    statistics are deleted, and what KOReader sends of it later is ignored."""
+    await koreader.forget(user_id, md5)
+
+
 @account_router.post("/link", operation_id="linkKoreaderBook", status_code=204)
 async def link_koreader_book(
     body: KoreaderLinkBody, user_id: CurrentUserId, koreader: KoreaderServiceDep

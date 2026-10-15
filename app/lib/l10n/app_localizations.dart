@@ -6343,6 +6343,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Les livres de l\'étagère sont disponibles hors ligne'**
   String get shelfOfflineDone;
+
+  /// No description provided for @koreaderForget.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get koreaderForget;
+
+  /// No description provided for @koreaderForgetTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer cette lecture ?'**
+  String get koreaderForgetTitle;
+
+  /// No description provided for @koreaderForgetBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sa progression et ses statistiques envoyées par la liseuse seront effacées de Babel, et ce livre sera ignoré ensuite. Ton fichier sur la liseuse n\'est pas touché.'**
+  String get koreaderForgetBody;
 }
 
 class _AppLocalizationsDelegate

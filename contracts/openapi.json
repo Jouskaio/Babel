@@ -6435,7 +6435,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.69.0"
+    "version": "0.70.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -11172,6 +11172,47 @@
           }
         ],
         "summary": "List Koreader Unknown",
+        "tags": [
+          "kosync"
+        ]
+      }
+    },
+    "/v1/me/koreader/unknown/{md5}": {
+      "delete": {
+        "description": "Forget a book of your e-reader that Babel does not have: its position and reading\nstatistics are deleted, and what KOReader sends of it later is ignored.",
+        "operationId": "forgetKoreaderBook",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "md5",
+            "required": true,
+            "schema": {
+              "title": "Md5",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Forget Koreader Book",
         "tags": [
           "kosync"
         ]

@@ -241,3 +241,25 @@ def test_a_koreader_book_can_be_tied_by_hand_to_a_library_book(
     assert back["percentage"] == pytest.approx(0.3)
     nobody = {"md5": document, "item_id": "00000000-0000-0000-0000-000000000000"}
     assert client.post("/v1/me/koreader/link", json=nobody, headers=ada).status_code == 404
+
+
+def test_a_koreader_book_can_be_forgotten_and_stays_out(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
+    key = {
+        "x-auth-user": "ada@example.com",
+        "x-auth-key": hashlib.md5(password.encode(), usedforsecurity=False).hexdigest(),
+    }
+    document = "b" * 32
+    body = {"document": document, "progress": "x", "percentage": 0.3, "device": "Boox"}
+    client.put("/v1/kosync/syncs/progress", json=body, headers=key)
+    assert len(client.get("/v1/me/koreader/unknown", headers=ada).json()) == 1
+
+    gone = client.delete(f"/v1/me/koreader/unknown/{document}", headers=ada)
+    assert gone.status_code == 204
+    assert client.get("/v1/me/koreader/unknown", headers=ada).json() == []
+    # KOReader keeps sending it: still nothing kept.
+    client.put("/v1/kosync/syncs/progress", json=body, headers=key)
+    assert client.get("/v1/me/koreader/unknown", headers=ada).json() == []
+    assert client.get("/v1/me/koreader/status", headers=ada).json()["unknown_books"] == 0

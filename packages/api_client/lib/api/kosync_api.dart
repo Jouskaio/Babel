@@ -16,6 +16,55 @@ class KosyncApi {
 
   final ApiClient apiClient;
 
+  /// Forget Koreader Book
+  ///
+  /// Forget a book of your e-reader that Babel does not have: its position and reading statistics are deleted, and what KOReader sends of it later is ignored.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] md5 (required):
+  Future<Response> forgetKoreaderBookWithHttpInfo(String md5,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/me/koreader/unknown/{md5}'
+      .replaceAll('{md5}', md5);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'DELETE',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Forget Koreader Book
+  ///
+  /// Forget a book of your e-reader that Babel does not have: its position and reading statistics are deleted, and what KOReader sends of it later is ignored.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] md5 (required):
+  Future<void> forgetKoreaderBook(String md5,) async {
+    final response = await forgetKoreaderBookWithHttpInfo(md5,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Get Koreader
   ///
   /// What to type in KOReader to sync your reading with Babel.

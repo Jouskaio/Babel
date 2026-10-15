@@ -9,12 +9,61 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**forgetKoreaderBook**](KosyncApi.md#forgetkoreaderbook) | **DELETE** /v1/me/koreader/unknown/{md5} | Forget Koreader Book
 [**getKoreader**](KosyncApi.md#getkoreader) | **GET** /v1/me/koreader | Get Koreader
 [**getKoreaderStatus**](KosyncApi.md#getkoreaderstatus) | **GET** /v1/me/koreader/status | Get Koreader Status
 [**linkKoreaderBook**](KosyncApi.md#linkkoreaderbook) | **POST** /v1/me/koreader/link | Link Koreader Book
 [**listKoreaderUnknownBooks**](KosyncApi.md#listkoreaderunknownbooks) | **GET** /v1/me/koreader/unknown | List Koreader Unknown
 [**newKoreaderPassword**](KosyncApi.md#newkoreaderpassword) | **POST** /v1/me/koreader/password | New Koreader Password
 
+
+# **forgetKoreaderBook**
+> forgetKoreaderBook(md5)
+
+Forget Koreader Book
+
+Forget a book of your e-reader that Babel does not have: its position and reading statistics are deleted, and what KOReader sends of it later is ignored.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = KosyncApi();
+final md5 = md5_example; // String | 
+
+try {
+    api_instance.forgetKoreaderBook(md5);
+} catch (e) {
+    print('Exception when calling KosyncApi->forgetKoreaderBook: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **md5** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getKoreader**
 > KoreaderResponse getKoreader()

@@ -332,6 +332,32 @@ class _UnknownBook extends ConsumerWidget {
     }
   }
 
+  Future<void> _forget(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final sure = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.koreaderForgetTitle),
+        content: Text(l10n.koreaderForgetBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.koreaderForget),
+          ),
+        ],
+      ),
+    );
+    if (sure != true) return;
+    await ref.read(kosyncApiProvider).forgetKoreaderBook(book.md5);
+    ref
+      ..invalidate(koreaderUnknownProvider)
+      ..invalidate(koreaderStatusProvider);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
@@ -352,6 +378,15 @@ class _UnknownBook extends ConsumerWidget {
           TextButton(
             onPressed: () => _pick(context, ref),
             child: Text(l10n.koreaderLink),
+          ),
+          IconButton(
+            tooltip: l10n.koreaderForget,
+            onPressed: () => _forget(context, ref),
+            icon: Icon(
+              Icons.delete_outline,
+              color: BabelColors.textSecondary,
+              size: 20,
+            ),
           ),
         ],
       ),
