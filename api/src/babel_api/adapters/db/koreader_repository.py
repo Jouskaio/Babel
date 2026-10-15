@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.models import (
@@ -13,6 +13,7 @@ from babel_api.adapters.db.models import (
     KoreaderDayStatRow,
     KoreaderHashRow,
     KoreaderKeyRow,
+    KoreaderLinkRow,
     KoreaderProgressRow,
     LibraryItemRow,
     ReadingPositionRow,
@@ -48,6 +49,18 @@ class OrphanProgress:
     device: str
     device_id: str
     at: datetime
+
+
+@dataclass(frozen=True, slots=True)
+class UnknownBook:
+    """A book KOReader knows (by its md5) that Babel could not match to the library."""
+
+    md5: str
+    title: str
+    authors: str
+    percentage: float | None
+    device: str
+    at: datetime | None
 
 
 def _aware(moment: datetime | None) -> datetime | None:
@@ -145,6 +158,40 @@ class SqlKoreaderRepository:
             row.device,
             row.device_id,
             _aware(row.updated_at) or datetime.now(UTC),
+        )
+
+    async def orphans(self, user_id: UUID) -> list[KoreaderProgressRow]:
+        rows = await self._session.scalars(
+            select(KoreaderProgressRow).where(KoreaderProgressRow.user_id == user_id)
+        )
+        return list(rows)
+
+    async def stat_books(self, user_id: UUID) -> list[KoreaderBookStatRow]:
+        rows = await self._session.scalars(
+            select(KoreaderBookStatRow).where(KoreaderBookStatRow.user_id == user_id)
+        )
+        return list(rows)
+
+    async def linked(self, user_id: UUID, md5: str) -> UUID | None:
+        return await self._session.scalar(
+            select(KoreaderLinkRow.item_id).where(
+                KoreaderLinkRow.user_id == user_id, KoreaderLinkRow.md5 == md5
+            )
+        )
+
+    async def link(self, user_id: UUID, md5: str, item_id: UUID) -> None:
+        row = await self._session.get(KoreaderLinkRow, (user_id, md5))
+        if row is None:
+            self._session.add(KoreaderLinkRow(user_id=user_id, md5=md5, item_id=item_id))
+        else:
+            row.item_id = item_id
+        await self._session.flush()
+
+    async def drop_orphan(self, user_id: UUID, document: str) -> None:
+        await self._session.execute(
+            delete(KoreaderProgressRow).where(
+                KoreaderProgressRow.user_id == user_id, KoreaderProgressRow.document == document
+            )
         )
 
     async def orphan_count(self, user_id: UUID) -> int:

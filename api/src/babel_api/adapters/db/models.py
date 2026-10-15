@@ -740,6 +740,18 @@ class KoreaderProgressRow(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+class KoreaderLinkRow(Base):
+    """A book of KOReader the reader tied by hand to a book of their library."""
+
+    __tablename__ = "koreader_links"
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    md5: Mapped[str] = mapped_column(String(64), primary_key=True)
+    item_id: Mapped[UUID] = mapped_column(ForeignKey("library_items.id", ondelete="CASCADE"))
+
+
 class KoreaderBookStatRow(Base):
     """What KOReader's reading statistics say about a book (its partial md5 names the book)."""
 

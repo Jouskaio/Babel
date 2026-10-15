@@ -3801,4 +3801,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get koreaderStatsPlugin => 'Download the KOReader plugin';
+
+  @override
+  String get koreaderLink => 'Link';
+
+  @override
+  String get koreaderLinkTitle => 'Link to a book of your library';
+
+  @override
+  String get koreaderLinkSearch => 'Search a book';
+
+  @override
+  String get koreaderLinked => 'Book linked';
+
+  @override
+  String get koreaderUntitled => 'Untitled book';
 }

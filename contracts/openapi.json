@@ -2729,6 +2729,28 @@
         "title": "KoreaderDeviceResponse",
         "type": "object"
       },
+      "KoreaderLinkBody": {
+        "properties": {
+          "item_id": {
+            "description": "The library book to tie it to",
+            "format": "uuid",
+            "title": "Item Id",
+            "type": "string"
+          },
+          "md5": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Md5",
+            "type": "string"
+          }
+        },
+        "required": [
+          "md5",
+          "item_id"
+        ],
+        "title": "KoreaderLinkBody",
+        "type": "object"
+      },
       "KoreaderPasswordResponse": {
         "properties": {
           "has_password": {
@@ -2880,6 +2902,62 @@
           "stats_seconds"
         ],
         "title": "KoreaderStatusResponse",
+        "type": "object"
+      },
+      "KoreaderUnknownBookResponse": {
+        "properties": {
+          "at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At"
+          },
+          "authors": {
+            "title": "Authors",
+            "type": "string"
+          },
+          "device": {
+            "title": "Device",
+            "type": "string"
+          },
+          "md5": {
+            "description": "KOReader's identifier of the book",
+            "title": "Md5",
+            "type": "string"
+          },
+          "percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "How far KOReader says you are, 0 to 100",
+            "title": "Percent"
+          },
+          "title": {
+            "description": "From KOReader's statistics; empty when unknown",
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "md5",
+          "title",
+          "authors",
+          "percent",
+          "device",
+          "at"
+        ],
+        "title": "KoreaderUnknownBookResponse",
         "type": "object"
       },
       "KudosResponse": {
@@ -10879,6 +10957,46 @@
         ]
       }
     },
+    "/v1/me/koreader/link": {
+      "post": {
+        "description": "Tie a book of your e-reader to a book of your library (its progress comes along).",
+        "operationId": "linkKoreaderBook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KoreaderLinkBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Link Koreader Book",
+        "tags": [
+          "kosync"
+        ]
+      }
+    },
     "/v1/me/koreader/password": {
       "post": {
         "description": "Make (or replace) your KOReader password; it is shown only now.",
@@ -10928,6 +11046,37 @@
           }
         ],
         "summary": "Get Koreader Status",
+        "tags": [
+          "kosync"
+        ]
+      }
+    },
+    "/v1/me/koreader/unknown": {
+      "get": {
+        "description": "The books of your e-reader that Babel could not match to your library.",
+        "operationId": "listKoreaderUnknownBooks",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/KoreaderUnknownBookResponse"
+                  },
+                  "title": "Response Listkoreaderunknownbooks",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Koreader Unknown",
         "tags": [
           "kosync"
         ]

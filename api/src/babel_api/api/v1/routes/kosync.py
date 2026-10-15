@@ -182,6 +182,20 @@ class KoreaderStatusResponse(BaseModel):
     stats_seconds: int = Field(description="Reading time they add up to")
 
 
+class KoreaderUnknownBookResponse(BaseModel):
+    md5: str = Field(description="KOReader's identifier of the book")
+    title: str = Field(description="From KOReader's statistics; empty when unknown")
+    authors: str
+    percent: float | None = Field(description="How far KOReader says you are, 0 to 100")
+    device: str
+    at: datetime | None
+
+
+class KoreaderLinkBody(BaseModel):
+    md5: str = Field(min_length=1, max_length=64)
+    item_id: UUID = Field(description="The library book to tie it to")
+
+
 class KoreaderPasswordResponse(KoreaderResponse):
     password: str = Field(description="Shown once: KOReader's password")
 
@@ -239,6 +253,35 @@ async def get_koreader_status(
             for r in status.recent
         ],
     )
+
+
+@account_router.get("/unknown", operation_id="listKoreaderUnknownBooks")
+async def list_koreader_unknown(
+    user_id: CurrentUserId, koreader: KoreaderServiceDep
+) -> list[KoreaderUnknownBookResponse]:
+    """The books of your e-reader that Babel could not match to your library."""
+    return [
+        KoreaderUnknownBookResponse(
+            md5=b.md5,
+            title=b.title,
+            authors=b.authors,
+            percent=None if b.percentage is None else round(b.percentage * 100, 1),
+            device=b.device,
+            at=b.at,
+        )
+        for b in await koreader.unknown(user_id)
+    ]
+
+
+@account_router.post("/link", operation_id="linkKoreaderBook", status_code=204)
+async def link_koreader_book(
+    body: KoreaderLinkBody, user_id: CurrentUserId, koreader: KoreaderServiceDep
+) -> None:
+    """Tie a book of your e-reader to a book of your library (its progress comes along)."""
+    try:
+        await koreader.link(user_id, body.md5, body.item_id)
+    except NotFoundError:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No such book in your library") from None
 
 
 @account_router.post("/password", operation_id="newKoreaderPassword")

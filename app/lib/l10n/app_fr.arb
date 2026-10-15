@@ -2047,5 +2047,10 @@
   "koreaderStatsNone": "Aucune statistique reçue. Le plugin Babel pour KOReader envoie ton temps de lecture et tes jours de lecture (installation sur la page Télécharger).",
   "koreaderStatsReceived": "Reçues {when} : {books} livres, {hours} h de lecture au total.",
   "@koreaderStatsReceived": {"placeholders": {"when": {"type": "String"}, "books": {"type": "int"}, "hours": {"type": "int"}}},
-  "koreaderStatsPlugin": "Télécharger le plugin KOReader"
+  "koreaderStatsPlugin": "Télécharger le plugin KOReader",
+  "koreaderLink": "Associer",
+  "koreaderLinkTitle": "Associer à un livre de ta bibliothèque",
+  "koreaderLinkSearch": "Chercher un livre",
+  "koreaderLinked": "Livre associé",
+  "koreaderUntitled": "Livre sans titre"
 }

@@ -112,6 +112,105 @@ class KosyncApi {
     return null;
   }
 
+  /// Link Koreader Book
+  ///
+  /// Tie a book of your e-reader to a book of your library (its progress comes along).
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [KoreaderLinkBody] koreaderLinkBody (required):
+  Future<Response> linkKoreaderBookWithHttpInfo(KoreaderLinkBody koreaderLinkBody,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/me/koreader/link';
+
+    // ignore: prefer_final_locals
+    Object? postBody = koreaderLinkBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Link Koreader Book
+  ///
+  /// Tie a book of your e-reader to a book of your library (its progress comes along).
+  ///
+  /// Parameters:
+  ///
+  /// * [KoreaderLinkBody] koreaderLinkBody (required):
+  Future<void> linkKoreaderBook(KoreaderLinkBody koreaderLinkBody,) async {
+    final response = await linkKoreaderBookWithHttpInfo(koreaderLinkBody,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
+  /// List Koreader Unknown
+  ///
+  /// The books of your e-reader that Babel could not match to your library.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> listKoreaderUnknownBooksWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/me/koreader/unknown';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// List Koreader Unknown
+  ///
+  /// The books of your e-reader that Babel could not match to your library.
+  Future<List<KoreaderUnknownBookResponse>?> listKoreaderUnknownBooks() async {
+    final response = await listKoreaderUnknownBooksWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<KoreaderUnknownBookResponse>') as List)
+        .cast<KoreaderUnknownBookResponse>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
   /// New Koreader Password
   ///
   /// Make (or replace) your KOReader password; it is shown only now.
