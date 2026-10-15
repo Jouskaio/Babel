@@ -64,6 +64,7 @@ class LibraryItemResponse(BaseModel):
         default=None, description="The catalog work: reviews and notes are shared per work"
     )
     paper: bool = Field(default=False, description="Owned on paper (it may have a file too)")
+    ereader: bool = Field(default=False, description="Kept on an e-reader to read there")
     audio_duration: float | None = Field(
         default=None,
         description="An audiobook from the reader's Audiobookshelf: its length in seconds",
@@ -97,6 +98,7 @@ class LibraryItemResponse(BaseModel):
             hidden=item.state.hidden,
             work_id=item.work_id,
             paper=item.paper,
+            ereader=item.ereader,
             audio_duration=item.audio.duration if item.audio else None,
             series=item.series,
             series_index=item.series_index,
@@ -290,6 +292,24 @@ async def set_paper(
     """Whether you own the book on paper. A paper book without a file that you no longer
     own leaves the library (its status, review and notes are kept)."""
     return LibraryItemResponse.of(await files.set_paper(user_id, item_id, body.paper, device_id))
+
+
+class EreaderRequest(BaseModel):
+    ereader: bool
+
+
+@router.put("/library/{item_id}/ereader", operation_id="setEreader")
+async def set_ereader(
+    user_id: CurrentUserId,
+    files: FileServiceDep,
+    item_id: UUID,
+    body: EreaderRequest,
+    device_id: DeviceHeader = None,
+) -> LibraryItemResponse:
+    """Whether you keep the book on an e-reader to read there (it can also be on paper)."""
+    return LibraryItemResponse.of(
+        await files.set_ereader(user_id, item_id, body.ereader, device_id)
+    )
 
 
 @router.post("/library/{item_id}/file", operation_id="attachFile")

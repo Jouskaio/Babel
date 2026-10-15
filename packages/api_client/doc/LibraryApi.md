@@ -31,6 +31,7 @@ Method | HTTP request | Description
 [**previewLink**](LibraryApi.md#previewlink) | **POST** /v1/library/links/preview | Preview Link
 [**removeFromLibrary**](LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
 [**saveReview**](LibraryApi.md#savereview) | **PUT** /v1/library/{item_id}/review | Save Review
+[**setEreader**](LibraryApi.md#setereader) | **PUT** /v1/library/{item_id}/ereader | Set Ereader
 [**setPaper**](LibraryApi.md#setpaper) | **PUT** /v1/library/{item_id}/paper | Set Paper
 [**stopFollow**](LibraryApi.md#stopfollow) | **DELETE** /v1/library/follows/{follow_id} | Stop Follow
 [**updateBookDetails**](LibraryApi.md#updatebookdetails) | **PATCH** /v1/library/{item_id} | Update Details
@@ -1101,6 +1102,59 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**ReviewResponse**](ReviewResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **setEreader**
+> LibraryItemResponse setEreader(itemId, ereaderRequest, xBabelDevice)
+
+Set Ereader
+
+Whether you keep the book on an e-reader to read there (it can also be on paper).
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = LibraryApi();
+final itemId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final ereaderRequest = EreaderRequest(); // EreaderRequest | 
+final xBabelDevice = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.setEreader(itemId, ereaderRequest, xBabelDevice);
+    print(result);
+} catch (e) {
+    print('Exception when calling LibraryApi->setEreader: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **itemId** | **String**|  | 
+ **ereaderRequest** | [**EreaderRequest**](EreaderRequest.md)|  | 
+ **xBabelDevice** | **String**|  | [optional] 
+
+### Return type
+
+[**LibraryItemResponse**](LibraryItemResponse.md)
 
 ### Authorization
 

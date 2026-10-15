@@ -164,6 +164,27 @@ class FileTransfer {
     );
   }
 
+  /// Keeps the books of [items] on this device (those already here are skipped), one after
+  /// the other. Stops at the first network error, which is thrown.
+  Future<void> keepOffline(
+    Iterable<LibraryItemResponse> items, {
+    void Function(int done, int total)? onProgress,
+  }) async {
+    final todo = [
+      for (final i in items)
+        if (i.sha256 != null && i.format != null && i.format != BookFormat.cbr)
+          i,
+    ];
+    for (var done = 0; done < todo.length; done++) {
+      onProgress?.call(done, todo.length);
+      final item = todo[done];
+      if (!await isOnDevice(item.sha256!, item.format!.value)) {
+        await download(item);
+      }
+    }
+    onProgress?.call(todo.length, todo.length);
+  }
+
   /// The content of a book, to read it: the local copy when there is one, otherwise
   /// downloaded (and kept on devices, so the book can be read offline next time).
   Future<Uint8List> open(

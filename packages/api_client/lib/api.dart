@@ -87,6 +87,7 @@ part 'model/device_response.dart';
 part 'model/edition_response.dart';
 part 'model/entity_kind.dart';
 part 'model/entry_status.dart';
+part 'model/ereader_request.dart';
 part 'model/external_rating_response.dart';
 part 'model/external_review_response.dart';
 part 'model/external_reviews_response.dart';

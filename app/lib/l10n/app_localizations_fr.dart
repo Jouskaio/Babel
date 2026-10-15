@@ -3847,4 +3847,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get koreaderUntitled => 'Livre sans titre';
+
+  @override
+  String get ereaderOwned => 'Sur ma liseuse (à lire dessus)';
+
+  @override
+  String get ereaderShort => 'Liseuse';
+
+  @override
+  String get shelfKeepOffline => 'Hors ligne';
+
+  @override
+  String get shelfOfflineDone =>
+      'Les livres de l\'étagère sont disponibles hors ligne';
 }

@@ -6319,6 +6319,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Livre sans titre'**
   String get koreaderUntitled;
+
+  /// No description provided for @ereaderOwned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur ma liseuse (à lire dessus)'**
+  String get ereaderOwned;
+
+  /// No description provided for @ereaderShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liseuse'**
+  String get ereaderShort;
+
+  /// No description provided for @shelfKeepOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hors ligne'**
+  String get shelfKeepOffline;
+
+  /// No description provided for @shelfOfflineDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les livres de l\'étagère sont disponibles hors ligne'**
+  String get shelfOfflineDone;
 }
 
 class _AppLocalizationsDelegate

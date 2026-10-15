@@ -75,6 +75,7 @@ def _to_item(row: LibraryItemRow) -> LibraryItem:
         removed_at=_maybe(row.removed_at),
         work_id=row.work_id,
         paper=row.paper,
+        ereader=row.ereader,
         work_cover_id=row.work.cover_id if row.work else None,
         work_cover_url=row.work.cover_url if row.work else None,
         audio=AudioRef(row.audio_id, row.audio_duration or 0, row.audio_cover)
@@ -239,6 +240,12 @@ class SqlFileRepository:
     async def set_origin(self, item_id: UUID, origin: str | None) -> LibraryItem:
         row = await self._session.get_one(LibraryItemRow, item_id)
         row.origin = origin
+        await self._session.flush()
+        return _to_item(row)
+
+    async def set_ereader(self, item_id: UUID, ereader: bool) -> LibraryItem:
+        row = await self._session.get_one(LibraryItemRow, item_id)
+        row.ereader = ereader
         await self._session.flush()
         return _to_item(row)
 

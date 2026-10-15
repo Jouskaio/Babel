@@ -134,6 +134,8 @@ class LibraryItem:
     work_id: UUID | None = None
     # The reader owns it on paper (with or without a file to read it on devices too).
     paper: bool = False
+    # The reader keeps it on an e-reader to read there (alongside paper, or a file).
+    ereader: bool = False
     # The work's cover, for paper books without a file.
     work_cover_id: int | None = None
     # Where the work's cover was found when Open Library had none (served by Babel).

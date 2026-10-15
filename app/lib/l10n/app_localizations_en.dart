@@ -3816,4 +3816,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get koreaderUntitled => 'Untitled book';
+
+  @override
+  String get ereaderOwned => 'On my e-reader (to read there)';
+
+  @override
+  String get ereaderShort => 'E-reader';
+
+  @override
+  String get shelfKeepOffline => 'Keep offline';
+
+  @override
+  String get shelfOfflineDone => 'The shelf\'s books are available offline';
 }

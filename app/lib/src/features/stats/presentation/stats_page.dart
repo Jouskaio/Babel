@@ -10,6 +10,7 @@ import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/back_leading.dart';
 import '../../../core/widgets/book_cover.dart';
+import '../../../core/widgets/error_retry.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
@@ -38,7 +39,6 @@ class _StatsPageState extends ConsumerState<StatsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final stats = ref.watch(yearStatsProvider(_year));
     return Scaffold(
       appBar: AppBar(
@@ -49,12 +49,8 @@ class _StatsPageState extends ConsumerState<StatsPage> {
       body: stats.when(
         loading: () =>
             Center(child: CircularProgressIndicator(color: BabelColors.gold)),
-        error: (_, _) => Center(
-          child: TextButton(
-            onPressed: () => ref.invalidate(yearStatsProvider(_year)),
-            child: Text(l10n.retry),
-          ),
-        ),
+        error: (_, _) =>
+            ErrorRetry(onRetry: () => ref.invalidate(yearStatsProvider(_year))),
         data: (stats) => stats == null
             ? const SizedBox.shrink()
             : _Body(

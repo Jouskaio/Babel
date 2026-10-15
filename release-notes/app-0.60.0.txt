@@ -1,0 +1,1 @@
+Un livre peut être à la fois en papier et sur ta liseuse (interrupteur « Sur ma liseuse »), étagères téléchargeables pour le hors ligne, écran « Pas de connexion » avec Réessayer, et erreurs réseau qui ne font plus planter l'app

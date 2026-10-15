@@ -12,6 +12,7 @@ import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/back_leading.dart';
 import '../../../core/widgets/book_cover.dart';
+import '../../../core/widgets/error_retry.dart';
 import '../../../core/widgets/loading_bar.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../core/widgets/searching_indicator.dart';
@@ -42,12 +43,8 @@ class WorkPage extends ConsumerWidget {
       body: work.when(
         loading: () =>
             Center(child: CircularProgressIndicator(color: BabelColors.gold)),
-        error: (_, _) => Center(
-          child: TextButton(
-            onPressed: () =>
-                ref.invalidate(workProvider((id: workId, lang: lang))),
-            child: Text(context.l10n.retry),
-          ),
+        error: (_, _) => ErrorRetry(
+          onRetry: () => ref.invalidate(workProvider((id: workId, lang: lang))),
         ),
         data: (work) =>
             work == null ? const SizedBox.shrink() : _WorkBody(work: work),
