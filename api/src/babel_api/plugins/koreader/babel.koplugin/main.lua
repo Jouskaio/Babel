@@ -50,7 +50,18 @@ function Babel:login()
     end
     local server, user, key = conf.custom_server, conf.username, conf.userkey
     if not server or server == "" or not user or not key then
-        return nil
+        local seen = {}
+        for name in pairs(sync.data or {}) do
+            seen[#seen + 1] = tostring(name)
+        end
+        return nil, string.format(
+            "%s (server %s, e-mail %s, key %s; found: %s)",
+            sync.file or "kosync.lua",
+            server and "ok" or "missing",
+            user and "ok" or "missing",
+            key and "ok" or "missing",
+            #seen > 0 and table.concat(seen, ", ") or "nothing"
+        )
     end
     return (server:gsub("/+$", "")), user, key
 end
@@ -123,7 +134,7 @@ function Babel:upload(verbose)
     end
     local server, user, key = self:login()
     if not server then
-        say(_("Set up Progress sync first (Tools > Progress sync > Custom sync server), with the address, e-mail and password from Babel."))
+        say(_("Set up Progress sync first (Tools > Progress sync > Custom sync server), with the address, e-mail and password from Babel.") .. "\n\nBabel plugin 3: " .. tostring(user))
         return
     end
     local last = self.settings:readSetting("last_upload")
