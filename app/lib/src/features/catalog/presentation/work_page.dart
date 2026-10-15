@@ -94,11 +94,13 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
   void _pickCover(String path) {
     setState(() => _cover = path);
     // Back to the top, where the cover is shown large.
-    _scroll.animateTo(
-      0,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOutCubic,
-    );
+    if (MediaQuery.sizeOf(context).width < 1000) {
+      _scroll.animateTo(
+        0,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOutCubic,
+      );
+    }
   }
 
   /// A book owned on paper, followed without a file (one can be added later).
@@ -145,234 +147,310 @@ class _WorkBodyState extends ConsumerState<_WorkBody> {
       if (work.authors.isNotEmpty) work.authors.join(', '),
       if (work.firstPublishYear case final year?) '$year',
     ].join(' · ');
+    final wide = MediaQuery.sizeOf(context).width >= 1000;
+    final align = wide ? TextAlign.start : TextAlign.center;
+    final wrapAlign = wide ? WrapAlignment.start : WrapAlignment.center;
+    final rowAlign = wide ? MainAxisAlignment.start : MainAxisAlignment.center;
+    final cover = <Widget>[
+      Center(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          child: BookCover(
+            key: ValueKey(_cover ?? work.coverPath),
+            width: 220,
+            url: switch (_cover ?? work.coverPath) {
+              final path? => apiUrl(path),
+              _ => null,
+            },
+            title: work.title,
+          ),
+        ),
+      ),
+      if (covers.length > 1) ...[
+        const SizedBox(height: 22),
+        Text(
+          '${l10n.workCovers} · ${l10n.coversCount(covers.length)}'
+              .toUpperCase(),
+          textAlign: TextAlign.center,
+          style: BabelText.label(9),
+        ),
+        const SizedBox(height: 10),
+        if (wide)
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              for (final cover in covers)
+                Tooltip(
+                  message: cover.label,
+                  child: InkWell(
+                    onTap: () => setState(() => _cover = cover.path),
+                    borderRadius: BabelShape.radius(6),
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        borderRadius: BabelShape.radius(8),
+                        border: Border.all(
+                          color: (_cover ?? work.coverPath) == cover.path
+                              ? BabelColors.gold
+                              : Colors.transparent,
+                          width: 2,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BabelShape.radius(5),
+                        child: Image.network(
+                          apiUrl(cover.path),
+                          width: 56,
+                          height: 84,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Container(
+                            width: 56,
+                            height: 84,
+                            color: BabelColors.velvet,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          )
+        else
+          LayoutBuilder(
+            builder: (context, box) => SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: box.maxWidth),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 10,
+                  children: [
+                    for (final cover in covers)
+                      Tooltip(
+                        message: cover.label,
+                        child: InkWell(
+                          onTap: () => setState(() => _cover = cover.path),
+                          borderRadius: BabelShape.radius(6),
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              borderRadius: BabelShape.radius(8),
+                              border: Border.all(
+                                color: (_cover ?? work.coverPath) == cover.path
+                                    ? BabelColors.gold
+                                    : Colors.transparent,
+                                width: 2,
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BabelShape.radius(5),
+                              child: Image.network(
+                                apiUrl(cover.path),
+                                width: 56,
+                                height: 84,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => Container(
+                                  width: 56,
+                                  height: 84,
+                                  color: BabelColors.velvet,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
+    ];
+    final heading = <Widget>[
+      SizedBox(height: wide ? 0 : 28),
+      Text(work.title, textAlign: align, style: BabelText.title(36)),
+      if (work.originalTitle != work.title)
+        Text(
+          work.originalTitle,
+          textAlign: align,
+          style: BabelText.reading(
+            15,
+            color: BabelColors.textSecondary,
+            italic: true,
+          ),
+        ),
+      const SizedBox(height: 8),
+      Text(meta.toUpperCase(), textAlign: align, style: BabelText.label(10)),
+      if (work.rating case final rating?) ...[
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: rowAlign,
+          children: [
+            Icon(Icons.star_rounded, color: BabelColors.gold, size: 18),
+            const SizedBox(width: 4),
+            Text(
+              rating.toStringAsFixed(1),
+              style: BabelText.body(14, color: BabelColors.gold),
+            ),
+            Text(' / 5', style: BabelText.body(12)),
+          ],
+        ),
+      ],
+      if (work.subjects.isNotEmpty) ...[
+        const SizedBox(height: 14),
+        Wrap(
+          alignment: wrapAlign,
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            for (final genre in work.subjects.take(8))
+              InkWell(
+                borderRadius: BabelShape.radius(999),
+                onTap: () => context.go(Routes.searchFor(genre)),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: BabelColors.border),
+                    borderRadius: BabelShape.radius(999),
+                  ),
+                  child: Text(genre, style: BabelText.body(12)),
+                ),
+              ),
+          ],
+        ),
+      ],
+      if (work.series case final series?) ...[
+        const SizedBox(height: 18),
+        Align(
+          alignment: wide ? Alignment.centerLeft : Alignment.center,
+          child: PillButton(
+            label: l10n.sagaSee,
+            kind: PillButtonKind.secondary,
+            onPressed: () => context.push(
+              Routes.saga(series, author: work.authors.firstOrNull),
+            ),
+          ),
+        ),
+      ],
+    ];
+    final body = <Widget>[
+      if (work.description case final description?) ...[
+        const SizedBox(height: sectionGap),
+        SectionTitle(l10n.workSummary),
+        _Description(text: description),
+      ],
+      _Related(workId: work.id, bookCover: work.coverPath),
+      if (work.editions.isNotEmpty) ...[
+        const SizedBox(height: sectionGap),
+        SectionTitle(
+          l10n.workEditions,
+          trailing: Text(
+            l10n.editionsCount(work.editions.length).toUpperCase(),
+            style: BabelText.label(10),
+          ),
+        ),
+        for (final edition in work.editions.take(20))
+          _EditionRow(edition: edition, onPickCover: _pickCover),
+      ],
+      if (trace != null) ...[
+        const SizedBox(height: sectionGap),
+        BookTraceCard(trace: trace),
+      ],
+      WorkReadersSection(workId: work.id),
+      _ExternalReviews(workId: work.id),
+    ];
+    final get = <Widget>[
+      // Without a file to read (a paper book, or one taken out of the library) it can
+      // still be asked for.
+      if (trace == null ||
+          !trace.available ||
+          (trace.item.sha256 == null && trace.item.audioDuration == null)) ...[
+        const SizedBox(height: sectionGap),
+        _SourceMatches(
+          title: work.title,
+          workId: work.id,
+          languages: {for (final e in work.editions) ?e.language}.toList(),
+        ),
+        const SizedBox(height: sectionGap),
+        SectionTitle(l10n.getThisBook),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: BabelColors.surface,
+            borderRadius: BabelShape.radius(22),
+            border: Border.all(color: BabelColors.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.importOwnCopy, style: BabelText.body(14)),
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  PillButton(
+                    label: l10n.paperOwned,
+                    onPressed: _adding ? null : () => _addPaper(work),
+                  ),
+                  PillButton(
+                    label: l10n.importFile,
+                    kind: PillButtonKind.secondary,
+                    onPressed: () => context.go(Routes.library),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(l10n.paperOwnedHint, style: BabelText.body(12)),
+            ],
+          ),
+        ),
+      ],
+    ];
+    // Wide screens: the cover and where to get the book stay on the left, the story
+    // (title, summary, editions, readers, reviews) takes the right.
+    if (wide) {
+      return Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1160),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 300,
+                  child: ListView(
+                    padding: const EdgeInsets.only(bottom: 48),
+                    children: [...cover, ...get],
+                  ),
+                ),
+                const SizedBox(width: 48),
+                Expanded(
+                  child: ListView(
+                    controller: _scroll,
+                    padding: const EdgeInsets.only(bottom: 48),
+                    children: [...heading, ...body],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 720),
         child: ListView(
           controller: _scroll,
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 48),
-          children: [
-            Center(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                child: BookCover(
-                  key: ValueKey(_cover ?? work.coverPath),
-                  width: 220,
-                  url: switch (_cover ?? work.coverPath) {
-                    final path? => apiUrl(path),
-                    _ => null,
-                  },
-                  title: work.title,
-                ),
-              ),
-            ),
-            if (covers.length > 1) ...[
-              const SizedBox(height: 22),
-              Text(
-                '${l10n.workCovers} · ${l10n.coversCount(covers.length)}'
-                    .toUpperCase(),
-                textAlign: TextAlign.center,
-                style: BabelText.label(9),
-              ),
-              const SizedBox(height: 10),
-              LayoutBuilder(
-                builder: (context, box) => SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: box.maxWidth),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 10,
-                      children: [
-                        for (final cover in covers)
-                          Tooltip(
-                            message: cover.label,
-                            child: InkWell(
-                              onTap: () => setState(() => _cover = cover.path),
-                              borderRadius: BabelShape.radius(6),
-                              child: Container(
-                                padding: const EdgeInsets.all(2),
-                                decoration: BoxDecoration(
-                                  borderRadius: BabelShape.radius(8),
-                                  border: Border.all(
-                                    color:
-                                        (_cover ?? work.coverPath) == cover.path
-                                        ? BabelColors.gold
-                                        : Colors.transparent,
-                                    width: 2,
-                                  ),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BabelShape.radius(5),
-                                  child: Image.network(
-                                    apiUrl(cover.path),
-                                    width: 56,
-                                    height: 84,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) => Container(
-                                      width: 56,
-                                      height: 84,
-                                      color: BabelColors.velvet,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-            const SizedBox(height: 28),
-            Text(
-              work.title,
-              textAlign: TextAlign.center,
-              style: BabelText.title(36),
-            ),
-            if (work.originalTitle != work.title)
-              Text(
-                work.originalTitle,
-                textAlign: TextAlign.center,
-                style: BabelText.reading(
-                  15,
-                  color: BabelColors.textSecondary,
-                  italic: true,
-                ),
-              ),
-            const SizedBox(height: 8),
-            Text(
-              meta.toUpperCase(),
-              textAlign: TextAlign.center,
-              style: BabelText.label(10),
-            ),
-            if (work.rating case final rating?) ...[
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.star_rounded, color: BabelColors.gold, size: 18),
-                  const SizedBox(width: 4),
-                  Text(
-                    rating.toStringAsFixed(1),
-                    style: BabelText.body(14, color: BabelColors.gold),
-                  ),
-                  Text(' / 5', style: BabelText.body(12)),
-                ],
-              ),
-            ],
-            if (work.subjects.isNotEmpty) ...[
-              const SizedBox(height: 14),
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  for (final genre in work.subjects.take(8))
-                    InkWell(
-                      borderRadius: BabelShape.radius(999),
-                      onTap: () => context.go(Routes.searchFor(genre)),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: BabelColors.border),
-                          borderRadius: BabelShape.radius(999),
-                        ),
-                        child: Text(genre, style: BabelText.body(12)),
-                      ),
-                    ),
-                ],
-              ),
-            ],
-            if (work.series case final series?) ...[
-              const SizedBox(height: 18),
-              Center(
-                child: PillButton(
-                  label: l10n.sagaSee,
-                  kind: PillButtonKind.secondary,
-                  onPressed: () => context.push(
-                    Routes.saga(series, author: work.authors.firstOrNull),
-                  ),
-                ),
-              ),
-            ],
-            if (work.description case final description?) ...[
-              const SizedBox(height: sectionGap),
-              SectionTitle(l10n.workSummary),
-              _Description(text: description),
-            ],
-            _Related(workId: work.id, bookCover: work.coverPath),
-            if (work.editions.isNotEmpty) ...[
-              const SizedBox(height: sectionGap),
-              SectionTitle(
-                l10n.workEditions,
-                trailing: Text(
-                  l10n.editionsCount(work.editions.length).toUpperCase(),
-                  style: BabelText.label(10),
-                ),
-              ),
-              for (final edition in work.editions.take(20))
-                _EditionRow(edition: edition, onPickCover: _pickCover),
-            ],
-            if (trace != null) ...[
-              const SizedBox(height: sectionGap),
-              BookTraceCard(trace: trace),
-            ],
-            WorkReadersSection(workId: work.id),
-            _ExternalReviews(workId: work.id),
-            // Without a file to read (a paper book, or one taken out of the library) it can
-            // still be asked for.
-            if (trace == null ||
-                !trace.available ||
-                (trace.item.sha256 == null &&
-                    trace.item.audioDuration == null)) ...[
-              const SizedBox(height: sectionGap),
-              _SourceMatches(
-                title: work.title,
-                workId: work.id,
-                languages: {for (final e in work.editions) ?e.language}
-                    .toList(),
-              ),
-              const SizedBox(height: sectionGap),
-              SectionTitle(l10n.getThisBook),
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: BabelColors.surface,
-                  borderRadius: BabelShape.radius(22),
-                  border: Border.all(color: BabelColors.border),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l10n.importOwnCopy, style: BabelText.body(14)),
-                    const SizedBox(height: 14),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: [
-                        PillButton(
-                          label: l10n.paperOwned,
-                          onPressed: _adding ? null : () => _addPaper(work),
-                        ),
-                        PillButton(
-                          label: l10n.importFile,
-                          kind: PillButtonKind.secondary,
-                          onPressed: () => context.go(Routes.library),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Text(l10n.paperOwnedHint, style: BabelText.body(12)),
-                  ],
-                ),
-              ),
-            ],
-          ],
+          children: [...cover, ...heading, ...body, ...get],
         ),
       ),
     );

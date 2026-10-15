@@ -1,0 +1,1 @@
+Book page on wide screens: two columns, covers on the left, title, summary, editions and reviews on the right
