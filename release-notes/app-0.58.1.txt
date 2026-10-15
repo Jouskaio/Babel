@@ -1,0 +1,1 @@
+Page Télécharger : mise en page corrigée sur téléphone, taille des fichiers affichée en Ko pour les petits (le plugin KOReader), et explication pour décompresser le plugin sur une Boox

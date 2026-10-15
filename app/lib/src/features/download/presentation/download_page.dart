@@ -121,12 +121,32 @@ class _Platform extends StatelessWidget {
   final String? label;
   final Widget? action;
 
+  /// "134 MB", "52 KB": the size a reader expects for the file.
+  static String _size(int bytes) => bytes >= 1048576
+      ? '${(bytes / 1048576).toStringAsFixed(bytes >= 10485760 ? 0 : 1)} MB'
+      : '${(bytes / 1024).ceil()} KB';
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final size = file == null || file!.size == 0
-        ? null
-        : '${(file!.size / 1048576).toStringAsFixed(0)} MB';
+    final size = file == null || file!.size == 0 ? null : _size(file!.size);
+    final button = file != null
+        ? PillButton(
+            label: size == null ? label! : '${label!} · $size',
+            onPressed: () => launchUrl(
+              Uri.parse(siteUrl(file!.url)),
+              mode: LaunchMode.externalApplication,
+            ),
+          )
+        : action ?? Text(l10n.downloadSoon, style: BabelText.label(10));
+    final text = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(name, style: BabelText.heading(20)),
+        const SizedBox(height: 2),
+        Text(hint, style: BabelText.body(13)),
+      ],
+    );
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(18),
@@ -135,34 +155,33 @@ class _Platform extends StatelessWidget {
         borderRadius: BabelShape.radius(22),
         border: Border.all(color: BabelColors.border),
       ),
-      child: Row(
-        children: [
-          Icon(icon, color: BabelColors.gold, size: 30),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: BabelText.heading(20)),
-                const SizedBox(height: 2),
-                Text(hint, style: BabelText.body(13)),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          if (file != null)
-            PillButton(
-              label: size == null ? label! : '${label!} · $size',
-              onPressed: () => launchUrl(
-                Uri.parse(siteUrl(file!.url)),
-                mode: LaunchMode.externalApplication,
+      // Side by side when there is room; on a phone the button goes under the text.
+      child: LayoutBuilder(
+        builder: (context, box) => box.maxWidth >= 560
+            ? Row(
+                children: [
+                  Icon(icon, color: BabelColors.gold, size: 30),
+                  const SizedBox(width: 16),
+                  Expanded(child: text),
+                  const SizedBox(width: 12),
+                  button,
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(icon, color: BabelColors.gold, size: 30),
+                      const SizedBox(width: 14),
+                      Expanded(child: text),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Align(alignment: Alignment.centerLeft, child: button),
+                ],
               ),
-            )
-          else if (action != null)
-            action!
-          else
-            Text(l10n.downloadSoon, style: BabelText.label(10)),
-        ],
       ),
     );
   }
