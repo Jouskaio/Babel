@@ -1,0 +1,1 @@
+Recherche AO3 plus rapide : l'app interroge AO3 directement depuis ton appareil (avec de nouvelles tentatives rapides) et passe par le serveur seulement si besoin ; sur le web, c'est toujours le serveur
