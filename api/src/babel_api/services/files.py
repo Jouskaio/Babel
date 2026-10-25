@@ -10,7 +10,7 @@ from typing import Any, Literal
 from uuid import UUID
 
 from babel_api.adapters.files.comics import ComicConverter
-from babel_api.domain.catalog import IdentifierKind
+from babel_api.domain.catalog import FANFIC_PREFIX, IdentifierKind, SourceWork
 from babel_api.domain.errors import (
     BlockedFileError,
     BookAlreadyInLibraryError,
@@ -143,11 +143,18 @@ class FileService:
         chunks: AsyncIterator[bytes],
         filename: str,
         device_id: UUID | None = None,
+        *,
+        ereader: bool = False,
     ) -> ImportResult:
+        """Imports a file; [ereader]: it comes from the reader's e-reader, so it is marked as
+        being on it."""
         stored, path, existed = await self.store(user_id, chunks, filename)
         item = await self._files.find_item(user_id, stored.sha256)
         if item is None:
             item = await self._add_item(user_id, stored, path, filename, device_id)
+        if ereader and not item.ereader:
+            item = await self._files.set_ereader(item.id, True)
+            await self._record(item, device_id)
         return ImportResult(item, deduplicated=existed and stored.uploaded_by != user_id)
 
     async def store(
@@ -471,6 +478,29 @@ class FileService:
         )
         await self._files.commit()
         return updated
+
+    async def create_fanfic_work(
+        self, user_id: UUID, item_id: UUID, device_id: UUID | None = None
+    ) -> LibraryItem:
+        """A fanfiction is in no catalog: give it a work of its own (same title and author, same
+        work), so its reviews and notes have a page like any book's."""
+        item = await self._files.get_item(item_id)
+        if item is None or item.user_id != user_id:
+            raise NotFoundError
+        if item.origin != "ao3":
+            raise UnsupportedFileError
+        key = " ".join(f"{item.title}|{item.authors[0] if item.authors else ''}".lower().split())
+        digest = hashlib.sha1(key.encode(), usedforsecurity=False).hexdigest()[:24]
+        work = await self._catalog.upsert_work(
+            SourceWork(
+                open_library_id=f"{FANFIC_PREFIX}{digest}",
+                title=item.title,
+                authors=item.authors,
+                subjects=(await self.file_subjects(item.file))[:12] if item.file else (),
+            )
+        )
+        await self._catalog.commit()
+        return await self.link_work(user_id, item_id, work.id, device_id)
 
     async def remove_from_library(
         self, user_id: UUID, item_id: UUID, device_id: UUID | None = None

@@ -176,7 +176,7 @@ async def webdav(
                 if chunk:
                     yield chunk
 
-        await files.import_file(user_id, chunks(), leaf)
+        await files.import_file(user_id, chunks(), leaf, ereader=True)
         return Response(status_code=status.HTTP_201_CREATED)
 
     if method in ("MKCOL", "DELETE", "MOVE", "COPY"):

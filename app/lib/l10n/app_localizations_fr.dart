@@ -4068,7 +4068,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get koreaderGuideBooks =>
-      'Dans Babel, ouvre la fiche d\'un livre de ta bibliothèque et active « Sur ma liseuse ». Le plugin télécharge ces livres dans le dossier Babel de la liseuse, sous le nom « Auteur - Titre.epub », quand elle passe en ligne (au plus une fois par heure), ou tout de suite avec Outils › Babel › Télécharger mes livres Babel. Tu peux aussi choisir de télécharger toute la bibliothèque. Un livre téléchargé ainsi est exactement le fichier de ta bibliothèque : sa progression se synchronise sans rien associer.';
+      'Dans Babel, ouvre la fiche d\'un livre de ta bibliothèque et active « Sur ma liseuse ». Le plugin télécharge ces livres dans le dossier Babel de la liseuse, sous le nom « Auteur - Titre.epub », quand elle passe en ligne (au plus une fois par heure), ou tout de suite avec Outils › Babel › Télécharger mes livres Babel. Tu peux aussi choisir de télécharger toute la bibliothèque. Un livre téléchargé ainsi est exactement le fichier de ta bibliothèque : sa progression se synchronise sans rien associer.\n\nDans l\'autre sens, « Envoyer les livres de la liseuse à Babel » ajoute à ta bibliothèque les livres que Babel n\'a pas encore ; ils sont cochés « Sur ma liseuse » automatiquement, comme tout livre que ta liseuse signale pour la première fois.\n\nAvec l\'écran d\'accueil Bookshelf : dans son menu en bas à gauche, appui long sur un élément, puis le bouton +, « Action système… » et choisis « Babel : télécharger mes livres », « Babel : envoyer les statistiques » ou « Babel : envoyer les livres de la liseuse ». On y trouve aussi « Plugin… » › Babel pour ouvrir tout le menu.';
 
   @override
   String get koreaderGuideHelpTitle => 'Un souci ?';
@@ -4188,4 +4188,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get mergeDone => 'Doublon fusionné';
+
+  @override
+  String get fanficPageCreate => 'Créer une fiche pour cette fanfiction';
+
+  @override
+  String get fanficPageHint =>
+      'Les fanfictions ne sont dans aucun catalogue : Babel crée une fiche à son nom, où vos avis et notes se rassemblent.';
 }

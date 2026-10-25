@@ -58,7 +58,8 @@ async def register() -> JSONResponse:
 
 
 @router.get("/users/auth", include_in_schema=False)
-async def auth(_: Reader) -> dict[str, str]:
+async def auth(user_id: Reader, koreader: KoreaderServiceDep, device: str = "") -> dict[str, str]:
+    await koreader.seen(user_id, device)
     return {"authorized": "OK"}
 
 
@@ -112,10 +113,15 @@ async def get_progress(
 
 @router.get("/library", include_in_schema=False)
 async def sync_library(
-    user_id: Reader, files: FileServiceDep, scope: str = "ereader"
+    user_id: Reader,
+    files: FileServiceDep,
+    koreader: KoreaderServiceDep,
+    scope: str = "ereader",
+    device: str = "",
 ) -> dict[str, list[dict[str, Any]]]:
     """The books the Babel plugin puts on the e-reader: those marked "on my e-reader", or the
     whole library (scope=all)."""
+    await koreader.seen(user_id, device)
     return {
         "books": [
             {
@@ -134,7 +140,14 @@ async def sync_library(
 
 
 @router.get("/library/files/{sha256}", include_in_schema=False)
-async def sync_library_file(user_id: Reader, files: FileServiceDep, sha256: str) -> FileResponse:
+async def sync_library_file(
+    user_id: Reader,
+    files: FileServiceDep,
+    koreader: KoreaderServiceDep,
+    sha256: str,
+    device: str = "",
+) -> FileResponse:
+    await koreader.seen(user_id, device)
     download = await files.download(user_id, sha256.lower())
     return FileResponse(
         download.path,
@@ -153,6 +166,7 @@ async def put_finished(
     user_id: Reader, koreader: KoreaderServiceDep, body: FinishedBody
 ) -> dict[str, bool]:
     """A book finished in KOReader is finished in Babel."""
+    await koreader.seen(user_id, body.device)
     return {"applied": await koreader.finished(user_id, body.document, body.device)}
 
 
@@ -182,10 +196,52 @@ async def put_annotations(
     user_id: Reader, koreader: KoreaderServiceDep, body: AnnotationsBody
 ) -> dict[str, int]:
     """Highlights and notes made in KOReader."""
+    await koreader.seen(user_id, body.device)
     added = await koreader.annotations(
         user_id, body.document, body.device, [n.model_dump() for n in body.annotations]
     )
     return {"added": added}
+
+
+class MissingBody(BaseModel):
+    device: str = ""
+    documents: Annotated[list[str], Field(max_length=5000)] = Field(default_factory=list[str])
+
+    @field_validator("documents", mode="before")
+    @classmethod
+    def _empty_object(cls, value: Any) -> Any:
+        return [] if value == {} else value
+
+
+@router.post("/library/missing", include_in_schema=False)
+async def library_missing(
+    user_id: Reader, koreader: KoreaderServiceDep, body: MissingBody
+) -> dict[str, list[str]]:
+    """Which of these e-reader books (KOReader's identifiers) Babel does not have."""
+    await koreader.seen(user_id, body.device)
+    return {"missing": await koreader.missing(user_id, body.documents)}
+
+
+@router.put("/library/upload", include_in_schema=False)
+async def library_upload(
+    user_id: Reader,
+    files: FileServiceDep,
+    koreader: KoreaderServiceDep,
+    request: Request,
+    name: str,
+    device: str = "",
+) -> dict[str, bool]:
+    """A book of the e-reader, sent by the plugin: it joins the library, marked as being on the
+    e-reader (a file Babel already has is just marked)."""
+
+    async def chunks():
+        async for chunk in request.stream():
+            if chunk:
+                yield chunk
+
+    await koreader.seen(user_id, device)
+    result = await files.import_file(user_id, chunks(), name, ereader=True)
+    return {"deduplicated": result.deduplicated}
 
 
 class StatsBook(BaseModel):
@@ -206,6 +262,7 @@ class StatsDay(BaseModel):
 
 
 class StatsBody(BaseModel):
+    device: str = ""
     books: list[StatsBook] = Field(default_factory=list[StatsBook], max_length=3000)
     days: list[StatsDay] = Field(default_factory=list[StatsDay], max_length=30000)
 
@@ -221,6 +278,7 @@ async def put_stats(
     user_id: Reader, koreader: KoreaderServiceDep, body: StatsBody
 ) -> dict[str, int]:
     """Reading statistics from KOReader's Babel plugin: books, and the time read each day."""
+    await koreader.seen(user_id, body.device)
     await koreader.put_stats(
         user_id,
         [b.model_dump() for b in body.books],

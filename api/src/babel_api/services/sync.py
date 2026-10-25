@@ -180,6 +180,25 @@ class SyncService:
             raise NotFoundError
         return await self._sync.list_positions(item_id)
 
+    async def touch_device(self, user_id: UUID, device_id: UUID) -> None:
+        """The device was just used (what the account page shows as "seen")."""
+        await self._own_device(user_id, device_id)
+        await self._sync.touch_device(device_id, datetime.now(UTC))
+        await self._sync.commit()
+
+    async def mark_ereader(self, user_id: UUID, item_id: UUID) -> bool:
+        """The book is on the reader's e-reader (it just came from there): say so. False when
+        it already was, or is not theirs."""
+        item = await self._files.get_item(item_id)
+        if item is None or item.user_id != user_id or item.ereader:
+            return False
+        updated = await self._files.set_ereader(item_id, True)
+        await self._sync.record(
+            user_id, EntityKind.LIBRARY_ITEM, str(item_id), ChangeOp.UPSERT, item_data(updated)
+        )
+        await self._files.commit()
+        return True
+
     async def merge_items(
         self, user_id: UUID, keep_id: UUID, drop_id: UUID, device_id: UUID | None = None
     ) -> LibraryItem:

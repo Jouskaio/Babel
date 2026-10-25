@@ -407,3 +407,116 @@ def test_a_shared_file_can_be_reported_and_the_administrators_decide(
     kept = client.post(f"/v1/admin/file-reports/{sha}/dismiss", headers=boss)
     assert kept.status_code == 204
     assert client.get("/v1/admin/file-reports", headers=boss).json() == []
+
+
+def test_books_coming_from_the_e_reader_are_marked_as_on_it(
+    client: TestClient, ada: dict[str, str], tmp_path: Path
+) -> None:
+    password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
+    key = {
+        "x-auth-user": "ada@example.com",
+        "x-auth-key": hashlib.md5(password.encode(), usedforsecurity=False).hexdigest(),
+    }
+    content = epub(title="Jane Eyre", isbn=None)
+    path = tmp_path / "jane.epub"
+    path.write_bytes(content)
+    document = partial_md5(path)
+
+    # The plugin asks which of its books Babel lacks, then sends them.
+    lacking = client.post("/v1/kosync/library/missing", json={"documents": [document]}, headers=key)
+    assert lacking.json() == {"missing": [document]}
+    sent = client.put(
+        "/v1/kosync/library/upload", params={"name": "jane.epub"}, content=content, headers=key
+    )
+    assert sent.status_code == 200
+    (item,) = client.get("/v1/library", headers=ada).json()
+    assert item["ereader"] is True
+    assert client.post(
+        "/v1/kosync/library/missing", json={"documents": [document]}, headers=key
+    ).json() == {"missing": []}
+
+    # Taken off the e-reader by hand, a book is marked again only if it newly shows up there.
+    client.put(f"/v1/library/{item['id']}/ereader", json={"ereader": False}, headers=ada)
+    body = {"document": document, "progress": "x", "percentage": 0.1, "device": "Boox"}
+    client.put("/v1/kosync/syncs/progress", json=body, headers=key)
+    assert client.get("/v1/library", headers=ada).json()[0]["ereader"] is True
+    client.put(f"/v1/library/{item['id']}/ereader", json={"ereader": False}, headers=ada)
+    client.put("/v1/kosync/syncs/progress", json=body, headers=key)
+    assert client.get("/v1/library", headers=ada).json()[0]["ereader"] is False
+
+
+def test_a_book_uploaded_from_the_e_reader_cloud_is_on_the_e_reader(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    import base64
+
+    password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
+    token = base64.b64encode(f"ada@example.com:{password}".encode()).decode()
+    sent = client.put(
+        "/v1/webdav/Any.epub",
+        content=epub(title="Emma", isbn=None),
+        headers={"authorization": f"Basic {token}"},
+    )
+    assert sent.status_code == 201
+    assert client.get("/v1/library", headers=ada).json()[0]["ereader"] is True
+
+
+def test_a_fanfiction_gets_a_page_of_its_own(
+    app: FastAPI, client: TestClient, ada: dict[str, str]
+) -> None:
+    from dataclasses import replace
+
+    from babel_api.domain.sources import RemoteEntry
+
+    class FakeAo3:
+        async def work(self, work_id: str) -> RemoteEntry:
+            return RemoteEntry(path=f"/works/{work_id}", size=0, remote_id=f"{work_id}:1/1|x")
+
+    app.state.container = replace(app.state.container, ao3=FakeAo3())
+    fic = upload(
+        client,
+        ada,
+        epub(title="Let's Make a Deal", isbn=None, source="https://archiveofourown.org/works/9"),
+    ).json()["item"]
+    book = upload(client, ada, epub(title="Jane Eyre", isbn=None)).json()["item"]
+
+    made = client.post(f"/v1/library/{fic['id']}/work/fanfic", headers=ada)
+    assert made.status_code == 200
+    work_id = made.json()["work_id"]
+    assert work_id is not None
+    again = client.post(f"/v1/library/{fic['id']}/work/fanfic", headers=ada)
+    assert again.json()["work_id"] == work_id  # the same fanfiction, the same page
+    page = client.get(f"/v1/catalog/works/{work_id}", headers=ada)
+    assert page.status_code == 200
+    assert page.json()["title"] == "Let's Make a Deal"
+    # Only a fanfiction gets one.
+    assert client.post(f"/v1/library/{book['id']}/work/fanfic", headers=ada).status_code in (
+        400,
+        415,
+        422,
+    )
+
+
+def test_what_the_plugin_does_counts_as_the_e_reader_being_connected(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
+    key = {
+        "x-auth-user": "ada@example.com",
+        "x-auth-key": hashlib.md5(password.encode(), usedforsecurity=False).hexdigest(),
+    }
+    assert [d["name"] for d in client.get("/v1/devices", headers=ada).json()] == []
+    stats = {
+        "device": "gocolor7",
+        "books": [{"md5": "a" * 32, "title": "Jane Eyre", "total_read_time": 60}],
+        "days": [{"md5": "a" * 32, "day": "2026-10-20", "seconds": 60, "pages": 3}],
+    }
+    assert client.put("/v1/kosync/syncs/stats", json=stats, headers=key).status_code == 200
+    (device,) = client.get("/v1/devices", headers=ada).json()
+    assert device["name"] == "KOReader · gocolor7"
+    assert device["last_seen_at"] is not None
+    assert (
+        client.get("/v1/kosync/library", params={"device": "Boox"}, headers=key).status_code == 200
+    )
+    names = {d["name"] for d in client.get("/v1/devices", headers=ada).json()}
+    assert names == {"KOReader · gocolor7", "KOReader · Boox"}

@@ -6737,7 +6737,7 @@ abstract class AppLocalizations {
   /// No description provided for @koreaderGuideBooks.
   ///
   /// In fr, this message translates to:
-  /// **'Dans Babel, ouvre la fiche d\'un livre de ta bibliothèque et active « Sur ma liseuse ». Le plugin télécharge ces livres dans le dossier Babel de la liseuse, sous le nom « Auteur - Titre.epub », quand elle passe en ligne (au plus une fois par heure), ou tout de suite avec Outils › Babel › Télécharger mes livres Babel. Tu peux aussi choisir de télécharger toute la bibliothèque. Un livre téléchargé ainsi est exactement le fichier de ta bibliothèque : sa progression se synchronise sans rien associer.'**
+  /// **'Dans Babel, ouvre la fiche d\'un livre de ta bibliothèque et active « Sur ma liseuse ». Le plugin télécharge ces livres dans le dossier Babel de la liseuse, sous le nom « Auteur - Titre.epub », quand elle passe en ligne (au plus une fois par heure), ou tout de suite avec Outils › Babel › Télécharger mes livres Babel. Tu peux aussi choisir de télécharger toute la bibliothèque. Un livre téléchargé ainsi est exactement le fichier de ta bibliothèque : sa progression se synchronise sans rien associer.\n\nDans l\'autre sens, « Envoyer les livres de la liseuse à Babel » ajoute à ta bibliothèque les livres que Babel n\'a pas encore ; ils sont cochés « Sur ma liseuse » automatiquement, comme tout livre que ta liseuse signale pour la première fois.\n\nAvec l\'écran d\'accueil Bookshelf : dans son menu en bas à gauche, appui long sur un élément, puis le bouton +, « Action système… » et choisis « Babel : télécharger mes livres », « Babel : envoyer les statistiques » ou « Babel : envoyer les livres de la liseuse ». On y trouve aussi « Plugin… » › Babel pour ouvrir tout le menu.'**
   String get koreaderGuideBooks;
 
   /// No description provided for @koreaderGuideHelpTitle.
@@ -6949,6 +6949,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Doublon fusionné'**
   String get mergeDone;
+
+  /// No description provided for @fanficPageCreate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer une fiche pour cette fanfiction'**
+  String get fanficPageCreate;
+
+  /// No description provided for @fanficPageHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les fanfictions ne sont dans aucun catalogue : Babel crée une fiche à son nom, où vos avis et notes se rassemblent.'**
+  String get fanficPageHint;
 }
 
 class _AppLocalizationsDelegate

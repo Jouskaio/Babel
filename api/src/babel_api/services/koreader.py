@@ -112,6 +112,10 @@ class KoreaderService:
             await self._repo.commit()
             return
         device_id = await self._device_id(user_id, device)
+        # The first time the e-reader reports this book, it is on the e-reader.
+        before = await self._sync.positions(user_id, item_id)
+        if not any(p.locator.startswith(PREFIX) for p in before):
+            await self._sync.mark_ereader(user_id, item_id)
         await self._sync.record_position(
             user_id,
             device_id,
@@ -127,6 +131,11 @@ class KoreaderService:
         if found:
             return found.id
         return (await self._sync.register_device(user_id, name, DeviceKind.EREADER)).id
+
+    async def seen(self, user_id: UUID, device: str) -> None:
+        """Anything the plugin does counts as the e-reader being connected."""
+        if device.strip():
+            await self._sync.touch_device(user_id, await self._device_id(user_id, device))
 
     async def finished(self, user_id: UUID, document: str, device: str) -> bool:
         """The reader finished the book on the e-reader: it is finished in Babel too."""
@@ -213,7 +222,14 @@ class KoreaderService:
         self, user_id: UUID, books: list[dict[str, object]], days: list[tuple[str, date, int, int]]
     ) -> None:
         """Reading statistics sent by KOReader's Babel plugin."""
+        seen = {row.md5 for row in await self._repo.stat_books(user_id)}
         await self._repo.save_stats(user_id, books, days)
+        for md5 in {str(b["md5"]) for b in books} - seen:
+            # A book the e-reader reports for the first time, and Babel has: it is on it.
+            try:
+                await self._sync.mark_ereader(user_id, await self._item_of(user_id, md5))
+            except NotFoundError:
+                continue
         await self._repo.mark(user_id)
         await self._repo.commit()
 
@@ -235,6 +251,19 @@ class KoreaderService:
             recent=await self._repo.recent(user_id),
             unknown_books=await self._repo.orphan_count(user_id),
         )
+
+    async def missing(self, user_id: UUID, documents: list[str]) -> list[str]:
+        """Which of the e-reader's books (by KOReader's identifier) the library does not have."""
+        lost: list[str] = []
+        ignored = await self._repo.ignored(user_id)
+        for document in dict.fromkeys(documents):
+            if document in ignored:
+                continue
+            try:
+                await self._item_of(user_id, document)
+            except NotFoundError:
+                lost.append(document)
+        return lost
 
     async def unknown(self, user_id: UUID) -> list[UnknownBook]:
         """The books KOReader reported (position or statistics) that match no library book."""
