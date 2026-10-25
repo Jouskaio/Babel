@@ -3496,7 +3496,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get downloadIntro =>
-      'Babel runs in the browser, on Android and on Mac. The apps offer each new version themselves, with what changes.';
+      'Babel runs in the browser, on Android and on Mac, and soon on iPhone. The apps offer each new version themselves, with what changes.';
 
   @override
   String downloadLatest(String version, String date) {
@@ -3505,21 +3505,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get downloadAndroidHint =>
-      'APK file. If Android asks, allow installing from this site.';
+      'APK file to download here. If Android asks, allow installing from this site. Coming to Google Play.';
 
   @override
   String get downloadApk => 'Download';
 
   @override
   String get downloadMacHint =>
-      'Zip file, to drag into Applications. On first launch macOS refuses the app (not signed by Apple yet): click Done, then System Settings › Privacy & Security › Open Anyway.';
+      'Zip file to download here, to drag into Applications. On first launch macOS refuses the app (not signed by Apple yet): click Done, then System Settings › Privacy & Security › Open Anyway. Coming to the Mac App Store.';
 
   @override
   String get downloadMac => 'Download';
 
   @override
   String get downloadIosSoon =>
-      'Coming to the App Store. Meanwhile, open Babel in Safari, then Share › Add to Home Screen.';
+      'No file to download yet: the iPhone and iPad app will come to the App Store. Meanwhile, open Babel in Safari, then Share › Add to Home Screen: it works like an app.';
 
   @override
   String get downloadWebName => 'Browser';
@@ -3536,7 +3536,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get downloadUpdates =>
-      'Updates: the app offers each new version with what\'s new. Google Play and the App Store will come later.';
+      'Updates: each app offers the new version with what\'s new. Google Play, the Mac App Store and the App Store will come later.';
 
   @override
   String get footerDownload => 'Download';
@@ -3800,7 +3800,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get koreaderStatsPlugin => 'Download the KOReader plugin';
+  String get koreaderStatsPlugin => 'Install the KOReader plugin';
 
   @override
   String get koreaderLink => 'Link';
@@ -4001,4 +4001,87 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get fanficShareHint =>
       'Visible to everyone in the community library. Other books are already there.';
+
+  @override
+  String get koreaderGuideTitle => 'The Babel plugin for KOReader';
+
+  @override
+  String get koreaderGuideIntro =>
+      'For e-readers running KOReader (Boox, Kobo, Kindle, PocketBook…). The plugin sends your reading time to Babel and downloads the books of your library onto the e-reader. Reading progress goes through KOReader\'s own sync.';
+
+  @override
+  String get koreaderGuideInstallTitle => '1. Install the plugin';
+
+  @override
+  String get koreaderGuideInstall =>
+      'Easiest: install KOReader\'s App Store (copy its appstore.koplugin folder into koreader/plugins, then restart KOReader). Then open Tools › App Store, search \"babel\" and install it: updates will come from there.\n\nWithout the App Store: copy the babel.koplugin folder of the GitHub repository into koreader/plugins, then restart KOReader. The plugin shows in Tools › Babel.';
+
+  @override
+  String get koreaderGuideConnectTitle => '2. Link it to your account';
+
+  @override
+  String get koreaderGuideConnect =>
+      'In Babel, open Account › KOReader and make a KOReader password (it is shown once). In KOReader, open a book then Tools › Progress sync › Custom sync server, and enter the address, your e-mail and that password. The Babel plugin reuses this login: nothing else to set up.';
+
+  @override
+  String get koreaderGuideUseTitle => '3. Send your reading';
+
+  @override
+  String get koreaderGuideUse =>
+      'Tools › Babel › Send reading statistics now. Also leave automatic sending on: after you close a book the statistics go by themselves when the e-reader is online. KOReader\'s Reading statistics plugin must be enabled. See the result in Babel: Statistics and Account › KOReader.';
+
+  @override
+  String get koreaderGuideBooksTitle => '4. Get your books on the e-reader';
+
+  @override
+  String get koreaderGuideBooks =>
+      'In Babel, open a book of your library and switch on \"On my e-reader\". The plugin downloads those books into the e-reader\'s Babel folder, named \"Author - Title.epub\", when it goes online (at most once an hour), or right away with Tools › Babel › Download my Babel books now. You can also download the whole library. A book downloaded this way is exactly your library\'s file: its progress syncs with nothing to link.';
+
+  @override
+  String get koreaderGuideHelpTitle => 'Something wrong?';
+
+  @override
+  String get koreaderGuideHelp =>
+      '\"Set up Progress sync first\": the login is missing or changed, log in again in Progress sync. A book is not recognised: open Account › KOReader in Babel to link it to a library book or delete it. No network: the plugin waits, nothing is lost.';
+
+  @override
+  String get koreaderGuidePluginLink => 'The Babel plugin repository';
+
+  @override
+  String get koreaderGuideStoreLink => 'KOReader\'s App Store';
+
+  @override
+  String get downloadKoreaderCard =>
+      'Plugin for KOReader: sends your reading time to Babel and downloads your books onto the e-reader. It installs from KOReader\'s App Store and updates itself.';
+
+  @override
+  String get downloadKoreaderGuide => 'See how to install';
+
+  @override
+  String get featureFanficTitle => 'Fanfiction';
+
+  @override
+  String get featureFanficBody =>
+      'Search AO3 by tags, fandom or numbers, add with one tap, follow new chapters and translate a passage or the whole book.';
+
+  @override
+  String get featureCommunityTitle => 'Community library';
+
+  @override
+  String get featureCommunityBody =>
+      'Books shared by Babel readers join your library without any upload. Fanfictions stay with their reader unless they share them.';
+
+  @override
+  String get featureEreaderTitle => 'Your e-reader';
+
+  @override
+  String get featureEreaderBody =>
+      'With KOReader, progress syncs, your reading time reaches Babel and your books download themselves onto the e-reader.';
+
+  @override
+  String get featureOfflineTitle => 'Offline, your way';
+
+  @override
+  String get featureOfflineBody =>
+      'Keep a book or a whole shelf on the device, and pick a theme: dark, paper, Art Deco or Art Nouveau.';
 }

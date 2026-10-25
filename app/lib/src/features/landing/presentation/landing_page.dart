@@ -353,6 +353,26 @@ class _Features extends StatelessWidget {
       (l10n.featureSyncTitle, l10n.featureSyncBody, BabelColors.dustyRose),
       (l10n.featureNotesTitle, l10n.featureNotesBody, BabelColors.velvet),
       (l10n.featureStatsTitle, l10n.featureStatsBody, const Color(0xFF36584A)),
+      (
+        l10n.featureFanficTitle,
+        l10n.featureFanficBody,
+        const Color(0xFF7D2638),
+      ),
+      (
+        l10n.featureCommunityTitle,
+        l10n.featureCommunityBody,
+        const Color(0xFF4A6FA5),
+      ),
+      (
+        l10n.featureEreaderTitle,
+        l10n.featureEreaderBody,
+        const Color(0xFF8B6F47),
+      ),
+      (
+        l10n.featureOfflineTitle,
+        l10n.featureOfflineBody,
+        const Color(0xFF6B5B95),
+      ),
     ];
     Widget card((String, String, Color) item) => Container(
       padding: wide
@@ -404,17 +424,22 @@ class _Features extends StatelessWidget {
           ),
           SizedBox(height: wide ? 48 : 20),
           if (wide)
-            IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (final (i, item) in items.indexed) ...[
-                    if (i > 0) const SizedBox(width: 24),
-                    Expanded(child: card(item)),
-                  ],
-                ],
-              ),
-            )
+            for (var start = 0; start < items.length; start += 4)
+              Padding(
+                padding: EdgeInsets.only(top: start == 0 ? 0 : 24),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (final (i, item)
+                          in items.skip(start).take(4).toList().indexed) ...[
+                        if (i > 0) const SizedBox(width: 24),
+                        Expanded(child: card(item)),
+                      ],
+                    ],
+                  ),
+                ),
+              )
           else
             for (final item in items)
               Padding(

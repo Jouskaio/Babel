@@ -75,9 +75,12 @@ class DownloadPage extends ConsumerWidget {
                 _Platform(
                   icon: Icons.menu_book_outlined,
                   name: 'KOReader',
-                  hint: l10n.downloadKoreaderHint,
-                  file: release?.koreader,
-                  label: l10n.downloadPlugin,
+                  hint: l10n.downloadKoreaderCard,
+                  action: PillButton(
+                    label: l10n.downloadKoreaderGuide,
+                    kind: PillButtonKind.secondary,
+                    onPressed: () => context.push(Routes.koreaderGuide),
+                  ),
                 ),
                 _Platform(
                   icon: Icons.phone_iphone,
