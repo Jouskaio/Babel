@@ -66,6 +66,9 @@ class LibraryItemResponse(BaseModel):
     )
     paper: bool = Field(default=False, description="Owned on paper (it may have a file too)")
     ereader: bool = Field(default=False, description="Kept on an e-reader to read there")
+    shared: bool = Field(
+        default=False, description="A fanfiction shared with the community library"
+    )
     audio_duration: float | None = Field(
         default=None,
         description="An audiobook from the reader's Audiobookshelf: its length in seconds",
@@ -103,6 +106,7 @@ class LibraryItemResponse(BaseModel):
             work_id=item.work_id,
             paper=item.paper,
             ereader=item.ereader,
+            shared=item.shared,
             filename=book_filename(item) if item.file else None,
             audio_duration=item.audio.duration if item.audio else None,
             series=item.series,
@@ -315,6 +319,22 @@ async def set_ereader(
     return LibraryItemResponse.of(
         await files.set_ereader(user_id, item_id, body.ereader, device_id)
     )
+
+
+class SharedRequest(BaseModel):
+    shared: bool
+
+
+@router.put("/library/{item_id}/shared", operation_id="setShared")
+async def set_shared(
+    user_id: CurrentUserId,
+    files: FileServiceDep,
+    item_id: UUID,
+    body: SharedRequest,
+    device_id: DeviceHeader = None,
+) -> LibraryItemResponse:
+    """Share a fanfiction with the community library (every other book is shared already)."""
+    return LibraryItemResponse.of(await files.set_shared(user_id, item_id, body.shared, device_id))
 
 
 @router.post("/library/{item_id}/file", operation_id="attachFile")

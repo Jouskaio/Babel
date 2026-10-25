@@ -40,6 +40,9 @@ doc/ChaptarrLinkResponse.md
 doc/CheckSourceResponse.md
 doc/CommentRequest.md
 doc/CommentResponse.md
+doc/CommunityApi.md
+doc/CommunityBookResponse.md
+doc/CommunityPageResponse.md
 doc/ConnectorRequest.md
 doc/ConnectorStatus.md
 doc/CreateSourceRequest.md
@@ -148,6 +151,7 @@ doc/ReviewRequest.md
 doc/ReviewResponse.md
 doc/SagaVolumeResponse.md
 doc/SharedNoteResponse.md
+doc/SharedRequest.md
 doc/ShelfResponse.md
 doc/ShelfmarkLinkRequest.md
 doc/ShelfmarkLinkResponse.md
@@ -189,6 +193,7 @@ lib/api/ao3_api.dart
 lib/api/audiobooks_api.dart
 lib/api/auth_api.dart
 lib/api/catalog_api.dart
+lib/api/community_api.dart
 lib/api/discover_api.dart
 lib/api/health_api.dart
 lib/api/kavita_api.dart
@@ -243,6 +248,8 @@ lib/model/chaptarr_link_response.dart
 lib/model/check_source_response.dart
 lib/model/comment_request.dart
 lib/model/comment_response.dart
+lib/model/community_book_response.dart
+lib/model/community_page_response.dart
 lib/model/connector_request.dart
 lib/model/connector_status.dart
 lib/model/create_source_request.dart
@@ -343,6 +350,7 @@ lib/model/review_request.dart
 lib/model/review_response.dart
 lib/model/saga_volume_response.dart
 lib/model/shared_note_response.dart
+lib/model/shared_request.dart
 lib/model/shelf_response.dart
 lib/model/shelfmark_link_request.dart
 lib/model/shelfmark_link_response.dart

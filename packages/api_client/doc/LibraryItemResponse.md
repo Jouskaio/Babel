@@ -26,6 +26,7 @@ Name | Type | Description | Notes
 **series** | **String** | The series it belongs to | [optional] 
 **seriesIndex** | **num** | Its volume number in it | [optional] 
 **sha256** | **String** | Identifies the file; download it from /v1/files/{sha256}. Null for a paper book without a file | [optional] 
+**shared** | **bool** | A fanfiction shared with the community library | [optional] [default to false]
 **size** | **int** |  | [optional] 
 **startedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **stateTime** | [**DateTime**](DateTime.md) | When status or progress last changed (device clock) | [optional] 

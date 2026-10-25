@@ -29,6 +29,7 @@ int? branchOf(String path) {
   if (under(Routes.library) ||
       under(Routes.sources) ||
       under(Routes.importLink) ||
+      under(Routes.community) ||
       under(Routes.audiobooks)) {
     return 2;
   }

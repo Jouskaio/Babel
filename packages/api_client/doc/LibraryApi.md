@@ -33,6 +33,7 @@ Method | HTTP request | Description
 [**saveReview**](LibraryApi.md#savereview) | **PUT** /v1/library/{item_id}/review | Save Review
 [**setEreader**](LibraryApi.md#setereader) | **PUT** /v1/library/{item_id}/ereader | Set Ereader
 [**setPaper**](LibraryApi.md#setpaper) | **PUT** /v1/library/{item_id}/paper | Set Paper
+[**setShared**](LibraryApi.md#setshared) | **PUT** /v1/library/{item_id}/shared | Set Shared
 [**stopFollow**](LibraryApi.md#stopfollow) | **DELETE** /v1/library/follows/{follow_id} | Stop Follow
 [**updateBookDetails**](LibraryApi.md#updatebookdetails) | **PATCH** /v1/library/{item_id} | Update Details
 [**uploadBookCover**](LibraryApi.md#uploadbookcover) | **PUT** /v1/library/{item_id}/cover | Upload Cover
@@ -1203,6 +1204,59 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **itemId** | **String**|  | 
  **paperRequest** | [**PaperRequest**](PaperRequest.md)|  | 
+ **xBabelDevice** | **String**|  | [optional] 
+
+### Return type
+
+[**LibraryItemResponse**](LibraryItemResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **setShared**
+> LibraryItemResponse setShared(itemId, sharedRequest, xBabelDevice)
+
+Set Shared
+
+Share a fanfiction with the community library (every other book is shared already).
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = LibraryApi();
+final itemId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final sharedRequest = SharedRequest(); // SharedRequest | 
+final xBabelDevice = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.setShared(itemId, sharedRequest, xBabelDevice);
+    print(result);
+} catch (e) {
+    print('Exception when calling LibraryApi->setShared: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **itemId** | **String**|  | 
+ **sharedRequest** | [**SharedRequest**](SharedRequest.md)|  | 
  **xBabelDevice** | **String**|  | [optional] 
 
 ### Return type

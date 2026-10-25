@@ -3978,4 +3978,27 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ao3Down =>
       'AO3 is not answering right now (it is often overloaded). Try again in a moment.';
+
+  @override
+  String get communityTitle => 'Community library';
+
+  @override
+  String get communityHint =>
+      'The books every Babel reader shares (a fanfiction is only there when its reader shares it). Add a book to your library without uploading anything.';
+
+  @override
+  String get communityEmpty => 'No book found.';
+
+  @override
+  String get communityMore => 'Show more';
+
+  @override
+  String get communityHave => 'In my library';
+
+  @override
+  String get fanficShare => 'Share this fanfiction';
+
+  @override
+  String get fanficShareHint =>
+      'Visible to everyone in the community library. Other books are already there.';
 }

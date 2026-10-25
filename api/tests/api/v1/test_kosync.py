@@ -276,3 +276,62 @@ def test_a_download_is_named_after_the_book(client: TestClient, ada: dict[str, s
     disposition = got.headers["content-disposition"]
     assert "Jane%20Eyre.epub" in disposition
     assert "Z-Library" not in disposition
+
+
+def test_the_community_library_shares_books_but_fanfictions_only_when_chosen(
+    app: FastAPI, client: TestClient, ada: dict[str, str]
+) -> None:
+    from dataclasses import replace
+
+    from babel_api.domain.sources import RemoteEntry
+
+    class FakeAo3:
+        async def work(self, work_id: str) -> RemoteEntry:
+            return RemoteEntry(path=f"/works/{work_id}", size=0, remote_id=f"{work_id}:1/1|x")
+
+    app.state.container = replace(app.state.container, ao3=FakeAo3())
+    bob = account(client, "bob@example.com")
+    book = upload(client, ada, epub(title="Jane Eyre", isbn=None)).json()["item"]
+    fic = upload(
+        client,
+        ada,
+        epub(title="A Work", isbn=None, source="https://archiveofourown.org/works/9"),
+    ).json()["item"]
+    assert fic["origin"] == "ao3"
+
+    seen = client.get("/v1/community", headers=bob).json()
+    assert [b["title"] for b in seen["books"]] == ["Jane Eyre"]  # the fanfiction is kept private
+    assert seen["books"][0]["in_library"] is False
+    assert client.get("/v1/community", params={"q": "eyre"}, headers=bob).json()["books"]
+    assert client.get("/v1/community", params={"q": "zzz"}, headers=bob).json()["books"] == []
+
+    added = client.post(f"/v1/library/files/{book['sha256']}", headers=bob)
+    assert added.status_code == 201
+    assert client.get("/v1/community", headers=bob).json()["books"][0]["in_library"] is True
+
+    shared = client.put(f"/v1/library/{fic['id']}/shared", json={"shared": True}, headers=ada)
+    assert shared.json()["shared"] is True
+    titles = {b["title"] for b in client.get("/v1/community", headers=bob).json()["books"]}
+    assert titles == {"Jane Eyre", "A Work"}
+
+
+def test_the_plugin_lists_and_downloads_the_books_for_the_e_reader(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    content = epub(title="Jane Eyre", isbn=None)
+    item = upload(client, ada, content).json()["item"]
+    password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
+    key = {
+        "x-auth-user": "ada@example.com",
+        "x-auth-key": hashlib.md5(password.encode(), usedforsecurity=False).hexdigest(),
+    }
+    assert client.get("/v1/kosync/library", headers=key).json() == {"books": []}
+    client.put(f"/v1/library/{item['id']}/ereader", json={"ereader": True}, headers=ada)
+    (book,) = client.get("/v1/kosync/library", headers=key).json()["books"]
+    assert book["name"] == "Charlotte Brontë - Jane Eyre.epub"
+    assert book["size"] == len(content)
+    got = client.get(f"/v1/kosync/library/files/{book['sha256']}", headers=key)
+    assert got.content == content
+    assert client.get(f"/v1/kosync/library/files/{book['sha256']}").status_code == 401
+    everything = client.get("/v1/kosync/library", params={"scope": "all"}, headers=key)
+    assert len(everything.json()["books"]) == 1

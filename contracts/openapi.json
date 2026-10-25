@@ -1432,6 +1432,85 @@
         "title": "CommentResponse",
         "type": "object"
       },
+      "CommunityBookResponse": {
+        "properties": {
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
+          "cover_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover Path"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "in_library": {
+            "title": "In Library",
+            "type": "boolean"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          },
+          "size": {
+            "title": "Size",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sha256",
+          "title",
+          "authors",
+          "format",
+          "size",
+          "cover_path",
+          "in_library"
+        ],
+        "title": "CommunityBookResponse",
+        "type": "object"
+      },
+      "CommunityPageResponse": {
+        "properties": {
+          "books": {
+            "items": {
+              "$ref": "#/components/schemas/CommunityBookResponse"
+            },
+            "title": "Books",
+            "type": "array"
+          },
+          "has_next": {
+            "title": "Has Next",
+            "type": "boolean"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "books",
+          "page",
+          "has_next"
+        ],
+        "title": "CommunityPageResponse",
+        "type": "object"
+      },
       "ConnectorRequest": {
         "properties": {
           "enabled": {
@@ -3448,6 +3527,12 @@
             "description": "Identifies the file; download it from /v1/files/{sha256}. Null for a paper book without a file",
             "title": "Sha256"
           },
+          "shared": {
+            "default": false,
+            "description": "A fanfiction shared with the community library",
+            "title": "Shared",
+            "type": "boolean"
+          },
           "size": {
             "anyOf": [
               {
@@ -5188,6 +5273,19 @@
         "title": "SharedNoteResponse",
         "type": "object"
       },
+      "SharedRequest": {
+        "properties": {
+          "shared": {
+            "title": "Shared",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "shared"
+        ],
+        "title": "SharedRequest",
+        "type": "object"
+      },
       "ShelfResponse": {
         "properties": {
           "audience": {
@@ -6688,7 +6786,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.72.1"
+    "version": "0.73.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -9040,6 +9138,68 @@
         ]
       }
     },
+    "/v1/community": {
+      "get": {
+        "description": "Books shared by every reader (a fanfiction only when its reader shares it), newest\nfirst; add one to your library with POST /library/files/{sha256}.",
+        "operationId": "listCommunity",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 200,
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "maximum": 10000,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunityPageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Community",
+        "tags": [
+          "community"
+        ]
+      }
+    },
     "/v1/devices": {
       "get": {
         "description": "The account's devices, most recently seen first.",
@@ -10874,6 +11034,82 @@
         "summary": "Save Review",
         "tags": [
           "social",
+          "library"
+        ]
+      }
+    },
+    "/v1/library/{item_id}/shared": {
+      "put": {
+        "description": "Share a fanfiction with the community library (every other book is shared already).",
+        "operationId": "setShared",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SharedRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Set Shared",
+        "tags": [
           "library"
         ]
       }
