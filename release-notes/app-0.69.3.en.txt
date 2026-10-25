@@ -1,0 +1,1 @@
+Sign-in and sign-up on the web: password managers (Proton Pass, Dashlane…) can now fill the e-mail and the password
