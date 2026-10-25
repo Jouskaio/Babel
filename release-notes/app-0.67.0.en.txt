@@ -1,0 +1,1 @@
+Site: updated landing page (fanfiction, community library, e-reader, offline), download page with the coming stores, and a plugin install guide page for KOReader instead of the zip

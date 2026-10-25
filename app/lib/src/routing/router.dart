@@ -17,6 +17,7 @@ import '../features/catalog/presentation/search_page.dart';
 import '../features/catalog/presentation/work_page.dart';
 import '../features/discover/presentation/playlist_page.dart';
 import '../features/download/presentation/download_page.dart';
+import '../features/download/presentation/koreader_guide_page.dart';
 import '../features/home/presentation/home_page.dart';
 import '../features/kavita/presentation/admin_page.dart';
 import '../features/kavita/presentation/kavita_setup_page.dart';
@@ -63,6 +64,7 @@ abstract final class Routes {
   static String read(String itemId) => '/read/$itemId';
   static const importLink = '/import-link';
   static const community = '/community';
+  static const koreaderGuide = '/koreader';
   static const stats = '/stats';
   static const audiobooks = '/audiobooks';
   static String saga(String series, {String? author}) => Uri(
@@ -82,7 +84,13 @@ abstract final class Routes {
   static const public = {landing, login, signup};
 
   /// Reachable whether signed in or not (e.g. links opened from an email).
-  static const open = {forgotPassword, resetPassword, verifyEmail, download};
+  static const open = {
+    forgotPassword,
+    resetPassword,
+    verifyEmail,
+    download,
+    koreaderGuide,
+  };
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -198,6 +206,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: Routes.scan, builder: (_, _) => const ScanPage()),
       GoRoute(path: Routes.download, builder: (_, _) => const DownloadPage()),
+      GoRoute(
+        path: Routes.koreaderGuide,
+        builder: (_, _) => const KoreaderGuidePage(),
+      ),
       GoRoute(
         path: '/read/:id',
         builder: (_, state) => ReaderPage(itemId: state.pathParameters['id']!),

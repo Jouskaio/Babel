@@ -210,7 +210,7 @@ class _SyncStatus extends ConsumerWidget {
         else
           Text(l10n.koreaderStatsNone, style: BabelText.body(13)),
         TextButton(
-          onPressed: () => context.push(Routes.download),
+          onPressed: () => context.push(Routes.koreaderGuide),
           child: Text(l10n.koreaderStatsPlugin),
         ),
         const SizedBox(height: 10),

@@ -5783,7 +5783,7 @@ abstract class AppLocalizations {
   /// No description provided for @downloadIntro.
   ///
   /// In fr, this message translates to:
-  /// **'Babel tourne dans le navigateur, sur Android et sur Mac. Les applications te proposent elles-mêmes chaque nouvelle version, avec la liste de ce qui change.'**
+  /// **'Babel tourne dans le navigateur, sur Android et sur Mac, et bientôt sur iPhone. Les applications te proposent elles-mêmes chaque nouvelle version, avec la liste de ce qui change.'**
   String get downloadIntro;
 
   /// No description provided for @downloadLatest.
@@ -5795,7 +5795,7 @@ abstract class AppLocalizations {
   /// No description provided for @downloadAndroidHint.
   ///
   /// In fr, this message translates to:
-  /// **'Fichier APK. Si Android le demande, autorise l\'installation depuis ce site.'**
+  /// **'Fichier APK à télécharger ici. Si Android le demande, autorise l\'installation depuis ce site. Bientôt sur Google Play.'**
   String get downloadAndroidHint;
 
   /// No description provided for @downloadApk.
@@ -5807,7 +5807,7 @@ abstract class AppLocalizations {
   /// No description provided for @downloadMacHint.
   ///
   /// In fr, this message translates to:
-  /// **'Fichier .zip, à glisser dans Applications. Au premier lancement, macOS refuse l\'app (pas encore signée par Apple) : clique sur Terminé, puis Réglages Système › Confidentialité et sécurité › Ouvrir quand même.'**
+  /// **'Fichier .zip à télécharger ici, à glisser dans Applications. Au premier lancement, macOS refuse l\'app (pas encore signée par Apple) : clique sur Terminé, puis Réglages Système › Confidentialité et sécurité › Ouvrir quand même. Bientôt sur le Mac App Store.'**
   String get downloadMacHint;
 
   /// No description provided for @downloadMac.
@@ -5819,7 +5819,7 @@ abstract class AppLocalizations {
   /// No description provided for @downloadIosSoon.
   ///
   /// In fr, this message translates to:
-  /// **'Bientôt sur l\'App Store. En attendant, ouvre Babel dans Safari, puis Partager › Sur l\'écran d\'accueil.'**
+  /// **'Pas encore de fichier à télécharger : l\'app iPhone et iPad arrivera sur l\'App Store. En attendant, ouvre Babel dans Safari, puis Partager › Sur l\'écran d\'accueil : il s\'utilise comme une application.'**
   String get downloadIosSoon;
 
   /// No description provided for @downloadWebName.
@@ -5849,7 +5849,7 @@ abstract class AppLocalizations {
   /// No description provided for @downloadUpdates.
   ///
   /// In fr, this message translates to:
-  /// **'Mises à jour : l\'application te propose chaque nouvelle version avec ses nouveautés. Google Play et l\'App Store viendront plus tard.'**
+  /// **'Mises à jour : chaque application te propose la nouvelle version avec ses nouveautés. Google Play, le Mac App Store et l\'App Store viendront plus tard.'**
   String get downloadUpdates;
 
   /// No description provided for @footerDownload.
@@ -6287,7 +6287,7 @@ abstract class AppLocalizations {
   /// No description provided for @koreaderStatsPlugin.
   ///
   /// In fr, this message translates to:
-  /// **'Télécharger le plugin KOReader'**
+  /// **'Installer le plugin KOReader'**
   String get koreaderStatsPlugin;
 
   /// No description provided for @koreaderLink.
@@ -6679,6 +6679,150 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Visible de tous dans la bibliothèque commune. Les autres livres y sont déjà.'**
   String get fanficShareHint;
+
+  /// No description provided for @koreaderGuideTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le plugin Babel pour KOReader'**
+  String get koreaderGuideTitle;
+
+  /// No description provided for @koreaderGuideIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour les liseuses qui font tourner KOReader (Boox, Kobo, Kindle, PocketBook…). Le plugin envoie ton temps de lecture à Babel et télécharge sur la liseuse les livres de ta bibliothèque. La progression de lecture, elle, passe par la synchronisation intégrée de KOReader.'**
+  String get koreaderGuideIntro;
+
+  /// No description provided for @koreaderGuideInstallTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'1. Installer le plugin'**
+  String get koreaderGuideInstallTitle;
+
+  /// No description provided for @koreaderGuideInstall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le plus simple : installe l\'App Store de KOReader (copie son dossier appstore.koplugin dans koreader/plugins, puis redémarre KOReader). Ouvre ensuite Outils › App Store, cherche « babel », installe-le : les mises à jour viendront de là.\n\nSans App Store : copie le dossier babel.koplugin du dépôt GitHub dans koreader/plugins, puis redémarre KOReader. Le plugin apparaît dans Outils › Babel.'**
+  String get koreaderGuideInstall;
+
+  /// No description provided for @koreaderGuideConnectTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'2. Le relier à ton compte'**
+  String get koreaderGuideConnectTitle;
+
+  /// No description provided for @koreaderGuideConnect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans Babel, ouvre Compte › KOReader et crée un mot de passe KOReader (il ne s\'affiche qu\'une fois). Dans KOReader, ouvre un livre puis Outils › Synchronisation de la progression › Serveur personnalisé, et entre l\'adresse, ton e-mail et ce mot de passe. Le plugin Babel réutilise cette connexion : il n\'y a rien d\'autre à configurer.'**
+  String get koreaderGuideConnect;
+
+  /// No description provided for @koreaderGuideUseTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'3. Envoyer ta lecture'**
+  String get koreaderGuideUseTitle;
+
+  /// No description provided for @koreaderGuideUse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Outils › Babel › Envoyer les statistiques de lecture. Active aussi l\'envoi automatique : après la fermeture d\'un livre, les statistiques partent toutes seules si la liseuse est en ligne. Le plugin Reading statistics de KOReader doit être activé. Retrouve le résultat dans Babel : Statistiques et Compte › KOReader.'**
+  String get koreaderGuideUse;
+
+  /// No description provided for @koreaderGuideBooksTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'4. Avoir tes livres sur la liseuse'**
+  String get koreaderGuideBooksTitle;
+
+  /// No description provided for @koreaderGuideBooks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans Babel, ouvre la fiche d\'un livre de ta bibliothèque et active « Sur ma liseuse ». Le plugin télécharge ces livres dans le dossier Babel de la liseuse, sous le nom « Auteur - Titre.epub », quand elle passe en ligne (au plus une fois par heure), ou tout de suite avec Outils › Babel › Télécharger mes livres Babel. Tu peux aussi choisir de télécharger toute la bibliothèque. Un livre téléchargé ainsi est exactement le fichier de ta bibliothèque : sa progression se synchronise sans rien associer.'**
+  String get koreaderGuideBooks;
+
+  /// No description provided for @koreaderGuideHelpTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un souci ?'**
+  String get koreaderGuideHelpTitle;
+
+  /// No description provided for @koreaderGuideHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'« Configure la synchronisation d\'abord » : la connexion est absente ou a changé, reconnecte-toi dans Synchronisation de la progression. Un livre n\'est pas reconnu : ouvre Compte › KOReader dans Babel pour l\'associer à un livre de ta bibliothèque ou l\'effacer. Pas de réseau : le plugin attend, rien ne se perd.'**
+  String get koreaderGuideHelp;
+
+  /// No description provided for @koreaderGuidePluginLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépôt du plugin Babel'**
+  String get koreaderGuidePluginLink;
+
+  /// No description provided for @koreaderGuideStoreLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'App Store de KOReader'**
+  String get koreaderGuideStoreLink;
+
+  /// No description provided for @downloadKoreaderCard.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plugin pour KOReader : envoie ton temps de lecture à Babel et télécharge tes livres sur la liseuse. Il s\'installe depuis l\'App Store de KOReader et se met à jour tout seul.'**
+  String get downloadKoreaderCard;
+
+  /// No description provided for @downloadKoreaderGuide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir l\'installation'**
+  String get downloadKoreaderGuide;
+
+  /// No description provided for @featureFanficTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fanfictions'**
+  String get featureFanficTitle;
+
+  /// No description provided for @featureFanficBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cherchez sur AO3 par tags, fandom ou statistiques, ajoutez d\'un geste, suivez les nouveaux chapitres et traduisez un passage ou tout le livre.'**
+  String get featureFanficBody;
+
+  /// No description provided for @featureCommunityTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bibliothèque commune'**
+  String get featureCommunityTitle;
+
+  /// No description provided for @featureCommunityBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les livres partagés par les lecteurs de Babel s\'ajoutent à votre bibliothèque sans rien envoyer. Les fanfictions restent à leur lecteur, sauf s\'il les partage.'**
+  String get featureCommunityBody;
+
+  /// No description provided for @featureEreaderTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre liseuse'**
+  String get featureEreaderTitle;
+
+  /// No description provided for @featureEreaderBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avec KOReader, la progression se synchronise, votre temps de lecture arrive dans Babel et vos livres se téléchargent tout seuls sur la liseuse.'**
+  String get featureEreaderBody;
+
+  /// No description provided for @featureOfflineTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hors ligne, à votre goût'**
+  String get featureOfflineTitle;
+
+  /// No description provided for @featureOfflineBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gardez un livre ou une étagère entière sur l\'appareil, et choisissez un thème : sombre, papier, Art déco ou Art nouveau.'**
+  String get featureOfflineBody;
 }
 
 class _AppLocalizationsDelegate
