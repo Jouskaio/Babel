@@ -106,6 +106,7 @@ doc/LinkPreviewResponse.md
 doc/LinkRequest.md
 doc/LoginRequest.md
 doc/MemberResponse.md
+doc/MergeRequest.md
 doc/NewRequest.md
 doc/OpOutcome.md
 doc/OpdsConfig.md
@@ -310,6 +311,7 @@ lib/model/link_preview_response.dart
 lib/model/link_request.dart
 lib/model/login_request.dart
 lib/model/member_response.dart
+lib/model/merge_request.dart
 lib/model/new_request.dart
 lib/model/op_outcome.dart
 lib/model/opds_config.dart

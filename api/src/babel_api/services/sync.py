@@ -1,7 +1,7 @@
 """Devices, pulling the change log and applying operations pushed by devices (ADR 0010)."""
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any, cast
@@ -179,6 +179,71 @@ class SyncService:
         if item is None or item.user_id != user_id:
             raise NotFoundError
         return await self._sync.list_positions(item_id)
+
+    async def merge_items(
+        self, user_id: UUID, keep_id: UUID, drop_id: UUID, device_id: UUID | None = None
+    ) -> LibraryItem:
+        """Two copies of one book (another file, another format): the reader keeps one. It
+        takes what the other had (status and progress, paper or e-reader, the work, the shelves)
+        and the other leaves the library; its file stays stored."""
+        keep = await self._files.get_item(keep_id)
+        drop = await self._files.get_item(drop_id)
+        if (
+            keep_id == drop_id
+            or keep is None
+            or drop is None
+            or keep.user_id != user_id
+            or drop.user_id != user_id
+        ):
+            raise NotFoundError
+        now = datetime.now(UTC)
+        # Shelves first: removing a book takes it off its shelves.
+        for shelf in await self._sync.list_shelves(user_id):
+            if drop.id not in shelf.item_ids:
+                continue
+            ids = tuple(dict.fromkeys(keep.id if i == drop.id else i for i in shelf.item_ids))
+            moved = replace(shelf, item_ids=ids, client_time=now)
+            await self._sync.save_shelf(moved)
+            await self._sync.record(
+                user_id,
+                EntityKind.SHELF,
+                str(shelf.id),
+                ChangeOp.UPSERT,
+                moved.as_data(),
+                device_id,
+            )
+        if keep.work_id is None and drop.work_id is not None:
+            await self._files.set_work(keep.id, drop.work_id)
+        if drop.paper and not keep.paper:
+            await self._files.set_paper(keep.id, True)
+        if drop.ereader and not keep.ereader:
+            await self._files.set_ereader(keep.id, True)
+        a, b = keep.state, drop.state
+        merged = ReadingState(
+            status=a.status or b.status,
+            progress=max((p for p in (a.progress, b.progress) if p is not None), default=None),
+            client_time=now,
+            started_at=a.started_at or b.started_at,
+            finished_at=a.finished_at or b.finished_at,
+            hidden=a.hidden and b.hidden,
+        )
+        updated = await self._files.save_state(keep.id, merged)
+        await self._sync.record(
+            user_id,
+            EntityKind.LIBRARY_ITEM,
+            str(keep.id),
+            ChangeOp.UPSERT,
+            item_data(updated),
+            device_id,
+        )
+        await self._files.remove_item(drop.id, now)
+        await self._sync.record(
+            user_id, EntityKind.LIBRARY_ITEM, str(drop.id), ChangeOp.DELETE, device_id=device_id
+        )
+        await self._files.commit()
+        refreshed = await self._files.get_item(keep.id)
+        assert refreshed is not None  # noqa: S101 - it was just read
+        return refreshed
 
     # ------------------------------------------------------------ internals
     async def _own_device(self, user_id: UUID, device_id: UUID) -> Device:

@@ -3873,6 +3873,21 @@
         "title": "MemberResponse",
         "type": "object"
       },
+      "MergeRequest": {
+        "properties": {
+          "from_item_id": {
+            "description": "The copy to take into this one; it leaves the library",
+            "format": "uuid",
+            "title": "From Item Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from_item_id"
+        ],
+        "title": "MergeRequest",
+        "type": "object"
+      },
       "NewRequest": {
         "properties": {
           "language": {
@@ -10955,6 +10970,82 @@
           }
         ],
         "summary": "Attach File",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/v1/library/{item_id}/merge": {
+      "post": {
+        "description": "Merge a duplicate into this book: it keeps the status, progress, shelves, work and\npaper / e-reader marks of both, and the other copy leaves the library (its file stays).",
+        "operationId": "mergeLibraryItems",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Babel-Device",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Babel-Device"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Merge Library Items",
         "tags": [
           "library"
         ]

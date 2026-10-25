@@ -4170,4 +4170,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ao3SaveButton => 'Enregistrer';
+
+  @override
+  String mergeWith(String copy) {
+    return 'Fusionner avec le doublon ($copy)';
+  }
+
+  @override
+  String get mergeTitle => 'Fusionner ces deux livres ?';
+
+  @override
+  String get mergeBody =>
+      'Ce livre garde le statut, la progression, les étagères et les marques « papier » et « liseuse » des deux. L\'autre exemplaire quitte ta bibliothèque (son fichier reste stocké).';
+
+  @override
+  String get mergeButton => 'Fusionner';
+
+  @override
+  String get mergeDone => 'Doublon fusionné';
 }

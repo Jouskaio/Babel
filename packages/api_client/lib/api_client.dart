@@ -368,6 +368,8 @@ class ApiClient {
           return LoginRequest.fromJson(value);
         case 'MemberResponse':
           return MemberResponse.fromJson(value);
+        case 'MergeRequest':
+          return MergeRequest.fromJson(value);
         case 'NewRequest':
           return NewRequest.fromJson(value);
         case 'OpOutcome':

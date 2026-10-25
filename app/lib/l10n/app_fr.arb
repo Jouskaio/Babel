@@ -2154,5 +2154,11 @@
   "ao3ExcludeHint": "Exclure un tag (Entrée)",
   "ao3SaveTitle": "Enregistrer cette recherche",
   "ao3SaveHint": "Nom de la recherche",
-  "ao3SaveButton": "Enregistrer"
+  "ao3SaveButton": "Enregistrer",
+  "mergeWith": "Fusionner avec le doublon ({copy})",
+  "mergeTitle": "Fusionner ces deux livres ?",
+  "mergeBody": "Ce livre garde le statut, la progression, les étagères et les marques « papier » et « liseuse » des deux. L'autre exemplaire quitte ta bibliothèque (son fichier reste stocké).",
+  "mergeButton": "Fusionner",
+  "mergeDone": "Doublon fusionné",
+  "@mergeWith": {"placeholders": {"copy": {"type": "String"}}}
 }

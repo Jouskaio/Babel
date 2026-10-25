@@ -155,6 +155,7 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**importReadingList**](doc//LibraryApi.md#importreadinglist) | **POST** /v1/library/import-csv | Import Reading List
 *LibraryApi* | [**linkWork**](doc//LibraryApi.md#linkwork) | **PUT** /v1/library/{item_id}/work | Link Work
 *LibraryApi* | [**listFileReports**](doc//LibraryApi.md#listfilereports) | **GET** /v1/admin/file-reports | List File Reports
+*LibraryApi* | [**mergeLibraryItems**](doc//LibraryApi.md#mergelibraryitems) | **POST** /v1/library/{item_id}/merge | Merge Library Items
 *LibraryApi* | [**previewLink**](doc//LibraryApi.md#previewlink) | **POST** /v1/library/links/preview | Preview Link
 *LibraryApi* | [**removeFromLibrary**](doc//LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
 *LibraryApi* | [**saveReview**](doc//LibraryApi.md#savereview) | **PUT** /v1/library/{item_id}/review | Save Review
@@ -332,6 +333,7 @@ Class | Method | HTTP request | Description
  - [LinkRequest](doc//LinkRequest.md)
  - [LoginRequest](doc//LoginRequest.md)
  - [MemberResponse](doc//MemberResponse.md)
+ - [MergeRequest](doc//MergeRequest.md)
  - [NewRequest](doc//NewRequest.md)
  - [OpOutcome](doc//OpOutcome.md)
  - [OpdsConfig](doc//OpdsConfig.md)

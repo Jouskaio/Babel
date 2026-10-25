@@ -835,6 +835,66 @@ class _BookActionsState extends ConsumerState<_BookActions> {
     }
   }
 
+  /// Other books of the library with the same title and author: copies of the same book.
+  List<LibraryItemResponse> _duplicates(LibraryItemResponse item) {
+    String norm(String s) => s
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^\p{L}\p{N}]+', unicode: true), ' ')
+        .trim();
+    final key =
+        '${norm(item.title)}|${item.authors.isEmpty ? '' : norm(item.authors.first)}';
+    return [
+      for (final other
+          in ref.watch(libraryControllerProvider).value ??
+              const <LibraryItemResponse>[])
+        if (other.id != item.id &&
+            other.sha256 != null &&
+            '${norm(other.title)}|${other.authors.isEmpty ? '' : norm(other.authors.first)}' ==
+                key)
+          other,
+    ];
+  }
+
+  Future<void> _merge(
+    LibraryItemResponse keep,
+    LibraryItemResponse other,
+  ) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final sure = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.mergeTitle),
+        content: Text(l10n.mergeBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.mergeButton),
+          ),
+        ],
+      ),
+    );
+    if (sure != true) return;
+    try {
+      final merged = await ref
+          .read(libraryApiProvider)
+          .mergeLibraryItems(keep.id, MergeRequest(fromItemId: other.id));
+      if (merged != null) {
+        await ref.read(libraryControllerProvider.notifier).keep(merged);
+      }
+      await ref.read(libraryControllerProvider.notifier).reload();
+      navigator.pop();
+      messenger.showSnackBar(SnackBar(content: Text(l10n.mergeDone)));
+    } on ApiException {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.errorNetwork)));
+    }
+  }
+
   Future<void> _setShared(LibraryItemResponse item, bool value) async {
     final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
@@ -1032,6 +1092,21 @@ class _BookActionsState extends ConsumerState<_BookActions> {
               ),
               onChanged: (value) => _setEreader(item, value),
             ),
+            for (final other in _duplicates(item))
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => _merge(item, other),
+                  icon: Icon(Icons.merge_type, color: BabelColors.gold),
+                  label: Text(
+                    l10n.mergeWith(
+                      '${other.format?.value.toUpperCase() ?? ''} · '
+                      '${other.size == null ? '' : fileSize(context, other.size!)}',
+                    ),
+                    style: BabelText.body(14, color: BabelColors.textPrimary),
+                  ),
+                ),
+              ),
             if (item.origin == 'ao3' && item.sha256 != null)
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,

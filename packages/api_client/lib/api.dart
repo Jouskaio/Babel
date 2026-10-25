@@ -142,6 +142,7 @@ part 'model/link_preview_response.dart';
 part 'model/link_request.dart';
 part 'model/login_request.dart';
 part 'model/member_response.dart';
+part 'model/merge_request.dart';
 part 'model/new_request.dart';
 part 'model/op_outcome.dart';
 part 'model/opds_config.dart';

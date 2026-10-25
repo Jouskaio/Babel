@@ -30,6 +30,7 @@ Method | HTTP request | Description
 [**importReadingList**](LibraryApi.md#importreadinglist) | **POST** /v1/library/import-csv | Import Reading List
 [**linkWork**](LibraryApi.md#linkwork) | **PUT** /v1/library/{item_id}/work | Link Work
 [**listFileReports**](LibraryApi.md#listfilereports) | **GET** /v1/admin/file-reports | List File Reports
+[**mergeLibraryItems**](LibraryApi.md#mergelibraryitems) | **POST** /v1/library/{item_id}/merge | Merge Library Items
 [**previewLink**](LibraryApi.md#previewlink) | **POST** /v1/library/links/preview | Preview Link
 [**removeFromLibrary**](LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
 [**saveReview**](LibraryApi.md#savereview) | **PUT** /v1/library/{item_id}/review | Save Review
@@ -1056,6 +1057,59 @@ This endpoint does not need any parameter.
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **mergeLibraryItems**
+> LibraryItemResponse mergeLibraryItems(itemId, mergeRequest, xBabelDevice)
+
+Merge Library Items
+
+Merge a duplicate into this book: it keeps the status, progress, shelves, work and paper / e-reader marks of both, and the other copy leaves the library (its file stays).
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = LibraryApi();
+final itemId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final mergeRequest = MergeRequest(); // MergeRequest | 
+final xBabelDevice = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.mergeLibraryItems(itemId, mergeRequest, xBabelDevice);
+    print(result);
+} catch (e) {
+    print('Exception when calling LibraryApi->mergeLibraryItems: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **itemId** | **String**|  | 
+ **mergeRequest** | [**MergeRequest**](MergeRequest.md)|  | 
+ **xBabelDevice** | **String**|  | [optional] 
+
+### Return type
+
+[**LibraryItemResponse**](LibraryItemResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

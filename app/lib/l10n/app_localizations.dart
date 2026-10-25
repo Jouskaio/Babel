@@ -6919,6 +6919,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Enregistrer'**
   String get ao3SaveButton;
+
+  /// No description provided for @mergeWith.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fusionner avec le doublon ({copy})'**
+  String mergeWith(String copy);
+
+  /// No description provided for @mergeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fusionner ces deux livres ?'**
+  String get mergeTitle;
+
+  /// No description provided for @mergeBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce livre garde le statut, la progression, les étagères et les marques « papier » et « liseuse » des deux. L\'autre exemplaire quitte ta bibliothèque (son fichier reste stocké).'**
+  String get mergeBody;
+
+  /// No description provided for @mergeButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fusionner'**
+  String get mergeButton;
+
+  /// No description provided for @mergeDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Doublon fusionné'**
+  String get mergeDone;
 }
 
 class _AppLocalizationsDelegate

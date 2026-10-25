@@ -321,6 +321,25 @@ async def set_ereader(
     )
 
 
+class MergeRequest(BaseModel):
+    from_item_id: UUID = Field(description="The copy to take into this one; it leaves the library")
+
+
+@router.post("/library/{item_id}/merge", operation_id="mergeLibraryItems")
+async def merge_library_items(
+    user_id: CurrentUserId,
+    sync: SyncServiceDep,
+    item_id: UUID,
+    body: MergeRequest,
+    device_id: DeviceHeader = None,
+) -> LibraryItemResponse:
+    """Merge a duplicate into this book: it keeps the status, progress, shelves, work and
+    paper / e-reader marks of both, and the other copy leaves the library (its file stays)."""
+    return LibraryItemResponse.of(
+        await sync.merge_items(user_id, item_id, body.from_item_id, device_id)
+    )
+
+
 class SharedRequest(BaseModel):
     shared: bool
 
