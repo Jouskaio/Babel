@@ -1,0 +1,1 @@
+Bibliothèque commune : tous les livres partagés par les lecteurs (les fanfictions seulement si leur lecteur les partage) sont ajoutables sans rien envoyer. Plugin KOReader 1.2 : télécharge sur la liseuse les livres marqués « Sur ma liseuse » (ou toute la bibliothèque) quand elle passe en ligne
