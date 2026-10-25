@@ -40,7 +40,7 @@ jobs:
             echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/babel.jks"
             echo "BABEL_KEYSTORE_FILE=$RUNNER_TEMP/babel.jks" >> "$GITHUB_ENV"
           fi
-      - run: flutter build apk --release --dart-define=BABEL_API_URL=${{ vars.BABEL_API_URL }}
+      - run: flutter build apk --release --no-tree-shake-icons --dart-define=BABEL_API_URL=${{ vars.BABEL_API_URL }}
         env:
           BABEL_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           BABEL_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -63,7 +63,7 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
-      - run: flutter build macos --release --dart-define=BABEL_API_URL=${{ vars.BABEL_API_URL }}
+      - run: flutter build macos --release --no-tree-shake-icons --dart-define=BABEL_API_URL=${{ vars.BABEL_API_URL }}
       # Unsigned (ad hoc): first launch with right-click → Open.
       - run: ditto -c -k --keepParent build/macos/Build/Products/Release/Babel.app Babel-macOS.zip
       - uses: actions/upload-artifact@v7
@@ -95,7 +95,7 @@ jobs:
         working-directory: app
         run: |
           flutter pub get
-          flutter build web --release
+          flutter build web --release --no-tree-shake-icons
       - uses: docker/setup-buildx-action@v4
       - uses: docker/login-action@v4
         with:
