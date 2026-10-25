@@ -1,0 +1,47 @@
+name: KOReader plugin
+
+# Keeps the public repository Jouskaio/babel.koplugin (what KOReader's App Store reads, so
+# readers get updates from their e-reader) in step with the plugin of this repository.
+# Needs a secret KOPLUGIN_TOKEN: a fine-grained token with "Contents: read and write" on that
+# repository. Without it the job does nothing.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "api/src/babel_api/plugins/koreader/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mirror the plugin and publish its release
+        env:
+          GH_TOKEN: ${{ secrets.KOPLUGIN_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::notice::KOPLUGIN_TOKEN is not set: nothing to mirror"
+            exit 0
+          fi
+          src=api/src/babel_api/plugins/koreader
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/Jouskaio/babel.koplugin.git" mirror
+          cp "$src"/babel.koplugin/*.lua mirror/
+          cp "$src"/README.md mirror/README.md
+          cd mirror
+          git config user.name "babel-bot"
+          git config user.email "babel-bot@users.noreply.github.com"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "Sync from Babel ${GITHUB_SHA::7}"
+            git push
+          fi
+          version=$(sed -n 's/.*version = "\([^"]*\)".*/\1/p' _meta.lua | head -1)
+          if [ -n "$version" ] && ! gh release view "v$version" --repo Jouskaio/babel.koplugin >/dev/null 2>&1; then
+            gh release create "v$version" --repo Jouskaio/babel.koplugin \
+              --title "Babel for KOReader $version" --generate-notes
+          fi
