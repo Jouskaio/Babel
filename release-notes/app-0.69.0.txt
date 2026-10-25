@@ -1,0 +1,1 @@
+Doublons : dans la fiche d'un livre, « Fusionner avec le doublon » garde le statut, la progression, les étagères et les marques papier / liseuse des deux exemplaires, et retire l'autre
