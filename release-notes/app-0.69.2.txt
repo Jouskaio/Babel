@@ -1,0 +1,1 @@
+Correction : les nouvelles icônes (bibliothèque commune, signaler, fusion…) s'affichent partout

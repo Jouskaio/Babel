@@ -1,0 +1,1 @@
+Fix: the new icons (community library, report, merge…) show everywhere
