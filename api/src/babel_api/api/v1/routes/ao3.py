@@ -69,12 +69,25 @@ class Ao3SearchResponse(BaseModel):
     total: int | None
 
 
+@router.get("/tags", operation_id="suggestAo3Tags")
+async def suggest_ao3_tags(
+    _user: CurrentUserId, container: ContainerDep, term: Annotated[str, Query(max_length=80)] = ""
+) -> list[str]:
+    """Tags AO3 knows that start like what is typed."""
+    try:
+        async with asyncio.timeout(10):
+            return await container.ao3.suggest_tags(term)
+    except (SourceConnectionError, TimeoutError):
+        return []
+
+
 @router.get("/search", operation_id="searchAo3")
 async def search_ao3(
     _user: CurrentUserId,
     container: ContainerDep,
     tags: Annotated[list[str], Query(max_length=12)] = [],  # noqa: B006 - FastAPI copies it
     any_tag: bool = False,
+    excluded: Annotated[list[str], Query(max_length=12)] = [],  # noqa: B006 - FastAPI copies it
     text: Annotated[str, Query(max_length=300)] = "",
     fandom: Annotated[str, Query(max_length=200)] = "",
     language: Annotated[str, Query(max_length=10)] = "",
@@ -94,6 +107,7 @@ async def search_ao3(
     query = Ao3Query(
         tags=tuple(tags),
         any_tag=any_tag,
+        excluded=tuple(excluded),
         text=text,
         fandom=fandom,
         language=language,

@@ -382,6 +382,55 @@ class LibraryApi {
     }
   }
 
+  /// Dismiss File Reports
+  ///
+  /// Keep the file: forget the reports about it.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] sha256 (required):
+  Future<Response> dismissFileReportsWithHttpInfo(String sha256,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/admin/file-reports/{sha256}/dismiss'
+      .replaceAll('{sha256}', sha256);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Dismiss File Reports
+  ///
+  /// Keep the file: forget the reports about it.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] sha256 (required):
+  Future<void> dismissFileReports(String sha256,) async {
+    final response = await dismissFileReportsWithHttpInfo(sha256,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Download File
   ///
   /// Download a stored file. Supports HTTP range requests to resume downloads.
@@ -1136,6 +1185,57 @@ class LibraryApi {
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'LibraryItemResponse',) as LibraryItemResponse;
     
+    }
+    return null;
+  }
+
+  /// List File Reports
+  ///
+  /// Files readers reported in the community library, the most reported first.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> listFileReportsWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/admin/file-reports';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// List File Reports
+  ///
+  /// Files readers reported in the community library, the most reported first.
+  Future<List<FileReportResponse>?> listFileReports() async {
+    final response = await listFileReportsWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<FileReportResponse>') as List)
+        .cast<FileReportResponse>()
+        .toList(growable: false);
+
     }
     return null;
   }

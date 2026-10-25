@@ -14,7 +14,7 @@ import logging
 import re
 import time
 from collections.abc import AsyncIterator
-from typing import Any, NoReturn
+from typing import Any, NoReturn, cast
 
 import httpx
 from bs4 import BeautifulSoup, Tag
@@ -332,6 +332,9 @@ class Ao3Connector:
         elif tags:
             either = " OR ".join(f'"{t}"' for t in tags)
             text = f"({either}) {text}".strip() if text else f"({either})"
+        excluded = [t.strip() for t in q.excluded if t.strip()]
+        if excluded:
+            text = " ".join([text, *(f'-"{t}"' for t in excluded)]).strip()
         if text:
             params["work_search[query]"] = text
         if q.fandom.strip():
@@ -422,6 +425,31 @@ class Ao3Connector:
             self._searches.pop(next(iter(self._searches)))
         self._searches[query] = (time.monotonic(), page)
         return page
+
+    async def suggest_tags(self, term: str) -> list[str]:
+        """Tags AO3 knows that start like [term] (its own autocomplete)."""
+        term = term.strip()
+        if len(term) < 2:
+            return []
+        response = await self._get(
+            self._client(), "/autocomplete/freeform", retries=1, term=term[:80]
+        )
+        if response.status_code >= 400:
+            raise SourceConnectionError(str(response.status_code))
+        try:
+            found: Any = response.json()
+        except ValueError:
+            return []
+        if not isinstance(found, list):
+            return []
+        names: list[str] = []
+        for entry in cast(list[Any], found):
+            if not isinstance(entry, dict):
+                continue
+            name = cast(dict[str, Any], entry).get("name")
+            if isinstance(name, str) and name:
+                names.append(name)
+        return names[:10]
 
     async def kudos(self, config: dict[str, Any], token: str | None, work_id: str) -> bool:
         """Leaves kudos on a work, as the reader when a password is known (else as a guest).

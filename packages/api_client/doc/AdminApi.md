@@ -9,7 +9,9 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**dismissFileReports**](AdminApi.md#dismissfilereports) | **POST** /v1/admin/file-reports/{sha256}/dismiss | Dismiss File Reports
 [**getAdminOverview**](AdminApi.md#getadminoverview) | **GET** /v1/admin/overview | Overview
+[**listFileReports**](AdminApi.md#listfilereports) | **GET** /v1/admin/file-reports | List File Reports
 [**listMembers**](AdminApi.md#listmembers) | **GET** /v1/admin/users | List Members
 [**listReports**](AdminApi.md#listreports) | **GET** /v1/admin/reports | List Reports
 [**resolveReport**](AdminApi.md#resolvereport) | **POST** /v1/admin/reports/{report_id}/resolve | Resolve Report
@@ -18,6 +20,54 @@ Method | HTTP request | Description
 [**setSourceQuota**](AdminApi.md#setsourcequota) | **PUT** /v1/admin/users/{member_id}/quota | Set Quota
 [**withdrawFile**](AdminApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
 
+
+# **dismissFileReports**
+> dismissFileReports(sha256)
+
+Dismiss File Reports
+
+Keep the file: forget the reports about it.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = AdminApi();
+final sha256 = sha256_example; // String | 
+
+try {
+    api_instance.dismissFileReports(sha256);
+} catch (e) {
+    print('Exception when calling AdminApi->dismissFileReports: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **sha256** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getAdminOverview**
 > AdminOverview getAdminOverview()
@@ -52,6 +102,51 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**AdminOverview**](AdminOverview.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **listFileReports**
+> List<FileReportResponse> listFileReports()
+
+List File Reports
+
+Files readers reported in the community library, the most reported first.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = AdminApi();
+
+try {
+    final result = api_instance.listFileReports();
+    print(result);
+} catch (e) {
+    print('Exception when calling AdminApi->listFileReports: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**List<FileReportResponse>**](FileReportResponse.md)
 
 ### Authorization
 

@@ -196,6 +196,7 @@ def make_file_service(container: Container, session: AsyncSession) -> FileServic
         container.metadata_reader,
         container.covers,
         access=settings.file_access,
+        community=settings.community_enabled,
         max_bytes=settings.max_upload_mb * 1024 * 1024,
         comics=container.comics,
         fanfic_found=fanfic_found,

@@ -340,3 +340,18 @@ def test_any_tag_goes_in_the_text_query_as_an_or() -> None:
     )
     assert params["work_search[query]"] == '("Angst" OR "Fluff") rain'
     assert "work_search[freeform_names]" not in params
+
+
+def test_excluded_tags_are_minus_terms_and_tags_are_suggested() -> None:
+    params = Ao3Connector.search_params(
+        Ao3Query(tags=("Angst",), excluded=("Major Character Death",))
+    )
+    assert params["work_search[query]"] == '-"Major Character Death"'
+
+    def answer(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/autocomplete/freeform"
+        return httpx.Response(200, json=[{"id": "Angst", "name": "Angst"}, {"name": "Angsty"}])
+
+    connector = Ao3Connector(httpx.MockTransport(answer), pause=0)
+    assert asyncio.run(connector.suggest_tags("ang")) == ["Angst", "Angsty"]
+    assert asyncio.run(connector.suggest_tags("a")) == []

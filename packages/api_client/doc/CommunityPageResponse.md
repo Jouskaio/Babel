@@ -9,6 +9,7 @@ import 'package:babel_api_client/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **books** | [**List<CommunityBookResponse>**](CommunityBookResponse.md) |  | [default to const []]
+**enabled** | **bool** |  | [optional] [default to true]
 **hasNext** | **bool** |  | 
 **page** | **int** |  | 
 

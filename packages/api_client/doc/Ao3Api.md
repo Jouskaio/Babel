@@ -10,10 +10,11 @@ All URIs are relative to *http://localhost*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**searchAo3**](Ao3Api.md#searchao3) | **GET** /v1/ao3/search | Search Ao3
+[**suggestAo3Tags**](Ao3Api.md#suggestao3tags) | **GET** /v1/ao3/tags | Suggest Ao3 Tags
 
 
 # **searchAo3**
-> Ao3SearchResponse searchAo3(tags, anyTag, text, fandom, language, complete, minWords, minKudos, minHits, updatedWithin, sort, descending, page)
+> Ao3SearchResponse searchAo3(tags, anyTag, excluded, text, fandom, language, complete, minWords, minKudos, minHits, updatedWithin, sort, descending, page)
 
 Search Ao3
 
@@ -32,6 +33,7 @@ import 'package:babel_api_client/api.dart';
 final api_instance = Ao3Api();
 final tags = []; // List<String> | 
 final anyTag = true; // bool | 
+final excluded = []; // List<String> | 
 final text = text_example; // String | 
 final fandom = fandom_example; // String | 
 final language = language_example; // String | 
@@ -45,7 +47,7 @@ final descending = true; // bool |
 final page = 56; // int | 
 
 try {
-    final result = api_instance.searchAo3(tags, anyTag, text, fandom, language, complete, minWords, minKudos, minHits, updatedWithin, sort, descending, page);
+    final result = api_instance.searchAo3(tags, anyTag, excluded, text, fandom, language, complete, minWords, minKudos, minHits, updatedWithin, sort, descending, page);
     print(result);
 } catch (e) {
     print('Exception when calling Ao3Api->searchAo3: $e\n');
@@ -58,6 +60,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **tags** | [**List<String>**](String.md)|  | [optional] [default to const []]
  **anyTag** | **bool**|  | [optional] [default to false]
+ **excluded** | [**List<String>**](String.md)|  | [optional] [default to const []]
  **text** | **String**|  | [optional] [default to '']
  **fandom** | **String**|  | [optional] [default to '']
  **language** | **String**|  | [optional] [default to '']
@@ -73,6 +76,55 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**Ao3SearchResponse**](Ao3SearchResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **suggestAo3Tags**
+> List<String> suggestAo3Tags(term)
+
+Suggest Ao3 Tags
+
+Tags AO3 knows that start like what is typed.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = Ao3Api();
+final term = term_example; // String | 
+
+try {
+    final result = api_instance.suggestAo3Tags(term);
+    print(result);
+} catch (e) {
+    print('Exception when calling Ao3Api->suggestAo3Tags: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **term** | **String**|  | [optional] [default to '']
+
+### Return type
+
+**List<String>**
 
 ### Authorization
 

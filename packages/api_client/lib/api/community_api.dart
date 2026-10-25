@@ -82,4 +82,57 @@ class CommunityApi {
     }
     return null;
   }
+
+  /// Report Community File
+  ///
+  /// Flag a shared file for the administrators (illegal, wrong, unwanted).
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] sha256 (required):
+  ///
+  /// * [FileReportRequest] fileReportRequest (required):
+  Future<Response> reportCommunityFileWithHttpInfo(String sha256, FileReportRequest fileReportRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/community/{sha256}/report'
+      .replaceAll('{sha256}', sha256);
+
+    // ignore: prefer_final_locals
+    Object? postBody = fileReportRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Report Community File
+  ///
+  /// Flag a shared file for the administrators (illegal, wrong, unwanted).
+  ///
+  /// Parameters:
+  ///
+  /// * [String] sha256 (required):
+  ///
+  /// * [FileReportRequest] fileReportRequest (required):
+  Future<void> reportCommunityFile(String sha256, FileReportRequest fileReportRequest,) async {
+    final response = await reportCommunityFileWithHttpInfo(sha256, fileReportRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
 }

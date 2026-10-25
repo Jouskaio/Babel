@@ -7,6 +7,7 @@ import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../l10n.dart';
+import '../../library/presentation/file_reports.dart';
 import '../../social/presentation/safety.dart';
 import '../../sources/presentation/plugins_section.dart';
 import '../../sources/presentation/source_badge.dart';
@@ -30,6 +31,8 @@ class AdminPage extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 40),
             children: [
               const ReportsSection(),
+              const SizedBox(height: 24),
+              const FileReportsSection(),
               const SizedBox(height: 24),
               const _Controls(),
               const SizedBox(height: 24),

@@ -755,6 +755,21 @@ class KoreaderLinkRow(Base):
     item_id: Mapped[UUID] = mapped_column(ForeignKey("library_items.id", ondelete="CASCADE"))
 
 
+class CommunityReportRow(Base):
+    """A reader's report of a file of the community library."""
+
+    __tablename__ = "community_reports"
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    sha256: Mapped[str] = mapped_column(
+        ForeignKey("stored_files.sha256", ondelete="CASCADE"), primary_key=True
+    )
+    reason: Mapped[str] = mapped_column(String(500), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 class KoreaderIgnoredRow(Base):
     """A book of KOReader the reader does not want in Babel: nothing of it is kept."""
 

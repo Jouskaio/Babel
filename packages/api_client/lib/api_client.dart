@@ -286,6 +286,10 @@ class ApiClient {
           return FeedEntryResponse.fromJson(value);
         case 'FeedKind':
           return FeedKindTypeTransformer().decode(value);
+        case 'FileReportRequest':
+          return FileReportRequest.fromJson(value);
+        case 'FileReportResponse':
+          return FileReportResponse.fromJson(value);
         case 'FilesCheckRequest':
           return FilesCheckRequest.fromJson(value);
         case 'FilesCheckResponse':

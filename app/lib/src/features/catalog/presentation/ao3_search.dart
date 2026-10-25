@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:babel_api_client/api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/ao3/ao3_direct.dart';
@@ -33,7 +37,12 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
   final _kudos = TextEditingController();
   final _hits = TextEditingController();
   final _words = TextEditingController();
+  final _exclude = TextEditingController();
   final _tags = <String>[];
+  final _excluded = <String>[];
+  var _suggestions = <String>[];
+  Timer? _suggestTimer;
+  var _saved = <({String name, Map<String, dynamic> data})>[];
   var _any = false;
   var _sort = 'best';
   var _descending = true;
@@ -45,8 +54,142 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
   final _added = <String>{};
   final _adding = <String>{};
 
+  static const _savedKey = 'ao3_saved_searches';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSaved();
+  }
+
+  Future<void> _loadSaved() async {
+    try {
+      final raw = await SharedPreferencesAsync().getString(_savedKey);
+      if (raw == null || !mounted) return;
+      final list = jsonDecode(raw) as List<dynamic>;
+      setState(() {
+        _saved = [
+          for (final e in list)
+            (
+              name: (e as Map<String, dynamic>)['name'] as String,
+              data: e['data'] as Map<String, dynamic>,
+            ),
+        ];
+      });
+    } on Object {
+      // Nothing saved yet, or no storage: the search works without it.
+    }
+  }
+
+  Future<void> _store() async {
+    try {
+      await SharedPreferencesAsync().setString(
+        _savedKey,
+        jsonEncode([
+          for (final s in _saved) {'name': s.name, 'data': s.data},
+        ]),
+      );
+    } on Object {
+      // Kept for this session only.
+    }
+  }
+
+  Map<String, dynamic> _snapshot() => {
+    'tags': _tags,
+    'excluded': _excluded,
+    'any': _any,
+    'fandom': _fandom.text,
+    'kudos': _kudos.text,
+    'hits': _hits.text,
+    'words': _words.text,
+    'language': _language,
+    'complete': _complete,
+    'updated': _updated,
+    'sort': _sort,
+    'descending': _descending,
+  };
+
+  void _apply(Map<String, dynamic> d) {
+    setState(() {
+      _tags
+        ..clear()
+        ..addAll((d['tags'] as List<dynamic>? ?? []).cast<String>());
+      _excluded
+        ..clear()
+        ..addAll((d['excluded'] as List<dynamic>? ?? []).cast<String>());
+      _any = d['any'] as bool? ?? false;
+      _fandom.text = d['fandom'] as String? ?? '';
+      _kudos.text = d['kudos'] as String? ?? '';
+      _hits.text = d['hits'] as String? ?? '';
+      _words.text = d['words'] as String? ?? '';
+      _language = d['language'] as String? ?? '';
+      _complete = d['complete'] as bool?;
+      _updated = d['updated'] as String? ?? '';
+      _sort = d['sort'] as String? ?? 'best';
+      _descending = d['descending'] as bool? ?? true;
+    });
+    _search();
+  }
+
+  Future<void> _save() async {
+    final l10n = context.l10n;
+    final name = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.ao3SaveTitle),
+        content: TextField(
+          controller: name,
+          autofocus: true,
+          decoration: InputDecoration(hintText: l10n.ao3SaveHint),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.ao3SaveButton),
+          ),
+        ],
+      ),
+    );
+    final label = name.text.trim();
+    name.dispose();
+    if (ok != true || label.isEmpty) return;
+    setState(() {
+      _saved = [..._saved, (name: label, data: _snapshot())];
+    });
+    await _store();
+  }
+
+  void _suggest(String value) {
+    _suggestTimer?.cancel();
+    _suggestTimer = Timer(const Duration(milliseconds: 350), () async {
+      final found = kIsWeb
+          ? await _serverSuggest(value)
+          : await ref.read(ao3DirectProvider).suggest(value);
+      if (mounted && _tag.text.trim() == value.trim()) {
+        setState(() => _suggestions = found);
+      }
+    });
+  }
+
+  Future<List<String>> _serverSuggest(String value) async {
+    if (value.trim().length < 2) return const [];
+    try {
+      return await ref.read(ao3ApiProvider).suggestAo3Tags(term: value) ??
+          const [];
+    } on ApiException {
+      return const [];
+    }
+  }
+
   @override
   void dispose() {
+    _suggestTimer?.cancel();
+    _exclude.dispose();
     _tag.dispose();
     _fandom.dispose();
     _kudos.dispose();
@@ -59,6 +202,15 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
     final tag = value.trim();
     if (tag.isNotEmpty && !_tags.contains(tag)) setState(() => _tags.add(tag));
     _tag.clear();
+    setState(() => _suggestions = []);
+  }
+
+  void _addExcluded(String value) {
+    final tag = value.trim();
+    if (tag.isNotEmpty && !_excluded.contains(tag)) {
+      setState(() => _excluded.add(tag));
+    }
+    _exclude.clear();
   }
 
   int? _number(TextEditingController c) => int.tryParse(c.text.trim());
@@ -78,6 +230,7 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
         .searchAo3(
           tags: q.tags,
           anyTag: q.anyTag,
+          excluded: q.excluded,
           text: q.text,
           fandom: q.fandom,
           language: q.language,
@@ -97,6 +250,7 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
     final params = Ao3Params(
       tags: List.of(_tags),
       anyTag: _any,
+      excluded: List.of(_excluded),
       text: widget.text.trim(),
       fandom: _fandom.text.trim(),
       language: _language,
@@ -187,6 +341,7 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
               child: TextField(
                 controller: _tag,
                 onSubmitted: _addTag,
+                onChanged: _suggest,
                 style: BabelText.body(14, color: BabelColors.textPrimary),
                 decoration: InputDecoration(
                   labelText: l10n.ao3TagHint,
@@ -201,6 +356,17 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
             ),
           ],
         ),
+        if (_suggestions.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final s in _suggestions)
+                ActionChip(label: Text(s), onPressed: () => _addTag(s)),
+            ],
+          ),
+        ],
         if (_tags.isNotEmpty) ...[
           const SizedBox(height: 8),
           Wrap(
@@ -223,6 +389,30 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
             ],
             selected: {_any},
             onSelectionChanged: (v) => setState(() => _any = v.first),
+          ),
+        ],
+        const SizedBox(height: 10),
+        TextField(
+          controller: _exclude,
+          onSubmitted: _addExcluded,
+          style: BabelText.body(14, color: BabelColors.textPrimary),
+          decoration: InputDecoration(
+            labelText: l10n.ao3ExcludeHint,
+            isDense: true,
+          ),
+        ),
+        if (_excluded.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final tag in _excluded)
+                InputChip(
+                  label: Text('− $tag'),
+                  onDeleted: () => setState(() => _excluded.remove(tag)),
+                ),
+            ],
           ),
         ],
         const SizedBox(height: 14),
@@ -273,7 +463,38 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
           ],
         ),
         const SizedBox(height: 16),
-        PillButton(label: l10n.ao3Search, onPressed: _search),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            PillButton(label: l10n.ao3Search, onPressed: _search),
+            PillButton(
+              label: l10n.ao3SaveButton,
+              kind: PillButtonKind.secondary,
+              onPressed: _save,
+            ),
+          ],
+        ),
+        if (_saved.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final s in _saved)
+                InputChip(
+                  label: Text(s.name),
+                  onPressed: () => _apply(s.data),
+                  onDeleted: () {
+                    setState(
+                      () => _saved = _saved.where((x) => x != s).toList(),
+                    );
+                    _store();
+                  },
+                ),
+            ],
+          ),
+        ],
         const SizedBox(height: 18),
         if (_results case final future?)
           FutureBuilder<Ao3SearchResponse?>(

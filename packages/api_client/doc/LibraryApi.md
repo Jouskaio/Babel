@@ -15,6 +15,7 @@ Method | HTTP request | Description
 [**checkFiles**](LibraryApi.md#checkfiles) | **POST** /v1/library/files/check | Check Files
 [**checkFollow**](LibraryApi.md#checkfollow) | **POST** /v1/library/follows/{follow_id}/check | Check Follow
 [**deleteReview**](LibraryApi.md#deletereview) | **DELETE** /v1/library/{item_id}/review | Delete Review
+[**dismissFileReports**](LibraryApi.md#dismissfilereports) | **POST** /v1/admin/file-reports/{sha256}/dismiss | Dismiss File Reports
 [**downloadFile**](LibraryApi.md#downloadfile) | **GET** /v1/files/{sha256} | Download File
 [**downloadFileAsCbz**](LibraryApi.md#downloadfileascbz) | **GET** /v1/files/{sha256}/cbz | Download As Cbz
 [**getFileCover**](LibraryApi.md#getfilecover) | **GET** /v1/files/{sha256}/cover | Get File Cover
@@ -28,6 +29,7 @@ Method | HTTP request | Description
 [**importLink**](LibraryApi.md#importlink) | **POST** /v1/library/links | Import Link
 [**importReadingList**](LibraryApi.md#importreadinglist) | **POST** /v1/library/import-csv | Import Reading List
 [**linkWork**](LibraryApi.md#linkwork) | **PUT** /v1/library/{item_id}/work | Link Work
+[**listFileReports**](LibraryApi.md#listfilereports) | **GET** /v1/admin/file-reports | List File Reports
 [**previewLink**](LibraryApi.md#previewlink) | **POST** /v1/library/links/preview | Preview Link
 [**removeFromLibrary**](LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
 [**saveReview**](LibraryApi.md#savereview) | **PUT** /v1/library/{item_id}/review | Save Review
@@ -323,6 +325,54 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **itemId** | **String**|  | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **dismissFileReports**
+> dismissFileReports(sha256)
+
+Dismiss File Reports
+
+Keep the file: forget the reports about it.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = LibraryApi();
+final sha256 = sha256_example; // String | 
+
+try {
+    api_instance.dismissFileReports(sha256);
+} catch (e) {
+    print('Exception when calling LibraryApi->dismissFileReports: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **sha256** | **String**|  | 
 
 ### Return type
 
@@ -961,6 +1011,51 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **listFileReports**
+> List<FileReportResponse> listFileReports()
+
+List File Reports
+
+Files readers reported in the community library, the most reported first.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = LibraryApi();
+
+try {
+    final result = api_instance.listFileReports();
+    print(result);
+} catch (e) {
+    print('Exception when calling LibraryApi->listFileReports: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**List<FileReportResponse>**](FileReportResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

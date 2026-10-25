@@ -14,11 +14,14 @@ class CommunityPageResponse {
   /// Returns a new [CommunityPageResponse] instance.
   CommunityPageResponse({
     this.books = const [],
+    this.enabled = true,
     required this.hasNext,
     required this.page,
   });
 
   List<CommunityBookResponse> books;
+
+  bool enabled;
 
   bool hasNext;
 
@@ -27,6 +30,7 @@ class CommunityPageResponse {
   @override
   bool operator ==(Object other) => identical(this, other) || other is CommunityPageResponse &&
     _deepEquality.equals(other.books, books) &&
+    other.enabled == enabled &&
     other.hasNext == hasNext &&
     other.page == page;
 
@@ -34,15 +38,17 @@ class CommunityPageResponse {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (books.hashCode) +
+    (enabled.hashCode) +
     (hasNext.hashCode) +
     (page.hashCode);
 
   @override
-  String toString() => 'CommunityPageResponse[books=$books, hasNext=$hasNext, page=$page]';
+  String toString() => 'CommunityPageResponse[books=$books, enabled=$enabled, hasNext=$hasNext, page=$page]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'books'] = this.books;
+      json[r'enabled'] = this.enabled;
       json[r'has_next'] = this.hasNext;
       json[r'page'] = this.page;
     return json;
@@ -68,6 +74,7 @@ class CommunityPageResponse {
 
       return CommunityPageResponse(
         books: CommunityBookResponse.listFromJson(json[r'books']),
+        enabled: mapValueOfType<bool>(json, r'enabled') ?? true,
         hasNext: mapValueOfType<bool>(json, r'has_next')!,
         page: mapValueOfType<int>(json, r'page')!,
       );

@@ -236,3 +236,25 @@ app offers them. A model is a few hundred MB, downloaded at first start. Quality
 open models: good for reading, not DeepL; a long novel takes from tens of minutes to a few hours
 on a NAS processor. Remove the service (and the `BABEL_TRANSLATE_URL` line) to turn it off: the
 app then only translates short passages.
+
+
+## Backups and monitoring
+
+- **Database.** The `backup` service dumps the database every night to `/opt/babel/backups`
+  (`babel-YYYY-MM-DD.sql.gz`) and keeps 14 days. The first dump is made when it starts. To
+  restore into an empty database:
+
+  ```bash
+  gunzip -c /opt/babel/backups/babel-YYYY-MM-DD.sql.gz | docker compose exec -T db psql -U babel babel
+  ```
+
+  Copy that folder off the server now and then (another disk, another machine): a backup on the
+  same disk does not survive the disk.
+- **Book files.** They live on the NAS share (`/srv/babel-files`): back that share up with the
+  NAS's own tools.
+- **Uptime.** The GitHub workflow `uptime.yml` checks the API, the site and the downloads every
+  30 minutes. When one fails, the run fails and GitHub e-mails you (Settings › Notifications ›
+  Actions).
+- **Community library.** `BABEL_COMMUNITY_ENABLED=false` in `.env` switches it off for everyone
+  (nobody's own library changes). Readers report files with the flag; administrators decide in
+  the admin page (Reported files).

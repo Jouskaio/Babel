@@ -28,6 +28,8 @@ class Ao3Api {
   ///
   /// * [bool] anyTag:
   ///
+  /// * [List<String>] excluded:
+  ///
   /// * [String] text:
   ///
   /// * [String] fandom:
@@ -49,7 +51,7 @@ class Ao3Api {
   /// * [bool] descending:
   ///
   /// * [int] page:
-  Future<Response> searchAo3WithHttpInfo({ List<String>? tags, bool? anyTag, String? text, String? fandom, String? language, bool? complete, int? minWords, int? minKudos, int? minHits, String? updatedWithin, String? sort, bool? descending, int? page, }) async {
+  Future<Response> searchAo3WithHttpInfo({ List<String>? tags, bool? anyTag, List<String>? excluded, String? text, String? fandom, String? language, bool? complete, int? minWords, int? minKudos, int? minHits, String? updatedWithin, String? sort, bool? descending, int? page, }) async {
     // ignore: prefer_const_declarations
     final path = r'/v1/ao3/search';
 
@@ -65,6 +67,9 @@ class Ao3Api {
     }
     if (anyTag != null) {
       queryParams.addAll(_queryParams('', 'any_tag', anyTag));
+    }
+    if (excluded != null) {
+      queryParams.addAll(_queryParams('multi', 'excluded', excluded));
     }
     if (text != null) {
       queryParams.addAll(_queryParams('', 'text', text));
@@ -124,6 +129,8 @@ class Ao3Api {
   ///
   /// * [bool] anyTag:
   ///
+  /// * [List<String>] excluded:
+  ///
   /// * [String] text:
   ///
   /// * [String] fandom:
@@ -145,8 +152,8 @@ class Ao3Api {
   /// * [bool] descending:
   ///
   /// * [int] page:
-  Future<Ao3SearchResponse?> searchAo3({ List<String>? tags, bool? anyTag, String? text, String? fandom, String? language, bool? complete, int? minWords, int? minKudos, int? minHits, String? updatedWithin, String? sort, bool? descending, int? page, }) async {
-    final response = await searchAo3WithHttpInfo( tags: tags, anyTag: anyTag, text: text, fandom: fandom, language: language, complete: complete, minWords: minWords, minKudos: minKudos, minHits: minHits, updatedWithin: updatedWithin, sort: sort, descending: descending, page: page, );
+  Future<Ao3SearchResponse?> searchAo3({ List<String>? tags, bool? anyTag, List<String>? excluded, String? text, String? fandom, String? language, bool? complete, int? minWords, int? minKudos, int? minHits, String? updatedWithin, String? sort, bool? descending, int? page, }) async {
+    final response = await searchAo3WithHttpInfo( tags: tags, anyTag: anyTag, excluded: excluded, text: text, fandom: fandom, language: language, complete: complete, minWords: minWords, minKudos: minKudos, minHits: minHits, updatedWithin: updatedWithin, sort: sort, descending: descending, page: page, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -156,6 +163,69 @@ class Ao3Api {
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Ao3SearchResponse',) as Ao3SearchResponse;
     
+    }
+    return null;
+  }
+
+  /// Suggest Ao3 Tags
+  ///
+  /// Tags AO3 knows that start like what is typed.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] term:
+  Future<Response> suggestAo3TagsWithHttpInfo({ String? term, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/ao3/tags';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (term != null) {
+      queryParams.addAll(_queryParams('', 'term', term));
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Suggest Ao3 Tags
+  ///
+  /// Tags AO3 knows that start like what is typed.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] term:
+  Future<List<String>?> suggestAo3Tags({ String? term, }) async {
+    final response = await suggestAo3TagsWithHttpInfo( term: term, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<String>') as List)
+        .cast<String>()
+        .toList(growable: false);
+
     }
     return null;
   }

@@ -71,7 +71,9 @@ Class | Method | HTTP request | Description
 *AccountApi* | [**resendVerificationEmail**](doc//AccountApi.md#resendverificationemail) | **POST** /v1/me/email/verification | Resend Verification
 *AccountApi* | [**updateMe**](doc//AccountApi.md#updateme) | **PATCH** /v1/me | Update Me
 *AccountApi* | [**updateSocialProfile**](doc//AccountApi.md#updatesocialprofile) | **PATCH** /v1/me/profile | Update Profile
+*AdminApi* | [**dismissFileReports**](doc//AdminApi.md#dismissfilereports) | **POST** /v1/admin/file-reports/{sha256}/dismiss | Dismiss File Reports
 *AdminApi* | [**getAdminOverview**](doc//AdminApi.md#getadminoverview) | **GET** /v1/admin/overview | Overview
+*AdminApi* | [**listFileReports**](doc//AdminApi.md#listfilereports) | **GET** /v1/admin/file-reports | List File Reports
 *AdminApi* | [**listMembers**](doc//AdminApi.md#listmembers) | **GET** /v1/admin/users | List Members
 *AdminApi* | [**listReports**](doc//AdminApi.md#listreports) | **GET** /v1/admin/reports | List Reports
 *AdminApi* | [**resolveReport**](doc//AdminApi.md#resolvereport) | **POST** /v1/admin/reports/{report_id}/resolve | Resolve Report
@@ -80,6 +82,7 @@ Class | Method | HTTP request | Description
 *AdminApi* | [**setSourceQuota**](doc//AdminApi.md#setsourcequota) | **PUT** /v1/admin/users/{member_id}/quota | Set Quota
 *AdminApi* | [**withdrawFile**](doc//AdminApi.md#withdrawfile) | **POST** /v1/admin/files/{sha256}/withdraw | Withdraw File
 *Ao3Api* | [**searchAo3**](doc//Ao3Api.md#searchao3) | **GET** /v1/ao3/search | Search Ao3
+*Ao3Api* | [**suggestAo3Tags**](doc//Ao3Api.md#suggestao3tags) | **GET** /v1/ao3/tags | Suggest Ao3 Tags
 *AudiobooksApi* | [**addAudiobook**](doc//AudiobooksApi.md#addaudiobook) | **POST** /v1/audiobookshelf/books/{remote_id} | Add
 *AudiobooksApi* | [**browseAudiobooks**](doc//AudiobooksApi.md#browseaudiobooks) | **GET** /v1/audiobookshelf/libraries/{library_id}/books | Browse
 *AudiobooksApi* | [**getAudioCover**](doc//AudiobooksApi.md#getaudiocover) | **GET** /v1/audio-covers/{key} | Cover
@@ -114,6 +117,7 @@ Class | Method | HTTP request | Description
 *CatalogApi* | [**recognizeCover**](doc//CatalogApi.md#recognizecover) | **POST** /v1/catalog/recognize | Recognize Cover
 *CatalogApi* | [**searchWorks**](doc//CatalogApi.md#searchworks) | **GET** /v1/catalog/search | Search Works
 *CommunityApi* | [**listCommunity**](doc//CommunityApi.md#listcommunity) | **GET** /v1/community | List Community
+*CommunityApi* | [**reportCommunityFile**](doc//CommunityApi.md#reportcommunityfile) | **POST** /v1/community/{sha256}/report | Report Community File
 *DiscoverApi* | [**getPlaylist**](doc//DiscoverApi.md#getplaylist) | **GET** /v1/catalog/playlists/{key} | Get Playlist
 *DiscoverApi* | [**getSuggestions**](doc//DiscoverApi.md#getsuggestions) | **GET** /v1/me/for-you | Get Suggestions
 *DiscoverApi* | [**listPlaylists**](doc//DiscoverApi.md#listplaylists) | **GET** /v1/catalog/playlists | List Playlists
@@ -136,6 +140,7 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**checkFiles**](doc//LibraryApi.md#checkfiles) | **POST** /v1/library/files/check | Check Files
 *LibraryApi* | [**checkFollow**](doc//LibraryApi.md#checkfollow) | **POST** /v1/library/follows/{follow_id}/check | Check Follow
 *LibraryApi* | [**deleteReview**](doc//LibraryApi.md#deletereview) | **DELETE** /v1/library/{item_id}/review | Delete Review
+*LibraryApi* | [**dismissFileReports**](doc//LibraryApi.md#dismissfilereports) | **POST** /v1/admin/file-reports/{sha256}/dismiss | Dismiss File Reports
 *LibraryApi* | [**downloadFile**](doc//LibraryApi.md#downloadfile) | **GET** /v1/files/{sha256} | Download File
 *LibraryApi* | [**downloadFileAsCbz**](doc//LibraryApi.md#downloadfileascbz) | **GET** /v1/files/{sha256}/cbz | Download As Cbz
 *LibraryApi* | [**getFileCover**](doc//LibraryApi.md#getfilecover) | **GET** /v1/files/{sha256}/cover | Get File Cover
@@ -149,6 +154,7 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**importLink**](doc//LibraryApi.md#importlink) | **POST** /v1/library/links | Import Link
 *LibraryApi* | [**importReadingList**](doc//LibraryApi.md#importreadinglist) | **POST** /v1/library/import-csv | Import Reading List
 *LibraryApi* | [**linkWork**](doc//LibraryApi.md#linkwork) | **PUT** /v1/library/{item_id}/work | Link Work
+*LibraryApi* | [**listFileReports**](doc//LibraryApi.md#listfilereports) | **GET** /v1/admin/file-reports | List File Reports
 *LibraryApi* | [**previewLink**](doc//LibraryApi.md#previewlink) | **POST** /v1/library/links/preview | Preview Link
 *LibraryApi* | [**removeFromLibrary**](doc//LibraryApi.md#removefromlibrary) | **DELETE** /v1/library/{item_id} | Remove From Library
 *LibraryApi* | [**saveReview**](doc//LibraryApi.md#savereview) | **PUT** /v1/library/{item_id}/review | Save Review
@@ -285,6 +291,8 @@ Class | Method | HTTP request | Description
  - [FanficDetailsResponse](doc//FanficDetailsResponse.md)
  - [FeedEntryResponse](doc//FeedEntryResponse.md)
  - [FeedKind](doc//FeedKind.md)
+ - [FileReportRequest](doc//FileReportRequest.md)
+ - [FileReportResponse](doc//FileReportResponse.md)
  - [FilesCheckRequest](doc//FilesCheckRequest.md)
  - [FilesCheckResponse](doc//FilesCheckResponse.md)
  - [FinishedBookResponse](doc//FinishedBookResponse.md)

@@ -101,6 +101,8 @@ part 'model/extra_challenge_response.dart';
 part 'model/fanfic_details_response.dart';
 part 'model/feed_entry_response.dart';
 part 'model/feed_kind.dart';
+part 'model/file_report_request.dart';
+part 'model/file_report_response.dart';
 part 'model/files_check_request.dart';
 part 'model/files_check_response.dart';
 part 'model/finished_book_response.dart';

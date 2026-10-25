@@ -11,9 +11,10 @@ import asyncio
 import hashlib
 import secrets
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from pathlib import PurePosixPath
-from uuid import UUID
+from typing import Any
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 from babel_api.adapters.db.koreader_repository import (
     KoreaderContact,
@@ -26,8 +27,8 @@ from babel_api.domain.errors import NotFoundError
 from babel_api.domain.koreader import partial_md5
 from babel_api.domain.naming import book_filename
 from babel_api.domain.ports import BlobStore, FileRepository, UserRepository
-from babel_api.domain.sync import DeviceKind, ReadingPosition
-from babel_api.services.sync import SyncService
+from babel_api.domain.sync import ChangeOp, DeviceKind, EntityKind, ReadingPosition
+from babel_api.services.sync import Operation, OpOutcome, SyncService
 
 
 @dataclass(frozen=True, slots=True)
@@ -110,14 +111,7 @@ class KoreaderService:
             await self._repo.put_orphan(user_id, document, progress, percentage, device, "")
             await self._repo.commit()
             return
-        devices = await self._sync.devices(user_id)
-        name = f"{DEVICE_PREFIX}{device.strip() or 'e-reader'}"[:80]
-        found = next((d for d in devices if d.name == name), None)
-        device_id = (
-            found.id
-            if found
-            else (await self._sync.register_device(user_id, name, DeviceKind.EREADER)).id
-        )
+        device_id = await self._device_id(user_id, device)
         await self._sync.record_position(
             user_id,
             device_id,
@@ -125,6 +119,83 @@ class KoreaderService:
             f"{PREFIX}{progress}"[:1000],
             round(max(0.0, min(1.0, percentage)) * 100, 2),
         )
+
+    async def _device_id(self, user_id: UUID, device: str) -> UUID:
+        """The e-reader as a device of the reader, made the first time it is seen."""
+        name = f"{DEVICE_PREFIX}{device.strip() or 'e-reader'}"[:80]
+        found = next((d for d in await self._sync.devices(user_id) if d.name == name), None)
+        if found:
+            return found.id
+        return (await self._sync.register_device(user_id, name, DeviceKind.EREADER)).id
+
+    async def finished(self, user_id: UUID, document: str, device: str) -> bool:
+        """The reader finished the book on the e-reader: it is finished in Babel too."""
+        try:
+            item_id = await self._item_of(user_id, document)
+        except NotFoundError:
+            return False
+        now = datetime.now(UTC)
+        results, _ = await self._sync.push(
+            user_id,
+            await self._device_id(user_id, device),
+            [
+                Operation(
+                    key=f"koreader-finished:{item_id}:{now.date()}",
+                    entity=EntityKind.READING_STATE,
+                    entity_id=str(item_id),
+                    op=ChangeOp.UPSERT,
+                    data={"status": "finished", "client_time": now.isoformat()},
+                )
+            ],
+        )
+        return any(r.outcome is OpOutcome.APPLIED for r in results)
+
+    async def annotations(
+        self, user_id: UUID, document: str, device: str, found: list[dict[str, Any]]
+    ) -> int:
+        """Highlights and notes made in KOReader become the reader's annotations in Babel."""
+        try:
+            item_id = await self._item_of(user_id, document)
+        except NotFoundError:
+            return 0
+        item = await self._files.get_item(item_id)
+        if item is None or item.sha256 is None:
+            return 0
+        operations: list[Operation] = []
+        for note in found:
+            quote = str(note.get("text") or "").strip()
+            if not quote:
+                continue
+            when = str(note.get("datetime") or "")
+            made = datetime.fromisoformat(when.replace(" ", "T")) if when else datetime.now(UTC)
+            if made.tzinfo is None:
+                made = made.replace(tzinfo=UTC)
+            percent = note.get("percent")
+            annotation_id = uuid5(NAMESPACE_URL, f"koreader:{user_id}:{item.sha256}:{quote}")
+            operations.append(
+                Operation(
+                    key=f"koreader-annotation:{annotation_id}:{made.isoformat()}",
+                    entity=EntityKind.ANNOTATION,
+                    entity_id=str(annotation_id),
+                    op=ChangeOp.UPSERT,
+                    data={
+                        "item_id": str(item_id),
+                        "chapter": 0,
+                        "quote": quote,
+                        "note": str(note.get("note") or "").strip() or None,
+                        "color": "gold",
+                        "visibility": "private",
+                        "client_time": made.isoformat(),
+                        "percent": percent if isinstance(percent, int | float) else None,
+                    },
+                )
+            )
+        if not operations:
+            return 0
+        results, _ = await self._sync.push(
+            user_id, await self._device_id(user_id, device), operations
+        )
+        return sum(1 for r in results if r.outcome is OpOutcome.APPLIED)
 
     async def get(self, user_id: UUID, document: str) -> tuple[ReadingPosition, str, str] | None:
         """The latest position of the book on any device, with KOReader's own position string

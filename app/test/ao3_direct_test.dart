@@ -91,4 +91,22 @@ void main() {
     );
     expect(calls, 1);
   });
+
+  test('excluded tags are minus terms and tags are suggested', () async {
+    final query = Ao3Direct.query(
+      const Ao3Params(tags: ['Angst'], excluded: ['Major Character Death']),
+    );
+    expect(query['work_search[query]'], '-"Major Character Death"');
+
+    final client = MockClient((request) async {
+      expect(request.url.path, '/autocomplete/freeform');
+      return http.Response(
+        '[{"id":"Angst","name":"Angst"},{"name":"Angsty"}]',
+        200,
+      );
+    });
+    final direct = Ao3Direct(client: client, pause: Duration.zero);
+    expect(await direct.suggest('ang'), ['Angst', 'Angsty']);
+    expect(await direct.suggest('a'), isEmpty);
+  });
 }

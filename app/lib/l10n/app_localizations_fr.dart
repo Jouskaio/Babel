@@ -4061,7 +4061,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get koreaderGuideUse =>
-      'Outils › Babel › Envoyer les statistiques de lecture. Active aussi l\'envoi automatique : après la fermeture d\'un livre, les statistiques partent toutes seules si la liseuse est en ligne. Le plugin Reading statistics de KOReader doit être activé. Retrouve le résultat dans Babel : Statistiques et Compte › KOReader.';
+      'Outils › Babel › Envoyer les statistiques de lecture. Active aussi l\'envoi automatique : après la fermeture d\'un livre, les statistiques partent toutes seules si la liseuse est en ligne. Le plugin Reading statistics de KOReader doit être activé. Quand tu marques un livre comme terminé, Babel le marque terminé aussi, et tes surlignages et notes arrivent dans tes annotations Babel. Le menu « Tester la connexion à Babel » vérifie que tout est bien relié.';
 
   @override
   String get koreaderGuideBooksTitle => '4. Avoir tes livres sur la liseuse';
@@ -4117,4 +4117,57 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get featureOfflineBody =>
       'Gardez un livre ou une étagère entière sur l\'appareil, et choisissez un thème : sombre, papier, Art déco ou Art nouveau.';
+
+  @override
+  String get reportFileTitle => 'Signaler ce fichier';
+
+  @override
+  String get reportFileHint =>
+      'Pourquoi ? (contenu illicite, mauvais fichier…)';
+
+  @override
+  String get reportFileSend => 'Signaler';
+
+  @override
+  String get reportFileSent => 'Merci, les administrateurs vont regarder.';
+
+  @override
+  String get communityOff =>
+      'La bibliothèque commune est désactivée par l\'administrateur.';
+
+  @override
+  String get communityHint2 =>
+      'Chacun reste responsable de ce qu\'il partage : signale tout fichier illicite ou qui n\'a pas à être là avec le drapeau.';
+
+  @override
+  String get fileReportsTitle => 'Fichiers signalés';
+
+  @override
+  String get fileReportsEmpty => 'Aucun fichier signalé.';
+
+  @override
+  String get fileReportKeep => 'Garder';
+
+  @override
+  String get fileReportWithdraw => 'Retirer';
+
+  @override
+  String get fileReportWithdrawTitle => 'Retirer ce fichier ?';
+
+  @override
+  String fileReportWithdrawBody(String title) {
+    return '« $title » sera retiré de toutes les bibliothèques et son empreinte bloquée.';
+  }
+
+  @override
+  String get ao3ExcludeHint => 'Exclure un tag (Entrée)';
+
+  @override
+  String get ao3SaveTitle => 'Enregistrer cette recherche';
+
+  @override
+  String get ao3SaveHint => 'Nom de la recherche';
+
+  @override
+  String get ao3SaveButton => 'Enregistrer';
 }
