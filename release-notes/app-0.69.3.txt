@@ -1,0 +1,1 @@
+Connexion et inscription sur le web : les gestionnaires de mots de passe (Proton Pass, Dashlane…) peuvent maintenant remplir l'e-mail et le mot de passe
