@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/auth/auth_controller.dart';
 import '../../../core/auth/auth_failure.dart';
+import '../../../core/autofill/autofill_bridge.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/babel_text_field.dart';
@@ -26,8 +27,21 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   bool _busy = false;
   AuthFailure? _failure;
 
+  late final AutofillBridge _autofill;
+
+  @override
+  void initState() {
+    super.initState();
+    _autofill = AutofillBridge({
+      'nickname': _name,
+      'username': _email,
+      'new-password': _password,
+    });
+  }
+
   @override
   void dispose() {
+    _autofill.dispose();
     _name.dispose();
     _email.dispose();
     _password.dispose();

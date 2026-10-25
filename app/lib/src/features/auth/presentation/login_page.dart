@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_controller.dart';
 import '../../../core/auth/auth_failure.dart';
+import '../../../core/autofill/autofill_bridge.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/babel_text_field.dart';
@@ -25,9 +26,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _password = TextEditingController();
   bool _busy = false;
   AuthFailure? _failure;
+  late final AutofillBridge _autofill;
+
+  @override
+  void initState() {
+    super.initState();
+    _autofill = AutofillBridge({
+      'username': _email,
+      'current-password': _password,
+    });
+  }
 
   @override
   void dispose() {
+    _autofill.dispose();
     _email.dispose();
     _password.dispose();
     super.dispose();
