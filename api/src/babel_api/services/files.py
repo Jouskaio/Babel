@@ -60,6 +60,7 @@ def item_data(item: LibraryItem) -> dict[str, Any]:
         "cover_path": item.cover_path,
         "paper": item.paper,
         "ereader": item.ereader,
+        "shared": item.shared,
         "series": item.series,
         "series_index": item.series_index,
         "cover_id": item.cover_id,
@@ -299,6 +300,25 @@ class FileService:
         item = await self._files.set_paper(item_id, paper)
         await self._record(item, device_id)
         return item
+
+    async def set_shared(
+        self, user_id: UUID, item_id: UUID, shared: bool, device_id: UUID | None = None
+    ) -> LibraryItem:
+        """Whether a fanfiction is shared with the community library."""
+        await self._own(user_id, item_id)
+        item = await self._files.set_shared(item_id, shared)
+        await self._record(item, device_id)
+        return item
+
+    async def community(
+        self, user_id: UUID, query: str, limit: int, offset: int
+    ) -> tuple[list[StoredFile], set[str]]:
+        """What every reader shares, newest first, with the files this reader already has.
+
+        Nothing when the server limits downloads to the files' owners (file_access "entitled")."""
+        if self._access != "everyone":
+            return [], set()
+        return await self._files.community(user_id, query, limit, offset)
 
     async def set_ereader(
         self, user_id: UUID, item_id: UUID, ereader: bool, device_id: UUID | None = None

@@ -5,8 +5,9 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import String, and_, cast, delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.elements import ColumnElement
 
 from babel_api.adapters.db.models import (
     BlockedFileRow,
@@ -76,6 +77,7 @@ def _to_item(row: LibraryItemRow) -> LibraryItem:
         work_id=row.work_id,
         paper=row.paper,
         ereader=row.ereader,
+        shared=row.shared,
         work_cover_id=row.work.cover_id if row.work else None,
         work_cover_url=row.work.cover_url if row.work else None,
         audio=AudioRef(row.audio_id, row.audio_duration or 0, row.audio_cover)
@@ -242,6 +244,60 @@ class SqlFileRepository:
         row.origin = origin
         await self._session.flush()
         return _to_item(row)
+
+    async def set_shared(self, item_id: UUID, shared: bool) -> LibraryItem:
+        row = await self._session.get_one(LibraryItemRow, item_id)
+        row.shared = shared
+        await self._session.flush()
+        return _to_item(row)
+
+    @staticmethod
+    def _community_filter() -> ColumnElement[bool]:
+        """Stored files some reader has in their library and shares: every book, except a
+        fanfiction its reader keeps to themselves, and what a reader hid."""
+        shared = (
+            select(LibraryItemRow.id)
+            .where(
+                LibraryItemRow.file_sha256 == StoredFileRow.sha256,
+                LibraryItemRow.removed_at.is_(None),
+                LibraryItemRow.hidden.is_(False),
+                or_(
+                    LibraryItemRow.origin.is_(None),
+                    LibraryItemRow.origin != "ao3",
+                    LibraryItemRow.shared.is_(True),
+                ),
+            )
+            .exists()
+        )
+        return and_(StoredFileRow.withdrawn_at.is_(None), shared)
+
+    async def community(
+        self, user_id: UUID, query: str, limit: int, offset: int
+    ) -> tuple[list[StoredFile], set[str]]:
+        """The community's files (newest first), and which of them the reader already has."""
+        statement = select(StoredFileRow).where(self._community_filter())
+        if words := _plain(query).split():
+            for word in words:
+                like = f"%{word}%"
+                statement = statement.where(
+                    or_(
+                        func.lower(StoredFileRow.title).like(like),
+                        func.lower(cast(StoredFileRow.authors, String)).like(like),
+                        func.lower(StoredFileRow.original_name).like(like),
+                    )
+                )
+        rows = await self._session.scalars(
+            statement.order_by(StoredFileRow.created_at.desc()).limit(limit).offset(offset)
+        )
+        files = [_to_file(row) for row in rows]
+        mine = await self._session.scalars(
+            select(LibraryItemRow.file_sha256).where(
+                LibraryItemRow.user_id == user_id,
+                LibraryItemRow.removed_at.is_(None),
+                LibraryItemRow.file_sha256.in_([f.sha256 for f in files]),
+            )
+        )
+        return files, {sha for sha in mine if sha}
 
     async def set_ereader(self, item_id: UUID, ereader: bool) -> LibraryItem:
         row = await self._session.get_one(LibraryItemRow, item_id)

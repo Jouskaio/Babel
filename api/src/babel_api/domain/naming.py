@@ -13,6 +13,11 @@ def _clean(text: str) -> str:
     return _SPACES.sub(" ", _FORBIDDEN.sub(" ", text)).strip(" .")
 
 
+def clean_name(text: str) -> str:
+    """A name without forbidden characters or the extension of a file."""
+    return _clean(re.sub(r"\.(epub|pdf|cbz|cbr|m4b)$", "", text, flags=re.IGNORECASE))
+
+
 def _volume(index: float) -> str:
     return f"{int(index):02d}" if index == int(index) else f"{index:g}"
 

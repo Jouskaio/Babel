@@ -248,6 +248,10 @@ class ApiClient {
           return CommentRequest.fromJson(value);
         case 'CommentResponse':
           return CommentResponse.fromJson(value);
+        case 'CommunityBookResponse':
+          return CommunityBookResponse.fromJson(value);
+        case 'CommunityPageResponse':
+          return CommunityPageResponse.fromJson(value);
         case 'ConnectorRequest':
           return ConnectorRequest.fromJson(value);
         case 'ConnectorStatus':
@@ -448,6 +452,8 @@ class ApiClient {
           return SagaVolumeResponse.fromJson(value);
         case 'SharedNoteResponse':
           return SharedNoteResponse.fromJson(value);
+        case 'SharedRequest':
+          return SharedRequest.fromJson(value);
         case 'ShelfResponse':
           return ShelfResponse.fromJson(value);
         case 'ShelfmarkLinkRequest':

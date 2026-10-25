@@ -88,6 +88,9 @@ final ao3DirectProvider = Provider<Ao3Direct>((ref) => Ao3Direct());
 final ao3ApiProvider = Provider<Ao3Api>(
   (ref) => Ao3Api(ref.watch(apiClientProvider)),
 );
+final communityApiProvider = Provider<CommunityApi>(
+  (ref) => CommunityApi(ref.watch(apiClientProvider)),
+);
 final kosyncApiProvider = Provider<KosyncApi>(
   (ref) => KosyncApi(ref.watch(apiClientProvider)),
 );

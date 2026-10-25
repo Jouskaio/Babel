@@ -21,6 +21,7 @@ import '../features/home/presentation/home_page.dart';
 import '../features/kavita/presentation/admin_page.dart';
 import '../features/kavita/presentation/kavita_setup_page.dart';
 import '../features/landing/presentation/landing_page.dart';
+import '../features/library/presentation/community_page.dart';
 import '../features/library/presentation/library_page.dart';
 import '../features/library/presentation/link_import_page.dart';
 import '../features/reader/presentation/reader_page.dart';
@@ -61,6 +62,7 @@ abstract final class Routes {
   static String playlist(String key) => '/playlist/$key';
   static String read(String itemId) => '/read/$itemId';
   static const importLink = '/import-link';
+  static const community = '/community';
   static const stats = '/stats';
   static const audiobooks = '/audiobooks';
   static String saga(String series, {String? author}) => Uri(
@@ -205,6 +207,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) =>
             LinkImportPage(initialUrl: sharedLink(state.uri.queryParameters)),
       ),
+      GoRoute(path: Routes.community, builder: (_, _) => const CommunityPage()),
       GoRoute(path: Routes.sources, builder: (_, _) => const SourcesPage()),
       GoRoute(path: Routes.newSource, builder: (_, _) => const NewSourcePage()),
       GoRoute(

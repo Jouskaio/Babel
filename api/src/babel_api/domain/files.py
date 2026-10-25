@@ -136,6 +136,8 @@ class LibraryItem:
     paper: bool = False
     # The reader keeps it on an e-reader to read there (alongside paper, or a file).
     ereader: bool = False
+    # A fanfiction shared with the community library (other books are always shared).
+    shared: bool = False
     # The work's cover, for paper books without a file.
     work_cover_id: int | None = None
     # Where the work's cover was found when Open Library had none (served by Babel).

@@ -1452,6 +1452,75 @@ class LibraryApi {
     return null;
   }
 
+  /// Set Shared
+  ///
+  /// Share a fanfiction with the community library (every other book is shared already).
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [SharedRequest] sharedRequest (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<Response> setSharedWithHttpInfo(String itemId, SharedRequest sharedRequest, { String? xBabelDevice, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/{item_id}/shared'
+      .replaceAll('{item_id}', itemId);
+
+    // ignore: prefer_final_locals
+    Object? postBody = sharedRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (xBabelDevice != null) {
+      headerParams[r'X-Babel-Device'] = parameterToString(xBabelDevice);
+    }
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'PUT',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Set Shared
+  ///
+  /// Share a fanfiction with the community library (every other book is shared already).
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [SharedRequest] sharedRequest (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<LibraryItemResponse?> setShared(String itemId, SharedRequest sharedRequest, { String? xBabelDevice, }) async {
+    final response = await setSharedWithHttpInfo(itemId, sharedRequest,  xBabelDevice: xBabelDevice, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'LibraryItemResponse',) as LibraryItemResponse;
+    
+    }
+    return null;
+  }
+
   /// Stop Follow
   ///
   /// Stop checking this book for new chapters (the book stays).

@@ -6637,6 +6637,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'AO3 ne répond pas pour l\'instant (il est souvent surchargé). Réessaie dans un moment.'**
   String get ao3Down;
+
+  /// No description provided for @communityTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bibliothèque commune'**
+  String get communityTitle;
+
+  /// No description provided for @communityHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les livres partagés par tous les lecteurs de Babel (une fanfiction n\'y est que si son lecteur la partage). Ajoute un livre à ta bibliothèque sans rien envoyer.'**
+  String get communityHint;
+
+  /// No description provided for @communityEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun livre trouvé.'**
+  String get communityEmpty;
+
+  /// No description provided for @communityMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir plus'**
+  String get communityMore;
+
+  /// No description provided for @communityHave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans ma biblio'**
+  String get communityHave;
+
+  /// No description provided for @fanficShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager cette fanfiction'**
+  String get fanficShare;
+
+  /// No description provided for @fanficShareHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visible de tous dans la bibliothèque commune. Les autres livres y sont déjà.'**
+  String get fanficShareHint;
 }
 
 class _AppLocalizationsDelegate

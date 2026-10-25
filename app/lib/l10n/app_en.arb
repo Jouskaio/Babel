@@ -1314,5 +1314,12 @@
   "ao3Previous": "Previous page",
   "ao3Next": "Next page",
   "ao3Limited": "AO3 asks for a pause: try again in a few minutes.",
-  "ao3Down": "AO3 is not answering right now (it is often overloaded). Try again in a moment."
+  "ao3Down": "AO3 is not answering right now (it is often overloaded). Try again in a moment.",
+  "communityTitle": "Community library",
+  "communityHint": "The books every Babel reader shares (a fanfiction is only there when its reader shares it). Add a book to your library without uploading anything.",
+  "communityEmpty": "No book found.",
+  "communityMore": "Show more",
+  "communityHave": "In my library",
+  "fanficShare": "Share this fanfiction",
+  "fanficShareHint": "Visible to everyone in the community library. Other books are already there."
 }

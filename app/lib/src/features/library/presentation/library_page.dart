@@ -373,6 +373,16 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
+                    tooltip: l10n.communityTitle,
+                    onPressed: () => context.push(Routes.community),
+                    style: IconButton.styleFrom(
+                      fixedSize: const Size(48, 48),
+                      side: BorderSide(color: BabelColors.border),
+                    ),
+                    icon: Icon(Icons.groups, color: BabelColors.textPrimary),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
                     tooltip: l10n.linkTitle,
                     onPressed: () => context.push(Routes.importLink),
                     style: IconButton.styleFrom(
@@ -825,6 +835,21 @@ class _BookActionsState extends ConsumerState<_BookActions> {
     }
   }
 
+  Future<void> _setShared(LibraryItemResponse item, bool value) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    try {
+      final updated = await ref
+          .read(libraryApiProvider)
+          .setShared(item.id, SharedRequest(shared: value));
+      if (updated != null) {
+        await ref.read(libraryControllerProvider.notifier).keep(updated);
+      }
+    } on ApiException {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.errorNetwork)));
+    }
+  }
+
   Future<void> _download() async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
@@ -1007,6 +1032,18 @@ class _BookActionsState extends ConsumerState<_BookActions> {
               ),
               onChanged: (value) => _setEreader(item, value),
             ),
+            if (item.origin == 'ao3' && item.sha256 != null)
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: item.shared,
+                activeThumbColor: BabelColors.gold,
+                title: Text(
+                  l10n.fanficShare,
+                  style: BabelText.body(15, color: BabelColors.textPrimary),
+                ),
+                subtitle: Text(l10n.fanficShareHint, style: BabelText.body(12)),
+                onChanged: (value) => _setShared(item, value),
+              ),
             const SizedBox(height: 8),
             StatusPicker(item: item),
             const SizedBox(height: 14),

@@ -10,11 +10,17 @@ from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field, field_validator
 
-from babel_api.api.dependencies import ContainerDep, CurrentUserId, KoreaderServiceDep
+from babel_api.api.dependencies import (
+    ContainerDep,
+    CurrentUserId,
+    FileServiceDep,
+    KoreaderServiceDep,
+)
 from babel_api.domain.errors import NotFoundError
+from babel_api.domain.naming import book_filename
 
 router = APIRouter(prefix="/kosync", tags=["kosync"])
 account_router = APIRouter(prefix="/me/koreader", tags=["kosync"])
@@ -101,6 +107,36 @@ async def get_progress(
         "device_id": str(position.device_id),
         "timestamp": int(position.client_time.timestamp()),
     }
+
+
+@router.get("/library", include_in_schema=False)
+async def sync_library(
+    user_id: Reader, files: FileServiceDep, scope: str = "ereader"
+) -> dict[str, list[dict[str, Any]]]:
+    """The books the Babel plugin puts on the e-reader: those marked "on my e-reader", or the
+    whole library (scope=all)."""
+    return {
+        "books": [
+            {
+                "sha256": item.file.sha256,
+                "name": book_filename(item),
+                "size": item.file.size,
+                "format": item.file.format.value,
+            }
+            for item in await files.library(user_id)
+            if item.file is not None and (scope == "all" or item.ereader)
+        ]
+    }
+
+
+@router.get("/library/files/{sha256}", include_in_schema=False)
+async def sync_library_file(user_id: Reader, files: FileServiceDep, sha256: str) -> FileResponse:
+    download = await files.download(user_id, sha256.lower())
+    return FileResponse(
+        download.path,
+        media_type=download.file.format.media_type,
+        filename=download.name or download.file.original_name,
+    )
 
 
 class StatsBook(BaseModel):
