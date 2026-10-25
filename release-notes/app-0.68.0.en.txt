@@ -1,0 +1,1 @@
+KOReader plugin 1.3: a book finished on the e-reader is finished in Babel too, your highlights reach your annotations, optional clean-up of finished books and a connection test. Community library: Report button, reports in the admin page and a kill switch. AO3 search: tag suggestions, excluded tags and saved searches

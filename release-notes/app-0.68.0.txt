@@ -1,0 +1,1 @@
+Plugin KOReader 1.3 : un livre terminé sur la liseuse l'est aussi dans Babel, tes surlignages arrivent dans tes annotations, nettoyage des livres terminés (au choix) et test de connexion. Bibliothèque commune : bouton Signaler, signalements dans l'admin et interrupteur de coupure. Recherche AO3 : suggestions de tags, tags exclus et recherches enregistrées
