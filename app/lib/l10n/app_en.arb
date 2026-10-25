@@ -1329,7 +1329,7 @@
   "koreaderGuideConnectTitle": "2. Link it to your account",
   "koreaderGuideConnect": "In Babel, open Account › KOReader and make a KOReader password (it is shown once). In KOReader, open a book then Tools › Progress sync › Custom sync server, and enter the address, your e-mail and that password. The Babel plugin reuses this login: nothing else to set up.",
   "koreaderGuideUseTitle": "3. Send your reading",
-  "koreaderGuideUse": "Tools › Babel › Send reading statistics now. Also leave automatic sending on: after you close a book the statistics go by themselves when the e-reader is online. KOReader's Reading statistics plugin must be enabled. When you mark a book finished, Babel marks it finished too, and your highlights and notes reach your Babel annotations. \"Test the connection to Babel\" checks everything is linked.",
+  "koreaderGuideUse": "One button: Tools › Babel › Sync with Babel. It sends your reading statistics, sends Babel the e-reader's books it lacks, downloads the books marked \"On my e-reader\" (without downloading again the ones already on the e-reader) and tidies the Babel folder (copies of books that are elsewhere on the e-reader are removed, the original stays). It all runs by itself when the e-reader goes online, at most once an hour. The other settings are under \"Options\". KOReader's Reading statistics plugin must be enabled. When you mark a book finished, Babel marks it finished too, and your highlights and notes reach your Babel annotations. \"Test the connection to Babel\" checks everything is linked.",
   "koreaderGuideBooksTitle": "4. Get your books on the e-reader",
   "koreaderGuideBooks": "In Babel, open a book of your library and switch on \"On my e-reader\". The plugin downloads those books into the e-reader's Babel folder, named \"Author - Title.epub\", when it goes online (at most once an hour), or right away with Tools › Babel › Download my Babel books now. You can also download the whole library. A book downloaded this way is exactly your library's file: its progress syncs with nothing to link.\n\nThe other way round, \"Send the e-reader's books to Babel\" adds to your library the books Babel does not have yet; they are ticked \"On my e-reader\" automatically, like any book your e-reader reports for the first time.\n\nWith the Bookshelf home screen: in its menu at the bottom left, long-press an item, then the + button, \"System action…\" and pick \"Babel: download my books\", \"Babel: send reading statistics\" or \"Babel: send the e-reader's books\". \"Plugin…\" › Babel opens the whole menu.",
   "koreaderGuideHelpTitle": "Something wrong?",
@@ -1370,5 +1370,7 @@
   "mergeDone": "Duplicate merged",
   "@mergeWith": {"placeholders": {"copy": {"type": "String"}}},
   "fanficPageCreate": "Create a page for this fanfiction",
-  "fanficPageHint": "Fanfictions are in no catalog: Babel makes a page in its name, where your reviews and notes gather."
+  "fanficPageHint": "Fanfictions are in no catalog: Babel makes a page in its name, where your reviews and notes gather.",
+  "koreaderOnEreader": "{count} book(s) marked \"On my e-reader\" in your Babel library.",
+  "@koreaderOnEreader": {"placeholders": {"count": {"type": "int"}}}
 }

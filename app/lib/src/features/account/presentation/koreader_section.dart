@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:babel_api_client/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,10 +27,14 @@ final koreaderProvider = FutureProvider.autoDispose<KoreaderResponse?>(
 );
 
 /// Whether KOReader is syncing: its last call, its books and a book Babel did not know.
+/// The sync state, read again every 20 seconds while the page is open: what the e-reader just
+/// did shows without pressing refresh.
 final koreaderStatusProvider =
-    FutureProvider.autoDispose<KoreaderStatusResponse?>(
-      (ref) => ref.watch(kosyncApiProvider).getKoreaderStatus(),
-    );
+    FutureProvider.autoDispose<KoreaderStatusResponse?>((ref) {
+      final timer = Timer(const Duration(seconds: 20), ref.invalidateSelf);
+      ref.onDispose(timer.cancel);
+      return ref.watch(kosyncApiProvider).getKoreaderStatus();
+    });
 
 /// "My e-readers": the address, the e-mail and a password made for KOReader (shown once).
 class KoreaderSection extends ConsumerStatefulWidget {
@@ -173,6 +179,14 @@ class _SyncStatus extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(top: 10),
               child: Text(l10n.koreaderNoBook, style: BabelText.body(13)),
+            ),
+          if (value.ereaderBooks > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Text(
+                l10n.koreaderOnEreader(value.ereaderBooks),
+                style: BabelText.body(13, color: BabelColors.textPrimary),
+              ),
             ),
           if (value.unknownBooks > 0)
             Padding(

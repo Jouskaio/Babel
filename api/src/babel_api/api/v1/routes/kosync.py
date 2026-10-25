@@ -122,19 +122,24 @@ async def sync_library(
     """The books the Babel plugin puts on the e-reader: those marked "on my e-reader", or the
     whole library (scope=all)."""
     await koreader.seen(user_id, device)
+    wanted = [
+        item
+        for item in await files.library(user_id)
+        if item.file is not None
+        and (scope == "all" or (item.ereader and item.state.status is not ReadingStatus.FINISHED))
+    ]
+    md5 = await koreader.identifiers([i.file.sha256 for i in wanted if i.file is not None])
     return {
         "books": [
             {
                 "sha256": item.file.sha256,
+                "md5": md5.get(item.file.sha256, ""),
                 "name": book_filename(item),
                 "size": item.file.size,
                 "format": item.file.format.value,
             }
-            for item in await files.library(user_id)
+            for item in wanted
             if item.file is not None
-            and (
-                scope == "all" or (item.ereader and item.state.status is not ReadingStatus.FINISHED)
-            )
         ]
     }
 
@@ -241,6 +246,7 @@ async def library_upload(
 
     await koreader.seen(user_id, device)
     result = await files.import_file(user_id, chunks(), name, ereader=True)
+    await koreader.adopt(user_id)
     return {"deduplicated": result.deduplicated}
 
 
@@ -323,6 +329,7 @@ class KoreaderStatusResponse(BaseModel):
     stats_at: datetime | None = Field(description="When KOReader's statistics last came")
     stats_books: int = Field(description="Books they cover")
     stats_seconds: int = Field(description="Reading time they add up to")
+    ereader_books: int = Field(description='Library books marked "on my e-reader"')
 
 
 class KoreaderUnknownBookResponse(BaseModel):
@@ -384,6 +391,7 @@ async def get_koreader_status(
         stats_at=status.stats_at,
         stats_books=status.stats_books,
         stats_seconds=status.stats_seconds,
+        ereader_books=status.ereader_books,
         recent=[
             KoreaderBookResponse(
                 item_id=r.item_id,

@@ -9,6 +9,7 @@ import 'package:babel_api_client/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **devices** | [**List<KoreaderDeviceResponse>**](KoreaderDeviceResponse.md) |  | [default to const []]
+**ereaderBooks** | **int** | Library books marked \"on my e-reader\" | 
 **lastSeenAt** | [**DateTime**](DateTime.md) | The last time KOReader called Babel; null if it never did | [optional] 
 **lastUnmatchedAt** | [**DateTime**](DateTime.md) | The last time KOReader asked for a book that is not in your library | [optional] 
 **recent** | [**List<KoreaderBookResponse>**](KoreaderBookResponse.md) | The books it synced last | [default to const []]

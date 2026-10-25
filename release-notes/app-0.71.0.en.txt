@@ -1,0 +1,1 @@
+KOReader plugin 1.5: one "Sync with Babel" button that sends statistics and the e-reader's books, downloads the books to read without duplicates and removes duplicate copies from the Babel folder. The sync status in the account refreshes by itself and counts the books marked "On my e-reader"

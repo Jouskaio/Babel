@@ -1,0 +1,1 @@
+Plugin KOReader 1.5 : un seul bouton « Synchroniser avec Babel » qui envoie les statistiques et les livres de la liseuse, télécharge les livres à lire sans doublon et supprime les copies en double du dossier Babel. L'état de la synchro dans le compte se met à jour tout seul et compte les livres marqués « Sur ma liseuse »
