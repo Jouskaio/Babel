@@ -1,0 +1,1 @@
+Les livres qui arrivent de la liseuse sont cochés « Sur ma liseuse » automatiquement ; le plugin KOReader 1.4 envoie les livres de la liseuse que Babel n'a pas et ajoute des actions (utilisables dans le menu de Bookshelf) ; les fanfictions ont maintenant leur propre fiche ; tout ce que fait le plugin compte comme une connexion de la liseuse

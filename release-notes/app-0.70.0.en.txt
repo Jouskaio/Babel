@@ -1,0 +1,1 @@
+Books arriving from the e-reader are ticked "On my e-reader" automatically; KOReader plugin 1.4 sends the e-reader's books Babel lacks and adds actions (usable in Bookshelf's menu); fanfictions now get a page of their own; everything the plugin does counts as the e-reader being connected
