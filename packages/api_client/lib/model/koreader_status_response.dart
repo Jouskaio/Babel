@@ -14,6 +14,7 @@ class KoreaderStatusResponse {
   /// Returns a new [KoreaderStatusResponse] instance.
   KoreaderStatusResponse({
     this.devices = const [],
+    required this.ereaderBooks,
     this.lastSeenAt,
     this.lastUnmatchedAt,
     this.recent = const [],
@@ -24,6 +25,9 @@ class KoreaderStatusResponse {
   });
 
   List<KoreaderDeviceResponse> devices;
+
+  /// Library books marked \"on my e-reader\"
+  int ereaderBooks;
 
   /// The last time KOReader called Babel; null if it never did
   DateTime? lastSeenAt;
@@ -49,6 +53,7 @@ class KoreaderStatusResponse {
   @override
   bool operator ==(Object other) => identical(this, other) || other is KoreaderStatusResponse &&
     _deepEquality.equals(other.devices, devices) &&
+    other.ereaderBooks == ereaderBooks &&
     other.lastSeenAt == lastSeenAt &&
     other.lastUnmatchedAt == lastUnmatchedAt &&
     _deepEquality.equals(other.recent, recent) &&
@@ -61,6 +66,7 @@ class KoreaderStatusResponse {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (devices.hashCode) +
+    (ereaderBooks.hashCode) +
     (lastSeenAt == null ? 0 : lastSeenAt!.hashCode) +
     (lastUnmatchedAt == null ? 0 : lastUnmatchedAt!.hashCode) +
     (recent.hashCode) +
@@ -70,11 +76,12 @@ class KoreaderStatusResponse {
     (unknownBooks.hashCode);
 
   @override
-  String toString() => 'KoreaderStatusResponse[devices=$devices, lastSeenAt=$lastSeenAt, lastUnmatchedAt=$lastUnmatchedAt, recent=$recent, statsAt=$statsAt, statsBooks=$statsBooks, statsSeconds=$statsSeconds, unknownBooks=$unknownBooks]';
+  String toString() => 'KoreaderStatusResponse[devices=$devices, ereaderBooks=$ereaderBooks, lastSeenAt=$lastSeenAt, lastUnmatchedAt=$lastUnmatchedAt, recent=$recent, statsAt=$statsAt, statsBooks=$statsBooks, statsSeconds=$statsSeconds, unknownBooks=$unknownBooks]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'devices'] = this.devices;
+      json[r'ereader_books'] = this.ereaderBooks;
     if (this.lastSeenAt != null) {
       json[r'last_seen_at'] = this.lastSeenAt!.toUtc().toIso8601String();
     } else {
@@ -117,6 +124,7 @@ class KoreaderStatusResponse {
 
       return KoreaderStatusResponse(
         devices: KoreaderDeviceResponse.listFromJson(json[r'devices']),
+        ereaderBooks: mapValueOfType<int>(json, r'ereader_books')!,
         lastSeenAt: mapDateTime(json, r'last_seen_at', r''),
         lastUnmatchedAt: mapDateTime(json, r'last_unmatched_at', r''),
         recent: KoreaderBookResponse.listFromJson(json[r'recent']),
@@ -172,6 +180,7 @@ class KoreaderStatusResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'devices',
+    'ereader_books',
     'recent',
     'stats_books',
     'stats_seconds',

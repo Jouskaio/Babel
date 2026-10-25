@@ -4061,7 +4061,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get koreaderGuideUse =>
-      'Outils › Babel › Envoyer les statistiques de lecture. Active aussi l\'envoi automatique : après la fermeture d\'un livre, les statistiques partent toutes seules si la liseuse est en ligne. Le plugin Reading statistics de KOReader doit être activé. Quand tu marques un livre comme terminé, Babel le marque terminé aussi, et tes surlignages et notes arrivent dans tes annotations Babel. Le menu « Tester la connexion à Babel » vérifie que tout est bien relié.';
+      'Un seul bouton : Outils › Babel › Synchroniser avec Babel. Il envoie tes statistiques de lecture, envoie à Babel les livres de la liseuse qu\'il n\'a pas, télécharge les livres marqués « Sur ma liseuse » (sans retélécharger ceux qui sont déjà sur la liseuse) et range le dossier Babel (les copies de livres présents ailleurs sur la liseuse sont supprimées, l\'original reste). Le tout se refait tout seul quand la liseuse passe en ligne, au plus une fois par heure. Les autres réglages sont dans « Options ». Le plugin Reading statistics de KOReader doit être activé. Quand tu marques un livre comme terminé, Babel le marque terminé aussi, et tes surlignages et notes arrivent dans tes annotations Babel. « Tester la connexion à Babel » vérifie que tout est bien relié.';
 
   @override
   String get koreaderGuideBooksTitle => '4. Avoir tes livres sur la liseuse';
@@ -4195,4 +4195,9 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get fanficPageHint =>
       'Les fanfictions ne sont dans aucun catalogue : Babel crée une fiche à son nom, où vos avis et notes se rassemblent.';
+
+  @override
+  String koreaderOnEreader(int count) {
+    return '$count livre(s) marqué(s) « Sur ma liseuse » dans ta bibliothèque Babel.';
+  }
 }

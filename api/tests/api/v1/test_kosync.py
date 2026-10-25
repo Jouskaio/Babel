@@ -520,3 +520,35 @@ def test_what_the_plugin_does_counts_as_the_e_reader_being_connected(
     )
     names = {d["name"] for d in client.get("/v1/devices", headers=ada).json()}
     assert names == {"KOReader · gocolor7", "KOReader · Boox"}
+
+
+def test_a_book_sent_after_its_progress_picks_that_progress_up(
+    client: TestClient, ada: dict[str, str], tmp_path: Path
+) -> None:
+    password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
+    key = {
+        "x-auth-user": "ada@example.com",
+        "x-auth-key": hashlib.md5(password.encode(), usedforsecurity=False).hexdigest(),
+    }
+    content = epub(title="Jane Eyre", isbn=None)
+    path = tmp_path / "jane.epub"
+    path.write_bytes(content)
+    document = partial_md5(path)
+    body = {"document": document, "progress": "x", "percentage": 0.4, "device": "gocolor7"}
+    client.put("/v1/kosync/syncs/progress", json=body, headers=key)
+    before = client.get("/v1/me/koreader/status", headers=ada).json()
+    assert (before["unknown_books"], before["recent"], before["ereader_books"]) == (1, [], 0)
+
+    sent = client.put(
+        "/v1/kosync/library/upload",
+        params={"name": "jane.epub", "device": "gocolor7"},
+        content=content,
+        headers=key,
+    )
+    assert sent.status_code == 200
+    after = client.get("/v1/me/koreader/status", headers=ada).json()
+    assert after["unknown_books"] == 0
+    assert after["ereader_books"] == 1
+    (recent,) = after["recent"]
+    assert recent["title"] == "Jane Eyre"
+    assert recent["percent"] == pytest.approx(40.0)

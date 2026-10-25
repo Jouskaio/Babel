@@ -4028,7 +4028,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get koreaderGuideUse =>
-      'Tools › Babel › Send reading statistics now. Also leave automatic sending on: after you close a book the statistics go by themselves when the e-reader is online. KOReader\'s Reading statistics plugin must be enabled. When you mark a book finished, Babel marks it finished too, and your highlights and notes reach your Babel annotations. \"Test the connection to Babel\" checks everything is linked.';
+      'One button: Tools › Babel › Sync with Babel. It sends your reading statistics, sends Babel the e-reader\'s books it lacks, downloads the books marked \"On my e-reader\" (without downloading again the ones already on the e-reader) and tidies the Babel folder (copies of books that are elsewhere on the e-reader are removed, the original stays). It all runs by itself when the e-reader goes online, at most once an hour. The other settings are under \"Options\". KOReader\'s Reading statistics plugin must be enabled. When you mark a book finished, Babel marks it finished too, and your highlights and notes reach your Babel annotations. \"Test the connection to Babel\" checks everything is linked.';
 
   @override
   String get koreaderGuideBooksTitle => '4. Get your books on the e-reader';
@@ -4161,4 +4161,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get fanficPageHint =>
       'Fanfictions are in no catalog: Babel makes a page in its name, where your reviews and notes gather.';
+
+  @override
+  String koreaderOnEreader(int count) {
+    return '$count book(s) marked \"On my e-reader\" in your Babel library.';
+  }
 }

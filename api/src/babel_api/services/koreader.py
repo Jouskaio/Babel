@@ -40,6 +40,7 @@ class KoreaderStatus:
     stats_at: datetime | None = None
     stats_books: int = 0
     stats_seconds: int = 0
+    ereader_books: int = 0
 
 
 PREFIX = "koreader:"
@@ -240,6 +241,7 @@ class KoreaderService:
     # ------------------------------------------------------------ what the reader can check
     async def status(self, user_id: UUID) -> "KoreaderStatus":
         """Whether KOReader has called, which books it synced last, and its devices."""
+        await self.adopt(user_id)
         devices = [d for d in await self._sync.devices(user_id) if d.name.startswith(DEVICE_PREFIX)]
         stats_at, stats_books, stats_seconds = await self._repo.stats_overview(user_id)
         return KoreaderStatus(
@@ -249,8 +251,46 @@ class KoreaderService:
             contact=await self._repo.contact(user_id),
             devices=[(d.name[len(DEVICE_PREFIX) :], d.last_seen_at) for d in devices],
             recent=await self._repo.recent(user_id),
-            unknown_books=await self._repo.orphan_count(user_id),
+            unknown_books=len(await self.unknown(user_id)),
+            ereader_books=sum(
+                1 for i in await self._files.list_items(user_id) if i.file is not None and i.ereader
+            ),
         )
+
+    async def identifiers(self, shas: list[str]) -> dict[str, str]:
+        """KOReader's identifier (partial md5) of each stored file, worked out once and kept."""
+        by_sha = {sha: md5 for md5, sha in (await self._repo.hashes(shas)).items()}
+        for sha in set(shas) - set(by_sha):
+            path = self._store.path(sha)
+            if path is None:
+                continue
+            md5 = await asyncio.to_thread(partial_md5, path)
+            await self._repo.save_hash(sha, md5)
+            by_sha[sha] = md5
+        await self._repo.commit()
+        return by_sha
+
+    async def adopt(self, user_id: UUID) -> int:
+        """Positions kept for books Babel did not have, whose book has come since (sent from the
+        e-reader, imported…): they become reading positions of that book."""
+        adopted = 0
+        for orphan in await self._repo.orphans(user_id):
+            try:
+                await self._item_of(user_id, orphan.document)
+            except NotFoundError:
+                continue
+            await self.put(
+                user_id,
+                orphan.document,
+                orphan.progress,
+                orphan.percentage,
+                orphan.device,
+            )
+            await self._repo.drop_orphan(user_id, orphan.document)
+            adopted += 1
+        if adopted:
+            await self._repo.commit()
+        return adopted
 
     async def missing(self, user_id: UUID, documents: list[str]) -> list[str]:
         """Which of the e-reader's books (by KOReader's identifier) the library does not have."""

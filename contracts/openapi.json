@@ -3221,6 +3221,11 @@
             "title": "Devices",
             "type": "array"
           },
+          "ereader_books": {
+            "description": "Library books marked \"on my e-reader\"",
+            "title": "Ereader Books",
+            "type": "integer"
+          },
           "last_seen_at": {
             "anyOf": [
               {
@@ -3292,7 +3297,8 @@
           "unknown_books",
           "stats_at",
           "stats_books",
-          "stats_seconds"
+          "stats_seconds",
+          "ereader_books"
         ],
         "title": "KoreaderStatusResponse",
         "type": "object"
