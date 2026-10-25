@@ -333,3 +333,36 @@ def test_the_data_outlives_a_withdrawn_file(
     assert client.get("/v1/library", headers=ada).json() == []
     [trace] = client.get("/v1/library/history", headers=ada).json()
     assert (trace["available"], trace["review"]["rating"]) == (False, 2)
+
+
+def test_a_duplicate_is_merged_into_the_book_the_reader_keeps(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    phone = device(client, ada, "Pixel")
+    keep, extra = book(client, ada, "Jane Eyre"), book(client, ada, "Jane Eyre (copy)")
+    shelf_id = str(uuid.uuid4())
+    push(client, ada, phone, state("op-m00001", extra, "2026-10-05T10:00:00+00:00", "reading", 40))
+    push(
+        client,
+        ada,
+        phone,
+        shelf("op-m00002", shelf_id, "Classics", [extra], "2026-10-05T10:00:00+00:00"),
+    )
+    client.put(f"/v1/library/{extra}/paper", json={"paper": True}, headers=ada)
+
+    merged = client.post(f"/v1/library/{keep}/merge", json={"from_item_id": extra}, headers=ada)
+    assert merged.status_code == 200
+    body = merged.json()
+    assert (body["status"], body["progress"], body["paper"]) == ("reading", 40, True)
+
+    ids = [i["id"] for i in client.get("/v1/library", headers=ada).json()]
+    assert keep in ids
+    assert extra not in ids
+    log = [c for c in pull(client, ada)["changes"] if c["entity"] == "shelf"]
+    assert log[-1]["data"]["item_ids"] == [keep]
+    assert (
+        client.post(
+            f"/v1/library/{keep}/merge", json={"from_item_id": keep}, headers=ada
+        ).status_code
+        == 404
+    )

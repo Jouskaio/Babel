@@ -4136,4 +4136,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ao3SaveButton => 'Save';
+
+  @override
+  String mergeWith(String copy) {
+    return 'Merge with the duplicate ($copy)';
+  }
+
+  @override
+  String get mergeTitle => 'Merge these two books?';
+
+  @override
+  String get mergeBody =>
+      'This book keeps the status, progress, shelves and the \"paper\" and \"e-reader\" marks of both. The other copy leaves your library (its file stays stored).';
+
+  @override
+  String get mergeButton => 'Merge';
+
+  @override
+  String get mergeDone => 'Duplicate merged';
 }

@@ -1,0 +1,1 @@
+Duplicates: in a book's sheet, "Merge with the duplicate" keeps the status, progress, shelves and paper / e-reader marks of both copies and removes the other
