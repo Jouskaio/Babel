@@ -21,7 +21,7 @@ from babel_api.adapters.hardcover import (
 )
 from babel_api.adapters.pagebound import PageboundClient, PageboundReview
 from babel_api.adapters.wikidata import Adaptation, WikidataClient
-from babel_api.domain.catalog import Edition, IdentifierKind, SourceWork, Work
+from babel_api.domain.catalog import FANFIC_PREFIX, Edition, IdentifierKind, SourceWork, Work
 from babel_api.domain.challenges import norm
 from babel_api.domain.errors import NotFoundError, SourceUnavailableError
 from babel_api.domain.isbn import normalize_isbn
@@ -347,7 +347,9 @@ class WorkService:
         olid = work.open_library_id
         asked = await asyncio.gather(
             self._external.openlibrary(olid)
-            if self._external is not None and olid and not olid.startswith(HARDCOVER_PREFIX)
+            if self._external is not None
+            and olid
+            and not olid.startswith((HARDCOVER_PREFIX, FANFIC_PREFIX))
             else _nothing(),
             self._external.goodreads(work.title, work.authors)
             if self._external is not None
@@ -530,7 +532,9 @@ class WorkService:
     # ------------------------------------------------------------ internals
     @staticmethod
     def _needs_sync(work: Work) -> bool:
-        if work.open_library_id is None or work.open_library_id.startswith(HARDCOVER_PREFIX):
+        if work.open_library_id is None or work.open_library_id.startswith(
+            (HARDCOVER_PREFIX, FANFIC_PREFIX)
+        ):
             return False
         synced = work.editions_synced_at
         return synced is None or datetime.now(UTC) - synced > EDITIONS_TTL

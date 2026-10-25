@@ -139,6 +139,7 @@ Class | Method | HTTP request | Description
 *LibraryApi* | [**attachFile**](doc//LibraryApi.md#attachfile) | **POST** /v1/library/{item_id}/file | Attach File
 *LibraryApi* | [**checkFiles**](doc//LibraryApi.md#checkfiles) | **POST** /v1/library/files/check | Check Files
 *LibraryApi* | [**checkFollow**](doc//LibraryApi.md#checkfollow) | **POST** /v1/library/follows/{follow_id}/check | Check Follow
+*LibraryApi* | [**createFanficWork**](doc//LibraryApi.md#createfanficwork) | **POST** /v1/library/{item_id}/work/fanfic | Create Fanfic Work
 *LibraryApi* | [**deleteReview**](doc//LibraryApi.md#deletereview) | **DELETE** /v1/library/{item_id}/review | Delete Review
 *LibraryApi* | [**dismissFileReports**](doc//LibraryApi.md#dismissfilereports) | **POST** /v1/admin/file-reports/{sha256}/dismiss | Dismiss File Reports
 *LibraryApi* | [**downloadFile**](doc//LibraryApi.md#downloadfile) | **GET** /v1/files/{sha256} | Download File

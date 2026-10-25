@@ -4035,7 +4035,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get koreaderGuideBooks =>
-      'In Babel, open a book of your library and switch on \"On my e-reader\". The plugin downloads those books into the e-reader\'s Babel folder, named \"Author - Title.epub\", when it goes online (at most once an hour), or right away with Tools › Babel › Download my Babel books now. You can also download the whole library. A book downloaded this way is exactly your library\'s file: its progress syncs with nothing to link.';
+      'In Babel, open a book of your library and switch on \"On my e-reader\". The plugin downloads those books into the e-reader\'s Babel folder, named \"Author - Title.epub\", when it goes online (at most once an hour), or right away with Tools › Babel › Download my Babel books now. You can also download the whole library. A book downloaded this way is exactly your library\'s file: its progress syncs with nothing to link.\n\nThe other way round, \"Send the e-reader\'s books to Babel\" adds to your library the books Babel does not have yet; they are ticked \"On my e-reader\" automatically, like any book your e-reader reports for the first time.\n\nWith the Bookshelf home screen: in its menu at the bottom left, long-press an item, then the + button, \"System action…\" and pick \"Babel: download my books\", \"Babel: send reading statistics\" or \"Babel: send the e-reader\'s books\". \"Plugin…\" › Babel opens the whole menu.';
 
   @override
   String get koreaderGuideHelpTitle => 'Something wrong?';
@@ -4154,4 +4154,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mergeDone => 'Duplicate merged';
+
+  @override
+  String get fanficPageCreate => 'Create a page for this fanfiction';
+
+  @override
+  String get fanficPageHint =>
+      'Fanfictions are in no catalog: Babel makes a page in its name, where your reviews and notes gather.';
 }

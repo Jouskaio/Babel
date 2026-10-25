@@ -5,6 +5,9 @@ from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
+# A work made for a fanfiction (no catalog knows it): its identifier starts with this.
+FANFIC_PREFIX = "ao3:"
+
 
 @dataclass(frozen=True, slots=True)
 class TrendingWork:

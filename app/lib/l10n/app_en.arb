@@ -1331,7 +1331,7 @@
   "koreaderGuideUseTitle": "3. Send your reading",
   "koreaderGuideUse": "Tools › Babel › Send reading statistics now. Also leave automatic sending on: after you close a book the statistics go by themselves when the e-reader is online. KOReader's Reading statistics plugin must be enabled. When you mark a book finished, Babel marks it finished too, and your highlights and notes reach your Babel annotations. \"Test the connection to Babel\" checks everything is linked.",
   "koreaderGuideBooksTitle": "4. Get your books on the e-reader",
-  "koreaderGuideBooks": "In Babel, open a book of your library and switch on \"On my e-reader\". The plugin downloads those books into the e-reader's Babel folder, named \"Author - Title.epub\", when it goes online (at most once an hour), or right away with Tools › Babel › Download my Babel books now. You can also download the whole library. A book downloaded this way is exactly your library's file: its progress syncs with nothing to link.",
+  "koreaderGuideBooks": "In Babel, open a book of your library and switch on \"On my e-reader\". The plugin downloads those books into the e-reader's Babel folder, named \"Author - Title.epub\", when it goes online (at most once an hour), or right away with Tools › Babel › Download my Babel books now. You can also download the whole library. A book downloaded this way is exactly your library's file: its progress syncs with nothing to link.\n\nThe other way round, \"Send the e-reader's books to Babel\" adds to your library the books Babel does not have yet; they are ticked \"On my e-reader\" automatically, like any book your e-reader reports for the first time.\n\nWith the Bookshelf home screen: in its menu at the bottom left, long-press an item, then the + button, \"System action…\" and pick \"Babel: download my books\", \"Babel: send reading statistics\" or \"Babel: send the e-reader's books\". \"Plugin…\" › Babel opens the whole menu.",
   "koreaderGuideHelpTitle": "Something wrong?",
   "koreaderGuideHelp": "\"Set up Progress sync first\": the login is missing or changed, log in again in Progress sync. A book is not recognised: open Account › KOReader in Babel to link it to a library book or delete it. No network: the plugin waits, nothing is lost.",
   "koreaderGuidePluginLink": "The Babel plugin repository",
@@ -1368,5 +1368,7 @@
   "mergeBody": "This book keeps the status, progress, shelves and the \"paper\" and \"e-reader\" marks of both. The other copy leaves your library (its file stays stored).",
   "mergeButton": "Merge",
   "mergeDone": "Duplicate merged",
-  "@mergeWith": {"placeholders": {"copy": {"type": "String"}}}
+  "@mergeWith": {"placeholders": {"copy": {"type": "String"}}},
+  "fanficPageCreate": "Create a page for this fanfiction",
+  "fanficPageHint": "Fanfictions are in no catalog: Babel makes a page in its name, where your reviews and notes gather."
 }

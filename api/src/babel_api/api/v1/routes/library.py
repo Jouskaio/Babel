@@ -392,6 +392,17 @@ async def link_work(
     return LibraryItemResponse.of(await files.link_work(user_id, item_id, body.work_id, device_id))
 
 
+@router.post("/library/{item_id}/work/fanfic", operation_id="createFanficWork")
+async def create_fanfic_work(
+    user_id: CurrentUserId,
+    files: FileServiceDep,
+    item_id: UUID,
+    device_id: DeviceHeader = None,
+) -> LibraryItemResponse:
+    """Give a fanfiction its own page (no catalog has it) and link the book to it."""
+    return LibraryItemResponse.of(await files.create_fanfic_work(user_id, item_id, device_id))
+
+
 @router.get(
     "/files/{sha256}",
     operation_id="downloadFile",

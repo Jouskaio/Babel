@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../catalog/application/catalog_providers.dart';
 import '../../catalog/presentation/search_page.dart';
@@ -71,6 +72,26 @@ class _LinkWorkSheetState extends ConsumerState<_LinkWorkSheet> {
     }
   }
 
+  /// A fanfiction is in no catalog: it gets a page of its own.
+  Future<void> _createFanficPage() async {
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    setState(() => _saving = true);
+    try {
+      final updated = await ref
+          .read(libraryApiProvider)
+          .createFanficWork(widget.item.id);
+      if (updated != null) {
+        await ref.read(libraryControllerProvider.notifier).keep(updated);
+      }
+      navigator.pop();
+    } on ApiException {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.errorNetwork)));
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -94,6 +115,16 @@ class _LinkWorkSheetState extends ConsumerState<_LinkWorkSheet> {
               Text(l10n.linkWork, style: BabelText.title(30)),
               const SizedBox(height: 6),
               Text(l10n.linkWorkHint, style: BabelText.body(13)),
+              if (widget.item.origin == 'ao3') ...[
+                const SizedBox(height: 14),
+                PillButton(
+                  label: l10n.fanficPageCreate,
+                  expand: true,
+                  onPressed: _saving ? null : _createFanficPage,
+                ),
+                const SizedBox(height: 4),
+                Text(l10n.fanficPageHint, style: BabelText.body(12)),
+              ],
               const SizedBox(height: 14),
               TextField(
                 controller: _query,

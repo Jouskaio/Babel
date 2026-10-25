@@ -337,6 +337,71 @@ class LibraryApi {
     return null;
   }
 
+  /// Create Fanfic Work
+  ///
+  /// Give a fanfiction its own page (no catalog has it) and link the book to it.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<Response> createFanficWorkWithHttpInfo(String itemId, { String? xBabelDevice, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/{item_id}/work/fanfic'
+      .replaceAll('{item_id}', itemId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (xBabelDevice != null) {
+      headerParams[r'X-Babel-Device'] = parameterToString(xBabelDevice);
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Create Fanfic Work
+  ///
+  /// Give a fanfiction its own page (no catalog has it) and link the book to it.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<LibraryItemResponse?> createFanficWork(String itemId, { String? xBabelDevice, }) async {
+    final response = await createFanficWorkWithHttpInfo(itemId,  xBabelDevice: xBabelDevice, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'LibraryItemResponse',) as LibraryItemResponse;
+    
+    }
+    return null;
+  }
+
   /// Delete Review
   ///
   /// Note: This method returns the HTTP [Response].

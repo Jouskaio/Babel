@@ -2123,7 +2123,7 @@
   "koreaderGuideUseTitle": "3. Envoyer ta lecture",
   "koreaderGuideUse": "Outils › Babel › Envoyer les statistiques de lecture. Active aussi l'envoi automatique : après la fermeture d'un livre, les statistiques partent toutes seules si la liseuse est en ligne. Le plugin Reading statistics de KOReader doit être activé. Quand tu marques un livre comme terminé, Babel le marque terminé aussi, et tes surlignages et notes arrivent dans tes annotations Babel. Le menu « Tester la connexion à Babel » vérifie que tout est bien relié.",
   "koreaderGuideBooksTitle": "4. Avoir tes livres sur la liseuse",
-  "koreaderGuideBooks": "Dans Babel, ouvre la fiche d'un livre de ta bibliothèque et active « Sur ma liseuse ». Le plugin télécharge ces livres dans le dossier Babel de la liseuse, sous le nom « Auteur - Titre.epub », quand elle passe en ligne (au plus une fois par heure), ou tout de suite avec Outils › Babel › Télécharger mes livres Babel. Tu peux aussi choisir de télécharger toute la bibliothèque. Un livre téléchargé ainsi est exactement le fichier de ta bibliothèque : sa progression se synchronise sans rien associer.",
+  "koreaderGuideBooks": "Dans Babel, ouvre la fiche d'un livre de ta bibliothèque et active « Sur ma liseuse ». Le plugin télécharge ces livres dans le dossier Babel de la liseuse, sous le nom « Auteur - Titre.epub », quand elle passe en ligne (au plus une fois par heure), ou tout de suite avec Outils › Babel › Télécharger mes livres Babel. Tu peux aussi choisir de télécharger toute la bibliothèque. Un livre téléchargé ainsi est exactement le fichier de ta bibliothèque : sa progression se synchronise sans rien associer.\n\nDans l'autre sens, « Envoyer les livres de la liseuse à Babel » ajoute à ta bibliothèque les livres que Babel n'a pas encore ; ils sont cochés « Sur ma liseuse » automatiquement, comme tout livre que ta liseuse signale pour la première fois.\n\nAvec l'écran d'accueil Bookshelf : dans son menu en bas à gauche, appui long sur un élément, puis le bouton +, « Action système… » et choisis « Babel : télécharger mes livres », « Babel : envoyer les statistiques » ou « Babel : envoyer les livres de la liseuse ». On y trouve aussi « Plugin… » › Babel pour ouvrir tout le menu.",
   "koreaderGuideHelpTitle": "Un souci ?",
   "koreaderGuideHelp": "« Configure la synchronisation d'abord » : la connexion est absente ou a changé, reconnecte-toi dans Synchronisation de la progression. Un livre n'est pas reconnu : ouvre Compte › KOReader dans Babel pour l'associer à un livre de ta bibliothèque ou l'effacer. Pas de réseau : le plugin attend, rien ne se perd.",
   "koreaderGuidePluginLink": "Dépôt du plugin Babel",
@@ -2160,5 +2160,7 @@
   "mergeBody": "Ce livre garde le statut, la progression, les étagères et les marques « papier » et « liseuse » des deux. L'autre exemplaire quitte ta bibliothèque (son fichier reste stocké).",
   "mergeButton": "Fusionner",
   "mergeDone": "Doublon fusionné",
-  "@mergeWith": {"placeholders": {"copy": {"type": "String"}}}
+  "@mergeWith": {"placeholders": {"copy": {"type": "String"}}},
+  "fanficPageCreate": "Créer une fiche pour cette fanfiction",
+  "fanficPageHint": "Les fanfictions ne sont dans aucun catalogue : Babel crée une fiche à son nom, où vos avis et notes se rassemblent."
 }

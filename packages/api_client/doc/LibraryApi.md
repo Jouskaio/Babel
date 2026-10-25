@@ -14,6 +14,7 @@ Method | HTTP request | Description
 [**attachFile**](LibraryApi.md#attachfile) | **POST** /v1/library/{item_id}/file | Attach File
 [**checkFiles**](LibraryApi.md#checkfiles) | **POST** /v1/library/files/check | Check Files
 [**checkFollow**](LibraryApi.md#checkfollow) | **POST** /v1/library/follows/{follow_id}/check | Check Follow
+[**createFanficWork**](LibraryApi.md#createfanficwork) | **POST** /v1/library/{item_id}/work/fanfic | Create Fanfic Work
 [**deleteReview**](LibraryApi.md#deletereview) | **DELETE** /v1/library/{item_id}/review | Delete Review
 [**dismissFileReports**](LibraryApi.md#dismissfilereports) | **POST** /v1/admin/file-reports/{sha256}/dismiss | Dismiss File Reports
 [**downloadFile**](LibraryApi.md#downloadfile) | **GET** /v1/files/{sha256} | Download File
@@ -284,6 +285,57 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**FollowResponse**](FollowResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **createFanficWork**
+> LibraryItemResponse createFanficWork(itemId, xBabelDevice)
+
+Create Fanfic Work
+
+Give a fanfiction its own page (no catalog has it) and link the book to it.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = LibraryApi();
+final itemId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final xBabelDevice = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.createFanficWork(itemId, xBabelDevice);
+    print(result);
+} catch (e) {
+    print('Exception when calling LibraryApi->createFanficWork: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **itemId** | **String**|  | 
+ **xBabelDevice** | **String**|  | [optional] 
+
+### Return type
+
+[**LibraryItemResponse**](LibraryItemResponse.md)
 
 ### Authorization
 
