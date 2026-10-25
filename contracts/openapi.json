@@ -3336,6 +3336,18 @@
             "title": "Ereader",
             "type": "boolean"
           },
+          "filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name to save the file under: Author - Title.epub",
+            "title": "Filename"
+          },
           "finished_at": {
             "anyOf": [
               {
@@ -6676,7 +6688,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.71.2"
+    "version": "0.72.0"
   },
   "openapi": "3.1.0",
   "paths": {

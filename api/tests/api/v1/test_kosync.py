@@ -147,10 +147,12 @@ def test_koreader_cloud_storage_lists_downloads_and_receives_books(
     listing = client.request("PROPFIND", "/v1/webdav/", headers={**auth, "depth": "1"})
     assert listing.status_code == 207
     assert "<D:collection/>" in listing.text
-    assert "Jane%20Eyre.epub" in listing.text
+    # Named after the author and the title, not after whatever the file was called.
+    assert "Charlotte%20Bront%C3%AB%20-%20Jane%20Eyre.epub" in listing.text
     assert f"<D:getcontentlength>{len(content)}</D:getcontentlength>" in listing.text
 
-    assert client.get("/v1/webdav/Jane%20Eyre.epub", headers=auth).content == content
+    nice = "/v1/webdav/Charlotte%20Bront%C3%AB%20-%20Jane%20Eyre.epub"
+    assert client.get(nice, headers=auth).content == content
     assert client.get("/v1/webdav/missing.epub", headers=auth).status_code == 404
 
     # The Babel plugin is offered as a folder, to install it without unzipping anything.
@@ -263,3 +265,14 @@ def test_a_koreader_book_can_be_forgotten_and_stays_out(
     client.put("/v1/kosync/syncs/progress", json=body, headers=key)
     assert client.get("/v1/me/koreader/unknown", headers=ada).json() == []
     assert client.get("/v1/me/koreader/status", headers=ada).json()["unknown_books"] == 0
+
+
+def test_a_download_is_named_after_the_book(client: TestClient, ada: dict[str, str]) -> None:
+    item = upload(
+        client, ada, epub(title="Jane Eyre", isbn=None), name="x (Z-Library).epub"
+    ).json()["item"]
+    assert item["filename"] == "Charlotte Brontë - Jane Eyre.epub"
+    got = client.get(f"/v1/files/{item['sha256']}", headers=ada)
+    disposition = got.headers["content-disposition"]
+    assert "Jane%20Eyre.epub" in disposition
+    assert "Z-Library" not in disposition

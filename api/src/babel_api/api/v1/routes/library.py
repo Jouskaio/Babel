@@ -24,6 +24,7 @@ from babel_api.api.dependencies import (
 from babel_api.domain.errors import FileTooLargeError
 from babel_api.domain.files import BookFormat, LibraryItem, ReadingStatus
 from babel_api.domain.follows import Follow
+from babel_api.domain.naming import book_filename
 from babel_api.services.imports import ImportService
 from babel_api.services.links import LinkKind
 
@@ -77,6 +78,9 @@ class LibraryItemResponse(BaseModel):
     origin: str | None = Field(
         default=None, description='Where it comes from: "ao3" for a fanfiction of AO3'
     )
+    filename: str | None = Field(
+        default=None, description="The name to save the file under: Author - Title.epub"
+    )
 
     @classmethod
     def of(cls, item: LibraryItem) -> "LibraryItemResponse":
@@ -99,6 +103,7 @@ class LibraryItemResponse(BaseModel):
             work_id=item.work_id,
             paper=item.paper,
             ereader=item.ereader,
+            filename=book_filename(item) if item.file else None,
             audio_duration=item.audio.duration if item.audio else None,
             series=item.series,
             series_index=item.series_index,
@@ -362,7 +367,7 @@ async def download_file(
     return FileResponse(
         download.path,
         media_type=download.file.format.media_type,
-        filename=download.file.original_name,
+        filename=download.name or download.file.original_name,
         headers={"Cache-Control": "private, max-age=31536000, immutable"},
     )
 

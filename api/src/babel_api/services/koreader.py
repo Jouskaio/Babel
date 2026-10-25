@@ -24,6 +24,7 @@ from babel_api.adapters.db.koreader_repository import (
 )
 from babel_api.domain.errors import NotFoundError
 from babel_api.domain.koreader import partial_md5
+from babel_api.domain.naming import book_filename
 from babel_api.domain.ports import BlobStore, FileRepository, UserRepository
 from babel_api.domain.sync import DeviceKind, ReadingPosition
 from babel_api.services.sync import SyncService
@@ -237,10 +238,15 @@ class KoreaderService:
         if sha is None or sha not in by_sha:
             # KOReader can also name a book by the md5 of its file name ("Filename" matching).
             for item in items:
-                name = PurePosixPath(item.file.original_name).name if item.file else ""
-                if (
-                    name
-                    and hashlib.md5(name.encode(), usedforsecurity=False).hexdigest() == document
+                names = (
+                    {PurePosixPath(item.file.original_name).name, book_filename(item)}
+                    if item.file
+                    else set[str]()
+                )
+                if any(
+                    hashlib.md5(name.encode(), usedforsecurity=False).hexdigest() == document
+                    for name in names
+                    if name
                 ):
                     return item.id
             raise NotFoundError

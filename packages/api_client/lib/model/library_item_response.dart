@@ -20,6 +20,7 @@ class LibraryItemResponse {
     this.coverPath,
     this.editionId,
     this.ereader = false,
+    this.filename,
     this.finishedAt,
     this.format,
     this.hidden = false,
@@ -55,6 +56,9 @@ class LibraryItemResponse {
 
   /// Kept on an e-reader to read there
   bool ereader;
+
+  /// The name to save the file under: Author - Title.epub
+  String? filename;
 
   DateTime? finishedAt;
 
@@ -118,6 +122,7 @@ class LibraryItemResponse {
     other.coverPath == coverPath &&
     other.editionId == editionId &&
     other.ereader == ereader &&
+    other.filename == filename &&
     other.finishedAt == finishedAt &&
     other.format == format &&
     other.hidden == hidden &&
@@ -145,6 +150,7 @@ class LibraryItemResponse {
     (coverPath == null ? 0 : coverPath!.hashCode) +
     (editionId == null ? 0 : editionId!.hashCode) +
     (ereader.hashCode) +
+    (filename == null ? 0 : filename!.hashCode) +
     (finishedAt == null ? 0 : finishedAt!.hashCode) +
     (format == null ? 0 : format!.hashCode) +
     (hidden.hashCode) +
@@ -163,7 +169,7 @@ class LibraryItemResponse {
     (workId == null ? 0 : workId!.hashCode);
 
   @override
-  String toString() => 'LibraryItemResponse[addedAt=$addedAt, audioDuration=$audioDuration, authors=$authors, coverId=$coverId, coverPath=$coverPath, editionId=$editionId, ereader=$ereader, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, origin=$origin, paper=$paper, progress=$progress, series=$series, seriesIndex=$seriesIndex, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title, workId=$workId]';
+  String toString() => 'LibraryItemResponse[addedAt=$addedAt, audioDuration=$audioDuration, authors=$authors, coverId=$coverId, coverPath=$coverPath, editionId=$editionId, ereader=$ereader, filename=$filename, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, origin=$origin, paper=$paper, progress=$progress, series=$series, seriesIndex=$seriesIndex, sha256=$sha256, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title, workId=$workId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -190,6 +196,11 @@ class LibraryItemResponse {
       json[r'edition_id'] = null;
     }
       json[r'ereader'] = this.ereader;
+    if (this.filename != null) {
+      json[r'filename'] = this.filename;
+    } else {
+      json[r'filename'] = null;
+    }
     if (this.finishedAt != null) {
       json[r'finished_at'] = this.finishedAt!.toUtc().toIso8601String();
     } else {
@@ -287,6 +298,7 @@ class LibraryItemResponse {
         coverPath: mapValueOfType<String>(json, r'cover_path'),
         editionId: mapValueOfType<String>(json, r'edition_id'),
         ereader: mapValueOfType<bool>(json, r'ereader') ?? false,
+        filename: mapValueOfType<String>(json, r'filename'),
         finishedAt: mapDateTime(json, r'finished_at', r''),
         format: BookFormat.fromJson(json[r'format']),
         hidden: mapValueOfType<bool>(json, r'hidden') ?? false,
