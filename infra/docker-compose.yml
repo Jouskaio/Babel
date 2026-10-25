@@ -70,6 +70,35 @@ services:
     mem_limit: 2g
     logging: *logging
 
+  # Nightly dump of the database, kept 14 days in /opt/babel/backups (the book files live on the
+  # NAS: back that share up separately). Restore: see infra/README.md.
+  backup:
+    image: postgres:17-alpine
+    container_name: babel-backup
+    environment:
+      PGPASSWORD: ${BABEL_DB_PASSWORD:?set BABEL_DB_PASSWORD in .env}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          stamp=$$(date +%F)
+          if pg_dump -h db -U babel babel | gzip > /backups/babel-$$stamp.sql.gz.part; then
+            mv /backups/babel-$$stamp.sql.gz.part /backups/babel-$$stamp.sql.gz
+          else
+            rm -f /backups/babel-$$stamp.sql.gz.part
+          fi
+          find /backups -name 'babel-*.sql.gz' -mtime +14 -delete
+          sleep 86400
+        done
+    volumes:
+      - /opt/babel/backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    mem_limit: 128m
+    logging: *logging
+
   web:
     image: ghcr.io/jouskaio/babel-web:${BABEL_WEB_TAG:-latest}
     container_name: babel-web

@@ -534,6 +534,42 @@ async def withdraw_file(
     await files.withdraw(admin_id, sha256, body.reason, block=body.block)
 
 
+class FileReportResponse(BaseModel):
+    sha256: str
+    title: str
+    authors: list[str]
+    format: str
+    reports: int
+    reasons: list[str]
+
+
+@router.get("/admin/file-reports", operation_id="listFileReports", tags=["admin"])
+async def list_file_reports(_: CurrentAdminId, files: FileServiceDep) -> list[FileReportResponse]:
+    """Files readers reported in the community library, the most reported first."""
+    return [
+        FileReportResponse(
+            sha256=file.sha256,
+            title=file.title or file.original_name,
+            authors=list(file.authors),
+            format=file.format.value,
+            reports=count,
+            reasons=reasons,
+        )
+        for file, count, reasons in await files.reports()
+    ]
+
+
+@router.post(
+    "/admin/file-reports/{sha256}/dismiss",
+    operation_id="dismissFileReports",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["admin"],
+)
+async def dismiss_file_reports(_: CurrentAdminId, files: FileServiceDep, sha256: Sha256) -> None:
+    """Keep the file: forget the reports about it."""
+    await files.dismiss_reports(sha256)
+
+
 class ReadingPositionResponse(BaseModel):
     device_id: UUID
     locator: str

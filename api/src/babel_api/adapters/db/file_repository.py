@@ -11,6 +11,7 @@ from sqlalchemy.sql.elements import ColumnElement
 
 from babel_api.adapters.db.models import (
     BlockedFileRow,
+    CommunityReportRow,
     EditionRow,
     FollowRow,
     LibraryItemRow,
@@ -270,6 +271,41 @@ class SqlFileRepository:
             .exists()
         )
         return and_(StoredFileRow.withdrawn_at.is_(None), shared)
+
+    async def add_report(self, user_id: UUID, sha256: str, reason: str) -> None:
+        row = await self._session.get(CommunityReportRow, (user_id, sha256))
+        if row is None:
+            self._session.add(CommunityReportRow(user_id=user_id, sha256=sha256, reason=reason))
+        else:
+            row.reason = reason
+        await self._session.flush()
+
+    async def reports(self) -> list[tuple[StoredFile, int, list[str]]]:
+        rows = await self._session.execute(
+            select(StoredFileRow, CommunityReportRow.reason)
+            .join(CommunityReportRow, CommunityReportRow.sha256 == StoredFileRow.sha256)
+            .where(StoredFileRow.withdrawn_at.is_(None))
+            .order_by(CommunityReportRow.created_at.desc())
+        )
+        grouped: dict[str, tuple[StoredFile, list[str]]] = {}
+        for stored, reason in rows.all():
+            entry = grouped.setdefault(stored.sha256, (_to_file(stored), []))
+            if reason:
+                entry[1].append(reason)
+        found = [(file, len(reasons), reasons[:3]) for file, reasons in grouped.values()]
+        counts = await self._session.execute(
+            select(CommunityReportRow.sha256, func.count()).group_by(CommunityReportRow.sha256)
+        )
+        total = {sha: int(n) for sha, n in counts.all()}
+        return sorted(
+            [(file, total.get(file.sha256, n), why) for file, n, why in found],
+            key=lambda r: -r[1],
+        )
+
+    async def dismiss_reports(self, sha256: str) -> None:
+        await self._session.execute(
+            delete(CommunityReportRow).where(CommunityReportRow.sha256 == sha256)
+        )
 
     async def community(
         self, user_id: UUID, query: str, limit: int, offset: int

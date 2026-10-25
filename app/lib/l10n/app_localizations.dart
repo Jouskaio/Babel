@@ -6725,7 +6725,7 @@ abstract class AppLocalizations {
   /// No description provided for @koreaderGuideUse.
   ///
   /// In fr, this message translates to:
-  /// **'Outils › Babel › Envoyer les statistiques de lecture. Active aussi l\'envoi automatique : après la fermeture d\'un livre, les statistiques partent toutes seules si la liseuse est en ligne. Le plugin Reading statistics de KOReader doit être activé. Retrouve le résultat dans Babel : Statistiques et Compte › KOReader.'**
+  /// **'Outils › Babel › Envoyer les statistiques de lecture. Active aussi l\'envoi automatique : après la fermeture d\'un livre, les statistiques partent toutes seules si la liseuse est en ligne. Le plugin Reading statistics de KOReader doit être activé. Quand tu marques un livre comme terminé, Babel le marque terminé aussi, et tes surlignages et notes arrivent dans tes annotations Babel. Le menu « Tester la connexion à Babel » vérifie que tout est bien relié.'**
   String get koreaderGuideUse;
 
   /// No description provided for @koreaderGuideBooksTitle.
@@ -6823,6 +6823,102 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Gardez un livre ou une étagère entière sur l\'appareil, et choisissez un thème : sombre, papier, Art déco ou Art nouveau.'**
   String get featureOfflineBody;
+
+  /// No description provided for @reportFileTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler ce fichier'**
+  String get reportFileTitle;
+
+  /// No description provided for @reportFileHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pourquoi ? (contenu illicite, mauvais fichier…)'**
+  String get reportFileHint;
+
+  /// No description provided for @reportFileSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler'**
+  String get reportFileSend;
+
+  /// No description provided for @reportFileSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci, les administrateurs vont regarder.'**
+  String get reportFileSent;
+
+  /// No description provided for @communityOff.
+  ///
+  /// In fr, this message translates to:
+  /// **'La bibliothèque commune est désactivée par l\'administrateur.'**
+  String get communityOff;
+
+  /// No description provided for @communityHint2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chacun reste responsable de ce qu\'il partage : signale tout fichier illicite ou qui n\'a pas à être là avec le drapeau.'**
+  String get communityHint2;
+
+  /// No description provided for @fileReportsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichiers signalés'**
+  String get fileReportsTitle;
+
+  /// No description provided for @fileReportsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun fichier signalé.'**
+  String get fileReportsEmpty;
+
+  /// No description provided for @fileReportKeep.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garder'**
+  String get fileReportKeep;
+
+  /// No description provided for @fileReportWithdraw.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get fileReportWithdraw;
+
+  /// No description provided for @fileReportWithdrawTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer ce fichier ?'**
+  String get fileReportWithdrawTitle;
+
+  /// No description provided for @fileReportWithdrawBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {title} » sera retiré de toutes les bibliothèques et son empreinte bloquée.'**
+  String fileReportWithdrawBody(String title);
+
+  /// No description provided for @ao3ExcludeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exclure un tag (Entrée)'**
+  String get ao3ExcludeHint;
+
+  /// No description provided for @ao3SaveTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer cette recherche'**
+  String get ao3SaveTitle;
+
+  /// No description provided for @ao3SaveHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom de la recherche'**
+  String get ao3SaveHint;
+
+  /// No description provided for @ao3SaveButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get ao3SaveButton;
 }
 
 class _AppLocalizationsDelegate

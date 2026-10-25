@@ -52,6 +52,9 @@ class Settings(BaseSettings):
     # Book files (ADR 0010): content-addressed store, who may download, upload size cap.
     files_dir: str = str(API_DIR / "data" / "files")
     file_access: Literal["everyone", "entitled"] = "everyone"
+    # The community library (every reader's books, fanfictions only when shared). An
+    # administrator can switch it off here without touching anyone's own library.
+    community_enabled: bool = True
     max_upload_mb: int = 300
     # Fernet key encrypting source credentials. Without it, sources work without tokens only.
     # Generate one with Fernet.generate_key() (see infra/README.md).

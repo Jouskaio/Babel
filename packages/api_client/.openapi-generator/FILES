@@ -61,6 +61,8 @@ doc/ExtraChallengeResponse.md
 doc/FanficDetailsResponse.md
 doc/FeedEntryResponse.md
 doc/FeedKind.md
+doc/FileReportRequest.md
+doc/FileReportResponse.md
 doc/FilesCheckRequest.md
 doc/FilesCheckResponse.md
 doc/FinishedBookResponse.md
@@ -267,6 +269,8 @@ lib/model/extra_challenge_response.dart
 lib/model/fanfic_details_response.dart
 lib/model/feed_entry_response.dart
 lib/model/feed_kind.dart
+lib/model/file_report_request.dart
+lib/model/file_report_response.dart
 lib/model/files_check_request.dart
 lib/model/files_check_response.dart
 lib/model/finished_book_response.dart

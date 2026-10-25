@@ -14,6 +14,7 @@ import '../../../core/widgets/error_retry.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../application/library_controller.dart';
+import 'file_reports.dart';
 
 /// The community library: the books every reader shares (a fanfiction only when its reader
 /// chose to), to add to one's own library without uploading anything.
@@ -34,6 +35,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
   var _hasNext = true;
   var _loading = false;
   var _failed = false;
+  var _enabled = true;
 
   @override
   void initState() {
@@ -63,6 +65,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
       setState(() {
         _page += 1;
         _hasNext = page?.hasNext ?? false;
+        _enabled = page?.enabled ?? true;
         _books.addAll(page?.books ?? const []);
       });
     } on ApiException {
@@ -136,7 +139,10 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 48),
             children: [
-              Text(l10n.communityHint, style: BabelText.body(13)),
+              Text(
+                '${l10n.communityHint} ${l10n.communityHint2}',
+                style: BabelText.body(13),
+              ),
               const SizedBox(height: 14),
               TextField(
                 controller: _search,
@@ -153,6 +159,8 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                   book: book,
                   adding: _adding.contains(book.sha256),
                   onAdd: () => _add(book),
+                  onReport: () =>
+                      reportCommunityFile(context, ref, book.sha256),
                 ),
               if (_failed)
                 ErrorRetry(onRetry: _more)
@@ -166,7 +174,10 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
               else if (_books.isEmpty)
                 Padding(
                   padding: const EdgeInsets.all(24),
-                  child: Text(l10n.communityEmpty, style: BabelText.body(15)),
+                  child: Text(
+                    _enabled ? l10n.communityEmpty : l10n.communityOff,
+                    style: BabelText.body(15),
+                  ),
                 )
               else if (_hasNext)
                 Center(
@@ -184,11 +195,17 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
 }
 
 class _Row extends StatelessWidget {
-  const _Row({required this.book, required this.adding, required this.onAdd});
+  const _Row({
+    required this.book,
+    required this.adding,
+    required this.onAdd,
+    required this.onReport,
+  });
 
   final CommunityBookResponse book;
   final bool adding;
   final VoidCallback onAdd;
+  final VoidCallback onReport;
 
   @override
   Widget build(BuildContext context) {
@@ -235,6 +252,15 @@ class _Row extends StatelessWidget {
                 ? PillButtonKind.secondary
                 : PillButtonKind.primary,
             onPressed: book.inLibrary || adding ? null : onAdd,
+          ),
+          IconButton(
+            tooltip: l10n.reportFileTitle,
+            onPressed: onReport,
+            icon: Icon(
+              Icons.flag_outlined,
+              size: 20,
+              color: BabelColors.textSecondary,
+            ),
           ),
         ],
       ),

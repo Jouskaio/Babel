@@ -120,6 +120,7 @@ class FileService:
         covers: CoverCache,
         *,
         access: FileAccess,
+        community: bool = True,
         max_bytes: int,
         comics: ComicConverter | None = None,
         fanfic_found: FanficHook | None = None,
@@ -132,6 +133,7 @@ class FileService:
         self._reader = reader
         self._covers = covers
         self._access = access
+        self._community = community
         self._max_bytes = max_bytes
         self._comics = comics
 
@@ -316,9 +318,29 @@ class FileService:
         """What every reader shares, newest first, with the files this reader already has.
 
         Nothing when the server limits downloads to the files' owners (file_access "entitled")."""
-        if self._access != "everyone":
+        if self._access != "everyone" or not self._community:
             return [], set()
         return await self._files.community(user_id, query, limit, offset)
+
+    @property
+    def community_enabled(self) -> bool:
+        return self._community and self._access == "everyone"
+
+    async def report(self, user_id: UUID, sha256: str, reason: str) -> None:
+        """A reader flags a shared file (illegal, wrong, unwanted) for the administrators."""
+        file = await self._files.get_file(sha256)
+        if file is None or not file.available:
+            raise NotFoundError
+        await self._files.add_report(user_id, sha256, reason.strip()[:500])
+        await self._files.commit()
+
+    async def reports(self) -> list[tuple[StoredFile, int, list[str]]]:
+        """Files readers reported and nobody handled yet, the most reported first."""
+        return await self._files.reports()
+
+    async def dismiss_reports(self, sha256: str) -> None:
+        await self._files.dismiss_reports(sha256)
+        await self._files.commit()
 
     async def set_ereader(
         self, user_id: UUID, item_id: UUID, ereader: bool, device_id: UUID | None = None

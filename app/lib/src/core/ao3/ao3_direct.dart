@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:babel_api_client/api.dart';
 import 'package:html/dom.dart';
@@ -10,6 +11,7 @@ class Ao3Params {
   const Ao3Params({
     this.tags = const [],
     this.anyTag = false,
+    this.excluded = const [],
     this.text = '',
     this.fandom = '',
     this.language = '',
@@ -25,6 +27,7 @@ class Ao3Params {
 
   final List<String> tags;
   final bool anyTag;
+  final List<String> excluded;
   final String text;
   final String fandom;
   final String language;
@@ -80,6 +83,9 @@ class Ao3Direct {
       final either = tags.map((t) => '"$t"').join(' OR ');
       text = text.isEmpty ? '($either)' : '($either) $text';
     }
+    for (final t in q.excluded) {
+      if (t.trim().isNotEmpty) text = '$text -"${t.trim()}"'.trim();
+    }
     if (text.isNotEmpty) params['work_search[query]'] = text;
     if (q.fandom.trim().isNotEmpty) {
       params['work_search[fandom_names]'] = q.fandom.trim();
@@ -131,6 +137,32 @@ class Ao3Direct {
       throw ApiException(502, 'AO3 did not answer');
     }
     return parse(last.body, q.page);
+  }
+
+  /// Tags AO3 knows that start like [term] (its own autocomplete); empty when it does not answer.
+  Future<List<String>> suggest(String term) async {
+    final typed = term.trim();
+    if (typed.length < 2) return const [];
+    try {
+      final response = await _client
+          .get(
+            Uri.https('archiveofourown.org', '/autocomplete/freeform', {
+              'term': typed,
+            }),
+            headers: {'User-Agent': 'Babel/1.0 (+https://babel.jouskaio.me)'},
+          )
+          .timeout(const Duration(seconds: 8));
+      if (response.statusCode != 200) return const [];
+      final found = jsonDecode(response.body);
+      return [
+        if (found is List)
+          for (final entry in found)
+            if (entry is Map && entry['name'] is String)
+              entry['name'] as String,
+      ].take(10).toList();
+    } on Object {
+      return const [];
+    }
   }
 
   static String _text(Element? e) =>

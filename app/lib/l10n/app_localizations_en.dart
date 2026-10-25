@@ -4028,7 +4028,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get koreaderGuideUse =>
-      'Tools › Babel › Send reading statistics now. Also leave automatic sending on: after you close a book the statistics go by themselves when the e-reader is online. KOReader\'s Reading statistics plugin must be enabled. See the result in Babel: Statistics and Account › KOReader.';
+      'Tools › Babel › Send reading statistics now. Also leave automatic sending on: after you close a book the statistics go by themselves when the e-reader is online. KOReader\'s Reading statistics plugin must be enabled. When you mark a book finished, Babel marks it finished too, and your highlights and notes reach your Babel annotations. \"Test the connection to Babel\" checks everything is linked.';
 
   @override
   String get koreaderGuideBooksTitle => '4. Get your books on the e-reader';
@@ -4084,4 +4084,56 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get featureOfflineBody =>
       'Keep a book or a whole shelf on the device, and pick a theme: dark, paper, Art Deco or Art Nouveau.';
+
+  @override
+  String get reportFileTitle => 'Report this file';
+
+  @override
+  String get reportFileHint => 'Why? (illegal content, wrong file…)';
+
+  @override
+  String get reportFileSend => 'Report';
+
+  @override
+  String get reportFileSent => 'Thanks, the administrators will look.';
+
+  @override
+  String get communityOff =>
+      'The community library is switched off by the administrator.';
+
+  @override
+  String get communityHint2 =>
+      'Everyone stays responsible for what they share: flag any illegal or misplaced file with the flag.';
+
+  @override
+  String get fileReportsTitle => 'Reported files';
+
+  @override
+  String get fileReportsEmpty => 'No reported file.';
+
+  @override
+  String get fileReportKeep => 'Keep';
+
+  @override
+  String get fileReportWithdraw => 'Withdraw';
+
+  @override
+  String get fileReportWithdrawTitle => 'Withdraw this file?';
+
+  @override
+  String fileReportWithdrawBody(String title) {
+    return '\"$title\" will be removed from every library and its hash blocked.';
+  }
+
+  @override
+  String get ao3ExcludeHint => 'Exclude a tag (Enter)';
+
+  @override
+  String get ao3SaveTitle => 'Save this search';
+
+  @override
+  String get ao3SaveHint => 'Name of the search';
+
+  @override
+  String get ao3SaveButton => 'Save';
 }

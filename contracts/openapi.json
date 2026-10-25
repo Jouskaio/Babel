@@ -1494,6 +1494,11 @@
             "title": "Books",
             "type": "array"
           },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
           "has_next": {
             "title": "Has Next",
             "type": "boolean"
@@ -2349,6 +2354,61 @@
         ],
         "title": "FeedKind",
         "type": "string"
+      },
+      "FileReportRequest": {
+        "properties": {
+          "reason": {
+            "default": "",
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "title": "FileReportRequest",
+        "type": "object"
+      },
+      "FileReportResponse": {
+        "properties": {
+          "authors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Authors",
+            "type": "array"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "reports": {
+            "title": "Reports",
+            "type": "integer"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sha256",
+          "title",
+          "authors",
+          "format",
+          "reports",
+          "reasons"
+        ],
+        "title": "FileReportResponse",
+        "type": "object"
       },
       "FilesCheckRequest": {
         "properties": {
@@ -6786,7 +6846,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.73.0"
+    "version": "0.74.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -6836,6 +6896,81 @@
         ],
         "summary": "Set Connector",
         "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/v1/admin/file-reports": {
+      "get": {
+        "description": "Files readers reported in the community library, the most reported first.",
+        "operationId": "listFileReports",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FileReportResponse"
+                  },
+                  "title": "Response Listfilereports",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List File Reports",
+        "tags": [
+          "library",
+          "admin"
+        ]
+      }
+    },
+    "/v1/admin/file-reports/{sha256}/dismiss": {
+      "post": {
+        "description": "Keep the file: forget the reports about it.",
+        "operationId": "dismissFileReports",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sha256",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Sha256",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dismiss File Reports",
+        "tags": [
+          "library",
           "admin"
         ]
       }
@@ -7258,6 +7393,20 @@
           },
           {
             "in": "query",
+            "name": "excluded",
+            "required": false,
+            "schema": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 12,
+              "title": "Excluded",
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
             "name": "text",
             "required": false,
             "schema": {
@@ -7438,6 +7587,60 @@
           }
         ],
         "summary": "Search Ao3",
+        "tags": [
+          "ao3"
+        ]
+      }
+    },
+    "/v1/ao3/tags": {
+      "get": {
+        "description": "Tags AO3 knows that start like what is typed.",
+        "operationId": "suggestAo3Tags",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "term",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 80,
+              "title": "Term",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Response Suggestao3Tags",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Suggest Ao3 Tags",
         "tags": [
           "ao3"
         ]
@@ -9195,6 +9398,58 @@
           }
         ],
         "summary": "List Community",
+        "tags": [
+          "community"
+        ]
+      }
+    },
+    "/v1/community/{sha256}/report": {
+      "post": {
+        "description": "Flag a shared file for the administrators (illegal, wrong, unwanted).",
+        "operationId": "reportCommunityFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sha256",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Sha256",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Report Community File",
         "tags": [
           "community"
         ]

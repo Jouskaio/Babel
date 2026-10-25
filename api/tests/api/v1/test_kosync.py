@@ -335,3 +335,75 @@ def test_the_plugin_lists_and_downloads_the_books_for_the_e_reader(
     assert client.get(f"/v1/kosync/library/files/{book['sha256']}").status_code == 401
     everything = client.get("/v1/kosync/library", params={"scope": "all"}, headers=key)
     assert len(everything.json()["books"]) == 1
+
+
+def test_a_book_finished_and_highlights_made_in_koreader_reach_babel(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    content = epub(title="Jane Eyre", isbn=None)
+    item = upload(client, ada, content).json()["item"]
+    client.put(f"/v1/library/{item['id']}/ereader", json={"ereader": True}, headers=ada)
+    password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
+    key = {
+        "x-auth-user": "ada@example.com",
+        "x-auth-key": hashlib.md5(password.encode(), usedforsecurity=False).hexdigest(),
+    }
+    (book,) = client.get("/v1/kosync/library", headers=key).json()["books"]
+    document = "c" * 32
+    # KOReader names the book by its own identifier: link it first, as the reader would.
+    client.put(
+        "/v1/kosync/syncs/progress",
+        json={"document": document, "progress": "x", "percentage": 0.5, "device": "Boox"},
+        headers=key,
+    )
+    client.post("/v1/me/koreader/link", json={"md5": document, "item_id": item["id"]}, headers=ada)
+
+    notes = {
+        "document": document,
+        "device": "Boox",
+        "annotations": [
+            {"text": "Reader, I married him.", "note": "yes", "datetime": "2026-10-20 21:00:00"}
+        ],
+    }
+    first = client.put("/v1/kosync/syncs/annotations", json=notes, headers=key)
+    assert first.json() == {"added": 1}
+    assert client.put("/v1/kosync/syncs/annotations", json=notes, headers=key).json() == {
+        "added": 0
+    }  # sent again: nothing new
+    assert client.put(
+        "/v1/kosync/syncs/annotations", json={**notes, "document": "d" * 32}, headers=key
+    ).json() == {"added": 0}  # a book Babel does not have
+
+    done = client.put(
+        "/v1/kosync/syncs/finished", json={"document": document, "device": "Boox"}, headers=key
+    )
+    assert done.json() == {"applied": True}
+    listed = client.get("/v1/library", headers=ada).json()
+    assert listed[0]["status"] == "finished"
+    # A finished book leaves the e-reader's list.
+    assert client.get("/v1/kosync/library", headers=key).json() == {"books": []}
+    assert book["name"].endswith("Jane Eyre.epub")
+
+
+def test_a_shared_file_can_be_reported_and_the_administrators_decide(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    bob = account(client, "bob@example.com")
+    boss = account(client, "admin@example.com")
+    item = upload(client, ada, epub(title="Jane Eyre", isbn=None)).json()["item"]
+    sha = item["sha256"]
+    assert client.get("/v1/admin/file-reports", headers=boss).json() == []
+
+    sent = client.post(
+        f"/v1/community/{sha}/report", json={"reason": "not mine to share"}, headers=bob
+    )
+    assert sent.status_code == 204
+    client.post(f"/v1/community/{sha}/report", json={"reason": "again"}, headers=bob)  # no double
+    (report,) = client.get("/v1/admin/file-reports", headers=boss).json()
+    assert (report["sha256"], report["reports"]) == (sha, 1)
+    assert client.get("/v1/admin/file-reports", headers=bob).status_code == 403
+    assert client.post(f"/v1/community/{'0' * 64}/report", json={}, headers=bob).status_code == 404
+
+    kept = client.post(f"/v1/admin/file-reports/{sha}/dismiss", headers=boss)
+    assert kept.status_code == 204
+    assert client.get("/v1/admin/file-reports", headers=boss).json() == []

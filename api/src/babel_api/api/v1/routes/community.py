@@ -6,6 +6,7 @@ from fastapi import APIRouter, Query
 from pydantic import BaseModel
 
 from babel_api.api.dependencies import CurrentUserId, FileServiceDep
+from babel_api.api.v1.routes.library import Sha256
 from babel_api.domain.files import StoredFile
 from babel_api.domain.naming import clean_name
 
@@ -39,6 +40,11 @@ class CommunityPageResponse(BaseModel):
     books: list[CommunityBookResponse]
     page: int
     has_next: bool
+    enabled: bool = True
+
+
+class FileReportRequest(BaseModel):
+    reason: str = ""
 
 
 @router.get("", operation_id="listCommunity")
@@ -55,4 +61,13 @@ async def list_community(
         books=[CommunityBookResponse.of(f, mine) for f in found[:PAGE_SIZE]],
         page=page,
         has_next=len(found) > PAGE_SIZE,
+        enabled=files.community_enabled,
     )
+
+
+@router.post("/{sha256}/report", operation_id="reportCommunityFile", status_code=204)
+async def report_community_file(
+    sha256: Sha256, body: FileReportRequest, user_id: CurrentUserId, files: FileServiceDep
+) -> None:
+    """Flag a shared file for the administrators (illegal, wrong, unwanted)."""
+    await files.report(user_id, sha256.lower(), body.reason)

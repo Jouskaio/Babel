@@ -20,6 +20,7 @@ from babel_api.api.dependencies import (
     KoreaderServiceDep,
 )
 from babel_api.domain.errors import NotFoundError
+from babel_api.domain.files import ReadingStatus
 from babel_api.domain.naming import book_filename
 
 router = APIRouter(prefix="/kosync", tags=["kosync"])
@@ -124,7 +125,10 @@ async def sync_library(
                 "format": item.file.format.value,
             }
             for item in await files.library(user_id)
-            if item.file is not None and (scope == "all" or item.ereader)
+            if item.file is not None
+            and (
+                scope == "all" or (item.ereader and item.state.status is not ReadingStatus.FINISHED)
+            )
         ]
     }
 
@@ -137,6 +141,51 @@ async def sync_library_file(user_id: Reader, files: FileServiceDep, sha256: str)
         media_type=download.file.format.media_type,
         filename=download.name or download.file.original_name,
     )
+
+
+class FinishedBody(BaseModel):
+    document: str
+    device: str = ""
+
+
+@router.put("/syncs/finished", include_in_schema=False)
+async def put_finished(
+    user_id: Reader, koreader: KoreaderServiceDep, body: FinishedBody
+) -> dict[str, bool]:
+    """A book finished in KOReader is finished in Babel."""
+    return {"applied": await koreader.finished(user_id, body.document, body.device)}
+
+
+class KoreaderNote(BaseModel):
+    text: str = ""
+    note: str | None = None
+    datetime: str | None = None
+    percent: float | None = None
+
+
+class AnnotationsBody(BaseModel):
+    document: str
+    device: str = ""
+    annotations: Annotated[list[KoreaderNote], Field(max_length=2000)] = Field(
+        default_factory=list[KoreaderNote]
+    )
+
+    @field_validator("annotations", mode="before")
+    @classmethod
+    def _empty_object(cls, value: Any) -> Any:
+        """An empty Lua table is sent as {} rather than []."""
+        return [] if value == {} else value
+
+
+@router.put("/syncs/annotations", include_in_schema=False)
+async def put_annotations(
+    user_id: Reader, koreader: KoreaderServiceDep, body: AnnotationsBody
+) -> dict[str, int]:
+    """Highlights and notes made in KOReader."""
+    added = await koreader.annotations(
+        user_id, body.document, body.device, [n.model_dump() for n in body.annotations]
+    )
+    return {"added": added}
 
 
 class StatsBook(BaseModel):

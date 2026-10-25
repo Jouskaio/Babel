@@ -1,0 +1,25 @@
+name: Uptime
+
+# Checks the public site every 30 minutes. A failing run is e-mailed by GitHub (Settings >
+# Notifications > Actions), which is the alert.
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: API
+        run: curl -fsS --retry 3 --retry-delay 10 --max-time 30 https://babel.jouskaio.me/api/v1/health
+      - name: KOReader sync
+        run: curl -fsS --retry 3 --retry-delay 10 --max-time 30 https://babel.jouskaio.me/api/v1/kosync/healthcheck
+      - name: Site
+        run: curl -fsS --retry 3 --retry-delay 10 --max-time 30 -o /dev/null https://babel.jouskaio.me/
+      - name: Downloads
+        run: curl -fsS --retry 3 --retry-delay 10 --max-time 30 -o /dev/null https://babel.jouskaio.me/downloads/latest.json

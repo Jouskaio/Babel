@@ -16,6 +16,7 @@ class _FakeAo3 extends Ao3Api {
   Future<Ao3SearchResponse?> searchAo3({
     List<String>? tags,
     bool? anyTag,
+    List<String>? excluded,
     String? text,
     String? fandom,
     String? language,

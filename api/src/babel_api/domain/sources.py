@@ -134,6 +134,7 @@ class Ao3Query:
 
     tags: tuple[str, ...] = ()
     any_tag: bool = False  # one of the tags is enough (otherwise all of them)
+    excluded: tuple[str, ...] = ()  # tags the works must not have
     text: str = ""
     fandom: str = ""
     language: str = ""  # AO3's language code, "en", "fr"…
