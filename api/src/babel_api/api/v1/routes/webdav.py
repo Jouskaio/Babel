@@ -20,6 +20,7 @@ from fastapi.responses import FileResponse
 
 from babel_api.api.dependencies import FileServiceDep, KoreaderServiceDep
 from babel_api.domain.files import LibraryItem
+from babel_api.domain.naming import book_filename
 
 router = APIRouter(prefix="/webdav", tags=["webdav"], include_in_schema=False)
 
@@ -91,7 +92,7 @@ def _named(items: list[LibraryItem]) -> dict[str, LibraryItem]:
     for item in sorted(items, key=lambda i: i.added_at):
         if item.file is None or item.removed_at is not None:
             continue
-        name = PurePosixPath(item.file.original_name).name or f"{item.file.sha256}.epub"
+        name = book_filename(item)
         if name in named:
             path = PurePosixPath(name)
             name = f"{path.stem} ({item.file.sha256[:6]}){path.suffix}"

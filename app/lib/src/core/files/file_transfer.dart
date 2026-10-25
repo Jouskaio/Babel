@@ -42,6 +42,15 @@ class FileTransfer {
     return (sha256: sha256, format: format, size: item.size ?? 0);
   }
 
+  /// "Author - Title.epub" as the server names it, with the extension actually saved.
+  static String _nameOf(LibraryItemResponse item, String extension) {
+    final named = item.filename;
+    final dot = named?.lastIndexOf('.') ?? -1;
+    return named == null || dot < 1
+        ? '${item.title}.$extension'
+        : '${named.substring(0, dot)}.$extension';
+  }
+
   /// Gives [item] a file (a paper book, say), to read it on this device too.
   Future<LibraryItemResponse> attach(
     LibraryItemResponse item,
@@ -160,7 +169,7 @@ class FileTransfer {
       bytes,
       sha256: file.sha256,
       extension: extension,
-      fileName: '${item.title}.$extension',
+      fileName: _nameOf(item, extension),
     );
   }
 
@@ -234,7 +243,7 @@ class FileTransfer {
         Stream.value(bytes),
         sha256: file.sha256,
         extension: extension,
-        fileName: '${item.title}.$extension',
+        fileName: _nameOf(item, extension),
       );
     }
     return bytes;

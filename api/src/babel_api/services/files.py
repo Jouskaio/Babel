@@ -20,6 +20,7 @@ from babel_api.domain.errors import (
     UnsupportedFileError,
 )
 from babel_api.domain.files import BookFormat, Cover, LibraryItem, ReadingState, StoredFile
+from babel_api.domain.naming import book_filename
 from babel_api.domain.ports import (
     BlobStore,
     CatalogRepository,
@@ -72,6 +73,7 @@ def item_data(item: LibraryItem) -> dict[str, Any]:
         "hidden": item.state.hidden,
         "work_id": str(item.work_id) if item.work_id else None,
         "origin": item.origin,
+        "filename": book_filename(item) if item.file else None,
     }
 
 
@@ -97,6 +99,7 @@ class ImportResult:
 class Download:
     file: StoredFile
     path: Path
+    name: str = ""  # the name to save it under (empty: the file's own)
 
 
 logger = logging.getLogger(__name__)
@@ -463,7 +466,8 @@ class FileService:
         if file is None or not file.available or path is None:
             raise NotFoundError
         await self._check_access(user_id, file)
-        return Download(file, path)
+        item = await self._files.find_item(user_id, sha256)
+        return Download(file, path, book_filename(item) if item else file.original_name)
 
     async def as_cbz(self, user_id: UUID, sha256: str) -> Download:
         """A comic as CBZ, so every device can read it: CBR files are converted once."""

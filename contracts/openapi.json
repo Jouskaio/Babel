@@ -3336,6 +3336,18 @@
             "title": "Ereader",
             "type": "boolean"
           },
+          "filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name to save the file under: Author - Title.epub",
+            "title": "Filename"
+          },
           "finished_at": {
             "anyOf": [
               {
