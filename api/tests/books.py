@@ -25,6 +25,7 @@ def epub(
     subjects: tuple[str, ...] = (),
     series: tuple[str, str] | None = None,
     source: str | None = None,
+    body: str = "<p>Reader, I married him.</p>",
 ) -> bytes:
     """A minimal EPUB; ``cover`` adds a JPEG cover declared the EPUB 3 or EPUB 2 way."""
     identifier = f"<dc:identifier>urn:isbn:{isbn}</dc:identifier>" if isbn else ""
@@ -56,9 +57,7 @@ def epub(
         )
         if cover is not None:
             archive.writestr("OEBPS/images/cover art.jpg", cover)
-        archive.writestr(
-            "OEBPS/chapter1.xhtml", "<html><body><p>Reader, I married him.</p></body></html>"
-        )
+        archive.writestr("OEBPS/chapter1.xhtml", f"<html><body>{body}</body></html>")
     return buffer.getvalue()
 
 

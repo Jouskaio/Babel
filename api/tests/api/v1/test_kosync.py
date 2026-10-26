@@ -655,3 +655,30 @@ def test_the_statistics_tell_how_far_the_reader_is_when_the_e_reader_sent_no_pos
     )
     again = client.get(f"/v1/library/{item['id']}/positions", headers=ada).json()
     assert [round(p["percent"]) for p in again] == [50]
+
+
+def test_a_fanfiction_is_told_by_the_first_pages_of_its_epub(
+    app: FastAPI, client: TestClient, ada: dict[str, str]
+) -> None:
+    from dataclasses import replace
+
+    from babel_api.domain.sources import RemoteEntry
+
+    class FakeAo3:
+        async def work(self, work_id: str) -> RemoteEntry:
+            return RemoteEntry(path=f"/works/{work_id}", size=0, remote_id=f"{work_id}:1/1|x")
+
+    app.state.container = replace(app.state.container, ao3=FakeAo3())
+    bob = account(client, "bob@example.com")
+    fic = upload(
+        client,
+        ada,
+        epub(
+            title="Downloaded from AO3",
+            isbn=None,
+            body='<p>Posted originally on the <a href="https://archiveofourown.org/works/55">'
+            "Archive of Our Own</a>.</p>",
+        ),
+    ).json()["item"]
+    assert fic["origin"] == "ao3"
+    assert client.get("/v1/community", headers=bob).json()["books"] == []

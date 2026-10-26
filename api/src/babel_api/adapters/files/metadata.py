@@ -144,7 +144,7 @@ def _comic_info(path: Path) -> BookMetadata:
 
 _AO3_HOSTS = r"(?:archiveofourown\.(?:org|net|com|gay)|ao3\.org)"
 _AO3_WORK = re.compile(_AO3_HOSTS + r"/(?:collections/[^/\s]+/)?works/(\d+)", re.I)
-_AO3_MENTION = re.compile(_AO3_HOSTS, re.I)
+_AO3_MENTION = re.compile(_AO3_HOSTS + r"|archive of our own", re.I)
 
 
 def _ao3_work(texts: list[str]) -> str | None:
@@ -155,6 +155,24 @@ def _ao3_work(texts: list[str]) -> str | None:
         if found:
             return found.group(1)
     return None
+
+
+def _body_ao3(path: Path) -> tuple[str | None, bool]:
+    """The first pages of an EPUB tell where a fanfiction comes from (AO3's own downloads and
+    FanFicFare put the work's address there, not in the package metadata)."""
+    try:
+        with zipfile.ZipFile(path) as archive:
+            names = sorted(
+                n for n in archive.namelist() if n.lower().endswith((".xhtml", ".html", ".htm"))
+            )[:8]
+            pages: list[str] = []
+            for name in names:
+                with archive.open(name) as page:
+                    pages.append(page.read(60_000).decode("utf-8", "ignore"))
+    except (zipfile.BadZipFile, OSError, KeyError, ValueError):
+        return None, False
+    work = _ao3_work(pages)
+    return work, work is not None or any(_AO3_MENTION.search(t) for t in pages)
 
 
 class EbookMetadataReader:
@@ -220,6 +238,10 @@ class EbookMetadataReader:
             *texts("description"),
         ]
         ao3 = _ao3_work(about)
+        fanfic = ao3 is not None or any(_AO3_MENTION.search(t) for t in about)
+        if not fanfic:
+            body_work, fanfic = _body_ao3(path)
+            ao3 = body_work
         series, series_index = _epub_series(package)
         return BookMetadata(
             title=titles[0] if titles else None,
@@ -230,7 +252,7 @@ class EbookMetadataReader:
             series=series,
             series_index=series_index,
             ao3_work=ao3,
-            fanfic=ao3 is not None or any(_AO3_MENTION.search(t) for t in about),
+            fanfic=fanfic,
         )
 
     def cover(self, path: Path, file_format: BookFormat) -> Cover | None:
