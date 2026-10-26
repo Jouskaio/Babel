@@ -56,6 +56,9 @@ class Settings(BaseSettings):
     # administrator can switch it off here without touching anyone's own library.
     community_enabled: bool = True
     max_upload_mb: int = 1000
+    # When set, every book of the library also appears there with a clean name (see
+    # adapters/files/export.py), for Kavita, Plex or a file manager. Empty: off.
+    library_export_dir: str = ""
     # Fernet key encrypting source credentials. Without it, sources work without tokens only.
     # Generate one with Fernet.generate_key() (see infra/README.md).
     secrets_key: SecretStr = SecretStr("")

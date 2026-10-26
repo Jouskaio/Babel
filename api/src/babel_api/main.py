@@ -45,6 +45,7 @@ from babel_api.adapters.translate import Translator
 from babel_api.adapters.wikidata import WikidataClient
 from babel_api.api.dependencies import (
     Container,
+    make_file_service,
     make_follow_service,
     make_kavita_service,
     make_request_service,
@@ -187,6 +188,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             follow_task = asyncio.create_task(
                 follow_forever(services, timedelta(hours=settings.follow_interval_hours))
             )
+        export_task: asyncio.Task[None] | None = None
+        if settings.library_export_dir:
+
+            async def export_library() -> None:
+                # Once at start-up: what was added before exporting was turned on.
+                try:
+                    async with container.sessions() as session:
+                        count = await make_file_service(container, session).export_all()
+                    logging.getLogger(__name__).info("Library export: %s files", count)
+                except Exception:
+                    logging.getLogger(__name__).exception("Library export failed")
+
+            export_task = asyncio.create_task(export_library())
         watch_task: asyncio.Task[None] | None = None
         if container.shelfmark is not None or container.chaptarr is not None:
 
@@ -210,6 +224,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
         yield
         refresh_task.cancel()
+        if export_task is not None:
+            export_task.cancel()
         if watch_task is not None:
             watch_task.cancel()
         kavita.cancel()

@@ -682,3 +682,31 @@ def test_a_fanfiction_is_told_by_the_first_pages_of_its_epub(
     ).json()["item"]
     assert fic["origin"] == "ao3"
     assert client.get("/v1/community", headers=bob).json()["books"] == []
+
+
+def test_books_are_also_exported_with_clean_names_when_asked(
+    app: FastAPI, client: TestClient, ada: dict[str, str], tmp_path: Path
+) -> None:
+    from dataclasses import replace
+
+    from babel_api.adapters.files.export import LibraryExporter
+
+    out = tmp_path / "library"
+    settings = app.state.container.settings.model_copy(update={"library_export_dir": str(out)})
+    app.state.container = replace(app.state.container, settings=settings)
+    item = upload(client, ada, epub(title="Jane Eyre", isbn=None)).json()["item"]
+    exported = out / "ebooks" / "Charlotte Brontë" / "Charlotte Brontë - Jane Eyre.epub"
+    assert exported.is_file()
+    assert exported.stat().st_nlink >= 2  # a link to the stored file: no extra space
+    assert item["filename"] == exported.name
+
+    # A withdrawn file takes its links away.
+    boss = account(client, "admin@example.com")
+    gone = client.post(
+        f"/v1/admin/files/{item['sha256']}/withdraw",
+        json={"reason": "test", "block": False},
+        headers=boss,
+    )
+    assert gone.status_code == 204
+    assert not exported.exists()
+    assert LibraryExporter(out).forget(tmp_path / "nothing") == 0

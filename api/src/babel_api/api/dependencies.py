@@ -31,6 +31,7 @@ from babel_api.adapters.db.sync_repository import SqlSyncRepository
 from babel_api.adapters.db.translation_repository import SqlTranslationRepository
 from babel_api.adapters.external_ratings import ExternalRatings
 from babel_api.adapters.files.comics import ComicConverter
+from babel_api.adapters.files.export import LibraryExporter
 from babel_api.adapters.hardcover import HardcoverClient
 from babel_api.adapters.kavita import KavitaClient
 from babel_api.adapters.pagebound import PageboundClient
@@ -197,6 +198,9 @@ def make_file_service(container: Container, session: AsyncSession) -> FileServic
         container.covers,
         access=settings.file_access,
         community=settings.community_enabled,
+        exporter=LibraryExporter(settings.library_export_dir)
+        if settings.library_export_dir
+        else None,
         max_bytes=settings.max_upload_mb * 1024 * 1024,
         comics=container.comics,
         fanfic_found=fanfic_found,

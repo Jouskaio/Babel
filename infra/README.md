@@ -275,3 +275,18 @@ proxy_send_timeout 600s;
 `proxy_request_buffering off` makes the proxy pass the upload on as it arrives instead of
 storing it first, which is much quicker for big files. An upload refused for its size shows
 "file too large for the server" in the import report.
+
+## Clean copies of the books
+
+`BABEL_LIBRARY_EXPORT_DIR` (set to `/data/files/library` in `docker-compose.yml`, so the
+`library` folder of the Babel share) gives every book of the library a readable place:
+
+```
+library/ebooks/<Author>/<Author> - <Series NN> - <Title>.epub
+library/comics/<Author>/<Author> - <Title>.cbz
+```
+
+They are hard links to the stored files: no extra space, and a book withdrawn by an administrator
+loses its link. Books already in the library are exported once at each start. To read them in
+Kavita or Plex, add the `library/ebooks` and `library/comics` folders of the Babel share as
+libraries there.
