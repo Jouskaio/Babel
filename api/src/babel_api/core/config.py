@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     # The community library (every reader's books, fanfictions only when shared). An
     # administrator can switch it off here without touching anyone's own library.
     community_enabled: bool = True
-    max_upload_mb: int = 300
+    max_upload_mb: int = 1000
     # Fernet key encrypting source credentials. Without it, sources work without tokens only.
     # Generate one with Fernet.generate_key() (see infra/README.md).
     secrets_key: SecretStr = SecretStr("")

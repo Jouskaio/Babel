@@ -1,0 +1,1 @@
+Import de plusieurs fichiers : lecture et envoi de trois fichiers à la fois, et la raison de chaque échec est indiquée (taille, connexion, serveur occupé). La taille maximale d'un fichier passe à 1 Go

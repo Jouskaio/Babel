@@ -1377,5 +1377,10 @@
   "@koreaderProblems": {"placeholders": {"parts": {"type": "String"}}},
   "koreaderBookRead": "Read on the e-reader: {spent}, {pages} pages",
   "@koreaderBookRead": {"placeholders": {"spent": {"type": "String"}, "pages": {"type": "int"}}},
-  "communityIntro": "The books Babel readers share. Add them to your library with one tap, without uploading anything."
+  "communityIntro": "The books Babel readers share. Add them to your library with one tap, without uploading anything.",
+  "importWhyNetwork": "connection lost during the upload",
+  "importWhyTooBig": "file too large for the server",
+  "importWhyBusy": "the server did not answer in time (large file or busy server)",
+  "importWhyOther": "refused by the server (code {code})",
+  "@importWhyOther": {"placeholders": {"code": {"type": "int"}}}
 }
