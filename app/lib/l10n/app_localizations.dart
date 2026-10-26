@@ -6985,6 +6985,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Les livres que les lecteurs de Babel partagent. Ajoute-les à ta bibliothèque d\'un geste, sans rien envoyer.'**
   String get communityIntro;
+
+  /// No description provided for @importWhyNetwork.
+  ///
+  /// In fr, this message translates to:
+  /// **'connexion interrompue pendant l\'envoi'**
+  String get importWhyNetwork;
+
+  /// No description provided for @importWhyTooBig.
+  ///
+  /// In fr, this message translates to:
+  /// **'fichier trop volumineux pour le serveur'**
+  String get importWhyTooBig;
+
+  /// No description provided for @importWhyBusy.
+  ///
+  /// In fr, this message translates to:
+  /// **'le serveur n\'a pas répondu à temps (fichier lourd ou serveur occupé)'**
+  String get importWhyBusy;
+
+  /// No description provided for @importWhyOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'refusé par le serveur (code {code})'**
+  String importWhyOther(int code);
 }
 
 class _AppLocalizationsDelegate

@@ -4214,4 +4214,19 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get communityIntro =>
       'Les livres que les lecteurs de Babel partagent. Ajoute-les à ta bibliothèque d\'un geste, sans rien envoyer.';
+
+  @override
+  String get importWhyNetwork => 'connexion interrompue pendant l\'envoi';
+
+  @override
+  String get importWhyTooBig => 'fichier trop volumineux pour le serveur';
+
+  @override
+  String get importWhyBusy =>
+      'le serveur n\'a pas répondu à temps (fichier lourd ou serveur occupé)';
+
+  @override
+  String importWhyOther(int code) {
+    return 'refusé par le serveur (code $code)';
+  }
 }

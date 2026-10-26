@@ -258,3 +258,20 @@ app then only translates short passages.
 - **Community library.** `BABEL_COMMUNITY_ENABLED=false` in `.env` switches it off for everyone
   (nobody's own library changes). Readers report files with the flag; administrators decide in
   the admin page (Reported files).
+
+## Large files (comics, manga)
+
+A comic volume can weigh several hundred MB. Babel accepts up to `BABEL_MAX_UPLOAD_MB` (1000 by
+default). The proxy in front must allow it too: in Nginx Proxy Manager, the proxy host of Babel,
+Advanced tab, custom Nginx configuration:
+
+```nginx
+client_max_body_size 1000m;
+proxy_request_buffering off;
+proxy_read_timeout 600s;
+proxy_send_timeout 600s;
+```
+
+`proxy_request_buffering off` makes the proxy pass the upload on as it arrives instead of
+storing it first, which is much quicker for big files. An upload refused for its size shows
+"file too large for the server" in the import report.

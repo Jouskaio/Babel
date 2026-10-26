@@ -2169,5 +2169,10 @@
   "@koreaderProblems": {"placeholders": {"parts": {"type": "String"}}},
   "koreaderBookRead": "Lu sur la liseuse : {spent}, {pages} pages",
   "@koreaderBookRead": {"placeholders": {"spent": {"type": "String"}, "pages": {"type": "int"}}},
-  "communityIntro": "Les livres que les lecteurs de Babel partagent. Ajoute-les à ta bibliothèque d'un geste, sans rien envoyer."
+  "communityIntro": "Les livres que les lecteurs de Babel partagent. Ajoute-les à ta bibliothèque d'un geste, sans rien envoyer.",
+  "importWhyNetwork": "connexion interrompue pendant l'envoi",
+  "importWhyTooBig": "fichier trop volumineux pour le serveur",
+  "importWhyBusy": "le serveur n'a pas répondu à temps (fichier lourd ou serveur occupé)",
+  "importWhyOther": "refusé par le serveur (code {code})",
+  "@importWhyOther": {"placeholders": {"code": {"type": "int"}}}
 }

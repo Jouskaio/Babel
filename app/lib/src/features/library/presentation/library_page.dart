@@ -178,6 +178,33 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     }
   }
 
+  /// Runs [job] for every item, [size] at a time.
+  Future<void> _inParallel<T>(
+    List<T> items,
+    int size,
+    Future<void> Function(T) job,
+  ) async {
+    var next = 0;
+    Future<void> worker() async {
+      while (next < items.length) {
+        final item = items[next++];
+        await job(item);
+      }
+    }
+
+    await Future.wait([for (var i = 0; i < size; i++) worker()]);
+  }
+
+  /// Why a file was refused, in words.
+  String _whyFailed(AppLocalizations l10n, ApiException error) {
+    if (error.innerException != null) return l10n.importWhyNetwork;
+    return switch (error.code) {
+      413 => l10n.importWhyTooBig,
+      408 || 502 || 503 || 504 => l10n.importWhyBusy,
+      _ => l10n.importWhyOther(error.code),
+    };
+  }
+
   /// Several files at once (a whole e-reader): the ones Babel already has are skipped, the ones
   /// it holds for someone else are added without uploading, the others are uploaded.
   Future<void> _importMany(List<XFile> files) async {
@@ -192,10 +219,11 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     });
     try {
       final hashes = <XFile, String>{};
-      for (final file in files) {
+      // Read a few at a time: a whole e-reader is many large files.
+      await _inParallel(files, 3, (file) async {
         final digest = await sha256.bind(file.openRead()).first;
         hashes[file] = digest.toString();
-      }
+      });
       final known = <String>{};
       final onBabel = <String>{};
       final all = hashes.values.toSet().toList();
@@ -209,7 +237,8 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
         onBabel.addAll(checked?.onBabel ?? const []);
       }
       var done = 0;
-      for (final file in files) {
+      // A few uploads at the same time, so one slow or large file does not hold the others.
+      await _inParallel(files, 3, (file) async {
         if (!mounted) return;
         setState(() {
           _importing = l10n.bulkProgress(done + 1, files.length);
@@ -233,11 +262,11 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             if (result.item.origin == 'ao3') fanfics++;
             known.add(sha);
           }
-        } on ApiException {
-          failed.add(file.name);
+        } on ApiException catch (error) {
+          failed.add('${file.name} — ${_whyFailed(l10n, error)}');
         }
         done++;
-      }
+      });
     } finally {
       if (mounted) setState(() => _importing = null);
     }

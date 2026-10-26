@@ -4180,4 +4180,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get communityIntro =>
       'The books Babel readers share. Add them to your library with one tap, without uploading anything.';
+
+  @override
+  String get importWhyNetwork => 'connection lost during the upload';
+
+  @override
+  String get importWhyTooBig => 'file too large for the server';
+
+  @override
+  String get importWhyBusy =>
+      'the server did not answer in time (large file or busy server)';
+
+  @override
+  String importWhyOther(int code) {
+    return 'refused by the server (code $code)';
+  }
 }
