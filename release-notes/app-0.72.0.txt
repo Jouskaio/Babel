@@ -1,0 +1,1 @@
+Un livre lu sur la liseuse passe « en cours » dans Babel dès que ses statistiques arrivent, et sa fiche montre le temps passé à le lire sur la liseuse

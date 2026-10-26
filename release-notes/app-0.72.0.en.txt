@@ -1,0 +1,1 @@
+A book read on the e-reader becomes "reading" in Babel as soon as its statistics arrive, and its sheet shows the time spent reading it on the e-reader
