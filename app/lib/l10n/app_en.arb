@@ -1376,5 +1376,6 @@
   "koreaderProblems": "Part of the state could not be read ({parts}). Tell the administrator.",
   "@koreaderProblems": {"placeholders": {"parts": {"type": "String"}}},
   "koreaderBookRead": "Read on the e-reader: {spent}, {pages} pages",
-  "@koreaderBookRead": {"placeholders": {"spent": {"type": "String"}, "pages": {"type": "int"}}}
+  "@koreaderBookRead": {"placeholders": {"spent": {"type": "String"}, "pages": {"type": "int"}}},
+  "communityIntro": "The books Babel readers share. Add them to your library with one tap, without uploading anything."
 }
