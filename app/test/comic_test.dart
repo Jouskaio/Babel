@@ -20,11 +20,18 @@ final _png = base64.decode(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
 );
 
-/// A CBZ with [pages] pages (named out of order on purpose), maybe a manga.
-Uint8List cbz({int pages = 3, String? manga}) {
+/// A 2×8 PNG: a tall strip, as a webtoon's pages are.
+final _strip = base64.decode(
+  'iVBORw0KGgoAAAANSUhEUgAAAAIAAAAICAIAAABcT7kVAAAADklEQVR4nGP4DwYMpFIAO0Mv0SUnU4oAAAAASUVORK5CYII=',
+);
+
+/// A CBZ with [pages] pages (named out of order on purpose), maybe a manga; [tall]: pages
+/// are strips.
+Uint8List cbz({int pages = 3, String? manga, bool tall = false}) {
   final archive = Archive();
+  final image = tall ? _strip : _png;
   for (var i = pages; i >= 1; i--) {
-    archive.addFile(ArchiveFile('Chapitre 1/page$i.png', _png.length, _png));
+    archive.addFile(ArchiveFile('Chapitre 1/page$i.png', image.length, image));
   }
   if (manga != null) {
     final info = utf8.encode(
@@ -77,6 +84,7 @@ void main() {
     Future<void> open(
       WidgetTester tester, {
       String? manga,
+      bool tall = false,
       List<Map<String, Object?>> others = const [],
     }) async {
       tester.view.physicalSize = const Size(400, 800);
@@ -90,7 +98,7 @@ void main() {
             builder: (context, ref, _) {
               container = ProviderScope.containerOf(context);
               return ComicView(
-                book: ComicBook.open(cbz(manga: manga)),
+                book: ComicBook.open(cbz(manga: manga, tall: tall)),
                 itemId: 'i1',
                 fileSha256: 'sha',
                 title: 'Akira',
@@ -123,10 +131,24 @@ void main() {
       expect(pages.last, 2);
     });
 
+    testWidgets(
+      'normal pages in vertical mode turn one by one, fitted to the window',
+      (tester) async {
+        await open(tester);
+        await tester.tap(find.byTooltip('Sens de lecture'));
+        await settle(tester);
+        await tester.tap(find.text('Vertical (webtoon)'));
+        await settle(tester);
+        expect(find.byType(ListView), findsNothing);
+        final view = tester.widget<PageView>(find.byType(PageView));
+        expect(view.scrollDirection, Axis.vertical);
+      },
+    );
+
     testWidgets('webtoons read as one vertical strip, kept per book', (
       tester,
     ) async {
-      await open(tester);
+      await open(tester, tall: true);
       await tester.tap(find.byTooltip('Sens de lecture'));
       await settle(tester);
       await tester.tap(find.text('Vertical (webtoon)'));

@@ -3,6 +3,7 @@
 import hashlib
 import uuid
 from pathlib import Path
+from typing import Any
 
 import pytest
 from fastapi import FastAPI
@@ -582,3 +583,75 @@ def test_a_book_read_on_the_e_reader_is_reading_and_has_its_stats(
     totals = client.get(f"/v1/me/koreader/books/{item['id']}", headers=ada).json()
     assert (totals["read_seconds"], totals["read_pages"]) == (600, 12)
     assert client.get(f"/v1/me/koreader/books/{uuid.uuid4()}", headers=ada).status_code == 404
+
+
+def test_fanfictions_are_told_by_the_file_even_from_a_mirror_or_without_a_work_address(
+    app: FastAPI, client: TestClient, ada: dict[str, str]
+) -> None:
+    from dataclasses import replace
+
+    from babel_api.domain.sources import RemoteEntry
+
+    class FakeAo3:
+        async def work(self, work_id: str) -> RemoteEntry:
+            return RemoteEntry(path=f"/works/{work_id}", size=0, remote_id=f"{work_id}:1/1|x")
+
+    app.state.container = replace(app.state.container, ao3=FakeAo3())
+    bob = account(client, "bob@example.com")
+    mirror = upload(
+        client,
+        ada,
+        epub(title="From a mirror", isbn=None, source="https://archiveofourown.gay/works/7"),
+    ).json()["item"]
+    bare = upload(
+        client,
+        ada,
+        epub(
+            title="From AO3 without address",
+            isbn=None,
+            source="https://archiveofourown.org/",
+        ),
+    ).json()["item"]
+    plain = upload(client, ada, epub(title="Jane Eyre", isbn=None)).json()["item"]
+    assert (mirror["origin"], bare["origin"], plain["origin"]) == ("ao3", "ao3", None)
+    titles = [b["title"] for b in client.get("/v1/community", headers=bob).json()["books"]]
+    assert titles == ["Jane Eyre"]
+
+
+def test_the_statistics_tell_how_far_the_reader_is_when_the_e_reader_sent_no_position(
+    client: TestClient, ada: dict[str, str], tmp_path: Path
+) -> None:
+    content = epub(title="Jane Eyre", isbn=None)
+    item = upload(client, ada, content).json()["item"]
+    path = tmp_path / "jane.epub"
+    path.write_bytes(content)
+    document = partial_md5(path)
+    password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
+    key = {
+        "x-auth-user": "ada@example.com",
+        "x-auth-key": hashlib.md5(password.encode(), usedforsecurity=False).hexdigest(),
+    }
+    client.post("/v1/kosync/library/missing", json={"documents": [document]}, headers=key)
+    stats: dict[str, Any] = {
+        "device": "gocolor7",
+        "books": [
+            {"md5": document, "title": "Jane Eyre", "total_read_time": 600, "progress": 0.42}
+        ],
+        "days": [],
+    }
+    assert client.put("/v1/kosync/syncs/stats", json=stats, headers=key).status_code == 200
+    positions = client.get(f"/v1/library/{item['id']}/positions", headers=ada).json()
+    assert [round(p["percent"]) for p in positions] == [42]
+    # KOReader's own pull gets nothing from it (such a position means nothing to it).
+    back = client.get(f"/v1/kosync/syncs/progress/{document}", headers=key).json()
+    assert "progress" not in back
+    # A position KOReader sends itself wins over the statistics.
+    body = {"document": document, "progress": "x", "percentage": 0.5, "device": "gocolor7"}
+    client.put("/v1/kosync/syncs/progress", json=body, headers=key)
+    client.put(
+        "/v1/kosync/syncs/stats",
+        json={**stats, "books": [{**stats["books"][0], "progress": 0.9}]},
+        headers=key,
+    )
+    again = client.get(f"/v1/library/{item['id']}/positions", headers=ada).json()
+    assert [round(p["percent"]) for p in again] == [50]

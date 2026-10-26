@@ -12,6 +12,7 @@ import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/back_leading.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/error_retry.dart';
+import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../application/library_controller.dart';
 import 'file_reports.dart';
@@ -128,6 +129,68 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
     }
   }
 
+  Future<void> _open(CommunityBookResponse book) async {
+    final l10n = context.l10n;
+    final add = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              BookCover(
+                width: 96,
+                url: book.coverPath == null ? null : apiUrl(book.coverPath!),
+                title: book.title,
+              ),
+              const SizedBox(width: 18),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(book.title, style: BabelText.title(26)),
+                    if (book.authors.isNotEmpty)
+                      Text(book.authors.join(', '), style: BabelText.body(14)),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${book.format.toUpperCase()} · ${fileSize(context, book.size)}',
+                      style: BabelText.label(
+                        10,
+                        color: BabelColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (book.inLibrary)
+                      Text(
+                        l10n.communityHave,
+                        style: BabelText.body(14, color: BabelColors.gold),
+                      )
+                    else
+                      PillButton(
+                        label: l10n.ao3Add,
+                        onPressed: () => Navigator.of(context).pop(true),
+                      ),
+                    TextButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                        reportCommunityFile(this.context, ref, book.sha256);
+                      },
+                      icon: const Icon(Icons.flag_outlined, size: 18),
+                      label: Text(l10n.reportFileTitle),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (add == true) await _add(book);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -218,6 +281,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                       onAdd: () => _add(book),
                       onReport: () =>
                           reportCommunityFile(context, ref, book.sha256),
+                      onOpen: () => _open(book),
                     );
                   },
                 ),
@@ -266,12 +330,14 @@ class _Card extends StatelessWidget {
     required this.adding,
     required this.onAdd,
     required this.onReport,
+    required this.onOpen,
   });
 
   final CommunityBookResponse book;
   final bool adding;
   final VoidCallback onAdd;
   final VoidCallback onReport;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -281,79 +347,93 @@ class _Card extends StatelessWidget {
       children: [
         Expanded(
           child: LayoutBuilder(
-            builder: (context, box) => Stack(
-              children: [
-                BookCover(
-                  // As wide as the cell, unless the cell is too short for a 2:3 cover.
-                  width: math.min(box.maxWidth, box.maxHeight / 1.5),
-                  url: book.coverPath == null ? null : apiUrl(book.coverPath!),
-                  title: book.title,
-                ),
-                Positioned(
-                  right: 8,
-                  bottom: 8,
-                  child: book.inLibrary
-                      ? Tooltip(
-                          message: l10n.communityHave,
-                          child: CircleAvatar(
-                            radius: 17,
+            builder: (context, box) {
+              // As wide as the cell, unless the cell is too short for a 2:3 cover.
+              final width = math.min(box.maxWidth, box.maxHeight / 1.5);
+              return Align(
+                alignment: Alignment.topLeft,
+                child: SizedBox(
+                  width: width,
+                  height: width * 1.5,
+                  child: Stack(
+                    children: [
+                      InkWell(
+                        onTap: onOpen,
+                        child: BookCover(
+                          width: width,
+                          url: book.coverPath == null
+                              ? null
+                              : apiUrl(book.coverPath!),
+                          title: book.title,
+                        ),
+                      ),
+                      Positioned(
+                        right: 8,
+                        bottom: 8,
+                        child: book.inLibrary
+                            ? Tooltip(
+                                message: l10n.communityHave,
+                                child: CircleAvatar(
+                                  radius: 17,
+                                  backgroundColor: BabelColors.canvas
+                                      .withValues(alpha: 0.85),
+                                  child: Icon(
+                                    Icons.check,
+                                    size: 19,
+                                    color: BabelColors.gold,
+                                  ),
+                                ),
+                              )
+                            : Tooltip(
+                                message: l10n.ao3Add,
+                                child: InkWell(
+                                  customBorder: const CircleBorder(),
+                                  onTap: adding ? null : onAdd,
+                                  child: CircleAvatar(
+                                    radius: 19,
+                                    backgroundColor: BabelColors.gold,
+                                    child: adding
+                                        ? SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: BabelColors.canvas,
+                                            ),
+                                          )
+                                        : Icon(
+                                            Icons.add,
+                                            size: 22,
+                                            color: BabelColors.canvas,
+                                          ),
+                                  ),
+                                ),
+                              ),
+                      ),
+                      Positioned(
+                        right: 4,
+                        top: 4,
+                        child: IconButton(
+                          tooltip: l10n.reportFileTitle,
+                          onPressed: onReport,
+                          visualDensity: VisualDensity.compact,
+                          style: IconButton.styleFrom(
                             backgroundColor: BabelColors.canvas.withValues(
-                              alpha: 0.85,
-                            ),
-                            child: Icon(
-                              Icons.check,
-                              size: 19,
-                              color: BabelColors.gold,
+                              alpha: 0.55,
                             ),
                           ),
-                        )
-                      : Tooltip(
-                          message: l10n.ao3Add,
-                          child: InkWell(
-                            customBorder: const CircleBorder(),
-                            onTap: adding ? null : onAdd,
-                            child: CircleAvatar(
-                              radius: 19,
-                              backgroundColor: BabelColors.gold,
-                              child: adding
-                                  ? SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: BabelColors.canvas,
-                                      ),
-                                    )
-                                  : Icon(
-                                      Icons.add,
-                                      size: 22,
-                                      color: BabelColors.canvas,
-                                    ),
-                            ),
+                          icon: Icon(
+                            Icons.flag_outlined,
+                            size: 16,
+                            color: BabelColors.textSecondary,
                           ),
                         ),
-                ),
-                Positioned(
-                  right: 4,
-                  top: 4,
-                  child: IconButton(
-                    tooltip: l10n.reportFileTitle,
-                    onPressed: onReport,
-                    visualDensity: VisualDensity.compact,
-                    style: IconButton.styleFrom(
-                      backgroundColor: BabelColors.canvas.withValues(
-                        alpha: 0.55,
                       ),
-                    ),
-                    icon: Icon(
-                      Icons.flag_outlined,
-                      size: 16,
-                      color: BabelColors.textSecondary,
-                    ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
         const SizedBox(height: 8),

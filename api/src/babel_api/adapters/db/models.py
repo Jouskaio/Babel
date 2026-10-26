@@ -168,6 +168,8 @@ class StoredFileRow(Base):
     authors: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
     # From the file itself (EPUB dc:subject, ComicInfo genre); None until read.
     subjects: Mapped[list[str] | None] = mapped_column(JSON)
+    # A fanfiction, read from the file the first time the community library needs to know.
+    fanfic: Mapped[bool | None] = mapped_column()
 
 
 class BlockedFileRow(Base):
