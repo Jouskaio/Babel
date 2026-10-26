@@ -6908,7 +6908,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.79.1"
+    "version": "0.79.2"
   },
   "openapi": "3.1.0",
   "paths": {

@@ -1,0 +1,1 @@
+Importing several files: three files are read and uploaded at a time, and the reason of each failure is shown (size, connection, busy server). The maximum file size is now 1 GB
