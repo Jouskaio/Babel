@@ -411,6 +411,24 @@ async def get_koreader_status(
     )
 
 
+class KoreaderBookStatsResponse(BaseModel):
+    read_seconds: int = Field(description="Time read on the e-reader")
+    read_pages: int = Field(description="Pages read on the e-reader")
+    last_opened: datetime | None
+
+
+@account_router.get("/books/{item_id}", operation_id="getKoreaderBookStats")
+async def get_koreader_book_stats(
+    item_id: UUID, user_id: CurrentUserId, koreader: KoreaderServiceDep
+) -> KoreaderBookStatsResponse:
+    """What KOReader's statistics say about one of your library books."""
+    try:
+        seconds, pages, opened = await koreader.book_stats(user_id, item_id)
+    except NotFoundError:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No such book") from None
+    return KoreaderBookStatsResponse(read_seconds=seconds, read_pages=pages, last_opened=opened)
+
+
 @account_router.get("/unknown", operation_id="listKoreaderUnknownBooks")
 async def list_koreader_unknown(
     user_id: CurrentUserId, koreader: KoreaderServiceDep

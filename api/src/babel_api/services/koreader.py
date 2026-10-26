@@ -231,12 +231,17 @@ class KoreaderService:
         """Reading statistics sent by KOReader's Babel plugin."""
         seen = {row.md5 for row in await self._repo.stat_books(user_id)}
         await self._repo.save_stats(user_id, books, days)
-        for md5 in {str(b["md5"]) for b in books} - seen:
-            # A book the e-reader reports for the first time, and Babel has: it is on it.
+        for book in books:
+            md5 = str(book["md5"])
             try:
-                await self._sync.mark_ereader(user_id, await self._item_of(user_id, md5))
+                item_id = await self._item_of(user_id, md5)
             except NotFoundError:
                 continue
+            if md5 not in seen:
+                # A book the e-reader reports for the first time, and Babel has: it is on it.
+                await self._sync.mark_ereader(user_id, item_id)
+            if int(str(book.get("total_read_time") or 0)) > 0:
+                await self._sync.start_reading(user_id, item_id)
         await self._repo.mark(user_id)
         await self._repo.commit()
         await self.adopt_quietly(user_id)
@@ -310,6 +315,15 @@ class KoreaderService:
             by_sha[sha] = md5
         await self._repo.commit()
         return by_sha
+
+    async def book_stats(self, user_id: UUID, item_id: UUID) -> tuple[int, int, datetime | None]:
+        """What the e-reader's statistics say about a library book: seconds, pages, last opened."""
+        item = await self._files.get_item(item_id)
+        if item is None or item.user_id != user_id:
+            raise NotFoundError
+        if item.sha256 is None:
+            return 0, 0, None
+        return await self._repo.book_totals(user_id, list(await self._repo.hashes([item.sha256])))
 
     async def adopt_quietly(self, user_id: UUID) -> None:
         """[adopt], where a failure must not break what the plugin was doing."""

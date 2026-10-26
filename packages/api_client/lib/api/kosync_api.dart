@@ -113,6 +113,63 @@ class KosyncApi {
     return null;
   }
 
+  /// Get Koreader Book Stats
+  ///
+  /// What KOReader's statistics say about one of your library books.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  Future<Response> getKoreaderBookStatsWithHttpInfo(String itemId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/me/koreader/books/{item_id}'
+      .replaceAll('{item_id}', itemId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get Koreader Book Stats
+  ///
+  /// What KOReader's statistics say about one of your library books.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  Future<KoreaderBookStatsResponse?> getKoreaderBookStats(String itemId,) async {
+    final response = await getKoreaderBookStatsWithHttpInfo(itemId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'KoreaderBookStatsResponse',) as KoreaderBookStatsResponse;
+    
+    }
+    return null;
+  }
+
   /// Get Koreader Status
   ///
   /// Whether KOReader is syncing: when it last called, with which e-readers, and the books.

@@ -1374,5 +1374,7 @@
   "koreaderOnEreader": "{count} book(s) marked \"On my e-reader\" in your Babel library.",
   "@koreaderOnEreader": {"placeholders": {"count": {"type": "int"}}},
   "koreaderProblems": "Part of the state could not be read ({parts}). Tell the administrator.",
-  "@koreaderProblems": {"placeholders": {"parts": {"type": "String"}}}
+  "@koreaderProblems": {"placeholders": {"parts": {"type": "String"}}},
+  "koreaderBookRead": "Read on the e-reader: {spent}, {pages} pages",
+  "@koreaderBookRead": {"placeholders": {"spent": {"type": "String"}, "pages": {"type": "int"}}}
 }

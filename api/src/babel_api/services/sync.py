@@ -186,6 +186,27 @@ class SyncService:
         await self._sync.touch_device(device_id, datetime.now(UTC))
         await self._sync.commit()
 
+    async def start_reading(self, user_id: UUID, item_id: UUID) -> bool:
+        """A book read on the e-reader is "reading", unless the reader already said where they
+        are with it (finished, abandoned, or reading already)."""
+        item = await self._files.get_item(item_id)
+        if (
+            item is None
+            or item.user_id != user_id
+            or item.state.status not in (None, ReadingStatus.TO_READ)
+        ):
+            return False
+        now = datetime.now(UTC)
+        await self._store_state(
+            item,
+            self._advance(
+                item.state, ReadingStatus.READING, item.state.progress, now, item.state.hidden
+            ),
+            None,
+        )
+        await self._files.commit()
+        return True
+
     async def mark_ereader(self, user_id: UUID, item_id: UUID) -> bool:
         """The book is on the reader's e-reader (it just came from there): say so. False when
         it already was, or is not theirs."""
@@ -376,7 +397,9 @@ class SyncService:
             finished = None
         return ReadingState(status, progress, when, started, finished, hidden)
 
-    async def _store_state(self, item: LibraryItem, state: ReadingState, device_id: UUID) -> None:
+    async def _store_state(
+        self, item: LibraryItem, state: ReadingState, device_id: UUID | None
+    ) -> None:
         updated = await self._files.save_state(item.id, state)
         await self._sync.record(
             item.user_id,

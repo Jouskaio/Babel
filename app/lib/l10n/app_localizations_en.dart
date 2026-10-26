@@ -4171,4 +4171,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String koreaderProblems(String parts) {
     return 'Part of the state could not be read ($parts). Tell the administrator.';
   }
+
+  @override
+  String koreaderBookRead(String spent, int pages) {
+    return 'Read on the e-reader: $spent, $pages pages';
+  }
 }

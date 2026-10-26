@@ -334,6 +334,8 @@ class ApiClient {
           return KnownVolumeResponse.fromJson(value);
         case 'KoreaderBookResponse':
           return KoreaderBookResponse.fromJson(value);
+        case 'KoreaderBookStatsResponse':
+          return KoreaderBookStatsResponse.fromJson(value);
         case 'KoreaderDeviceResponse':
           return KoreaderDeviceResponse.fromJson(value);
         case 'KoreaderLinkBody':

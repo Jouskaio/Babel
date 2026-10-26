@@ -778,6 +778,21 @@ class _BookActions extends ConsumerStatefulWidget {
 
 class _BookActionsState extends ConsumerState<_BookActions> {
   double? _progress;
+
+  /// What the e-reader's statistics say about this book (nothing for most books).
+  late final Future<KoreaderBookStatsResponse?> _readerStats =
+      _loadReaderStats();
+
+  Future<KoreaderBookStatsResponse?> _loadReaderStats() async {
+    try {
+      return await ref
+          .read(kosyncApiProvider)
+          .getKoreaderBookStats(widget.item.id);
+    } on Object {
+      return null;
+    }
+  }
+
   late final Future<bool> _onDevice = switch ((
     widget.item.sha256,
     widget.item.format,
@@ -986,6 +1001,27 @@ class _BookActionsState extends ConsumerState<_BookActions> {
                 if (item.ereader) l10n.ereaderShort.toUpperCase(),
               ].join(' · '),
               style: BabelText.label(10, color: BabelColors.textSecondary),
+            ),
+            FutureBuilder<KoreaderBookStatsResponse?>(
+              future: _readerStats,
+              builder: (context, snapshot) {
+                final stats = snapshot.data;
+                if (stats == null || stats.readSeconds <= 0) {
+                  return const SizedBox.shrink();
+                }
+                final hours = stats.readSeconds ~/ 3600;
+                final minutes = (stats.readSeconds % 3600) ~/ 60;
+                final spent = hours > 0
+                    ? '$hours h $minutes min'
+                    : '$minutes min';
+                return Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    l10n.koreaderBookRead(spent, stats.readPages),
+                    style: BabelText.body(13, color: BabelColors.gold),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 24),
             FollowPanel(itemId: item.id),
