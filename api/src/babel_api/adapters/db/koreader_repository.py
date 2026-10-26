@@ -262,6 +262,24 @@ class SqlKoreaderRepository:
             stat.seconds, stat.pages = seconds, pages
         await self._session.flush()
 
+    async def book_totals(self, user_id: UUID, md5s: list[str]) -> tuple[int, int, datetime | None]:
+        """Seconds and pages read of a book (all its identifiers), and when it was last opened."""
+        if not md5s:
+            return 0, 0, None
+        sums = await self._session.execute(
+            select(
+                func.coalesce(func.sum(KoreaderDayStatRow.seconds), 0),
+                func.coalesce(func.sum(KoreaderDayStatRow.pages), 0),
+            ).where(KoreaderDayStatRow.user_id == user_id, KoreaderDayStatRow.md5.in_(md5s))
+        )
+        seconds, pages = sums.one()
+        opened = await self._session.scalar(
+            select(func.max(KoreaderBookStatRow.last_open)).where(
+                KoreaderBookStatRow.user_id == user_id, KoreaderBookStatRow.md5.in_(md5s)
+            )
+        )
+        return int(seconds), int(pages), _aware(opened)
+
     async def stats_overview(self, user_id: UUID) -> tuple[datetime | None, int, int]:
         """When statistics last came, for how many books, and the time they add up to."""
         latest = await self._session.scalar(

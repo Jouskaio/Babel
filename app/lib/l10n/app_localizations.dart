@@ -6973,6 +6973,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Une partie de l\'état n\'a pas pu être lue ({parts}). Dis-le à l\'administrateur.'**
   String koreaderProblems(String parts);
+
+  /// No description provided for @koreaderBookRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu sur la liseuse : {spent}, {pages} pages'**
+  String koreaderBookRead(String spent, int pages);
 }
 
 class _AppLocalizationsDelegate

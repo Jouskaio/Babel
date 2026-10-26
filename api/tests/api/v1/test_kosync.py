@@ -1,6 +1,7 @@
 """KOReader's progress sync."""
 
 import hashlib
+import uuid
 from pathlib import Path
 
 import pytest
@@ -552,3 +553,32 @@ def test_a_book_sent_after_its_progress_picks_that_progress_up(
     (recent,) = after["recent"]
     assert recent["title"] == "Jane Eyre"
     assert recent["percent"] == pytest.approx(40.0)
+
+
+def test_a_book_read_on_the_e_reader_is_reading_and_has_its_stats(
+    client: TestClient, ada: dict[str, str], tmp_path: Path
+) -> None:
+    content = epub(title="Jane Eyre", isbn=None)
+    item = upload(client, ada, content).json()["item"]
+    path = tmp_path / "jane.epub"
+    path.write_bytes(content)
+    document = partial_md5(path)
+    password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
+    key = {
+        "x-auth-user": "ada@example.com",
+        "x-auth-key": hashlib.md5(password.encode(), usedforsecurity=False).hexdigest(),
+    }
+    # The library's file gets its KOReader identifier the first time it is looked up.
+    client.post("/v1/kosync/library/missing", json={"documents": [document]}, headers=key)
+    assert client.get("/v1/library", headers=ada).json()[0]["status"] is None
+
+    stats = {
+        "device": "gocolor7",
+        "books": [{"md5": document, "title": "Jane Eyre", "total_read_time": 600, "pages": 300}],
+        "days": [{"md5": document, "day": "2026-10-20", "seconds": 600, "pages": 12}],
+    }
+    assert client.put("/v1/kosync/syncs/stats", json=stats, headers=key).status_code == 200
+    assert client.get("/v1/library", headers=ada).json()[0]["status"] == "reading"
+    totals = client.get(f"/v1/me/koreader/books/{item['id']}", headers=ada).json()
+    assert (totals["read_seconds"], totals["read_pages"]) == (600, 12)
+    assert client.get(f"/v1/me/koreader/books/{uuid.uuid4()}", headers=ada).status_code == 404

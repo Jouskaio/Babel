@@ -3103,6 +3103,39 @@
         "title": "KoreaderBookResponse",
         "type": "object"
       },
+      "KoreaderBookStatsResponse": {
+        "properties": {
+          "last_opened": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Opened"
+          },
+          "read_pages": {
+            "description": "Pages read on the e-reader",
+            "title": "Read Pages",
+            "type": "integer"
+          },
+          "read_seconds": {
+            "description": "Time read on the e-reader",
+            "title": "Read Seconds",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "read_seconds",
+          "read_pages",
+          "last_opened"
+        ],
+        "title": "KoreaderBookStatsResponse",
+        "type": "object"
+      },
       "KoreaderDeviceResponse": {
         "properties": {
           "last_seen_at": {
@@ -12178,6 +12211,55 @@
           }
         ],
         "summary": "Get Koreader",
+        "tags": [
+          "kosync"
+        ]
+      }
+    },
+    "/v1/me/koreader/books/{item_id}": {
+      "get": {
+        "description": "What KOReader's statistics say about one of your library books.",
+        "operationId": "getKoreaderBookStats",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KoreaderBookStatsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Koreader Book Stats",
         "tags": [
           "kosync"
         ]

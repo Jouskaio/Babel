@@ -125,6 +125,7 @@ part 'model/kavita_link_response.dart';
 part 'model/kavita_status.dart';
 part 'model/known_volume_response.dart';
 part 'model/koreader_book_response.dart';
+part 'model/koreader_book_stats_response.dart';
 part 'model/koreader_device_response.dart';
 part 'model/koreader_link_body.dart';
 part 'model/koreader_password_response.dart';

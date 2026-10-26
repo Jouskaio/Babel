@@ -11,6 +11,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**forgetKoreaderBook**](KosyncApi.md#forgetkoreaderbook) | **DELETE** /v1/me/koreader/unknown/{md5} | Forget Koreader Book
 [**getKoreader**](KosyncApi.md#getkoreader) | **GET** /v1/me/koreader | Get Koreader
+[**getKoreaderBookStats**](KosyncApi.md#getkoreaderbookstats) | **GET** /v1/me/koreader/books/{item_id} | Get Koreader Book Stats
 [**getKoreaderStatus**](KosyncApi.md#getkoreaderstatus) | **GET** /v1/me/koreader/status | Get Koreader Status
 [**linkKoreaderBook**](KosyncApi.md#linkkoreaderbook) | **POST** /v1/me/koreader/link | Link Koreader Book
 [**listKoreaderUnknownBooks**](KosyncApi.md#listkoreaderunknownbooks) | **GET** /v1/me/koreader/unknown | List Koreader Unknown
@@ -98,6 +99,55 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**KoreaderResponse**](KoreaderResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getKoreaderBookStats**
+> KoreaderBookStatsResponse getKoreaderBookStats(itemId)
+
+Get Koreader Book Stats
+
+What KOReader's statistics say about one of your library books.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = KosyncApi();
+final itemId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+
+try {
+    final result = api_instance.getKoreaderBookStats(itemId);
+    print(result);
+} catch (e) {
+    print('Exception when calling KosyncApi->getKoreaderBookStats: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **itemId** | **String**|  | 
+
+### Return type
+
+[**KoreaderBookStatsResponse**](KoreaderBookStatsResponse.md)
 
 ### Authorization
 

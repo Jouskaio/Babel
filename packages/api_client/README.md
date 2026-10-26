@@ -130,6 +130,7 @@ Class | Method | HTTP request | Description
 *KavitaApi* | [**unlinkKavita**](doc//KavitaApi.md#unlinkkavita) | **DELETE** /v1/me/kavita | Unlink Kavita
 *KosyncApi* | [**forgetKoreaderBook**](doc//KosyncApi.md#forgetkoreaderbook) | **DELETE** /v1/me/koreader/unknown/{md5} | Forget Koreader Book
 *KosyncApi* | [**getKoreader**](doc//KosyncApi.md#getkoreader) | **GET** /v1/me/koreader | Get Koreader
+*KosyncApi* | [**getKoreaderBookStats**](doc//KosyncApi.md#getkoreaderbookstats) | **GET** /v1/me/koreader/books/{item_id} | Get Koreader Book Stats
 *KosyncApi* | [**getKoreaderStatus**](doc//KosyncApi.md#getkoreaderstatus) | **GET** /v1/me/koreader/status | Get Koreader Status
 *KosyncApi* | [**linkKoreaderBook**](doc//KosyncApi.md#linkkoreaderbook) | **POST** /v1/me/koreader/link | Link Koreader Book
 *KosyncApi* | [**listKoreaderUnknownBooks**](doc//KosyncApi.md#listkoreaderunknownbooks) | **GET** /v1/me/koreader/unknown | List Koreader Unknown
@@ -317,6 +318,7 @@ Class | Method | HTTP request | Description
  - [KavitaStatus](doc//KavitaStatus.md)
  - [KnownVolumeResponse](doc//KnownVolumeResponse.md)
  - [KoreaderBookResponse](doc//KoreaderBookResponse.md)
+ - [KoreaderBookStatsResponse](doc//KoreaderBookStatsResponse.md)
  - [KoreaderDeviceResponse](doc//KoreaderDeviceResponse.md)
  - [KoreaderLinkBody](doc//KoreaderLinkBody.md)
  - [KoreaderPasswordResponse](doc//KoreaderPasswordResponse.md)
