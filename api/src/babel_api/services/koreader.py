@@ -9,6 +9,7 @@ apps: KOReader's own position (an XPointer) is kept to give back to KOReader its
 
 import asyncio
 import hashlib
+import logging
 import secrets
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
@@ -42,6 +43,8 @@ class KoreaderStatus:
     stats_seconds: int = 0
     ereader_books: int = 0
 
+
+logger = logging.getLogger(__name__)
 
 PREFIX = "koreader:"
 DEVICE_PREFIX = "KOReader · "
@@ -241,7 +244,10 @@ class KoreaderService:
     # ------------------------------------------------------------ what the reader can check
     async def status(self, user_id: UUID) -> "KoreaderStatus":
         """Whether KOReader has called, which books it synced last, and its devices."""
-        await self.adopt(user_id)
+        try:
+            await self.adopt(user_id)
+        except Exception:
+            logger.exception("KOReader: could not adopt the kept positions")
         devices = [d for d in await self._sync.devices(user_id) if d.name.startswith(DEVICE_PREFIX)]
         stats_at, stats_books, stats_seconds = await self._repo.stats_overview(user_id)
         return KoreaderStatus(
@@ -251,11 +257,18 @@ class KoreaderService:
             contact=await self._repo.contact(user_id),
             devices=[(d.name[len(DEVICE_PREFIX) :], d.last_seen_at) for d in devices],
             recent=await self._repo.recent(user_id),
-            unknown_books=len(await self.unknown(user_id)),
+            unknown_books=await self._unknown_count(user_id),
             ereader_books=sum(
                 1 for i in await self._files.list_items(user_id) if i.file is not None and i.ereader
             ),
         )
+
+    async def _unknown_count(self, user_id: UUID) -> int:
+        try:
+            return len(await self.unknown(user_id))
+        except Exception:
+            logger.exception("KOReader: could not list the unknown books")
+            return await self._repo.orphan_count(user_id)
 
     async def identifiers(self, shas: list[str]) -> dict[str, str]:
         """KOReader's identifier (partial md5) of each stored file, worked out once and kept."""
@@ -264,7 +277,10 @@ class KoreaderService:
             path = self._store.path(sha)
             if path is None:
                 continue
-            md5 = await asyncio.to_thread(partial_md5, path)
+            try:
+                md5 = await asyncio.to_thread(partial_md5, path)
+            except OSError:
+                continue
             await self._repo.save_hash(sha, md5)
             by_sha[sha] = md5
         await self._repo.commit()
@@ -370,7 +386,10 @@ class KoreaderService:
                 path = self._store.path(sha)
                 if path is None:
                     continue
-                md5 = await asyncio.to_thread(partial_md5, path)
+                try:
+                    md5 = await asyncio.to_thread(partial_md5, path)
+                except OSError:
+                    continue  # a file the store lost: the others still match
                 await self._repo.save_hash(sha, md5)
                 known[md5] = sha
             await self._repo.commit()

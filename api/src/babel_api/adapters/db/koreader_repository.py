@@ -5,6 +5,7 @@ from datetime import UTC, date, datetime
 from uuid import UUID
 
 from sqlalchemy import delete, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from babel_api.adapters.db.models import (
@@ -292,9 +293,15 @@ class SqlKoreaderRepository:
         return {md5: sha for md5, sha in rows.all()}
 
     async def save_hash(self, sha256: str, md5: str) -> None:
-        if await self._session.get(KoreaderHashRow, sha256) is None:
-            self._session.add(KoreaderHashRow(sha256=sha256, md5=md5))
-            await self._session.flush()
+        """Keeps a file's identifier; two requests working it out at once is not an error."""
+        if await self._session.get(KoreaderHashRow, sha256) is not None:
+            return
+        try:
+            async with self._session.begin_nested():
+                self._session.add(KoreaderHashRow(sha256=sha256, md5=md5))
+                await self._session.flush()
+        except IntegrityError:
+            pass
 
     async def commit(self) -> None:
         await self._session.commit()
