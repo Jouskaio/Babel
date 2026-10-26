@@ -6967,6 +6967,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count} livre(s) marqué(s) « Sur ma liseuse » dans ta bibliothèque Babel.'**
   String koreaderOnEreader(int count);
+
+  /// No description provided for @koreaderProblems.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une partie de l\'état n\'a pas pu être lue ({parts}). Dis-le à l\'administrateur.'**
+  String koreaderProblems(String parts);
 }
 
 class _AppLocalizationsDelegate

@@ -224,6 +224,7 @@ async def library_missing(
 ) -> dict[str, list[str]]:
     """Which of these e-reader books (KOReader's identifiers) Babel does not have."""
     await koreader.seen(user_id, body.device)
+    await koreader.adopt_quietly(user_id)
     return {"missing": await koreader.missing(user_id, body.documents)}
 
 
@@ -246,7 +247,7 @@ async def library_upload(
 
     await koreader.seen(user_id, device)
     result = await files.import_file(user_id, chunks(), name, ereader=True)
-    await koreader.adopt(user_id)
+    await koreader.adopt_quietly(user_id)
     return {"deduplicated": result.deduplicated}
 
 
@@ -330,6 +331,9 @@ class KoreaderStatusResponse(BaseModel):
     stats_books: int = Field(description="Books they cover")
     stats_seconds: int = Field(description="Reading time they add up to")
     ereader_books: int = Field(description='Library books marked "on my e-reader"')
+    problems: list[str] = Field(
+        default_factory=list, description="Parts of this state that could not be read"
+    )
 
 
 class KoreaderUnknownBookResponse(BaseModel):
@@ -392,6 +396,7 @@ async def get_koreader_status(
         stats_books=status.stats_books,
         stats_seconds=status.stats_seconds,
         ereader_books=status.ereader_books,
+        problems=list(status.problems),
         recent=[
             KoreaderBookResponse(
                 item_id=r.item_id,

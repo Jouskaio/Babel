@@ -11,6 +11,7 @@ import asyncio
 import hashlib
 import logging
 import secrets
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from pathlib import PurePosixPath
@@ -42,6 +43,8 @@ class KoreaderStatus:
     stats_books: int = 0
     stats_seconds: int = 0
     ereader_books: int = 0
+    # The parts of this state that could not be worked out (and why), instead of no state at all.
+    problems: tuple[str, ...] = ()
 
 
 logger = logging.getLogger(__name__)
@@ -236,6 +239,7 @@ class KoreaderService:
                 continue
         await self._repo.mark(user_id)
         await self._repo.commit()
+        await self.adopt_quietly(user_id)
 
     async def orphan(self, user_id: UUID, document: str) -> OrphanProgress | None:
         """What KOReader last sent for a book Babel does not have."""
@@ -243,24 +247,45 @@ class KoreaderService:
 
     # ------------------------------------------------------------ what the reader can check
     async def status(self, user_id: UUID) -> "KoreaderStatus":
-        """Whether KOReader has called, which books it synced last, and its devices."""
-        try:
-            await self.adopt(user_id)
-        except Exception:
-            logger.exception("KOReader: could not adopt the kept positions")
-        devices = [d for d in await self._sync.devices(user_id) if d.name.startswith(DEVICE_PREFIX)]
-        stats_at, stats_books, stats_seconds = await self._repo.stats_overview(user_id)
-        return KoreaderStatus(
-            stats_at=stats_at,
-            stats_books=stats_books,
-            stats_seconds=stats_seconds,
-            contact=await self._repo.contact(user_id),
-            devices=[(d.name[len(DEVICE_PREFIX) :], d.last_seen_at) for d in devices],
-            recent=await self._repo.recent(user_id),
-            unknown_books=await self._unknown_count(user_id),
-            ereader_books=sum(
+        """Whether KOReader has called, which books it synced last, and its devices. Each part
+        is worked out on its own: one that fails is reported in ``problems`` and the rest still
+        answer."""
+        problems: list[str] = []
+
+        async def part[T](name: str, work: Callable[[], Awaitable[T]], fallback: T) -> T:
+            try:
+                return await work()
+            except Exception as error:
+                logger.exception("KOReader status: %s failed", name)
+                problems.append(f"{name}: {type(error).__name__}")
+                await self._repo.rollback()
+                return fallback
+
+        async def devices() -> list[tuple[str, datetime]]:
+            return [
+                (d.name[len(DEVICE_PREFIX) :], d.last_seen_at)
+                for d in await self._sync.devices(user_id)
+                if d.name.startswith(DEVICE_PREFIX)
+            ]
+
+        async def on_ereader() -> int:
+            return sum(
                 1 for i in await self._files.list_items(user_id) if i.file is not None and i.ereader
+            )
+
+        stats = await part("statistics", lambda: self._repo.stats_overview(user_id), (None, 0, 0))
+        return KoreaderStatus(
+            stats_at=stats[0],
+            stats_books=stats[1],
+            stats_seconds=stats[2],
+            contact=await part(
+                "contact", lambda: self._repo.contact(user_id), KoreaderContact(None, None)
             ),
+            devices=await part("devices", devices, []),
+            recent=await part("recent", lambda: self._repo.recent(user_id), []),
+            unknown_books=await part("unknown", lambda: self._unknown_count(user_id), 0),
+            ereader_books=await part("ereader", on_ereader, 0),
+            problems=tuple(problems),
         )
 
     async def _unknown_count(self, user_id: UUID) -> int:
@@ -285,6 +310,14 @@ class KoreaderService:
             by_sha[sha] = md5
         await self._repo.commit()
         return by_sha
+
+    async def adopt_quietly(self, user_id: UUID) -> None:
+        """[adopt], where a failure must not break what the plugin was doing."""
+        try:
+            await self.adopt(user_id)
+        except Exception:
+            logger.exception("KOReader: could not adopt the kept positions")
+            await self._repo.rollback()
 
     async def adopt(self, user_id: UUID) -> int:
         """Positions kept for books Babel did not have, whose book has come since (sent from the

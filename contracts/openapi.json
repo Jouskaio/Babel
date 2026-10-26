@@ -3252,6 +3252,14 @@
             "description": "The last time KOReader asked for a book that is not in your library",
             "title": "Last Unmatched At"
           },
+          "problems": {
+            "description": "Parts of this state that could not be read",
+            "items": {
+              "type": "string"
+            },
+            "title": "Problems",
+            "type": "array"
+          },
           "recent": {
             "description": "The books it synced last",
             "items": {

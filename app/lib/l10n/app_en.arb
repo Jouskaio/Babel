@@ -1372,5 +1372,7 @@
   "fanficPageCreate": "Create a page for this fanfiction",
   "fanficPageHint": "Fanfictions are in no catalog: Babel makes a page in its name, where your reviews and notes gather.",
   "koreaderOnEreader": "{count} book(s) marked \"On my e-reader\" in your Babel library.",
-  "@koreaderOnEreader": {"placeholders": {"count": {"type": "int"}}}
+  "@koreaderOnEreader": {"placeholders": {"count": {"type": "int"}}},
+  "koreaderProblems": "Part of the state could not be read ({parts}). Tell the administrator.",
+  "@koreaderProblems": {"placeholders": {"parts": {"type": "String"}}}
 }

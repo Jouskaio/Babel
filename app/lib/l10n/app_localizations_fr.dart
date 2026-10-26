@@ -4200,4 +4200,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String koreaderOnEreader(int count) {
     return '$count livre(s) marqué(s) « Sur ma liseuse » dans ta bibliothèque Babel.';
   }
+
+  @override
+  String koreaderProblems(String parts) {
+    return 'Une partie de l\'état n\'a pas pu être lue ($parts). Dis-le à l\'administrateur.';
+  }
 }

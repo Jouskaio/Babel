@@ -17,6 +17,7 @@ class KoreaderStatusResponse {
     required this.ereaderBooks,
     this.lastSeenAt,
     this.lastUnmatchedAt,
+    this.problems = const [],
     this.recent = const [],
     this.statsAt,
     required this.statsBooks,
@@ -34,6 +35,9 @@ class KoreaderStatusResponse {
 
   /// The last time KOReader asked for a book that is not in your library
   DateTime? lastUnmatchedAt;
+
+  /// Parts of this state that could not be read
+  List<String> problems;
 
   /// The books it synced last
   List<KoreaderBookResponse> recent;
@@ -56,6 +60,7 @@ class KoreaderStatusResponse {
     other.ereaderBooks == ereaderBooks &&
     other.lastSeenAt == lastSeenAt &&
     other.lastUnmatchedAt == lastUnmatchedAt &&
+    _deepEquality.equals(other.problems, problems) &&
     _deepEquality.equals(other.recent, recent) &&
     other.statsAt == statsAt &&
     other.statsBooks == statsBooks &&
@@ -69,6 +74,7 @@ class KoreaderStatusResponse {
     (ereaderBooks.hashCode) +
     (lastSeenAt == null ? 0 : lastSeenAt!.hashCode) +
     (lastUnmatchedAt == null ? 0 : lastUnmatchedAt!.hashCode) +
+    (problems.hashCode) +
     (recent.hashCode) +
     (statsAt == null ? 0 : statsAt!.hashCode) +
     (statsBooks.hashCode) +
@@ -76,7 +82,7 @@ class KoreaderStatusResponse {
     (unknownBooks.hashCode);
 
   @override
-  String toString() => 'KoreaderStatusResponse[devices=$devices, ereaderBooks=$ereaderBooks, lastSeenAt=$lastSeenAt, lastUnmatchedAt=$lastUnmatchedAt, recent=$recent, statsAt=$statsAt, statsBooks=$statsBooks, statsSeconds=$statsSeconds, unknownBooks=$unknownBooks]';
+  String toString() => 'KoreaderStatusResponse[devices=$devices, ereaderBooks=$ereaderBooks, lastSeenAt=$lastSeenAt, lastUnmatchedAt=$lastUnmatchedAt, problems=$problems, recent=$recent, statsAt=$statsAt, statsBooks=$statsBooks, statsSeconds=$statsSeconds, unknownBooks=$unknownBooks]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -92,6 +98,7 @@ class KoreaderStatusResponse {
     } else {
       json[r'last_unmatched_at'] = null;
     }
+      json[r'problems'] = this.problems;
       json[r'recent'] = this.recent;
     if (this.statsAt != null) {
       json[r'stats_at'] = this.statsAt!.toUtc().toIso8601String();
@@ -127,6 +134,9 @@ class KoreaderStatusResponse {
         ereaderBooks: mapValueOfType<int>(json, r'ereader_books')!,
         lastSeenAt: mapDateTime(json, r'last_seen_at', r''),
         lastUnmatchedAt: mapDateTime(json, r'last_unmatched_at', r''),
+        problems: json[r'problems'] is Iterable
+            ? (json[r'problems'] as Iterable).cast<String>().toList(growable: false)
+            : const [],
         recent: KoreaderBookResponse.listFromJson(json[r'recent']),
         statsAt: mapDateTime(json, r'stats_at', r''),
         statsBooks: mapValueOfType<int>(json, r'stats_books')!,

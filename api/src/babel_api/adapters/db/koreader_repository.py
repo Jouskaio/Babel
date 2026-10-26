@@ -303,5 +303,8 @@ class SqlKoreaderRepository:
         except IntegrityError:
             pass
 
+    async def rollback(self) -> None:
+        await self._session.rollback()
+
     async def commit(self) -> None:
         await self._session.commit()

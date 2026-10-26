@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **ereaderBooks** | **int** | Library books marked \"on my e-reader\" | 
 **lastSeenAt** | [**DateTime**](DateTime.md) | The last time KOReader called Babel; null if it never did | [optional] 
 **lastUnmatchedAt** | [**DateTime**](DateTime.md) | The last time KOReader asked for a book that is not in your library | [optional] 
+**problems** | **List<String>** | Parts of this state that could not be read | [optional] [default to const []]
 **recent** | [**List<KoreaderBookResponse>**](KoreaderBookResponse.md) | The books it synced last | [default to const []]
 **statsAt** | [**DateTime**](DateTime.md) | When KOReader's statistics last came | [optional] 
 **statsBooks** | **int** | Books they cover | 
