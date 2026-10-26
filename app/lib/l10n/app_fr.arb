@@ -2164,5 +2164,7 @@
   "fanficPageCreate": "Créer une fiche pour cette fanfiction",
   "fanficPageHint": "Les fanfictions ne sont dans aucun catalogue : Babel crée une fiche à son nom, où vos avis et notes se rassemblent.",
   "koreaderOnEreader": "{count} livre(s) marqué(s) « Sur ma liseuse » dans ta bibliothèque Babel.",
-  "@koreaderOnEreader": {"placeholders": {"count": {"type": "int"}}}
+  "@koreaderOnEreader": {"placeholders": {"count": {"type": "int"}}},
+  "koreaderProblems": "Une partie de l'état n'a pas pu être lue ({parts}). Dis-le à l'administrateur.",
+  "@koreaderProblems": {"placeholders": {"parts": {"type": "String"}}}
 }

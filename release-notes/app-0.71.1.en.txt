@@ -1,0 +1,1 @@
+Account › KOReader: the sync state answers even if a part fails, and says which one

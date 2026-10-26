@@ -180,6 +180,14 @@ class _SyncStatus extends ConsumerWidget {
               padding: const EdgeInsets.only(top: 10),
               child: Text(l10n.koreaderNoBook, style: BabelText.body(13)),
             ),
+          if (value.problems.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Text(
+                l10n.koreaderProblems(value.problems.join(', ')),
+                style: BabelText.body(12, color: BabelColors.dustyRose),
+              ),
+            ),
           if (value.ereaderBooks > 0)
             Padding(
               padding: const EdgeInsets.only(top: 12),

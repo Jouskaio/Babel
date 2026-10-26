@@ -4166,4 +4166,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String koreaderOnEreader(int count) {
     return '$count book(s) marked \"On my e-reader\" in your Babel library.';
   }
+
+  @override
+  String koreaderProblems(String parts) {
+    return 'Part of the state could not be read ($parts). Tell the administrator.';
+  }
 }
