@@ -1,15 +1,17 @@
 """Importing, downloading and withdrawing book files (ADR 0010)."""
 
+import asyncio
 import hashlib
 import logging
 from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
-from pathlib import Path, PurePath
+from pathlib import Path, PurePath, PurePosixPath
 from typing import Any, Literal
 from uuid import UUID
 
 from babel_api.adapters.files.comics import ComicConverter
+from babel_api.adapters.files.export import LibraryExporter
 from babel_api.domain.catalog import FANFIC_PREFIX, IdentifierKind, SourceWork
 from babel_api.domain.errors import (
     BlockedFileError,
@@ -20,7 +22,7 @@ from babel_api.domain.errors import (
     UnsupportedFileError,
 )
 from babel_api.domain.files import BookFormat, Cover, LibraryItem, ReadingState, StoredFile
-from babel_api.domain.naming import book_filename
+from babel_api.domain.naming import book_filename, clean_name
 from babel_api.domain.ports import (
     BlobStore,
     CatalogRepository,
@@ -121,6 +123,7 @@ class FileService:
         *,
         access: FileAccess,
         community: bool = True,
+        exporter: LibraryExporter | None = None,
         max_bytes: int,
         comics: ComicConverter | None = None,
         fanfic_found: FanficHook | None = None,
@@ -134,6 +137,7 @@ class FileService:
         self._covers = covers
         self._access = access
         self._community = community
+        self._exporter = exporter
         self._max_bytes = max_bytes
         self._comics = comics
 
@@ -581,6 +585,8 @@ class FileService:
         if block:
             await self._files.block(sha256, reason, admin_id, now)
         await self._files.commit()
+        if self._exporter is not None and (path := self._store.path(sha256)) is not None:
+            await asyncio.to_thread(self._exporter.forget, path)
         await self._store.delete(sha256)
 
     # ------------------------------------------------------------ internals
@@ -630,9 +636,31 @@ class FileService:
             device_id,
         )
         await self._files.commit()
+        await self._export(item, path)
         if ao3_work is not None:
             await self._on_fanfic(item, ao3_work)
         return item
+
+    async def _export(self, item: LibraryItem, path: Path | None) -> None:
+        """A clean copy of the book where other tools can read it (when exporting is on)."""
+        if self._exporter is None or item.file is None or path is None:
+            return
+        kind = "comics" if item.file.format in (BookFormat.CBZ, BookFormat.CBR) else "ebooks"
+        author = clean_name(item.authors[0]) if item.authors else ""
+        relative = PurePosixPath(kind, author or "Unknown", book_filename(item))
+        await asyncio.to_thread(self._exporter.export, path, relative, item.file.sha256)
+
+    async def export_all(self) -> int:
+        """Exports every book already in the library (once at start-up; what is there is kept)."""
+        if self._exporter is None:
+            return 0
+        done: set[str] = set()
+        for item in await self._files.list_for_export():
+            if item.file is None or item.file.sha256 in done:
+                continue
+            done.add(item.file.sha256)
+            await self._export(item, self._store.path(item.file.sha256))
+        return len(done)
 
     async def _on_fanfic(self, item: LibraryItem, work_id: str) -> None:
         """A fanfiction of Archive of Our Own was just added: it may be followed for new

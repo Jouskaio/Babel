@@ -398,6 +398,16 @@ class SqlFileRepository:
         )
         return [_to_item(row) for row in rows]
 
+    async def list_for_export(self) -> list[LibraryItem]:
+        """The books of every library whose file is available, oldest first."""
+        rows = await self._session.scalars(
+            select(LibraryItemRow)
+            .join(StoredFileRow, LibraryItemRow.file_sha256 == StoredFileRow.sha256)
+            .where(LibraryItemRow.removed_at.is_(None), StoredFileRow.withdrawn_at.is_(None))
+            .order_by(LibraryItemRow.added_at)
+        )
+        return [_to_item(row) for row in rows]
+
     async def list_items(self, user_id: UUID) -> list[LibraryItem]:
         rows = await self._session.scalars(
             select(LibraryItemRow)

@@ -21,6 +21,9 @@ services:
       BABEL_MAIL_FROM: Babel <contact@jouskaio.me>
       # Book files (ADR 0010), on the NAS share mounted at /srv/babel-files.
       BABEL_FILES_DIR: /data/files
+      # A clean copy of every book (hard links, no extra space) under <share>/library, to browse
+      # in File Station or add as a folder in Kavita or Plex.
+      BABEL_LIBRARY_EXPORT_DIR: /data/files/library
       # Translation of books and long passages (the LibreTranslate below, on the internal network).
       BABEL_TRANSLATE_URL: http://translate:5000
     ports:
