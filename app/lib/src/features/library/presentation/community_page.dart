@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:babel_api_client/api.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,6 @@ import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/back_leading.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/error_retry.dart';
-import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../application/library_controller.dart';
 import 'file_reports.dart';
@@ -27,6 +27,7 @@ class CommunityPage extends ConsumerStatefulWidget {
 
 class _CommunityPageState extends ConsumerState<CommunityPage> {
   final _search = TextEditingController();
+  final _scroll = ScrollController();
   Timer? _debounce;
   final _books = <CommunityBookResponse>[];
   final _adding = <String>{};
@@ -40,12 +41,16 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
   @override
   void initState() {
     super.initState();
+    _scroll.addListener(() {
+      if (_scroll.position.extentAfter < 600) _more();
+    });
     _more();
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
+    _scroll.dispose();
     _search.dispose();
     super.dispose();
   }
@@ -131,61 +136,120 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
         backgroundColor: BabelColors.canvas,
         scrolledUnderElevation: 0,
         leading: const BackLeading(),
-        title: Text(l10n.communityTitle, style: BabelText.heading(24)),
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 760),
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(24, 8, 24, 48),
-            children: [
-              Text(
-                '${l10n.communityHint} ${l10n.communityHint2}',
-                style: BabelText.body(13),
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: _search,
-                onChanged: _onChanged,
-                style: BabelText.body(15, color: BabelColors.textPrimary),
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: l10n.searchHint,
-                ),
-              ),
-              const SizedBox(height: 16),
-              for (final book in _books)
-                _Row(
-                  book: book,
-                  adding: _adding.contains(book.sha256),
-                  onAdd: () => _add(book),
-                  onReport: () =>
-                      reportCommunityFile(context, ref, book.sha256),
-                ),
-              if (_failed)
-                ErrorRetry(onRetry: _more)
-              else if (_loading)
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Center(
-                    child: CircularProgressIndicator(color: BabelColors.gold),
+          constraints: const BoxConstraints(maxWidth: 1100),
+          child: CustomScrollView(
+            controller: _scroll,
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l10n.communityTitle, style: BabelText.title(44)),
+                      const SizedBox(height: 6),
+                      Text(l10n.communityIntro, style: BabelText.body(14)),
+                      const SizedBox(height: 18),
+                      TextField(
+                        controller: _search,
+                        onChanged: _onChanged,
+                        textInputAction: TextInputAction.search,
+                        style: BabelText.body(
+                          16,
+                          color: BabelColors.textPrimary,
+                        ),
+                        cursorColor: BabelColors.gold,
+                        decoration: InputDecoration(
+                          hintText: l10n.searchHint,
+                          hintStyle: BabelText.reading(
+                            16,
+                            color: BabelColors.textSecondary,
+                            italic: true,
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search_rounded,
+                            color: BabelColors.gold,
+                          ),
+                          filled: true,
+                          fillColor: BabelColors.surface,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 16,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(999),
+                            ),
+                            borderSide: BorderSide(color: BabelColors.border),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(999),
+                            ),
+                            borderSide: BorderSide(
+                              color: BabelColors.gold,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 22),
+                    ],
                   ),
-                )
-              else if (_books.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(24),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                sliver: SliverGrid.builder(
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 180,
+                    mainAxisSpacing: 22,
+                    crossAxisSpacing: 18,
+                    mainAxisExtent: 340,
+                  ),
+                  itemCount: _books.length,
+                  itemBuilder: (context, i) {
+                    final book = _books[i];
+                    return _Card(
+                      book: book,
+                      adding: _adding.contains(book.sha256),
+                      onAdd: () => _add(book),
+                      onReport: () =>
+                          reportCommunityFile(context, ref, book.sha256),
+                    );
+                  },
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                  child: _failed
+                      ? ErrorRetry(onRetry: _more)
+                      : _loading
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            color: BabelColors.gold,
+                          ),
+                        )
+                      : _books.isEmpty
+                      ? Text(
+                          _enabled ? l10n.communityEmpty : l10n.communityOff,
+                          style: BabelText.body(15),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 56),
+                sliver: SliverToBoxAdapter(
                   child: Text(
-                    _enabled ? l10n.communityEmpty : l10n.communityOff,
-                    style: BabelText.body(15),
-                  ),
-                )
-              else if (_hasNext)
-                Center(
-                  child: TextButton(
-                    onPressed: _more,
-                    child: Text(l10n.communityMore),
+                    l10n.communityHint2,
+                    style: BabelText.body(12, color: BabelColors.textSecondary),
                   ),
                 ),
+              ),
             ],
           ),
         ),
@@ -194,8 +258,10 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
   }
 }
 
-class _Row extends StatelessWidget {
-  const _Row({
+/// A shared book: its cover with a round button to add it (or a tick when it is already in the
+/// library), its title and author, and a discreet flag to report the file.
+class _Card extends StatelessWidget {
+  const _Card({
     required this.book,
     required this.adding,
     required this.onAdd,
@@ -210,60 +276,105 @@ class _Row extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Row(
-        children: [
-          BookCover(
-            width: 56,
-            url: book.coverPath == null ? null : apiUrl(book.coverPath!),
-            title: book.title,
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, box) => Stack(
               children: [
-                Text(
-                  book.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: BabelText.heading(17),
+                BookCover(
+                  // As wide as the cell, unless the cell is too short for a 2:3 cover.
+                  width: math.min(box.maxWidth, box.maxHeight / 1.5),
+                  url: book.coverPath == null ? null : apiUrl(book.coverPath!),
+                  title: book.title,
                 ),
-                if (book.authors.isNotEmpty)
-                  Text(
-                    book.authors.join(', '),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: BabelText.body(13),
+                Positioned(
+                  right: 8,
+                  bottom: 8,
+                  child: book.inLibrary
+                      ? Tooltip(
+                          message: l10n.communityHave,
+                          child: CircleAvatar(
+                            radius: 17,
+                            backgroundColor: BabelColors.canvas.withValues(
+                              alpha: 0.85,
+                            ),
+                            child: Icon(
+                              Icons.check,
+                              size: 19,
+                              color: BabelColors.gold,
+                            ),
+                          ),
+                        )
+                      : Tooltip(
+                          message: l10n.ao3Add,
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: adding ? null : onAdd,
+                            child: CircleAvatar(
+                              radius: 19,
+                              backgroundColor: BabelColors.gold,
+                              child: adding
+                                  ? SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: BabelColors.canvas,
+                                      ),
+                                    )
+                                  : Icon(
+                                      Icons.add,
+                                      size: 22,
+                                      color: BabelColors.canvas,
+                                    ),
+                            ),
+                          ),
+                        ),
+                ),
+                Positioned(
+                  right: 4,
+                  top: 4,
+                  child: IconButton(
+                    tooltip: l10n.reportFileTitle,
+                    onPressed: onReport,
+                    visualDensity: VisualDensity.compact,
+                    style: IconButton.styleFrom(
+                      backgroundColor: BabelColors.canvas.withValues(
+                        alpha: 0.55,
+                      ),
+                    ),
+                    icon: Icon(
+                      Icons.flag_outlined,
+                      size: 16,
+                      color: BabelColors.textSecondary,
+                    ),
                   ),
-                Text(
-                  '${book.format.toUpperCase()} · ${fileSize(context, book.size)}',
-                  style: BabelText.label(10, color: BabelColors.textSecondary),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 10),
-          PillButton(
-            label: book.inLibrary ? l10n.communityHave : l10n.ao3Add,
-            loading: adding,
-            kind: book.inLibrary
-                ? PillButtonKind.secondary
-                : PillButtonKind.primary,
-            onPressed: book.inLibrary || adding ? null : onAdd,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          book.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: BabelText.heading(15),
+        ),
+        if (book.authors.isNotEmpty)
+          Text(
+            book.authors.join(', '),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: BabelText.body(12),
           ),
-          IconButton(
-            tooltip: l10n.reportFileTitle,
-            onPressed: onReport,
-            icon: Icon(
-              Icons.flag_outlined,
-              size: 20,
-              color: BabelColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
+        Text(
+          '${book.format.toUpperCase()} · ${fileSize(context, book.size)}',
+          style: BabelText.label(9, color: BabelColors.textSecondary),
+        ),
+      ],
     );
   }
 }

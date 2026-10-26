@@ -1,0 +1,1 @@
+Bibliothèque commune : nouvelle présentation en grille de couvertures, avec un bouton + pour ajouter un livre, un drapeau discret pour le signaler, et le défilement continu

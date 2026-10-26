@@ -1,0 +1,1 @@
+Community library: new look as a grid of covers, with a + button to add a book, a discreet flag to report it, and endless scrolling

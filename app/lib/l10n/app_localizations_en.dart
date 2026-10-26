@@ -4176,4 +4176,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String koreaderBookRead(String spent, int pages) {
     return 'Read on the e-reader: $spent, $pages pages';
   }
+
+  @override
+  String get communityIntro =>
+      'The books Babel readers share. Add them to your library with one tap, without uploading anything.';
 }

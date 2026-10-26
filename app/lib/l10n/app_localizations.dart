@@ -6979,6 +6979,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Lu sur la liseuse : {spent}, {pages} pages'**
   String koreaderBookRead(String spent, int pages);
+
+  /// No description provided for @communityIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les livres que les lecteurs de Babel partagent. Ajoute-les à ta bibliothèque d\'un geste, sans rien envoyer.'**
+  String get communityIntro;
 }
 
 class _AppLocalizationsDelegate

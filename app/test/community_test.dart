@@ -57,8 +57,9 @@ void main() {
 
     expect(find.text('Jane Eyre'), findsWidgets);
     expect(find.text('Emma'), findsWidgets);
-    expect(find.text('AJOUTER'), findsOneWidget); // only the book not yet mine
-    expect(find.text('DANS MA BIBLIO'), findsOneWidget);
+    // Only the book not yet mine has the round add button; the other shows a tick.
+    expect(find.byTooltip('Ajouter'), findsOneWidget);
+    expect(find.byTooltip('Dans ma biblio'), findsOneWidget);
     expect(fake.asked, ['']);
   });
 }

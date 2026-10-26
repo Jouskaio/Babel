@@ -2168,5 +2168,6 @@
   "koreaderProblems": "Une partie de l'état n'a pas pu être lue ({parts}). Dis-le à l'administrateur.",
   "@koreaderProblems": {"placeholders": {"parts": {"type": "String"}}},
   "koreaderBookRead": "Lu sur la liseuse : {spent}, {pages} pages",
-  "@koreaderBookRead": {"placeholders": {"spent": {"type": "String"}, "pages": {"type": "int"}}}
+  "@koreaderBookRead": {"placeholders": {"spent": {"type": "String"}, "pages": {"type": "int"}}},
+  "communityIntro": "Les livres que les lecteurs de Babel partagent. Ajoute-les à ta bibliothèque d'un geste, sans rien envoyer."
 }
