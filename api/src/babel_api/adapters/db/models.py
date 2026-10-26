@@ -254,7 +254,7 @@ class ChangeRow(Base):
     )
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     entity: Mapped[str] = mapped_column(String(32))
-    entity_id: Mapped[str] = mapped_column(String(64))
+    entity_id: Mapped[str] = mapped_column(String(128))
     op: Mapped[str] = mapped_column(String(8))
     data: Mapped[dict[str, object]] = mapped_column(JSON, default=dict)
     device_id: Mapped[UUID | None] = mapped_column(ForeignKey("devices.id", ondelete="SET NULL"))

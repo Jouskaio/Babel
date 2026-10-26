@@ -46,3 +46,10 @@ def test_a_development_server_migrates_its_database_on_startup(tmp_path: Path) -
             },
         )
     assert response.status_code == 201, response.text
+
+
+def test_change_journal_holds_a_position_id() -> None:
+    """SQLite ignores lengths: check by hand that "<item uuid>:<device uuid>" (73) fits."""
+    from babel_api.adapters.db.models import ChangeRow
+
+    assert ChangeRow.__table__.c.entity_id.type.length >= 73  # pyright: ignore[reportAttributeAccessIssue]
