@@ -15,6 +15,7 @@ import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../audiobooks/presentation/audio_player_view.dart';
 import '../../library/application/library_controller.dart';
+import '../../library/application/shelves.dart';
 import '../../library/presentation/attach_file.dart';
 import '../application/reader_settings.dart';
 import '../application/reading_position.dart';
@@ -57,6 +58,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
   // Kept from the start: the last position is saved while the page is closing.
   late final ReadingPositions _positions;
   late final ReadingPalette _palette;
+  var _started = false;
 
   @override
   void initState() {
@@ -103,6 +105,17 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
     }
     if (item.audioDuration != null) {
       return AudioPlayerView(item: item, onBack: _back);
+    }
+    if (!_started &&
+        item.sha256 != null &&
+        (item.status == null || item.status == ReadingStatus.toRead)) {
+      // Opening a book to read it is starting it.
+      _started = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(readingStateProvider).setStatus(item, ReadingStatus.reading);
+        }
+      });
     }
     if (item.sha256 == null) {
       // A paper book: its file can be added to read it here too.

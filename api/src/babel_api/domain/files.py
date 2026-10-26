@@ -38,6 +38,8 @@ class BookMetadata:
     series_index: float | None = None
     # The Archive of Our Own work this file says it is (a fanfiction downloaded from AO3).
     ao3_work: str | None = None
+    # A fanfiction from Archive of Our Own (or a mirror), even when the file gives no work address.
+    fanfic: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,6 +59,8 @@ class StoredFile:
     authors: tuple[str, ...] = ()
     # From the file itself; None until read (files stored before subjects were kept).
     subjects: tuple[str, ...] | None = None
+    # Whether the file is a fanfiction (read from the file); None until looked at.
+    fanfic: bool | None = None
 
     @property
     def available(self) -> bool:

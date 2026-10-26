@@ -50,6 +50,7 @@ class KoreaderStatus:
 logger = logging.getLogger(__name__)
 
 PREFIX = "koreader:"
+STATS_PREFIX = "koreader-stats:"
 DEVICE_PREFIX = "KOReader · "
 
 
@@ -220,13 +221,21 @@ class KoreaderService:
         positions = await self._sync.positions(user_id, item_id)
         if not positions:
             return None
+        # What the e-reader itself sent: a position worked out from statistics means nothing to it.
+        positions = [p for p in positions if not p.locator.startswith(STATS_PREFIX)]
+        if not positions:
+            return None
         latest = max(positions, key=lambda p: p.client_time)
         names = {d.id: d.name for d in await self._sync.devices(user_id)}
         progress = latest.locator[len(PREFIX) :] if latest.locator.startswith(PREFIX) else ""
         return latest, progress, names.get(latest.device_id, "")
 
     async def put_stats(
-        self, user_id: UUID, books: list[dict[str, object]], days: list[tuple[str, date, int, int]]
+        self,
+        user_id: UUID,
+        books: list[dict[str, object]],
+        days: list[tuple[str, date, int, int]],
+        device: str = "",
     ) -> None:
         """Reading statistics sent by KOReader's Babel plugin."""
         seen = {row.md5 for row in await self._repo.stat_books(user_id)}
@@ -242,6 +251,9 @@ class KoreaderService:
                 await self._sync.mark_ereader(user_id, item_id)
             if int(str(book.get("total_read_time") or 0)) > 0:
                 await self._sync.start_reading(user_id, item_id)
+            reached = book.get("progress")
+            if isinstance(reached, int | float) and reached > 0 and device.strip():
+                await self._position_from_stats(user_id, item_id, device, float(reached) * 100)
         await self._repo.mark(user_id)
         await self._repo.commit()
         await self.adopt_quietly(user_id)
@@ -315,6 +327,21 @@ class KoreaderService:
             by_sha[sha] = md5
         await self._repo.commit()
         return by_sha
+
+    async def _position_from_stats(
+        self, user_id: UUID, item_id: UUID, device: str, percent: float
+    ) -> None:
+        """Where the last reading session ended is where the reader is, when the e-reader sent
+        no position of its own: Babel shows the progress and opens the book there."""
+        device_id = await self._device_id(user_id, device)
+        mine = [p for p in await self._sync.positions(user_id, item_id) if p.device_id == device_id]
+        if any(p.locator.startswith(PREFIX) for p in mine):
+            return  # the e-reader's own position is better
+        if mine and abs(mine[0].percent - percent) < 0.5:
+            return
+        await self._sync.record_position(
+            user_id, device_id, item_id, STATS_PREFIX, round(max(0.0, min(100.0, percent)), 2)
+        )
 
     async def book_stats(self, user_id: UUID, item_id: UUID) -> tuple[int, int, datetime | None]:
         """What the e-reader's statistics say about a library book: seconds, pages, last opened."""

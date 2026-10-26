@@ -259,6 +259,7 @@ class StatsBook(BaseModel):
     total_read_time: int = 0
     total_read_pages: int = 0
     last_open: int | None = None
+    progress: Annotated[float | None, Field(ge=0, le=1)] = None  # where the last session ended
 
 
 class StatsDay(BaseModel):
@@ -290,6 +291,7 @@ async def put_stats(
         user_id,
         [b.model_dump() for b in body.books],
         [(d.md5, d.day, d.seconds, d.pages) for d in body.days],
+        body.device,
     )
     return {"books": len(body.books), "days": len(body.days)}
 

@@ -112,7 +112,7 @@ class SqlKoreaderRepository:
             .join(DeviceRow, DeviceRow.id == ReadingPositionRow.device_id)
             .where(
                 ReadingPositionRow.user_id == user_id,
-                ReadingPositionRow.locator.like("koreader:%"),
+                ReadingPositionRow.locator.like("koreader%"),
                 LibraryItemRow.removed_at.is_(None),
             )
             .order_by(ReadingPositionRow.client_time.desc())

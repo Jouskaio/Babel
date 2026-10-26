@@ -46,6 +46,7 @@ def _to_file(row: StoredFileRow) -> StoredFile:
         title=row.title,
         authors=tuple(row.authors or ()),
         subjects=tuple(row.subjects) if row.subjects is not None else None,
+        fanfic=row.fanfic,
     )
 
 
@@ -255,22 +256,46 @@ class SqlFileRepository:
     @staticmethod
     def _community_filter() -> ColumnElement[bool]:
         """Stored files some reader has in their library and shares: every book, except a
-        fanfiction its reader keeps to themselves, and what a reader hid."""
-        shared = (
-            select(LibraryItemRow.id)
+        fanfiction (the file says so, or a reader's copy is marked so) its readers keep to
+        themselves, and what a reader hid."""
+        item = LibraryItemRow
+        mine = and_(
+            item.file_sha256 == StoredFileRow.sha256,
+            item.removed_at.is_(None),
+        )
+        shared = select(item.id).where(mine, item.shared.is_(True)).exists()
+        private_fanfic = select(item.id).where(mine, item.origin == "ao3", item.shared.is_(False))
+        visible = (
+            select(item.id)
             .where(
-                LibraryItemRow.file_sha256 == StoredFileRow.sha256,
-                LibraryItemRow.removed_at.is_(None),
-                LibraryItemRow.hidden.is_(False),
-                or_(
-                    LibraryItemRow.origin.is_(None),
-                    LibraryItemRow.origin != "ao3",
-                    LibraryItemRow.shared.is_(True),
-                ),
+                mine,
+                item.hidden.is_(False),
+                or_(item.origin.is_(None), item.origin != "ao3", item.shared.is_(True)),
             )
             .exists()
         )
-        return and_(StoredFileRow.withdrawn_at.is_(None), shared)
+        return and_(
+            StoredFileRow.withdrawn_at.is_(None),
+            visible,
+            ~private_fanfic.exists(),
+            or_(StoredFileRow.fanfic.is_not(True), shared),
+        )
+
+    async def set_fanfic(self, sha256: str, fanfic: bool) -> None:
+        row = await self._session.get(StoredFileRow, sha256)
+        if row is not None:
+            row.fanfic = fanfic
+            await self._session.flush()
+
+    async def is_shared(self, sha256: str) -> bool:
+        found = await self._session.scalar(
+            select(LibraryItemRow.id).where(
+                LibraryItemRow.file_sha256 == sha256,
+                LibraryItemRow.removed_at.is_(None),
+                LibraryItemRow.shared.is_(True),
+            )
+        )
+        return found is not None
 
     async def add_report(self, user_id: UUID, sha256: str, reason: str) -> None:
         row = await self._session.get(CommunityReportRow, (user_id, sha256))

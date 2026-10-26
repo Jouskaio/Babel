@@ -3,7 +3,7 @@
 import hashlib
 import logging
 from collections.abc import AsyncIterator, Awaitable, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path, PurePath
 from typing import Any, Literal
@@ -327,7 +327,23 @@ class FileService:
         Nothing when the server limits downloads to the files' owners (file_access "entitled")."""
         if self._access != "everyone" or not self._community:
             return [], set()
-        return await self._files.community(user_id, query, limit, offset)
+        found, mine = await self._files.community(user_id, query, limit, offset)
+        kept: list[StoredFile] = []
+        for file in found:
+            if file.fanfic is None:
+                # Never looked at: a fanfiction is told by the file itself, whatever its readers
+                # marked, and then stays out unless a reader shares it.
+                path = self._store.path(file.sha256)
+                fanfic = (
+                    self._reader.metadata(path, file.format).fanfic if path is not None else False
+                )
+                await self._files.set_fanfic(file.sha256, fanfic)
+                await self._files.commit()
+                file = replace(file, fanfic=fanfic)
+            if file.fanfic and not await self._files.is_shared(file.sha256):
+                continue
+            kept.append(file)
+        return kept, mine
 
     @property
     def community_enabled(self) -> bool:
@@ -603,7 +619,7 @@ class FileService:
                 work,
                 series=series,
                 series_index=number,
-                origin="ao3" if metadata.ao3_work else None,
+                origin="ao3" if metadata.ao3_work or metadata.fanfic else None,
             )
         await self._changes.record(
             user_id,

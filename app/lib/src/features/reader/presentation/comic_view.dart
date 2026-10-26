@@ -55,6 +55,9 @@ class _ComicViewState extends ConsumerState<ComicView> {
   bool _annotating = false;
   bool _zoomed = false;
 
+  /// Whether the pages are tall strips (a webtoon); until known, they are taken as pages.
+  bool _strips = false;
+
   String get _directionKey => 'babel.comic.direction.${widget.itemId}';
 
   @override
@@ -63,6 +66,18 @@ class _ComicViewState extends ConsumerState<ComicView> {
     _strip.addListener(_onStripScroll);
     _stripZoom.addListener(_onStripZoom);
     unawaited(_loadDirection());
+    unawaited(_lookAtPages());
+  }
+
+  Future<void> _lookAtPages() async {
+    try {
+      final image = await decodeImageFromList(widget.book.page(0));
+      final strips = image.width / image.height < 0.45;
+      image.dispose();
+      if (mounted && strips != _strips) setState(() => _strips = strips);
+    } on Object {
+      // Not decodable here: the pages stay pages.
+    }
   }
 
   Future<void> _loadDirection() async {
@@ -84,6 +99,10 @@ class _ComicViewState extends ConsumerState<ComicView> {
   }
 
   bool get _vertical => _direction == ComicDirection.vertical;
+
+  /// The continuous strip (webtoons); other vertical books turn page by page, each page
+  /// fitted to the window.
+  bool get _stripMode => _vertical && _strips;
 
   final _stripZoom = TransformationController();
   Offset? _stripTapAt;
@@ -129,7 +148,7 @@ class _ComicViewState extends ConsumerState<ComicView> {
   /// Goes to [page] (from 1): at once on e-ink, else with a short slide.
   void _go(int page) {
     final target = page.clamp(1, widget.book.length);
-    if (_vertical) {
+    if (_stripMode) {
       if (!_strip.hasClients) return;
       var offset = 0.0;
       for (var i = 0; i < target - 1; i++) {
@@ -154,7 +173,7 @@ class _ComicViewState extends ConsumerState<ComicView> {
   }
 
   void _turn({required bool forward}) {
-    if (_vertical) {
+    if (_stripMode) {
       if (!_strip.hasClients) return;
       final position = _strip.position;
       final step = position.viewportDimension - 48;
@@ -337,7 +356,7 @@ class _ComicViewState extends ConsumerState<ComicView> {
           showReaderNote(context, note, place: pagePlace(note)),
     );
 
-    final body = _vertical
+    final body = _stripMode
         // Pinch or double tap to zoom into the strip; scrolling resumes at full width.
         ? GestureDetector(
             onDoubleTapDown: (d) => _stripTapAt = d.localPosition,
@@ -357,6 +376,7 @@ class _ComicViewState extends ConsumerState<ComicView> {
           )
         : PageView.builder(
             controller: _pages,
+            scrollDirection: _vertical ? Axis.vertical : Axis.horizontal,
             reverse: _direction == ComicDirection.rightToLeft,
             physics: _zoomed || _annotating
                 ? const NeverScrollableScrollPhysics()

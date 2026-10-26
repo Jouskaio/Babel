@@ -142,7 +142,9 @@ def _comic_info(path: Path) -> BookMetadata:
     )
 
 
-_AO3_WORK = re.compile(r"archiveofourown\.org/(?:collections/[^/\s]+/)?works/(\d+)", re.I)
+_AO3_HOSTS = r"(?:archiveofourown\.(?:org|net|com|gay)|ao3\.org)"
+_AO3_WORK = re.compile(_AO3_HOSTS + r"/(?:collections/[^/\s]+/)?works/(\d+)", re.I)
+_AO3_MENTION = re.compile(_AO3_HOSTS, re.I)
 
 
 def _ao3_work(texts: list[str]) -> str | None:
@@ -210,15 +212,14 @@ class EbookMetadataReader:
         )
         titles = texts("title")
         languages = texts("language")
-        ao3 = _ao3_work(
-            [
-                *texts("source"),
-                *texts("identifier"),
-                *texts("relation"),
-                *texts("publisher"),
-                *texts("description"),
-            ]
-        )
+        about = [
+            *texts("source"),
+            *texts("identifier"),
+            *texts("relation"),
+            *texts("publisher"),
+            *texts("description"),
+        ]
+        ao3 = _ao3_work(about)
         series, series_index = _epub_series(package)
         return BookMetadata(
             title=titles[0] if titles else None,
@@ -229,6 +230,7 @@ class EbookMetadataReader:
             series=series,
             series_index=series_index,
             ao3_work=ao3,
+            fanfic=ao3 is not None or any(_AO3_MENTION.search(t) for t in about),
         )
 
     def cover(self, path: Path, file_format: BookFormat) -> Cover | None:
