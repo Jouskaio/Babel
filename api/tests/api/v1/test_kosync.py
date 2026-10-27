@@ -331,6 +331,17 @@ def test_the_community_library_shows_the_title_a_reader_corrected(
     (book,) = client.get("/v1/community", headers=bob).json()["books"]
     assert book["title"] == "Jane Eyre"
 
+    # A reader who adds it from the community library starts from the corrected wording.
+    client.patch(
+        f"/v1/library/{item['id']}", json={"series": "Eyre cycle", "series_index": 2}, headers=ada
+    )
+    added = client.post(f"/v1/library/files/{item['sha256']}", headers=bob).json()
+    assert (added["title"], added["series"], added["series_index"]) == (
+        "Jane Eyre",
+        "Eyre cycle",
+        2,
+    )
+
 
 def test_the_plugin_lists_and_downloads_the_books_for_the_e_reader(
     client: TestClient, ada: dict[str, str]
