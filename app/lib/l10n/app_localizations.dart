@@ -2978,6 +2978,18 @@ abstract class AppLocalizations {
   /// **'Ne plus masquer'**
   String get unhideBook;
 
+  /// No description provided for @removeBookAsk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer « {title} » de la bibliothèque ?'**
+  String removeBookAsk(String title);
+
+  /// No description provided for @hideBookAsk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer « {title} » ?'**
+  String hideBookAsk(String title);
+
   /// No description provided for @bookHidden.
   ///
   /// In fr, this message translates to:

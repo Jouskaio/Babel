@@ -317,6 +317,21 @@ def test_the_community_library_shares_books_but_fanfictions_only_when_chosen(
     assert titles == {"Jane Eyre", "A Work"}
 
 
+def test_the_community_library_shows_the_title_a_reader_corrected(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    bob = account(client, "bob@example.com")
+    item = upload(client, ada, epub(title="jane eyre - volume 01 (z-library)", isbn=None)).json()[
+        "item"
+    ]
+    assert client.get("/v1/community", headers=bob).json()["books"][0]["title"].startswith("jane")
+
+    fixed = client.patch(f"/v1/library/{item['id']}", json={"title": "Jane Eyre"}, headers=ada)
+    assert fixed.status_code == 200
+    (book,) = client.get("/v1/community", headers=bob).json()["books"]
+    assert book["title"] == "Jane Eyre"
+
+
 def test_the_plugin_lists_and_downloads_the_books_for_the_e_reader(
     client: TestClient, ada: dict[str, str]
 ) -> None:

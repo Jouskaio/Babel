@@ -1,0 +1,1 @@
+A confirmation is asked before removing or hiding a book. The community library shows the title readers corrected

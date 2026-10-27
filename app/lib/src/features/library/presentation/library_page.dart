@@ -990,9 +990,41 @@ class _BookActionsState extends ConsumerState<_BookActions> {
     }
   }
 
+  /// Asks before a book leaves the library or disappears from it.
+  Future<bool> _confirm(String title, String body, String action) async {
+    final l10n = context.l10n;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: BabelColors.surface,
+        title: Text(title, style: BabelText.title(24)),
+        content: Text(body, style: BabelText.body(13)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(action),
+          ),
+        ],
+      ),
+    );
+    return ok == true && mounted;
+  }
+
   Future<void> _remove() async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
+    if (!await _confirm(
+      l10n.removeBookAsk(widget.item.title),
+      l10n.removeKeepsData,
+      l10n.removeFromLibrary,
+    )) {
+      return;
+    }
+    if (!mounted) return;
     Navigator.of(context).pop();
     await ref.read(libraryControllerProvider.notifier).remove(widget.item);
     messenger.showSnackBar(
@@ -1005,6 +1037,15 @@ class _BookActionsState extends ConsumerState<_BookActions> {
     final messenger = ScaffoldMessenger.of(context);
     final item = widget.item;
     final hide = item.hidden != true;
+    if (hide &&
+        !await _confirm(
+          l10n.hideBookAsk(item.title),
+          l10n.bookHidden(item.title),
+          l10n.hideBook,
+        )) {
+      return;
+    }
+    if (!mounted) return;
     Navigator.of(context).pop();
     await ref.read(readingStateProvider).setHidden(item, hide);
     if (hide) {

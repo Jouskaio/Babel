@@ -113,6 +113,17 @@ void main() {
     await tester.tap(find.text('Rebecca').first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Retirer de la bibliothèque'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Retirer « Rebecca » de la bibliothèque ?'),
+      findsOneWidget,
+    );
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('Retirer de la bibliothèque'),
+      ),
+    );
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 300)),
     );
