@@ -79,10 +79,8 @@ class _SeriesSheet extends ConsumerWidget {
             for (final item in volumes)
               InkWell(
                 borderRadius: BabelShape.radius(14),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  showBookActions(context, item);
-                },
+                // Above the sheet, not instead of it: closing the book comes back here.
+                onTap: () => showBookActions(context, item),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
@@ -215,10 +213,8 @@ class _EditionsSheet extends ConsumerWidget {
             for (final item in editions)
               InkWell(
                 borderRadius: BabelShape.radius(14),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  showBookActions(context, item);
-                },
+                // Above the sheet, not instead of it: closing the book comes back here.
+                onTap: () => showBookActions(context, item),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(

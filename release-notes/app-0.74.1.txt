@@ -1,0 +1,1 @@
+Navigation : un livre s'ouvre au-dessus de sa série (la fermeture revient à la série), la bibliothèque garde son filtre, sa recherche et la série ouverte quand on actualise la page, et la page de scan a un bouton retour

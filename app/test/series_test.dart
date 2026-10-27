@@ -171,4 +171,37 @@ void main() {
       expect((entries[2] as SeriesGroup).items.length, 2);
     },
   );
+
+  testWidgets(
+    'a reloaded library reopens its series, and a volume opens above it',
+    (tester) async {
+      tester.view.physicalSize = const Size(500, 2000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final server = FakeServer()
+        ..addVolume('v3', 'Homunculus 3', 'Homunculus', 3)
+        ..addVolume('v1', 'Homunculus 1', 'Homunculus', 1);
+      await tester.pumpWidget(
+        wrap(
+          Scaffold(
+            body: Consumer(
+              builder: (context, ref, _) {
+                ref.watch(syncEngineProvider);
+                return const LibraryPage(series: 'Homunculus');
+              },
+            ),
+          ),
+          overrides: server.overrides,
+        ),
+      );
+      await settle(tester);
+      expect(find.text('TOME 1'), findsOneWidget);
+
+      await tester.tap(find.text('Homunculus 3').last);
+      await tester.pumpAndSettle();
+      expect(find.text('Homunculus · tome 3'), findsOneWidget);
+      // The series is still there below: closing the book comes back to it.
+      expect(find.text('TOME 1'), findsOneWidget);
+    },
+  );
 }

@@ -15,6 +15,7 @@ import '../../../core/sync/lookups.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/back_leading.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
@@ -165,6 +166,7 @@ class _ScanPageState extends ConsumerState<ScanPage> {
     final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
+        leading: const BackLeading(),
         backgroundColor: BabelColors.canvas,
         scrolledUnderElevation: 0,
         centerTitle: true,
