@@ -614,14 +614,20 @@ class FileService:
             ao3_work = metadata.ao3_work
             title = metadata.title or PurePath(filename).stem or file.original_name
             work = await self._files.guess_work(file.edition_id, title, metadata.authors)
+            authors = metadata.authors
             series, number = metadata.series, metadata.series_index
             if series is None and (guess := guess_series(title)):
                 series, number = guess.series, guess.number
+            # Another reader already named this book better than its file does: start from that.
+            named = await self._files.named_by_another_reader(file.sha256, user_id)
+            if named is not None:
+                title, authors = named.title, named.authors
+                series, number = named.series, named.series_index
             item = await self._files.add_item(
                 user_id,
                 file.sha256,
                 title,
-                metadata.authors,
+                authors,
                 work,
                 series=series,
                 series_index=number,

@@ -362,6 +362,27 @@ class SqlFileRepository:
         )
         return files, {sha for sha in mine if sha}
 
+    async def named_by_another_reader(self, sha256: str, user_id: UUID) -> LibraryItem | None:
+        """The oldest copy of this file another reader kept in their library under a title of
+        their own (not the file's), to start a new copy from."""
+        file = await self.get_file(sha256)
+        rows = await self._session.scalars(
+            select(LibraryItemRow)
+            .where(
+                LibraryItemRow.file_sha256 == sha256,
+                LibraryItemRow.user_id != user_id,
+                LibraryItemRow.removed_at.is_(None),
+                LibraryItemRow.hidden.is_(False),
+                or_(LibraryItemRow.origin.is_(None), LibraryItemRow.origin != "ao3"),
+            )
+            .order_by(LibraryItemRow.added_at)
+        )
+        for row in rows:
+            if row.title and (file is None or row.title != file.title):
+                await self._session.refresh(row, ["file", "work"])
+                return _to_item(row)
+        return None
+
     async def _with_readers_names(self, files: list[StoredFile]) -> list[StoredFile]:
         """A reader who corrected a book's title or authors names it better than the file does:
         show their wording (the oldest correction wins) instead of the file's own."""
