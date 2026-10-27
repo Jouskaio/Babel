@@ -1,0 +1,1 @@
+Plusieurs livres liés à la même fiche (autre langue, autre format) forment une seule tuile « ×N éditions » ; on choisit l'édition à l'ouverture et leur statut de lecture est partagé
