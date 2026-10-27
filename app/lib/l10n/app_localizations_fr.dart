@@ -3044,6 +3044,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get editionsHint =>
+      'Ces livres sont liés à la même fiche (autre langue, autre format). Ils partagent leur statut de lecture.';
+
+  @override
   String seriesRead(int count) {
     return '$count lus';
   }

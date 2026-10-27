@@ -71,3 +71,34 @@ List<LibraryEntry> groupSeries(List<LibraryItemResponse> items) {
   }
   return entries;
 }
+
+/// Several books of the reader tied to the same catalog page (another language, another
+/// edition, another format): one entry, the first book standing for it.
+class EditionGroup extends LibraryEntry {
+  const EditionGroup(this.items);
+  final List<LibraryItemResponse> items;
+  LibraryItemResponse get first => items.first;
+}
+
+/// What the library shows: editions of a same page together, then the volumes of a series.
+List<LibraryEntry> groupLibrary(List<LibraryItemResponse> items) {
+  final byWork = <String, List<LibraryItemResponse>>{};
+  for (final item in items) {
+    if (item.workId case final work?) {
+      byWork.putIfAbsent(work, () => []).add(item);
+    }
+  }
+  // One book per page goes on to the series grouping; the others ride along with it.
+  final representatives = [
+    for (final item in items)
+      if (item.workId == null || byWork[item.workId]!.first.id == item.id) item,
+  ];
+  return [
+    for (final entry in groupSeries(representatives))
+      if (entry case SingleBook(:final item)
+          when item.workId != null && byWork[item.workId]!.length > 1)
+        EditionGroup(byWork[item.workId]!)
+      else
+        entry,
+  ];
+}
