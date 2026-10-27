@@ -1,9 +1,16 @@
 import 'package:babel_api_client/api.dart';
 
-/// What makes two spellings the same series: letters and digits, lower case.
+/// What makes two spellings the same series: letters and digits, lower case, without a
+/// bracketed note ("Homunculus (Omnibus)") or a closing "omnibus" / "series" word.
 String seriesKey(String name) => name
     .toLowerCase()
+    .replaceAll(RegExp(r'[(\[][^)\]]*[)\]]'), ' ')
     .replaceAll(RegExp(r'[^\p{L}\p{N}]+', unicode: true), ' ')
+    .trim()
+    .replaceAll(
+      RegExp(r' (omnibus|integrale|intégrale|series|saga|cycle|trilogy)$'),
+      '',
+    )
     .trim();
 
 /// A volume number as written: "3", "2.5".

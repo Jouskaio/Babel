@@ -1851,6 +1851,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Reviews and notes are shared by all editions of a book: pick the matching page.';
 
   @override
+  String get linkWorkRemove => 'Remove the link to this page';
+
+  @override
   String get linkWorkNone => 'None of these';
 
   @override

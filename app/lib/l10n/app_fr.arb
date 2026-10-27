@@ -1003,6 +1003,7 @@
   "you": "Vous",
   "linkWork": "Associer à une fiche",
   "linkWorkHint": "Avis et notes sont partagés entre toutes les éditions d'un même livre : choisissez la fiche qui correspond.",
+  "linkWorkRemove": "Retirer l'association avec cette fiche",
   "linkWorkNone": "Ce n'est aucun de ces livres",
   "feedFinished": "{name} a terminé {title}",
   "@feedFinished": {

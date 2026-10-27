@@ -3158,6 +3158,12 @@ abstract class AppLocalizations {
   /// **'Avis et notes sont partagés entre toutes les éditions d\'un même livre : choisissez la fiche qui correspond.'**
   String get linkWorkHint;
 
+  /// No description provided for @linkWorkRemove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer l\'association avec cette fiche'**
+  String get linkWorkRemove;
+
   /// No description provided for @linkWorkNone.
   ///
   /// In fr, this message translates to:
