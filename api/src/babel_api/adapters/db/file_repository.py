@@ -1,6 +1,7 @@
 """SQLAlchemy implementation of the file repository."""
 
 import re
+from dataclasses import replace
 from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
@@ -351,6 +352,7 @@ class SqlFileRepository:
             statement.order_by(StoredFileRow.created_at.desc()).limit(limit).offset(offset)
         )
         files = [_to_file(row) for row in rows]
+        files = await self._with_readers_names(files)
         mine = await self._session.scalars(
             select(LibraryItemRow.file_sha256).where(
                 LibraryItemRow.user_id == user_id,
@@ -359,6 +361,32 @@ class SqlFileRepository:
             )
         )
         return files, {sha for sha in mine if sha}
+
+    async def _with_readers_names(self, files: list[StoredFile]) -> list[StoredFile]:
+        """A reader who corrected a book's title or authors names it better than the file does:
+        show their wording (the oldest correction wins) instead of the file's own."""
+        rows = await self._session.scalars(
+            select(LibraryItemRow)
+            .where(
+                LibraryItemRow.file_sha256.in_([f.sha256 for f in files]),
+                LibraryItemRow.removed_at.is_(None),
+                LibraryItemRow.hidden.is_(False),
+                or_(LibraryItemRow.origin.is_(None), LibraryItemRow.origin != "ao3"),
+            )
+            .order_by(LibraryItemRow.added_at)
+        )
+        named: dict[str, LibraryItemRow] = {}
+        for row in rows:
+            if row.file_sha256:
+                file = next(f for f in files if f.sha256 == row.file_sha256)
+                if row.title and row.title != file.title:
+                    named.setdefault(row.file_sha256, row)
+        return [
+            replace(f, title=named[f.sha256].title, authors=tuple(named[f.sha256].authors or ()))
+            if f.sha256 in named
+            else f
+            for f in files
+        ]
 
     async def set_ereader(self, item_id: UUID, ereader: bool) -> LibraryItem:
         row = await self._session.get_one(LibraryItemRow, item_id)
