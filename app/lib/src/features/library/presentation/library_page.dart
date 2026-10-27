@@ -44,7 +44,7 @@ class LibraryPage extends ConsumerStatefulWidget {
 
 class _LibraryPageState extends ConsumerState<LibraryPage> {
   String? _importing;
-  double _progress = 0;
+  final _progress = ValueNotifier<double>(0);
 
   /// A reading status or a shelf id; null shows every book.
   Object? _filter;
@@ -55,6 +55,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   @override
   void dispose() {
     _search.dispose();
+    _progress.dispose();
     super.dispose();
   }
 
@@ -215,15 +216,18 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     final failed = <String>[];
     setState(() {
       _importing = l10n.bulkChecking(files.length);
-      _progress = 0;
+      _progress.value = 0;
     });
     try {
       final hashes = <XFile, String>{};
-      // Read a few at a time: a whole e-reader is many large files.
-      await _inParallel(files, 3, (file) async {
-        final digest = await sha256.bind(file.openRead()).first;
-        hashes[file] = digest.toString();
-      });
+      // Read a few at a time: a whole e-reader is many large files. Not in a browser, where
+      // hashing would freeze the page: the server recognizes a book it already has.
+      if (!kIsWeb) {
+        await _inParallel(files, 3, (file) async {
+          final digest = await sha256.bind(file.openRead()).first;
+          hashes[file] = digest.toString();
+        });
+      }
       final known = <String>{};
       final onBabel = <String>{};
       final all = hashes.values.toSet().toList();
@@ -242,13 +246,13 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
         if (!mounted) return;
         setState(() {
           _importing = l10n.bulkProgress(done + 1, files.length);
-          _progress = done / files.length;
+          _progress.value = done / files.length;
         });
-        final sha = hashes[file]!;
+        final sha = hashes[file] ?? '';
         try {
-          if (known.contains(sha)) {
+          if (sha.isNotEmpty && known.contains(sha)) {
             existing++;
-          } else if (onBabel.contains(sha)) {
+          } else if (sha.isNotEmpty && onBabel.contains(sha)) {
             final item = await api.addStoredFile(sha);
             if (item != null) {
               await controller.keep(item);
@@ -260,7 +264,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             final result = await controller.import(file);
             added++;
             if (result.item.origin == 'ao3') fanfics++;
-            known.add(sha);
+            if (sha.isNotEmpty) known.add(sha);
           }
         } on ApiException catch (error) {
           failed.add('${file.name} — ${_whyFailed(l10n, error)}');
@@ -310,20 +314,22 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     );
   }
 
+  /// An upload reports every chunk: repaint the bar once per percent, not the whole page.
+  void _reportProgress(double p) {
+    if (p - _progress.value >= 0.01 || p >= 1) _progress.value = p;
+  }
+
   Future<void> _importFile(XFile file) async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
     setState(() {
       _importing = file.name;
-      _progress = 0;
+      _progress.value = 0;
     });
     try {
       final result = await ref
           .read(libraryControllerProvider.notifier)
-          .import(
-            file,
-            onProgress: (p) => mounted ? setState(() => _progress = p) : null,
-          );
+          .import(file, onProgress: _reportProgress);
       messenger.showSnackBar(
         SnackBar(
           content: Text(
@@ -504,10 +510,13 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                   children: [
                     Text(l10n.importing(name), style: BabelText.body(13)),
                     const SizedBox(height: 8),
-                    LinearProgressIndicator(
-                      value: _progress,
-                      color: BabelColors.gold,
-                      backgroundColor: BabelColors.sunken,
+                    ValueListenableBuilder<double>(
+                      valueListenable: _progress,
+                      builder: (_, value, _) => LinearProgressIndicator(
+                        value: value,
+                        color: BabelColors.gold,
+                        backgroundColor: BabelColors.sunken,
+                      ),
                     ),
                   ],
                 ),
@@ -836,7 +845,9 @@ class _BookActionsState extends ConsumerState<_BookActions> {
       context,
       ref,
       liveItem(ref, widget.item),
-      onProgress: (p) => mounted ? setState(() => _progress = p) : null,
+      onProgress: (p) => mounted && (p - (_progress ?? 0) >= 0.01 || p >= 1)
+          ? setState(() => _progress = p)
+          : null,
     );
     if (mounted) setState(() => _progress = null);
   }
@@ -964,7 +975,10 @@ class _BookActionsState extends ConsumerState<_BookActions> {
           .read(fileTransferProvider)
           .download(
             widget.item,
-            onProgress: (p) => mounted ? setState(() => _progress = p) : null,
+            onProgress: (p) =>
+                mounted && (p - (_progress ?? 0) >= 0.01 || p >= 1)
+                ? setState(() => _progress = p)
+                : null,
           );
       navigator.pop();
       messenger.showSnackBar(

@@ -1,0 +1,1 @@
+Import de livres plus fluide : seule la barre de progression se redessine, et le navigateur ne calcule plus lui-même l'empreinte des fichiers

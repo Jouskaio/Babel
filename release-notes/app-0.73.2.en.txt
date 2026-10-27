@@ -1,0 +1,1 @@
+Smoother book import: only the progress bar repaints, and the browser no longer hashes the files itself
