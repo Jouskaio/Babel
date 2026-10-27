@@ -1723,6 +1723,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unhideBook => 'Stop hiding';
 
   @override
+  String removeBookAsk(String title) {
+    return 'Remove “$title” from the library?';
+  }
+
+  @override
+  String hideBookAsk(String title) {
+    return 'Hide “$title”?';
+  }
+
+  @override
   String bookHidden(String title) {
     return '“$title” is hidden. Find it with “Show hidden books”.';
   }

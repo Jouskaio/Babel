@@ -108,6 +108,14 @@ void main() {
     await tester.ensureVisible(find.text('Masquer de la bibliothèque'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Masquer de la bibliothèque'));
+    await tester.pumpAndSettle();
+    expect(find.text('Masquer « Jane Eyre » ?'), findsOneWidget);
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('Masquer de la bibliothèque'),
+      ),
+    );
     await settle(tester);
     expect(find.text('Jane Eyre'), findsNothing);
     final hidden = server.pushed.lastWhere(

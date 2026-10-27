@@ -1740,6 +1740,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get unhideBook => 'Ne plus masquer';
 
   @override
+  String removeBookAsk(String title) {
+    return 'Retirer « $title » de la bibliothèque ?';
+  }
+
+  @override
+  String hideBookAsk(String title) {
+    return 'Masquer « $title » ?';
+  }
+
+  @override
   String bookHidden(String title) {
     return '« $title » est masqué. Retrouvez-le avec « Afficher les livres masqués ».';
   }

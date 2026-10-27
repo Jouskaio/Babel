@@ -914,6 +914,22 @@
   "hiddenBadge": "Masqué",
   "hideBook": "Masquer de la bibliothèque",
   "unhideBook": "Ne plus masquer",
+  "removeBookAsk": "Retirer « {title} » de la bibliothèque ?",
+  "@removeBookAsk": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "hideBookAsk": "Masquer « {title} » ?",
+  "@hideBookAsk": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "bookHidden": "« {title} » est masqué. Retrouvez-le avec « Afficher les livres masqués ».",
   "@bookHidden": {
     "placeholders": {

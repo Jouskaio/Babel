@@ -661,6 +661,22 @@
   "hiddenBadge": "Hidden",
   "hideBook": "Hide from the library",
   "unhideBook": "Stop hiding",
+  "removeBookAsk": "Remove “{title}” from the library?",
+  "@removeBookAsk": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "hideBookAsk": "Hide “{title}”?",
+  "@hideBookAsk": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "bookHidden": "“{title}” is hidden. Find it with “Show hidden books”.",
   "removeKeepsData": "Your notes, review and progress are kept: add this book again to find them.",
   "progressTitle": "Progress",
