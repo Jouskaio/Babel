@@ -36,7 +36,13 @@ import 'series_sheet.dart';
 
 /// The reader's library (design: Penpot "screen / bibliotheque").
 class LibraryPage extends ConsumerStatefulWidget {
-  const LibraryPage({super.key});
+  const LibraryPage({this.filter, this.query, this.series, super.key});
+
+  /// Where the page was left, from its address, so a reload comes back to the same place:
+  /// a reading status or a shelf, a search, a series whose sheet was open.
+  final String? filter;
+  final String? query;
+  final String? series;
 
   @override
   ConsumerState<LibraryPage> createState() => _LibraryPageState();
@@ -51,6 +57,47 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   bool _showHidden = false;
   final _search = TextEditingController();
   String _query = '';
+
+  /// The series sheet to reopen once the books are loaded (after a reload).
+  String? _pendingSeries;
+  String? _openSeries;
+
+  @override
+  void initState() {
+    super.initState();
+    _filter = ReadingStatus.fromJson(widget.filter) ?? widget.filter;
+    _query = widget.query ?? '';
+    _search.text = _query;
+    _pendingSeries = widget.series;
+    // A file shared to Babel before the library was shown.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _importShared());
+  }
+
+  /// Writes where the page is in its address (without a new history entry).
+  void _remember() {
+    final filter = _filter;
+    final params = {
+      if (filter is ReadingStatus) 'filter': filter.value,
+      if (filter is String) 'filter': filter,
+      if (_query.isNotEmpty) 'q': _query,
+      'series': ?_openSeries,
+    };
+    GoRouter.maybeOf(context)?.replace<void>(
+      Uri(
+        path: Routes.library,
+        queryParameters: params.isEmpty ? null : params,
+      ).toString(),
+    );
+  }
+
+  Future<void> _showSeries(SeriesGroup group) async {
+    _openSeries = group.name;
+    _remember();
+    await showSeriesSheet(context, group);
+    if (!mounted) return;
+    _openSeries = null;
+    _remember();
+  }
 
   @override
   void dispose() {
@@ -77,7 +124,10 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     final name = await askShelfName(context);
     if (name == null || name.isEmpty) return;
     final shelf = await ref.read(shelvesControllerProvider).create(name);
-    if (mounted) setState(() => _filter = shelf.id);
+    if (mounted) {
+      setState(() => _filter = shelf.id);
+      _remember();
+    }
   }
 
   List<LibraryItemResponse> _visible(
@@ -151,13 +201,6 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     messenger.showSnackBar(
       SnackBar(content: Text(l10n.cleanFinishedDone(finished.length))),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // A file shared to Babel before the library was shown.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _importShared());
   }
 
   void _importShared() {
@@ -370,6 +413,19 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     final items = _visible(all, shelves);
     // The volumes of a series sit together in one tile.
     final entries = groupLibrary(items);
+    if (_pendingSeries case final name?) {
+      final group = entries.whereType<SeriesGroup>().where(
+        (g) => seriesKey(g.name) == seriesKey(name),
+      );
+      if (group.isNotEmpty) {
+        _pendingSeries = null;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _showSeries(group.first);
+        });
+      } else if (!library.isLoading) {
+        _pendingSeries = null;
+      }
+    }
     return RefreshIndicator(
       onRefresh: ref.read(libraryControllerProvider.notifier).reload,
       color: BabelColors.gold,
@@ -446,7 +502,10 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             sliver: SliverToBoxAdapter(
               child: TextField(
                 controller: _search,
-                onChanged: (value) => setState(() => _query = value),
+                onChanged: (value) {
+                  setState(() => _query = value);
+                  _remember();
+                },
                 style: BabelText.body(15, color: BabelColors.textPrimary),
                 decoration: InputDecoration(
                   hintText: l10n.librarySearchHint,
@@ -464,6 +523,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                           onPressed: () {
                             _search.clear();
                             setState(() => _query = '');
+                            _remember();
                           },
                         ),
                 ),
@@ -476,7 +536,10 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               shelves: shelves,
               hiddenCount: hiddenCount,
               showHidden: _showHidden,
-              onFilter: (f) => setState(() => _filter = f),
+              onFilter: (f) {
+                setState(() => _filter = f);
+                _remember();
+              },
               onShowHidden: (v) => setState(() => _showHidden = v),
               onNewShelf: _newShelf,
             ),
@@ -570,6 +633,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                     SingleBook(:final item) => _BookTile(item: item),
                     SeriesGroup() => _SeriesTile(
                       group: entries[i] as SeriesGroup,
+                      onOpen: () => _showSeries(entries[i] as SeriesGroup),
                     ),
                     EditionGroup() => _EditionTile(
                       group: entries[i] as EditionGroup,
@@ -607,8 +671,9 @@ Future<void> showBookActions(BuildContext context, LibraryItemResponse item) =>
 /// Several volumes of a series, as one tile: the first volume's cover, how many there
 /// are and how many were read.
 class _SeriesTile extends ConsumerWidget {
-  const _SeriesTile({required this.group});
+  const _SeriesTile({required this.group, required this.onOpen});
   final SeriesGroup group;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -618,7 +683,7 @@ class _SeriesTile extends ConsumerWidget {
         .length;
     return InkWell(
       borderRadius: BabelShape.radius(8),
-      onTap: () => showSeriesSheet(context, group),
+      onTap: onOpen,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
