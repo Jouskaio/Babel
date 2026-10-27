@@ -1,0 +1,1 @@
+Navigation: a book opens above its series (closing it comes back to the series), the library keeps its filter, search and open series when the page is reloaded, and the scan page has a back button
