@@ -691,6 +691,7 @@
   "you": "You",
   "linkWork": "Link to a book page",
   "linkWorkHint": "Reviews and notes are shared by all editions of a book: pick the matching page.",
+  "linkWorkRemove": "Remove the link to this page",
   "linkWorkNone": "None of these",
   "feedFinished": "{name} finished {title}",
   "profileFinished": "Recently read",

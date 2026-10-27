@@ -125,6 +125,14 @@ class _LinkWorkSheetState extends ConsumerState<_LinkWorkSheet> {
                 const SizedBox(height: 4),
                 Text(l10n.fanficPageHint, style: BabelText.body(12)),
               ],
+              if (widget.item.workId != null) ...[
+                const SizedBox(height: 14),
+                PillButton(
+                  label: l10n.linkWorkRemove,
+                  expand: true,
+                  onPressed: _saving ? null : () => _link(null),
+                ),
+              ],
               const SizedBox(height: 14),
               TextField(
                 controller: _query,
@@ -169,11 +177,6 @@ class _LinkWorkSheetState extends ConsumerState<_LinkWorkSheet> {
                             WorkRow(
                               work: work,
                               onTap: _saving ? () {} : () => _link(work.id),
-                            ),
-                          if (widget.item.workId != null)
-                            TextButton(
-                              onPressed: _saving ? null : () => _link(null),
-                              child: Text(l10n.linkWorkNone),
                             ),
                         ],
                       ),

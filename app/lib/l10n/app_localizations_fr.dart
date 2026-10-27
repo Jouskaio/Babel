@@ -1869,6 +1869,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Avis et notes sont partagés entre toutes les éditions d\'un même livre : choisissez la fiche qui correspond.';
 
   @override
+  String get linkWorkRemove => 'Retirer l\'association avec cette fiche';
+
+  @override
   String get linkWorkNone => 'Ce n\'est aucun de ces livres';
 
   @override

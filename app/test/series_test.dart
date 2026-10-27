@@ -128,4 +128,13 @@ void main() {
       expect(find.text('Informations enregistrées.'), findsOneWidget);
     },
   );
+
+  test(
+    'a bracketed note or a closing omnibus word does not make another series',
+    () {
+      expect(seriesKey('Homunculus (Omnibus)'), seriesKey('Homunculus'));
+      expect(seriesKey('Homunculus Omnibus'), seriesKey('homunculus'));
+      expect(seriesKey('Dune'), isNot(seriesKey('Dune Messiah')));
+    },
+  );
 }
