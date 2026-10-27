@@ -50,6 +50,10 @@ def test_a_development_server_migrates_its_database_on_startup(tmp_path: Path) -
 
 def test_change_journal_holds_a_position_id() -> None:
     """SQLite ignores lengths: check by hand that "<item uuid>:<device uuid>" (73) fits."""
+    from sqlalchemy import String
+
     from babel_api.adapters.db.models import ChangeRow
 
-    assert ChangeRow.__table__.c.entity_id.type.length >= 73  # pyright: ignore[reportAttributeAccessIssue]
+    column_type = ChangeRow.__table__.c["entity_id"].type
+    assert isinstance(column_type, String)
+    assert (column_type.length or 0) >= 73
