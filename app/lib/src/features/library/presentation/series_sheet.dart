@@ -168,3 +168,110 @@ class _Progress extends StatelessWidget {
     );
   }
 }
+
+/// The editions of a catalog page the reader has (another language or format), each opening
+/// its own book sheet.
+Future<void> showEditionsSheet(BuildContext context, EditionGroup group) =>
+    showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      backgroundColor: BabelColors.surface,
+      builder: (_) => _EditionsSheet(group: group),
+    );
+
+class _EditionsSheet extends ConsumerWidget {
+  const _EditionsSheet({required this.group});
+  final EditionGroup group;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    // Live: an edition removed or unlinked while the sheet is open.
+    final all = ref.watch(libraryControllerProvider).value ?? const [];
+    final ids = {for (final i in group.items) i.id};
+    final editions = [
+      for (final i in all)
+        if (ids.contains(i.id) && i.workId == group.first.workId) i,
+    ];
+    final positions = ref.watch(positionPercentsProvider).value ?? const {};
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+        ),
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          children: [
+            Text(group.first.title, style: BabelText.title(32)),
+            Text(
+              l10n.editionsCount(editions.length).toUpperCase(),
+              style: BabelText.label(10),
+            ),
+            const SizedBox(height: 6),
+            Text(l10n.editionsHint, style: BabelText.body(13)),
+            const SizedBox(height: 10),
+            for (final item in editions)
+              InkWell(
+                borderRadius: BabelShape.radius(14),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  showBookActions(context, item);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      BookCover(
+                        width: 48,
+                        url: libraryCoverUrl(item),
+                        title: item.title,
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              [
+                                item.format?.value.toUpperCase() ??
+                                    l10n.paperBook.toUpperCase(),
+                                if (item.paper && item.format != null)
+                                  l10n.paperBook.toUpperCase(),
+                                if (item.ereader)
+                                  l10n.ereaderShort.toUpperCase(),
+                              ].join(' · '),
+                              style: BabelText.label(
+                                9,
+                                color: BabelColors.gold,
+                              ),
+                            ),
+                            Text(item.title, style: BabelText.heading(17)),
+                            if (item.authors.isNotEmpty)
+                              Text(
+                                item.authors.join(', '),
+                                style: BabelText.body(12),
+                              ),
+                            const SizedBox(height: 4),
+                            _Progress(
+                              status: item.status,
+                              percent: effectiveProgress(item, positions),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right,
+                        color: BabelColors.textSecondary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}

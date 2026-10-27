@@ -1619,6 +1619,7 @@
       }
     }
   },
+  "editionsHint": "Ces livres sont liés à la même fiche (autre langue, autre format). Ils partagent leur statut de lecture.",
   "seriesRead": "{count} lus",
   "@seriesRead": {
     "placeholders": {

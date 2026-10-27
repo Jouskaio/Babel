@@ -369,7 +369,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     final hiddenCount = all.where((i) => i.hidden == true).length;
     final items = _visible(all, shelves);
     // The volumes of a series sit together in one tile.
-    final entries = groupSeries(items);
+    final entries = groupLibrary(items);
     return RefreshIndicator(
       onRefresh: ref.read(libraryControllerProvider.notifier).reload,
       color: BabelColors.gold,
@@ -571,6 +571,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                     SeriesGroup() => _SeriesTile(
                       group: entries[i] as SeriesGroup,
                     ),
+                    EditionGroup() => _EditionTile(
+                      group: entries[i] as EditionGroup,
+                    ),
                   },
                   childCount: entries.length,
                 ),
@@ -682,6 +685,82 @@ class _SeriesTile extends ConsumerWidget {
             [
               l10n.seriesVolumes(group.items.length),
               if (read > 0) l10n.seriesRead(read),
+            ].join(' · ').toUpperCase(),
+            style: BabelText.label(
+              9,
+              color: BabelColors.textSecondary,
+              spacing: 1.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Several editions of a same catalog page (language, format) as one tile.
+class _EditionTile extends StatelessWidget {
+  const _EditionTile({required this.group});
+  final EditionGroup group;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final first = group.first;
+    return InkWell(
+      borderRadius: BabelShape.radius(8),
+      onTap: () => showEditionsSheet(context, group),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              LayoutBuilder(
+                builder: (context, c) => BookCover(
+                  width: c.maxWidth,
+                  url: libraryCoverUrl(first),
+                  title: first.title,
+                  style: first.origin == 'ao3'
+                      ? BookCoverStyle.fanfiction
+                      : BookCoverStyle.standard,
+                ),
+              ),
+              Positioned(
+                right: 6,
+                top: 6,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: BabelColors.canvas.withValues(alpha: 0.85),
+                    borderRadius: BabelShape.radius(3),
+                  ),
+                  child: Text(
+                    '×${group.items.length}',
+                    style: BabelText.label(
+                      9,
+                      color: BabelColors.textPrimary,
+                      spacing: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            first.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: BabelText.heading(16),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            [
+              l10n.editionsCount(group.items.length),
+              if (first.status case final status?) statusLabel(l10n, status),
             ].join(' · ').toUpperCase(),
             style: BabelText.label(
               9,

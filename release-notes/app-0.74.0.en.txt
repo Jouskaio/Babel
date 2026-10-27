@@ -1,0 +1,1 @@
+Several books tied to the same page (another language or format) now make one tile "×N editions"; pick the edition when opening, and they share their reading status

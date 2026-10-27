@@ -137,4 +137,38 @@ void main() {
       expect(seriesKey('Dune'), isNot(seriesKey('Dune Messiah')));
     },
   );
+
+  test(
+    'editions tied to the same page make one entry, a series counts them once',
+    () {
+      LibraryItemResponse tied(
+        String id,
+        String title,
+        String work, {
+        String? series,
+        num? n,
+      }) => LibraryItemResponse.fromJson({
+        ...libraryItem(id, title),
+        'work_id': work,
+        'series': series,
+        'series_index': n,
+      })!;
+      final entries = groupLibrary([
+        tied('1', 'Dune', 'w-dune'),
+        book('2', 'Emma'),
+        tied('3', 'Dune (FR)', 'w-dune'),
+        tied('4', 'Tome 1 EN', 'w-1', series: 'Saga', n: 1),
+        tied('5', 'Tome 1 FR', 'w-1', series: 'Saga', n: 1),
+        tied('6', 'Tome 2', 'w-2', series: 'Saga', n: 2),
+      ]);
+      expect(entries.map((e) => e.runtimeType.toString()).toList(), [
+        'EditionGroup',
+        'SingleBook',
+        'SeriesGroup',
+      ]);
+      expect((entries[0] as EditionGroup).items.map((i) => i.id), ['1', '3']);
+      // The series holds two volumes (one book per page), not three.
+      expect((entries[2] as SeriesGroup).items.length, 2);
+    },
+  );
 }

@@ -1037,6 +1037,7 @@
   "coverLinkFirst": "Link this book to a book page first to choose among its editions' covers.",
   "volumeNumber": "Volume {number}",
   "seriesVolumes": "{count, plural, =1{1 volume} other{{count} volumes}}",
+  "editionsHint": "These books are tied to the same page (another language or format). They share their reading status.",
   "seriesRead": "{count} read",
   "detailsSaved": "Details saved.",
   "seriesOf": "{series} · volume {number}",

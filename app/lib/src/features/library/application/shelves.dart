@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/storage/local_database.dart';
 import '../../../core/sync/sync_engine.dart';
 import '../../reader/application/reading_position.dart';
+import 'library_controller.dart';
 
 /// A list of books the reader made in their library.
 class Shelf {
@@ -150,8 +151,27 @@ class ReadingStateController {
   ReadingStateController(this._ref);
   final Ref _ref;
 
-  Future<void> setStatus(LibraryItemResponse item, ReadingStatus? status) =>
-      _save(item, status, item.progress?.toDouble());
+  /// The books of the reader tied to the same catalog page: the book itself, and its other
+  /// editions, which share a reading status.
+  List<LibraryItemResponse> _editions(LibraryItemResponse item) {
+    final all = _ref.read(libraryControllerProvider).value ?? const [];
+    return [
+      item,
+      if (item.workId case final work?)
+        ...all.where(
+          (i) => i.id != item.id && i.workId == work && i.hidden != true,
+        ),
+    ];
+  }
+
+  Future<void> setStatus(
+    LibraryItemResponse item,
+    ReadingStatus? status,
+  ) async {
+    for (final edition in _editions(item)) {
+      await _save(edition, status, edition.progress?.toDouble());
+    }
+  }
 
   /// Hides a book from the library (kept, with all its data) or shows it again.
   Future<void> setHidden(LibraryItemResponse item, bool hidden) =>

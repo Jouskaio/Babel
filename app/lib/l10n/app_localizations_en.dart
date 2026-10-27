@@ -3022,6 +3022,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get editionsHint =>
+      'These books are tied to the same page (another language or format). They share their reading status.';
+
+  @override
   String seriesRead(int count) {
     return '$count read';
   }

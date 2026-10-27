@@ -5048,6 +5048,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 tome} other{{count} tomes}}'**
   String seriesVolumes(int count);
 
+  /// No description provided for @editionsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces livres sont liés à la même fiche (autre langue, autre format). Ils partagent leur statut de lecture.'**
+  String get editionsHint;
+
   /// No description provided for @seriesRead.
   ///
   /// In fr, this message translates to:
