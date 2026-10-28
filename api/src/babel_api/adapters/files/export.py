@@ -58,6 +58,39 @@ class LibraryExporter:
             pass
         return relative
 
+    def reorganize(self, entries: list[tuple[Path, PurePosixPath, str]]) -> int:
+        """Puts every (source, wanted place, tag) where it belongs and drops its links left
+        elsewhere (another spelling of the author, an old title). Returns how many moved."""
+        links: dict[tuple[int, int], list[Path]] = {}
+        for folder, _dirs, names in os.walk(self._root):
+            for name in names:
+                path = Path(folder) / name
+                with contextlib.suppress(OSError):
+                    found = path.stat()
+                    links.setdefault((found.st_dev, found.st_ino), []).append(path)
+        moved = 0
+        for source, relative, tag in entries:
+            try:
+                found = source.stat()
+            except OSError:
+                continue
+            kept = self.export(source, relative, tag)
+            if kept is None:
+                continue
+            for old in links.get((found.st_dev, found.st_ino), []):
+                if old != kept:
+                    with contextlib.suppress(OSError):
+                        old.unlink()
+                        moved += 1
+        self._prune()
+        return moved
+
+    def _prune(self) -> None:
+        for folder, _dirs, _names in os.walk(self._root, topdown=False):
+            if Path(folder) != self._root:
+                with contextlib.suppress(OSError):
+                    Path(folder).rmdir()  # only succeeds when empty
+
     def forget(self, source: Path) -> int:
         """Removes the exported links of a file that left the store (a copy that is not a link
         stays: it cannot be told from another file)."""
