@@ -60,7 +60,6 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   /// The series sheet to reopen once the books are loaded (after a reload).
   String? _pendingSeries;
-  String? _openSeries;
 
   @override
   void initState() {
@@ -80,7 +79,6 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       if (filter is ReadingStatus) 'filter': filter.value,
       if (filter is String) 'filter': filter,
       if (_query.isNotEmpty) 'q': _query,
-      'series': ?_openSeries,
     };
     GoRouter.maybeOf(context)?.replace<void>(
       Uri(
@@ -91,12 +89,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   }
 
   Future<void> _showSeries(SeriesGroup group) async {
-    _openSeries = group.name;
-    _remember();
+    // The address is not touched while sheets are open: rewriting the route
+    // under them left the page stuck (no back, no tab switch).
     await showSeriesSheet(context, group);
-    if (!mounted) return;
-    _openSeries = null;
-    _remember();
   }
 
   @override

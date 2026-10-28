@@ -1,0 +1,1 @@
+Fix: after opening a series and linking a page to a book, back and the tab bar no longer get stuck
