@@ -43,3 +43,14 @@ def book_filename(item: LibraryItem) -> str:
     if len(stem) > MAX_STEM:
         stem = stem[:MAX_STEM].rsplit(" ", 1)[0].rstrip(" -,.") or stem[:MAX_STEM]
     return f"{stem}.{extension}"
+
+
+_SUFFIX = re.compile(r"^(jr|sr|ii|iii|iv)\.?$", re.IGNORECASE)
+
+
+def author_folder(name: str) -> str:
+    """The folder of an author: "Brontë, Charlotte" and "Charlotte Brontë" are the same one."""
+    last, comma, first = name.partition(",")
+    if comma and first.strip() and "," not in first and not _SUFFIX.match(first.strip()):
+        name = f"{first.strip()} {last.strip()}"
+    return clean_name(name)

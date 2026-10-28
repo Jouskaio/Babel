@@ -753,3 +753,23 @@ def test_the_exporter_reuses_an_authors_folder_whatever_its_case(tmp_path: Path)
     exporter.export(other, PurePosixPath("ebooks", "charlotte bronte", "B.epub"), "b")
     assert sorted(p.name for p in (out / "ebooks").iterdir()) == ["Charlotte Brontë"]
     assert (out / "ebooks" / "Charlotte Brontë" / "B.epub").is_file()
+
+
+def test_reorganize_moves_old_links_and_authors_share_a_folder(tmp_path: Path) -> None:
+    from pathlib import PurePosixPath
+
+    from babel_api.adapters.files.export import LibraryExporter
+    from babel_api.domain.naming import author_folder
+
+    assert author_folder("Brontë, Charlotte") == "Charlotte Brontë"
+    assert author_folder("Martin Luther King, Jr.") == "Martin Luther King, Jr"
+    out = tmp_path / "library"
+    source = tmp_path / "a.epub"
+    source.write_bytes(b"a")
+    exporter = LibraryExporter(out)
+    exporter.export(source, PurePosixPath("ebooks", "Brontë, Charlotte", "Old.epub"), "a")
+    wanted = PurePosixPath("ebooks", "Charlotte Brontë", "New.epub")
+    assert exporter.reorganize([(source, wanted, "a")]) == 1
+    assert [p.name for p in out.rglob("*.epub")] == ["New.epub"]
+    assert not (out / "ebooks" / "Brontë, Charlotte").exists()
+    assert exporter.reorganize([(source, wanted, "a")]) == 0

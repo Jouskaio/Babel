@@ -22,7 +22,7 @@ from babel_api.domain.errors import (
     UnsupportedFileError,
 )
 from babel_api.domain.files import BookFormat, Cover, LibraryItem, ReadingState, StoredFile
-from babel_api.domain.naming import book_filename, clean_name
+from babel_api.domain.naming import author_folder, book_filename
 from babel_api.domain.ports import (
     BlobStore,
     CatalogRepository,
@@ -655,13 +655,21 @@ class FileService:
             await self._on_fanfic(item, ao3_work)
         return item
 
+    @staticmethod
+    def _export_path(item: LibraryItem) -> PurePosixPath:
+        kind = (
+            "comics"
+            if item.file and item.file.format in (BookFormat.CBZ, BookFormat.CBR)
+            else "ebooks"
+        )
+        author = author_folder(item.authors[0]) if item.authors else ""
+        return PurePosixPath(kind, author or "Unknown", book_filename(item))
+
     async def _export(self, item: LibraryItem, path: Path | None) -> None:
         """A clean copy of the book where other tools can read it (when exporting is on)."""
         if self._exporter is None or item.file is None or path is None:
             return
-        kind = "comics" if item.file.format in (BookFormat.CBZ, BookFormat.CBR) else "ebooks"
-        author = clean_name(item.authors[0]) if item.authors else ""
-        relative = PurePosixPath(kind, author or "Unknown", book_filename(item))
+        relative = self._export_path(item)
         await asyncio.to_thread(self._exporter.export, path, relative, item.file.sha256)
 
     async def _re_export(self, item: LibraryItem) -> None:
@@ -678,12 +686,16 @@ class FileService:
         """Exports every book already in the library (once at start-up; what is there is kept)."""
         if self._exporter is None:
             return 0
+        entries: list[tuple[Path, PurePosixPath, str]] = []
         done: set[str] = set()
         for item in await self._files.list_for_export():
             if item.file is None or item.file.sha256 in done:
                 continue
             done.add(item.file.sha256)
-            await self._export(item, self._store.path(item.file.sha256))
+            if (path := self._store.path(item.file.sha256)) is not None:
+                entries.append((path, self._export_path(item), item.file.sha256))
+        # Also puts books exported under an older layout (another author spelling) in order.
+        await asyncio.to_thread(self._exporter.reorganize, entries)
         return len(done)
 
     async def _on_fanfic(self, item: LibraryItem, work_id: str) -> None:
