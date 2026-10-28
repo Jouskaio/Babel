@@ -18,6 +18,7 @@ Name | Type | Description | Notes
 **size** | **int** |  | 
 **status** | [**EntryStatus**](EntryStatus.md) |  | 
 **title** | **String** | Given by the source, or read from the file | [optional] 
+**updated** | [**DateTime**](DateTime.md) | When the work last changed on the source (AO3), when known | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

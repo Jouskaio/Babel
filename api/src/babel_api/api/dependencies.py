@@ -381,6 +381,7 @@ def make_source_service(
         container.secrets,
         max_sources=container.settings.max_sources_per_user,
         follow=follow,
+        versions=follows.versions,
     )
 
 

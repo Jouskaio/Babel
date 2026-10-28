@@ -401,7 +401,8 @@ class FollowRow(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    item_id: Mapped[UUID] = mapped_column(
+    # None: a subscription not in the library yet (it comes with its next chapter).
+    item_id: Mapped[UUID | None] = mapped_column(
         ForeignKey("library_items.id", ondelete="CASCADE"), unique=True
     )
     kind: Mapped[str] = mapped_column(String(16))
