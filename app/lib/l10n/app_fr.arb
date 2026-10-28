@@ -1999,6 +1999,8 @@
   "@fanficBookmarks": {"placeholders": {"count": {"type": "int"}}},
   "fanficComplete": "Terminée",
   "fanficInProgress": "En cours d'écriture",
+  "sourceUpdatedOn": "Mis à jour le {date}",
+  "@sourceUpdatedOn": { "placeholders": { "date": { "type": "String" } } },
   "sourceSearchHint": "Chercher un titre ou un auteur…",
   "sourceNoMatch": "Aucun livre ne correspond.",
   "koreaderStatus": "État de la synchronisation",

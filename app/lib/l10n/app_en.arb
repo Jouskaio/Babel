@@ -1207,6 +1207,8 @@
   "@fanficBookmarks": {"placeholders": {"count": {"type": "int"}}},
   "fanficComplete": "Complete",
   "fanficInProgress": "Work in progress",
+  "sourceUpdatedOn": "Updated {date}",
+  "@sourceUpdatedOn": { "placeholders": { "date": { "type": "String" } } },
   "sourceSearchHint": "Search a title or an author…",
   "sourceNoMatch": "No book matches.",
   "koreaderStatus": "Sync status",
