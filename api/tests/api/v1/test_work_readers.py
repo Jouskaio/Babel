@@ -57,6 +57,9 @@ def test_every_edition_of_a_work_shares_its_reviews_and_notes(
     assert cleo_book["work_id"] is None
     linked = client.put(f"/v1/library/{cleo_book['id']}/work", json={"work_id": work}, headers=cleo)
     assert linked.json()["work_id"] == work
+    # The page names the book: its title and author replace the file's.
+    assert linked.json()["title"] == "Jane Eyre"
+    assert linked.json()["authors"] == ["Charlotte Brontë"]
     missing = client.put(
         f"/v1/library/{cleo_book['id']}/work", json={"work_id": str(uuid.uuid4())}, headers=cleo
     )
