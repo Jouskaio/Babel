@@ -9,9 +9,15 @@ import contextlib
 import logging
 import os
 import shutil
+import unicodedata
 from pathlib import Path, PurePosixPath
 
 logger = logging.getLogger(__name__)
+
+
+def _fold(text: str) -> str:
+    plain = unicodedata.normalize("NFD", text.casefold())
+    return "".join(c for c in plain if not unicodedata.combining(c))
 
 
 class LibraryExporter:
@@ -21,7 +27,7 @@ class LibraryExporter:
     def export(self, source: Path, relative: PurePosixPath, tag: str) -> Path | None:
         """Puts [source] at [relative] under the export folder; [tag] tells two different
         files of one name apart. Returns where it is, None when it could not be done."""
-        target = self._root / relative
+        target = self._root / self._same_folder(relative)
         try:
             target.parent.mkdir(parents=True, exist_ok=True)
             if target.exists():
@@ -38,6 +44,19 @@ class LibraryExporter:
             logger.warning("Could not export %s to %s", source, relative, exc_info=True)
             return None
         return target
+
+    def _same_folder(self, relative: PurePosixPath) -> PurePosixPath:
+        """Reuses the author's folder when one exists that differs only by case or accents."""
+        if len(relative.parts) < 3:
+            return relative
+        kind, author = relative.parts[0], relative.parts[1]
+        try:
+            for folder in (self._root / kind).iterdir():
+                if folder.is_dir() and _fold(folder.name) == _fold(author):
+                    return PurePosixPath(kind, folder.name, *relative.parts[2:])
+        except OSError:
+            pass
+        return relative
 
     def forget(self, source: Path) -> int:
         """Removes the exported links of a file that left the store (a copy that is not a link

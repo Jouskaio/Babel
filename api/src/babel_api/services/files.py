@@ -459,6 +459,7 @@ class FileService:
             values["custom_cover"] = None  # the last choice wins
         updated = await self._files.update_details(item.id, values) if values else item
         await self._record(updated, device_id)
+        await self._re_export(updated)
         return updated
 
     async def set_cover_image(
@@ -485,9 +486,15 @@ class FileService:
         item = await self._files.get_item(item_id)
         if item is None or item.user_id != user_id:
             raise NotFoundError
-        if work_id is not None and await self._catalog.get_work(work_id) is None:
+        work = await self._catalog.get_work(work_id) if work_id is not None else None
+        if work_id is not None and work is None:
             raise NotFoundError
         updated = await self._files.set_work(item_id, work_id)
+        if work is not None and work.title:
+            # The page names the book better than its file does.
+            updated = await self._files.update_details(
+                item_id, {"title": work.title[:500], "authors": list(work.authors[:8])}
+            )
         await self._changes.record(
             user_id,
             EntityKind.LIBRARY_ITEM,
@@ -497,6 +504,7 @@ class FileService:
             device_id,
         )
         await self._files.commit()
+        await self._re_export(updated)
         return updated
 
     async def create_fanfic_work(
@@ -655,6 +663,16 @@ class FileService:
         author = clean_name(item.authors[0]) if item.authors else ""
         relative = PurePosixPath(kind, author or "Unknown", book_filename(item))
         await asyncio.to_thread(self._exporter.export, path, relative, item.file.sha256)
+
+    async def _re_export(self, item: LibraryItem) -> None:
+        """A renamed book moves to its new author's folder (the old link is dropped)."""
+        if self._exporter is None or item.file is None:
+            return
+        path = self._store.path(item.file.sha256)
+        if path is None:
+            return
+        await asyncio.to_thread(self._exporter.forget, path)
+        await self._export(item, path)
 
     async def export_all(self) -> int:
         """Exports every book already in the library (once at start-up; what is there is kept)."""

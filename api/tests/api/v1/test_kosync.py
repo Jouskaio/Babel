@@ -736,3 +736,20 @@ def test_books_are_also_exported_with_clean_names_when_asked(
     assert gone.status_code == 204
     assert not exported.exists()
     assert LibraryExporter(out).forget(tmp_path / "nothing") == 0
+
+
+def test_the_exporter_reuses_an_authors_folder_whatever_its_case(tmp_path: Path) -> None:
+    from pathlib import PurePosixPath
+
+    from babel_api.adapters.files.export import LibraryExporter
+
+    out = tmp_path / "library"
+    source = tmp_path / "a.epub"
+    source.write_bytes(b"a")
+    other = tmp_path / "b.epub"
+    other.write_bytes(b"b")
+    exporter = LibraryExporter(out)
+    exporter.export(source, PurePosixPath("ebooks", "Charlotte Brontë", "A.epub"), "a")
+    exporter.export(other, PurePosixPath("ebooks", "charlotte bronte", "B.epub"), "b")
+    assert sorted(p.name for p in (out / "ebooks").iterdir()) == ["Charlotte Brontë"]
+    assert (out / "ebooks" / "Charlotte Brontë" / "B.epub").is_file()
