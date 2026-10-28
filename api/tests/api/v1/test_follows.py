@@ -352,7 +352,6 @@ def test_a_work_imported_from_an_ao3_source_is_followed_and_several_chapters_mak
 def test_a_subscription_comes_into_the_library_when_it_is_updated(
     app: FastAPI, client: TestClient, ao3: Ao3, ada: dict[str, str]
 ) -> None:
-    from babel_api.domain.follows import Follow  # noqa: F401
     from babel_api.services.follows import ao3_updated
 
     container: Container = app.state.container
