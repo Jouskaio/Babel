@@ -3628,6 +3628,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fanficInProgress => 'Work in progress';
 
   @override
+  String sourceUpdatedOn(String date) {
+    return 'Updated $date';
+  }
+
+  @override
   String get sourceSearchHint => 'Search a title or an author…';
 
   @override
