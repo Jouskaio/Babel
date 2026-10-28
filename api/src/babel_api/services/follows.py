@@ -7,13 +7,19 @@ version through sync. A finished work stops being followed.
 """
 
 import logging
+import re
 from dataclasses import replace
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Protocol
 from uuid import UUID, uuid4
 
 from babel_api.adapters.sources.ao3 import Ao3Connector
-from babel_api.domain.errors import NotFoundError, SourceConnectionError, SourceRateLimitedError
+from babel_api.domain.errors import (
+    DomainError,
+    NotFoundError,
+    SourceConnectionError,
+    SourceRateLimitedError,
+)
 from babel_api.domain.files import LibraryItem
 from babel_api.domain.follows import Follow, is_complete
 from babel_api.domain.ports import FileRepository, SyncRepository
@@ -45,6 +51,23 @@ def chapter_count(chapters: str | None) -> int:
     """The chapters posted so far in "4/?" or "4/10": 4 (0 when unknown)."""
     head = (chapters or "").split("/", 1)[0].strip()
     return int(head) if head.isdigit() else 0
+
+
+_ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+_BLURB_DATE = re.compile(r"\d{1,2} [A-Z][a-z]{2} \d{4}")
+
+
+def ao3_updated(version: str) -> date | None:
+    """The update date in an AO3 version id ("<work>:<chapters>|<date>"), None when unknown."""
+    tail = version.split("|", 1)[1] if "|" in version else ""
+    if match := _ISO_DATE.search(tail):
+        return date.fromisoformat(match.group())
+    if match := _BLURB_DATE.search(tail):
+        try:
+            return datetime.strptime(match.group(), "%d %b %Y").date()
+        except ValueError:
+            return None
+    return None
 
 
 class FollowService:
@@ -121,6 +144,39 @@ class FollowService:
         await self._follows.commit()
         return saved
 
+    async def track_subscriptions(self, user_id: UUID, entries: list[RemoteEntry]) -> int:
+        """Follows the works the reader subscribes to on AO3, in the library or not: the first
+        check only notes their state, a later update brings the book (or its new chapter)."""
+        known = {f.ref for f in await self._follows.list_follows(user_id) if f.kind == "ao3"}
+        added = 0
+        for entry in entries:
+            work_id = entry.path.rsplit("/", 1)[-1]
+            if work_id in known:
+                continue
+            known.add(work_id)
+            await self._follows.save(
+                Follow(
+                    id=uuid4(),
+                    user_id=user_id,
+                    item_id=None,
+                    kind="ao3",
+                    ref=work_id,
+                    url=f"https://archiveofourown.org/works/{work_id}",
+                    version="",
+                    chapters=None,
+                    complete=False,
+                    created_at=datetime.now(UTC),
+                )
+            )
+            added += 1
+        if added:
+            await self._follows.commit()
+        return added
+
+    async def versions(self, user_id: UUID) -> dict[str, str]:
+        """Work id -> last known version, for the dates shown in AO3 sources."""
+        return {f.ref: f.version for f in await self._follows.list_follows(user_id) if f.version}
+
     async def list_follows(self, user_id: UUID) -> list[Follow]:
         return await self._follows.list_follows(user_id)
 
@@ -142,6 +198,8 @@ class FollowService:
         except SourceConnectionError as error:
             return await self._saved(follow, last_checked_at=now, last_error=str(error)[:200])
         chapters = ao3_chapters(entry)
+        if follow.item_id is None:
+            return await self._check_subscription(follow, entry, chapters, now)
         updated: LibraryItem | None = None
         if entry.remote_id != follow.version:
             item = await self._files.get_item(follow.item_id)
@@ -166,6 +224,58 @@ class FollowService:
             added = chapter_count(chapters) - chapter_count(follow.chapters)
             await self._notifier.new_chapters(
                 updated.user_id, updated.id, entry.title or updated.title, chapters, added
+            )
+        return saved
+
+    async def _check_subscription(
+        self, follow: Follow, entry: RemoteEntry, chapters: str | None, now: datetime
+    ) -> Follow:
+        """A subscription not in the library: the first look only notes the version, an update
+        after that brings the book in (marked as being on the e-reader)."""
+        complete = is_complete(chapters)
+        if follow.version == "" or entry.remote_id == follow.version:
+            return await self._saved(
+                follow,
+                version=entry.remote_id,
+                chapters=chapters,
+                complete=complete,
+                last_checked_at=now,
+                last_error=None,
+            )
+        name = f"{entry.title}.epub" if entry.title else "work.epub"
+        try:
+            result = await self._library.import_file(
+                follow.user_id,
+                self._ao3.fetch({"username": ""}, None, entry),
+                name,
+                ereader=True,
+            )
+        except DomainError as error:
+            return await self._saved(
+                follow, last_checked_at=now, last_error=type(error).__name__[:200]
+            )
+        item = await self._library.mark_origin(result.item.id, "ao3")
+        logger.info("Subscribed AO3 work %s updated: added to the library", follow.ref)
+        saved = await self._follows.save(
+            replace(
+                follow,
+                item_id=item.id,
+                version=entry.remote_id,
+                chapters=chapters or follow.chapters,
+                complete=complete,
+                last_checked_at=now,
+                last_error=None,
+                updated_at=now,
+            )
+        )
+        await self._follows.commit()
+        if self._notifier is not None:
+            await self._notifier.new_chapters(
+                item.user_id,
+                item.id,
+                entry.title or item.title,
+                chapters,
+                max(chapter_count(chapters) - chapter_count(follow.chapters), 1),
             )
         return saved
 

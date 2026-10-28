@@ -23,6 +23,7 @@ class SourceEntryResponse {
     required this.size,
     required this.status,
     this.title,
+    this.updated,
   });
 
   List<String> authors;
@@ -47,6 +48,9 @@ class SourceEntryResponse {
   /// Given by the source, or read from the file
   String? title;
 
+  /// When the work last changed on the source (AO3), when known
+  DateTime? updated;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is SourceEntryResponse &&
     _deepEquality.equals(other.authors, authors) &&
@@ -58,7 +62,8 @@ class SourceEntryResponse {
     other.path == path &&
     other.size == size &&
     other.status == status &&
-    other.title == title;
+    other.title == title &&
+    other.updated == updated;
 
   @override
   int get hashCode =>
@@ -72,10 +77,11 @@ class SourceEntryResponse {
     (path.hashCode) +
     (size.hashCode) +
     (status.hashCode) +
-    (title == null ? 0 : title!.hashCode);
+    (title == null ? 0 : title!.hashCode) +
+    (updated == null ? 0 : updated!.hashCode);
 
   @override
-  String toString() => 'SourceEntryResponse[authors=$authors, coverPath=$coverPath, format=$format, id=$id, itemId=$itemId, name=$name, path=$path, size=$size, status=$status, title=$title]';
+  String toString() => 'SourceEntryResponse[authors=$authors, coverPath=$coverPath, format=$format, id=$id, itemId=$itemId, name=$name, path=$path, size=$size, status=$status, title=$title, updated=$updated]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -104,6 +110,11 @@ class SourceEntryResponse {
       json[r'title'] = this.title;
     } else {
       json[r'title'] = null;
+    }
+    if (this.updated != null) {
+      json[r'updated'] = _dateFormatter.format(this.updated!.toUtc());
+    } else {
+      json[r'updated'] = null;
     }
     return json;
   }
@@ -139,6 +150,7 @@ class SourceEntryResponse {
         size: mapValueOfType<int>(json, r'size')!,
         status: EntryStatus.fromJson(json[r'status'])!,
         title: mapValueOfType<String>(json, r'title'),
+        updated: mapDateTime(json, r'updated', r''),
       );
     }
     return null;

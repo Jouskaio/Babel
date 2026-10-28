@@ -1,6 +1,6 @@
 """Sources of book files: GitHub, OPDS catalogs, WebDAV folders and AO3 (ADR 0009)."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Annotated, Any
 from uuid import UUID
 
@@ -131,6 +131,9 @@ class SourceEntryResponse(BaseModel):
     authors: list[str]
     cover_path: str | None
     format: str | None = Field(description="epub, pdf, cbz or cbr, when known")
+    updated: date | None = Field(
+        default=None, description="When the work last changed on the source (AO3), when known"
+    )
 
 
 class SourceDetailResponse(BaseModel):
@@ -153,6 +156,7 @@ class SourceDetailResponse(BaseModel):
                     authors=list(e.authors),
                     cover_path=e.cover_path,
                     format=e.format,
+                    updated=e.updated,
                 )
                 for e in detail.entries
             ],
@@ -300,6 +304,7 @@ async def search_sources(
                 authors=list(e.authors),
                 cover_path=e.cover_path,
                 format=e.format,
+                updated=e.updated,
             ),
         )
         for source, e in await sources.search(user_id, q)

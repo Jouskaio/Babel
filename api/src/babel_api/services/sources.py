@@ -23,12 +23,14 @@ from babel_api.domain.ports import FileRepository, SourceConnector, SourceReposi
 from babel_api.domain.sources import (
     EntryStatus,
     FanficDetails,
+    RemoteEntry,
     Source,
     SourceDetail,
     SourceEntry,
     SourceKind,
 )
 from babel_api.services.files import FileService, stored_sha
+from babel_api.services.follows import ao3_updated
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +42,15 @@ SEARCH_RESCAN = timedelta(minutes=10)
 
 # At most this many books per "import all" call, to keep requests short.
 IMPORT_BATCH = 50
+
+
+def _dated(entry: SourceEntry, versions: dict[str, str]) -> SourceEntry:
+    """The entry with the date its AO3 work last changed (the follow-up knows it better than
+    the listing, which has none for a subscription)."""
+    if not entry.path.startswith("/works/"):
+        return entry
+    version = versions.get(entry.path.rsplit("/", 1)[-1]) or entry.remote_id
+    return replace(entry, updated=ao3_updated(version))
 
 
 def _plain(text: str) -> str:
@@ -61,6 +72,10 @@ class BatchImport:
 class Ao3Details(Protocol):
     async def kudos(self, config: dict[str, Any], token: str | None, work_id: str) -> bool: ...
 
+    async def subscriptions(
+        self, config: dict[str, Any], token: str | None
+    ) -> list[RemoteEntry]: ...
+
     async def details(
         self, config: dict[str, Any], token: str | None, work_id: str
     ) -> FanficDetails: ...
@@ -77,8 +92,10 @@ class SourceService:
         *,
         max_sources: int,
         follow: Callable[[SourceKind, LibraryItem, SourceEntry], Awaitable[None]] | None = None,
+        versions: Callable[[UUID], Awaitable[dict[str, str]]] | None = None,
     ) -> None:
         self._follow = follow
+        self._versions = versions
         self._sources = sources
         self._files = files
         self._library = library
@@ -142,6 +159,7 @@ class SourceService:
             return []
         found: list[tuple[Source, SourceEntry]] = []
         now = datetime.now(UTC)
+        known = await self._versions(user_id) if self._versions else {}
         for source in await self._sources.list_sources(user_id):
             stale = source.last_scan_at is None or now - source.last_scan_at > SEARCH_RESCAN
             if stale and source.kind not in SLOW_KINDS:
@@ -153,15 +171,17 @@ class SourceService:
             for entry in await self._sources.entries(source.id):
                 haystack = _plain(" ".join([entry.title or entry.name, *entry.authors]))
                 if all(w in haystack for w in words):
-                    found.append((source, await self._with_status(user_id, source.kind, entry)))
+                    shown = await self._with_status(user_id, source.kind, entry)
+                    found.append((source, _dated(shown, known)))
                     if len(found) >= limit:
                         return found
         return found
 
     async def detail(self, user_id: UUID, source_id: UUID) -> SourceDetail:
         source = await self._own(user_id, source_id)
+        known = await self._versions(user_id) if self._versions else {}
         entries = [
-            await self._with_status(user_id, source.kind, e)
+            _dated(await self._with_status(user_id, source.kind, e), known)
             for e in await self._sources.entries(source_id)
         ]
         return SourceDetail(replace(source, entry_count=len(entries)), entries)
@@ -231,6 +251,23 @@ class SourceService:
             await self._sources.record_scan(source_id, [], now, f"connection: {error}")
         await self._sources.commit()
         return await self.detail(user_id, source_id)
+
+    async def ao3_subscriptions(self) -> list[tuple[UUID, list[RemoteEntry]]]:
+        """For each AO3 source with a password: its owner and the works they subscribe to."""
+        found: list[tuple[UUID, list[RemoteEntry]]] = []
+        if SourceKind.AO3.value in await self._sources.disabled_kinds():
+            return found
+        for _owner, source in await self._sources.all_sources():
+            if source.kind is not SourceKind.AO3 or not source.has_credentials:
+                continue
+            connector = cast(Ao3Details, self._connectors[source.kind])
+            try:
+                entries = await connector.subscriptions(source.config, await self._token(source))
+            except SourceConnectionError:
+                logger.info("AO3 subscriptions of source %s unreachable", source.id)
+                continue
+            found.append((source.user_id, entries))
+        return found
 
     # ------------------------------------------------------------ import
     async def import_entry(

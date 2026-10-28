@@ -38,12 +38,15 @@ class SqlFollowRepository:
 
     async def save(self, follow: Follow) -> Follow:
         """Adds the follow, or updates the one of the same library item."""
-        row = await self._session.scalar(
-            select(FollowRow).where(FollowRow.item_id == follow.item_id)
-        )
+        row = await self._session.get(FollowRow, follow.id)
+        if row is None and follow.item_id is not None:
+            row = await self._session.scalar(
+                select(FollowRow).where(FollowRow.item_id == follow.item_id)
+            )
         if row is None:
             row = FollowRow(id=follow.id, user_id=follow.user_id, item_id=follow.item_id)
             self._session.add(row)
+        row.item_id = follow.item_id
         row.kind, row.ref, row.url = follow.kind, follow.ref, follow.url[:2000]
         row.version, row.chapters, row.complete = follow.version, follow.chapters, follow.complete
         row.last_checked_at, row.last_error = follow.last_checked_at, follow.last_error

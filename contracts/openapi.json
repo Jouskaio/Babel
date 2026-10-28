@@ -5621,6 +5621,19 @@
             ],
             "description": "Given by the source, or read from the file",
             "title": "Title"
+          },
+          "updated": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the work last changed on the source (AO3), when known",
+            "title": "Updated"
           }
         },
         "required": [
@@ -6908,7 +6921,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.80.7"
+    "version": "0.81.0"
   },
   "openapi": "3.1.0",
   "paths": {

@@ -515,6 +515,8 @@ class FollowResponse(BaseModel):
 
     @classmethod
     def of(cls, follow: Follow) -> "FollowResponse":
+        if follow.item_id is None:
+            raise ValueError("a subscription not in the library has no book to show")
         return cls(
             id=follow.id,
             item_id=follow.item_id,
@@ -530,7 +532,7 @@ class FollowResponse(BaseModel):
 @router.get("/library/follows", operation_id="getFollows")
 async def get_follows(user_id: CurrentUserId, follows: FollowServiceDep) -> list[FollowResponse]:
     """Unfinished AO3 works imported by link, checked daily for new chapters."""
-    return [FollowResponse.of(f) for f in await follows.list_follows(user_id)]
+    return [FollowResponse.of(f) for f in await follows.list_follows(user_id) if f.item_id]
 
 
 @router.post("/library/follows/{follow_id}/check", operation_id="checkFollow")

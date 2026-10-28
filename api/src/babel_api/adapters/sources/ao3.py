@@ -504,6 +504,12 @@ class Ao3Connector:
             unique.setdefault(entry.path, entry)
         return list(unique.values())
 
+    async def subscriptions(self, config: dict[str, Any], token: str | None) -> list[RemoteEntry]:
+        """The works the reader is subscribed to (needs the AO3 password)."""
+        username = str(config["username"])
+        client = await self._session(username, token)
+        return await self._works(client, f"/users/{username}/subscriptions", "dl.subscription dt")
+
     async def fetch(
         self, config: dict[str, Any], token: str | None, entry: RemoteEntry
     ) -> AsyncIterator[bytes]:
