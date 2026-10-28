@@ -179,7 +179,7 @@ wheels = [
 
 [[package]]
 name = "babel-api"
-version = "0.80.5"
+version = "0.80.6"
 source = { editable = "." }
 dependencies = [
     { name = "aiosmtplib" },
