@@ -3656,6 +3656,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get fanficInProgress => 'En cours d\'écriture';
 
   @override
+  String sourceUpdatedOn(String date) {
+    return 'Mis à jour le $date';
+  }
+
+  @override
   String get sourceSearchHint => 'Chercher un titre ou un auteur…';
 
   @override

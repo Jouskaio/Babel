@@ -6008,6 +6008,12 @@ abstract class AppLocalizations {
   /// **'En cours d\'écriture'**
   String get fanficInProgress;
 
+  /// No description provided for @sourceUpdatedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mis à jour le {date}'**
+  String sourceUpdatedOn(String date);
+
   /// No description provided for @sourceSearchHint.
   ///
   /// In fr, this message translates to:

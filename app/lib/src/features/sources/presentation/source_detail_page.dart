@@ -261,9 +261,17 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
           e.title ?? titleAndFormat(e.name).$1,
           ...e.authors,
         ].any((text) => text.toLowerCase().contains(query));
-    final shownPending = pending.where(matches).toList();
-    final shownInLibrary = inLibrary.where(matches).toList();
-    final shownUnreadable = unreadable.where(matches).toList();
+    // Most recently updated first (a fanfiction's last chapter); undated ones keep their order.
+    List<SourceEntryResponse> shown(List<SourceEntryResponse> entries) {
+      final list = entries.where(matches).toList();
+      final dated = list.where((e) => e.updated != null).toList()
+        ..sort((a, b) => b.updated!.compareTo(a.updated!));
+      return [...dated, ...list.where((e) => e.updated == null)];
+    }
+
+    final shownPending = shown(pending);
+    final shownInLibrary = shown(inLibrary);
+    final shownUnreadable = shown(unreadable);
     final failed = source.lastError != null;
     final busy = _scanning || _importingAll || source.scanning;
     return RefreshIndicator(
@@ -467,6 +475,11 @@ class _SourceDetailPageState extends ConsumerState<SourceDetailPage> {
                     [
                       if (entry.authors.isNotEmpty) entry.authors.join(', '),
                       if (format.isNotEmpty) format,
+                      if (entry.updated case final date?)
+                        context.l10n.sourceUpdatedOn(
+                          MaterialLocalizations.of(context)
+                              .formatMediumDate(date),
+                        ),
                       if (entry.size > 0) fileSize(context, entry.size),
                     ].join(' · '),
                     style: BabelText.body(12),
