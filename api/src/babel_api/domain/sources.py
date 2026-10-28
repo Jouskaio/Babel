@@ -1,7 +1,7 @@
 """User-defined sources of book files (ADR 0009)."""
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from enum import StrEnum
 from typing import Any
 from uuid import UUID
@@ -79,6 +79,8 @@ class SourceEntry:
     cover_path: str | None = None
     locator: str | None = None
     format: str | None = None
+    # When the work last changed on the source (AO3), when known.
+    updated: date | None = None
 
     @property
     def name(self) -> str:

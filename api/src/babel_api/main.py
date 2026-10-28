@@ -49,6 +49,7 @@ from babel_api.api.dependencies import (
     make_follow_service,
     make_kavita_service,
     make_request_service,
+    make_source_service,
 )
 from babel_api.api.errors import install_error_handlers
 from babel_api.api.v1.router import router as v1_router
@@ -56,12 +57,13 @@ from babel_api.core.config import Settings, get_settings
 from babel_api.domain.sources import SourceKind
 from babel_api.domain.users import IdentityProvider
 from babel_api.services.catalog import CatalogService
-from babel_api.services.follow_loop import follow_forever
+from babel_api.services.follow_loop import follow_forever, subscriptions_forever
 from babel_api.services.follows import FollowService
 from babel_api.services.kavita import KavitaProvisioner, KavitaService
 from babel_api.services.refresh import refresh_forever
 from babel_api.services.request_watch import watch_forever
 from babel_api.services.requests import RequestService
+from babel_api.services.sources import SourceService
 from babel_api.services.works import WorkService
 
 
@@ -177,6 +179,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         except SQLAlchemyError:
             logging.getLogger(__name__).warning("Translations not reset", exc_info=True)
         follow_task: asyncio.Task[None] | None = None
+        subscription_task: asyncio.Task[None] | None = None
         container: Container = app.state.container
         if settings.follow_interval_hours > 0:
 
@@ -187,6 +190,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
             follow_task = asyncio.create_task(
                 follow_forever(services, timedelta(hours=settings.follow_interval_hours))
+            )
+
+            @asynccontextmanager
+            async def source_services() -> AsyncGenerator[SourceService]:
+                async with container.sessions() as session:
+                    yield make_source_service(container, session)
+
+            subscription_task = asyncio.create_task(
+                subscriptions_forever(source_services, services)
             )
         export_task: asyncio.Task[None] | None = None
         if settings.library_export_dir:
@@ -231,6 +243,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         kavita.cancel()
         if follow_task is not None:
             follow_task.cancel()
+        if subscription_task is not None:
+            subscription_task.cancel()
         await mailer.drain()
         await pusher.aclose()
         await open_library.aclose()

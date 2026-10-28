@@ -347,3 +347,48 @@ def test_a_work_imported_from_an_ao3_source_is_followed_and_several_chapters_mak
     _, title, text, _ = chapters[0]
     assert title == "Nouveaux chapitres"
     assert text == "Arcane · +3 chapitres (6/? au total)"
+
+
+def test_a_subscription_comes_into_the_library_when_it_is_updated(
+    app: FastAPI, client: TestClient, ao3: Ao3, ada: dict[str, str]
+) -> None:
+    from babel_api.domain.follows import Follow  # noqa: F401
+    from babel_api.services.follows import ao3_updated
+
+    container: Container = app.state.container
+    subscribed = [
+        RemoteEntry(path="/works/77", size=0, remote_id="77:|", title="Arcane", format="epub")
+    ]
+
+    @asynccontextmanager
+    async def services() -> AsyncGenerator[FollowService]:
+        async with container.sessions() as session:
+            yield make_follow_service(container, session)
+
+    user = client.get("/v1/me", headers=ada).json()["id"]
+
+    async def track() -> int:
+        async with services() as follows_service:
+            return await follows_service.track_subscriptions(uuid.UUID(user), subscribed)
+
+    assert asyncio.run(track()) == 1
+    assert asyncio.run(track()) == 0  # followed once
+    assert follows(client, ada) == []  # not a book yet: nothing to show
+
+    # The first look only notes the state: the existing chapters are not imported.
+    assert asyncio.run(check_due_follows(services, timedelta(0))) == 1
+    assert client.get("/v1/library", headers=ada).json() == []
+    assert ao3.downloads == 0
+
+    # An update brings the book in, marked as being on the e-reader, and follows it.
+    ao3.chapters, ao3.updated = "4/?", "2026-10-05"
+    assert asyncio.run(check_due_follows(services, timedelta(0))) == 1
+    [book] = client.get("/v1/library", headers=ada).json()
+    assert (book["ereader"], book["origin"]) == (True, "ao3")
+    assert ao3.downloads == 1
+    [follow] = follows(client, ada)
+    assert follow["item_id"] == book["id"]
+
+    assert str(ao3_updated("77:4/?|2026-10-05")) == "2026-10-05"
+    assert str(ao3_updated("77:4/?|05 Oct 2026")) == "2026-10-05"
+    assert ao3_updated("77:|") is None

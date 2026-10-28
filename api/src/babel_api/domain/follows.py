@@ -9,7 +9,8 @@ from uuid import UUID
 class Follow:
     id: UUID
     user_id: UUID
-    item_id: UUID
+    # None: an AO3 subscription that is not in the library yet.
+    item_id: UUID | None
     # "ao3" for now; the work identifier on that site.
     kind: str
     ref: str
