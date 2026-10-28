@@ -1,0 +1,1 @@
+Correction : après avoir ouvert une saga et associé une fiche à un livre, le retour et la barre d'onglets ne restent plus bloqués
