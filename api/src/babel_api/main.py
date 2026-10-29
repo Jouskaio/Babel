@@ -200,6 +200,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             subscription_task = asyncio.create_task(
                 subscriptions_forever(source_services, services)
             )
+
+        async def adopt_series() -> None:
+            # Once at start-up: books whose title names a series the reader already has.
+            try:
+                async with container.sessions() as session:
+                    count = await make_file_service(container, session).adopt_all_series()
+                logging.getLogger(__name__).info("Series adopted: %s books", count)
+            except Exception:
+                logging.getLogger(__name__).exception("Series adoption failed")
+
+        series_task = asyncio.create_task(adopt_series())
         export_task: asyncio.Task[None] | None = None
         if settings.library_export_dir:
 
@@ -236,6 +247,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
         yield
         refresh_task.cancel()
+        series_task.cancel()
         if export_task is not None:
             export_task.cancel()
         if watch_task is not None:

@@ -31,7 +31,7 @@ from babel_api.domain.ports import (
     FileRepository,
     MetadataReader,
 )
-from babel_api.domain.series import guess_series
+from babel_api.domain.series import guess_series, series_key, volume_number
 from babel_api.domain.sync import ChangeOp, EntityKind
 
 
@@ -458,6 +458,8 @@ class FileService:
             values["cover_id"] = int(cover) if cover else None
             values["custom_cover"] = None  # the last choice wins
         updated = await self._files.update_details(item.id, values) if values else item
+        if "series" not in changes:  # a series the reader just cleared stays cleared
+            updated = await self._adopt_series(updated)
         await self._record(updated, device_id)
         await self._re_export(updated)
         return updated
@@ -495,6 +497,7 @@ class FileService:
             updated = await self._files.update_details(
                 item_id, {"title": work.title[:500], "authors": list(work.authors[:8])}
             )
+            updated = await self._adopt_series(updated)
         await self._changes.record(
             user_id,
             EntityKind.LIBRARY_ITEM,
@@ -671,6 +674,61 @@ class FileService:
             return
         relative = self._export_path(item)
         await asyncio.to_thread(self._exporter.export, path, relative, item.file.sha256)
+
+    async def _adopt_series(self, item: LibraryItem) -> LibraryItem:
+        """A book whose title names a series the reader already has joins it, at the right
+        volume (a title alone is a guess: only a series already in the library is trusted)."""
+        known: dict[str, str] = {}
+        for other in await self._files.list_items(item.user_id):
+            if other.series and other.id != item.id:
+                known.setdefault(series_key(other.series), other.series)
+        series = item.series
+        if series is None:
+            for name in known.values():
+                if volume_number(item.title, name) is not None:
+                    series = name
+                    break
+            else:
+                guess = guess_series(item.title)
+                series = known.get(series_key(guess.series)) if guess else None
+        if series is None:
+            return item
+        number = item.series_index
+        if number is None:
+            number = volume_number(item.title, series)
+            if number is None and (guess := guess_series(item.title)):
+                number = guess.number if series_key(guess.series) == series_key(series) else None
+        if series == item.series and number == item.series_index:
+            return item
+        return await self._files.update_details(item.id, {"series": series, "series_index": number})
+
+    async def adopt_all_series(self) -> int:
+        """Once at start-up: books of the library that name a series the reader has."""
+        changed = 0
+        items = await self._files.list_for_export()
+        # Two books of one reader guessing the same series make it, even if none has it yet.
+        guesses: dict[tuple[UUID, str], list[LibraryItem]] = {}
+        for item in items:
+            if item.series is None and (guess := guess_series(item.title)):
+                guesses.setdefault((item.user_id, series_key(guess.series)), []).append(item)
+        for group in guesses.values():
+            if len(group) >= 2:
+                for item in group:
+                    guess = guess_series(item.title)
+                    if guess:
+                        updated = await self._files.update_details(
+                            item.id, {"series": guess.series, "series_index": guess.number}
+                        )
+                        changed += 1
+                        await self._record(updated, None)
+        for item in await self._files.list_for_export():
+            if item.series is not None and item.series_index is not None:
+                continue
+            updated = await self._adopt_series(item)
+            if updated is not item:
+                changed += 1
+                await self._record(updated, None)
+        return changed
 
     async def _re_export(self, item: LibraryItem) -> None:
         """A renamed book moves to its new author's folder (the old link is dropped)."""

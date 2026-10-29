@@ -112,3 +112,21 @@ def test_the_reader_uploads_their_own_cover(client: TestClient, ada: dict[str, s
     assert bad.status_code == 400
     chosen = client.patch(url, json={"cover_id": 5}, headers=ada).json()
     assert chosen["cover_path"] == "/v1/catalog/covers/5/M"
+
+
+def test_a_renamed_book_joins_the_series_the_reader_already_has(
+    client: TestClient, ada: dict[str, str]
+) -> None:
+    first = add(client, ada, epub(title="Homunculus 1", isbn=None))
+    assert first["series"] == "Homunculus"
+    odd = add(client, ada, epub(title="scan_0042", isbn=None))
+    assert odd["series"] is None
+
+    renamed = client.patch(
+        f"/v1/library/{odd['id']}", json={"title": "Homunculus - 07"}, headers=ada
+    ).json()
+    assert (renamed["series"], renamed["series_index"]) == ("Homunculus", 7.0)
+
+    # A series the reader clears on purpose stays cleared.
+    cleared = client.patch(f"/v1/library/{odd['id']}", json={"series": ""}, headers=ada).json()
+    assert cleared["series"] is None
