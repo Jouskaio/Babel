@@ -137,6 +137,10 @@ async def sync_library(
                 "name": book_filename(item),
                 "size": item.file.size,
                 "format": item.file.format.value,
+                "title": item.title,
+                "authors": ", ".join(item.authors),
+                "series": item.series or "",
+                "series_index": item.series_index,
             }
             for item in wanted
             if item.file is not None
