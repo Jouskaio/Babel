@@ -17,6 +17,7 @@ import '../../../core/share/share_intake.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
@@ -655,7 +656,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
 /// Opens a book's sheet (above the floating navigation bar of the tabs).
 Future<void> showBookActions(BuildContext context, LibraryItemResponse item) =>
-    showModalBottomSheet<void>(
+    showBabelSheet<void>(
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
@@ -848,7 +849,7 @@ class _BookTile extends ConsumerWidget {
     );
     return InkWell(
       borderRadius: BabelShape.radius(8),
-      onTap: () => showModalBottomSheet<void>(
+      onTap: () => showBabelSheet<void>(
         context: context,
         // Above the floating navigation bar of the tabs.
         useRootNavigator: true,
@@ -1586,7 +1587,7 @@ class _Filters extends StatelessWidget {
     );
   }
 
-  void _showShelves(BuildContext context) => showModalBottomSheet<void>(
+  void _showShelves(BuildContext context) => showBabelSheet<void>(
     context: context,
     useRootNavigator: true,
     isScrollControlled: true,

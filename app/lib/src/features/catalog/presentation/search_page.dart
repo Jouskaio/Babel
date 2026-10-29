@@ -11,6 +11,7 @@ import '../../../core/sync/lookups.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
@@ -380,7 +381,7 @@ class _Results extends ConsumerWidget {
                 if (work != null) {
                   context.push(Routes.work(work));
                 } else {
-                  showModalBottomSheet<void>(
+                  showBabelSheet<void>(
                     context: context,
                     useRootNavigator: true,
                     backgroundColor: Colors.transparent,

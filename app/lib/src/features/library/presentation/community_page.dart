@@ -9,6 +9,7 @@ import '../../../core/api/api_providers.dart';
 import '../../../core/locale/file_size.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/back_leading.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/error_retry.dart';
@@ -131,7 +132,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
 
   Future<void> _open(CommunityBookResponse book) async {
     final l10n = context.l10n;
-    final add = await showModalBottomSheet<bool>(
+    final add = await showBabelSheet<bool>(
       context: context,
       builder: (context) => SafeArea(
         child: Padding(

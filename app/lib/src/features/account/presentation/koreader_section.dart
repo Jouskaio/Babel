@@ -10,6 +10,7 @@ import '../../../core/api/api_providers.dart';
 import '../../../core/locale/relative_time.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
@@ -336,7 +337,7 @@ class _UnknownBook extends ConsumerWidget {
   final KoreaderUnknownBookResponse book;
 
   Future<void> _pick(BuildContext context, WidgetRef ref) async {
-    final item = await showModalBottomSheet<LibraryItemResponse>(
+    final item = await showBabelSheet<LibraryItemResponse>(
       context: context,
       isScrollControlled: true,
       builder: (_) => const _LibraryPicker(),

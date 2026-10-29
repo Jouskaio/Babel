@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/loading_bar.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
@@ -13,7 +14,7 @@ import 'sharing_settings.dart';
 import 'social_widgets.dart';
 
 Future<void> showReviewSheet(BuildContext context, LibraryItemResponse item) =>
-    showModalBottomSheet<void>(
+    showBabelSheet<void>(
       context: context,
       // Above the floating navigation bar of the tabs.
       useRootNavigator: true,
@@ -25,7 +26,7 @@ Future<void> showReviewSheet(BuildContext context, LibraryItemResponse item) =>
 Future<void> showRecommendSheet(
   BuildContext context,
   LibraryItemResponse item,
-) => showModalBottomSheet<void>(
+) => showBabelSheet<void>(
   context: context,
   // Above the floating navigation bar of the tabs.
   useRootNavigator: true,

@@ -1,5 +1,6 @@
 import 'package:babel_api_client/api.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -64,94 +65,166 @@ class _Head extends StatelessWidget {
   );
 }
 
-/// The book being read: the most recently opened one with some progress.
-LibraryItemResponse? readingNow(
+/// The books being read, the most recently opened first: those with some progress.
+List<LibraryItemResponse> readingNow(
   List<LibraryItemResponse> items,
   Map<String, SavedPosition> positions,
 ) {
-  LibraryItemResponse? best;
-  DateTime? bestTime;
+  final reading = <(LibraryItemResponse, DateTime?)>[];
   for (final item in items) {
     if (item.hidden == true || item.status == ReadingStatus.finished) continue;
     final progress = effectiveProgress(item, positions) ?? 0;
     if (progress <= 0 || progress >= 100) continue;
-    final at = positions[item.id]?.time ?? item.stateTime;
-    if (best == null ||
-        (at != null && (bestTime == null || at.isAfter(bestTime)))) {
-      best = item;
-      bestTime = at;
-    }
+    reading.add((item, positions[item.id]?.time ?? item.stateTime));
   }
-  return best;
+  reading.sort((a, b) {
+    if (a.$2 == null || b.$2 == null) return a.$2 == null ? 1 : -1;
+    return b.$2!.compareTo(a.$2!);
+  });
+  return [for (final r in reading) r.$1];
 }
 
-/// "Continue": the book being read, its progress and a button to go back to it.
-class ContinueCard extends ConsumerWidget {
+/// "Continue": the books being read, one card each (swipe sideways to see the others), with
+/// their progress and a button to go back to them.
+class ContinueCard extends ConsumerStatefulWidget {
   const ContinueCard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
+  ConsumerState<ContinueCard> createState() => _ContinueCardState();
+}
+
+class _ContinueCardState extends ConsumerState<ContinueCard> {
+  // The next card peeks in, which tells there is more to swipe to.
+  final _controller = PageController(viewportFraction: 0.94);
+  int _page = 0;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final items = ref.watch(libraryControllerProvider).value ?? const [];
     final positions = ref.watch(positionPercentsProvider).value ?? const {};
-    final item = readingNow(items, positions);
-    if (item == null) return const SizedBox.shrink();
-    final percent = effectiveProgress(item, positions) ?? 0;
+    final reading = readingNow(items, positions);
+    if (reading.isEmpty) return const SizedBox.shrink();
+    if (reading.length == 1) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: _gap),
+        child: _ReadingCard(reading.first, positions),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.only(bottom: _gap),
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: BabelColors.surface,
-          borderRadius: BabelShape.radius(26),
-          border: Border.all(color: BabelColors.border),
-        ),
-        child: Row(
-          children: [
-            BookCover(
-              width: 96,
-              url: libraryCoverUrl(item),
-              title: item.title,
-              angle: -3,
-            ),
-            const SizedBox(width: 18),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.homeReading.toUpperCase(),
-                    style: BabelText.label(9, color: BabelColors.gold),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 214,
+            // A mouse drags it too (the web app on a computer).
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context)
+                  .copyWith(dragDevices: PointerDeviceKind.values.toSet()),
+              child: PageView.builder(
+                controller: _controller,
+                padEnds: false,
+                itemCount: reading.length,
+                onPageChanged: (page) => setState(() => _page = page),
+                itemBuilder: (context, i) => Padding(
+                  padding: EdgeInsets.only(
+                    right: i == reading.length - 1 ? 0 : 10,
                   ),
-                  const SizedBox(height: 4),
-                  Text('${percent.round()}%', style: BabelText.figure(46)),
-                  const SizedBox(height: 6),
-                  ClipRRect(
-                    borderRadius: BabelShape.radius(2),
-                    child: LinearProgressIndicator(
-                      value: (percent / 100).clamp(0, 1).toDouble(),
-                      minHeight: 3,
-                      color: BabelColors.gold,
-                      backgroundColor: BabelColors.sunken,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    item.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: BabelText.body(13),
-                  ),
-                  const SizedBox(height: 12),
-                  PillButton(
-                    label: '${l10n.homeResume} →',
-                    onPressed: () => context.push(Routes.read(item.id)),
-                  ),
-                ],
+                  child: _ReadingCard(reading[i], positions),
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var i = 0; i < reading.length; i++)
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  width: i == _page ? 16 : 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: i == _page ? BabelColors.gold : BabelColors.border,
+                    borderRadius: BabelShape.radius(3),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReadingCard extends StatelessWidget {
+  const _ReadingCard(this.item, this.positions);
+  final LibraryItemResponse item;
+  final Map<String, SavedPosition> positions;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final percent = effectiveProgress(item, positions) ?? 0;
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: BabelColors.surface,
+        borderRadius: BabelShape.radius(26),
+        border: Border.all(color: BabelColors.border),
+      ),
+      child: Row(
+        children: [
+          BookCover(
+            width: 96,
+            url: libraryCoverUrl(item),
+            title: item.title,
+            angle: -3,
+          ),
+          const SizedBox(width: 18),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.homeReading.toUpperCase(),
+                  style: BabelText.label(9, color: BabelColors.gold),
+                ),
+                const SizedBox(height: 4),
+                Text('${percent.round()}%', style: BabelText.figure(46)),
+                const SizedBox(height: 6),
+                ClipRRect(
+                  borderRadius: BabelShape.radius(2),
+                  child: LinearProgressIndicator(
+                    value: (percent / 100).clamp(0, 1).toDouble(),
+                    minHeight: 3,
+                    color: BabelColors.gold,
+                    backgroundColor: BabelColors.sunken,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  item.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: BabelText.body(13),
+                ),
+                const SizedBox(height: 12),
+                PillButton(
+                  label: '${l10n.homeResume} →',
+                  onPressed: () => context.push(Routes.read(item.id)),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -492,7 +565,7 @@ class BornFromReadings extends ConsumerWidget {
     final l10n = context.l10n;
     final items = ref.watch(libraryControllerProvider).value ?? const [];
     final positions = ref.watch(positionPercentsProvider).value ?? const {};
-    final book = readingNow(items, positions);
+    final book = readingNow(items, positions).firstOrNull;
     final workId = book?.workId;
     if (book == null || workId == null) return const SizedBox.shrink();
     final related = ref.watch(relatedWorksProvider(workId)).value;
