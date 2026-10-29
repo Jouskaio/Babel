@@ -8,6 +8,7 @@ import 'package:just_audio/just_audio.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
@@ -233,7 +234,7 @@ class _AudioPlayerViewState extends ConsumerState<AudioPlayerView> {
       speed == speed.roundToDouble() ? speed.toStringAsFixed(0) : '$speed';
 
   Future<void> _chooseSpeed(BuildContext context, AudioSession session) =>
-      showModalBottomSheet<void>(
+      showBabelSheet<void>(
         context: context,
         useRootNavigator: true,
         backgroundColor: BabelColors.surface,
@@ -256,7 +257,7 @@ class _AudioPlayerViewState extends ConsumerState<AudioPlayerView> {
 
   Future<void> _chooseSleep(BuildContext context, AudioSession session) {
     final l10n = context.l10n;
-    return showModalBottomSheet<void>(
+    return showBabelSheet<void>(
       context: context,
       useRootNavigator: true,
       backgroundColor: BabelColors.surface,
@@ -286,7 +287,7 @@ class _AudioPlayerViewState extends ConsumerState<AudioPlayerView> {
     BuildContext context,
     NowPlaying now,
     AudioSession session,
-  ) => showModalBottomSheet<void>(
+  ) => showBabelSheet<void>(
     context: context,
     useRootNavigator: true,
     isScrollControlled: true,

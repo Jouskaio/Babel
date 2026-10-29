@@ -1,0 +1,1 @@
+Bottom sheets (reading settings, book sheet…) have a Close button; Home swipes through the books you are reading like a carousel

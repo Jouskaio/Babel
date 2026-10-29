@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/display/eink.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../l10n.dart';
 import '../application/annotations.dart';
 import '../application/reader_notes.dart';
@@ -269,7 +270,7 @@ class _ComicViewState extends ConsumerState<ComicView> {
 
   Future<void> _chooseDirection() async {
     final l10n = context.l10n;
-    final chosen = await showModalBottomSheet<ComicDirection>(
+    final chosen = await showBabelSheet<ComicDirection>(
       context: context,
       // Above the floating navigation bar of the tabs.
       useRootNavigator: true,

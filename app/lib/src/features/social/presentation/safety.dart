@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../application/social_providers.dart';
@@ -34,7 +35,7 @@ class ReaderSafetyMenu extends ConsumerWidget {
       color: BabelColors.surface,
       onSelected: (action) => action == 'block'
           ? _block(context, ref)
-          : showModalBottomSheet<void>(
+          : showBabelSheet<void>(
               context: context,
               useRootNavigator: true,
               isScrollControlled: true,

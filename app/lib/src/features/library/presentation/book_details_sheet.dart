@@ -8,6 +8,7 @@ import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/babel_text_field.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
@@ -27,7 +28,7 @@ int? coverIdOf(String path) {
 Future<void> showBookDetailsSheet(
   BuildContext context,
   LibraryItemResponse item,
-) => showModalBottomSheet<void>(
+) => showBabelSheet<void>(
   context: context,
   useRootNavigator: true,
   isScrollControlled: true,
