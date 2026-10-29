@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/loading_bar.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
@@ -15,7 +16,7 @@ import '../application/translation.dart';
 
 /// Translates a passage the reader selected, into the language they choose.
 Future<void> showTranslateSheet(BuildContext context, String text) =>
-    showModalBottomSheet<void>(
+    showBabelSheet<void>(
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
@@ -137,7 +138,7 @@ Future<void> showTranslateBookSheet(
   BuildContext context, {
   required String itemId,
   required String title,
-}) => showModalBottomSheet<void>(
+}) => showBabelSheet<void>(
   context: context,
   useRootNavigator: true,
   isScrollControlled: true,

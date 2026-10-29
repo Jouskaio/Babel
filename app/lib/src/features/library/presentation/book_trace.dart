@@ -8,6 +8,7 @@ import '../../../core/locale/relative_time.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../core/widgets/section_title.dart';
 import '../../../l10n.dart';
@@ -337,7 +338,7 @@ Future<void> showCommentsSheet(
   BuildContext context,
   WorkReviewResponse review,
   String workId,
-) => showModalBottomSheet<void>(
+) => showBabelSheet<void>(
   context: context,
   useRootNavigator: true,
   isScrollControlled: true,

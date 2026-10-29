@@ -5,13 +5,14 @@ import '../../../core/display/eink.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../l10n.dart';
 import '../application/reader_settings.dart';
 
 /// The reader's "Aa" menu: text size, theme, font, line spacing and how to read
 /// (scrolling or pages). [text]: false for PDF and comics, where only the theme applies.
 Future<void> showReaderSettings(BuildContext context, {bool text = true}) =>
-    showModalBottomSheet<void>(
+    showBabelSheet<void>(
       context: context,
       // Above the floating navigation bar of the tabs.
       useRootNavigator: true,

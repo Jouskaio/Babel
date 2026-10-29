@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
@@ -18,7 +19,7 @@ import 'library_page.dart' show libraryCoverUrl, showBookActions;
 
 /// The volumes of a series in reading order, each with its status and progress.
 Future<void> showSeriesSheet(BuildContext context, SeriesGroup group) =>
-    showModalBottomSheet<void>(
+    showBabelSheet<void>(
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
@@ -170,7 +171,7 @@ class _Progress extends StatelessWidget {
 /// The editions of a catalog page the reader has (another language or format), each opening
 /// its own book sheet.
 Future<void> showEditionsSheet(BuildContext context, EditionGroup group) =>
-    showModalBottomSheet<void>(
+    showBabelSheet<void>(
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,

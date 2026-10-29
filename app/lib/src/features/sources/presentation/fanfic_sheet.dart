@@ -7,6 +7,7 @@ import '../../../core/api/api_providers.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/loading_bar.dart';
 import '../../../l10n.dart';
@@ -20,7 +21,7 @@ Future<void> showFanficSheet(
   required SourceEntryResponse entry,
   required String title,
   required Widget action,
-}) => showModalBottomSheet<void>(
+}) => showBabelSheet<void>(
   context: context,
   useRootNavigator: true,
   isScrollControlled: true,

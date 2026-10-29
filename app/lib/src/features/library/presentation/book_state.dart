@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../catalog/application/catalog_providers.dart';
@@ -284,7 +285,7 @@ class _ShelfNameDialogState extends State<_ShelfNameDialog> {
 
 /// Puts a book on shelves or takes it off, and makes new ones.
 Future<void> showShelfPicker(BuildContext context, LibraryItemResponse item) =>
-    showModalBottomSheet<void>(
+    showBabelSheet<void>(
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
@@ -349,7 +350,7 @@ Future<void> showShelfPicker(BuildContext context, LibraryItemResponse item) =>
 
 /// Renames a shelf, sets who sees it, or deletes it.
 Future<void> showShelfEditor(BuildContext context, Shelf shelf) =>
-    showModalBottomSheet<void>(
+    showBabelSheet<void>(
       context: context,
       useRootNavigator: true,
       backgroundColor: BabelColors.surface,

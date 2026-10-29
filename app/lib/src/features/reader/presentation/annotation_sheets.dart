@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
+import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../l10n.dart';
 import '../../social/presentation/sharing_settings.dart';
@@ -57,7 +58,7 @@ Future<void> showAnnotationEditor(
   BuildContext context,
   Annotation annotation, {
   bool focusNote = false,
-}) => showModalBottomSheet<void>(
+}) => showBabelSheet<void>(
   context: context,
   // Above the floating navigation bar of the tabs.
   useRootNavigator: true,
@@ -204,7 +205,7 @@ Future<void> showMarginPanel(
   required ValueChanged<int> onOpenChapter,
   List<(BookNoteResponse, NotePlace?)> others = const [],
   ValueChanged<double>? onSeek,
-}) => showModalBottomSheet<void>(
+}) => showBabelSheet<void>(
   context: context,
   // Above the floating navigation bar of the tabs.
   useRootNavigator: true,
@@ -410,7 +411,7 @@ Future<void> showReaderNote(
   BuildContext context,
   BookNoteResponse note, {
   NotePlace? place,
-}) => showModalBottomSheet<void>(
+}) => showBabelSheet<void>(
   context: context,
   useRootNavigator: true,
   backgroundColor: BabelColors.surface,
