@@ -69,6 +69,7 @@ class ProgressBody(BaseModel):
     percentage: float = 0
     device: str = ""
     device_id: str = ""
+    anchor: str = ""
 
 
 @router.put("/syncs/progress", include_in_schema=False)
@@ -76,7 +77,9 @@ async def put_progress(
     user_id: Reader, koreader: KoreaderServiceDep, body: ProgressBody
 ) -> dict[str, Any]:
     # A book Babel does not have is kept aside, not refused: KOReader would show an error.
-    await koreader.put(user_id, body.document, body.progress, body.percentage, body.device)
+    await koreader.put(
+        user_id, body.document, body.progress, body.percentage, body.device, body.anchor
+    )
     return {"document": body.document, "timestamp": int(datetime.now(UTC).timestamp())}
 
 
@@ -100,12 +103,13 @@ async def get_progress(
     if found is None:
         # KOReader reads a body without a position as "nothing synced yet": no error.
         return {"document": document, "message": "No progress yet"}
-    position, progress, device = found
+    position, progress, device, anchor = found
     return {
         "document": document,
         "progress": progress,
         "percentage": position.percent / 100,
         "device": device,
+        "anchor": anchor,
         "device_id": str(position.device_id),
         "timestamp": int(position.client_time.timestamp()),
     }

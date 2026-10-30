@@ -129,5 +129,13 @@ void main() {
       expect(context?.suffix, 'The end cam');
       expect(context!.fraction, closeTo(21 / 58, 0.001));
     });
+
+    test('the words where a reader stopped lead back to the same place', () {
+      const html =
+          '<p>It was a dark night. Reader, I married him. The end came.</p>';
+      final words = anchorAt(html, 21 / 62, length: 22);
+      expect(words, 'Reader, I married him.');
+      expect(quoteContext(html, words)!.fraction, closeTo(21 / 62, 0.05));
+    });
   });
 }
