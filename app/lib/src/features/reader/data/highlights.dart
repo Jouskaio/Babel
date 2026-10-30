@@ -253,6 +253,21 @@ String applyReaderNotes(String html, Iterable<ReaderMark> notes) {
   );
 }
 
+/// A few words of [html] at [fraction] (0 to 1 of its text): where a reader stopped, so that
+/// another device, which lays the book out differently, finds the place by them.
+String anchorAt(String html, double fraction, {int length = 80}) {
+  final text = _textOf(html).buffer.toString();
+  if (text.isEmpty) return '';
+  var start = (fraction.clamp(0, 1) * text.length).round();
+  start = start.clamp(0, text.length - 1);
+  // From the next word, not the middle of one.
+  final atWord = start == 0 || RegExp(r'\s').hasMatch(text[start - 1]);
+  final space = atWord ? -1 : text.indexOf(RegExp(r'\s'), start);
+  if (space >= 0 && space - start < 20) start = space + 1;
+  final end = (start + length).clamp(start, text.length);
+  return text.substring(start, end).replaceAll(RegExp(r'\s+'), ' ').trim();
+}
+
 /// The plain, folded text of chapters, built once, to look for quotes across a book.
 class BookText {
   BookText(this._html);

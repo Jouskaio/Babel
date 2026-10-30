@@ -75,6 +75,12 @@ def test_progress_goes_both_ways_with_koreader(
     assert back["progress"] == body["progress"]
     assert back["percentage"] == pytest.approx(0.42)
     assert back["device"] == "KOReader · Boox Go"
+    assert back["anchor"] == ""
+    # The words where the reader stopped travel with the position, not with KOReader's string.
+    said = {**body, "anchor": "  It was a  dark night "}
+    assert client.put("/v1/kosync/syncs/progress", json=said, headers=key).status_code == 200
+    back = client.get("/v1/kosync/syncs/progress/" + document, headers=key).json()
+    assert (back["progress"], back["anchor"]) == (body["progress"], "It was a dark night")
 
     # It is a reading position like any other: the book is now "reading", on an e-reader.
     positions = client.get(f"/v1/library/{item['id']}/positions", headers=ada).json()

@@ -54,6 +54,12 @@ STATS_PREFIX = "koreader-stats:"
 DEVICE_PREFIX = "KOReader · "
 
 
+def _with_anchor(locator: str, anchor: str) -> str:
+    """A position and, after a line break, the words where it is (kept short)."""
+    anchor = " ".join(anchor.split())[:200]
+    return f"{locator[:700]}\n{anchor}" if anchor else locator[:1000]
+
+
 class KoreaderService:
     def __init__(
         self,
@@ -110,6 +116,7 @@ class KoreaderService:
         progress: str,
         percentage: float,
         device: str,
+        anchor: str = "",
     ) -> None:
         try:
             item_id = await self._item_of_marked(user_id, document)
@@ -128,7 +135,7 @@ class KoreaderService:
             user_id,
             device_id,
             item_id,
-            f"{PREFIX}{progress}"[:1000],
+            _with_anchor(f"{PREFIX}{progress}", anchor),
             round(max(0.0, min(1.0, percentage)) * 100, 2),
         )
 
@@ -214,9 +221,12 @@ class KoreaderService:
         )
         return sum(1 for r in results if r.outcome is OpOutcome.APPLIED)
 
-    async def get(self, user_id: UUID, document: str) -> tuple[ReadingPosition, str, str] | None:
+    async def get(
+        self, user_id: UUID, document: str
+    ) -> tuple[ReadingPosition, str, str, str] | None:
         """The latest position of the book on any device, with KOReader's own position string
-        (empty when it did not come from KOReader) and the device's name."""
+        (empty when it did not come from KOReader), the device's name and the words where the
+        reader stopped (to find the place again in another rendering of the book)."""
         item_id = await self._item_of_marked(user_id, document)
         positions = await self._sync.positions(user_id, item_id)
         if not positions:
@@ -227,8 +237,9 @@ class KoreaderService:
             return None
         latest = max(positions, key=lambda p: p.client_time)
         names = {d.id: d.name for d in await self._sync.devices(user_id)}
-        progress = latest.locator[len(PREFIX) :] if latest.locator.startswith(PREFIX) else ""
-        return latest, progress, names.get(latest.device_id, "")
+        locator, _, anchor = latest.locator.partition("\n")
+        progress = locator[len(PREFIX) :] if locator.startswith(PREFIX) else ""
+        return latest, progress, names.get(latest.device_id, ""), anchor
 
     async def put_stats(
         self,
