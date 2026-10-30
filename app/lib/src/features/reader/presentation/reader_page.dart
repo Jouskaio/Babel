@@ -52,7 +52,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
     var start = saved == null ? null : ReadingLocator.parse(saved.locator);
     if (saved != null && start == null && saved.percent > 0.5) {
       // Left by an e-reader: its own position means nothing here, but how far it got does.
-      start = ReadingLocator.share(saved.percent / 100);
+      start = ReadingLocator.share(saved.percent / 100, anchor: saved.anchor);
       _keepProgress = true;
     }
     return _Opened(item, bytes, start);
@@ -96,12 +96,12 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
   // (an e-reader's): the page opens at the start, and that must not replace the real progress.
   var _keepProgress = false;
 
-  void _savePosition(ReadingLocator locator, double percent) {
+  void _savePosition(ReadingLocator locator, double percent, {String? anchor}) {
     if (_keepProgress) {
       if (percent < 0.5) return;
       _keepProgress = false;
     }
-    _positions.save(widget.itemId, locator, percent);
+    _positions.save(widget.itemId, locator, percent, anchor: anchor);
   }
 
   @override

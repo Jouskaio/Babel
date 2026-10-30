@@ -42,7 +42,8 @@ class EpubView extends ConsumerStatefulWidget {
   final String fileSha256;
   final String title;
   final ReadingLocator? start;
-  final void Function(ReadingLocator locator, double percent) onPosition;
+  final void Function(ReadingLocator locator, double percent, {String? anchor})
+  onPosition;
   final VoidCallback onBack;
 
   @override
@@ -122,6 +123,20 @@ class _EpubViewState extends ConsumerState<EpubView>
     final share = start.share;
     if (share == null) return (start.chapter.clamp(0, last), start.fraction);
     final target = share.clamp(0, 1) * widget.book.totalLength;
+    final words = start.anchor;
+    if (words != null && words.isNotEmpty) {
+      // The place is found by the words saved there, wherever this layout put them.
+      final chapters = [for (final c in widget.book.chapters) c.html];
+      var guess = 0;
+      while (guess < last && _before[guess + 1] <= target) {
+        guess++;
+      }
+      final found = BookText(chapters).chapterOf(words, hint: guess);
+      final where = found == null
+          ? null
+          : quoteContext(chapters[found], words)?.fraction;
+      if (found != null && where != null) return (found, where);
+    }
     var before = 0;
     for (var i = 0; i <= last; i++) {
       final length = widget.book.chapters[i].length;
@@ -179,8 +194,11 @@ class _EpubViewState extends ConsumerState<EpubView>
     return (_before[_chapter] + _fraction * length) / total * 100;
   }
 
-  void _save() =>
-      widget.onPosition(ReadingLocator.epub(_chapter, _fraction), _percent);
+  void _save() => widget.onPosition(
+    ReadingLocator.epub(_chapter, _fraction),
+    _percent,
+    anchor: anchorAt(widget.book.chapters[_chapter].html, _fraction),
+  );
 
   void _open(int chapter, {double fraction = 0}) {
     if (chapter < 0 || chapter >= widget.book.chapters.length) return;

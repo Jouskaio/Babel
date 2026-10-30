@@ -12,26 +12,32 @@ class ReadingLocator {
   const ReadingLocator.epub(this.chapter, this.fraction)
     : page = null,
       share = null,
+      anchor = null,
       seconds = null;
   const ReadingLocator.page(int this.page)
     : chapter = 0,
       fraction = 0,
       share = null,
+      anchor = null,
       seconds = null;
   const ReadingLocator.audio(double this.seconds)
     : chapter = 0,
       fraction = 0,
       share = null,
+      anchor = null,
       page = null;
 
   /// Only how far in the book (0 to 1): what an e-reader reports, the app finds the place.
-  const ReadingLocator.share(double this.share)
+  const ReadingLocator.share(double this.share, {this.anchor})
     : chapter = 0,
       fraction = 0,
       page = null,
       seconds = null;
 
   final double? share;
+
+  /// The words where the reader stopped on another device: the place is found by them.
+  final String? anchor;
 
   final int chapter;
   final double fraction;
@@ -77,19 +83,33 @@ class ReadingLocator {
 class SavedPosition {
   const SavedPosition({
     required this.locator,
+    this.anchor,
     required this.percent,
     required this.time,
     required this.deviceId,
   });
 
-  factory SavedPosition.fromJson(Map<String, Object?> data) => SavedPosition(
-    locator: data['locator']! as String,
-    percent: (data['percent']! as num).toDouble(),
-    time: DateTime.parse(data['client_time']! as String),
-    deviceId: data['device_id'] as String?,
-  );
+  factory SavedPosition.fromJson(Map<String, Object?> data) {
+    // The words where the reader stopped follow the position, after a line break.
+    final (locator, anchor) = _split(data['locator']! as String);
+    return SavedPosition(
+      locator: locator,
+      anchor: anchor,
+      percent: (data['percent']! as num).toDouble(),
+      time: DateTime.parse(data['client_time']! as String),
+      deviceId: data['device_id'] as String?,
+    );
+  }
+
+  static (String, String?) _split(String value) {
+    final cut = value.indexOf('\n');
+    if (cut < 0) return (value, null);
+    final words = value.substring(cut + 1).trim();
+    return (value.substring(0, cut), words.isEmpty ? null : words);
+  }
 
   final String locator;
+  final String? anchor;
   final double percent;
   final DateTime time;
   final String? deviceId;
@@ -136,15 +156,18 @@ class ReadingPositions {
   Future<void> save(
     String itemId,
     ReadingLocator locator,
-    double percent,
-  ) async {
+    double percent, {
+    String? anchor,
+  }) async {
     final db = await _ref.read(localDatabaseProvider.future);
     if (db == null || !_ref.mounted) return;
     final deviceId = _ref.read(deviceSessionProvider).id ?? 'this-device';
     final data = <String, Object>{
       'item_id': itemId,
       'device_id': deviceId,
-      'locator': locator.toString(),
+      'locator': anchor == null || anchor.isEmpty
+          ? locator.toString()
+          : '$locator\n$anchor',
       'percent': double.parse(percent.clamp(0, 100).toStringAsFixed(2)),
       'client_time': DateTime.now().toUtc().toIso8601String(),
     };
