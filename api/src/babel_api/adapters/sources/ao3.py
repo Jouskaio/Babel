@@ -493,12 +493,24 @@ class Ao3Connector:
 
     async def list_entries(self, config: dict[str, Any], token: str | None) -> list[RemoteEntry]:
         username = str(config["username"])
-        client = await self._session(username, token)
+        try:
+            client = await self._session(username, token)
+        except SourceConnectionError as error:
+            if str(error) != "unreachable":
+                raise
+            # AO3 refuses the sign-in (its front answers 418/525 at times): the public
+            # bookmarks are still there to read, subscriptions wait for the next scan.
+            log.warning("AO3 sign-in of %s failed: scanning the public bookmarks only", username)
+            client, token = self._client(), None
         entries = await self._works(client, f"/users/{username}/bookmarks", "li.bookmark.blurb")
         if token:
-            entries += await self._works(
-                client, f"/users/{username}/subscriptions", "dl.subscription dt"
-            )
+            try:
+                entries += await self._works(
+                    client, f"/users/{username}/subscriptions", "dl.subscription dt"
+                )
+            except SourceConnectionError:
+                # A subscriptions page that will not load must not lose the bookmarks scan.
+                log.warning("AO3 subscriptions of %s skipped in this scan", username)
         unique: dict[str, RemoteEntry] = {}
         for entry in entries:
             unique.setdefault(entry.path, entry)

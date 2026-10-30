@@ -51,10 +51,10 @@ class EpubView extends ConsumerStatefulWidget {
 
 class _EpubViewState extends ConsumerState<EpubView>
     with SingleTickerProviderStateMixin {
-  late int _chapter = (widget.start?.chapter ?? 0).clamp(
-    0,
-    widget.book.chapters.length - 1,
-  );
+  /// The chapter and the place in it to open at: the saved one, or, from an e-reader that only
+  /// said how far it is, the matching share of the text.
+  late final (int, double) _from = _startPlace();
+  late int _chapter = _from.$1;
   double _fraction = 0;
   ScrollController _scroll = ScrollController();
   bool _chrome = true;
@@ -115,10 +115,28 @@ class _EpubViewState extends ConsumerState<EpubView>
       (sum += i == 0 ? 0 : widget.book.chapters[i - 1].length),
   ];
 
+  (int, double) _startPlace() {
+    final start = widget.start;
+    final last = widget.book.chapters.length - 1;
+    if (start == null) return (0, 0);
+    final share = start.share;
+    if (share == null) return (start.chapter.clamp(0, last), start.fraction);
+    final target = share.clamp(0, 1) * widget.book.totalLength;
+    var before = 0;
+    for (var i = 0; i <= last; i++) {
+      final length = widget.book.chapters[i].length;
+      if (before + length >= target) {
+        return (i, length == 0 ? 0 : ((target - before) / length).clamp(0, 1));
+      }
+      before += length;
+    }
+    return (last < 0 ? 0 : last, 0);
+  }
+
   @override
   void initState() {
     super.initState();
-    _attach(widget.start?.fraction ?? 0);
+    _attach(_from.$2);
   }
 
   @override

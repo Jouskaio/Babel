@@ -11,15 +11,27 @@ import '../../../core/sync/sync_engine.dart';
 class ReadingLocator {
   const ReadingLocator.epub(this.chapter, this.fraction)
     : page = null,
+      share = null,
       seconds = null;
   const ReadingLocator.page(int this.page)
     : chapter = 0,
       fraction = 0,
+      share = null,
       seconds = null;
   const ReadingLocator.audio(double this.seconds)
     : chapter = 0,
       fraction = 0,
+      share = null,
       page = null;
+
+  /// Only how far in the book (0 to 1): what an e-reader reports, the app finds the place.
+  const ReadingLocator.share(double this.share)
+    : chapter = 0,
+      fraction = 0,
+      page = null,
+      seconds = null;
+
+  final double? share;
 
   final int chapter;
   final double fraction;

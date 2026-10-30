@@ -100,7 +100,12 @@ void main() {
       'data': null,
       'device_id': 'phone',
     });
-    await container.read(syncEngineProvider.notifier).sync();
+    // The engine may still be busy with the first round: ask again until it has applied it.
+    for (var i = 0; i < 20; i++) {
+      await container.read(syncEngineProvider.notifier).sync();
+      if (await LocalStores.annotations.record('n1').get(db) == null) break;
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
     expect(await LocalStores.annotations.record('n1').get(db), isNull);
   });
 

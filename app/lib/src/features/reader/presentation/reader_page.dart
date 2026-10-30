@@ -49,8 +49,12 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
         );
     await refreshed;
     final saved = await _positions.latest(item.id);
-    final start = saved == null ? null : ReadingLocator.parse(saved.locator);
-    _keepProgress = saved != null && start == null && saved.percent > 0.5;
+    var start = saved == null ? null : ReadingLocator.parse(saved.locator);
+    if (saved != null && start == null && saved.percent > 0.5) {
+      // Left by an e-reader: its own position means nothing here, but how far it got does.
+      start = ReadingLocator.share(saved.percent / 100);
+      _keepProgress = true;
+    }
     return _Opened(item, bytes, start);
   }
 
