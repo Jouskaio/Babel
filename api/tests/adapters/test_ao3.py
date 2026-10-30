@@ -217,8 +217,11 @@ def test_a_failing_login_post_is_sent_again_and_never_read_as_a_wrong_password()
 
     fake = FakeAo3()
     fake.login_525 = 99
+    # AO3 refuses the sign-in for good: the public bookmarks are scanned all the same.
+    public = asyncio.run(connector(fake).list_entries({"username": "ada"}, "right"))
+    assert {e.path for e in public} >= {"/works/1"}
     with pytest.raises(SourceConnectionError, match="unreachable"):
-        asyncio.run(connector(fake).list_entries({"username": "ada"}, "right"))
+        asyncio.run(connector(fake).subscriptions({"username": "ada"}, "right"))
     # ... and a wrong password is still a wrong password
     with pytest.raises(SourceConnectionError, match="401"):
         asyncio.run(connector(FakeAo3()).list_entries({"username": "ada"}, "wrong"))
