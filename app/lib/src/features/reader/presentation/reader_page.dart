@@ -50,6 +50,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
     await refreshed;
     final saved = await _positions.latest(item.id);
     final start = saved == null ? null : ReadingLocator.parse(saved.locator);
+    _keepProgress = saved != null && start == null && saved.percent > 0.5;
     return _Opened(item, bytes, start);
   }
 
@@ -87,12 +88,16 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
     super.dispose();
   }
 
-  var _firstSave = true;
+  // Set when the book was left further on by a device whose position this reader cannot use
+  // (an e-reader's): the page opens at the start, and that must not replace the real progress.
+  var _keepProgress = false;
 
   void _savePosition(ReadingLocator locator, double percent) {
-    final opening = _firstSave;
-    _firstSave = false;
-    _positions.save(widget.itemId, locator, percent, opening: opening);
+    if (_keepProgress) {
+      if (percent < 0.5) return;
+      _keepProgress = false;
+    }
+    _positions.save(widget.itemId, locator, percent);
   }
 
   @override
