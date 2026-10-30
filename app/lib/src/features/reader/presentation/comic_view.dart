@@ -55,6 +55,7 @@ class _ComicViewState extends ConsumerState<ComicView> {
     if (share == null) return start?.page ?? 1;
     return (share.clamp(0, 1) * (widget.book.length - 1)).round() + 1;
   }
+
   late ComicDirection _direction = widget.book.direction;
   late final _pages = PageController(initialPage: _page - 1);
   final _strip = ScrollController();
