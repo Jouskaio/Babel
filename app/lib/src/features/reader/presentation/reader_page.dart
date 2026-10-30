@@ -87,8 +87,13 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
     super.dispose();
   }
 
-  void _savePosition(ReadingLocator locator, double percent) =>
-      _positions.save(widget.itemId, locator, percent);
+  var _firstSave = true;
+
+  void _savePosition(ReadingLocator locator, double percent) {
+    final opening = _firstSave;
+    _firstSave = false;
+    _positions.save(widget.itemId, locator, percent, opening: opening);
+  }
 
   @override
   Widget build(BuildContext context) {

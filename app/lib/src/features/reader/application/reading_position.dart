@@ -124,11 +124,18 @@ class ReadingPositions {
   Future<void> save(
     String itemId,
     ReadingLocator locator,
-    double percent,
-  ) async {
+    double percent, {
+    bool opening = false,
+  }) async {
     final db = await _ref.read(localDatabaseProvider.future);
     if (db == null || !_ref.mounted) return;
     final deviceId = _ref.read(deviceSessionProvider).id ?? 'this-device';
+    // Merely opening a book is not reading it: its first screen must not wipe out how far the
+    // e-reader (or another device) already got.
+    if (opening && percent < 0.5) {
+      final other = await latest(itemId);
+      if (other != null && other.percent > 0.5) return;
+    }
     final data = <String, Object>{
       'item_id': itemId,
       'device_id': deviceId,
