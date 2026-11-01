@@ -178,7 +178,7 @@ jobs:
         with:
           fetch-depth: 0
       # Only the apps: the web job's Docker build record is an artifact too, and not needed.
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: babel-*
           path: built
