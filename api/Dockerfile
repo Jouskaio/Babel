@@ -14,7 +14,7 @@ COPY src ./src
 RUN uv sync --frozen --no-dev
 
 # ---------------------------------------------------------------- runtime
-FROM python:3.13-slim-bookworm AS runtime
+FROM python:3.15-slim-bookworm AS runtime
 # bsdtar (libarchive) opens CBR comics, which are converted to CBZ for the readers;
 # Tesseract reads the words of a cover photo (French and English).
 RUN apt-get update \
