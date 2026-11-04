@@ -3907,6 +3907,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ao3TagHint => 'Ajouter un tag (Entrée)';
 
   @override
+  String get ao3AuthorHint => 'Auteur (nom sur AO3)';
+
+  @override
   String get ao3TagAdd => 'Ajouter ce tag';
 
   @override

@@ -2085,6 +2085,7 @@
   "ao3Title": "Chercher sur AO3",
   "ao3Hint": "AO3 n'est interrogé que lorsque tu appuies sur Chercher. Le texte saisi plus haut est ajouté à la recherche.",
   "ao3TagHint": "Ajouter un tag (Entrée)",
+  "ao3AuthorHint": "Auteur (nom sur AO3)",
   "ao3TagAdd": "Ajouter ce tag",
   "ao3All": "Tous les tags (ET)",
   "ao3Any": "Au moins un (OU)",

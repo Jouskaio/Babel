@@ -358,3 +358,15 @@ def test_excluded_tags_are_minus_terms_and_tags_are_suggested() -> None:
     connector = Ao3Connector(httpx.MockTransport(answer), pause=0)
     assert asyncio.run(connector.suggest_tags("ang")) == ["Angst", "Angsty"]
     assert asyncio.run(connector.suggest_tags("a")) == []
+
+
+def test_an_author_is_a_search_field_and_authors_are_suggested() -> None:
+    params = Ao3Connector.search_params(Ao3Query(author=" Inverted "))
+    assert params["work_search[creators]"] == "Inverted"
+
+    def answer(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/autocomplete/pseud"
+        return httpx.Response(200, json=[{"id": "Inverted", "name": "Inverted"}])
+
+    connector = Ao3Connector(httpx.MockTransport(answer), pause=0)
+    assert asyncio.run(connector.suggest_authors("inv")) == ["Inverted"]

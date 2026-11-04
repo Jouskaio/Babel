@@ -34,6 +34,9 @@ class Ao3SearchPanel extends ConsumerStatefulWidget {
 class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
   final _tag = TextEditingController();
   final _fandom = TextEditingController();
+  final _author = TextEditingController();
+  var _authors = <String>[];
+  Timer? _authorTimer;
   final _kudos = TextEditingController();
   final _hits = TextEditingController();
   final _words = TextEditingController();
@@ -99,6 +102,7 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
     'excluded': _excluded,
     'any': _any,
     'fandom': _fandom.text,
+    'author': _author.text,
     'kudos': _kudos.text,
     'hits': _hits.text,
     'words': _words.text,
@@ -119,6 +123,7 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
         ..addAll((d['excluded'] as List<dynamic>? ?? []).cast<String>());
       _any = d['any'] as bool? ?? false;
       _fandom.text = d['fandom'] as String? ?? '';
+      _author.text = d['author'] as String? ?? '';
       _kudos.text = d['kudos'] as String? ?? '';
       _hits.text = d['hits'] as String? ?? '';
       _words.text = d['words'] as String? ?? '';
@@ -176,6 +181,27 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
     });
   }
 
+  void _suggestAuthors(String value) {
+    _authorTimer?.cancel();
+    _authorTimer = Timer(const Duration(milliseconds: 350), () async {
+      List<String> found;
+      if (kIsWeb) {
+        try {
+          found =
+              await ref.read(ao3ApiProvider).suggestAo3Authors(term: value) ??
+              const [];
+        } on ApiException {
+          found = const [];
+        }
+      } else {
+        found = await ref.read(ao3DirectProvider).suggest(value, kind: 'pseud');
+      }
+      if (mounted && _author.text.trim() == value.trim()) {
+        setState(() => _authors = found);
+      }
+    });
+  }
+
   Future<List<String>> _serverSuggest(String value) async {
     if (value.trim().length < 2) return const [];
     try {
@@ -192,6 +218,8 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
     _exclude.dispose();
     _tag.dispose();
     _fandom.dispose();
+    _authorTimer?.cancel();
+    _author.dispose();
     _kudos.dispose();
     _hits.dispose();
     _words.dispose();
@@ -233,6 +261,7 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
           excluded: q.excluded,
           text: q.text,
           fandom: q.fandom,
+          author: q.author,
           language: q.language,
           complete: q.complete,
           minWords: q.minWords,
@@ -253,6 +282,7 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
       excluded: List.of(_excluded),
       text: widget.text.trim(),
       fandom: _fandom.text.trim(),
+      author: _author.text.trim(),
       language: _language,
       complete: _complete,
       minWords: _number(_words),
@@ -389,6 +419,35 @@ class _Ao3SearchPanelState extends ConsumerState<Ao3SearchPanel> {
             ],
             selected: {_any},
             onSelectionChanged: (v) => setState(() => _any = v.first),
+          ),
+        ],
+        const SizedBox(height: 10),
+        TextField(
+          controller: _author,
+          onChanged: _suggestAuthors,
+          onSubmitted: (_) => _search(),
+          style: BabelText.body(14, color: BabelColors.textPrimary),
+          decoration: InputDecoration(
+            labelText: l10n.ao3AuthorHint,
+            prefixIcon: const Icon(Icons.person_outline),
+            isDense: true,
+          ),
+        ),
+        if (_authors.isNotEmpty && _author.text.trim().length >= 2) ...[
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final a in _authors)
+                ActionChip(
+                  label: Text(a),
+                  onPressed: () => setState(() {
+                    _author.text = a;
+                    _authors = [];
+                  }),
+                ),
+            ],
           ),
         ],
         const SizedBox(height: 10),

@@ -1293,6 +1293,7 @@
   "ao3Title": "Search AO3",
   "ao3Hint": "AO3 is only asked when you press Search. The text typed above is added to the search.",
   "ao3TagHint": "Add a tag (Enter)",
+  "ao3AuthorHint": "Author (name on AO3)",
   "ao3TagAdd": "Add this tag",
   "ao3All": "All tags (AND)",
   "ao3Any": "Any tag (OR)",
