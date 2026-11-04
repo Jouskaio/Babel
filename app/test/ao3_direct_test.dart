@@ -47,6 +47,9 @@ void main() {
     );
     expect(any['work_search[query]'], '("Angst" OR "Fluff") rain');
     expect(any.containsKey('work_search[freeform_names]'), isFalse);
+
+    final byAuthor = Ao3Direct.query(const Ao3Params(author: ' Inverted '));
+    expect(byAuthor['work_search[creators]'], 'Inverted');
   });
 
   test('a results page is read into cards', () {

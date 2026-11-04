@@ -81,6 +81,18 @@ async def suggest_ao3_tags(
         return []
 
 
+@router.get("/authors", operation_id="suggestAo3Authors")
+async def suggest_ao3_authors(
+    _user: CurrentUserId, container: ContainerDep, term: Annotated[str, Query(max_length=80)] = ""
+) -> list[str]:
+    """Authors AO3 knows that start like what is typed."""
+    try:
+        async with asyncio.timeout(10):
+            return await container.ao3.suggest_authors(term)
+    except (SourceConnectionError, TimeoutError):
+        return []
+
+
 @router.get("/search", operation_id="searchAo3")
 async def search_ao3(
     _user: CurrentUserId,
@@ -90,6 +102,7 @@ async def search_ao3(
     excluded: Annotated[list[str], Query(max_length=12)] = [],  # noqa: B006 - FastAPI copies it
     text: Annotated[str, Query(max_length=300)] = "",
     fandom: Annotated[str, Query(max_length=200)] = "",
+    author: Annotated[str, Query(max_length=100)] = "",
     language: Annotated[str, Query(max_length=10)] = "",
     complete: bool | None = None,
     min_words: Annotated[int | None, Query(ge=0)] = None,
@@ -110,6 +123,7 @@ async def search_ao3(
         excluded=tuple(excluded),
         text=text,
         fandom=fandom,
+        author=author,
         language=language,
         complete=complete,
         min_words=min_words,

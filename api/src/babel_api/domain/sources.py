@@ -139,6 +139,7 @@ class Ao3Query:
     excluded: tuple[str, ...] = ()  # tags the works must not have
     text: str = ""
     fandom: str = ""
+    author: str = ""  # works by this author (a name or pseud)
     language: str = ""  # AO3's language code, "en", "fr"…
     complete: bool | None = None  # True: finished works only, False: works in progress only
     min_words: int | None = None

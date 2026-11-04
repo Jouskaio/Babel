@@ -6416,6 +6416,12 @@ abstract class AppLocalizations {
   /// **'Ajouter un tag (Entrée)'**
   String get ao3TagHint;
 
+  /// No description provided for @ao3AuthorHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Auteur (nom sur AO3)'**
+  String get ao3AuthorHint;
+
   /// No description provided for @ao3TagAdd.
   ///
   /// In fr, this message translates to:
