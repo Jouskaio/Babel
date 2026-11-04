@@ -339,6 +339,8 @@ class Ao3Connector:
             params["work_search[query]"] = text
         if q.fandom.strip():
             params["work_search[fandom_names]"] = q.fandom.strip()
+        if q.author.strip():
+            params["work_search[creators]"] = q.author.strip()
         if q.language:
             params["work_search[language_id]"] = q.language
         if q.complete is not None:
@@ -428,11 +430,18 @@ class Ao3Connector:
 
     async def suggest_tags(self, term: str) -> list[str]:
         """Tags AO3 knows that start like [term] (its own autocomplete)."""
+        return await self._suggest("freeform", term)
+
+    async def suggest_authors(self, term: str) -> list[str]:
+        """Authors (pseuds) AO3 knows that start like [term]."""
+        return await self._suggest("pseud", term)
+
+    async def _suggest(self, kind: str, term: str) -> list[str]:
         term = term.strip()
         if len(term) < 2:
             return []
         response = await self._get(
-            self._client(), "/autocomplete/freeform", retries=1, term=term[:80]
+            self._client(), f"/autocomplete/{kind}", retries=1, term=term[:80]
         )
         if response.status_code >= 400:
             raise SourceConnectionError(str(response.status_code))

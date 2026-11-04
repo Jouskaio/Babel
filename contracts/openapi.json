@@ -6921,7 +6921,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.83.0"
+    "version": "0.84.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -7437,6 +7437,60 @@
         ]
       }
     },
+    "/v1/ao3/authors": {
+      "get": {
+        "description": "Authors AO3 knows that start like what is typed.",
+        "operationId": "suggestAo3Authors",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "term",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 80,
+              "title": "Term",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Response Suggestao3Authors",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Suggest Ao3 Authors",
+        "tags": [
+          "ao3"
+        ]
+      }
+    },
     "/v1/ao3/search": {
       "get": {
         "description": "Works of AO3 matching tags (all of them, or any), text, fandom and numbers, with\nAO3's own sorting and pages. AO3 is only asked when you search.",
@@ -7499,6 +7553,17 @@
               "default": "",
               "maxLength": 200,
               "title": "Fandom",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "author",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 100,
+              "title": "Author",
               "type": "string"
             }
           },

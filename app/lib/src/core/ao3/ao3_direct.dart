@@ -14,6 +14,7 @@ class Ao3Params {
     this.excluded = const [],
     this.text = '',
     this.fandom = '',
+    this.author = '',
     this.language = '',
     this.complete,
     this.minWords,
@@ -30,6 +31,7 @@ class Ao3Params {
   final List<String> excluded;
   final String text;
   final String fandom;
+  final String author;
   final String language;
   final bool? complete;
   final int? minWords;
@@ -90,6 +92,9 @@ class Ao3Direct {
     if (q.fandom.trim().isNotEmpty) {
       params['work_search[fandom_names]'] = q.fandom.trim();
     }
+    if (q.author.trim().isNotEmpty) {
+      params['work_search[creators]'] = q.author.trim();
+    }
     if (q.language.isNotEmpty) params['work_search[language_id]'] = q.language;
     if (q.complete != null) {
       params['work_search[complete]'] = q.complete! ? 'T' : 'F';
@@ -140,13 +145,13 @@ class Ao3Direct {
   }
 
   /// Tags AO3 knows that start like [term] (its own autocomplete); empty when it does not answer.
-  Future<List<String>> suggest(String term) async {
+  Future<List<String>> suggest(String term, {String kind = 'freeform'}) async {
     final typed = term.trim();
     if (typed.length < 2) return const [];
     try {
       final response = await _client
           .get(
-            Uri.https('archiveofourown.org', '/autocomplete/freeform', {
+            Uri.https('archiveofourown.org', '/autocomplete/$kind', {
               'term': typed,
             }),
             headers: {'User-Agent': 'Babel/1.0 (+https://babel.jouskaio.me)'},
