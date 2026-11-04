@@ -19,6 +19,7 @@ class _FakeAo3 extends Ao3Api {
     List<String>? excluded,
     String? text,
     String? fandom,
+    String? author,
     String? language,
     bool? complete,
     int? minWords,
