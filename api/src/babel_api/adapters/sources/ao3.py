@@ -29,8 +29,10 @@ log = logging.getLogger(__name__)
 BASE = "https://archiveofourown.org"
 _USERNAME = re.compile(r"^[A-Za-z0-9_]{3,40}$")
 _WORK = re.compile(r"^/works/(\d+)$")
-# A big account is scanned in the background, one page every few seconds: 150 pages is 3000 works.
-MAX_PAGES = 150
+# A list is read to its last page (20 works a page, one page every few seconds, in the
+# background). The bound only stops a list whose "next" link never ends: 5000 pages is
+# 100,000 works, far beyond any real account.
+MAX_PAGES = 5000
 SESSION_SECONDS = 30 * 60
 SEARCH_SECONDS = 10 * 60
 SEARCH_RETRIES = 2
@@ -217,7 +219,9 @@ class Ao3Connector:
             if soup.select_one("ol.pagination li.next a[rel=next]") is None:
                 break
         else:
-            log.warning("AO3 list %s cut after %s pages", url, MAX_PAGES)
+            # Never a partial list: the scan would remove the works of the pages not read.
+            log.warning("AO3 list %s still going after %s pages: scan stopped", url, MAX_PAGES)
+            raise SourceConnectionError("too many pages")
         return entries
 
     def _entry(self, blurb: Tag) -> RemoteEntry | None:
