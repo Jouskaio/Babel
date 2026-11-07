@@ -136,6 +136,42 @@ def test_public_bookmarks_are_listed_page_by_page() -> None:
     assert all(e.format == "epub" for e in entries)
 
 
+class LongList(FakeAo3):
+    """An account with more bookmarks than the old 3000-work cap: 20 works on each page."""
+
+    def __init__(self, pages: int, *, endless: bool = False) -> None:
+        super().__init__()
+        self.pages = pages
+        self.endless = endless
+
+    def __call__(self, request: httpx.Request) -> httpx.Response:
+        if request.url.path != "/users/ada/bookmarks":
+            return super().__call__(request)
+        self.requests.append(request)
+        number = int(request.url.params.get("page", "1"))
+        items = "".join(
+            blurb(number * 100 + i, f"Work {number}-{i}", "alice", "1/1", "01 Oct 2026")
+            for i in range(20)
+        )
+        return httpx.Response(200, text=page(items, next_page=self.endless or number < self.pages))
+
+
+def test_a_list_longer_than_3000_works_is_read_to_its_last_page() -> None:
+    fake = LongList(pages=180)
+    entries = asyncio.run(connector(fake).list_entries({"username": "ada"}, None))
+    assert len(entries) == 180 * 20
+    assert entries[-1].path == "/works/18019"
+
+
+def test_a_list_that_never_ends_fails_the_scan_instead_of_cutting_it(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("babel_api.adapters.sources.ao3.MAX_PAGES", 3)
+    fake = LongList(pages=0, endless=True)
+    with pytest.raises(SourceConnectionError):
+        asyncio.run(connector(fake).list_entries({"username": "ada"}, None))
+
+
 def test_signing_in_adds_private_bookmarks_and_subscriptions() -> None:
     entries = asyncio.run(connector(FakeAo3()).list_entries({"username": "ada"}, "right"))
     assert {e.title for e in entries} == {"First", "Private one", "Third", "Followed"}
