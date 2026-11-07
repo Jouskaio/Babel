@@ -28,7 +28,7 @@ CACHE_SECONDS = 24 * 3600
 DAILY_BUDGET = 4500
 MAX_PAUSE = 6 * 3600
 MIN_DESCRIPTION = 80  # a shorter text is no better than what the catalog already has
-_SEARCH = """query($q: String!) { search(query: $q, query_type: "Series", per_page: 5) {
+_SEARCH = """query($q: String!) { search(query: $q, query_type: "Series", per_page: 10) {
   ids results } }"""
 _VOLUMES = """query($id: Int!) { series(where: {id: {_eq: $id}}) {
   book_series(order_by: {position: asc}) { position book { id title } } } }"""
@@ -97,12 +97,12 @@ def pick_description(search: dict[str, Any], title: str, authors: tuple[str, ...
 
 _BRACKETS = re.compile(r"\[([^\]]+)\]")
 _ARTICLES = {"the", "a", "an", "le", "la", "les", "l", "un", "une", "der", "die", "das"}
-_SERIES_WORDS = {"series", "serie", "saga", "trilogy", "cycle", "collection", "novels"}
+_SERIES_WORDS = {"series", "serie", "saga", "trilogy", "cycle", "collection", "novels", "books"}
 
 
 def _norm(name: str) -> str:
     """A series name without the words that vary: "The Hunger Games (Trilogy)" and
-    "Hunger Games Series" are both "hunger games"."""
+    "Hunger Games Series" are both "hunger games", "The Oz Books" is "oz"."""
     words = series_key(re.sub(r"\([^)]*\)", " ", name)).split()
     while words and words[0] in _ARTICLES:
         words = words[1:]
@@ -199,11 +199,19 @@ class HardcoverClient:
         if cached is not None and time.monotonic() - cached[0] < CACHE_SECONDS:
             return cached[1]
         try:
-            found = await self._query(_SEARCH, {"q": f"{name} {author or ''}".strip()})
-            search = cast(dict[str, Any], found.get("search") or {})
-            series_id = pick_series(search, name, author)
+            series_id: int | None = None
+            seen: list[tuple[str, str]] = []
+            # A short name ("Oz") with the author added can bury the series under others that
+            # match the author's name: then the name alone is searched.
+            queries = [f"{name} {author}", name] if author else [name]
+            for query in queries:
+                found = await self._query(_SEARCH, {"q": query})
+                search = cast(dict[str, Any], found.get("search") or {})
+                series_id = pick_series(search, name, author)
+                if series_id is not None:
+                    break
+                seen += [(str(d.get("name")), str(d.get("author_name"))) for d in _hits(search)]
             if series_id is None:
-                seen = [(str(d.get("name")), str(d.get("author_name"))) for d in _hits(search)]
                 log.info("Hardcover has no series %r by %r; it found %s", name, author, seen)
             volumes: list[tuple[float, str, int | None]] = []
             if series_id is not None:
