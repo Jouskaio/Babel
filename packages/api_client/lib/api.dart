@@ -88,6 +88,7 @@ part 'model/connector_request.dart';
 part 'model/connector_status.dart';
 part 'model/create_source_request.dart';
 part 'model/csv_import_response.dart';
+part 'model/delete_forever_response.dart';
 part 'model/device_kind.dart';
 part 'model/device_response.dart';
 part 'model/edition_response.dart';

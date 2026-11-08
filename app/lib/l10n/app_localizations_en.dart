@@ -4220,4 +4220,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String importWhyOther(int code) {
     return 'refused by the server (code $code)';
   }
+
+  @override
+  String get deleteForever => 'Delete for good';
+
+  @override
+  String deleteForeverAsk(String title) {
+    return 'Delete “$title” for good?';
+  }
+
+  @override
+  String get deleteForeverBody =>
+      'The book leaves your library with your progress, notes, highlights and review: none of it can be brought back. Its file is deleted from the server too, unless other readers have it.';
+
+  @override
+  String deletedForever(String title) {
+    return '“$title” was deleted for good, file included.';
+  }
+
+  @override
+  String deletedForeverShared(String title) {
+    return '“$title” was deleted from your account. Other readers have it: its file stays on the server for them.';
+  }
 }

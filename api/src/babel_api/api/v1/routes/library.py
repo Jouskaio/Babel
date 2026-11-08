@@ -20,6 +20,8 @@ from babel_api.api.dependencies import (
     SyncServiceDep,
     covers_due,
     link_covers,
+    tags_due,
+    update_tags,
 )
 from babel_api.domain.errors import FileTooLargeError
 from babel_api.domain.files import BookFormat, LibraryItem, ReadingStatus
@@ -84,6 +86,10 @@ class LibraryItemResponse(BaseModel):
     filename: str | None = Field(
         default=None, description="The name to save the file under: Author - Title.epub"
     )
+    tags: list[str] = Field(
+        default_factory=list,
+        description="Its tags, from the subjects of its work and its file: to find it",
+    )
 
     @classmethod
     def of(cls, item: LibraryItem) -> "LibraryItemResponse":
@@ -113,6 +119,7 @@ class LibraryItemResponse(BaseModel):
             series_index=item.series_index,
             cover_id=item.cover_id,
             origin=item.origin,
+            tags=list(item.tags),
         )
 
 
@@ -137,6 +144,8 @@ async def get_library(
     items = await files.library(user_id)
     if covers_due(user_id) and any(i.work_id is None and i.file is None for i in items):
         background.add_task(link_covers, container, user_id)
+    if tags_due(user_id):
+        background.add_task(update_tags, container, user_id)
     return [LibraryItemResponse.of(item) for item in items]
 
 
@@ -199,6 +208,23 @@ async def remove_from_library(
     """Take a book out of the library. Its status, review, notes and positions are kept and
     come back if the same file is added again."""
     await files.remove_from_library(user_id, item_id, device_id)
+
+
+class DeleteForeverResponse(BaseModel):
+    file_deleted: bool = Field(
+        description="The file was deleted from Babel too (false: other readers have it)"
+    )
+
+
+@router.delete("/library/{item_id}/forever", operation_id="deleteBookForever")
+async def delete_forever(
+    user_id: CurrentUserId, files: FileServiceDep, item_id: UUID, device_id: DeviceHeader = None
+) -> DeleteForeverResponse:
+    """Delete a book for good, even one taken out of the library: its status, review, notes,
+    highlights and positions are deleted, and its file too unless another reader has it."""
+    return DeleteForeverResponse(
+        file_deleted=await files.delete_forever(user_id, item_id, device_id)
+    )
 
 
 class BookDetailsRequest(BaseModel):

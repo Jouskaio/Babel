@@ -2195,5 +2195,13 @@
   "importWhyTooBig": "fichier trop volumineux pour le serveur",
   "importWhyBusy": "le serveur n'a pas répondu à temps (fichier lourd ou serveur occupé)",
   "importWhyOther": "refusé par le serveur (code {code})",
-  "@importWhyOther": {"placeholders": {"code": {"type": "int"}}}
+  "@importWhyOther": {"placeholders": {"code": {"type": "int"}}},
+  "deleteForever": "Supprimer définitivement",
+  "deleteForeverAsk": "Supprimer « {title} » définitivement ?",
+  "@deleteForeverAsk": {"placeholders": {"title": {"type": "String"}}},
+  "deleteForeverBody": "Le livre quitte votre bibliothèque avec votre progression, vos notes, vos surlignages et votre avis : rien ne pourra être retrouvé. Son fichier est aussi supprimé du serveur, sauf si d'autres lecteurs l'ont.",
+  "deletedForever": "« {title} » a été supprimé définitivement, fichier compris.",
+  "@deletedForever": {"placeholders": {"title": {"type": "String"}}},
+  "deletedForeverShared": "« {title} » a été supprimé de votre compte. D'autres lecteurs l'ont : son fichier reste sur le serveur pour eux.",
+  "@deletedForeverShared": {"placeholders": {"title": {"type": "String"}}}
 }

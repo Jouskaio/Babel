@@ -224,6 +224,21 @@ class FakeServer {
     'device_id': null,
   });
 
+  /// A book with tags (subjects of its work or file).
+  void addTaggedItem(String id, String title, List<String> tags) =>
+      changes.add({
+        'seq': changes.length + 1,
+        'entity': 'library_item',
+        'entity_id': id,
+        'op': 'upsert',
+        'data': {...libraryItem(id, title), 'tags': tags},
+        'device_id': null,
+      });
+
+  /// The books deleted for good, and whether their file goes with them.
+  final deletedForever = <String>[];
+  bool fileDeletedForever = true;
+
   /// A book owned on paper, without a file.
   void addPaperItem(String id, String title) => changes.add({
     'seq': changes.length + 1,
@@ -433,6 +448,12 @@ class FakeServer {
         (jsonDecode(request.body) as Map<String, Object?>)['token'] as String?,
       );
       return http.Response('', 204);
+    }
+    if (path.startsWith('/v1/library/') &&
+        path.endsWith('/forever') &&
+        request.method == 'DELETE') {
+      deletedForever.add(path.split('/')[3]);
+      return json({'file_deleted': fileDeletedForever});
     }
     if (path == '/v1/library/files' && request.method == 'POST') {
       final name = RegExp('filename="([^"]+)"')

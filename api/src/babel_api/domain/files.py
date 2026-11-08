@@ -5,6 +5,8 @@ from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
+from babel_api.domain.tags import tags_of
+
 
 class BookFormat(StrEnum):
     """File formats accepted for import, detected from the content, not the name."""
@@ -157,10 +159,17 @@ class LibraryItem:
     custom_cover: str | None = None
     # "ao3" for a fanfiction of Archive of Our Own (it gets the fanfiction cover and follow-up).
     origin: str | None = None
+    # The free subjects of the catalog work (the file's own are in [file]).
+    work_subjects: tuple[str, ...] = ()
 
     @property
     def sha256(self) -> str | None:
         return self.file.sha256 if self.file else None
+
+    @property
+    def tags(self) -> tuple[str, ...]:
+        """The book's tags, to find it in the library: its work's subjects and its file's."""
+        return tuple(tags_of(self.work_subjects, self.file.subjects if self.file else None))
 
     @property
     def format_name(self) -> str:

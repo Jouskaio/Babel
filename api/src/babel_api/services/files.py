@@ -77,6 +77,7 @@ def item_data(item: LibraryItem) -> dict[str, Any]:
         "work_id": str(item.work_id) if item.work_id else None,
         "origin": item.origin,
         "filename": book_filename(item) if item.file else None,
+        "tags": list(item.tags),
     }
 
 
@@ -547,6 +548,43 @@ class FileService:
             user_id, EntityKind.LIBRARY_ITEM, str(item_id), ChangeOp.DELETE, device_id=device_id
         )
         await self._files.commit()
+
+    async def delete_forever(
+        self, user_id: UUID, item_id: UUID, device_id: UUID | None = None
+    ) -> bool:
+        """Deletes a book for good: it leaves the library with its status, review, notes,
+        highlights and positions, which do not come back if the file is added again. Its
+        file is deleted from Babel too unless another reader has it. Whether the file was
+        deleted."""
+        item = await self._files.get_item(item_id) or await self._removed_item(user_id, item_id)
+        if item is None or item.user_id != user_id:
+            raise NotFoundError
+        sha256 = item.sha256
+        for note in await self._files.delete_item(item_id):
+            await self._changes.record(
+                user_id, EntityKind.ANNOTATION, str(note), ChangeOp.DELETE, device_id=device_id
+            )
+        await self._changes.record(
+            user_id, EntityKind.LIBRARY_ITEM, str(item_id), ChangeOp.DELETE, device_id=device_id
+        )
+        delete_file = sha256 is not None and not await self._files.has_other_readers(
+            sha256, user_id
+        )
+        if sha256 is not None and delete_file:
+            path = self._store.path(sha256)
+            await self._files.delete_file(sha256)
+            await self._files.commit()
+            if self._exporter is not None and path is not None:
+                await asyncio.to_thread(self._exporter.forget, path)
+            await self._store.delete(sha256)
+            self._covers.forget(sha256)
+        else:
+            await self._files.commit()
+        return delete_file
+
+    async def _removed_item(self, user_id: UUID, item_id: UUID) -> LibraryItem | None:
+        """A book the reader took out of their library (its data is still kept)."""
+        return next((i for i in await self._files.all_items(user_id) if i.id == item_id), None)
 
     async def cover(self, sha256: str) -> tuple[Path, str]:
         """The cover found in a stored file, extracted once then cached."""

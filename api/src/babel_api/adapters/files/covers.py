@@ -45,3 +45,9 @@ class LocalCoverCache:
         partial.write_bytes(cover.content)
         partial.replace(path)
         return path, cover.media_type
+
+    def forget(self, sha256: str) -> None:
+        """Deletes the cover kept for a file that is gone."""
+        base = self._base(sha256)
+        for extension in (*_EXTENSIONS.values(), _NONE):
+            base.with_suffix(extension).unlink(missing_ok=True)
