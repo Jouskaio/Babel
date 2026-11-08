@@ -20,12 +20,14 @@ import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
+import '../../../core/widgets/search_suggestions.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../audiobooks/application/audiobooks_providers.dart';
 import '../../reader/presentation/translate_sheet.dart';
 import '../../social/presentation/book_social_sheets.dart';
 import '../application/library_controller.dart';
+import '../application/library_suggestions.dart';
 import '../application/series.dart';
 import '../application/shelves.dart';
 import 'attach_file.dart';
@@ -496,32 +498,42 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
             sliver: SliverToBoxAdapter(
-              child: TextField(
+              child: SuggestionField(
                 controller: _search,
-                onChanged: (value) {
-                  setState(() => _query = value);
+                suggest: (text) =>
+                    rankSuggestions(text, librarySuggestionCandidates(all)),
+                onSelected: (s) {
+                  setState(() => _query = s.label);
                   _remember();
                 },
-                style: BabelText.body(15, color: BabelColors.textPrimary),
-                decoration: InputDecoration(
-                  hintText: l10n.librarySearchHint,
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: BabelColors.textSecondary,
-                  ),
-                  suffixIcon: _query.isEmpty
-                      ? null
-                      : IconButton(
-                          icon: Icon(
-                            Icons.close,
-                            color: BabelColors.textSecondary,
+                fieldBuilder: (context, controller, focusNode) => TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  onChanged: (value) {
+                    setState(() => _query = value);
+                    _remember();
+                  },
+                  style: BabelText.body(15, color: BabelColors.textPrimary),
+                  decoration: InputDecoration(
+                    hintText: l10n.librarySearchHint,
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: BabelColors.textSecondary,
+                    ),
+                    suffixIcon: _query.isEmpty
+                        ? null
+                        : IconButton(
+                            icon: Icon(
+                              Icons.close,
+                              color: BabelColors.textSecondary,
+                            ),
+                            onPressed: () {
+                              _search.clear();
+                              setState(() => _query = '');
+                              _remember();
+                            },
                           ),
-                          onPressed: () {
-                            _search.clear();
-                            setState(() => _query = '');
-                            _remember();
-                          },
-                        ),
+                  ),
                 ),
               ),
             ),
