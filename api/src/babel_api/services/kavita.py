@@ -232,7 +232,7 @@ class KavitaProvisioner:
                 self.schedule(user_id)
 
     async def wait(self) -> None:
-        """Tests: until every scheduled creation has finished."""
+        """Until every scheduled creation has finished (or unwound after `cancel`)."""
         await asyncio.gather(*self._running.values(), return_exceptions=True)
 
     def cancel(self) -> None:
