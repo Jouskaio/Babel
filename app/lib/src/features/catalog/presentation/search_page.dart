@@ -13,10 +13,12 @@ import '../../../core/theme/babel_look.dart';
 import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/book_cover.dart';
+import '../../../core/widgets/search_suggestions.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../landing/application/trending_provider.dart';
 import '../../library/application/history.dart';
+import '../../library/application/library_controller.dart';
 import '../../library/application/series.dart';
 import '../../library/presentation/book_trace.dart';
 import '../application/catalog_providers.dart';
@@ -86,6 +88,26 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     ref.read(recentSearchesProvider.notifier).add(value);
   }
 
+  /// Proposed as soon as a letter is typed: past searches first, then the authors and
+  /// titles of the reader's library.
+  List<SearchSuggestion> _suggestions(String text) {
+    final books =
+        ref.read(libraryControllerProvider).value ??
+        const <LibraryItemResponse>[];
+    return rankSuggestions([
+      for (final q in ref.read(recentSearchesProvider))
+        SearchSuggestion(q, Icons.history),
+      for (final item in books)
+        for (final author in item.authors)
+          SearchSuggestion(author, Icons.person_outline),
+      for (final item in books)
+        if (item.series case final series?)
+          SearchSuggestion(series, Icons.collections_bookmark_outlined),
+      for (final item in books)
+        SearchSuggestion(item.title, Icons.menu_book_outlined),
+    ], text);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -99,73 +121,79 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           children: [
             Expanded(
               child: SelectionContainer.disabled(
-                child: TextField(
+                child: SuggestingSearchField(
                   controller: _controller,
-                  onChanged: _onChanged,
-                  onSubmitted: _search,
-                  textInputAction: TextInputAction.search,
-                  style: BabelText.body(16, color: BabelColors.textPrimary),
-                  cursorColor: BabelColors.gold,
-                  decoration: InputDecoration(
-                    hintText: l10n.searchHint,
-                    hintStyle: BabelText.reading(
-                      16,
-                      color: BabelColors.textSecondary,
-                      italic: true,
-                    ),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: Icon(
-                        Icons.search_rounded,
-                        color: BabelColors.gold,
-                        size: 22,
+                  suggestions: _suggestions,
+                  onSelected: (s) => _search(s.text),
+                  fieldBuilder: (context, controller, focusNode) => TextField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    onChanged: _onChanged,
+                    onSubmitted: _search,
+                    textInputAction: TextInputAction.search,
+                    style: BabelText.body(16, color: BabelColors.textPrimary),
+                    cursorColor: BabelColors.gold,
+                    decoration: InputDecoration(
+                      hintText: l10n.searchHint,
+                      hintStyle: BabelText.reading(
+                        16,
+                        color: BabelColors.textSecondary,
+                        italic: true,
                       ),
-                    ),
-                    // A small round cross, inset from the edge, once there is something to
-                    // erase.
-                    suffixIcon: ValueListenableBuilder<TextEditingValue>(
-                      valueListenable: _controller,
-                      builder: (context, value, _) => value.text.isEmpty
-                          ? const SizedBox.shrink()
-                          : Padding(
-                              padding: const EdgeInsets.only(right: 12),
-                              child: IconButton(
-                                tooltip: l10n.searchClear,
-                                onPressed: _clear,
-                                visualDensity: VisualDensity.compact,
-                                style: IconButton.styleFrom(
-                                  backgroundColor: BabelColors.sunken,
-                                  fixedSize: const Size(28, 28),
-                                  minimumSize: const Size(28, 28),
-                                  padding: EdgeInsets.zero,
-                                ),
-                                icon: Icon(
-                                  Icons.close_rounded,
-                                  size: 16,
-                                  color: BabelColors.textSecondary,
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Icon(
+                          Icons.search_rounded,
+                          color: BabelColors.gold,
+                          size: 22,
+                        ),
+                      ),
+                      // A small round cross, inset from the edge, once there is something to
+                      // erase.
+                      suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _controller,
+                        builder: (context, value, _) => value.text.isEmpty
+                            ? const SizedBox.shrink()
+                            : Padding(
+                                padding: const EdgeInsets.only(right: 12),
+                                child: IconButton(
+                                  tooltip: l10n.searchClear,
+                                  onPressed: _clear,
+                                  visualDensity: VisualDensity.compact,
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: BabelColors.sunken,
+                                    fixedSize: const Size(28, 28),
+                                    minimumSize: const Size(28, 28),
+                                    padding: EdgeInsets.zero,
+                                  ),
+                                  icon: Icon(
+                                    Icons.close_rounded,
+                                    size: 16,
+                                    color: BabelColors.textSecondary,
+                                  ),
                                 ),
                               ),
-                            ),
-                    ),
-                    filled: true,
-                    fillColor: BabelColors.surface,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 18,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(999),
                       ),
-                      borderSide: BorderSide(color: BabelColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(999),
+                      filled: true,
+                      fillColor: BabelColors.surface,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 18,
                       ),
-                      borderSide: BorderSide(
-                        color: BabelColors.gold,
-                        width: 1.5,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(999),
+                        ),
+                        borderSide: BorderSide(color: BabelColors.border),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(999),
+                        ),
+                        borderSide: BorderSide(
+                          color: BabelColors.gold,
+                          width: 1.5,
+                        ),
                       ),
                     ),
                   ),

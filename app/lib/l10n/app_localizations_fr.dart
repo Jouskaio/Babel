@@ -4254,4 +4254,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String importWhyOther(int code) {
     return 'refusé par le serveur (code $code)';
   }
+
+  @override
+  String get deleteForever => 'Supprimer définitivement';
+
+  @override
+  String deleteForeverAsk(String title) {
+    return 'Supprimer « $title » définitivement ?';
+  }
+
+  @override
+  String get deleteForeverBody =>
+      'Le livre quitte votre bibliothèque avec votre progression, vos notes, vos surlignages et votre avis : rien ne pourra être retrouvé. Son fichier est aussi supprimé du serveur, sauf si d\'autres lecteurs l\'ont.';
+
+  @override
+  String deletedForever(String title) {
+    return '« $title » a été supprimé définitivement, fichier compris.';
+  }
+
+  @override
+  String deletedForeverShared(String title) {
+    return '« $title » a été supprimé de votre compte. D\'autres lecteurs l\'ont : son fichier reste sur le serveur pour eux.';
+  }
 }

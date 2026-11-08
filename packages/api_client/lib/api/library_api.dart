@@ -402,6 +402,71 @@ class LibraryApi {
     return null;
   }
 
+  /// Delete Forever
+  ///
+  /// Delete a book for good, even one taken out of the library: its status, review, notes, highlights and positions are deleted, and its file too unless another reader has it.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<Response> deleteBookForeverWithHttpInfo(String itemId, { String? xBabelDevice, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/library/{item_id}/forever'
+      .replaceAll('{item_id}', itemId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (xBabelDevice != null) {
+      headerParams[r'X-Babel-Device'] = parameterToString(xBabelDevice);
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'DELETE',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Delete Forever
+  ///
+  /// Delete a book for good, even one taken out of the library: its status, review, notes, highlights and positions are deleted, and its file too unless another reader has it.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] itemId (required):
+  ///
+  /// * [String] xBabelDevice:
+  Future<DeleteForeverResponse?> deleteBookForever(String itemId, { String? xBabelDevice, }) async {
+    final response = await deleteBookForeverWithHttpInfo(itemId,  xBabelDevice: xBabelDevice, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'DeleteForeverResponse',) as DeleteForeverResponse;
+    
+    }
+    return null;
+  }
+
   /// Delete Review
   ///
   /// Note: This method returns the HTTP [Response].

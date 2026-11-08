@@ -7045,6 +7045,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'refusé par le serveur (code {code})'**
   String importWhyOther(int code);
+
+  /// No description provided for @deleteForever.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer définitivement'**
+  String get deleteForever;
+
+  /// No description provided for @deleteForeverAsk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer « {title} » définitivement ?'**
+  String deleteForeverAsk(String title);
+
+  /// No description provided for @deleteForeverBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le livre quitte votre bibliothèque avec votre progression, vos notes, vos surlignages et votre avis : rien ne pourra être retrouvé. Son fichier est aussi supprimé du serveur, sauf si d\'autres lecteurs l\'ont.'**
+  String get deleteForeverBody;
+
+  /// No description provided for @deletedForever.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {title} » a été supprimé définitivement, fichier compris.'**
+  String deletedForever(String title);
+
+  /// No description provided for @deletedForeverShared.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {title} » a été supprimé de votre compte. D\'autres lecteurs l\'ont : son fichier reste sur le serveur pour eux.'**
+  String deletedForeverShared(String title);
 }
 
 class _AppLocalizationsDelegate
