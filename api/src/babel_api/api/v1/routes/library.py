@@ -20,6 +20,8 @@ from babel_api.api.dependencies import (
     SyncServiceDep,
     covers_due,
     link_covers,
+    tags_due,
+    update_tags,
 )
 from babel_api.domain.errors import FileTooLargeError
 from babel_api.domain.files import BookFormat, LibraryItem, ReadingStatus
@@ -142,6 +144,8 @@ async def get_library(
     items = await files.library(user_id)
     if covers_due(user_id) and any(i.work_id is None and i.file is None for i in items):
         background.add_task(link_covers, container, user_id)
+    if tags_due(user_id):
+        background.add_task(update_tags, container, user_id)
     return [LibraryItemResponse.of(item) for item in items]
 
 

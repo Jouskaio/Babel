@@ -14,6 +14,8 @@ from babel_api.api.dependencies import (
     SyncServiceDep,
     covers_due,
     link_covers,
+    tags_due,
+    update_tags,
 )
 from babel_api.domain.sync import ChangeOp, Device, DeviceKind, EntityKind
 from babel_api.services.sync import Operation, OpOutcome
@@ -139,6 +141,9 @@ async def pull_changes(
         # The app reads its library from here: books imported from a list get their covers
         # in the background, and the links come back as changes.
         background.add_task(link_covers, container, user_id)
+    if tags_due(user_id):
+        # Books written to devices before they had tags get them as changes.
+        background.add_task(update_tags, container, user_id)
     pull = await sync.pull(user_id, since, limit, device_id)
     return PullResponse(
         changes=[

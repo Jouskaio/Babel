@@ -1,10 +1,13 @@
 """Deleting a book for good, and the tags that help find books in the library."""
 
+import json
+import sqlite3
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
+from babel_api.api import dependencies
 from babel_api.core.config import Settings
 from tests.api.v1.test_annotations import NOTE_ID, annotation
 from tests.api.v1.test_library import account, upload
@@ -127,3 +130,30 @@ def test_library_books_carry_the_tags_of_their_file(
 
     assert item["tags"] == ["Fantasy", "Governesses"]
     assert client.get("/v1/library", headers=ada).json()[0]["tags"] == ["Fantasy", "Governesses"]
+
+
+def test_books_written_to_devices_before_tags_get_them(
+    client: TestClient, ada: dict[str, str], settings: Settings
+) -> None:
+    upload(client, ada, epub(subjects=("Romance",)))
+    # As the change log wrote it before books had tags.
+    with sqlite3.connect(settings.database_url.removeprefix("sqlite+aiosqlite:///")) as db:
+        for seq, data in db.execute("SELECT seq, data FROM changes").fetchall():
+            book = json.loads(data)
+            book.pop("tags", None)
+            db.execute("UPDATE changes SET data = ? WHERE seq = ?", (json.dumps(book), seq))
+    dependencies._tags_checked.clear()  # pyright: ignore[reportPrivateUsage]
+
+    first = client.get("/v1/sync", headers=ada).json()
+    again = client.get("/v1/sync", params={"since": first["cursor"]}, headers=ada).json()
+
+    [change] = again["changes"]
+    assert change["entity"] == "library_item"
+    assert change["data"]["tags"] == ["Romance"]
+    # Once up to date, nothing more is written.
+    dependencies._tags_checked.clear()  # pyright: ignore[reportPrivateUsage]
+    client.get("/v1/sync", headers=ada)
+    assert (
+        client.get("/v1/sync", params={"since": again["cursor"]}, headers=ada).json()["changes"]
+        == []
+    )

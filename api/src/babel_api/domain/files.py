@@ -5,6 +5,8 @@ from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
+from babel_api.domain.tags import tags_of
+
 
 class BookFormat(StrEnum):
     """File formats accepted for import, detected from the content, not the name."""
@@ -167,7 +169,7 @@ class LibraryItem:
     @property
     def tags(self) -> tuple[str, ...]:
         """The book's tags, to find it in the library: its work's subjects and its file's."""
-        return book_tags(self.work_subjects, self.file.subjects if self.file else None)
+        return tuple(tags_of(self.work_subjects, self.file.subjects if self.file else None))
 
     @property
     def format_name(self) -> str:
@@ -191,32 +193,3 @@ class LibraryItem:
         if self.work_cover_url and self.work_id:
             return f"/v1/catalog/work-covers/{self.work_id}"
         return None
-
-
-_TAGS_MAX = 12
-_TAG_MAX_LENGTH = 40
-
-
-def book_tags(*sources: tuple[str, ...] | None) -> tuple[str, ...]:
-    """Readable tags from free subjects: "Governesses -- Fiction" is "Governesses",
-    catalog codes ("nyt:hardcover-fiction=2008-05-04") are left out, and each tag comes
-    once whatever its case."""
-    tags: list[str] = []
-    seen: set[str] = set()
-    for subjects in sources:
-        for subject in subjects or ():
-            tag = " ".join(subject.split(" -- ")[0].split()).strip(" .,;")
-            key = tag.casefold()
-            if (
-                len(tag) < 2
-                or len(tag) > _TAG_MAX_LENGTH
-                or any(c in tag for c in ":=/")
-                or not any(c.isalpha() for c in tag)
-                or key in seen
-            ):
-                continue
-            seen.add(key)
-            tags.append(tag)
-            if len(tags) == _TAGS_MAX:
-                return tuple(tags)
-    return tuple(tags)

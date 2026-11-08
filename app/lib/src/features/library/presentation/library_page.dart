@@ -124,7 +124,6 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     List<LibraryItemResponse> all,
   ) {
     final l10n = context.l10n;
-    final fromServer = ref.read(libraryTagsProvider).value ?? const {};
     final typed = text.trim();
     final onlyTags = typed.startsWith('#');
     final query = onlyTags ? typed.substring(1) : typed;
@@ -135,7 +134,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     ];
     final tagCounts = <String, (String, int)>{};
     for (final item in books) {
-      for (final tag in tagsOf(item, fromServer)) {
+      for (final tag in item.tags) {
         final key = _fold(tag);
         final (name, count) = tagCounts[key] ?? (tag, 0);
         tagCounts[key] = (name, count + 1);
@@ -201,18 +200,16 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   ) {
     final filter = _filter;
     final words = _fold(_query).split(' ').where((w) => w.isNotEmpty).toList();
-    final fromServer = ref.watch(libraryTagsProvider).value ?? const {};
     final tag = _tag == null ? null : _fold(_tag!);
     final shown = [
       for (final item in items)
         if ((_showHidden || item.hidden != true) &&
-            (tag == null ||
-                tagsOf(item, fromServer).any((t) => _fold(t) == tag)) &&
+            (tag == null || item.tags.any((t) => _fold(t) == tag)) &&
             (words.isEmpty ||
                 words.every(
                   _fold(
                     '${item.title} ${item.authors.join(' ')} ${item.series ?? ''} '
-                    '${tagsOf(item, fromServer).join(' ')}',
+                    '${item.tags.join(' ')}',
                   ).contains,
                 )))
           item,

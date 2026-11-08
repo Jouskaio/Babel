@@ -17,25 +17,6 @@ final libraryControllerProvider =
       LibraryController.new,
     );
 
-/// The tags of each book as the server has them now: books synced before tags existed
-/// carry none in the local database. Empty offline.
-final libraryTagsProvider = FutureProvider<Map<String, List<String>>>((
-  ref,
-) async {
-  try {
-    final items = await ref.read(libraryApiProvider).getLibrary() ?? const [];
-    return {for (final item in items) item.id: item.tags};
-  } on Object {
-    return const {};
-  }
-});
-
-/// A book's tags: the ones it was synced with, or else the server's.
-List<String> tagsOf(
-  LibraryItemResponse item,
-  Map<String, List<String>> fromServer,
-) => item.tags.isNotEmpty ? item.tags : (fromServer[item.id] ?? const []);
-
 /// The reader's library, read from the local database so it works offline; the sync
 /// engine keeps that database in step with the account.
 class LibraryController extends StreamNotifier<List<LibraryItemResponse>> {
