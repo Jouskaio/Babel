@@ -7045,6 +7045,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'refusé par le serveur (code {code})'**
   String importWhyOther(int code);
+
+  /// No description provided for @tagsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tags'**
+  String get tagsTitle;
+
+  /// No description provided for @tagFilter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tag · {name}'**
+  String tagFilter(String name);
+
+  /// No description provided for @tagsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun tag pour l\'instant : ils viennent des sujets du catalogue et des fichiers.'**
+  String get tagsEmpty;
+
+  /// No description provided for @tagsFindHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trouver un tag'**
+  String get tagsFindHint;
 }
 
 class _AppLocalizationsDelegate

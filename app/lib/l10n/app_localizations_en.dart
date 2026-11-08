@@ -4220,4 +4220,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String importWhyOther(int code) {
     return 'refused by the server (code $code)';
   }
+
+  @override
+  String get tagsTitle => 'Tags';
+
+  @override
+  String tagFilter(String name) {
+    return 'Tag · $name';
+  }
+
+  @override
+  String get tagsEmpty =>
+      'No tags yet: they come from the subjects of the catalog and of the files.';
+
+  @override
+  String get tagsFindHint => 'Find a tag';
 }

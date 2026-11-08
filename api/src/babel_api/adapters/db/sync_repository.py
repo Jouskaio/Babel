@@ -102,6 +102,18 @@ class SqlSyncRepository:
             for row in rows
         ]
 
+    async def latest_data(self, user_id: UUID, entity: EntityKind) -> dict[str, dict[str, Any]]:
+        """The data of the last upsert of each entity of a kind (deleted ones left out)."""
+        last = (
+            select(func.max(ChangeRow.seq))
+            .where(ChangeRow.user_id == user_id, ChangeRow.entity == entity.value)
+            .group_by(ChangeRow.entity_id)
+        )
+        rows = await self._session.scalars(select(ChangeRow).where(ChangeRow.seq.in_(last)))
+        return {
+            row.entity_id: dict(row.data or {}) for row in rows if row.op == ChangeOp.UPSERT.value
+        }
+
     async def latest_seq(self, user_id: UUID) -> int:
         latest = await self._session.scalar(
             select(func.max(ChangeRow.seq)).where(ChangeRow.user_id == user_id)

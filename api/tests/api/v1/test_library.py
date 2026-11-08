@@ -1,3 +1,5 @@
+import json
+import sqlite3
 from dataclasses import replace
 from pathlib import Path
 
@@ -5,6 +7,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from babel_api.api import dependencies
 from babel_api.core.config import Settings
 from tests.api.v1.test_works import FakeBooks
 from tests.books import CBR, JPEG, NOT_A_BOOK, PDF, cbz, epub
@@ -290,3 +293,37 @@ def test_a_fanfiction_file_is_recognised_and_known_files_are_skipped(
     assert checked["in_library"] == [sha(fic)]  # already there, listed once
     assert checked["on_babel"] == [emma]  # Bob's: add it without uploading
     assert unknown not in checked["in_library"] + checked["on_babel"]
+
+
+def test_books_have_tags_from_their_file_subjects(client: TestClient, ada: dict[str, str]) -> None:
+    upload(client, ada, epub(subjects=("Governesses -- Fiction", "Accessible book", "Romance")))
+
+    [item] = client.get("/v1/library", headers=ada).json()
+    assert item["tags"] == ["Governesses", "Romance"]
+
+
+def test_books_written_to_devices_before_tags_get_them(
+    client: TestClient, ada: dict[str, str], settings: Settings
+) -> None:
+    upload(client, ada, epub(subjects=("Romance",)))
+    # As the change log wrote it before books had tags.
+    with sqlite3.connect(settings.database_url.removeprefix("sqlite+aiosqlite:///")) as db:
+        for seq, data in db.execute("SELECT seq, data FROM changes").fetchall():
+            book = json.loads(data)
+            book.pop("tags", None)
+            db.execute("UPDATE changes SET data = ? WHERE seq = ?", (json.dumps(book), seq))
+    dependencies._tags_checked.clear()  # pyright: ignore[reportPrivateUsage]
+
+    first = client.get("/v1/sync", headers=ada).json()
+    again = client.get("/v1/sync", params={"since": first["cursor"]}, headers=ada).json()
+
+    [change] = again["changes"]
+    assert change["entity"] == "library_item"
+    assert change["data"]["tags"] == ["Romance"]
+    # Once up to date, nothing more is written.
+    dependencies._tags_checked.clear()  # pyright: ignore[reportPrivateUsage]
+    client.get("/v1/sync", headers=ada)
+    assert (
+        client.get("/v1/sync", params={"since": again["cursor"]}, headers=ada).json()["changes"]
+        == []
+    )

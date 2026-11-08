@@ -83,6 +83,7 @@ def _to_item(row: LibraryItemRow) -> LibraryItem:
         shared=row.shared,
         work_cover_id=row.work.cover_id if row.work else None,
         work_cover_url=row.work.cover_url if row.work else None,
+        work_subjects=tuple(row.work.subjects or ()) if row.work else (),
         audio=AudioRef(row.audio_id, row.audio_duration or 0, row.audio_cover)
         if row.audio_id
         else None,

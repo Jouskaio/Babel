@@ -1403,5 +1403,10 @@
   "importWhyTooBig": "file too large for the server",
   "importWhyBusy": "the server did not answer in time (large file or busy server)",
   "importWhyOther": "refused by the server (code {code})",
-  "@importWhyOther": {"placeholders": {"code": {"type": "int"}}}
+  "@importWhyOther": {"placeholders": {"code": {"type": "int"}}},
+  "tagsTitle": "Tags",
+  "tagFilter": "Tag · {name}",
+  "@tagFilter": {"placeholders": {"name": {"type": "String"}}},
+  "tagsEmpty": "No tags yet: they come from the subjects of the catalog and of the files.",
+  "tagsFindHint": "Find a tag"
 }

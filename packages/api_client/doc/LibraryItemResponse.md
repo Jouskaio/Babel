@@ -31,6 +31,7 @@ Name | Type | Description | Notes
 **startedAt** | [**DateTime**](DateTime.md) |  | [optional] 
 **stateTime** | [**DateTime**](DateTime.md) | When status or progress last changed (device clock) | [optional] 
 **status** | [**ReadingStatus**](ReadingStatus.md) |  | [optional] 
+**tags** | **List<String>** | Topics to search the book by, from its work's and its file's subjects | [optional] [default to const []]
 **title** | **String** |  | 
 **workId** | **String** | The catalog work: reviews and notes are shared per work | [optional] 
 

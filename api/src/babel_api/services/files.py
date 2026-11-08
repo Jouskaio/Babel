@@ -33,6 +33,7 @@ from babel_api.domain.ports import (
 )
 from babel_api.domain.series import guess_series, series_key, volume_number
 from babel_api.domain.sync import ChangeOp, EntityKind
+from babel_api.domain.tags import tags_of
 
 
 def _image_type(content: bytes) -> str | None:
@@ -77,6 +78,7 @@ def item_data(item: LibraryItem) -> dict[str, Any]:
         "work_id": str(item.work_id) if item.work_id else None,
         "origin": item.origin,
         "filename": book_filename(item) if item.file else None,
+        "tags": tags_of(item.work_subjects, item.file.subjects if item.file else None),
     }
 
 

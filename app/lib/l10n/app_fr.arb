@@ -2195,5 +2195,10 @@
   "importWhyTooBig": "fichier trop volumineux pour le serveur",
   "importWhyBusy": "le serveur n'a pas répondu à temps (fichier lourd ou serveur occupé)",
   "importWhyOther": "refusé par le serveur (code {code})",
-  "@importWhyOther": {"placeholders": {"code": {"type": "int"}}}
+  "@importWhyOther": {"placeholders": {"code": {"type": "int"}}},
+  "tagsTitle": "Tags",
+  "tagFilter": "Tag · {name}",
+  "@tagFilter": {"placeholders": {"name": {"type": "String"}}},
+  "tagsEmpty": "Aucun tag pour l'instant : ils viennent des sujets du catalogue et des fichiers.",
+  "tagsFindHint": "Trouver un tag"
 }

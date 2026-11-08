@@ -20,11 +20,14 @@ from babel_api.api.dependencies import (
     SyncServiceDep,
     covers_due,
     link_covers,
+    tags_due,
+    update_tags,
 )
 from babel_api.domain.errors import FileTooLargeError
 from babel_api.domain.files import BookFormat, LibraryItem, ReadingStatus
 from babel_api.domain.follows import Follow
 from babel_api.domain.naming import book_filename
+from babel_api.domain.tags import tags_of
 from babel_api.services.imports import ImportService
 from babel_api.services.links import LinkKind
 
@@ -84,6 +87,10 @@ class LibraryItemResponse(BaseModel):
     filename: str | None = Field(
         default=None, description="The name to save the file under: Author - Title.epub"
     )
+    tags: list[str] = Field(
+        default_factory=list[str],
+        description="Topics to search the book by, from its work's and its file's subjects",
+    )
 
     @classmethod
     def of(cls, item: LibraryItem) -> "LibraryItemResponse":
@@ -113,6 +120,7 @@ class LibraryItemResponse(BaseModel):
             series_index=item.series_index,
             cover_id=item.cover_id,
             origin=item.origin,
+            tags=tags_of(item.work_subjects, item.file.subjects if item.file else None),
         )
 
 
@@ -137,6 +145,8 @@ async def get_library(
     items = await files.library(user_id)
     if covers_due(user_id) and any(i.work_id is None and i.file is None for i in items):
         background.add_task(link_covers, container, user_id)
+    if tags_due(user_id):
+        background.add_task(update_tags, container, user_id)
     return [LibraryItemResponse.of(item) for item in items]
 
 

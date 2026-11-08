@@ -37,12 +37,19 @@ import 'series_sheet.dart';
 
 /// The reader's library (design: Penpot "screen / bibliotheque").
 class LibraryPage extends ConsumerStatefulWidget {
-  const LibraryPage({this.filter, this.query, this.series, super.key});
+  const LibraryPage({
+    this.filter,
+    this.query,
+    this.tag,
+    this.series,
+    super.key,
+  });
 
   /// Where the page was left, from its address, so a reload comes back to the same place:
-  /// a reading status or a shelf, a search, a series whose sheet was open.
+  /// a reading status or a shelf, a search, a tag, a series whose sheet was open.
   final String? filter;
   final String? query;
+  final String? tag;
   final String? series;
 
   @override
@@ -59,6 +66,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   final _search = TextEditingController();
   String _query = '';
 
+  /// Only the books with this tag; null shows them whatever their tags.
+  String? _tag;
+
   /// The series sheet to reopen once the books are loaded (after a reload).
   String? _pendingSeries;
 
@@ -68,6 +78,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     _filter = ReadingStatus.fromJson(widget.filter) ?? widget.filter;
     _query = widget.query ?? '';
     _search.text = _query;
+    _tag = widget.tag;
     _pendingSeries = widget.series;
     // A file shared to Babel before the library was shown.
     WidgetsBinding.instance.addPostFrameCallback((_) => _importShared());
@@ -80,6 +91,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       if (filter is ReadingStatus) 'filter': filter.value,
       if (filter is String) 'filter': filter,
       if (_query.isNotEmpty) 'q': _query,
+      'tag': ?_tag,
     };
     GoRouter.maybeOf(context)?.replace<void>(
       Uri(
@@ -132,13 +144,16 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   ) {
     final filter = _filter;
     final words = _fold(_query).split(' ').where((w) => w.isNotEmpty).toList();
+    final tag = _tag == null ? null : _fold(_tag!);
     final shown = [
       for (final item in items)
         if ((_showHidden || item.hidden != true) &&
+            (tag == null || item.tags.any((t) => _fold(t) == tag)) &&
             (words.isEmpty ||
                 words.every(
                   _fold(
-                    '${item.title} ${item.authors.join(' ')} ${item.series ?? ''}',
+                    '${item.title} ${item.authors.join(' ')} ${item.series ?? ''} '
+                    '${item.tags.join(' ')}',
                   ).contains,
                 )))
           item,
@@ -529,6 +544,12 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
           SliverToBoxAdapter(
             child: _Filters(
               filter: _filter,
+              tag: _tag,
+              tags: libraryTags(library.value ?? const []),
+              onTag: (t) {
+                setState(() => _tag = t);
+                _remember();
+              },
               shelves: shelves,
               hiddenCount: hiddenCount,
               showHidden: _showHidden,
@@ -606,7 +627,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                 padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
                 sliver: SliverToBoxAdapter(
                   child: Text(
-                    _query.isNotEmpty
+                    _query.isNotEmpty || _tag != null
                         ? l10n.libraryNoMatch
                         : _filter is String
                         ? l10n.shelfEmpty
@@ -1482,6 +1503,9 @@ class _BookActionsState extends ConsumerState<_BookActions> {
 class _Filters extends StatelessWidget {
   const _Filters({
     required this.filter,
+    required this.tag,
+    required this.tags,
+    required this.onTag,
     required this.shelves,
     required this.hiddenCount,
     required this.showHidden,
@@ -1491,6 +1515,11 @@ class _Filters extends StatelessWidget {
   });
 
   final Object? filter;
+  final String? tag;
+
+  /// Every tag of the library, the most used first, with its number of books.
+  final List<(String, int)> tags;
+  final ValueChanged<String?> onTag;
   final List<Shelf> shelves;
   final int hiddenCount;
   final bool showHidden;
@@ -1537,13 +1566,19 @@ class _Filters extends StatelessWidget {
                   selected: shelf != null,
                   onTap: () => _showShelves(context),
                 );
+                final tagTab = _Tab(
+                  label: '${l10n.tagsTitle} ▾',
+                  selected: tag != null,
+                  onTap: () => _showTags(context),
+                );
                 if (box.maxWidth < 560) {
-                  return Wrap(children: [...tabs, shelves]);
+                  return Wrap(children: [...tabs, shelves, tagTab]);
                 }
                 return Row(
                   children: [
                     Expanded(child: Wrap(children: tabs)),
                     shelves,
+                    tagTab,
                   ],
                 );
               },
@@ -1582,10 +1617,50 @@ class _Filters extends StatelessWidget {
                 ],
               ),
             ),
+          if (tag case final tag?)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 10, 12, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.tagFilter(tag),
+                      overflow: TextOverflow.ellipsis,
+                      style: BabelText.heading(18),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => onTag(null),
+                    child: Text(
+                      l10n.showAll,
+                      style: BabelText.body(
+                        13,
+                        color: BabelColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
   }
+
+  void _showTags(BuildContext context) => showBabelSheet<void>(
+    context: context,
+    useRootNavigator: true,
+    isScrollControlled: true,
+    backgroundColor: BabelColors.surface,
+    builder: (context) => _TagsSheet(
+      tags: tags,
+      selected: tag,
+      onTag: (t) {
+        Navigator.pop(context);
+        onTag(t);
+      },
+    ),
+  );
 
   void _showShelves(BuildContext context) => showBabelSheet<void>(
     context: context,
@@ -1813,6 +1888,131 @@ class _KeepShelfOfflineState extends ConsumerState<_KeepShelfOffline> {
       tooltip: context.l10n.shelfKeepOffline,
       onPressed: _keep,
       icon: Icon(Icons.download_for_offline_outlined, color: BabelColors.gold),
+    );
+  }
+}
+
+/// Every tag of the library, the most used first (then by name), with its number of books.
+/// Tags are told apart whatever their case: the first spelling met is kept.
+List<(String, int)> libraryTags(List<LibraryItemResponse> items) {
+  final names = <String, String>{};
+  final counts = <String, int>{};
+  for (final item in items) {
+    final own = <String>{};
+    for (final tag in item.tags) {
+      final key = tag.toLowerCase();
+      if (!own.add(key)) continue;
+      names.putIfAbsent(key, () => tag);
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+  }
+  final keys = counts.keys.toList()
+    ..sort((a, b) {
+      final byCount = counts[b]!.compareTo(counts[a]!);
+      return byCount != 0 ? byCount : a.compareTo(b);
+    });
+  return [for (final k in keys) (names[k]!, counts[k]!)];
+}
+
+/// The tags of the library to pick one from, with a field to find one among many.
+class _TagsSheet extends StatefulWidget {
+  const _TagsSheet({
+    required this.tags,
+    required this.selected,
+    required this.onTag,
+  });
+
+  final List<(String, int)> tags;
+  final String? selected;
+  final ValueChanged<String> onTag;
+
+  @override
+  State<_TagsSheet> createState() => _TagsSheetState();
+}
+
+class _TagsSheetState extends State<_TagsSheet> {
+  String _find = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final find = _LibraryPageState._fold(_find.trim());
+    final shown = [
+      for (final (name, count) in widget.tags)
+        if (find.isEmpty || _LibraryPageState._fold(name).contains(find))
+          (name, count),
+    ];
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.8,
+        ),
+        child: ListView(
+          shrinkWrap: true,
+          padding: EdgeInsets.fromLTRB(
+            24,
+            24,
+            24,
+            16 + MediaQuery.viewInsetsOf(context).bottom,
+          ),
+          children: [
+            Text(l10n.tagsTitle, style: BabelText.title(32)),
+            const SizedBox(height: 12),
+            if (widget.tags.isEmpty)
+              Text(l10n.tagsEmpty, style: BabelText.body(14))
+            else ...[
+              if (widget.tags.length > 12) ...[
+                TextField(
+                  onChanged: (v) => setState(() => _find = v),
+                  style: BabelText.body(15, color: BabelColors.textPrimary),
+                  decoration: InputDecoration(
+                    hintText: l10n.tagsFindHint,
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: BabelColors.textSecondary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final (name, count) in shown)
+                    InkWell(
+                      borderRadius: BabelShape.radius(999),
+                      onTap: () => widget.onTag(name),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: name == widget.selected
+                                ? BabelColors.gold
+                                : BabelColors.border,
+                          ),
+                          borderRadius: BabelShape.radius(999),
+                        ),
+                        child: Text(
+                          '$name · $count',
+                          style: BabelText.body(
+                            12,
+                            color: name == widget.selected
+                                ? BabelColors.gold
+                                : null,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

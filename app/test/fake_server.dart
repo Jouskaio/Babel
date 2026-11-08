@@ -215,14 +215,15 @@ class FakeServer {
     'entries': entries,
   };
 
-  void addItem(String id, String title) => changes.add({
-    'seq': changes.length + 1,
-    'entity': 'library_item',
-    'entity_id': id,
-    'op': 'upsert',
-    'data': libraryItem(id, title),
-    'device_id': null,
-  });
+  void addItem(String id, String title, {List<String> tags = const []}) =>
+      changes.add({
+        'seq': changes.length + 1,
+        'entity': 'library_item',
+        'entity_id': id,
+        'op': 'upsert',
+        'data': {...libraryItem(id, title), 'tags': tags},
+        'device_id': null,
+      });
 
   /// A book owned on paper, without a file.
   void addPaperItem(String id, String title) => changes.add({
