@@ -205,8 +205,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             # Once at start-up: books whose title names a series the reader already has.
             try:
                 async with container.sessions() as session:
-                    count = await make_file_service(container, session).adopt_all_series()
-                logging.getLogger(__name__).info("Series adopted: %s books", count)
+                    files = make_file_service(container, session)
+                    users = await SqlUserRepository(session).list_users()
+                    repaired = await files.repair_series([u.id for u in users])
+                    count = await files.adopt_all_series()
+                logging.getLogger(__name__).info(
+                    "Series repaired: %s books, adopted: %s books", repaired, count
+                )
             except Exception:
                 logging.getLogger(__name__).exception("Series adoption failed")
 

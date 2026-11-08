@@ -88,10 +88,32 @@ List<LibraryEntry> groupLibrary(List<LibraryItemResponse> items) {
       byWork.putIfAbsent(work, () => []).add(item);
     }
   }
+  // How many pages hold a book of each series: an edition whose series another page shares
+  // (the English "Kings Rising" next to "Captive Prince", not the French "Le roi") is the one
+  // that carries its page into that series.
+  final pagesBySeries = <String, Set<String>>{};
+  for (final item in items) {
+    final series = item.series;
+    if (series != null && seriesKey(series).isNotEmpty) {
+      pagesBySeries
+          .putIfAbsent(seriesKey(series), () => {})
+          .add(item.workId ?? item.id);
+    }
+  }
+  bool sharesSeries(LibraryItemResponse item) {
+    final series = item.series;
+    return series != null &&
+        (pagesBySeries[seriesKey(series)]?.length ?? 0) > 1;
+  }
+
+  final standsFor = <String, LibraryItemResponse>{
+    for (final MapEntry(:key, :value) in byWork.entries)
+      key: value.firstWhere(sharesSeries, orElse: () => value.first),
+  };
   // One book per page goes on to the series grouping; the others ride along with it.
   final representatives = [
     for (final item in items)
-      if (item.workId == null || byWork[item.workId]!.first.id == item.id) item,
+      if (item.workId == null || standsFor[item.workId]!.id == item.id) item,
   ];
   return [
     for (final entry in groupSeries(representatives))

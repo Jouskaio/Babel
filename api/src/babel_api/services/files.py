@@ -31,7 +31,13 @@ from babel_api.domain.ports import (
     FileRepository,
     MetadataReader,
 )
-from babel_api.domain.series import guess_series, series_key, volume_number
+from babel_api.domain.series import (
+    guess_series,
+    repaired_series,
+    series_key,
+    volume_number,
+    without_series_note,
+)
 from babel_api.domain.sync import ChangeOp, EntityKind
 
 
@@ -255,9 +261,11 @@ class FileService:
         state: ReadingState,
         device_id: UUID | None = None,
     ) -> LibraryItem:
-        """A paper book from an imported reading list, with its status and dates."""
-        work = await self._files.guess_work(None, title, authors)
+        """A paper book from an imported reading list, with its status and dates. A series
+        note in the title ("Kings Rising (Captive Prince, #3)") becomes the book's series."""
         guess = guess_series(title)
+        title = without_series_note(title)
+        work = await self._files.guess_work(None, title, authors)
         item = await self._files.add_item(
             user_id,
             None,
@@ -701,6 +709,20 @@ class FileService:
         if series == item.series and number == item.series_index:
             return item
         return await self._files.update_details(item.id, {"series": series, "series_index": number})
+
+    async def repair_series(self, user_ids: list[UUID]) -> int:
+        """Once at start-up: series an older guess named after a whole Goodreads title
+        ("Kings Rising (Captive Prince") get back their own name, so the volumes meet again."""
+        changed = 0
+        for user_id in user_ids:
+            for item in await self._files.list_items(user_id):
+                name = repaired_series(item.series) if item.series else None
+                if name is None:
+                    continue
+                updated = await self._files.update_details(item.id, {"series": name[:200]})
+                await self._record(updated, None)
+                changed += 1
+        return changed
 
     async def adopt_all_series(self) -> int:
         """Once at start-up: books of the library that name a series the reader has."""

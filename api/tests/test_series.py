@@ -4,8 +4,10 @@ from babel_api.domain.series import (
     SeriesGuess,
     guess_series,
     parse_number,
+    repaired_series,
     series_key,
     volume_number,
+    without_series_note,
 )
 
 
@@ -20,6 +22,9 @@ from babel_api.domain.series import (
         ("Les Cités obscures n°4", "Les Cités obscures", 4),
         ("Harry Potter, Book 3", "Harry Potter", 3),
         ("Astérix #12", "Astérix", 12),
+        ("Kings Rising (Captive Prince, #3)", "Captive Prince", 3),
+        ("Le roi (Le Prince captif, #3)", "Le Prince captif", 3),
+        ("The Will of the Many (Hierarchy #1)", "Hierarchy", 1),
     ],
 )
 def test_series_and_volume_are_found_in_titles(title: str, series: str, number: float) -> None:
@@ -60,3 +65,16 @@ def test_numbers_and_keys() -> None:
 )
 def test_the_volume_of_a_known_series(title: str, number: float | None) -> None:
     assert volume_number(title, "Homunculus") == number
+
+
+def test_a_goodreads_series_note_leaves_the_title() -> None:
+    assert without_series_note("Kings Rising (Captive Prince, #3)") == "Kings Rising"
+    assert without_series_note("Berserk (Volume 2.5)") == "Berserk (Volume 2.5)"
+    assert without_series_note("Jane Eyre") == "Jane Eyre"
+
+
+def test_a_series_cut_from_a_goodreads_note_is_repaired() -> None:
+    assert repaired_series("Kings Rising (Captive Prince") == "Captive Prince"
+    assert repaired_series("Le roi (Le Prince captif") == "Le Prince captif"
+    assert repaired_series("Homunculus (Omnibus)") is None
+    assert repaired_series("Captive Prince") is None
