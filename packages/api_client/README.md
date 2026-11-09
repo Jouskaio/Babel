@@ -186,6 +186,7 @@ Class | Method | HTTP request | Description
 *RequestsApi* | [**linkShelfmark**](doc//RequestsApi.md#linkshelfmark) | **PUT** /v1/me/shelfmark | Link Shelfmark
 *RequestsApi* | [**listBookRequests**](doc//RequestsApi.md#listbookrequests) | **GET** /v1/requests | List Requests
 *RequestsApi* | [**requestBook**](doc//RequestsApi.md#requestbook) | **POST** /v1/requests | Request Book
+*RequestsApi* | [**searchChaptarr**](doc//RequestsApi.md#searchchaptarr) | **GET** /v1/me/chaptarr/search | Search Chaptarr
 *RequestsApi* | [**unlinkChaptarr**](doc//RequestsApi.md#unlinkchaptarr) | **DELETE** /v1/me/chaptarr | Unlink Chaptarr
 *RequestsApi* | [**unlinkShelfmark**](doc//RequestsApi.md#unlinkshelfmark) | **DELETE** /v1/me/shelfmark | Unlink Shelfmark
 *SocialApi* | [**addFriend**](doc//SocialApi.md#addfriend) | **PUT** /v1/social/friends/{handle} | Add Friend

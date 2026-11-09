@@ -16,6 +16,7 @@ Method | HTTP request | Description
 [**linkShelfmark**](RequestsApi.md#linkshelfmark) | **PUT** /v1/me/shelfmark | Link Shelfmark
 [**listBookRequests**](RequestsApi.md#listbookrequests) | **GET** /v1/requests | List Requests
 [**requestBook**](RequestsApi.md#requestbook) | **POST** /v1/requests | Request Book
+[**searchChaptarr**](RequestsApi.md#searchchaptarr) | **GET** /v1/me/chaptarr/search | Search Chaptarr
 [**unlinkChaptarr**](RequestsApi.md#unlinkchaptarr) | **DELETE** /v1/me/chaptarr | Unlink Chaptarr
 [**unlinkShelfmark**](RequestsApi.md#unlinkshelfmark) | **DELETE** /v1/me/shelfmark | Unlink Shelfmark
 
@@ -348,6 +349,59 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **searchChaptarr**
+> List<WorkSummaryResponse> searchChaptarr(q, shown, limit)
+
+Search Chaptarr
+
+Books your Chaptarr (yours, else the server's when you are premium) finds for a search that the catalog's results lack. Empty when there is no Chaptarr or it does not answer: call it after the catalog search, its results follow those.
+
+### Example
+```dart
+import 'package:babel_api_client/api.dart';
+// TODO Configure HTTP Bearer authorization: HTTPBearer
+// Case 1. Use String Token
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken('YOUR_ACCESS_TOKEN');
+// Case 2. Use Function which generate token.
+// String yourTokenGeneratorFunction() { ... }
+//defaultApiClient.getAuthentication<HttpBearerAuth>('HTTPBearer').setAccessToken(yourTokenGeneratorFunction);
+
+final api_instance = RequestsApi();
+final q = q_example; // String | 
+final shown = []; // List<String> | The works the catalog search already gave
+final limit = 56; // int | 
+
+try {
+    final result = api_instance.searchChaptarr(q, shown, limit);
+    print(result);
+} catch (e) {
+    print('Exception when calling RequestsApi->searchChaptarr: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **q** | **String**|  | 
+ **shown** | [**List<String>**](String.md)| The works the catalog search already gave | [optional] [default to const []]
+ **limit** | **int**|  | [optional] [default to 10]
+
+### Return type
+
+[**List<WorkSummaryResponse>**](WorkSummaryResponse.md)
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

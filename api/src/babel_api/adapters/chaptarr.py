@@ -4,6 +4,7 @@ Only ebooks are requested. The books it downloads land in the library folder tha
 Kavita reads, so they show up in the reader's sources after Kavita scans.
 """
 
+import hashlib
 import re
 import unicodedata
 from typing import Any, cast
@@ -75,6 +76,24 @@ def best_match(
     return volume
 
 
+def book_ref(book: dict[str, Any]) -> str:
+    """A short key that names one book Chaptarr knows (its foreignBookId, whatever its form),
+    short enough for a work key: the same book always gets the same one."""
+    return hashlib.sha256(str(book.get("foreignBookId", "")).encode()).hexdigest()[:24]
+
+
+def book_cover(book: dict[str, Any]) -> str | None:
+    """The address of the book's cover at its metadata provider, if Chaptarr gives one."""
+    remote = book.get("remoteCover")
+    if isinstance(remote, str) and remote.startswith("https://"):
+        return remote
+    for image in cast(list[dict[str, Any]], book.get("images") or []):
+        url = image.get("remoteUrl") or image.get("url")
+        if image.get("coverType") == "cover" and isinstance(url, str) and url.startswith("https"):
+            return url
+    return None
+
+
 class ChaptarrClient:
     def __init__(self, base_url: str, api_key: str, client: httpx.AsyncClient | None = None):
         self._base = base_url.strip().rstrip("/")
@@ -122,6 +141,33 @@ class ChaptarrClient:
             if match := best_match(found, title, authors):
                 return match
         return None
+
+    async def search(self, term: str, limit: int = 20) -> list[dict[str, Any]]:
+        """The books Chaptarr's metadata knows for a search, as it ranks them (no matching:
+        the reader chooses)."""
+        found = cast(list[Any], await self._call("GET", "book/lookup", params={"term": term}))
+        books = [
+            cast(dict[str, Any], b)
+            for b in found
+            if isinstance(b, dict)
+            and str(cast(dict[str, Any], b).get("title") or "").strip()
+            and cast(dict[str, Any], b).get("foreignBookId")
+        ]
+        return books[:limit]
+
+    async def find(self, ref: str, title: str, authors: tuple[str, ...]) -> dict[str, Any] | None:
+        """The very book a search showed the reader ([book_ref]), found again by its title,
+        then with its author. None when Chaptarr no longer lists it."""
+        terms = [title, *([f"{title} {authors[0]}"] if authors else [])]
+        for term in terms:
+            for book in await self.search(term, 50):
+                if book_ref(book) == ref:
+                    return book
+        return None
+
+    @property
+    def base_url(self) -> str:
+        return self._base
 
     async def _first_id(self, path: str, profile_type: str | int) -> int:
         profiles = cast(list[dict[str, Any]], await self._call("GET", path))

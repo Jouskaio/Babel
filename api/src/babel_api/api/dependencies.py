@@ -6,7 +6,7 @@ import time
 from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import timedelta
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import Depends, Header, HTTPException, Request, status
@@ -122,6 +122,10 @@ class Container:
     chaptarr_for_reader: Callable[[str, str], ChaptarrClient] | None = None
     # Sources being scanned in the background (a slow connector such as AO3).
     scanning: set[UUID] = field(default_factory=set[UUID])
+    # What readers' Chaptarrs answered to searches (see RequestService.search).
+    chaptarr_searches: dict[tuple[str, str], tuple[float, list[dict[str, Any]]]] = field(
+        default_factory=dict[tuple[str, str], tuple[float, list[dict[str, Any]]]]
+    )
     # Playlists already built (see WorkService.playlist), shared by every request.
     playlists: dict[str, tuple[float, list[SearchHit]]] = field(
         default_factory=dict[str, tuple[float, list[SearchHit]]]
@@ -546,6 +550,7 @@ def make_request_service(container: Container, session: AsyncSession) -> Request
         container.shelfmark,
         container.shelfmark_for_reader or reader_shelfmark,
         add_to_library,
+        container.chaptarr_searches,
     )
 
 

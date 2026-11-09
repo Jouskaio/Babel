@@ -385,6 +385,83 @@ class RequestsApi {
     return null;
   }
 
+  /// Search Chaptarr
+  ///
+  /// Books your Chaptarr (yours, else the server's when you are premium) finds for a search that the catalog's results lack. Empty when there is no Chaptarr or it does not answer: call it after the catalog search, its results follow those.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] q (required):
+  ///
+  /// * [List<String>] shown:
+  ///   The works the catalog search already gave
+  ///
+  /// * [int] limit:
+  Future<Response> searchChaptarrWithHttpInfo(String q, { List<String>? shown, int? limit, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/me/chaptarr/search';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+      queryParams.addAll(_queryParams('', 'q', q));
+    if (shown != null) {
+      queryParams.addAll(_queryParams('multi', 'shown', shown));
+    }
+    if (limit != null) {
+      queryParams.addAll(_queryParams('', 'limit', limit));
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Search Chaptarr
+  ///
+  /// Books your Chaptarr (yours, else the server's when you are premium) finds for a search that the catalog's results lack. Empty when there is no Chaptarr or it does not answer: call it after the catalog search, its results follow those.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] q (required):
+  ///
+  /// * [List<String>] shown:
+  ///   The works the catalog search already gave
+  ///
+  /// * [int] limit:
+  Future<List<WorkSummaryResponse>?> searchChaptarr(String q, { List<String>? shown, int? limit, }) async {
+    final response = await searchChaptarrWithHttpInfo(q,  shown: shown, limit: limit, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<WorkSummaryResponse>') as List)
+        .cast<WorkSummaryResponse>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
   /// Unlink Chaptarr
   ///
   /// Forget your Chaptarr; the books already requested stay as they are.

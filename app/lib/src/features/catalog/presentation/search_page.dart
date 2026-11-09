@@ -473,29 +473,76 @@ class _Results extends ConsumerWidget {
             : l10n.searchFailed,
         style: BabelText.body(15),
       ),
-      data: (works) => works.isEmpty
-          ? Text(l10n.noResults(query), style: BabelText.body(15))
-          : Column(
-              children: [
-                for (final entry in groupVolumes(works))
-                  if (entry.volumes.length < 2)
-                    WorkRow(
-                      work: entry.first,
-                      onTap: () {
-                        onOpen();
-                        context.push(Routes.work(entry.first.id));
-                      },
-                    )
-                  else
-                    _SagaRow(
-                      entry: entry,
-                      onOpenWork: (work) {
-                        onOpen();
-                        context.push(Routes.work(work.id));
-                      },
-                    ),
-              ],
-            ),
+      data: (works) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (works.isEmpty)
+            Text(l10n.noResults(query), style: BabelText.body(15))
+          else
+            for (final entry in groupVolumes(works))
+              if (entry.volumes.length < 2)
+                WorkRow(
+                  work: entry.first,
+                  onTap: () {
+                    onOpen();
+                    context.push(Routes.work(entry.first.id));
+                  },
+                )
+              else
+                _SagaRow(
+                  entry: entry,
+                  onOpenWork: (work) {
+                    onOpen();
+                    context.push(Routes.work(work.id));
+                  },
+                ),
+          _ChaptarrResults(
+            query: query,
+            shown: [for (final w in works) w.id].join(','),
+            onOpen: onOpen,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// What the reader's Chaptarr finds that the catalog search lacks, under its own
+/// heading once it answers; nothing at all while it searches, fails, or has none.
+class _ChaptarrResults extends ConsumerWidget {
+  const _ChaptarrResults({
+    required this.query,
+    required this.shown,
+    required this.onOpen,
+  });
+  final String query;
+  final String shown;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final found = ref.watch(
+      chaptarrResultsProvider((query: query, shown: shown)),
+    );
+    final works = found.value ?? const <WorkSummaryResponse>[];
+    if (works.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        Text(
+          context.l10n.fromYourChaptarr.toUpperCase(),
+          style: BabelText.label(10),
+        ),
+        for (final work in works)
+          WorkRow(
+            work: work,
+            onTap: () {
+              onOpen();
+              context.push(Routes.work(work.id));
+            },
+          ),
+      ],
     );
   }
 }
