@@ -40,7 +40,7 @@ def _catalog() -> list[Theme]:
 
 def test_every_listed_file_is_shipped_and_nothing_else():
     themes = _catalog()
-    assert [t.id for t in themes] == ["babel", "midnight", "herbarium", "ink", "seaside"]
+    assert [t.id for t in themes] == ["academia", "nebula", "crypt", "arabesque", "emerald"]
     for theme in themes:
         root = PLUGIN / "themes" / theme.id
         on_disk = sorted(p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file())
@@ -54,7 +54,9 @@ def test_versions_follow_the_files():
         for f in theme.files:
             digest.update(f.encode())
             digest.update((root / f).read_bytes())
-        assert theme.version == digest.hexdigest()[:12], "run scripts/koreader-themes.py again"
+        assert theme.version == digest.hexdigest()[:12], (
+            "run scripts/koreader-themes/build.mjs again"
+        )
 
 
 def test_packs_are_what_bookshelf_reads():
@@ -63,7 +65,8 @@ def test_packs_are_what_bookshelf_reads():
         manifest = json.loads((root / "theme/theme.json").read_text())
         assert manifest["name"] == theme.name
         assert manifest["shelf"] in ("light", "dark")
-        assert (root / f"{manifest['hero']}.svg").is_file()
+        assert (root / f"{manifest['hero']}.png").is_file()
+        assert (root / "theme/wallpaper.jpg").read_bytes()[:3] == b"\xff\xd8\xff"
         colours = json.loads((root / "theme/colours.json").read_text())
         for look in colours.values():
             assert all(re.fullmatch(r"#[0-9A-F]{6}", v) for v in look.values())
@@ -74,5 +77,10 @@ def test_packs_are_what_bookshelf_reads():
             heights.add(int.from_bytes(head[20:24], "big"))
         assert len(heights) == 1
         assert heights.pop() % 3 == 0
-        for svg in root.glob("*.svg"):
-            assert "viewBox" in svg.read_text()
+        for cap in ("left", "right"):
+            png = (root / f"theme/plank.{cap}.png").read_bytes()
+            # Bookshelf reads where the plank ends from a tEXt chunk right after IHDR.
+            assert png[37:41] == b"tEXt"
+            assert png[41:63] == b"bookshelf\x00plank_end=70"
+        for ornament in root.glob("*.png"):
+            assert ornament.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
