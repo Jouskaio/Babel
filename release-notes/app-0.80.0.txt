@@ -1,0 +1,2 @@
+Les livres absents du catalogue, trouvés dans votre Chaptarr, apparaissent dans la recherche
+Correctif : genres en double sur la liseuse (KOReader)
