@@ -352,7 +352,7 @@ def test_the_community_library_shows_the_title_a_reader_corrected(
 def test_the_plugin_lists_and_downloads_the_books_for_the_e_reader(
     client: TestClient, ada: dict[str, str]
 ) -> None:
-    content = epub(title="Jane Eyre", isbn=None)
+    content = epub(title="Jane Eyre", isbn=None, subjects=("Governesses -- Fiction", "Orphans"))
     item = upload(client, ada, content).json()["item"]
     password = client.post("/v1/me/koreader/password", headers=ada).json()["password"]
     key = {
@@ -364,6 +364,7 @@ def test_the_plugin_lists_and_downloads_the_books_for_the_e_reader(
     (book,) = client.get("/v1/kosync/library", headers=key).json()["books"]
     assert book["name"] == "Charlotte Brontë - Jane Eyre.epub"
     assert book["size"] == len(content)
+    assert book["tags"] == ["Governesses", "Orphans"]
     got = client.get(f"/v1/kosync/library/files/{book['sha256']}", headers=key)
     assert got.content == content
     assert client.get(f"/v1/kosync/library/files/{book['sha256']}").status_code == 401
