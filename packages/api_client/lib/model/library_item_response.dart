@@ -36,6 +36,7 @@ class LibraryItemResponse {
     this.startedAt,
     this.stateTime,
     this.status,
+    this.tags = const [],
     required this.title,
     this.workId,
   });
@@ -112,6 +113,9 @@ class LibraryItemResponse {
   ///
   ReadingStatus? status;
 
+  /// Its tags, from the subjects of its work and its file: to find it
+  List<String> tags;
+
   String title;
 
   /// The catalog work: reviews and notes are shared per work
@@ -142,6 +146,7 @@ class LibraryItemResponse {
     other.startedAt == startedAt &&
     other.stateTime == stateTime &&
     other.status == status &&
+    _deepEquality.equals(other.tags, tags) &&
     other.title == title &&
     other.workId == workId;
 
@@ -171,11 +176,12 @@ class LibraryItemResponse {
     (startedAt == null ? 0 : startedAt!.hashCode) +
     (stateTime == null ? 0 : stateTime!.hashCode) +
     (status == null ? 0 : status!.hashCode) +
+    (tags.hashCode) +
     (title.hashCode) +
     (workId == null ? 0 : workId!.hashCode);
 
   @override
-  String toString() => 'LibraryItemResponse[addedAt=$addedAt, audioDuration=$audioDuration, authors=$authors, coverId=$coverId, coverPath=$coverPath, editionId=$editionId, ereader=$ereader, filename=$filename, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, origin=$origin, paper=$paper, progress=$progress, series=$series, seriesIndex=$seriesIndex, sha256=$sha256, shared=$shared, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, title=$title, workId=$workId]';
+  String toString() => 'LibraryItemResponse[addedAt=$addedAt, audioDuration=$audioDuration, authors=$authors, coverId=$coverId, coverPath=$coverPath, editionId=$editionId, ereader=$ereader, filename=$filename, finishedAt=$finishedAt, format=$format, hidden=$hidden, id=$id, origin=$origin, paper=$paper, progress=$progress, series=$series, seriesIndex=$seriesIndex, sha256=$sha256, shared=$shared, size=$size, startedAt=$startedAt, stateTime=$stateTime, status=$status, tags=$tags, title=$title, workId=$workId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -266,6 +272,7 @@ class LibraryItemResponse {
     } else {
       json[r'status'] = null;
     }
+      json[r'tags'] = this.tags;
       json[r'title'] = this.title;
     if (this.workId != null) {
       json[r'work_id'] = this.workId;
@@ -325,6 +332,9 @@ class LibraryItemResponse {
         startedAt: mapDateTime(json, r'started_at', r''),
         stateTime: mapDateTime(json, r'state_time', r''),
         status: ReadingStatus.fromJson(json[r'status']),
+        tags: json[r'tags'] is Iterable
+            ? (json[r'tags'] as Iterable).cast<String>().toList(growable: false)
+            : const [],
         title: mapValueOfType<String>(json, r'title')!,
         workId: mapValueOfType<String>(json, r'work_id'),
       );

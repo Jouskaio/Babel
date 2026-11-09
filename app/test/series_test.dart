@@ -172,6 +172,28 @@ void main() {
     },
   );
 
+  test('a page whose first edition names its series in another language still joins it', () {
+    LibraryItemResponse tied(String id, String work, String? series, num n) =>
+        LibraryItemResponse.fromJson({
+          ...libraryItem(id, id),
+          'work_id': work,
+          'series': series,
+          'series_index': n,
+        })!;
+    final entries = groupLibrary([
+      tied('Le roi', 'w-3', 'Le Prince captif', 3),
+      tied('Kings Rising', 'w-3', 'Captive Prince', 3),
+      tied("Prince's Gambit", 'w-2', 'Captive Prince', 2),
+      tied('Captive Prince', 'w-1', 'Captive Prince', 1),
+    ]);
+    expect(entries, hasLength(1));
+    expect((entries.single as SeriesGroup).items.map((i) => i.id), [
+      'Captive Prince',
+      "Prince's Gambit",
+      'Kings Rising',
+    ]);
+  });
+
   testWidgets(
     'a reloaded library reopens its series, and a volume opens above it',
     (tester) async {

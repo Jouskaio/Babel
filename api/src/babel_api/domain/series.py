@@ -9,6 +9,10 @@ _EXPLICIT = re.compile(
     rf"^(?P<series>.+?)[\s,:;\-–—(]+{_WORD}\.?\s*(?P<number>\d{{1,4}}(?:[.,]\d)?)\b\)?(?P<rest>.*)$",
     re.IGNORECASE,
 )
+# "Kings Rising (Captive Prince, #3)": Goodreads and StoryGraph put the series after the title.
+_NOTE = re.compile(
+    r"^(?P<title>.+?)\s*\((?P<series>[^()]+?)[\s,;:]*#\s*(?P<number>\d{1,4}(?:[.,]\d)?)\)$"
+)
 # "Homunculus 3": a plain number closing the title.
 _TRAILING = re.compile(r"^(?P<series>.+?)\s+(?P<number>\d{1,3})$")
 # Titles that merely contain a number: years, "Fahrenheit 451".
@@ -42,6 +46,12 @@ def guess_series(title: str) -> SeriesGuess | None:
     text = " ".join(title.split())
     if not text:
         return None
+    note = _NOTE.match(text)
+    if note:
+        series = note["series"].strip(" ,:;-–—")
+        number = parse_number(note["number"])
+        if len(series) >= 2 and number is not None:
+            return SeriesGuess(series, number)
     explicit = _EXPLICIT.match(text)
     if explicit:
         series = explicit["series"].strip(" ,:;-–—(")
@@ -63,6 +73,24 @@ def guess_series(title: str) -> SeriesGuess | None:
         ):
             return SeriesGuess(series, number)
     return None
+
+
+def without_series_note(title: str) -> str:
+    """A title without the series note Goodreads adds: "Kings Rising (Captive Prince, #3)"
+    is "Kings Rising"."""
+    text = " ".join(title.split())
+    note = _NOTE.match(text)
+    return note["title"].strip() if note else text
+
+
+def repaired_series(series: str) -> str | None:
+    """The series' name an older guess cut from a Goodreads note: "Kings Rising (Captive
+    Prince" is "Captive Prince". None when the name has no such unclosed bracket."""
+    head, bracket, tail = series.rpartition("(")
+    if not bracket or not head.strip() or ")" in tail:
+        return None
+    name = tail.strip(" ,:;-–—")
+    return name if len(name) >= 2 else None
 
 
 _AFTER_SERIES = re.compile(

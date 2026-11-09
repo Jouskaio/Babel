@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.elements import ColumnElement
 
 from babel_api.adapters.db.models import (
+    AnnotationRow,
     BlockedFileRow,
     CommunityReportRow,
     EditionRow,
@@ -91,6 +92,7 @@ def _to_item(row: LibraryItemRow) -> LibraryItem:
         cover_id=row.cover_id,
         custom_cover=row.custom_cover,
         origin=row.origin,
+        work_subjects=tuple(row.work.subjects or ()) if row.work else (),
     )
 
 
@@ -528,6 +530,34 @@ class SqlFileRepository:
         await self._session.execute(delete(ShelfItemRow).where(ShelfItemRow.item_id == item_id))
         row = await self._session.get_one(LibraryItemRow, item_id)
         row.removed_at = at
+        await self._session.flush()
+
+    async def delete_item(self, item_id: UUID) -> list[UUID]:
+        """Gone for good with everything about it: positions, shelves, review, follow-up
+        (by cascade) and the reader's highlights and notes in its file, whose ids come back."""
+        row = await self._session.get_one(LibraryItemRow, item_id)
+        notes = AnnotationRow.item_id == item_id
+        if row.file_sha256 is not None:
+            notes = or_(notes, AnnotationRow.file_sha256 == row.file_sha256)
+        mine = and_(AnnotationRow.user_id == row.user_id, notes)
+        deleted = list(await self._session.scalars(select(AnnotationRow.id).where(mine)))
+        await self._session.execute(delete(AnnotationRow).where(mine))
+        await self._session.execute(delete(LibraryItemRow).where(LibraryItemRow.id == item_id))
+        await self._session.flush()
+        return deleted
+
+    async def has_other_readers(self, sha256: str, user_id: UUID) -> bool:
+        """Whether another reader has (or had, and may add again) this file."""
+        found = await self._session.scalar(
+            select(LibraryItemRow.id)
+            .where(LibraryItemRow.file_sha256 == sha256, LibraryItemRow.user_id != user_id)
+            .limit(1)
+        )
+        return found is not None
+
+    async def delete_file(self, sha256: str) -> None:
+        """Forgets a stored file (its bytes are deleted by the caller)."""
+        await self._session.execute(delete(StoredFileRow).where(StoredFileRow.sha256 == sha256))
         await self._session.flush()
 
     async def restore_item(self, item_id: UUID, at: datetime) -> LibraryItem:

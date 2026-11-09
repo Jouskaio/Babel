@@ -31,7 +31,13 @@ from babel_api.domain.ports import (
     FileRepository,
     MetadataReader,
 )
-from babel_api.domain.series import guess_series, series_key, volume_number
+from babel_api.domain.series import (
+    guess_series,
+    repaired_series,
+    series_key,
+    volume_number,
+    without_series_note,
+)
 from babel_api.domain.sync import ChangeOp, EntityKind
 
 
@@ -77,6 +83,7 @@ def item_data(item: LibraryItem) -> dict[str, Any]:
         "work_id": str(item.work_id) if item.work_id else None,
         "origin": item.origin,
         "filename": book_filename(item) if item.file else None,
+        "tags": list(item.tags),
     }
 
 
@@ -255,9 +262,11 @@ class FileService:
         state: ReadingState,
         device_id: UUID | None = None,
     ) -> LibraryItem:
-        """A paper book from an imported reading list, with its status and dates."""
-        work = await self._files.guess_work(None, title, authors)
+        """A paper book from an imported reading list, with its status and dates. A series
+        note in the title ("Kings Rising (Captive Prince, #3)") becomes the book's series."""
         guess = guess_series(title)
+        title = without_series_note(title)
+        work = await self._files.guess_work(None, title, authors)
         item = await self._files.add_item(
             user_id,
             None,
@@ -548,6 +557,43 @@ class FileService:
         )
         await self._files.commit()
 
+    async def delete_forever(
+        self, user_id: UUID, item_id: UUID, device_id: UUID | None = None
+    ) -> bool:
+        """Deletes a book for good: it leaves the library with its status, review, notes,
+        highlights and positions, which do not come back if the file is added again. Its
+        file is deleted from Babel too unless another reader has it. Whether the file was
+        deleted."""
+        item = await self._files.get_item(item_id) or await self._removed_item(user_id, item_id)
+        if item is None or item.user_id != user_id:
+            raise NotFoundError
+        sha256 = item.sha256
+        for note in await self._files.delete_item(item_id):
+            await self._changes.record(
+                user_id, EntityKind.ANNOTATION, str(note), ChangeOp.DELETE, device_id=device_id
+            )
+        await self._changes.record(
+            user_id, EntityKind.LIBRARY_ITEM, str(item_id), ChangeOp.DELETE, device_id=device_id
+        )
+        delete_file = sha256 is not None and not await self._files.has_other_readers(
+            sha256, user_id
+        )
+        if sha256 is not None and delete_file:
+            path = self._store.path(sha256)
+            await self._files.delete_file(sha256)
+            await self._files.commit()
+            if self._exporter is not None and path is not None:
+                await asyncio.to_thread(self._exporter.forget, path)
+            await self._store.delete(sha256)
+            self._covers.forget(sha256)
+        else:
+            await self._files.commit()
+        return delete_file
+
+    async def _removed_item(self, user_id: UUID, item_id: UUID) -> LibraryItem | None:
+        """A book the reader took out of their library (its data is still kept)."""
+        return next((i for i in await self._files.all_items(user_id) if i.id == item_id), None)
+
     async def cover(self, sha256: str) -> tuple[Path, str]:
         """The cover found in a stored file, extracted once then cached."""
         file = await self._files.get_file(sha256)
@@ -701,6 +747,20 @@ class FileService:
         if series == item.series and number == item.series_index:
             return item
         return await self._files.update_details(item.id, {"series": series, "series_index": number})
+
+    async def repair_series(self, user_ids: list[UUID]) -> int:
+        """Once at start-up: series an older guess named after a whole Goodreads title
+        ("Kings Rising (Captive Prince") get back their own name, so the volumes meet again."""
+        changed = 0
+        for user_id in user_ids:
+            for item in await self._files.list_items(user_id):
+                name = repaired_series(item.series) if item.series else None
+                if name is None:
+                    continue
+                updated = await self._files.update_details(item.id, {"series": name[:200]})
+                await self._record(updated, None)
+                changed += 1
+        return changed
 
     async def adopt_all_series(self) -> int:
         """Once at start-up: books of the library that name a series the reader has."""

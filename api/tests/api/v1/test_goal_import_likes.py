@@ -1,10 +1,14 @@
 """Yearly goal, reading-list import, likes and comments on reviews."""
 
+import asyncio
 import uuid
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from babel_api.adapters.db.repositories import SqlUserRepository
+from babel_api.api.dependencies import Container, make_file_service
 from tests.api.v1.test_library import account, upload
 from tests.api.v1.test_social import befriend, handle
 from tests.books import epub
@@ -80,6 +84,22 @@ def test_a_french_semicolon_export_is_understood(client: TestClient, ada: dict[s
     assert books["Homunculus 3"]["series"] == "Homunculus"
 
 
+def test_a_goodreads_series_note_makes_one_series(client: TestClient, ada: dict[str, str]) -> None:
+    content = (
+        "Book Id,Title,Author,Exclusive Shelf\n"
+        '1,"Captive Prince (Captive Prince, #1)",C.S. Pacat,read\n'
+        '2,"Prince\'s Gambit (Captive Prince, #2)",C.S. Pacat,read\n'
+        '3,"Kings Rising (Captive Prince, #3)",C.S. Pacat,read\n'
+    )
+    assert csv_import(client, ada, content).json()["imported"] == 3
+    books = {b["title"]: b for b in client.get("/v1/library", headers=ada).json()}
+    assert {t: (b["series"], b["series_index"]) for t, b in books.items()} == {
+        "Captive Prince": ("Captive Prince", 1),
+        "Prince's Gambit": ("Captive Prince", 2),
+        "Kings Rising": ("Captive Prince", 3),
+    }
+
+
 def test_a_file_that_is_no_reading_list_is_refused(client: TestClient, ada: dict[str, str]) -> None:
     assert csv_import(client, ada, "name,value\na,1\n").status_code == 415
     assert csv_import(client, ada, "").status_code == 415
@@ -144,3 +164,23 @@ def test_reviews_are_liked_and_commented_by_those_who_can_see_them(
         == 204
     )
     assert client.get(f"/v1/social/reviews/{emma}/comments", headers=ada).json() == []
+
+
+def test_a_series_an_older_import_cut_badly_is_repaired(
+    app: FastAPI, client: TestClient, ada: dict[str, str]
+) -> None:
+    content = "Book Id,Title,Author,Exclusive Shelf\n1,Kings Rising,C.S. Pacat,read\n"
+    csv_import(client, ada, content)
+    book = client.get("/v1/library", headers=ada).json()[0]
+    url = f"/v1/library/{book['id']}"
+    client.patch(url, json={"series": "Kings Rising (Captive Prince"}, headers=ada)
+    container: Container = app.state.container
+
+    async def repair() -> int:
+        async with container.sessions() as session:
+            users = await SqlUserRepository(session).list_users()
+            return await make_file_service(container, session).repair_series([u.id for u in users])
+
+    assert asyncio.run(repair()) == 1
+    assert client.get("/v1/library", headers=ada).json()[0]["series"] == "Captive Prince"
+    assert asyncio.run(repair()) == 0

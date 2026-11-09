@@ -47,6 +47,7 @@ doc/ConnectorRequest.md
 doc/ConnectorStatus.md
 doc/CreateSourceRequest.md
 doc/CsvImportResponse.md
+doc/DeleteForeverResponse.md
 doc/DeviceKind.md
 doc/DeviceResponse.md
 doc/DiscoverApi.md
@@ -258,6 +259,7 @@ lib/model/connector_request.dart
 lib/model/connector_status.dart
 lib/model/create_source_request.dart
 lib/model/csv_import_response.dart
+lib/model/delete_forever_response.dart
 lib/model/device_kind.dart
 lib/model/device_response.dart
 lib/model/edition_response.dart

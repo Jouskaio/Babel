@@ -1403,5 +1403,10 @@
   "importWhyTooBig": "file too large for the server",
   "importWhyBusy": "the server did not answer in time (large file or busy server)",
   "importWhyOther": "refused by the server (code {code})",
-  "@importWhyOther": {"placeholders": {"code": {"type": "int"}}}
+  "@importWhyOther": {"placeholders": {"code": {"type": "int"}}},
+  "deleteForever": "Delete for good",
+  "deleteForeverAsk": "Delete “{title}” for good?",
+  "deleteForeverBody": "The book leaves your library with your progress, notes, highlights and review: none of it can be brought back. Its file is deleted from the server too, unless other readers have it.",
+  "deletedForever": "“{title}” was deleted for good, file included.",
+  "deletedForeverShared": "“{title}” was deleted from your account. Other readers have it: its file stays on the server for them."
 }

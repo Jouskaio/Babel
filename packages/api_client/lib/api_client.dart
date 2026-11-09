@@ -260,6 +260,8 @@ class ApiClient {
           return CreateSourceRequest.fromJson(value);
         case 'CsvImportResponse':
           return CsvImportResponse.fromJson(value);
+        case 'DeleteForeverResponse':
+          return DeleteForeverResponse.fromJson(value);
         case 'DeviceKind':
           return DeviceKindTypeTransformer().decode(value);
         case 'DeviceResponse':

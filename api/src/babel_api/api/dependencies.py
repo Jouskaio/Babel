@@ -58,11 +58,12 @@ from babel_api.domain.ports import (
     SourceConnector,
 )
 from babel_api.domain.sources import EntryStatus, SourceEntry, SourceKind
+from babel_api.domain.sync import ChangeOp, EntityKind
 from babel_api.domain.users import IdentityProvider
 from babel_api.services.audiobooks import AbsService
 from babel_api.services.auth import AuthService
 from babel_api.services.catalog import CatalogService
-from babel_api.services.files import FileService
+from babel_api.services.files import FileService, item_data
 from babel_api.services.follows import FollowService
 from babel_api.services.imports import ImportService
 from babel_api.services.kavita import KavitaProvisioner, KavitaService
@@ -622,6 +623,50 @@ async def link_covers(container: Container, user_id: UUID) -> None:
     if len(todo) == COVER_BATCH:
         # More books wait: look again soon rather than in six hours.
         _covers_checked[user_id] = time.monotonic() - COVER_RECHECK_SECONDS + 300
+
+
+# Readers whose tags were last brought up to date on their devices (monotonic seconds).
+_tags_checked: dict[UUID, float] = {}
+TAGS_RECHECK_SECONDS = 6 * 3600
+SUBJECTS_BATCH = 25
+
+
+def tags_due(user_id: UUID) -> bool:
+    """Whether to bring a reader's tags up to date now (not too often)."""
+    last = _tags_checked.get(user_id)
+    return last is None or time.monotonic() - last > TAGS_RECHECK_SECONDS
+
+
+async def update_tags(container: Container, user_id: UUID) -> None:
+    """Background task: devices keep the library as the change log last wrote it, and books
+    written there before they had tags (or whose subjects were read since) would never get
+    any. Reads the subjects of files stored before they were kept (a batch at a time), then
+    writes again the books whose tags changed."""
+    _tags_checked[user_id] = time.monotonic()
+    try:
+        async with container.sessions() as session:
+            files = make_file_service(container, session)
+            items = await files.library(user_id)
+            unread = [i.file for i in items if i.file is not None and i.file.subjects is None]
+            for file in unread[:SUBJECTS_BATCH]:
+                await files.file_subjects(file)
+            if unread:
+                items = await files.library(user_id)
+            sync = SqlSyncRepository(session)
+            written = await sync.latest_data(user_id, EntityKind.LIBRARY_ITEM)
+            for item in items:
+                data = item_data(item)
+                last = written.get(str(item.id))
+                if last is not None and last.get("tags") != data["tags"]:
+                    await sync.record(
+                        user_id, EntityKind.LIBRARY_ITEM, str(item.id), ChangeOp.UPSERT, data
+                    )
+            await sync.commit()
+            if len(unread) > SUBJECTS_BATCH:
+                # More files wait: look again soon rather than in six hours.
+                _tags_checked[user_id] = time.monotonic() - TAGS_RECHECK_SECONDS + 60
+    except Exception:
+        logging.getLogger(__name__).exception("Updating tags of %s failed", user_id)
 
 
 async def run_source_scan(container: Container, user_id: UUID, source_id: UUID) -> None:

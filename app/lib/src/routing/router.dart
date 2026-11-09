@@ -149,6 +149,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                 builder: (_, state) => LibraryPage(
                   filter: state.uri.queryParameters['filter'],
                   query: state.uri.queryParameters['q'],
+                  tag: state.uri.queryParameters['tag'],
                   series: state.uri.queryParameters['series'],
                 ),
               ),

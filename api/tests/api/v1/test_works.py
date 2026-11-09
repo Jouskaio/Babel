@@ -732,6 +732,72 @@ def test_series_are_recognised_whatever_the_extras_around_their_name() -> None:
     )
 
 
+def test_the_oz_books_are_the_oz_saga() -> None:
+    from typing import Any
+
+    from babel_api.adapters.hardcover import pick_series
+
+    def search(*docs: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "ids": [100 + n for n in range(len(docs))],
+            "results": {"hits": [{"document": d} for d in docs]},
+        }
+
+    baum = {"name": "The Oz Books", "author_name": "L. Frank Baum", "readers_count": 900}
+    thompson = {"name": "Oz", "author_name": "Ruth Plumly Thompson", "readers_count": 40}
+    assert pick_series(search(thompson, baum), "Oz", "L. Frank Baum") == 101
+    assert pick_series(search(thompson, baum), "The Oz Books", "Frank Baum") == 101
+    assert pick_series(search(thompson, baum), "Oz", None) == 101  # both "oz": most readers
+
+
+def test_a_series_buried_under_the_author_is_found_by_its_name_alone() -> None:
+    import asyncio
+    import json
+
+    asked: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        if "search" in body["query"]:
+            asked.append(body["variables"]["q"])
+            doc = (
+                {"name": "The Oz Books", "author_name": "L. Frank Baum"}
+                if body["variables"]["q"] == "Oz"
+                else {"name": "L. Frank Baum Collection", "author_name": "Various"}
+            )
+            hits = {"hits": [{"document": doc}]}
+            return httpx.Response(200, json={"data": {"search": {"ids": [9], "results": hits}}})
+        links = [
+            {"position": 1, "book": {"id": 1, "title": "The Wonderful Wizard of Oz"}},
+            {"position": 2, "book": {"id": 2, "title": "The Marvelous Land of Oz"}},
+        ]
+        return httpx.Response(200, json={"data": {"series": [{"book_series": links}]}})
+
+    found = asyncio.run(_hardcover(handler).series_volumes("Oz", "L. Frank Baum"))
+    assert asked == ["Oz L. Frank Baum", "Oz"]
+    assert found == [(1.0, "The Wonderful Wizard of Oz", 1), (2.0, "The Marvelous Land of Oz", 2)]
+
+
+def test_an_oz_volume_only_hardcover_knows_is_requested_from_chaptarr(
+    client: TestClient, chaptarr: FakeChaptarr, books: FakeBooks
+) -> None:
+    from tests.api.v1.test_library import account
+
+    chaptarr.known = [
+        {"title": "The Annotated Wizard of Oz", "author": {"authorName": "Michael Patrick Hearn"}},
+        {"title": "The Marvelous Land of Oz (Oz, #2)", "author": {"authorName": "L. Frank Baum"}},
+    ]
+    admin = account(client, "admin@example.com")
+    body = {"hardcover_id": 2, "title": "The Marvelous Land of Oz", "author": "L. Frank Baum"}
+    work = client.post("/v1/catalog/works/hardcover", json=body, headers=admin).json()
+
+    response = client.post("/v1/requests", json={"work_id": work["id"]}, headers=admin)
+    assert response.status_code == 201
+    assert [b["title"] for b in chaptarr.added] == ["The Marvelous Land of Oz (Oz, #2)"]
+    listed = client.get("/v1/requests", headers=admin).json()["items"]
+    assert [i["status"] for i in listed] == ["requested"]
+
+
 def test_a_volume_only_hardcover_knows_becomes_a_work_you_can_open(
     client: TestClient, books: FakeBooks, auth: dict[str, str]
 ) -> None:

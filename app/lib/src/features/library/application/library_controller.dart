@@ -6,7 +6,9 @@ import 'package:cross_file/cross_file.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sembast/sembast.dart';
 
+import '../../../core/api/api_providers.dart';
 import '../../../core/files/file_transfer.dart';
+import '../../../core/files/save_file.dart';
 import '../../../core/storage/local_database.dart';
 import '../../../core/sync/sync_engine.dart';
 
@@ -77,5 +79,50 @@ class LibraryController extends StreamNotifier<List<LibraryItemResponse>> {
           entityId: item.id,
           op: ChangeOp.delete,
         );
+  }
+
+  /// Deletes a book for good (this needs the network): its status, review, notes,
+  /// highlights and positions go with it, and its file too unless another reader has it.
+  /// Whether the file was deleted from the server.
+  Future<bool> deleteForever(LibraryItemResponse item) async {
+    final result = await ref
+        .read(libraryApiProvider)
+        .deleteBookForever(item.id);
+    final db = await ref.read(localDatabaseProvider.future);
+    if (db != null) {
+      await db.transaction((txn) async {
+        await LocalStores.library.record(item.id).delete(txn);
+        await LocalStores.positions.delete(
+          txn,
+          finder: Finder(filter: Filter.equals('item_id', item.id)),
+        );
+        await LocalStores.annotations.delete(
+          txn,
+          finder: Finder(
+            filter: Filter.or([
+              Filter.equals('item_id', item.id),
+              if (item.sha256 case final sha256?)
+                Filter.equals('file_sha256', sha256),
+            ]),
+          ),
+        );
+      });
+    }
+    // The copy kept on this device to read offline, in the background: the book is
+    // gone either way.
+    if ((item.sha256, item.format?.value) case (final sha256?, final format?)) {
+      unawaited(_deleteLocalCopy(sha256, format));
+    }
+    unawaited(reload());
+    return result?.fileDeleted ?? false;
+  }
+
+  static Future<void> _deleteLocalCopy(String sha256, String format) async {
+    try {
+      await deleteLocalBook(sha256, format);
+      if (format == 'cbr') await deleteLocalBook(sha256, 'cbz');
+    } on Object {
+      // No local storage here (tests, some platforms): nothing to delete.
+    }
   }
 }

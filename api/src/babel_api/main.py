@@ -205,8 +205,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             # Once at start-up: books whose title names a series the reader already has.
             try:
                 async with container.sessions() as session:
-                    count = await make_file_service(container, session).adopt_all_series()
-                logging.getLogger(__name__).info("Series adopted: %s books", count)
+                    files = make_file_service(container, session)
+                    users = await SqlUserRepository(session).list_users()
+                    repaired = await files.repair_series([u.id for u in users])
+                    count = await files.adopt_all_series()
+                logging.getLogger(__name__).info(
+                    "Series repaired: %s books, adopted: %s books", repaired, count
+                )
             except Exception:
                 logging.getLogger(__name__).exception("Series adoption failed")
 
@@ -246,17 +251,26 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             )
         )
         yield
-        refresh_task.cancel()
-        series_task.cancel()
-        if export_task is not None:
-            export_task.cancel()
-        if watch_task is not None:
-            watch_task.cancel()
+        tasks = [
+            task
+            for task in (
+                refresh_task,
+                series_task,
+                export_task,
+                watch_task,
+                follow_task,
+                subscription_task,
+            )
+            if task is not None
+        ]
+        for task in tasks:
+            task.cancel()
         kavita.cancel()
-        if follow_task is not None:
-            follow_task.cancel()
-        if subscription_task is not None:
-            subscription_task.cancel()
+        # Wait for the cancelled tasks to unwind: a task cut while it holds a database
+        # session must close it now, not while the event loop shuts down (aiosqlite then
+        # waits forever and the process never exits).
+        await asyncio.gather(*tasks, return_exceptions=True)
+        await kavita.wait()
         await mailer.drain()
         await pusher.aclose()
         await open_library.aclose()

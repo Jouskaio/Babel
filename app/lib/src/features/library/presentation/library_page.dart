@@ -20,6 +20,7 @@ import '../../../core/theme/babel_text.dart';
 import '../../../core/widgets/babel_sheet.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/pill_button.dart';
+import '../../../core/widgets/search_suggestions.dart';
 import '../../../l10n.dart';
 import '../../../routing/router.dart';
 import '../../audiobooks/application/audiobooks_providers.dart';
@@ -37,12 +38,19 @@ import 'series_sheet.dart';
 
 /// The reader's library (design: Penpot "screen / bibliotheque").
 class LibraryPage extends ConsumerStatefulWidget {
-  const LibraryPage({this.filter, this.query, this.series, super.key});
+  const LibraryPage({
+    this.filter,
+    this.query,
+    this.tag,
+    this.series,
+    super.key,
+  });
 
   /// Where the page was left, from its address, so a reload comes back to the same place:
-  /// a reading status or a shelf, a search, a series whose sheet was open.
+  /// a reading status or a shelf, a search, a tag, a series whose sheet was open.
   final String? filter;
   final String? query;
+  final String? tag;
   final String? series;
 
   @override
@@ -59,6 +67,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   final _search = TextEditingController();
   String _query = '';
 
+  /// A tag picked among the suggestions: only its books are shown.
+  String? _tag;
+
   /// The series sheet to reopen once the books are loaded (after a reload).
   String? _pendingSeries;
 
@@ -67,6 +78,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     super.initState();
     _filter = ReadingStatus.fromJson(widget.filter) ?? widget.filter;
     _query = widget.query ?? '';
+    _tag = widget.tag;
     _search.text = _query;
     _pendingSeries = widget.series;
     // A file shared to Babel before the library was shown.
@@ -80,6 +92,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       if (filter is ReadingStatus) 'filter': filter.value,
       if (filter is String) 'filter': filter,
       if (_query.isNotEmpty) 'q': _query,
+      'tag': ?_tag,
     };
     GoRouter.maybeOf(context)?.replace<void>(
       Uri(
@@ -102,18 +115,73 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     super.dispose();
   }
 
-  /// Lower case without accents, so "emily bronte" finds "Emily Brontë".
-  static String _fold(String text) {
-    const from = 'àáâãäåçèéêëìíîïñòóôõöùúûüýÿœæ';
-    const to = 'aaaaaaceeeeiiiinooooouuuuyyoa';
-    final lower = text.toLowerCase();
-    return String.fromCharCodes([
-      for (final c in lower.runes)
-        if (from.indexOf(String.fromCharCode(c)) case final i when i >= 0)
-          to.codeUnitAt(i)
-        else
-          c,
-    ]);
+  static String _fold(String text) => foldForSearch(text);
+
+  /// What to propose under the search bar: the library's tags, authors, series and
+  /// titles that match what is typed.
+  List<SearchSuggestion> _suggestions(
+    String text,
+    List<LibraryItemResponse> all,
+  ) {
+    final l10n = context.l10n;
+    final typed = text.trim();
+    final onlyTags = typed.startsWith('#');
+    final query = onlyTags ? typed.substring(1) : typed;
+    if (query.isEmpty && !onlyTags) return const [];
+    final books = [
+      for (final item in all)
+        if (_showHidden || item.hidden != true) item,
+    ];
+    final tagCounts = <String, (String, int)>{};
+    for (final item in books) {
+      for (final tag in item.tags) {
+        final key = _fold(tag);
+        final (name, count) = tagCounts[key] ?? (tag, 0);
+        tagCounts[key] = (name, count + 1);
+      }
+    }
+    // The most used tags first.
+    final tags = [
+      for (final (name, count)
+          in tagCounts.values.toList()..sort((a, b) => b.$2 - a.$2))
+        SearchSuggestion(
+          name,
+          Icons.sell_outlined,
+          detail: l10n.libraryCount(count).toLowerCase(),
+          value: name,
+        ),
+    ];
+    // "#" alone lists the tags; "#fan" only looks among them.
+    if (onlyTags) {
+      return query.isEmpty
+          ? tags.take(8).toList()
+          : rankSuggestions(tags, query);
+    }
+    return rankSuggestions([
+      ...tags,
+      for (final item in books)
+        for (final author in item.authors)
+          SearchSuggestion(author, Icons.person_outline),
+      for (final item in books)
+        if (item.series case final series?)
+          SearchSuggestion(series, Icons.collections_bookmark_outlined),
+      for (final item in books)
+        SearchSuggestion(item.title, Icons.menu_book_outlined),
+    ], query);
+  }
+
+  void _pick(SearchSuggestion suggestion) {
+    if (suggestion.value case final String tag) {
+      // A tag filters the books; the field is free again for words.
+      _search.clear();
+      setState(() {
+        _tag = tag;
+        _query = '';
+      });
+    } else {
+      setState(() => _query = suggestion.text);
+    }
+    _remember();
   }
 
   Future<void> _newShelf() async {
@@ -132,13 +200,16 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   ) {
     final filter = _filter;
     final words = _fold(_query).split(' ').where((w) => w.isNotEmpty).toList();
+    final tag = _tag == null ? null : _fold(_tag!);
     final shown = [
       for (final item in items)
         if ((_showHidden || item.hidden != true) &&
+            (tag == null || item.tags.any((t) => _fold(t) == tag)) &&
             (words.isEmpty ||
                 words.every(
                   _fold(
-                    '${item.title} ${item.authors.join(' ')} ${item.series ?? ''}',
+                    '${item.title} ${item.authors.join(' ')} ${item.series ?? ''} '
+                    '${item.tags.join(' ')}',
                   ).contains,
                 )))
           item,
@@ -496,33 +567,69 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
             sliver: SliverToBoxAdapter(
-              child: TextField(
-                controller: _search,
-                onChanged: (value) {
-                  setState(() => _query = value);
-                  _remember();
-                },
-                style: BabelText.body(15, color: BabelColors.textPrimary),
-                decoration: InputDecoration(
-                  hintText: l10n.librarySearchHint,
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: BabelColors.textSecondary,
-                  ),
-                  suffixIcon: _query.isEmpty
-                      ? null
-                      : IconButton(
-                          icon: Icon(
-                            Icons.close,
-                            color: BabelColors.textSecondary,
-                          ),
-                          onPressed: () {
-                            _search.clear();
-                            setState(() => _query = '');
-                            _remember();
-                          },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SuggestingSearchField(
+                    controller: _search,
+                    suggestions: (text) => _suggestions(text, all),
+                    onSelected: _pick,
+                    fieldBuilder: (context, controller, focusNode) => TextField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      onChanged: (value) {
+                        setState(() => _query = value);
+                        _remember();
+                      },
+                      style: BabelText.body(15, color: BabelColors.textPrimary),
+                      decoration: InputDecoration(
+                        hintText: l10n.librarySearchHint,
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: BabelColors.textSecondary,
                         ),
-                ),
+                        suffixIcon: _query.isEmpty
+                            ? null
+                            : IconButton(
+                                icon: Icon(
+                                  Icons.close,
+                                  color: BabelColors.textSecondary,
+                                ),
+                                onPressed: () {
+                                  _search.clear();
+                                  setState(() => _query = '');
+                                  _remember();
+                                },
+                              ),
+                      ),
+                    ),
+                  ),
+                  if (_tag case final tag?)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: InputChip(
+                        avatar: Icon(
+                          Icons.sell_outlined,
+                          size: 16,
+                          color: BabelColors.gold,
+                        ),
+                        label: Text(
+                          tag,
+                          style: BabelText.body(
+                            13,
+                            color: BabelColors.textPrimary,
+                          ),
+                        ),
+                        backgroundColor: BabelColors.surface,
+                        side: BorderSide(color: BabelColors.gold),
+                        shape: const StadiumBorder(),
+                        onDeleted: () {
+                          setState(() => _tag = null);
+                          _remember();
+                        },
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -1172,6 +1279,40 @@ class _BookActionsState extends ConsumerState<_BookActions> {
     );
   }
 
+  Future<void> _deleteForever() async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final item = widget.item;
+    if (!await _confirm(
+      l10n.deleteForeverAsk(item.title),
+      l10n.deleteForeverBody,
+      l10n.deleteForever,
+    )) {
+      return;
+    }
+    if (!mounted) return;
+    final navigator = Navigator.of(context);
+    setState(() => _progress = 0);
+    try {
+      final fileDeleted = await ref
+          .read(libraryControllerProvider.notifier)
+          .deleteForever(item);
+      navigator.pop();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            fileDeleted
+                ? l10n.deletedForever(item.title)
+                : l10n.deletedForeverShared(item.title),
+          ),
+        ),
+      );
+    } on Object {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.errorNetwork)));
+      if (mounted) setState(() => _progress = null);
+    }
+  }
+
   Future<void> _hide() async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
@@ -1470,6 +1611,18 @@ class _BookActionsState extends ConsumerState<_BookActions> {
               l10n.removeKeepsData,
               textAlign: TextAlign.center,
               style: BabelText.body(11),
+            ),
+            TextButton.icon(
+              onPressed: _progress == null ? _deleteForever : null,
+              icon: Icon(
+                Icons.delete_forever_outlined,
+                size: 18,
+                color: BabelColors.dustyRose,
+              ),
+              label: Text(
+                l10n.deleteForever,
+                style: BabelText.body(13, color: BabelColors.dustyRose),
+              ),
             ),
           ],
         ),
