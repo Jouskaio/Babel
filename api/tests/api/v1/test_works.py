@@ -306,7 +306,7 @@ class FakeChaptarr:
     """Chaptarr's side: what it knows, what was added, and whether files arrived."""
 
     def __init__(self) -> None:
-        self.known = [
+        self.known: list[dict[str, object]] = [
             {"title": "Jane Eyre: study guide", "author": {"authorName": "Some Teacher"}},
             {"title": "Jane Eyre", "author": {"authorName": "Charlotte Brontë"}},
         ]
@@ -314,9 +314,28 @@ class FakeChaptarr:
         self.arrived = False
         self.scans = 0
         self.downloading: dict[int, float] = {}
+        self.searched: list[str] = []
+        self.down = False
 
     def __call__(self) -> "FakeChaptarr":
         return self
+
+    base_url = "https://server-chaptarr.example.com"
+
+    async def search(self, term: str, limit: int = 20) -> list[dict[str, object]]:
+        self.searched.append(term)
+        if self.down:
+            raise ChaptarrError("unreachable")
+        words = term.casefold().split()
+        found = [b for b in self.known if any(w in str(b["title"]).casefold() for w in words)]
+        return [b for b in found if b.get("foreignBookId")][:limit]
+
+    async def find(
+        self, ref: str, title: str, authors: tuple[str, ...]
+    ) -> dict[str, object] | None:
+        from babel_api.adapters.chaptarr import book_ref
+
+        return next((b for b in await self.search(title, 50) if book_ref(b) == ref), None)
 
     async def lookup(self, title: str, authors: tuple[str, ...]) -> dict[str, object] | None:
         from babel_api.adapters.chaptarr import best_match
@@ -1433,3 +1452,123 @@ def test_covers_of_imported_books_are_looked_up_when_the_app_syncs(
     changes = client.get("/v1/sync", headers=auth).json()["changes"]
     linked = [c for c in changes if c["data"].get("work_id")]
     assert linked  # the link came back as a change the app applies
+
+
+# ---------------------------------------------------------------- Chaptarr fills search gaps
+def test_chaptarr_adds_the_books_the_catalog_search_lacks_and_requests_that_very_one(
+    client: TestClient, chaptarr: FakeChaptarr, books: FakeBooks
+) -> None:
+    from tests.api.v1.test_library import account
+
+    chaptarr.known = [
+        {
+            "title": "Jane Eyre",
+            "foreignBookId": "10210",
+            "author": {"authorName": "Charlotte Brontë"},
+        },
+        {
+            "title": "Jane Eyre's Daughter",
+            "foreignBookId": "old-edition",
+            "author": {"authorName": "Elizabeth Newark"},
+            "releaseDate": "1997-01-01T00:00:00Z",
+        },
+        {
+            "title": "Jane Eyre's Daughter",
+            "foreignBookId": "new-edition",
+            "author": {"authorName": "Elizabeth Newark"},
+            "releaseDate": "2008-01-01T00:00:00Z",
+            "overview": "The sequel.",
+            "remoteCover": "https://assets.hardcover.app/daughter.jpg",
+        },
+    ]
+    admin = account(client, "admin@example.com")
+    (hit,) = client.get("/v1/catalog/search", params={"q": "jane"}, headers=admin).json()
+
+    extra = client.get(
+        "/v1/me/chaptarr/search", params={"q": "jane", "shown": [hit["id"]]}, headers=admin
+    )
+    assert extra.status_code == 200
+    # Jane Eyre is already shown; the two editions of the sequel are one book to the reader.
+    assert [(w["title"], w["authors"]) for w in extra.json()] == [
+        ("Jane Eyre's Daughter", ["Elizabeth Newark"])
+    ]
+    (sequel,) = extra.json()
+    assert sequel["first_publish_year"] == 1997
+    assert sequel["cover_path"] is None  # Chaptarr's first answer had no cover
+
+    response = client.post("/v1/requests", json={"work_id": sequel["id"]}, headers=admin)
+    assert response.status_code == 201
+    # The edition the reader saw, not whichever a fuzzy match would have picked.
+    assert [b["foreignBookId"] for b in chaptarr.added] == ["old-edition"]
+
+    # Asked again, the same search is not sent to Chaptarr a second time.
+    asked = len(chaptarr.searched)
+    client.get("/v1/me/chaptarr/search", params={"q": "Jane "}, headers=admin)
+    assert len(chaptarr.searched) == asked
+
+
+def test_a_chaptarr_cover_from_a_known_host_is_kept(
+    client: TestClient, chaptarr: FakeChaptarr, books: FakeBooks
+) -> None:
+    from tests.api.v1.test_library import account
+
+    chaptarr.known = [
+        {
+            "title": "Wide Sargasso Sea",
+            "foreignBookId": "wss",
+            "author": {"authorName": "Jean Rhys"},
+            "remoteCover": "https://assets.hardcover.app/wss.jpg",
+        },
+        {
+            "title": "Sargasso Notes",
+            "foreignBookId": "notes",
+            "author": {"authorName": "Some One"},
+            "remoteCover": "https://evil.example.com/cover.jpg",
+        },
+    ]
+    admin = account(client, "admin@example.com")
+    found = client.get("/v1/me/chaptarr/search", params={"q": "sargasso"}, headers=admin).json()
+    covers = {w["title"]: w["cover_path"] for w in found}
+    assert covers["Wide Sargasso Sea"] is not None
+    assert covers["Sargasso Notes"] is None
+
+
+def test_chaptarr_search_is_empty_without_a_chaptarr_or_when_it_fails(
+    client: TestClient, chaptarr: FakeChaptarr, auth: dict[str, str]
+) -> None:
+    from tests.api.v1.test_library import account
+
+    chaptarr.known = [{"title": "Jane Eyre", "foreignBookId": "1", "author": {}}]
+    # Not premium and no Chaptarr of their own: the server's is not theirs to search.
+    mine = client.get("/v1/me/chaptarr/search", params={"q": "jane"}, headers=auth)
+    assert mine.status_code == 200
+    assert mine.json() == []
+    assert chaptarr.searched == []
+
+    chaptarr.down = True
+    admin = account(client, "admin@example.com")
+    down = client.get("/v1/me/chaptarr/search", params={"q": "eyre"}, headers=admin)
+    assert down.status_code == 200
+    assert down.json() == []
+
+
+def test_a_chaptarr_book_becomes_a_catalog_work() -> None:
+    from babel_api.adapters.chaptarr import book_cover, book_ref
+    from babel_api.services.requests import _source_work  # pyright: ignore[reportPrivateUsage]
+
+    book: dict[str, object] = {
+        "title": " The Oz Books ",
+        "foreignBookId": "x" * 80,
+        "author": {"authorName": "L. Frank Baum"},
+        "releaseDate": "0001-01-01T00:00:00Z",
+        "images": [{"coverType": "cover", "url": "https://covers.openlibrary.org/b/1.jpg"}],
+    }
+    work = _source_work(book)
+    assert work.open_library_id == f"ch:{book_ref(book)}"
+    assert len(work.open_library_id) <= 32  # the column's size
+    assert (work.title, work.authors, work.first_publish_year) == (
+        "The Oz Books",
+        ("L. Frank Baum",),
+        None,
+    )
+    assert book_cover(book) == "https://covers.openlibrary.org/b/1.jpg"

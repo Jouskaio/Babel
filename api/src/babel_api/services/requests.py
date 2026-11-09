@@ -5,8 +5,10 @@ premium readers). Chaptarr finds and downloads the book into the library Kavita 
 has the file, Babel asks Kavita to scan so the book soon shows up in the reader's sources.
 """
 
+import asyncio
 import logging
 import re
+import time
 from collections.abc import Awaitable, Callable
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
@@ -14,10 +16,11 @@ from typing import Any, cast
 from urllib.parse import urlsplit
 from uuid import UUID
 
-from babel_api.adapters.chaptarr import ChaptarrClient, ChaptarrError
+from babel_api.adapters.chaptarr import ChaptarrClient, ChaptarrError, book_cover, book_ref
 from babel_api.adapters.db.request_repository import SqlRequestRepository
 from babel_api.adapters.security.secrets import SecretBox
 from babel_api.adapters.shelfmark import CJK, ShelfmarkClient, ShelfmarkError
+from babel_api.domain.catalog import CHAPTARR_PREFIX, SourceWork
 from babel_api.domain.errors import (
     NotFoundError,
     PremiumRequiredError,
@@ -25,8 +28,8 @@ from babel_api.domain.errors import (
 )
 from babel_api.domain.ports import UserRepository
 from babel_api.domain.requests import BookRequest, ChaptarrLink, RequestStatus
-from babel_api.domain.series import guess_series
-from babel_api.services.works import WorkDetail, WorkService
+from babel_api.domain.series import guess_series, series_key
+from babel_api.services.works import SearchHit, WorkDetail, WorkService
 
 log = logging.getLogger(__name__)
 
@@ -49,6 +52,31 @@ def volume_title(title: str) -> str:
 
 IMPORT_WINDOW = timedelta(days=2)
 
+# Chaptarr asks its own metadata providers: a search waits this long, then gives up quietly.
+CHAPTARR_PATIENCE = 10.0
+# What a Chaptarr answered for a search is kept this long, and for this many searches.
+CHAPTARR_SEARCH_SECONDS = 24 * 3600
+CHAPTARR_SEARCH_KEPT = 500
+
+# (Chaptarr address, search) -> (when, the books it found); shared by every request.
+ChaptarrSearches = dict[tuple[str, str], tuple[float, list[dict[str, Any]]]]
+
+
+def _source_work(book: dict[str, Any]) -> SourceWork:
+    """A book of a Chaptarr search as a catalog work, keyed "ch:<ref>"."""
+    author = cast(dict[str, Any], book.get("author") or {})
+    name = str(author.get("authorName") or "").strip()
+    released = str(book.get("releaseDate") or "")[:4]
+    overview = str(book.get("overview") or "").strip()
+    return SourceWork(
+        open_library_id=f"{CHAPTARR_PREFIX}{book_ref(book)}",
+        title=str(book.get("title") or "").strip(),
+        authors=(name,) if name else (),
+        first_publish_year=int(released) if released.isdigit() and released != "0001" else None,
+        description=overview or None,
+    )
+
+
 # Adds the first of these titles Kavita (or another source) has to the reader's library.
 LibraryAdder = Callable[[UUID, list[str]], Awaitable[bool]]
 
@@ -66,7 +94,11 @@ class RequestService:
         shelfmark: Callable[[], ShelfmarkClient] | None = None,
         reader_shelfmark: ShelfmarkFactory | None = None,
         add_to_library: LibraryAdder | None = None,
+        chaptarr_searches: ChaptarrSearches | None = None,
     ) -> None:
+        self._searches: ChaptarrSearches = (
+            chaptarr_searches if chaptarr_searches is not None else {}
+        )
         self._add_to_library = add_to_library
         self._shelfmark = shelfmark
         self._reader_shelfmark = reader_shelfmark
@@ -175,6 +207,37 @@ class RequestService:
         premium = user is not None and user.has_premium
         return premium and (self._server is not None or self._shelfmark is not None)
 
+    # ------------------------------------------------------------ search
+    async def search(
+        self, user_id: UUID, query: str, shown: list[UUID], limit: int
+    ) -> list[SearchHit]:
+        """What the reader's Chaptarr (their own, else the server's when they are premium)
+        finds for a search and the works already shown lack. Nothing, never an error, when
+        there is no Chaptarr or it does not answer in time."""
+        client = await self._client_for(user_id)
+        if client is None:
+            return []
+        try:
+            books = await asyncio.wait_for(self._chaptarr_search(client, query), CHAPTARR_PATIENCE)
+        except (ChaptarrError, TimeoutError) as error:
+            log.info("Chaptarr search failed: %r", error)
+            return []
+        finally:
+            await client.aclose()
+        found = [(_source_work(b), book_cover(b)) for b in books]
+        return await self._works.add_found([f for f in found if f[0].title], shown, limit)
+
+    async def _chaptarr_search(self, client: ChaptarrClient, query: str) -> list[dict[str, Any]]:
+        key = (client.base_url, series_key(query))
+        kept = self._searches.get(key)
+        if kept is not None and time.monotonic() - kept[0] < CHAPTARR_SEARCH_SECONDS:
+            return kept[1]
+        books = await client.search(query.strip(), 40)
+        if len(self._searches) >= CHAPTARR_SEARCH_KEPT:
+            self._searches.pop(min(self._searches, key=lambda k: self._searches[k][0]))
+        self._searches[key] = (time.monotonic(), books)
+        return books
+
     # ------------------------------------------------------------ requests
     async def request(
         self, user_id: UUID, work_id: UUID, language: str = ""
@@ -231,7 +294,11 @@ class RequestService:
             return
         try:
             found = None
-            for name in dict.fromkeys((title, *hits)):  # then the titles Shelfmark gave
+            olid = work.open_library_id or ""
+            if olid.startswith(CHAPTARR_PREFIX):  # the very book the reader's search showed
+                found = await client.find(olid[len(CHAPTARR_PREFIX) :], work.title, work.authors)
+            names: list[str] = [] if found else list(dict.fromkeys((title, *hits)))
+            for name in names:  # the title, then the titles Shelfmark gave
                 found = await client.lookup(name, work.authors)
                 if found is not None:
                     break

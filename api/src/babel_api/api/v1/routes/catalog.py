@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 from babel_api.adapters.images import shrink
 from babel_api.adapters.ocr import OcrUnavailableError, queries, read_text
 from babel_api.api.dependencies import Container, ContainerDep, CurrentUserId, WorkServiceDep
-from babel_api.domain.catalog import Edition, IdentifierKind, Work
+from babel_api.domain.catalog import COVER_HOSTS, Edition, IdentifierKind, Work
 from babel_api.domain.files import Cover
 from babel_api.domain.series import guess_series
 from babel_api.services.works import SearchHit, WorkDetail
@@ -433,9 +433,6 @@ async def lookup_isbn(
     )
 
 
-_COVER_HOSTS = ("hardcover.app", "image.tmdb.org", "wikimedia.org")
-
-
 @router.get(
     "/work-covers/{work_id}",
     operation_id="getWorkCover",
@@ -455,7 +452,7 @@ async def get_work_cover(
 async def _proxied_image(container: Container, url: str) -> FileResponse:
     """An image of a known host, fetched once and kept (never redirects, never other hosts)."""
     host = urlsplit(url).hostname or ""
-    if not any(host == h or host.endswith(f".{h}") for h in _COVER_HOSTS):
+    if not any(host == h or host.endswith(f".{h}") for h in COVER_HOSTS):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No such image")
     key = hashlib.sha256(url.encode()).hexdigest()
     found = container.covers.get(key)

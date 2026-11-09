@@ -145,6 +145,9 @@ async def sync_library(
                 "authors": ", ".join(item.authors),
                 "series": item.series or "",
                 "series_index": item.series_index,
+                # Babel's tidied tags, in place of the file's own subjects (an AO3 work
+                # carries every tag it has, and each one became a genre on the e-reader).
+                "tags": list(item.tags),
             }
             for item in wanted
             if item.file is not None

@@ -6943,7 +6943,7 @@
   "info": {
     "summary": "Library, annotated reading, sync and statistics.",
     "title": "Babel API",
-    "version": "0.86.0"
+    "version": "0.87.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -12141,6 +12141,89 @@
           }
         ],
         "summary": "Link Chaptarr",
+        "tags": [
+          "requests"
+        ]
+      }
+    },
+    "/v1/me/chaptarr/search": {
+      "get": {
+        "description": "Books your Chaptarr (yours, else the server's when you are premium) finds for a search\nthat the catalog's results lack. Empty when there is no Chaptarr or it does not answer:\ncall it after the catalog search, its results follow those.",
+        "operationId": "searchChaptarr",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 2,
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The works the catalog search already gave",
+            "in": "query",
+            "name": "shown",
+            "required": false,
+            "schema": {
+              "default": [],
+              "description": "The works the catalog search already gave",
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "maxItems": 40,
+              "title": "Shown",
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "maximum": 40,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WorkSummaryResponse"
+                  },
+                  "title": "Response Searchchaptarr",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Search Chaptarr",
         "tags": [
           "requests"
         ]

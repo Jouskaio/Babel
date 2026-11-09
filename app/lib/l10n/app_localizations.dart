@@ -836,6 +836,12 @@ abstract class AppLocalizations {
   /// **'La recherche n’a pas abouti. Réessayez dans un instant.'**
   String get searchFailed;
 
+  /// No description provided for @fromYourChaptarr.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trouvés par votre Chaptarr'**
+  String get fromYourChaptarr;
+
   /// No description provided for @libraryTitle.
   ///
   /// In fr, this message translates to:
@@ -5489,7 +5495,7 @@ abstract class AppLocalizations {
   /// No description provided for @chaptarrLinkedHint.
   ///
   /// In fr, this message translates to:
-  /// **'Vos demandes de livres partent chez vous.'**
+  /// **'Vos recherches et demandes de livres passent par lui.'**
   String get chaptarrLinkedHint;
 
   /// No description provided for @chaptarrWrongKey.

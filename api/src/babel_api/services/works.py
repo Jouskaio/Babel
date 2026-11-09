@@ -6,7 +6,7 @@ import re
 import time
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 from uuid import UUID
 
 from babel_api.adapters.external_ratings import (
@@ -21,7 +21,15 @@ from babel_api.adapters.hardcover import (
 )
 from babel_api.adapters.pagebound import PageboundClient, PageboundReview
 from babel_api.adapters.wikidata import Adaptation, WikidataClient
-from babel_api.domain.catalog import FANFIC_PREFIX, Edition, IdentifierKind, SourceWork, Work
+from babel_api.domain.catalog import (
+    CHAPTARR_PREFIX,
+    COVER_HOSTS,
+    FANFIC_PREFIX,
+    Edition,
+    IdentifierKind,
+    SourceWork,
+    Work,
+)
 from babel_api.domain.challenges import norm
 from babel_api.domain.errors import NotFoundError, SourceUnavailableError
 from babel_api.domain.isbn import normalize_isbn
@@ -250,6 +258,31 @@ class WorkService:
             extra.append(SearchHit(work, work.title, work.cover_id))
         return extra
 
+    async def add_found(
+        self, found: list[tuple[SourceWork, str | None]], shown: list[UUID], limit: int
+    ) -> list[SearchHit]:
+        """Books another search found (a reader's Chaptarr), with their cover address: those
+        the works already shown do not hold become works of their own, in the order given."""
+        known: set[tuple[str, str]] = set()
+        for work_id in shown:
+            work = await self._repo.get_work(work_id)
+            if work is not None:
+                known.add(_hit_key(work.title, work.authors))
+        hits: list[SearchHit] = []
+        for source, cover in found:
+            key = _hit_key(source.title, source.authors)
+            if len(hits) >= limit or key in known:
+                continue
+            known.add(key)
+            work = await self._repo.upsert_work(source)
+            host = urlsplit(cover).hostname or "" if cover else ""
+            if cover and any(host == h or host.endswith(f".{h}") for h in COVER_HOSTS):
+                await self._repo.set_work_extras(work.id, None, cover, None)
+                work = await self._repo.get_work(work.id) or work
+            hits.append(SearchHit(work, work.title, work.cover_id))
+        await self._repo.commit()
+        return hits
+
     async def saga(self, series: str, author: str | None) -> list[SagaVolume]:
         """Every volume of a series the catalog lists, in order.
 
@@ -349,7 +382,7 @@ class WorkService:
             self._external.openlibrary(olid)
             if self._external is not None
             and olid
-            and not olid.startswith((HARDCOVER_PREFIX, FANFIC_PREFIX))
+            and not olid.startswith((HARDCOVER_PREFIX, FANFIC_PREFIX, CHAPTARR_PREFIX))
             else _nothing(),
             self._external.goodreads(work.title, work.authors)
             if self._external is not None
@@ -533,7 +566,7 @@ class WorkService:
     @staticmethod
     def _needs_sync(work: Work) -> bool:
         if work.open_library_id is None or work.open_library_id.startswith(
-            (HARDCOVER_PREFIX, FANFIC_PREFIX)
+            (HARDCOVER_PREFIX, FANFIC_PREFIX, CHAPTARR_PREFIX)
         ):
             return False
         synced = work.editions_synced_at

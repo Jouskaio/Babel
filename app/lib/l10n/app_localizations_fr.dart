@@ -411,6 +411,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'La recherche n’a pas abouti. Réessayez dans un instant.';
 
   @override
+  String get fromYourChaptarr => 'Trouvés par votre Chaptarr';
+
+  @override
   String get libraryTitle => 'Bibliothèque';
 
   @override
@@ -3346,7 +3349,8 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get chaptarrLinkedHint => 'Vos demandes de livres partent chez vous.';
+  String get chaptarrLinkedHint =>
+      'Vos recherches et demandes de livres passent par lui.';
 
   @override
   String get chaptarrWrongKey => 'Chaptarr a refusé la clé d\'API.';
