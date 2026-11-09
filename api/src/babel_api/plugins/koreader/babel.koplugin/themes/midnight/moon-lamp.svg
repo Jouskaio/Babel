@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A crescent moon on a stand. Drawn for Babel's Bookshelf themes. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 106">
+
+  <ellipse cx="35" cy="99" rx="24" ry="3" fill="#000" opacity="0.35"/>
+  <path d="M15 100 L55 100 L50 93 L20 93 Z" fill="#2B3654"/>
+  <rect x="33" y="70" width="4" height="23" fill="#4A5675"/>
+  <path d="M46 18 A28 28 0 1 0 46 72 A22 22 0 1 1 46 18 Z" fill="#EDE3C6"/>
+  <circle cx="28" cy="42" r="3" fill="#D5C9A6"/>
+  <circle cx="24" cy="56" r="2" fill="#D5C9A6"/>
+  <path d="M56 30 L58 36 L64 38 L58 40 L56 46 L54 40 L48 38 L54 36 Z" fill="#F4EEDC"/>
+</svg>

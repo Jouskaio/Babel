@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- An ink pot with a brush. Drawn for Babel's Bookshelf themes. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 76 106">
+
+  <ellipse cx="38" cy="99" rx="30" ry="3" fill="#000" opacity="0.2"/>
+  <path d="M10 100 L10 74 Q10 66 18 66 L46 66 Q54 66 54 74 L54 100 Z" fill="#1E1D1C"/>
+  <ellipse cx="32" cy="66" rx="22" ry="4.5" fill="#3A3836"/>
+  <ellipse cx="32" cy="66" rx="12" ry="2.5" fill="#000"/>
+  <rect x="14" y="78" width="8" height="14" fill="#C0533E"/>
+  <path d="M38 66 L66 8" stroke="#8A6A3E" stroke-width="5" stroke-linecap="round"/>
+  <path d="M34 74 L40 62 L44 64 L38 76 Z" fill="#2A2928"/>
+  <circle cx="66" cy="8" r="2.5" fill="#C0533E"/>
+</svg>
