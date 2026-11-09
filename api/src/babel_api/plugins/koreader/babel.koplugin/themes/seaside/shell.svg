@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A scallop shell. Drawn for Babel's Bookshelf themes. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 106">
+
+  <ellipse cx="35" cy="99" rx="28" ry="3" fill="#000" opacity="0.25"/>
+  <path d="M35 100 L8 72 Q4 40 35 34 Q66 40 62 72 Z" fill="#E9B79B"/>
+  <g stroke="#C98B6E" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M35 98 L14 66"/>
+    <path d="M35 98 L22 50"/>
+    <path d="M35 98 L35 40"/>
+    <path d="M35 98 L48 50"/>
+    <path d="M35 98 L56 66"/>
+  </g>
+  <path d="M26 100 L44 100 L40 92 L30 92 Z" fill="#D59C80"/>
+  <path d="M60 100 L62 92 L66 98 Z" fill="#E3C2A8"/>
+</svg>

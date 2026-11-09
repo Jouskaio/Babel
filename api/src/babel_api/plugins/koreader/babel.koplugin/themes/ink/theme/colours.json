@@ -1,0 +1,17 @@
+{
+  "day": {
+    "text": "#1E1D1C",
+    "progress bar": "#1E1D1C",
+    "progress track": "#D8D4CC",
+    "selected shelf": "#1E1D1C",
+    "selected shelf text": "#F6F3EC",
+    "page": "#F6F3EC",
+    "bookmark": "#C0533E",
+    "plank": "#232221"
+  },
+  "night": {
+    "text": "#F6F3EC",
+    "progress bar": "#D8D4CC",
+    "plank": "#232221"
+  }
+}

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A fern in a terracotta pot. Drawn for Babel's Bookshelf themes. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 76 106">
+
+  <ellipse cx="38" cy="99" rx="22" ry="3" fill="#000" opacity="0.25"/>
+  <path d="M38 64 Q30 40 8 30" fill="none" stroke="#4E6B4A" stroke-width="3"/>
+  <path d="M38 64 Q46 36 68 24" fill="none" stroke="#4E6B4A" stroke-width="3"/>
+  <path d="M38 64 Q38 34 36 8" fill="none" stroke="#4E6B4A" stroke-width="3"/>
+  <g fill="#6E8F63">
+    <ellipse cx="14" cy="28" rx="7" ry="3" transform="rotate(-30 14 28)"/>
+    <ellipse cx="20" cy="40" rx="8" ry="3" transform="rotate(30 20 40)"/>
+    <ellipse cx="24" cy="30" rx="8" ry="3" transform="rotate(-50 24 30)"/>
+    <ellipse cx="30" cy="48" rx="8" ry="3" transform="rotate(40 30 48)"/>
+    <ellipse cx="62" cy="22" rx="7" ry="3" transform="rotate(30 62 22)"/>
+    <ellipse cx="56" cy="36" rx="8" ry="3" transform="rotate(-30 56 36)"/>
+    <ellipse cx="52" cy="26" rx="8" ry="3" transform="rotate(60 52 26)"/>
+    <ellipse cx="46" cy="46" rx="8" ry="3" transform="rotate(-40 46 46)"/>
+    <ellipse cx="30" cy="14" rx="7" ry="3" transform="rotate(-20 30 14)"/>
+    <ellipse cx="42" cy="18" rx="7" ry="3" transform="rotate(20 42 18)"/>
+    <ellipse cx="30" cy="28" rx="7" ry="3" transform="rotate(-10 30 28)"/>
+    <ellipse cx="44" cy="32" rx="7" ry="3" transform="rotate(10 44 32)"/>
+  </g>
+  <path d="M20 66 L56 66 L50 100 L26 100 Z" fill="#B76E4B"/>
+  <rect x="17" y="60" width="42" height="9" rx="2" fill="#C98460"/>
+  <ellipse cx="38" cy="61" rx="19" ry="3.5" fill="#5B3B2A"/>
+</svg>

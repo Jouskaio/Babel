@@ -31,6 +31,9 @@ jobs:
           src=api/src/babel_api/plugins/koreader
           git clone "https://x-access-token:${GH_TOKEN}@github.com/Jouskaio/babel.koplugin.git" mirror
           cp "$src"/babel.koplugin/*.lua mirror/
+          # The Bookshelf themes: the plugin downloads them from here when it was installed without.
+          rm -rf mirror/themes
+          cp -r "$src"/babel.koplugin/themes mirror/themes
           cp "$src"/README.md mirror/README.md
           cd mirror
           git config user.name "babel-bot"

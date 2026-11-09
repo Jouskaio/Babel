@@ -1,0 +1,19 @@
+{
+  "day": {
+    "text": "#EDE6D3",
+    "progress bar": "#EDE3C6",
+    "progress track": "#3A4A70",
+    "selected shelf": "#EDE3C6",
+    "selected shelf text": "#0E1424",
+    "page": "#0E1424",
+    "panel": "#141C33",
+    "panel text": "#EDE6D3",
+    "plank": "#3E4759"
+  },
+  "night": {
+    "text": "#EDE6D3",
+    "progress bar": "#EDE3C6",
+    "page": "#0E1424",
+    "plank": "#3E4759"
+  }
+}

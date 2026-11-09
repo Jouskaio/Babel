@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A brass oil lamp, lit. Drawn for Babel's Bookshelf themes. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 106">
+
+  <ellipse cx="35" cy="99" rx="28" ry="3" fill="#000" opacity="0.25"/>
+  <path d="M12 100 L58 100 L52 92 L18 92 Z" fill="#8C6A35"/>
+  <path d="M30 92 L40 92 L38 78 L32 78 Z" fill="#B8924F"/>
+  <path d="M6 70 Q8 56 35 56 Q62 56 64 70 Q60 80 35 80 Q10 80 6 70 Z" fill="#C8A465"/>
+  <path d="M6 70 Q8 62 35 62 Q62 62 64 70" fill="none" stroke="#E3C98E" stroke-width="3"/>
+  <path d="M62 66 Q70 62 68 54 Q66 50 62 54" fill="none" stroke="#B8924F" stroke-width="4"/>
+  <ellipse cx="35" cy="56" rx="10" ry="2.5" fill="#0E1424"/>
+  <path d="M35 54 Q25 40 35 22 Q45 40 35 54 Z" fill="#F2B94B"/>
+  <path d="M35 52 Q30 43 35 33 Q40 43 35 52 Z" fill="#FBE7B0"/>
+</svg>
