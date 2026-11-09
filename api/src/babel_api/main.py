@@ -251,17 +251,25 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             )
         )
         yield
-        refresh_task.cancel()
-        series_task.cancel()
-        if export_task is not None:
-            export_task.cancel()
-        if watch_task is not None:
-            watch_task.cancel()
+        background = [
+            task
+            for task in (
+                refresh_task,
+                series_task,
+                export_task,
+                watch_task,
+                follow_task,
+                subscription_task,
+            )
+            if task is not None
+        ]
+        for task in background:
+            task.cancel()
         kavita.cancel()
-        if follow_task is not None:
-            follow_task.cancel()
-        if subscription_task is not None:
-            subscription_task.cancel()
+        # Wait until they have stopped: a task cancelled in the middle of a query must give
+        # its database connection back before the engine is disposed, or closing the
+        # connection later never finishes (and shutdown hangs).
+        await asyncio.gather(*background, return_exceptions=True)
         await mailer.drain()
         await pusher.aclose()
         await open_library.aclose()
