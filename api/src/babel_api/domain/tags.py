@@ -31,6 +31,8 @@ _NOISE = {
     "ebook",
     "ebooks",
 }
+# Notes a tool leaves on the books it went through ("Translated by Ebook Translator: …").
+_TOOL_NOTE = re.compile(r"^translated by\b", re.IGNORECASE)
 # The broad heading BISAC subjects start with.
 _BROAD = {"fiction", "juvenile fiction", "young adult fiction", "nonfiction"}
 # "nyt:…", "collectionID:…", "series:…", "place:…", "time:…", "person:…".
@@ -46,7 +48,7 @@ def _key(tag: str) -> str:
 def _tidy(subject: str) -> str | None:
     """The topic a subject names, or None for a shelving note."""
     text = subject.strip()
-    if not text or _PREFIXED.match(text):
+    if not text or _PREFIXED.match(text) or _TOOL_NOTE.match(text):
         return None
     # "Governesses -- Fiction", "England -- Social life and customs": the head is the topic.
     text = re.split(r"\s+--\s+", text, maxsplit=1)[0].strip(" .,;")

@@ -40,3 +40,7 @@ def test_a_book_has_a_few_tags_at_most() -> None:
 
 def test_no_subjects_no_tags() -> None:
     assert tags_of((), None) == []
+
+
+def test_notes_left_by_tools_are_not_tags() -> None:
+    assert tags_of(("Translated by Ebook Translator: Google (Free)", "Explicit")) == ["Explicit"]
