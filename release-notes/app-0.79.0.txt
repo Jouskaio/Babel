@@ -1,0 +1,4 @@
+Supprimer définitivement un livre (fichier compris s'il n'est qu'à vous)
+Chercher dans sa bibliothèque par tags
+Suggestions dès la première lettre dans les recherches
+Correctifs : séries Goodreads, signets AO3, série Oz
