@@ -1,0 +1,4 @@
+Delete a book for good (file included when only you have it)
+Search your library by tags
+Suggestions from the first letter in searches
+Fixes: Goodreads series, AO3 bookmarks, Oz series
