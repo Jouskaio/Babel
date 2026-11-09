@@ -14,6 +14,7 @@ from babel_api.api.dependencies import (
     WorkServiceDep,
     fulfill_request,
 )
+from babel_api.api.v1.routes.catalog import WorkSummaryResponse
 from babel_api.domain.requests import BookRequest, RequestStatus
 
 router = APIRouter(prefix="/requests", tags=["requests"])
@@ -149,6 +150,23 @@ async def link_chaptarr(
 async def unlink_chaptarr(user_id: CurrentUserId, requests: RequestServiceDep) -> None:
     """Forget your Chaptarr; the books already requested stay as they are."""
     await requests.unlink(user_id)
+
+
+@link_router.get("/search", operation_id="searchChaptarr")
+async def search_chaptarr(
+    user_id: CurrentUserId,
+    requests: RequestServiceDep,
+    q: Annotated[str, Query(min_length=2, max_length=200)],
+    shown: Annotated[
+        list[UUID],
+        Query(max_length=40, description="The works the catalog search already gave"),
+    ] = [],  # noqa: B006 - FastAPI copies query defaults
+    limit: Annotated[int, Query(ge=1, le=40)] = 10,
+) -> list[WorkSummaryResponse]:
+    """Books your Chaptarr (yours, else the server's when you are premium) finds for a search
+    that the catalog's results lack. Empty when there is no Chaptarr or it does not answer:
+    call it after the catalog search, its results follow those."""
+    return [WorkSummaryResponse.of_hit(h) for h in await requests.search(user_id, q, shown, limit)]
 
 
 shelfmark_router = APIRouter(prefix="/me/shelfmark", tags=["requests"])

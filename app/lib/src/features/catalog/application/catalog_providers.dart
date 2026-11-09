@@ -15,6 +15,25 @@ final searchResultsProvider = FutureProvider.autoDispose
           const [];
     });
 
+/// What the reader's Chaptarr finds for a search that the catalog's results lack
+/// ([shown]: their ids, comma-separated). Empty when there is no Chaptarr, or it
+/// fails: an extra that never stands in the way of the search.
+final chaptarrResultsProvider = FutureProvider.autoDispose
+    .family<List<WorkSummaryResponse>, ({String query, String shown})>((
+      ref,
+      args,
+    ) async {
+      try {
+        final shown = args.shown.isEmpty ? <String>[] : args.shown.split(',');
+        return await ref
+                .watch(requestsApiProvider)
+                .searchChaptarr(args.query, shown: shown, limit: 10) ??
+            const [];
+      } on ApiException {
+        return const [];
+      }
+    });
+
 /// Books of the reader's sources that match [query] (a title), to import the right one.
 final sourceMatchesProvider = FutureProvider.autoDispose
     .family<List<SourceMatchResponse>, String>(

@@ -7,6 +7,16 @@ from uuid import UUID
 
 # A work made for a fanfiction (no catalog knows it): its identifier starts with this.
 FANFIC_PREFIX = "ao3:"
+# A work only a reader's Chaptarr knows (its search filled a gap of the catalog): "ch:<ref>".
+CHAPTARR_PREFIX = "ch:"
+# Hosts whose covers Babel fetches and keeps for works found outside Open Library.
+COVER_HOSTS = (
+    "hardcover.app",
+    "image.tmdb.org",
+    "wikimedia.org",
+    "covers.openlibrary.org",
+    "gr-assets.com",
+)
 
 
 @dataclass(frozen=True, slots=True)
