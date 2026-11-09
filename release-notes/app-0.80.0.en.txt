@@ -1,0 +1,2 @@
+Books missing from the catalog, found in your Chaptarr, show up in search
+Fix: duplicated genres on the e-reader (KOReader)
