@@ -1,0 +1,2 @@
+Écrans de veille et d'extinction aléatoires sur les liseuses Boox (plugin KOReader)
+Nouvelle option : ouvrir KOReader au démarrage de la liseuse
