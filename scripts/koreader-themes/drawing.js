@@ -142,9 +142,9 @@ function grimoire(ctx,x,b){
   candle(ctx,x+31,b-h-t-20,b-h-t+6,14,9);
   ctx.fillStyle='#efe6d2';ctx.beginPath();ctx.ellipse(x+38,b-h-t+5,10,2.4,0,0,7);ctx.fill();
 }
-function nouveauTile(){ // a tone-on-tone repeat: mirrored whiplash stems, poppies, seed heads
+function nouveauTile(col='214,186,120',k=1){ // a tone-on-tone repeat: mirrored whiplash stems, poppies, seed heads
   const T=document.createElement('canvas'),w=180,h=240;T.width=w*S;T.height=h*S;const c=T.getContext('2d');c.scale(S,S);
-  c.strokeStyle='rgba(214,186,120,.26)';c.fillStyle='rgba(214,186,120,.16)';c.lineWidth=1.3;c.lineCap='round';
+  c.strokeStyle=`rgba(${col},${.26*k})`;c.fillStyle=`rgba(${col},${.16*k})`;c.lineWidth=1.3;c.lineCap='round';
   const half=s=>{c.save();if(s<0){c.translate(w,0);c.scale(-1,1)}
     c.beginPath();c.moveTo(90,240);c.bezierCurveTo(70,200,20,190,30,140);c.bezierCurveTo(38,100,80,110,70,80);c.bezierCurveTo(62,56,30,60,36,40);c.stroke();
     c.beginPath();c.moveTo(30,140);c.bezierCurveTo(10,130,4,110,14,98);c.stroke();
@@ -157,8 +157,8 @@ function nouveauTile(){ // a tone-on-tone repeat: mirrored whiplash stems, poppi
   half(1);half(-1);
   // the poppy at the crown, in the middle
   c.save();c.translate(90,34);for(let i=0;i<5;i++){c.rotate(Math.PI*2/5);c.beginPath();c.ellipse(0,-9,7,10,0,0,7);c.fill()}c.restore();
-  c.beginPath();c.arc(90,34,4,0,7);c.strokeStyle='rgba(214,186,120,.35)';c.stroke();
-  c.beginPath();c.moveTo(90,44);c.bezierCurveTo(96,90,84,140,90,240);c.strokeStyle='rgba(214,186,120,.2)';c.stroke();
+  c.beginPath();c.arc(90,34,4,0,7);c.strokeStyle=`rgba(${col},${.35*k})`;c.stroke();
+  c.beginPath();c.moveTo(90,44);c.bezierCurveTo(96,90,84,140,90,240);c.strokeStyle=`rgba(${col},${.2*k})`;c.stroke();
   // little whiplash curls between repeats
   c.beginPath();c.moveTo(0,200);c.bezierCurveTo(14,192,16,178,6,174);c.bezierCurveTo(0,172,-2,180,4,182);c.stroke();
   return T;
@@ -194,11 +194,11 @@ function tiffany2(ctx,x,b){
   ctx.strokeStyle='#3a2a12';ctx.lineWidth=2;shade_();ctx.stroke();
   ctx.fillStyle=bronze;ctx.beginPath();ctx.arc(x+40,b-118,3.5,0,7);ctx.fill();
 }
-function decoTile(){ // fan scales: arcs with rays, offset every other row
+function decoTile(col='212,175,100',k=1){ // fan scales: arcs with rays, offset every other row
   const T=document.createElement('canvas'),w=48,h=28;T.width=w*S;T.height=h*S;const c=T.getContext('2d');c.scale(S,S);
-  const fan=(cx,cy)=>{c.strokeStyle='rgba(212,175,100,.34)';c.lineWidth=.8;for(const r of[24,18,12]){c.beginPath();c.arc(cx,cy,r,Math.PI,0);c.stroke()}
-    c.strokeStyle='rgba(212,175,100,.2)';for(let i=1;i<8;i++){const a=Math.PI+Math.PI*i/8;c.beginPath();c.moveTo(cx+6*Math.cos(a),cy+6*Math.sin(a));c.lineTo(cx+24*Math.cos(a),cy+24*Math.sin(a));c.stroke()}
-    c.fillStyle='rgba(212,175,100,.35)';c.beginPath();c.arc(cx,cy,2,Math.PI,0);c.fill()};
+  const fan=(cx,cy)=>{c.strokeStyle=`rgba(${col},${.34*k})`;c.lineWidth=.8;for(const r of[24,18,12]){c.beginPath();c.arc(cx,cy,r,Math.PI,0);c.stroke()}
+    c.strokeStyle=`rgba(${col},${.2*k})`;for(let i=1;i<8;i++){const a=Math.PI+Math.PI*i/8;c.beginPath();c.moveTo(cx+6*Math.cos(a),cy+6*Math.sin(a));c.lineTo(cx+24*Math.cos(a),cy+24*Math.sin(a));c.stroke()}
+    c.fillStyle=`rgba(${col},${.35*k})`;c.beginPath();c.arc(cx,cy,2,Math.PI,0);c.fill()};
   fan(24,28);fan(0,14);fan(48,14);fan(24,0+28*0);
   return T;
 }
@@ -339,6 +339,162 @@ function wall_deco(ctx){
 }
 
 
+// ── Day wallpapers ────────────────────────────────────────────────────────
+// Light pictures for day (and for colour e-ink, which shows dark ones muddy); the dark ones above
+// are the night variants (wallpaper.dark), which Bookshelf shows when the reader turns night on.
+
+function wall_academia_day(ctx){
+  const n=noise2(61),n2=noise2(62);
+  // Upper wall: ivory paper with a tone-on-tone damask; lower: honey oak wainscot. Daylight from the right.
+  const RAIL=470;
+  paint(ctx,0,0,600,800,(x,y)=>{
+    const l=Math.exp(-(((x-560)/520)**2+((y-180)/620)**2));
+    if(y<RAIL){
+      const paper=fbm(n,x*.02,y*.02,4)*.06+fbm(n2,x*.3,y*.3,2)*.025;
+      // damask: a lozenge lattice with a soft medallion in each cell
+      const cw=100,ch=130,ox=((x%cw)+cw)%cw-cw/2,row=Math.floor(y/ch),oy=((y%ch)+ch)%ch-ch/2,sx=row%2?ox:(((x+cw/2)%cw)+cw)%cw-cw/2;
+      const r=Math.hypot(sx/30,oy/42),petal=.5+.5*Math.cos(6*Math.atan2(oy,sx)),med=clamp(1-Math.abs(r-(.7+.25*petal))*6)*.9+clamp(1-r*2.2)*.7;
+      const lat=clamp(1-Math.abs(Math.abs(sx)/cw*2+Math.abs(oy)/ch*2-1)*30)*.5;
+      let c=mixc(hex('#e9dfc8'),hex('#d9c9a6'),clamp(.25+paper*4));c=mixc(c,hex('#c9b48a'),clamp(med+lat)*.35);
+      return shade(c,.86+.2*l).map(v=>Math.min(255,v));
+    }
+    const board=Math.floor(x/100);let c=wood(n,y*1.3+board*300,x*1.6+board*40,'#a8743e','#d9aa6c',.9);
+    const px=((x-20)%200+200)%200,inP=px>8&&px<152&&y>RAIL+40&&y<770;
+    if(!inP&&(Math.abs(px-8)<2||Math.abs(px-152)<2))c=shade(c,.75);
+    if(y<RAIL+14)c=shade(wood(n2,x,y*3,'#8a5a2c','#c08a50'),y<RAIL+3?1.15:.95);
+    return shade(c,.82+.25*l).map(v=>Math.min(255,v));
+  });
+  for(let i=0;i<3;i++){const x=28+i*200;ctx.strokeStyle='rgba(90,55,25,.45)';ctx.lineWidth=2;ctx.strokeRect(x+1,RAIL+41,142,288);ctx.strokeStyle='rgba(255,240,210,.35)';ctx.strokeRect(x,RAIL+40,142,288)}
+  const sh=ctx.createLinearGradient(0,RAIL+14,0,RAIL+30);sh.addColorStop(0,'rgba(60,35,15,.35)');sh.addColorStop(1,'rgba(60,35,15,0)');ctx.fillStyle=sh;ctx.fillRect(0,RAIL+14,600,16);
+  // window light falling across the wall
+  ctx.save();ctx.globalCompositeOperation='lighter';for(const[x0,w]of[[330,70],[420,70]]){const g=ctx.createLinearGradient(0,0,600,800);g.addColorStop(0,'rgba(255,240,200,.10)');g.addColorStop(1,'rgba(255,240,200,0)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(x0,0);ctx.lineTo(x0+w,0);ctx.lineTo(x0+w-260,800);ctx.lineTo(x0-260,800);ctx.fill()}ctx.restore();
+  const vg=ctx.createRadialGradient(330,400,260,330,400,640);vg.addColorStop(0,'rgba(60,40,20,0)');vg.addColorStop(1,'rgba(60,40,20,.28)');ctx.fillStyle=vg;ctx.fillRect(0,0,600,800);
+}
+
+
+function wall_crypt_day(ctx){
+  const n=noise2(81),n2=noise2(82),n3=noise2(83),rr_=mulberry(87);
+  // Pale limestone ashlar in daylight from a high window: the night picture's courses, sunlit.
+  const rows=[];for(let y=-10;y<820;){const h=42+Math.floor(rr_()*26);const xs=[];let x=-40-rr_()*80;while(x<640){xs.push(x);x+=64+rr_()*90}xs.push(x);rows.push({y0:y,y1:y+h,xs,tone:xs.map(()=>rr_()-.5)});y+=h}
+  const rowAt=new Array(820);for(const r of rows)for(let y=Math.max(0,Math.floor(r.y0));y<Math.min(820,r.y1);y++)rowAt[y]=r;
+  paint(ctx,0,0,600,800,(x,y)=>{
+    const r=rowAt[Math.floor(y)];let k=0;while(k<r.xs.length-2&&r.xs[k+1]<=x)k++;
+    const x0=r.xs[k],x1=r.xs[k+1],wob=fbm(n3,x*.08,y*.08,3)*3.2;
+    const dl=x-x0+wob,dr=x1-x+wob,dt=y-r.y0+wob,db=r.y1-y+wob,edge=Math.min(dl,dr,dt,db);
+    const grain=fbm(n,x*.035,y*.035,5)*.8,big=fbm(n2,x*.008+k*1.7,y*.008+r.y0*.01,3);
+    let c=mixc(hex('#a79f92'),hex('#e2dccf'),clamp(.55+grain*.5+big*.45+r.tone[k]*.3));
+    c=mixc(c,hex('#9aa38a'),clamp(fbm(n3,x*.02,y*.02,3)+.05)*.18); // lichen
+    if(edge<1.8)c=shade(c,.72);
+    else if(edge<5){const t=(edge-1.8)/3.2;c=(dt<5||dl<5)&&dt<=db?shade(c,lerp(1.12,1,t)):shade(c,lerp(.75,1,t))}
+    const crack=Math.abs(fbm(n3,x*.03+9,y*.03,4));if(crack<.008)c=shade(c,.9);
+    const u=(x*.55+y*.84),beam=Math.max(0,Math.cos((u-420)/38))**6*clamp(1-Math.abs(u-420)/260)+Math.max(0,Math.cos((u-560)/30))**6*clamp(1-Math.abs(u-560)/200)*.6;
+    c=mixc(c,hex('#fff4dc'),beam*clamp(1-y/760)*.45);
+    const l=Math.exp(-(((x-300)/380)**2+((y-420)/420)**2));c=shade(c,.8+.25*l);
+    return c.map(v=>Math.min(255,v));
+  });
+  const arch=()=>{ctx.beginPath();ctx.moveTo(70,800);ctx.lineTo(70,420);ctx.quadraticCurveTo(80,250,300,170);ctx.quadraticCurveTo(520,250,530,420);ctx.lineTo(530,800)};
+  ctx.save();arch();ctx.closePath();ctx.fillStyle='rgba(70,60,50,.12)';ctx.fill();ctx.restore();
+  ctx.lineWidth=3;arch();ctx.strokeStyle='rgba(70,60,50,.45)';ctx.stroke();
+  ctx.save();ctx.translate(-2.5,-2.5);arch();ctx.strokeStyle='rgba(255,250,235,.6)';ctx.lineWidth=1.4;ctx.stroke();ctx.restore();
+  ctx.save();ctx.translate(14,8);ctx.scale(.953,.99);arch();ctx.strokeStyle='rgba(70,60,50,.3)';ctx.lineWidth=2;ctx.stroke();ctx.restore();
+  const vg=ctx.createRadialGradient(300,430,260,300,430,660);vg.addColorStop(0,'rgba(50,45,40,0)');vg.addColorStop(1,'rgba(50,45,40,.3)');ctx.fillStyle=vg;ctx.fillRect(0,0,600,800);
+}
+
+
+function wall_deco_day(ctx){
+  const n=noise2(101),n2=noise2(102);
+  // Champagne silk with gold fans, a pale celadon field behind the shelves under a stepped crown.
+  paint(ctx,0,0,600,800,(x,y)=>{
+    const v=fbm(n,x*.01,y*.01,5),sheen=fbm(n2,x*.003,y*.05,3);
+    let c=mixc(hex('#e2d6bb'),hex('#f4ecda'),clamp(.5+v*.6+sheen*.5));
+    const l=Math.exp(-(((x-300)/300)**2+((y-60)/420)**2));c=shade(c,.92+.1*l);
+    return c.map(v=>Math.min(255,v));
+  });
+  ctx.save();const pat=ctx.createPattern(decoTile('168,128,52',1.9),'repeat');pat.setTransform(new DOMMatrix().scale(1/S));ctx.fillStyle=pat;ctx.fillRect(0,0,600,800);ctx.restore();
+  const gold=ctx.createLinearGradient(0,0,600,0);gold.addColorStop(0,'#86662a');gold.addColorStop(.5,'#d2ac5e');gold.addColorStop(1,'#86662a');
+  const field=()=>{ctx.beginPath();ctx.moveTo(40,800);ctx.lineTo(40,330);ctx.lineTo(120,330);ctx.lineTo(120,310);ctx.lineTo(200,310);ctx.lineTo(200,292);ctx.lineTo(400,292);ctx.lineTo(400,310);ctx.lineTo(480,310);ctx.lineTo(480,330);ctx.lineTo(560,330);ctx.lineTo(560,800)};
+  ctx.save();field();ctx.closePath();ctx.clip();
+  paint(ctx,40,292,520,508,(x,y)=>{const v=fbm(n2,x*.012,y*.012,4);const c=mixc(hex('#cfe0d4'),hex('#e4eee4'),clamp(.5+v*.8));return shade(c,.96+.06*Math.sin(x*.9)*0)});
+  ctx.restore();
+  ctx.strokeStyle=gold;ctx.lineWidth=1.8;field();ctx.stroke();
+  ctx.save();ctx.translate(0,6);ctx.lineWidth=.8;ctx.globalAlpha=.8;ctx.beginPath();ctx.moveTo(46,800);ctx.lineTo(46,330);ctx.lineTo(126,330);ctx.lineTo(126,310);ctx.lineTo(206,310);ctx.lineTo(206,292);ctx.lineTo(394,292);ctx.lineTo(394,310);ctx.lineTo(474,310);ctx.lineTo(474,330);ctx.lineTo(554,330);ctx.lineTo(554,800);ctx.stroke();ctx.restore();
+  ctx.save();ctx.globalAlpha=.75;for(let i=0;i<=20;i++){const a=Math.PI+Math.PI*i/20;ctx.strokeStyle=gold;ctx.lineWidth=i%2?1.2:.6;ctx.beginPath();ctx.moveTo(300+24*Math.cos(a),292+24*Math.sin(a));ctx.lineTo(300+90*Math.cos(a),292+90*Math.sin(a));ctx.stroke()}ctx.restore();
+  ctx.fillStyle=gold;ctx.beginPath();ctx.arc(300,292,18,Math.PI,0);ctx.fill();
+  ctx.strokeStyle=gold;ctx.lineWidth=1.4;ctx.strokeRect(10,10,580,780);
+}
+
+// Nébuleuse by day: a celestial chart on aged parchment, engraved in sepia and gold.
+function wall_fantasy_day(ctx){
+  const n=noise2(111),n2=noise2(112),r=mulberry(5);
+  paint(ctx,0,0,600,800,(x,y)=>{
+    const f=fbm(n,x*.008,y*.008,5),g=fbm(n2,x*.05,y*.05,3);
+    let c=mixc(hex('#d9c7a0'),hex('#f1e5c8'),clamp(.55+f*.8+g*.15));
+    const stain=clamp(fbm(n2,x*.004+3,y*.004,4)*2-.15);c=mixc(c,hex('#c4a77a'),stain*.35);
+    const edge=Math.min(x,600-x,y,800-y);c=shade(c,.78+.22*clamp(edge/70));
+    return c;
+  });
+  const ink='rgba(78,52,28,',gold=ctx.createLinearGradient(0,0,600,800);gold.addColorStop(0,'#9a7434');gold.addColorStop(.5,'#d8b260');gold.addColorStop(1,'#93702e');
+  const cx=300,cy=470;
+  // concentric rings of an astrolabe, graduated
+  ctx.lineWidth=1;for(const[rad,a]of[[270,.5],[262,.35],[200,.3],[120,.25]]){ctx.strokeStyle=ink+a+')';ctx.beginPath();ctx.arc(cx,cy,rad,0,7);ctx.stroke()}
+  for(let i=0;i<180;i++){const a=i/180*Math.PI*2,r2=i%15?266:276;ctx.strokeStyle=ink+(i%15?.35:.6)+')';ctx.beginPath();ctx.moveTo(cx+262*Math.cos(a),cy+262*Math.sin(a));ctx.lineTo(cx+r2*Math.cos(a),cy+r2*Math.sin(a));ctx.stroke()}
+  // ecliptic and meridians
+  ctx.strokeStyle=ink+'.22)';for(let k=0;k<6;k++){ctx.beginPath();ctx.ellipse(cx,cy,270,270*Math.abs(Math.cos(k*Math.PI/6)),0,0,7);ctx.stroke()}
+  ctx.save();ctx.strokeStyle=gold;ctx.lineWidth=1.6;ctx.beginPath();ctx.ellipse(cx,cy,262,92,-.38,0,7);ctx.stroke();ctx.restore();
+  // constellations: stars joined by fine lines, the brightest with gold rays
+  const groups=[[[90,120],[140,96],[188,128],[222,104],[262,140]],[[380,90],[420,140],[470,120],[512,170],[468,206]],[[110,560],[150,610],[120,660],[190,690]],[[430,600],[480,560],[520,620],[470,680],[420,650]],[[250,300],[300,270],[350,310],[330,360]]];
+  for(const g of groups){ctx.strokeStyle=ink+'.45)';ctx.lineWidth=.8;ctx.setLineDash([3,3]);ctx.beginPath();g.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.setLineDash([]);
+    for(const[x,y]of g){const s=1.6+r()*2.2;ctx.fillStyle=gold;ctx.beginPath();for(let i=0;i<8;i++){const a=i*Math.PI/4,rr=i%2?s*.45:s*2.2;ctx.lineTo(x+rr*Math.cos(a),y+rr*Math.sin(a))}ctx.closePath();ctx.fill()}}
+  for(let i=0;i<160;i++){ctx.fillStyle=ink+(.3+r()*.4)+')';ctx.beginPath();ctx.arc(r()*600,r()*800,.5+r()*.9,0,7);ctx.fill()}
+  // a crescent and a sun engraved at the top corners
+  ctx.save();ctx.translate(70,60);ctx.fillStyle=gold;ctx.beginPath();ctx.arc(0,0,22,0,7);ctx.arc(9,-5,19,0,7,true);ctx.fill('evenodd');ctx.restore();
+  ctx.save();ctx.translate(530,60);ctx.strokeStyle=gold;ctx.lineWidth=1.2;for(let i=0;i<16;i++){const a=i*Math.PI/8;ctx.beginPath();ctx.moveTo(14*Math.cos(a),14*Math.sin(a));ctx.lineTo((i%2?22:30)*Math.cos(a),(i%2?22:30)*Math.sin(a));ctx.stroke()}ctx.fillStyle=gold;ctx.beginPath();ctx.arc(0,0,11,0,7);ctx.fill();ctx.restore();
+  ctx.strokeStyle=ink+'.55)';ctx.lineWidth=1.4;ctx.strokeRect(14,14,572,772);ctx.lineWidth=.6;ctx.strokeRect(20,20,560,760);
+}
+
+// Arabesque by day: a leaded stained-glass window in daylight, amber, sage, rose and ivory panes.
+function wall_nouveau_day(ctx){
+  const n=noise2(141),n2=noise2(142),cell=cellular(143,95,110);
+  paint(ctx,0,0,600,800,(x,y)=>{
+    const wx=x+fbm(n,x*.004,y*.004,2)*70,wy=y+fbm(n,x*.004+7,y*.004,2)*50;const[d1,d2,id]=cell(wx,wy);
+    const pal=[hex('#e8c27a'),hex('#f1dba6'),hex('#b9cba0'),hex('#a9c2a6'),hex('#f3e7c9'),hex('#e4b08a'),hex('#c8d8d0'),hex('#f0d18e')];
+    let c=pal[Math.abs(id*7+3)%pal.length];
+    const seed=fbm(n2,x*.03,y*.03,4),streak=fbm(n2,x*.004,y*.06,3);c=shade(c,.9+seed*.18+streak*.1);
+    const sun=Math.exp(-(((x-420)/320)**2+((y-160)/380)**2));c=mixc(c,hex('#fffaf0'),.15+sun*.35);
+    const lead=d2-d1;
+    if(lead<3.2){const t=lead/3.2;c=mixc(hex('#3f3b34'),hex('#7a7468'),Math.sin(t*Math.PI)*.8)}
+    else if(lead<5.5)c=mixc(c,shade(c,.82),1-(lead-3.2)/2.3);
+    return c.map(v=>Math.min(255,v));
+  });
+  ctx.fillStyle='#ddd5c4';ctx.fillRect(0,0,22,800);ctx.fillRect(578,0,22,800);ctx.fillRect(0,0,600,18);
+  ctx.fillStyle='rgba(80,70,55,.35)';ctx.fillRect(22,18,3,782);ctx.fillRect(575,18,3,782);ctx.fillRect(22,18,556,3);
+}
+
+// Nébuleuse by day, the other choice: an enchanted birch wood in morning mist, motes of light drifting.
+function wall_fantasy_mist(ctx){
+  const n=noise2(121),n2=noise2(122),r=mulberry(12);
+  paint(ctx,0,0,600,800,(x,y)=>{
+    const v=y/800;let c=ramp([[0,hex('#dfe9ea')],[.5,hex('#e9efe6')],[1,hex('#cfdccd')]],v);
+    const m=clamp(fbm(n,x*.006,y*.012,5)*1.4+.4);c=mixc(c,hex('#f8fbf6'),m*.5);
+    const l=Math.exp(-(((x-380)/260)**2+((y-200)/300)**2));c=mixc(c,hex('#fff6dc'),l*.5);
+    return c;
+  });
+  // three planes of birches, fainter with distance
+  const tree=(x,w,a,seed)=>{const rr=mulberry(seed);ctx.save();ctx.globalAlpha=a;
+    const g=ctx.createLinearGradient(x-w/2,0,x+w/2,0);g.addColorStop(0,'#9aa39a');g.addColorStop(.35,'#f4f2ea');g.addColorStop(1,'#a9b0a6');ctx.fillStyle=g;
+    ctx.beginPath();ctx.moveTo(x-w/2,800);ctx.bezierCurveTo(x-w/2+4,500,x-w/2-6,200,x-w/2+2,-10);ctx.lineTo(x+w/2+2,-10);ctx.bezierCurveTo(x+w/2-4,200,x+w/2+6,500,x+w/2,800);ctx.fill();
+    ctx.fillStyle='#3c403a';for(let y=0;y<800;y+=14+rr()*30){const ww=w*(.2+rr()*.5),xx=x-w/2+rr()*(w-ww);ctx.globalAlpha=a*(.5+rr()*.5);ctx.beginPath();ctx.ellipse(xx+ww/2,y,ww/2,1+rr()*1.6,0,0,7);ctx.fill()}
+    ctx.restore()};
+  for(const[x,w,a]of[[60,14,.25],[170,10,.22],[290,12,.2],[420,9,.22],[540,13,.25]])tree(x,w,a,x);
+  paint(ctx,0,0,600,800,(x,y)=>{const m=clamp(fbm(n2,x*.008,y*.02,4)*1.6+.3);return[244,248,242,Math.round(m*90)]});
+  for(const[x,w,a]of[[24,26,.55],[230,20,.45],[500,30,.6]])tree(x,w,a,x+7);
+  for(const[x,w]of[[110,44],[580,40]])tree(x,w,.85,x+3);
+  // light motes
+  for(let i=0;i<40;i++){const x=r()*600,y=r()*800;glow(ctx,x,y,4+r()*7,'255,236,170',.35);ctx.fillStyle='rgba(255,250,220,.95)';ctx.beginPath();ctx.arc(x,y,.8,0,7);ctx.fill()}
+  // sun shafts through the canopy
+  ctx.save();ctx.globalCompositeOperation='lighter';for(const[x0,w]of[[330,40],[400,60],[470,30]]){const g=ctx.createLinearGradient(0,0,0,800);g.addColorStop(0,'rgba(255,240,200,.16)');g.addColorStop(1,'rgba(255,240,200,0)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(x0,0);ctx.lineTo(x0+w,0);ctx.lineTo(x0+w-160,800);ctx.lineTo(x0-160,800);ctx.fill()}ctx.restore();
+}
+
 // ── Planks ────────────────────────────────────────────────────────────────
 // Bookshelf's plank design: 360 px tall, three bands of 120. The middle band is the plank: its top
 // 96 px the top surface, its last 24 the front face. Below it, the shadow (and brackets).
@@ -435,14 +591,15 @@ function ornament(fn){
 
 // ── Wallpapers ────────────────────────────────────────────────────────────
 const WALLS={academia:wall_academia,nebula:wall_fantasy,crypt:wall_dark,arabesque:wall_nouveau,emerald:wall_deco};
-function wallpaper(id){
-  S=1236/600;const c=document.createElement('canvas');c.width=1236;c.height=1648;const ctx=c.getContext('2d');ctx.setTransform(S,0,0,S,0,0);WALLS[id](ctx);return c;
+const DAY_WALLS={academia:wall_academia_day,nebula:wall_fantasy_day,crypt:wall_crypt_day,arabesque:wall_nouveau_day,emerald:wall_deco_day};
+function wallpaper(id,day){
+  S=1236/600;const c=document.createElement('canvas');c.width=1236;c.height=1648;const ctx=c.getContext('2d');ctx.setTransform(S,0,0,S,0,0);(day?DAY_WALLS:WALLS)[id](ctx);return c;
 }
 
 const EXPORT={on:true};
 function renderTheme(id){
   const left=plankLeft(id);
   const ornaments={};for(const[name,fn]of Object.entries(ORNAMENTS[id]))ornaments[name]=ornament(fn).toDataURL('image/png');
-  return {wallpaper:wallpaper(id).toDataURL('image/jpeg',.9),middle:plankMiddle(id).toDataURL('image/png'),
+  return {wallpaper:wallpaper(id,true).toDataURL('image/jpeg',.9),night:wallpaper(id).toDataURL('image/jpeg',.9),middle:plankMiddle(id).toDataURL('image/png'),
     left:left.toDataURL('image/png'),right:mirrored(left).toDataURL('image/png'),ornaments};
 }
