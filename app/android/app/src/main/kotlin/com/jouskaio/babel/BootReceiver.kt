@@ -29,7 +29,7 @@ class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action !in BOOT_ACTIONS || !BootKoreader.isOn(context)) return
         if (BootKoreader.canSeeForeground(context)) {
-            watch(context)
+            watch(context, intent.action)
             return
         }
         // Without usage access Babel cannot see what is in front: open KOReader at each broadcast,
@@ -45,31 +45,32 @@ class BootReceiver : BroadcastReceiver() {
 
     /**
      * The BOOX launcher comes up at no fixed moment of the boot (7 to 20 s after the first
-     * broadcast) and covers KOReader. So for a while Babel looks, once a second, at which app is in
-     * front, and opens KOReader only when the launcher is: KOReader is not opened again and again
-     * while it is already in front, and comes back within a second. One watch per boot, whichever
-     * broadcast starts it.
+     * broadcast) and covers KOReader. So KOReader is opened at each broadcast, then for a while
+     * Babel looks once a second at which app is in front and opens KOReader again only when the
+     * launcher is: it is not opened again and again while already in front, and comes back within
+     * a second. Each broadcast starts the watch again (the process may be new, and the launchers
+     * cannot be listed before the device is unlocked).
      */
-    private fun watch(context: Context) {
+    private fun watch(context: Context, action: String?) {
+        val app = context.applicationContext
+        open(app, action)
+        until = SystemClock.elapsedRealtime() + WATCH_MS
+        val pending = goAsync()
+        handler.postDelayed({ pending.finish() }, WATCH_MS)
         if (watching) return
         watching = true
-        val app = context.applicationContext
-        val home = BootKoreader.homePackages(app)
-        val pending = goAsync()
-        val handler = Handler(Looper.getMainLooper())
-        var ticks = 0
         val tick = object : Runnable {
             override fun run() {
-                // Opened once at the start; after that only when the launcher has come to the front.
-                if (ticks == 0 || BootKoreader.foreground(app) in home) open(app, "watch")
-                if (++ticks < WATCH_TICKS) {
+                val front = BootKoreader.foreground(app)
+                if (front != null && front in BootKoreader.homePackages(app)) open(app, "watch")
+                if (SystemClock.elapsedRealtime() < until) {
                     handler.postDelayed(this, WATCH_EVERY_MS)
                 } else {
-                    pending.finish()
+                    watching = false
                 }
             }
         }
-        handler.post(tick)
+        handler.postDelayed(tick, WATCH_EVERY_MS)
     }
 
     private fun open(context: Context, action: String?) {
@@ -87,16 +88,20 @@ class BootReceiver : BroadcastReceiver() {
         private const val LOCKED_BOOT = "android.intent.action.LOCKED_BOOT_COMPLETED"
         private const val AGAIN_AFTER_MS = 3000L
         private const val WATCH_EVERY_MS = 1000L
-        private const val WATCH_TICKS = 45
+
+        // Under the minute Android gives a boot broadcast.
+        private const val WATCH_MS = 40_000L
         private val BOOT_ACTIONS = setOf(
             LOCKED_BOOT,
             Intent.ACTION_BOOT_COMPLETED,
             "android.intent.action.QUICKBOOT_POWERON",
         )
 
-        /** Set once per process, and the process is new at each boot. */
-        @Volatile
+        private val handler = Handler(Looper.getMainLooper())
+
+        // On the main thread only.
         private var watching = false
+        private var until = 0L
     }
 }
 
@@ -166,7 +171,9 @@ object BootKoreader {
     /** The launchers (the apps that answer the Home button). */
     fun homePackages(context: Context): Set<String> {
         val home = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
-        return context.packageManager.queryIntentActivities(home, 0)
+        // Both flags: before the device is unlocked, only direct-boot apps would be listed.
+        val flags = PackageManager.MATCH_DIRECT_BOOT_AWARE or PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+        return context.packageManager.queryIntentActivities(home, flags)
             .mapNotNull { it.activityInfo?.packageName }
             .toSet()
     }
@@ -180,7 +187,7 @@ object BootKoreader {
         val now = System.currentTimeMillis()
         val since = now - SystemClock.elapsedRealtime()
         val events = try {
-            usage.queryEvents(since, now)
+            usage.queryEvents(since, now) ?: return null
         } catch (error: Exception) {
             return null
         }
