@@ -64,10 +64,13 @@ def test_packs_are_what_bookshelf_reads():
         root = PLUGIN / "themes" / theme.id
         manifest = json.loads((root / "theme/theme.json").read_text())
         assert manifest["name"] == theme.name
-        assert manifest["shelf"] in ("light", "dark")
+        # No "shelf": the look follows KOReader's night mode, which shows wallpaper.dark.
+        assert "shelf" not in manifest
         assert (root / f"{manifest['hero']}.png").is_file()
-        assert (root / "theme/wallpaper.jpg").read_bytes()[:3] == b"\xff\xd8\xff"
+        for wallpaper in ("wallpaper.jpg", "wallpaper.dark.jpg"):
+            assert (root / "theme" / wallpaper).read_bytes()[:3] == b"\xff\xd8\xff"
         colours = json.loads((root / "theme/colours.json").read_text())
+        assert set(colours) == {"day", "night"}
         for look in colours.values():
             assert all(re.fullmatch(r"#[0-9A-F]{6}", v) for v in look.values())
         heights: set[int] = set()
