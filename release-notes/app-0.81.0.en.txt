@@ -1,0 +1,2 @@
+Random sleep and power-off screens on BOOX e-readers (KOReader plugin)
+New option: open KOReader when the e-reader starts

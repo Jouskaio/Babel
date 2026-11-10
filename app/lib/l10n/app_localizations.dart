@@ -7081,6 +7081,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'« {title} » a été supprimé de votre compte. D\'autres lecteurs l\'ont : son fichier reste sur le serveur pour eux.'**
   String deletedForeverShared(String title);
+
+  /// No description provided for @bootKoreader.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir KOReader au démarrage'**
+  String get bootKoreader;
+
+  /// No description provided for @bootKoreaderHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quand la liseuse s\'allume, Babel ouvre KOReader directement. Sur une Boox, autorisez aussi le démarrage automatique de Babel (Réglages > Gestion des applications), et ne fermez pas Babel en le balayant dans les applis récentes : il ne pourrait plus démarrer.'**
+  String get bootKoreaderHint;
+
+  /// No description provided for @bootKoreaderAllow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour ouvrir KOReader au démarrage, Android demande d\'autoriser Babel à s\'afficher par-dessus les autres applis.'**
+  String get bootKoreaderAllow;
+
+  /// No description provided for @bootKoreaderAllowButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autoriser'**
+  String get bootKoreaderAllowButton;
+
+  /// No description provided for @bootKoreaderWatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour que KOReader revienne dès que l\'accueil de la liseuse le recouvre, sans être relancé pour rien, autorisez l\'accès aux données d\'utilisation pour Babel.'**
+  String get bootKoreaderWatch;
+
+  /// No description provided for @bootKoreaderWatchButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autoriser'**
+  String get bootKoreaderWatchButton;
 }
 
 class _AppLocalizationsDelegate

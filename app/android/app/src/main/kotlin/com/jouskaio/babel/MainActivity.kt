@@ -35,8 +35,8 @@ class MainActivity : AudioServiceActivity() {
         // Lets Flutter recognize e-readers (BOOX, PocketBook…) and adapt to e-ink.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "babel/device")
             .setMethodCallHandler { call, result ->
-                if (call.method == "info") {
-                    result.success(
+                when (call.method) {
+                    "info" -> result.success(
                         mapOf(
                             "manufacturer" to Build.MANUFACTURER,
                             "brand" to Build.BRAND,
@@ -44,8 +44,21 @@ class MainActivity : AudioServiceActivity() {
                             "device" to Build.DEVICE,
                         ),
                     )
-                } else {
-                    result.notImplemented()
+                    // "Open KOReader when the e-reader starts" (see BootReceiver).
+                    "bootKoreader" -> result.success(BootKoreader.state(this))
+                    "setBootKoreader" -> {
+                        BootKoreader.setOn(this, call.argument<Boolean>("on") == true)
+                        result.success(BootKoreader.state(this))
+                    }
+                    "allowUsageAccess" -> {
+                        runCatching { startActivity(BootKoreader.usageSettings(this)) }
+                        result.success(null)
+                    }
+                    "allowBackgroundStart" -> {
+                        runCatching { startActivity(BootKoreader.overlaySettings(this)) }
+                        result.success(null)
+                    }
+                    else -> result.notImplemented()
                 }
             }
     }
