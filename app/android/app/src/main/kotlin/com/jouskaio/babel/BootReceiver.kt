@@ -53,6 +53,7 @@ class BootReceiver : BroadcastReceiver() {
      */
     private fun watch(context: Context, action: String?) {
         val app = context.applicationContext
+        Log.i(TAG, "watch from $action (already watching: $watching)")
         open(app, action)
         until = SystemClock.elapsedRealtime() + WATCH_MS
         val pending = goAsync()
@@ -62,10 +63,13 @@ class BootReceiver : BroadcastReceiver() {
         val tick = object : Runnable {
             override fun run() {
                 val front = BootKoreader.foreground(app)
-                if (front != null && front in BootKoreader.homePackages(app)) open(app, "watch")
+                val home = BootKoreader.homePackages(app)
+                Log.i(TAG, "watch: front=$front home=$home")
+                if (front != null && front in home) open(app, "watch")
                 if (SystemClock.elapsedRealtime() < until) {
                     handler.postDelayed(this, WATCH_EVERY_MS)
                 } else {
+                    Log.i(TAG, "watch: done")
                     watching = false
                 }
             }
@@ -112,6 +116,9 @@ class BootReceiver : BroadcastReceiver() {
 object BootKoreader {
     private const val PREFS = "babel_boot"
     private const val KEY = "open_koreader"
+
+    /** The BOOX launcher, in case it is not listed yet early in the boot. */
+    private const val BOOX_HOME = "com.onyx"
 
     /** KOReader's packages: the Play/GitHub build and the F-Droid one. */
     private val PACKAGES = listOf("org.koreader.launcher", "org.koreader.launcher.fdroid")
@@ -175,7 +182,7 @@ object BootKoreader {
         val flags = PackageManager.MATCH_DIRECT_BOOT_AWARE or PackageManager.MATCH_DIRECT_BOOT_UNAWARE
         return context.packageManager.queryIntentActivities(home, flags)
             .mapNotNull { it.activityInfo?.packageName }
-            .toSet()
+            .toSet() + BOOX_HOME
     }
 
     /**
