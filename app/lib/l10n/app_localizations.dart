@@ -7105,6 +7105,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Autoriser'**
   String get bootKoreaderAllowButton;
+
+  /// No description provided for @bootKoreaderWatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour que KOReader revienne dès que l\'accueil de la liseuse le recouvre, sans être relancé pour rien, autorisez l\'accès aux données d\'utilisation pour Babel.'**
+  String get bootKoreaderWatch;
+
+  /// No description provided for @bootKoreaderWatchButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autoriser'**
+  String get bootKoreaderWatchButton;
 }
 
 class _AppLocalizationsDelegate

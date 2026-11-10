@@ -1,5 +1,8 @@
 package com.jouskaio.babel
 
+import android.app.AppOpsManager
+import android.app.usage.UsageEvents
+import android.app.usage.UsageStatsManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -9,6 +12,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.Process
+import android.os.SystemClock
 import android.os.UserManager
 import android.provider.Settings
 import android.util.Log
@@ -23,18 +28,48 @@ import android.util.Log
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action !in BOOT_ACTIONS || !BootKoreader.isOn(context)) return
-        // The BOOX launcher comes up at no fixed moment of the boot, before or after either
-        // broadcast, and covers KOReader. So KOReader is opened at once, then again every second for
-        // a while: it comes back in front less than a second after the launcher.
+        if (BootKoreader.canSeeForeground(context)) {
+            watch(context)
+            return
+        }
+        // Without usage access Babel cannot see what is in front: open KOReader at each broadcast,
+        // and once more a little later in case the BOOX launcher comes up just after.
         open(context, intent.action)
+        if (intent.action == LOCKED_BOOT) return
+        val pending = goAsync()
+        Handler(Looper.getMainLooper()).postDelayed({
+            open(context, intent.action)
+            pending.finish()
+        }, AGAIN_AFTER_MS)
+    }
+
+    /**
+     * The BOOX launcher comes up at no fixed moment of the boot (7 to 20 s after the first
+     * broadcast) and covers KOReader. So for a while Babel looks, once a second, at which app is in
+     * front, and opens KOReader only when the launcher is: KOReader is not opened again and again
+     * while it is already in front, and comes back within a second. One watch per boot, whichever
+     * broadcast starts it.
+     */
+    private fun watch(context: Context) {
+        if (watching) return
+        watching = true
+        val app = context.applicationContext
+        val home = BootKoreader.homePackages(app)
         val pending = goAsync()
         val handler = Handler(Looper.getMainLooper())
-        for (i in 1..AGAIN_TIMES) {
-            handler.postDelayed({
-                open(context, intent.action)
-                if (i == AGAIN_TIMES) pending.finish()
-            }, i * AGAIN_EVERY_MS)
+        var ticks = 0
+        val tick = object : Runnable {
+            override fun run() {
+                // Opened once at the start; after that only when the launcher has come to the front.
+                if (ticks == 0 || BootKoreader.foreground(app) in home) open(app, "watch")
+                if (++ticks < WATCH_TICKS) {
+                    handler.postDelayed(this, WATCH_EVERY_MS)
+                } else {
+                    pending.finish()
+                }
+            }
         }
+        handler.post(tick)
     }
 
     private fun open(context: Context, action: String?) {
@@ -50,13 +85,18 @@ class BootReceiver : BroadcastReceiver() {
     companion object {
         private const val TAG = "BabelBoot"
         private const val LOCKED_BOOT = "android.intent.action.LOCKED_BOOT_COMPLETED"
-        private const val AGAIN_EVERY_MS = 1000L
-        private const val AGAIN_TIMES = 15
+        private const val AGAIN_AFTER_MS = 3000L
+        private const val WATCH_EVERY_MS = 1000L
+        private const val WATCH_TICKS = 45
         private val BOOT_ACTIONS = setOf(
             LOCKED_BOOT,
             Intent.ACTION_BOOT_COMPLETED,
             "android.intent.action.QUICKBOOT_POWERON",
         )
+
+        /** Set once per process, and the process is new at each boot. */
+        @Volatile
+        private var watching = false
     }
 }
 
@@ -111,9 +151,53 @@ object BootKoreader {
         Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
+    /** Whether Babel may see which app is in front ("Usage access"). */
+    fun canSeeForeground(context: Context): Boolean {
+        val ops = context.getSystemService(AppOpsManager::class.java) ?: return false
+        @Suppress("DEPRECATION")
+        val mode = ops.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), context.packageName)
+        return mode == AppOpsManager.MODE_ALLOWED
+    }
+
+    /** Babel's "Usage access" page in the system settings. */
+    fun usageSettings(context: Context): Intent =
+        Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+    /** The launchers (the apps that answer the Home button). */
+    fun homePackages(context: Context): Set<String> {
+        val home = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+        return context.packageManager.queryIntentActivities(home, 0)
+            .mapNotNull { it.activityInfo?.packageName }
+            .toSet()
+    }
+
+    /**
+     * The app in front, from the activities moved to the front since boot; null when there is
+     * none yet (nothing shown, or the data still locked).
+     */
+    fun foreground(context: Context): String? {
+        val usage = context.getSystemService(UsageStatsManager::class.java) ?: return null
+        val now = System.currentTimeMillis()
+        val since = now - SystemClock.elapsedRealtime()
+        val events = try {
+            usage.queryEvents(since, now)
+        } catch (error: Exception) {
+            return null
+        }
+        var front: String? = null
+        val event = UsageEvents.Event()
+        while (events.hasNextEvent()) {
+            events.getNextEvent(event)
+            @Suppress("DEPRECATION")
+            if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) front = event.packageName
+        }
+        return front
+    }
+
     fun state(context: Context): Map<String, Boolean> = mapOf(
         "on" to isOn(context),
         "installed" to koreaderInstalled(context),
         "allowed" to canOpenFromBackground(context),
+        "watch" to canSeeForeground(context),
     )
 }

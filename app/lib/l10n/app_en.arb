@@ -1413,5 +1413,7 @@
   "bootKoreader": "Open KOReader at startup",
   "bootKoreaderHint": "When the e-reader starts, Babel opens KOReader right away. On a BOOX, also allow Babel to auto-start (Settings > App management), and don't close Babel by swiping it away in recent apps: it could no longer start.",
   "bootKoreaderAllow": "To open KOReader at startup, Android asks you to let Babel display over other apps.",
-  "bootKoreaderAllowButton": "Allow"
+  "bootKoreaderAllowButton": "Allow",
+  "bootKoreaderWatch": "So that KOReader comes back as soon as the e-reader's home screen covers it, without being reopened for nothing, give Babel usage access.",
+  "bootKoreaderWatchButton": "Allow"
 }

@@ -2208,5 +2208,7 @@
   "bootKoreader": "Ouvrir KOReader au démarrage",
   "bootKoreaderHint": "Quand la liseuse s'allume, Babel ouvre KOReader directement. Sur une Boox, autorisez aussi le démarrage automatique de Babel (Réglages > Gestion des applications), et ne fermez pas Babel en le balayant dans les applis récentes : il ne pourrait plus démarrer.",
   "bootKoreaderAllow": "Pour ouvrir KOReader au démarrage, Android demande d'autoriser Babel à s'afficher par-dessus les autres applis.",
-  "bootKoreaderAllowButton": "Autoriser"
+  "bootKoreaderAllowButton": "Autoriser",
+  "bootKoreaderWatch": "Pour que KOReader revienne dès que l'accueil de la liseuse le recouvre, sans être relancé pour rien, autorisez l'accès aux données d'utilisation pour Babel.",
+  "bootKoreaderWatchButton": "Autoriser"
 }

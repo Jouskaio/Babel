@@ -14,6 +14,7 @@ class BootKoreaderState {
     required this.on,
     required this.installed,
     required this.allowed,
+    required this.watch,
   });
 
   factory BootKoreaderState.from(Map<Object?, Object?>? map) =>
@@ -21,6 +22,7 @@ class BootKoreaderState {
         on: map?['on'] == true,
         installed: map?['installed'] == true,
         allowed: map?['allowed'] == true,
+        watch: map?['watch'] == true,
       );
 
   final bool on;
@@ -30,6 +32,10 @@ class BootKoreaderState {
 
   /// Android lets Babel open it from the background ("Display over other apps").
   final bool allowed;
+
+  /// Babel may see which app is in front ("Usage access"), so at boot it reopens KOReader only
+  /// when the launcher covers it.
+  final bool watch;
 }
 
 const _channel = MethodChannel('babel/device');
@@ -94,6 +100,20 @@ class _BootKoreaderSwitchState extends State<BootKoreaderSwitch> {
 
   Future<void> _allow() => _channel.invokeMethod<void>('allowBackgroundStart');
 
+  Future<void> _allowWatch() => _channel.invokeMethod<void>('allowUsageAccess');
+
+  Widget _ask(String text, String button, VoidCallback onPressed) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(text, style: BabelText.body(12, color: BabelColors.gold)),
+        ),
+        TextButton(onPressed: onPressed, child: Text(button)),
+      ],
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final state = _state;
@@ -110,22 +130,12 @@ class _BootKoreaderSwitchState extends State<BootKoreaderSwitch> {
           subtitle: Text(l10n.bootKoreaderHint, style: BabelText.body(12)),
         ),
         if (state.on && !state.allowed)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.bootKoreaderAllow,
-                    style: BabelText.body(12, color: BabelColors.gold),
-                  ),
-                ),
-                TextButton(
-                  onPressed: _allow,
-                  child: Text(l10n.bootKoreaderAllowButton),
-                ),
-              ],
-            ),
+          _ask(l10n.bootKoreaderAllow, l10n.bootKoreaderAllowButton, _allow)
+        else if (state.on && !state.watch)
+          _ask(
+            l10n.bootKoreaderWatch,
+            l10n.bootKoreaderWatchButton,
+            _allowWatch,
           ),
       ],
     );

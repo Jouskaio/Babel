@@ -50,6 +50,10 @@ class MainActivity : AudioServiceActivity() {
                         BootKoreader.setOn(this, call.argument<Boolean>("on") == true)
                         result.success(BootKoreader.state(this))
                     }
+                    "allowUsageAccess" -> {
+                        runCatching { startActivity(BootKoreader.usageSettings(this)) }
+                        result.success(null)
+                    }
                     "allowBackgroundStart" -> {
                         runCatching { startActivity(BootKoreader.overlaySettings(this)) }
                         result.success(null)

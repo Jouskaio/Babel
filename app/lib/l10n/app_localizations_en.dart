@@ -4259,4 +4259,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bootKoreaderAllowButton => 'Allow';
+
+  @override
+  String get bootKoreaderWatch =>
+      'So that KOReader comes back as soon as the e-reader\'s home screen covers it, without being reopened for nothing, give Babel usage access.';
+
+  @override
+  String get bootKoreaderWatchButton => 'Allow';
 }
