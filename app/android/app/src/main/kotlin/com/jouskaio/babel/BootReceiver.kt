@@ -76,8 +76,10 @@ class BootReceiver : BroadcastReceiver() {
             override fun run() {
                 val front = BootKoreader.foreground(app)
                 val home = BootKoreader.homePackages(app)
-                Log.i(TAG, "watch: front=$front home=$home")
-                if (front != null && front in home) open(app, "watch")
+                if (front != null && front in home) {
+                    Log.i(TAG, "watch: $front in front, KOReader opened again")
+                    open(app, "watch")
+                }
                 if (SystemClock.elapsedRealtime() < until) {
                     handler.postDelayed(this, WATCH_EVERY_MS)
                 } else {
