@@ -23,19 +23,18 @@ import android.util.Log
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action !in BOOT_ACTIONS || !BootKoreader.isOn(context)) return
-        if (intent.action == LOCKED_BOOT) {
-            // Early (the BOOX launcher may come up long before BOOT_COMPLETED), but the launcher can
-            // also come up after it and cover KOReader: BOOT_COMPLETED opens it again.
-            open(context, intent.action)
-            return
-        }
-        // Once more a few seconds later, in case the launcher comes up just after.
+        // The BOOX launcher comes up at no fixed moment of the boot, before or after either
+        // broadcast, and covers KOReader. So KOReader is opened at once, then again every second for
+        // a while: it comes back in front less than a second after the launcher.
         open(context, intent.action)
         val pending = goAsync()
-        Handler(Looper.getMainLooper()).postDelayed({
-            open(context, intent.action)
-            pending.finish()
-        }, AGAIN_AFTER_MS)
+        val handler = Handler(Looper.getMainLooper())
+        for (i in 1..AGAIN_TIMES) {
+            handler.postDelayed({
+                open(context, intent.action)
+                if (i == AGAIN_TIMES) pending.finish()
+            }, i * AGAIN_EVERY_MS)
+        }
     }
 
     private fun open(context: Context, action: String?) {
@@ -51,7 +50,8 @@ class BootReceiver : BroadcastReceiver() {
     companion object {
         private const val TAG = "BabelBoot"
         private const val LOCKED_BOOT = "android.intent.action.LOCKED_BOOT_COMPLETED"
-        private const val AGAIN_AFTER_MS = 4000L
+        private const val AGAIN_EVERY_MS = 1000L
+        private const val AGAIN_TIMES = 15
         private val BOOT_ACTIONS = setOf(
             LOCKED_BOOT,
             Intent.ACTION_BOOT_COMPLETED,
