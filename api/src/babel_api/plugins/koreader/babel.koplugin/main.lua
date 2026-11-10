@@ -12,6 +12,9 @@ library) are downloaded into a "Babel" folder, one after the other, when the e-r
 It also installs Bookshelf themes (Babel's, and the reader's own, from a folder or a .zip): see
 babel_bookshelf.lua.
 
+On a BOOX, it can also change the system's sleep and power-off images at random from a folder
+(Storefront's screensaver collection by default): see babel_boox.lua.
+
 Menu: Tools > Babel.
 --]]
 
@@ -37,6 +40,14 @@ if not ok_shelf then
     logger.warn("Babel: Bookshelf themes unavailable", Shelf)
     Shelf = nil
 end
+local ok_boox, Boox = pcall(require, "babel_boox")
+if not ok_boox then
+    logger.warn("Babel: BOOX screens unavailable", Boox)
+    Boox = nil
+end
+-- Whether the BOOX screens were already changed since KOReader started (the plugin is loaded
+-- again with each book).
+local boox_started = false
 
 local DAY = 24 * 60 * 60
 
@@ -60,6 +71,12 @@ function Babel:init()
     UIManager:nextTick(function()
         self:syncThemes(false)
     end)
+    if not boox_started then
+        boox_started = true
+        UIManager:scheduleIn(2, function()
+            self:rotateBooxScreens(false)
+        end)
+    end
 end
 
 -- One-tap actions: they can be put in a gesture, a profile or the Bookshelf start menu
@@ -1277,6 +1294,15 @@ function Babel:addToMainMenu(menu_items)
                 text = _("Bookshelf themes"),
                 sub_item_table_func = function()
                     return self:themesMenu()
+                end,
+            },
+            {
+                text = _("BOOX sleep screens"),
+                enabled_func = function()
+                    return self:isBoox()
+                end,
+                sub_item_table_func = function()
+                    return self:booxMenu()
                 end,
             },
             {
