@@ -19,53 +19,69 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const PLUGIN = join(HERE, "../../api/src/babel_api/plugins/koreader/babel.koplugin");
 const OUT = join(PLUGIN, "themes");
 
-// accent: progress bar and bookmark; track: progress track; plank: the shelf's own colour.
+// Each theme has a light picture for day and a dark one (wallpaper.dark) that Bookshelf shows in
+// KOReader's night mode, with the colours of each. accent: progress bar and bookmark; track:
+// progress track; plank: the shelf's own colour.
 const PACKS = [
   {
     id: "academia",
     folder: "Babel Cabinet de lecture",
     name: "Cabinet de lecture",
-    description: "Walnut panelling in lamplight, a green banker's lamp and a stack of old books.",
+    description: "Ivory damask and oak panelling by day, walnut in lamplight by night; a green banker's lamp and old books.",
     hero: "bankers-lamp",
-    colours: { text: "#EFE4C8", accent: "#C9A865", track: "#4A3A28", panel: "#100B07", plank: "#4A2816" },
+    colours: {
+      day: { text: "#2E1E12", accent: "#8A5A2C", track: "#D8C8A8", panel: "#F1E7D2", plank: "#4A2816" },
+      night: { text: "#EFE4C8", accent: "#C9A865", track: "#4A3A28", panel: "#100B07", plank: "#4A2816" },
+    },
   },
   {
     id: "nebula",
     folder: "Babel Nebuleuse",
     name: "Nébuleuse",
-    description: "A nebula sky, a silvery shelf with a glowing edge, crystals and a potion.",
+    description: "A celestial chart on parchment by day, a nebula sky by night; a silvery shelf, crystals and a potion.",
     hero: "crystals",
-    colours: { text: "#EEF2FF", accent: "#9FE3FF", track: "#2A3358", panel: "#080A1E", plank: "#A8ADC2" },
+    colours: {
+      day: { text: "#33261A", accent: "#6A4FA0", track: "#DCCDAE", panel: "#F1E5C8", plank: "#A8ADC2" },
+      night: { text: "#EEF2FF", accent: "#9FE3FF", track: "#2A3358", panel: "#080A1E", plank: "#A8ADC2" },
+    },
   },
   {
     id: "crypt",
     folder: "Babel Crypte",
     name: "Crypte",
-    description: "Old stone by candlelight, an iron-bound shelf, a candelabrum and a grimoire.",
+    description: "Sunlit limestone by day, stone by candlelight at night; an iron-bound shelf, a candelabrum and a grimoire.",
     hero: "candelabrum",
-    colours: { text: "#E6DCCB", accent: "#A3232F", track: "#3A3236", panel: "#0A080A", plank: "#2A2018" },
+    colours: {
+      day: { text: "#2A2622", accent: "#8A1E28", track: "#CFC8BC", panel: "#ECE7DE", plank: "#2A2018" },
+      night: { text: "#E6DCCB", accent: "#A3232F", track: "#3A3236", panel: "#0A080A", plank: "#2A2018" },
+    },
   },
   {
     id: "arabesque",
     folder: "Babel Arabesque",
     name: "Arabesque",
-    description: "Art nouveau stems and poppies, a gilded whiplash shelf, a Gallé vase and a Tiffany lamp.",
+    description: "A stained-glass window by day, art nouveau stems and poppies by night; a Gallé vase and a Tiffany lamp.",
     hero: "tiffany-lamp",
-    colours: { text: "#F1E6CC", accent: "#D6B46E", track: "#33463C", panel: "#121C17", plank: "#7A5430" },
+    colours: {
+      day: { text: "#2C3A2E", accent: "#A87A30", track: "#D9D3BC", panel: "#F3EAD2", plank: "#7A5430" },
+      night: { text: "#F1E6CC", accent: "#D6B46E", track: "#33463C", panel: "#121C17", plank: "#7A5430" },
+    },
   },
   {
     id: "emerald",
     folder: "Babel Emeraude",
     name: "Émeraude",
-    description: "Art deco fans in green and gold, a black marble shelf, a fan lamp and champagne coupes.",
+    description: "Art deco fans in champagne and celadon by day, green and gold by night; a black marble shelf, a fan lamp.",
     hero: "fan-lamp",
-    colours: { text: "#F3E6C4", accent: "#D4AF64", track: "#1E3A2E", panel: "#040C09", plank: "#1A1A1C" },
+    colours: {
+      day: { text: "#12382A", accent: "#A8802F", track: "#D6E2D6", panel: "#F4ECDA", plank: "#1A1A1C" },
+      night: { text: "#F3E6C4", accent: "#D4AF64", track: "#1E3A2E", panel: "#040C09", plank: "#1A1A1C" },
+    },
   },
 ];
 
-function colours(c) {
-  // The shelves are all dark, so the day and night sets are the same.
-  const set = {
+function colourSet(c) {
+  return {
     text: c.text,
     "progress bar": c.accent,
     "progress track": c.track,
@@ -77,8 +93,9 @@ function colours(c) {
     page: c.panel,
     plank: c.plank,
   };
-  return { day: set, night: { ...set } };
 }
+
+const colours = (c) => ({ day: colourSet(c.day), night: colourSet(c.night) });
 
 // Bookshelf reads where a plank end stops from a tEXt chunk "bookshelf" → "plank_end=N", which
 // must come right after IHDR.
@@ -117,11 +134,13 @@ for (const pack of PACKS) {
   const theme = join(root, "theme");
   mkdirSync(theme, { recursive: true });
   writeFileSync(join(theme, "wallpaper.jpg"), decode(r.wallpaper));
+  writeFileSync(join(theme, "wallpaper.dark.jpg"), decode(r.night));
   writeFileSync(join(theme, "plank.middle.png"), decode(r.middle));
   writeFileSync(join(theme, "plank.left.png"), withPlankEnd(decode(r.left), 70));
   writeFileSync(join(theme, "plank.right.png"), withPlankEnd(decode(r.right), 70));
   for (const [name, url] of Object.entries(r.ornaments)) writeFileSync(join(root, `${name}.png`), decode(url));
-  const manifest = { name: pack.name, description: pack.description, shelf: "dark", hero: pack.hero };
+  // No "shelf": the look follows KOReader's night mode, light by day and dark at night.
+  const manifest = { name: pack.name, description: pack.description, hero: pack.hero };
   writeFileSync(join(theme, "theme.json"), `${JSON.stringify(manifest, null, 2)}\n`);
   writeFileSync(join(theme, "colours.json"), `${JSON.stringify(colours(pack.colours), null, 2)}\n`);
 
