@@ -1409,5 +1409,9 @@
   "deleteForeverAsk": "Delete “{title}” for good?",
   "deleteForeverBody": "The book leaves your library with your progress, notes, highlights and review: none of it can be brought back. Its file is deleted from the server too, unless other readers have it.",
   "deletedForever": "“{title}” was deleted for good, file included.",
-  "deletedForeverShared": "“{title}” was deleted from your account. Other readers have it: its file stays on the server for them."
+  "deletedForeverShared": "“{title}” was deleted from your account. Other readers have it: its file stays on the server for them.",
+  "bootKoreader": "Open KOReader at startup",
+  "bootKoreaderHint": "When the e-reader starts, Babel opens KOReader right away.",
+  "bootKoreaderAllow": "To open KOReader at startup, Android asks you to let Babel display over other apps.",
+  "bootKoreaderAllowButton": "Allow"
 }

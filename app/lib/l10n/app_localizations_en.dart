@@ -4245,4 +4245,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String deletedForeverShared(String title) {
     return '“$title” was deleted from your account. Other readers have it: its file stays on the server for them.';
   }
+
+  @override
+  String get bootKoreader => 'Open KOReader at startup';
+
+  @override
+  String get bootKoreaderHint =>
+      'When the e-reader starts, Babel opens KOReader right away.';
+
+  @override
+  String get bootKoreaderAllow =>
+      'To open KOReader at startup, Android asks you to let Babel display over other apps.';
+
+  @override
+  String get bootKoreaderAllowButton => 'Allow';
 }

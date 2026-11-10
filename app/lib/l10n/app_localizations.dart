@@ -7081,6 +7081,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'« {title} » a été supprimé de votre compte. D\'autres lecteurs l\'ont : son fichier reste sur le serveur pour eux.'**
   String deletedForeverShared(String title);
+
+  /// No description provided for @bootKoreader.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir KOReader au démarrage'**
+  String get bootKoreader;
+
+  /// No description provided for @bootKoreaderHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quand la liseuse s\'allume, Babel ouvre KOReader directement.'**
+  String get bootKoreaderHint;
+
+  /// No description provided for @bootKoreaderAllow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour ouvrir KOReader au démarrage, Android demande d\'autoriser Babel à s\'afficher par-dessus les autres applis.'**
+  String get bootKoreaderAllow;
+
+  /// No description provided for @bootKoreaderAllowButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autoriser'**
+  String get bootKoreaderAllowButton;
 }
 
 class _AppLocalizationsDelegate
