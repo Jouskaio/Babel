@@ -7091,7 +7091,7 @@ abstract class AppLocalizations {
   /// No description provided for @bootKoreaderHint.
   ///
   /// In fr, this message translates to:
-  /// **'Quand la liseuse s\'allume, Babel ouvre KOReader directement.'**
+  /// **'Quand la liseuse s\'allume, Babel ouvre KOReader directement. Sur une Boox, autorisez aussi le démarrage automatique de Babel (Réglages > Gestion des applications), et ne fermez pas Babel en le balayant dans les applis récentes : il ne pourrait plus démarrer.'**
   String get bootKoreaderHint;
 
   /// No description provided for @bootKoreaderAllow.

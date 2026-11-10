@@ -4251,7 +4251,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bootKoreaderHint =>
-      'When the e-reader starts, Babel opens KOReader right away.';
+      'When the e-reader starts, Babel opens KOReader right away. On a BOOX, also allow Babel to auto-start (Settings > App management), and don\'t close Babel by swiping it away in recent apps: it could no longer start.';
 
   @override
   String get bootKoreaderAllow =>
