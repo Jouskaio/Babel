@@ -4280,4 +4280,25 @@ class AppLocalizationsFr extends AppLocalizations {
   String deletedForeverShared(String title) {
     return '« $title » a été supprimé de votre compte. D\'autres lecteurs l\'ont : son fichier reste sur le serveur pour eux.';
   }
+
+  @override
+  String get bootKoreader => 'Ouvrir KOReader au démarrage';
+
+  @override
+  String get bootKoreaderHint =>
+      'Quand la liseuse s\'allume, Babel ouvre KOReader directement. Sur une Boox, autorisez aussi le démarrage automatique de Babel (Réglages > Gestion des applications), et ne fermez pas Babel en le balayant dans les applis récentes : il ne pourrait plus démarrer.';
+
+  @override
+  String get bootKoreaderAllow =>
+      'Pour ouvrir KOReader au démarrage, Android demande d\'autoriser Babel à s\'afficher par-dessus les autres applis.';
+
+  @override
+  String get bootKoreaderAllowButton => 'Autoriser';
+
+  @override
+  String get bootKoreaderWatch =>
+      'Pour que KOReader revienne dès que l\'accueil de la liseuse le recouvre, sans être relancé pour rien, autorisez l\'accès aux données d\'utilisation pour Babel.';
+
+  @override
+  String get bootKoreaderWatchButton => 'Autoriser';
 }

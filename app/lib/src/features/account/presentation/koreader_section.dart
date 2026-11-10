@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_providers.dart';
+import '../../../core/display/boot_koreader.dart';
 import '../../../core/locale/relative_time.dart';
 import '../../../core/theme/babel_colors.dart';
 import '../../../core/theme/babel_text.dart';
@@ -98,6 +99,8 @@ class _KoreaderSectionState extends ConsumerState<KoreaderSection> {
           loading: _busy,
           onPressed: _make,
         ),
+        const SizedBox(height: 10),
+        const BootKoreaderSwitch(),
         if (info.hasPassword || _password != null) ...[
           const SizedBox(height: 22),
           const _SyncStatus(),
