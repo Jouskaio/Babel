@@ -7,6 +7,8 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.UserManager
 import android.provider.Settings
 import android.util.Log
@@ -21,23 +23,37 @@ import android.util.Log
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action !in BOOT_ACTIONS || !BootKoreader.isOn(context)) return
-        // LOCKED_BOOT_COMPLETED comes first (the e-reader's launcher may be up for a while before
-        // BOOT_COMPLETED): open KOReader then, and only once per boot.
-        if (BootKoreader.openedThisBoot(context)) return
+        if (intent.action == LOCKED_BOOT) {
+            // Early (the BOOX launcher may come up long before BOOT_COMPLETED), but the launcher can
+            // also come up after it and cover KOReader: BOOT_COMPLETED opens it again.
+            open(context, intent.action)
+            return
+        }
+        // Once more a few seconds later, in case the launcher comes up just after.
+        open(context, intent.action)
+        val pending = goAsync()
+        Handler(Looper.getMainLooper()).postDelayed({
+            open(context, intent.action)
+            pending.finish()
+        }, AGAIN_AFTER_MS)
+    }
+
+    private fun open(context: Context, action: String?) {
         val launch = BootKoreader.launchIntent(context) ?: return
         try {
             context.startActivity(launch)
-            BootKoreader.markOpened(context)
         } catch (error: Exception) {
-            // Too early (storage still locked): BOOT_COMPLETED tries again.
-            Log.w(TAG, "KOReader not opened at ${intent.action}", error)
+            // Too early (storage still locked) at LOCKED_BOOT_COMPLETED: BOOT_COMPLETED tries again.
+            Log.w(TAG, "KOReader not opened at $action", error)
         }
     }
 
     companion object {
         private const val TAG = "BabelBoot"
+        private const val LOCKED_BOOT = "android.intent.action.LOCKED_BOOT_COMPLETED"
+        private const val AGAIN_AFTER_MS = 4000L
         private val BOOT_ACTIONS = setOf(
-            "android.intent.action.LOCKED_BOOT_COMPLETED",
+            LOCKED_BOOT,
             Intent.ACTION_BOOT_COMPLETED,
             "android.intent.action.QUICKBOOT_POWERON",
         )
@@ -51,7 +67,6 @@ class BootReceiver : BroadcastReceiver() {
 object BootKoreader {
     private const val PREFS = "babel_boot"
     private const val KEY = "open_koreader"
-    private const val OPENED_BOOT = "opened_boot"
 
     /** KOReader's packages: the Play/GitHub build and the F-Droid one. */
     private val PACKAGES = listOf("org.koreader.launcher", "org.koreader.launcher.fdroid")
@@ -74,23 +89,6 @@ object BootKoreader {
 
     fun setOn(context: Context, on: Boolean) {
         prefs(context).edit().putBoolean(KEY, on).apply()
-    }
-
-    /** This boot, told apart from the others by Android's boot count. */
-    private fun bootCount(context: Context): Int =
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            -1
-        } else {
-            Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT, -1)
-        }
-
-    fun openedThisBoot(context: Context): Boolean {
-        val count = bootCount(context)
-        return count >= 0 && prefs(context).getInt(OPENED_BOOT, -2) == count
-    }
-
-    fun markOpened(context: Context) {
-        prefs(context).edit().putInt(OPENED_BOOT, bootCount(context)).apply()
     }
 
     fun launchIntent(context: Context): Intent? {
