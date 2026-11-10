@@ -1,6 +1,8 @@
 package com.jouskaio.babel
 
+import android.app.AlarmManager
 import android.app.AppOpsManager
+import android.app.PendingIntent
 import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.BroadcastReceiver
@@ -27,9 +29,19 @@ import android.util.Log
  */
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == WATCH_AGAIN) {
+            // The watch again, in case BOOX killed Babel's process (it does early in the boot).
+            val end = intent.getLongExtra(EXTRA_UNTIL, 0L)
+            if (BootKoreader.isOn(context) && SystemClock.elapsedRealtime() < end) {
+                watch(context, intent.action, end, openFirst = false)
+            }
+            return
+        }
         if (intent.action !in BOOT_ACTIONS || !BootKoreader.isOn(context)) return
         if (BootKoreader.canSeeForeground(context)) {
-            watch(context, intent.action)
+            val end = SystemClock.elapsedRealtime() + WATCH_MS
+            watch(context, intent.action, end, openFirst = true)
+            scheduleAgain(context, end)
             return
         }
         // Without usage access Babel cannot see what is in front: open KOReader at each broadcast,
@@ -51,13 +63,13 @@ class BootReceiver : BroadcastReceiver() {
      * a second. Each broadcast starts the watch again (the process may be new, and the launchers
      * cannot be listed before the device is unlocked).
      */
-    private fun watch(context: Context, action: String?) {
+    private fun watch(context: Context, action: String?, end: Long, openFirst: Boolean) {
         val app = context.applicationContext
         Log.i(TAG, "watch from $action (already watching: $watching)")
-        open(app, action)
-        until = SystemClock.elapsedRealtime() + WATCH_MS
+        if (openFirst) open(app, action)
+        until = maxOf(until, end)
         val pending = goAsync()
-        handler.postDelayed({ pending.finish() }, WATCH_MS)
+        handler.postDelayed({ pending.finish() }, end - SystemClock.elapsedRealtime())
         if (watching) return
         watching = true
         val tick = object : Runnable {
@@ -77,6 +89,33 @@ class BootReceiver : BroadcastReceiver() {
         handler.postDelayed(tick, WATCH_EVERY_MS)
     }
 
+    /**
+     * BOOX kills the apps it has just started a few seconds into the boot, Babel included, which
+     * stops the watch before its launcher comes up. A few alarms bring Babel back to carry on.
+     */
+    private fun scheduleAgain(context: Context, end: Long) {
+        val alarms = context.getSystemService(AlarmManager::class.java) ?: return
+        val exact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarms.canScheduleExactAlarms()
+        AGAIN_AT_MS.forEachIndexed { i, delay ->
+            val again = Intent(context, BootReceiver::class.java)
+                .setAction(WATCH_AGAIN)
+                .putExtra(EXTRA_UNTIL, end)
+            val operation = PendingIntent.getBroadcast(
+                context, i, again, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+            val at = SystemClock.elapsedRealtime() + delay
+            try {
+                if (exact) {
+                    alarms.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, at, operation)
+                } else {
+                    alarms.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, at, operation)
+                }
+            } catch (error: SecurityException) {
+                Log.w(TAG, "watch alarm not set", error)
+            }
+        }
+    }
+
     private fun open(context: Context, action: String?) {
         val launch = BootKoreader.launchIntent(context) ?: return
         try {
@@ -92,6 +131,9 @@ class BootReceiver : BroadcastReceiver() {
         private const val LOCKED_BOOT = "android.intent.action.LOCKED_BOOT_COMPLETED"
         private const val AGAIN_AFTER_MS = 3000L
         private const val WATCH_EVERY_MS = 1000L
+        private const val WATCH_AGAIN = "com.jouskaio.babel.BOOT_WATCH_AGAIN"
+        private const val EXTRA_UNTIL = "until"
+        private val AGAIN_AT_MS = listOf(4_000L, 8_000L, 14_000L, 22_000L)
 
         // Under the minute Android gives a boot broadcast.
         private const val WATCH_MS = 40_000L
