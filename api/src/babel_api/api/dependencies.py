@@ -692,6 +692,7 @@ async def run_source_scan(container: Container, user_id: UUID, source_id: UUID) 
                 source.last_added,
                 source.last_removed,
                 failed=source.last_error is not None,
+                limited="rate_limited" in (source.last_error or ""),
             )
     except Exception:
         logger.exception("Background scan of source %s failed", source_id)

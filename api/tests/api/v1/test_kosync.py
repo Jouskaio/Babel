@@ -405,9 +405,10 @@ def test_a_book_finished_and_highlights_made_in_koreader_reach_babel(
     assert client.put("/v1/kosync/syncs/annotations", json=notes, headers=key).json() == {
         "added": 0
     }  # sent again: nothing new
-    assert client.put(
+    unknown = client.put(
         "/v1/kosync/syncs/annotations", json={**notes, "document": "d" * 32}, headers=key
-    ).json() == {"added": 0}  # a book Babel does not have
+    )
+    assert unknown.status_code == 404  # a book Babel does not have: the plugin sends it again
 
     done = client.put(
         "/v1/kosync/syncs/finished", json={"document": document, "device": "Boox"}, headers=key

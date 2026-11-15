@@ -37,10 +37,18 @@ _SCANNED = {
     "fr": {
         "done": ("Source parcourue", "{name} : {total} livres (+{added}, −{removed})"),
         "failed": ("Source injoignable", "Le scan de {name} a échoué : réessayez plus tard"),
+        "limited": (
+            "Source saturée",
+            "{name} limite l'accès pour l'instant : réessayez dans quelques minutes",
+        ),
     },
     "en": {
         "done": ("Source scanned", "{name}: {total} books (+{added}, −{removed})"),
         "failed": ("Source unreachable", "The scan of {name} failed: try again later"),
+        "limited": (
+            "Source busy",
+            "{name} limits access for now: try again in a few minutes",
+        ),
     },
 }
 
@@ -87,11 +95,13 @@ class Notifier:
         removed: int,
         *,
         failed: bool,
+        limited: bool = False,
     ) -> int:
-        """A scan that went on in the background is over: books added, removed, or a failure."""
+        """A scan that went on in the background is over: books added, removed, or a failure
+        (the source refusing requests for a while is [limited], not unreachable)."""
         user = await self._users.get_by_id(user_id)
         texts = _SCANNED.get(user.locale if user else "fr", _SCANNED["fr"])
-        heading, body = texts["failed" if failed else "done"]
+        heading, body = texts[("limited" if limited else "failed") if failed else "done"]
         text = body.format(name=name, total=total, added=added, removed=removed)
         data = {"kind": "source_scanned", "source_id": str(source_id)}
         return await self._send(user_id, heading, text, data)
