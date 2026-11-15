@@ -177,14 +177,15 @@ class KoreaderService:
     async def annotations(
         self, user_id: UUID, document: str, device: str, found: list[dict[str, Any]]
     ) -> int:
-        """Highlights and notes made in KOReader become the reader's annotations in Babel."""
-        try:
-            item_id = await self._item_of(user_id, document)
-        except NotFoundError:
-            return 0
+        """Highlights and notes made in KOReader become the reader's annotations in Babel.
+
+        A book Babel does not know raises NotFoundError (a 404), so the plugin keeps the
+        highlights and sends them again later, once the book is matched.
+        """
+        item_id = await self._item_of(user_id, document)
         item = await self._files.get_item(item_id)
         if item is None or item.sha256 is None:
-            return 0
+            raise NotFoundError
         operations: list[Operation] = []
         for note in found:
             quote = str(note.get("text") or "").strip()
