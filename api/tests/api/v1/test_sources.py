@@ -667,6 +667,16 @@ def test_a_background_scan_tells_the_readers_devices_how_it_went(
     client.post(f"/v1/sources/{source_id}/scan", headers=ada)
     assert pushes.sent[-1][1] == "Source injoignable"
 
+    async def busy(config: dict[str, Any], token: str | None) -> list[RemoteEntry]:
+        raise SourceRateLimitedError  # AO3's downtime page, again and again
+
+    fake.list_entries = busy  # type: ignore[method-assign]
+    client.post(f"/v1/sources/{source_id}/scan", headers=ada)
+    assert pushes.sent[-1][1:3] == (
+        "Source saturée",
+        "AO3 · ada limite l'accès pour l'instant : réessayez dans quelques minutes",
+    )
+
 
 def test_plugins_are_installed_by_the_admin_and_switched_on_by_readers(
     app: FastAPI, client: TestClient, bob: dict[str, str]
