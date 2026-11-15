@@ -19,6 +19,7 @@ from typing import Any, NoReturn, cast
 import httpx
 from bs4 import BeautifulSoup, Tag
 
+from babel_api.adapters.sources.ao3_epub import build_epub, series_position
 from babel_api.adapters.sources.http import TIMEOUT, USER_AGENT, Throttle, retry_after
 from babel_api.adapters.sources.stdlib_transport import StdlibTransport
 from babel_api.domain.errors import SourceConnectionError, SourceRateLimitedError
@@ -57,6 +58,9 @@ MAX_RETRY_WAIT = 30.0
 # Pause asked by AO3 when it gives no Retry-After, and the longest one honored.
 COOL_DOWN = 120.0
 MAX_COOL_DOWN = 600.0
+# AO3's front sends its "downtime" page (418, "Request temporarily denied") while it holds
+# back traffic, as after its November 2026 outage: a passing refusal, like a 429.
+GATED = 418
 
 
 def _soup(response: httpx.Response) -> BeautifulSoup:
@@ -114,6 +118,10 @@ class Ao3Connector:
                 continue
             if response.status_code == 429:
                 self._limited(response)
+            if response.status_code == GATED:
+                if attempt == retries:
+                    self._gated(url, attempt + 1)
+                continue
             if response.status_code < 500 or attempt == retries:
                 if response.status_code >= 500:
                     log.warning(
@@ -130,6 +138,13 @@ class Ao3Connector:
         seconds = retry_after(response, COOL_DOWN, MAX_COOL_DOWN)
         self._requests.cool_down(seconds)
         self._downloads.cool_down(seconds)
+        raise SourceRateLimitedError
+
+    def _gated(self, url: str, tries: int) -> NoReturn:
+        """AO3 keeps answering its downtime page: every reader waits, then tries again."""
+        log.warning("AO3 answered its downtime page (418) for %s after %s tries", url, tries)
+        self._requests.cool_down(COOL_DOWN)
+        self._downloads.cool_down(COOL_DOWN)
         raise SourceRateLimitedError
 
     async def _session(self, username: str, password: str | None) -> httpx.AsyncClient:
@@ -169,6 +184,10 @@ class Ao3Connector:
                 continue
             if response.status_code == 429:
                 self._limited(response)
+            if response.status_code == GATED:
+                if attempt == LISTING_RETRIES:
+                    self._gated("/users/login", attempt + 1)
+                continue
             if response.status_code < 500:
                 break
             if attempt == LISTING_RETRIES:
@@ -286,7 +305,12 @@ class Ao3Connector:
             raise SourceConnectionError("404")
         if response.status_code >= 400:
             raise SourceConnectionError("unreachable")
-        page = _soup(response)
+        details = self._parse_details(_soup(response))
+        self._details[work_id] = (time.monotonic(), details)
+        return details
+
+    @staticmethod
+    def _parse_details(page: BeautifulSoup) -> FanficDetails:
         title = _text(page.select_one("h2.title"))
         if not title:
             raise SourceConnectionError("restricted")  # members only, or not a work page
@@ -300,7 +324,7 @@ class Ao3Connector:
 
         summary = page.select_one("div.summary blockquote")
         series = page.select_one("dd.series span.series a")
-        details = FanficDetails(
+        return FanficDetails(
             title=title,
             authors=tuple(_text(a) for a in page.select("h3.byline a[rel=author]"))[:5],
             summary=_text(summary) or None,
@@ -322,8 +346,6 @@ class Ao3Connector:
             bookmarks=number("bookmarks"),
             series=_text(series) or None,
         )
-        self._details[work_id] = (time.monotonic(), details)
-        return details
 
     @staticmethod
     def search_params(q: Ao3Query) -> dict[str, str]:
@@ -511,7 +533,7 @@ class Ao3Connector:
         except SourceConnectionError as error:
             if str(error) != "unreachable":
                 raise
-            # AO3 refuses the sign-in (its front answers 418/525 at times): the public
+            # AO3 refuses the sign-in (its front answers 525 at times): the public
             # bookmarks are still there to read, subscriptions wait for the next scan.
             log.warning("AO3 sign-in of %s failed: scanning the public bookmarks only", username)
             client, token = self._client(), None
@@ -542,10 +564,27 @@ class Ao3Connector:
         work = await self._get(client, entry.path, view_adult="true")
         if work.status_code >= 400:
             raise SourceConnectionError(str(work.status_code))
-        link = _soup(work).select_one("li.download a[href*='.epub']")
+        page = _soup(work)
+        link = page.select_one("li.download a[href*='.epub']")
         if link is None:
-            raise SourceConnectionError("no_download")  # restricted, or not available
-        url = str(link.get("href"))
+            # AO3 can turn its EPUB download off and keep the HTML one: Babel makes the EPUB.
+            html = page.select_one("li.download a[href*='.html']")
+            if html is None:
+                raise SourceConnectionError("no_download")  # restricted, or not available
+            content = b"".join([c async for c in self._download(client, str(html.get("href")))])
+            work_id = entry.path.rsplit("/", 1)[-1]
+            position = page.select_one("dd.series span.series span.position")
+            yield build_epub(
+                work_id,
+                self._parse_details(page),
+                content,
+                series_index=series_position(_text(position)),
+            )
+            return
+        async for chunk in self._download(client, str(link.get("href"))):
+            yield chunk
+
+    async def _download(self, client: httpx.AsyncClient, url: str) -> AsyncIterator[bytes]:
         for attempt in range(RETRIES + 1):
             if attempt:
                 await asyncio.sleep(self._pause * 2 * attempt)
@@ -555,6 +594,10 @@ class Ao3Connector:
                 async with client.stream("GET", url) as response:
                     if response.status_code == 429:
                         self._limited(response)
+                    if response.status_code == GATED:
+                        if attempt == RETRIES:
+                            self._gated(url, attempt + 1)
+                        continue
                     if response.status_code >= 500 and attempt < RETRIES:
                         continue  # a passing error, before any byte was sent
                     if response.status_code >= 400:

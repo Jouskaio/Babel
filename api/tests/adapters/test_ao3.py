@@ -1,10 +1,16 @@
 import asyncio
+import time
+import zipfile
+from pathlib import Path
 
 import httpx
 import pytest
+from defusedxml import ElementTree
 
+from babel_api.adapters.files.metadata import EbookMetadataReader
 from babel_api.adapters.sources.ao3 import Ao3Connector
 from babel_api.domain.errors import SourceConnectionError, SourceRateLimitedError
+from babel_api.domain.files import BookFormat
 from babel_api.domain.sources import Ao3Query
 
 
@@ -36,6 +42,8 @@ class FakeAo3:
         self.limited = False
         self.flaky = 0
         self.login_525 = 0  # answers to the login post that fail in AO3's front
+        self.gated = 0  # answers that are AO3's downtime page (418)
+        self.html_only = False  # AO3 offers its HTML download, not the EPUB
 
     def __call__(self, request: httpx.Request) -> httpx.Response:
         self.requests.append(request)
@@ -44,6 +52,9 @@ class FakeAo3:
         if self.flaky:
             self.flaky -= 1
             return httpx.Response(525)
+        if self.gated:
+            self.gated -= 1
+            return httpx.Response(418, text="<title>Request temporarily denied.</title>")
         path, query = request.url.path, dict(request.url.params)
         signed_in = "session=ada" in request.headers.get("cookie", "")
         if path == "/users/login" and request.method == "GET":
@@ -84,6 +95,17 @@ class FakeAo3:
         if path == "/works/9":
             self.pages_read = getattr(self, "pages_read", 0) + 1
             return httpx.Response(200, text=WORK_PAGE)
+        if path == "/works/1" and self.html_only:
+            return httpx.Response(
+                200,
+                text=WORK_PAGE.replace(
+                    "</body>",
+                    '<ul><li class="download"><a href="/downloads/1/First.html?updated_at=1">'
+                    "HTML</a></li></ul></body>",
+                ),
+            )
+        if path == "/downloads/1/First.html":
+            return httpx.Response(200, content=HTML_DOWNLOAD.encode())
         if path == "/works/1":
             return httpx.Response(
                 200,
@@ -111,6 +133,9 @@ WORK_PAGE = """<html><body><dl class="work meta group">
 <li><a class="tag" href="/tags/c2">Jinx</a></li></ul></dd>
 <dt class="freeform tags">Additional Tags:</dt><dd class="freeform tags"><ul class="commas">
 <li><a class="tag" href="/tags/t">Slow Burn</a></li></ul></dd>
+<dt class="series">Series:</dt><dd class="series"><span class="series">
+<span class="position">Part 2 of the <a href="/series/5">Piltover Nights</a> series</span>
+</span></dd>
 <dt class="language">Language:</dt><dd class="language">English</dd>
 <dd class="stats"><dl class="stats"><dt>Published:</dt><dd class="published">2026-09-01</dd>
 <dt>Updated:</dt><dd class="status">2026-10-05</dd><dt>Words:</dt><dd class="words">12,345</dd>
@@ -120,6 +145,18 @@ WORK_PAGE = """<html><body><dl class="work meta group">
 <h3 class="byline heading"><a rel="author" href="/users/z">ittybittyzz</a></h3>
 <div class="summary module"><h3 class="heading">Summary:</h3>
 <blockquote class="userstuff"><p>Vi comes home.</p></blockquote></div></body></html>"""
+
+
+HTML_DOWNLOAD = """<!DOCTYPE html><html><head><title>Arcane Nights</title>
+<script>alert(1)</script></head><body>
+<div id="preface"><h1>Arcane Nights</h1></div>
+<div id="chapters" class="userstuff">
+<div class="meta group"><h2 class="heading">Chapter 1: Home</h2></div>
+<div class="userstuff"><p onclick="x()">Vi comes home &amp; sleeps.<br>Then wakes.</p>
+<img src="https://example.org/art.png" alt="fanart"></div>
+<div class="meta group"><h2 class="heading">Chapter 2</h2></div>
+<div class="userstuff"><p>Caitlyn waits.</p></div>
+</div><div id="afterword">End</div></body></html>"""
 
 
 def connector(fake: FakeAo3) -> Ao3Connector:
@@ -406,3 +443,54 @@ def test_an_author_is_a_search_field_and_authors_are_suggested() -> None:
 
     connector = Ao3Connector(httpx.MockTransport(answer), pause=0)
     assert asyncio.run(connector.suggest_authors("inv")) == ["Inverted"]
+
+
+def test_ao3_downtime_page_is_retried_then_pauses_every_request() -> None:
+    fake = FakeAo3()
+    fake.gated = 2  # AO3 holds traffic back for a moment
+    assert asyncio.run(connector(fake).check({"username": "ada"}, None)) == {"username": "ada"}
+
+    fake = FakeAo3()
+    fake.gated = 999  # ... or for a long while: "limited", never "unreachable"
+    ao3 = connector(fake)
+    with pytest.raises(SourceRateLimitedError):
+        asyncio.run(ao3.list_entries({"username": "ada"}, "right"))
+    assert ao3._requests._next > time.monotonic() + 60  # pyright: ignore[reportPrivateUsage]
+
+
+def test_an_html_only_download_becomes_an_epub(tmp_path: Path) -> None:
+    fake = FakeAo3()
+    fake.html_only = True
+    ao3 = connector(fake)
+    entry = asyncio.run(ao3.list_entries({"username": "ada"}, None))[0]
+
+    async def download() -> bytes:
+        return b"".join([c async for c in ao3.fetch({"username": "ada"}, None, entry)])
+
+    book = tmp_path / "First.epub"
+    book.write_bytes(asyncio.run(download()))
+    reader = EbookMetadataReader()
+    assert reader.detect(book) is BookFormat.EPUB
+    meta = reader.metadata(book, BookFormat.EPUB)
+    assert meta.title == "Arcane Nights"
+    assert meta.authors == ("ittybittyzz",)
+    assert meta.language == "en"
+    assert meta.ao3_work == "1"
+    assert meta.fanfic
+    assert meta.series == "Piltover Nights"
+    assert meta.series_index == 2
+    assert {"Arcane", "Vi/Caitlyn", "Slow Burn"} <= set(meta.subjects)
+    with zipfile.ZipFile(book) as archive:
+        assert archive.namelist()[0] == "mimetype"
+        pages = [n for n in archive.namelist() if n.endswith(".xhtml")]
+        for name in pages:  # every page is well-formed XHTML
+            ElementTree.fromstring(archive.read(name))
+        first = archive.read("OEBPS/chapter0001.xhtml").decode()
+        second = archive.read("OEBPS/chapter0002.xhtml").decode()
+    assert "Vi comes home &amp; sleeps.<br/>Then wakes." in first
+    assert "[fanart]" in first
+    assert "example.org" not in first
+    assert "onclick" not in first
+    assert "alert" not in first
+    assert "Caitlyn waits." in second
+    assert "Vi comes home" not in second
