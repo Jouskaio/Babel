@@ -24,6 +24,10 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          # Flutter 3.50 deprecates package:flutter/material.dart for
+          # material_ui, but gen-l10n and google_fonts still use Flutter's own
+          # Material types. Stay on 3.47 until the packages follow.
+          flutter-version: 3.47.9
           cache: true
       - uses: actions/setup-java@v6
         with:
@@ -61,6 +65,10 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          # Flutter 3.50 deprecates package:flutter/material.dart for
+          # material_ui, but gen-l10n and google_fonts still use Flutter's own
+          # Material types. Stay on 3.47 until the packages follow.
+          flutter-version: 3.47.9
           cache: true
       - run: flutter pub get
       - run: flutter build macos --release --no-tree-shake-icons --dart-define=BABEL_API_URL=${{ vars.BABEL_API_URL }}
@@ -89,6 +97,10 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          # Flutter 3.50 deprecates package:flutter/material.dart for
+          # material_ui, but gen-l10n and google_fonts still use Flutter's own
+          # Material types. Stay on 3.47 until the packages follow.
+          flutter-version: 3.47.9
           cache: true
       # No BABEL_API_URL: the web app calls the API on its own origin, under /api.
       - name: Build
